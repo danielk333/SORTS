@@ -274,7 +274,7 @@ class SGP4(Propagator):
                 xp = 0.0
                 yp = 0.0
 
-            ecefs = frames.TEME_to_ECEF(t, pos, vel, mjd0=mjd0, xp=xp, yp=yp , model=self.polar_motion_model)
+            ecefs = frames.TEME_to_ECEF(t, pos, vel, mjd0=mjd0, xp=xp, yp=yp , model=self.settings['polar_motion_model'])
             return ecefs
         else:
             raise Exception('Output frame {} not found'.format(self.out_frame))

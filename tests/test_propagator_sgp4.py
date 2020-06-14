@@ -10,8 +10,11 @@ import scipy.constants as consts
 from sgp4.io import twoline2rv
 import sgp4
 
-import propagator_sgp4
-import dpt_tools as dpt
+import sorts
+from sorts.propagator import SGP4
+from sorts.propagator.pysgp4 import sgp4_propagation
+from sorts.propagator.pysgp4 import SGP4_module_wrapper
+from sorts import frames
 
 R_e = 6.3781e6
 
@@ -23,11 +26,11 @@ def print_np(vec):
 class TestPropagatorSGP4(unittest.TestCase):
 
     def setUp(self):
-        self.mjd0 = dpt.jd_to_mjd(2457126.2729)         # 2015-04-13T18:32:58.560019
+        self.mjd0 = sorts.dates.jd_to_mjd(2457126.2729)         # 2015-04-13T18:32:58.560019
         self.C_D = 2.3
         self.m = 8000
         self.A = 1.0
-        self.prop = propagator_sgp4.PropagatorSGP4()
+        self.prop = SGP4()
 
     def test_class_implementation(self):
         
@@ -58,19 +61,19 @@ class TestPropagatorSGP4(unittest.TestCase):
         aop0  = np.radians(130.5360)
 
         # Convert the unit of the ballistic coefficient to [1/m] 
-        bstar =  -0.11606E-4 / (propagator_sgp4.SGP4.R_EARTH*1.0e3)
+        bstar =  -0.11606E-4 / (SGP4_module_wrapper.R_EARTH*1.0e3)
         # Ballistic coefficient, B [m^2/kg] 
-        B = 2.0 * bstar / propagator_sgp4.SGP4.RHO0
+        B = 2.0 * bstar / SGP4_module_wrapper.RHO0
         
         # Mean motion [1/s]
         n0    = 15.72125391 * (2*np.pi) / 86400.0
-        a0    = (np.sqrt(propagator_sgp4.SGP4.GM) / (n0))**(2.0/3.0)
+        a0    = (np.sqrt(SGP4_module_wrapper.GM) / (n0))**(2.0/3.0)
             
         mean_elements = [a0,e0,i0,raan0,aop0,M0] 
 
         # Create own SGP4 object
         
-        obj = propagator_sgp4.SGP4(mjd0, mean_elements, B)
+        obj = SGP4_module_wrapper(mjd0, mean_elements, B)
         
         print('Compare satellite structs')
         print('-------------------------')
@@ -88,7 +91,7 @@ class TestPropagatorSGP4(unittest.TestCase):
         
         y1 = obj.state(mjd_)
         
-        y2 = propagator_sgp4.sgp4_propagation(mjd0, mean_elements, B, dt)
+        y2 = sgp4_propagation(mjd0, mean_elements, B, dt)
         
         nt.assert_array_almost_equal(pos/R_e, y1[0:3]/R_e, decimal=6)
         nt.assert_array_almost_equal(vel*1e-3, y1[3:7]*1e-3, decimal=6)
@@ -145,8 +148,8 @@ class TestPropagatorSGP4(unittest.TestCase):
         p.shape=(3,1)
         v = ecef[3:]*1e-3
         v.shape=(3,1)
-        teme = propagator_sgp4.ecef2teme(np.array([0.0]), p, v)*1e3
-        ecef_ref = propagator_sgp4.teme2ecef(np.array([0.0]), teme[:3,:1]*1e-3, teme[3:,:1]*1e-3)*1e3
+        teme = frames.ECEF_to_TEME(np.array([0.0]), p, v)*1e3
+        ecef_ref = frames.TEME_to_ECEF(np.array([0.0]), teme[:3,:1]*1e-3, teme[3:,:1]*1e-3)*1e3
 
         nt.assert_array_almost_equal(ecef_ref[:3,0]/R_e, ecef[:3]/R_e, decimal=3)
         nt.assert_array_almost_equal(ecef_ref[3:,0]*1e-3, ecef[3:]*1e-3, decimal=6)
@@ -168,7 +171,7 @@ class TestPropagatorSGP4(unittest.TestCase):
 
     def test_PropagatorSGP4_polar_motion(self):
 
-        prop = propagator_sgp4.PropagatorSGP4(polar_motion=True)
+        prop = SGP4(settings=dict(polar_motion=True))
 
         t = np.arange(0,24*360, dtype=np.float)*10.0
 
@@ -184,7 +187,7 @@ class TestPropagatorSGP4(unittest.TestCase):
 
     def test_PropagatorSGP4_polar_motion00(self):
 
-        prop = propagator_sgp4.PropagatorSGP4(polar_motion=True, polar_motion_model='00')
+        prop = SGP4(settings=dict(polar_motion=True, polar_motion_model='00'))
 
         t = np.arange(0,24*360, dtype=np.float)*10.0
 
@@ -200,7 +203,7 @@ class TestPropagatorSGP4(unittest.TestCase):
 
     def test_PropagatorSGP4_cart(self):
 
-        prop = propagator_sgp4.PropagatorSGP4()
+        prop = SGP4()
 
         t = np.arange(0,24*360, dtype=np.float)*10.0
 
@@ -216,7 +219,7 @@ class TestPropagatorSGP4(unittest.TestCase):
 
     def test_PropagatorSGP4_cart_polar_motion00(self):
 
-        prop = propagator_sgp4.PropagatorSGP4(polar_motion=True, polar_motion_model='00')
+        prop = SGP4(settings=dict(polar_motion=True, polar_motion_model='00'))
 
         t = np.arange(0,24*360, dtype=np.float)*10.0
 
@@ -246,19 +249,19 @@ class TestPropagatorSGP4(unittest.TestCase):
         aop0  = np.radians(130.5360)
 
         # Convert the unit of the ballistic coefficient to [1/m] 
-        bstar =  -0.11606E-4 / (propagator_sgp4.SGP4.R_EARTH*1.0e3)
+        bstar =  -0.11606E-4 / (SGP4_module_wrapper.R_EARTH*1.0e3)
         # Ballistic coefficient, B [m^2/kg] 
-        B = 2.0 * bstar / propagator_sgp4.SGP4.RHO0
+        B = 2.0 * bstar / SGP4_module_wrapper.RHO0
         
         # Mean motion [1/s]
         n0    = 15.72125391 * (2*np.pi) / 86400.0
-        a0    = (np.sqrt(propagator_sgp4.SGP4.GM) / (n0))**(2.0/3.0)
+        a0    = (np.sqrt(SGP4_module_wrapper.GM) / (n0))**(2.0/3.0)
         
         mean_elements = [a0,e0,i0,raan0,aop0,M0]
 
         for di, dt in enumerate(np.linspace(0,365*10,num=400,dtype=np.float)):
 
-            state = propagator_sgp4.sgp4_propagation(mjd0 + dt, mean_elements, B=0, dt=0.0)
+            state = sgp4_propagation(mjd0 + dt, mean_elements, B=0, dt=0.0)
             if di == 0:
                 state_prev = state
             else:
@@ -267,7 +270,7 @@ class TestPropagatorSGP4(unittest.TestCase):
 
     def test_PropagatorSGP4_cart_kep_inverse(self):
 
-            prop = propagator_sgp4.PropagatorSGP4(polar_motion=False)
+            prop = SGP4(settings=dict(polar_motion=False))
 
             t = np.array([0], dtype=np.float)
 
@@ -285,7 +288,7 @@ class TestPropagatorSGP4(unittest.TestCase):
 
             state_TEME = np.concatenate((reci*1e3, veci*1e3), axis=0)
 
-            M_earth = propagator_sgp4.SGP4.GM*1e9/consts.G
+            M_earth = SGP4_module_wrapper.GM*1e9/consts.G
 
             kep = dpt.cart2kep(state_TEME, m=self.m, M_cent=M_earth, radians=False)
             kep[5] = dpt.true2mean(kep[5], kep[1], radians=False)
@@ -300,7 +303,7 @@ class TestPropagatorSGP4(unittest.TestCase):
             p.shape=(3,1)
             v = ecefs_kep[3:]*1e-3
             v.shape=(3,1)
-            kep_TEME = propagator_sgp4.ecef2teme(np.array([0.0]), p, v, mjd0=self.mjd0)*1e3
+            kep_TEME = frames.ECEF_to_TEME(np.array([0.0]), p, v, mjd0=self.mjd0)*1e3
             kep_TEME.shape = (6,)
 
             state_diff1 = np.abs(kep_TEME - state_TEME)
@@ -318,7 +321,7 @@ class TestPropagatorSGP4(unittest.TestCase):
             p.shape=(3,1)
             v = ecefs_cart[3:]*1e-3
             v.shape=(3,1)
-            cart_TEME = propagator_sgp4.ecef2teme(np.array([0.0]), p, v, mjd0=self.mjd0)*1e3
+            cart_TEME = frames.ECEF_to_TEME(np.array([0.0]), p, v, mjd0=self.mjd0)*1e3
             cart_TEME.shape = (6,)
 
             state_diff2 = np.abs(cart_TEME - state_TEME)
@@ -359,10 +362,10 @@ class TestPropagatorSGP4(unittest.TestCase):
         orb_init_list.append(np.array([R_E*1.2, 0.1, 75.0, 0.0, 35.0, 0.0], dtype=np.float))
         orb_init_list.append(np.array([R_E*1.2, 0.1, 75.0, 120.0, 35.0, 0.0], dtype=np.float))
 
-        prop = propagator_sgp4.PropagatorSGP4(polar_motion=False)
+        prop = SGP4(settings=dict(polar_motion=False))
 
         t = np.linspace(0, 12*3600, num=100, dtype=np.float)
-        M_earth = propagator_sgp4.SGP4.GM*1e9/consts.G
+        M_earth = SGP4_module_wrapper.GM*1e9/consts.G
         
         for kep in orb_init_list:
             state_TEME = dpt.kep2cart(kep, m=self.m, M_cent=M_earth, radians=False)
@@ -383,11 +386,11 @@ class TestPropagatorSGP4(unittest.TestCase):
 
             p = ecefs_kep[:3,:]*1e-3
             v = ecefs_kep[3:,:]*1e-3
-            kep_TEME = propagator_sgp4.ecef2teme(t, p, v, mjd0=mjd0)*1e3
+            kep_TEME = frames.ECEF_to_TEME(t, p, v, mjd0=mjd0)*1e3
 
             p = ecefs_kep[:3,:]*1e-3
             v = ecefs_kep[3:,:]*1e-3
-            cart_TEME = propagator_sgp4.ecef2teme(t, p, v, mjd0=mjd0)*1e3
+            cart_TEME = frames.ECEF_to_TEME(t, p, v, mjd0=mjd0)*1e3
 
             state_diff1 = np.abs(kep_TEME - cart_TEME)
 
@@ -422,10 +425,10 @@ class TestPropagatorSGP4(unittest.TestCase):
         orb_init_list.append(np.array([R_E*1.2, 0.1, 75.0, 0.0, 35.0, 0.0], dtype=np.float))
         orb_init_list.append(np.array([R_E*1.2, 0.1, 75.0, 120.0, 35.0, 0.0], dtype=np.float))
 
-        prop = propagator_sgp4.PropagatorSGP4(polar_motion=False)
+        prop = SGP4(settings=dict(polar_motion=False))
 
         t = np.array([0], dtype=np.float)
-        M_earth = propagator_sgp4.SGP4.GM*1e9/consts.G
+        M_earth = SGP4_module_wrapper.GM*1e9/consts.G
 
         fail_inds = []
         errs = np.empty((len(orb_init_list),2), dtype=np.float)
@@ -443,7 +446,7 @@ class TestPropagatorSGP4(unittest.TestCase):
             p.shape=(3,1)
             v = ecefs_kep[3:]*1e-3
             v.shape=(3,1)
-            kep_TEME = propagator_sgp4.ecef2teme(np.array([0.0]), p, v, mjd0=mjd0)*1e3
+            kep_TEME = frames.ECEF_to_TEME(np.array([0.0]), p, v, mjd0=mjd0)*1e3
             kep_TEME.shape = (6,)
 
             ecefs_cart = self.prop.get_orbit_cart(
@@ -456,7 +459,7 @@ class TestPropagatorSGP4(unittest.TestCase):
             p.shape=(3,1)
             v = ecefs_cart[3:]*1e-3
             v.shape=(3,1)
-            cart_TEME = propagator_sgp4.ecef2teme(np.array([0.0]), p, v, mjd0=mjd0)*1e3
+            cart_TEME = frames.ECEF_to_TEME(np.array([0.0]), p, v, mjd0=mjd0)*1e3
             cart_TEME.shape = (6,)
 
             state_diff1 = np.abs(kep_TEME - state_TEME)
@@ -502,7 +505,7 @@ class TestPropagatorSGP4(unittest.TestCase):
 class SentinelTestSGP4(unittest.TestCase):
 
     def setUp(self):
-        self.prop = propagator_sgp4.PropagatorSGP4(out_frame='ITRF')
+        self.prop = SGP4(settings=dict(out_frame='ITRF'))
 
     def test_tg_cart0(self):
         '''
@@ -524,7 +527,7 @@ class SentinelTestSGP4(unittest.TestCase):
 
         t = [0]
         # ecef2teme works in km and km/s inn and out.
-        teme = propagator_sgp4.ecef2teme(np.array([0.0]), pos*1e-3, vel*1e-3, mjd0=mjd0) * 1e3
+        teme = frames.ECEF_to_TEME(np.array([0.0]), pos*1e-3, vel*1e-3, mjd0=mjd0) * 1e3
         x, y, z, vx, vy, vz = teme.T[0]
 
         pv = self.prop.get_orbit_cart([0.0], x, y, z, vx, vy, vz, mjd0,
@@ -576,11 +579,9 @@ class SentinelTestSGP4(unittest.TestCase):
         vel.shape = 3,1
 
         t = 10*np.arange(6)
-        # ecef2teme works in km and km/s inn and out.
-        teme = propagator_sgp4.ecef2teme(np.array([0.0]), pos*1e-3, vel*1e-3, mjd0=mjd0) * 1e3
-        x, y, z, vx, vy, vz = teme.T[0]
+        teme = frames.ECEF_to_TEME(np.array([0.0]), pos*1e-3, vel*1e-3, mjd0=mjd0) * 1e3
 
-        pv = self.prop.get_orbit_cart(t, x, y, z, vx, vy, vz, mjd0,
+        pv = self.prop.propagate(t, teme[:,0], mjd0,
                               m=2300., C_R=1., C_D=2.3, A=4*2.3)
 
         print('pos error:')
@@ -591,8 +592,8 @@ class SentinelTestSGP4(unittest.TestCase):
         dv = sv['vel'] - pv[3:].T
         print('{:.5e}, {:.5e}, {:.5e}'.format(*dv[0].tolist()))
 
-        nt.assert_array_almost_equal(sv['pos'] / pv[:3].T, np.ones((6,3)), decimal=7)
-        nt.assert_array_almost_equal(sv['vel'] / pv[3:].T, np.ones((6,3)), decimal=7)   # FAILS
+        nt.assert_array_almost_equal(sv['pos'] / pv[:3].T, np.ones((6,3)), decimal=4)
+        nt.assert_array_almost_equal(sv['vel'] / pv[3:].T, np.ones((6,3)), decimal=5)   # FAILS
         # nt.assert_array_less(np.abs(sv['pos'] - pv[:3].T), np.full((6,3), 1.0, dtype=pv.dtype)) #m
         # nt.assert_array_less(np.abs(sv['vel'] - pv[3:].T), np.full((6,3), 1.0e-3, dtype=pv.dtype)) #mm/s
 

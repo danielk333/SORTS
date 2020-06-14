@@ -469,7 +469,7 @@ def TEME_to_ECEF( t, p, v, mjd0=57084, xp=0.0, yp=0.0, model='80', lod=0.0015563
     jdut1 = mjd0 + t/86400.0 + 2400000.5
 
     # ------------------------ find gmst --------------------------
-    theta = gstime( jdut1 );
+    theta = dates.gstime( jdut1 );
 
     #find omega from nutation theory
     omega=  125.04452222  + ( -6962890.5390 *ttt + 7.455 *ttt*ttt + 0.008 *ttt*ttt*ttt ) / 3600.0;

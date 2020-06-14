@@ -184,9 +184,9 @@ class SpaceObject(object):
         self.A = A
         self.d = d
         self.mjd0 = mjd0
-        self._propagator = propagator
+        self._propagator_cls = propagator
         self.propagator_options = propagator_options
-        self.prop = propagator(**propagator_options)
+        self.propagator = propagator(**propagator_options)
         self.propagator_args = propagator_args
 
 
@@ -202,7 +202,7 @@ class SpaceObject(object):
             oid=self.oid,
             M_cent = self.M_cent,
             C_R = self.C_R,
-            propagator = self.propagator,
+            propagator = self._propagator_cls,
             propagator_options = self.propagator_options,
             propagator_args = self.propagator_args,
         )
@@ -368,7 +368,7 @@ class SpaceObject(object):
                 t = [t]
             t = np.array(t,dtype=np.float)
         
-        ecefs = self.prop.propagate(
+        ecefs = self.propagator.propagate(
             t = t, 
             state0 = np.squeeze(self.orbit.cartesian), 
             mjd0=self.mjd0,

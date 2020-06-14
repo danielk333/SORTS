@@ -15,6 +15,7 @@ import pyorb
 #Local import
 from . import space_object as so
 from . import plotting
+from . import constants
 
 class Population:
     '''Encapsulates a population of space objects as an array and functions for returning instances of space objects.
@@ -85,11 +86,12 @@ class Population:
     _default_dtype = 'float64'
 
     def __init__(self,
+                propagator,
                 name='Unnamed population',
                 extra_columns = [],
                 dtypes = [],
                 space_object_uses = [],
-                propagator = default_propagator,
+                propagator_args = {},
                 propagator_options = {},
             ):
         self.name = name
@@ -120,11 +122,12 @@ class Population:
         '''Return a copy of the current Population instance.
         '''
         pop = Population(
+                propagator = self.propagator,
                 name=self.name,
                 extra_columns = [],
                 dtypes = [],
                 space_object_uses = [],
-                propagator = self.propagator,
+                propagator_args = self.propagator_args,
                 propagator_options = copy.deepcopy(self.propagator_options),
             )
 
@@ -256,7 +259,7 @@ class Population:
 
         self.objs = np.empty((length,), dtype=_dtype)
 
-    def get_states(self, M_cent = propagator_sgp4.M_earth):
+    def get_states(self, M_cent = constants.M_earth):
         '''Use the orbital parameters and get the state.'''
         orbs = self.get_all_orbits(order_angs = True).T
         orbs[:,5] = pyorb.mean_to_true(orbs[:,5], orbs[:,1], radians=False)
@@ -460,13 +463,14 @@ class Population:
             hf.attrs['name'] = self.name
 
     @classmethod
-    def load(cls, fname, propagator = default_propagator, propagator_options = {}):
+    def load(cls, fname, propagator, propagator_options = {}, propagator_args = {}):
         pop = cls(
+            propagator = propagator,
             name='Unnamed population',
             extra_columns = [],
             dtypes = [],
             space_object_uses = [],
-            propagator = propagator,
+            propagator_args = propagator_args,
             propagator_options = propagator_options,
         )
         with h5py.File(fname,"r") as hf:
