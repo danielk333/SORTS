@@ -24,7 +24,7 @@ class PostInstallCommand(install):
         install.run(self)
 
 
-with open('README', 'r') as fh:
+with open('README.rst', 'r') as fh:
     long_description = fh.read()
 
 
@@ -45,6 +45,9 @@ setuptools.setup(
     ],
     install_requires=pip_req,
     packages=setuptools.find_packages(),
+    package_data={
+        'sorts': ['data/*'],
+    },
     # metadata to display on PyPI
     author='Daniel Kastinen',
     author_email='daniel.kastinen@irf.se',
