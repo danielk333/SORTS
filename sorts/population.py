@@ -3,17 +3,18 @@
 '''Defines a population of space objects in the form of a class.
 
 '''
+
+#Python standard import
 import copy
 
+#Third party import
 import h5py
-
 import numpy as np
-import space_object as so
-import dpt_tools as dpt
+import pyorb
 
-import propagator_sgp4
-from sorts_config import p as default_propagator
-
+#Local import
+from . import space_object as so
+from . import plotting
 
 class Population:
     '''Encapsulates a population of space objects as an array and functions for returning instances of space objects.
@@ -258,12 +259,12 @@ class Population:
     def get_states(self, M_cent = propagator_sgp4.M_earth):
         '''Use the orbital parameters and get the state.'''
         orbs = self.get_all_orbits(order_angs = True).T
-        orbs[:,5] = dpt.mean2true(orbs[:,5], orbs[:,1], radians=False)
+        orbs[:,5] = pyorb.mean_to_true(orbs[:,5], orbs[:,1], radians=False)
         if 'm' in self.header:
             mv = self.objs['m']
         else:
             mv = np.zeros(len(self), dtype=self._default_dtype)
-        states = dpt.kep2cart(orbs, m=mv, M_cent=M_cent, radians=False).T
+        states = pyorb.kep_to_cart(orbs, m=mv, M_cent=M_cent, radians=False).T
         return states
 
 
@@ -492,7 +493,7 @@ class Population:
         '''
         if isinstance(dist, str):        
             if dist=='orbits':
-                fig, ax = dpt.orbits(
+                fig, ax = plotting.orbits(
                     self.get_all_orbits(order_angs=True), 
                     title = "Orbit distribution: {}".format(self.name),
                     show = False,
@@ -502,7 +503,7 @@ class Population:
                     x_label = dist
                 else:
                     x_label = label
-                fig, ax = dpt.hist(
+                fig, ax = plotting.hist(
                     self.objs[dist],
                     title = "{} distribution: {}".format(dist, self.name),
                     show = False,
@@ -520,7 +521,7 @@ class Population:
             else:
                 x_label = label[0]
                 y_label = label[1]                
-            fig, ax = dpt.hist2d(
+            fig, ax = plotting.hist2d(
                 self.objs[dist[0]],
                 self.objs[dist[1]],
                 title = "{} vs {} distribution: {}".format(dist[0], dist[1], self.name),
@@ -537,7 +538,6 @@ class Population:
         return fig, ax
 
 
-
 #python 2.7 compliance
 Population.next = Population.__next__
 
@@ -551,7 +551,7 @@ if __name__ == "__main__":
     
     mc_factor = plib.master_catalog_factor(treshhold = 0.01)
     
-    dpt.orbits(
+    plotting.orbits(
         mc_factor.get_all_orbits(order_angs=True),
         title =  "Orbit distribution of factor master",
     )
