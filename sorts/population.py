@@ -86,11 +86,11 @@ class Population:
     _default_dtype = 'float64'
 
     def __init__(self,
-                propagator,
                 name='Unnamed population',
                 extra_columns = [],
                 dtypes = [],
                 space_object_uses = [],
+                propagator = None,
                 propagator_args = {},
                 propagator_options = {},
             ):
@@ -545,20 +545,3 @@ class Population:
 #python 2.7 compliance
 Population.next = Population.__next__
 
-
-if __name__ == "__main__":
-    import population_library as plib
-    import matplotlib.pyplot as plt
-
-    mc = plib.master_catalog()
-    mc.filter('d', lambda x: x >= 0.01)
-    
-    mc_factor = plib.master_catalog_factor(treshhold = 0.01)
-    
-    plotting.orbits(
-        mc_factor.get_all_orbits(order_angs=True),
-        title =  "Orbit distribution of factor master",
-    )
-
-    plt.show()
-    

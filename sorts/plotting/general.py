@@ -5,6 +5,7 @@
 '''
 
 #Python standard import
+from itertools import combinations
 
 #Third party import
 import numpy as np
