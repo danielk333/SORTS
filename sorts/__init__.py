@@ -4,7 +4,7 @@
 
 '''
 
-__version__ = '0.0.0'
+from .version import __version__
 
 __all__ = []
 

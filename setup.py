@@ -4,7 +4,7 @@ from setuptools.command.develop import develop
 from setuptools.command.install import install
 import subprocess
 
-import sorts
+import sorts.version
 
 class PostDevelopCommand(develop):
     """Post-installation for development mode."""
@@ -35,7 +35,7 @@ with open('requirements', 'r') as fh:
 
 setuptools.setup(
     name='sorts',
-    version=sorts.__version__,
+    version=sorts.version.__version__,
     long_description=long_description,
     url='https://gitlab.irf.se/danielk/SORTSpp',
     classifiers=[
