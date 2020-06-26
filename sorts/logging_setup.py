@@ -6,37 +6,51 @@ import logging
 import datetime
 import time
 
-exec_times = {'last': time.time()}
+class Profiler:
+    '''Performance profiler class.
 
-def record_time_diff(name):
-    '''Records a time difference since last call
+    The named performance control is especially useful for timing contents of loops.
     
-    This function modifies a global variable 'exec_times' in this module!
-    This is especcialy useful for timing contents of loops
+    Usage example:
 
-    example:
-    .. code:python
+        .. code-block:: python
 
-        record_time_diff('loop_start')
-        for i in range(large_number):
-            function_one(*args)
-            record_time_diff('function_one')
+            p = Profiler()
+            lst = list(range(200))
+            for i in range(1000):
+                p.start('list reversal')
+                lst = lst[::-1]
+                p.stop('list reversal')
 
-            function_two(*args)
-            record_time_diff('function_two')
     '''
-    global exec_times
+    def __init__(self, mean=True):
+        self.enable = True
+        self.mean = mean
+        self.exec_times = dict()
+        self.start = dict()
 
-    time_now = time.time()
-    dt = time_now - exec_times['last']
+    def start(self, name):
+        '''Records a start time for named call.
+        '''
+        self.start[name] = time.time()
 
-    if name in exec_times:
-        t_sum, num = exec_times[name]    
-        exec_times[name] = (t_sum + dt, num + 1)
-    else:
-        exec_times[name] = (dt, 1)
-    
-    exec_times['last'] = time_now
+    def stop(self, name):
+        dt = time.time() - self.start[name]
+
+        if mean:        
+            if name in self.exec_times:
+                exec_times[name]['spent'] += dt
+                exec_times[name]['num'] += 1
+            else:
+                exec_times[name] = {'spent': dt, 'num': 1}
+        else:
+            if name in self.exec_times:
+                exec_times[name].append(dt)
+            else:
+                exec_times[name] = [dt]
+
+
+
 
 def logg_time_record(exec_t, logger):
     '''Saves time record to log at info level
@@ -207,7 +221,7 @@ def add_logging_level(num, name):
 logging.Logger.always = add_logging_level(100, 'ALWAYS')
 
 def setup_logging(
-        name = 'SORTS++',
+        name = 'SORTS',
         root = '',
         file_level = logging.INFO,
         term_level = logging.INFO,
