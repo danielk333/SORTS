@@ -11,6 +11,7 @@ import importlib.resources
 import numpy as np
 import scipy.optimize
 import pyorb
+import pyant
 
 #Local import
 from . import dates
@@ -149,10 +150,10 @@ def TEME_to_ITRF(TEME, jd_ut1, xp, yp):
         rTEME = TEME[:3]
         vTEME = TEME[3:]*3600.0*24.0
 
-    theta, theta_dot = theta_GMST1982(jd_ut1)
+    theta, theta_dot = dates.GMST1982(jd_ut1)
     zero = theta_dot * 0.0
     angular_velocity = np.array([zero, zero, -theta_dot])
-    R = dpt.rot_mat_z(-theta)
+    R = pyant.coordinates.rot_mat_z(-theta)
 
     if len(rTEME.shape) == 1:
         rPEF = (R).dot(rTEME)
@@ -166,7 +167,7 @@ def TEME_to_ITRF(TEME, jd_ut1, xp, yp):
         rITRF = rPEF
         vITRF = vPEF
     else:
-        W = (dpt.rot_mat_x(yp)).dot(dpt.rot_mat_y(xp))
+        W = (pyant.coordinates.rot_mat_x(yp)).dot(pyant.coordinates.rot_mat_y(xp))
         rITRF = (W).dot(rPEF)
         vITRF = (W).dot(vPEF)
 
@@ -207,16 +208,16 @@ def ITRF_to_TEME(ITRF, jd_ut1, xp, yp):
         rITRF = ITRF[:3]
         vITRF = ITRF[3:]*3600.0*24.0
 
-    theta, theta_dot = theta_GMST1982(jd_ut1)
+    theta, theta_dot = dates.GMST1982(jd_ut1)
     zero = theta_dot * 0.0
     angular_velocity = np.array([zero, zero, -theta_dot])
-    R = dpt.rot_mat_z(theta)
+    R = pyant.coordinates.rot_mat_z(theta)
 
     if np.abs(xp) < 1e-10 and np.abs(yp) < 1e-10:
         rPEF = rITRF
         vPEF = vITRF
     else:
-        W = (dpt.rot_mat_y(-xp)).dot(dpt.rot_mat_x(-yp))
+        W = (pyant.coordinates.rot_mat_y(-xp)).dot(pyant.coordinates.rot_mat_x(-yp))
         rPEF = (W).dot(rITRF)
         vPEF = (W).dot(vITRF)
 
@@ -270,11 +271,15 @@ def ECEF_to_TEME( t, p, v, mjd0=57084, xp=0.0, yp=0.0, model='80', lod=0.0015563
     '''
 
     if not isinstance(t, np.ndarray):
-        raise TypeError('type(t) = {} not supported'.format(type(t)))
+        if isinstance(t, float):
+            t = np.array([t], dtype=np.float64)
+        else:
+            raise TypeError('type(t) = {} not supported'.format(type(t)))
 
-
-    if t.size != p.shape[1]:
-        raise Exception("t and p lengths conflicting, t {}, p {} ".format(t.size, p.shape[1]))
+    if len(p.shape) == 1:
+        p = p.reshape(3,1)
+    if len(v.shape) == 1:
+         v = v.reshape(3,1)
 
 
     if len(t.shape) == 1:
@@ -288,8 +293,8 @@ def ECEF_to_TEME( t, p, v, mjd0=57084, xp=0.0, yp=0.0, model='80', lod=0.0015563
 
     if p.shape[0] != 3 or v.shape[0] != 3:
         try:
-            p = p.reshape(3, p.size)
-            v = v.reshape(3, v.size)
+            p = p.reshape(3, t.size)
+            v = v.reshape(3, t.size)
         except:
             print('Reshaping failed: t-{}, p-{}, v-{}'.format(
                 t.shape, p.shape, v.shape,
@@ -341,25 +346,25 @@ def ECEF_to_TEME( t, p, v, mjd0=57084, xp=0.0, yp=0.0, model='80', lod=0.0015563
     elif model == '80':
         if isinstance(xp, np.ndarray):
             for tind in range(t.size):
-                pm = polarm(xp[0,tind], yp[0,tind], 0.0, model)
+                pm = polar_motion_matrix(xp[0,tind], yp[0,tind], 0.0, model)
                 pm = np.linalg.inv(pm)
                 recef[:,tind] = np.dot(pm, p[:,tind])
                 vecef[:,tind] = np.dot(pm, v[:,tind])
         else:
-            pm = polarm(xp, yp, 0.0, model)
+            pm = polar_motion_matrix(xp, yp, 0.0, model)
             pm = np.linalg.inv(pm)
             recef = np.dot(pm, p)
             vecef = np.dot(pm, v)
     elif model == '00':
         if isinstance(xp, np.ndarray):
             for tind in range(ttt.size):
-                pm = polarm(xp[0,tind], yp[0,tind], ttt[0,tind], model)
+                pm = polar_motion_matrix(xp[0,tind], yp[0,tind], ttt[0,tind], model)
                 pm = np.linalg.inv(pm)
                 recef[:,tind] = np.dot(pm, p[:,tind])
                 vecef[:,tind] = np.dot(pm, v[:,tind])
         else:
             for tind in range(ttt.size):
-                pm = polarm(xp, yp, ttt[0,tind], model)
+                pm = polar_motion_matrix(xp, yp, ttt[0,tind], model)
                 pm = np.linalg.inv(pm)
                 recef[:,tind] = np.dot(pm, rpef[:,tind])
                 vecef[:,tind] = np.dot(pm, vpef[:,tind])
@@ -424,7 +429,15 @@ def TEME_to_ECEF( t, p, v, mjd0=57084, xp=0.0, yp=0.0, model='80', lod=0.0015563
 
 
     if not isinstance(t, np.ndarray):
-        raise TypeError('type(t) = {} not supported'.format(type(t)))
+        if isinstance(t, float):
+            t = np.array([t], dtype=np.float64)
+        else:
+            raise TypeError('type(t) = {} not supported'.format(type(t)))
+
+    if len(p.shape) == 1:
+        p = p.reshape(3,1)
+    if len(v.shape) == 1:
+         v = v.reshape(3,1)
 
 
     if t.size != p.shape[1]:
@@ -513,22 +526,22 @@ def TEME_to_ECEF( t, p, v, mjd0=57084, xp=0.0, yp=0.0, model='80', lod=0.0015563
     elif model == '80':
         if isinstance(xp, np.ndarray):
             for tind in range(t.size):
-                pm = polarm(xp[0,tind], yp[0,tind], 0.0, model)
+                pm = polar_motion_matrix(xp[0,tind], yp[0,tind], 0.0, model)
                 recef[:,tind] = np.dot(pm, rpef[:,tind])
                 vecef[:,tind] = np.dot(pm, vpef[:,tind])
         else:
-            pm = polarm(xp, yp, 0.0, model)
+            pm = polar_motion_matrix(xp, yp, 0.0, model)
             recef = np.dot(pm, rpef)
             vecef = np.dot(pm, vpef)
     elif model == '00':
         if isinstance(xp, np.ndarray):
             for tind in range(ttt.size):
-                pm = polarm(xp[0,tind], yp[0,tind], ttt[0,tind], model)
+                pm = polar_motion_matrix(xp[0,tind], yp[0,tind], ttt[0,tind], model)
                 recef[:,tind] = np.dot(pm, rpef[:,tind])
                 vecef[:,tind] = np.dot(pm, vpef[:,tind])
         else:
             for tind in range(ttt.size):
-                pm = polarm(xp, yp, ttt[0,tind], model)
+                pm = polar_motion_matrix(xp, yp, ttt[0,tind], model)
                 recef[:,tind] = np.dot(pm, rpef[:,tind])
                 vecef[:,tind] = np.dot(pm, vpef[:,tind])
 
@@ -609,6 +622,10 @@ def TEME_to_TLE_OPTIM(state, mjd0, kepler=False, tol=1e-6, tol_v=1e-7, method=No
 
     return mean_elements
 
+def TLE_to_TEME(state, mjd0, kepler=False):
+    '''Convert mean elements used in two line element sets (TLE's) to osculating orbital elements in TEME.
+    '''
+    return propagator.pysgp4.sgp4_propagation(mjd0, state, B=0.0, dt=0.0)
 
 
 def TEME_to_TLE(state, mjd0, kepler=False, tol=1e-3, tol_v=1e-4):
@@ -678,3 +695,60 @@ def TEME_to_TLE(state, mjd0, kepler=False, tol=1e-3, tol_v=1e-4):
             mean_elements = TEME_to_TLE_OPTIM(state_cart, mjd0=mjd0, kepler=False, tol=tol, tol_v=tol_v, method=method)
 
     return mean_elements
+
+
+
+def polar_motion_matrix( xp, yp, ttt, opt ):
+    '''This function calculates the transformation matrix that accounts for polar motion. both the 1980 and 2000 theories are handled. note that the rotation order is different between 1980 and 2000.
+
+    *References:* Vallado 2004, 207-209, 211, 223-224.
+
+    Author: David Vallado 719-573-2600   25 jun 2002.
+    Adapted to Python, Daniel Kastinen 2018 (2020)
+
+
+    :param float xp: x-axis polar motion coefficient in radians
+    :param float yp: y-axis polar motion coefficient in radians
+    :param float ttt: Julian centuries of tt (00 theory only)
+    :param str opt: Model for polar motion to use, options are '01', '02', '80'.
+
+    :return: Transformation matrix for ECEF to PEF
+    :rtype: numpy.ndarray (3x3 matrix)
+
+    '''
+    cosxp = np.cos(xp)
+    sinxp = np.sin(xp)
+    cosyp = np.cos(yp)
+    sinyp = np.sin(yp)
+
+    pm = np.zeros([3,3])
+
+    if opt == '80':
+        pm[0,0] =  cosxp
+        pm[0,1] =  0.0
+        pm[0,2] = -sinxp
+        pm[1,0] =  sinxp * sinyp
+        pm[1,1] =  cosyp
+        pm[1,2] =  cosxp * sinyp
+        pm[2,0] =  sinxp * cosyp
+        pm[2,1] = -sinyp
+        pm[2,2] =  cosxp * cosyp
+
+    else:
+        convrt = np.pi / (3600.0*180.0)
+        # approximate sp value in rad
+        sp = -47.0e-6 * ttt * convrt
+        cossp = np.cos(sp)
+        sinsp = np.sin(sp)
+
+        # form the matrix
+        pm[0,0] =  cosxp * cossp
+        pm[0,1] = -cosyp * sinsp + sinyp * sinxp * cossp
+        pm[0,2] = -sinyp * sinsp - cosyp * sinxp * cossp
+        pm[1,0] =  cosxp * sinsp
+        pm[1,1] =  cosyp * cossp + sinyp * sinxp * sinsp
+        pm[1,2] =  sinyp * cossp - cosyp * sinxp * sinsp
+        pm[2,0] =  sinxp
+        pm[2,1] = -sinyp * cosxp
+        pm[2,2] =  cosyp * cosxp
+    return pm
