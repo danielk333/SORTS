@@ -25,6 +25,68 @@ _EOP_data = None
 _EOP_header = None
 
 
+def enu_to_ecef(lat, lon, alt, enu, radians=False):
+    '''ENU (east/north/up) to ECEF coordinate system conversion. 
+
+    TODO: Docstring
+    '''
+    if not radians:
+        lat, lon = np.radians(lat), np.radians(lon)
+
+    mx = np.array([[-np.sin(lon), -np.sin(lat) * np.cos(lon), np.cos(lat) * np.cos(lon)],
+                [np.cos(lon), -np.sin(lat) * np.sin(lon), np.cos(lat) * np.sin(lon)],
+                [0, np.cos(lat), np.sin(lat)]])
+    
+    ecef = np.dot(mx,enu)
+    return ecef 
+
+
+def ned_to_ecef(lat, lon, alt, ned, radians=False):
+    '''NED (north/east/down) to ECEF coordinate system conversion.
+
+    TODO: Docstring
+    '''
+    enu = np.empty(ned.size, dtype=ned.dtype)
+    enu[0,...] = ned[1,...]
+    enu[1,...] = ned[0,...]
+    enu[2,...] = -ned[2,...]
+    return enu_to_ecef(lat, lon, alt, enu, radians=radians)
+
+
+def ecef_to_enu(lat, lon, alt, ecef, radians=False):
+    '''ECEF coordinate system to local ENU (east,north,up).
+
+    TODO: Docstring
+    '''
+    if not radians:
+        lat, lon = np.radians(lat), np.radians(lon)
+
+    mx = np.array([[-np.sin(lon), -np.sin(lat) * np.cos(lon), np.cos(lat) * np.cos(lon)],
+                [np.cos(lon), -np.sin(lat) * np.sin(lon), np.cos(lat) * np.sin(lon)],
+                [0, np.cos(lat), np.sin(lat)]])
+    enu = np.dot(numpy.linalg.inv(mx),ecef)
+    return enu
+
+
+def azel_ecef(lat, lon, alt, az, el, radians=False):
+    '''Radar pointing (az,el) to unit vector in ECEF.
+
+    TODO: Docstring
+    '''
+    shape = (3,)
+    if isinstance(az,np.ndarray):    
+        if len(az.shape) > 1:
+            shape = (3,az.shape[1])
+    elif isinstance(el,np.ndarray):    
+        if len(el.shape) > 1:
+            shape = (3,el.shape[1])
+
+    sph = np.empty(shape, dtype=np.float64)
+    sph[0,...] = az
+    sph[1,...] = el
+    sph[2,...] = 1.0
+    enu = sph_to_cart(sph, radians=radians)
+    return enu_to_ecef(lat, lon, alt, enu, radians=radians)
 
 
 def geodetic_to_ecef(lat, lon, alt, radians=False):
@@ -141,7 +203,7 @@ def get_polar_motion(jd_ut1):
 
 
 def TEME_to_ITRF(TEME, jd_ut1, xp, yp):
-    """Convert TEME position and velocity into standard ITRS coordinates.
+    '''Convert TEME position and velocity into standard ITRS coordinates.
     This converts a position and velocity vector in the idiosyncratic
     True Equator Mean Equinox (TEME) frame of reference used by the SGP4
     theory into vectors into the more standard ITRS frame of reference.
@@ -162,7 +224,7 @@ def TEME_to_ITRF(TEME, jd_ut1, xp, yp):
     :param float yp: Polar motion constant for rotation around y axis
     :return: ITRF 6-D state vector given in SI-units.
     :rtype: numpy.ndarray
-    """
+    '''
 
     if len(TEME.shape) > 1:
         rTEME = TEME[:3, :]
@@ -205,7 +267,7 @@ def TEME_to_ITRF(TEME, jd_ut1, xp, yp):
 
 
 def ITRF_to_TEME(ITRF, jd_ut1, xp, yp):
-    """Convert ITRF position and velocity into the idiosyncratic
+    '''Convert ITRF position and velocity into the idiosyncratic
     True Equator Mean Equinox (TEME) frame of reference used by the SGP4
     theory.
 
@@ -220,7 +282,7 @@ def ITRF_to_TEME(ITRF, jd_ut1, xp, yp):
     :param float yp: Polar motion constant for rotation around y axis
     :return: ITRF 6-D state vector given in SI-units.
     :rtype: numpy.ndarray
-    """
+    '''
 
     if len(ITRF.shape) > 1:
         rITRF = ITRF[:3, :]
