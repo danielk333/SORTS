@@ -21,3 +21,4 @@ from . import constants
 from . import frames
 from . import dates
 from . import plotting
+from . import profiling
