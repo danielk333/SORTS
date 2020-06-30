@@ -18,7 +18,6 @@ import sgp4.model
 
 #Local import
 from .base import Propagator
-from .. import constants
 from .. import dates
 from .. import frames
 
@@ -204,10 +203,17 @@ class SGP4(Propagator):
     def __init__(self, settings=None, **kwargs):
         super(SGP4, self).__init__(**kwargs)
 
+        if self.logger is not None:
+            self.logger.info(f'sorts.propagator.SGP4:init')
+
         self.settings.update(SGP4.DEFAULT_SETTINGS)
         if settings is not None:
             self.settings.update(settings)
             self._check_settings()
+
+        if self.logger is not None:
+            for key in self.settings:
+                self.logger.debug(f'SGP4:settings:{key} = {self.settings[key]}')
 
 
     def propagate(self, t, state0, mjd0, **kwargs):
@@ -233,12 +239,21 @@ class SGP4(Propagator):
         :return: 6-D Cartesian state vectors in SI-units.
 
         '''
+        if self.profiler is not None:
+            self.profiler.start('SGP4-propagate')
+
         t = self._make_numpy(t)
+
+        if self.logger is not None:
+            self.logger.info(f'SGP4:propagate:len(t) = {len(t)}')
 
         if 'B' in kwargs:
             B = kwargs['B']
         else:
             B = 0.5*kwargs.get('C_D',2.3)*kwargs.get('A',1.0)/kwargs.get('m',1.0)
+
+        if self.logger is not None:
+            self.logger.debug(f'SGP4:propagate:B = {B}')
 
         mean_elements = frames.TEME_to_TLE(state0, mjd0=mjd0, kepler=False)
 
@@ -253,16 +268,21 @@ class SGP4(Propagator):
         vel=np.zeros([3,t.size])
 
         for mi,mjd in enumerate(mjdates):
+            if self.profiler is not None:
+                self.profiler.start('SGP4-propagate-step')
+
             y = obj.state(mjd)
             pos[:,mi] = y[:3]
             vel[:,mi] = y[3:]
+
+            if self.profiler is not None:
+                self.profiler.stop('SGP4-propagate-step')
 
         if self.settings['out_frame'] == 'TEME':
             states=np.empty((6,t.size), dtype=np.float)
             states[:3,:] = pos
             states[3:,:] = vel
-            return states
-
+            
         elif self.settings['out_frame'] == 'ITRF':
             if self.settings['polar_motion']:
                 PM_data = frames.get_polar_motion(dates.mjd_to_jd(mjdates))
@@ -270,13 +290,18 @@ class SGP4(Propagator):
                 xp.shape = (1,xp.size)
                 yp = PM_data[:,1]
                 yp.shape = (1,yp.size)
+
             else:
                 xp = 0.0
                 yp = 0.0
 
-            ecefs = frames.TEME_to_ECEF(t, pos, vel, mjd0=mjd0, xp=xp, yp=yp , model=self.settings['polar_motion_model'])
-            return ecefs
+            states = frames.TEME_to_ECEF(t, pos, vel, mjd0=mjd0, xp=xp, yp=yp , model=self.settings['polar_motion_model'])
         else:
             raise Exception('Output frame {} not found'.format(self.out_frame))
 
+        if self.profiler is not None:
+            self.profiler.stop('SGP4-propagate')
+        if self.logger is not None:
+            self.logger.info(f'SGP4:propagate:completed')
 
+        return states

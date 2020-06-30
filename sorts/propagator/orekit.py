@@ -518,9 +518,6 @@ class Orekit(Propagator):
 
         See :func:`propagator_base.PropagatorBase.get_orbit`.
         '''
-        if self.logger is not None:
-            self.logger.info(f'Orekit:propagate:len(t) = {len(t)}')
-
         if self.profiler is not None:
             self.profiler.start('orekit-propagate')
 
@@ -540,6 +537,9 @@ class Orekit(Propagator):
             kwargs['m'] = 0.0
 
         t = self._make_numpy(t)
+
+        if self.logger is not None:
+            self.logger.info(f'Orekit:propagate:len(t) = {len(t)}')
 
         initialDate = mjd2absdate(mjd0, self.utc)
 

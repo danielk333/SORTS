@@ -13,6 +13,9 @@ import scipy.optimize
 import pyorb
 import pyant
 
+from pyant.coordinates import cart_to_sph, sph_to_cart, vector_angle
+from pyant.coordinates import rot_mat_x, rot_mat_y, rot_mat_z
+
 #Local import
 from . import dates
 from . import propagator
@@ -20,6 +23,24 @@ from . import constants
 
 _EOP_data = None
 _EOP_header = None
+
+
+
+
+def geodetic_to_ecef(lat, lon, alt, radians=False):
+    '''Convert geodetic coordinates to ECEF using WGS84.
+    
+    TODO: Docstring
+    '''
+    if not radians:
+        lat, lon = np.radians(lat), np.radians(lon)
+    xi = np.sqrt(1 - constants.WGS84.esq * np.sin(lat)**2)
+    x = (a / xi + alt) * np.cos(lat) * np.cos(lon)
+    y = (a / xi + alt) * np.cos(lat) * np.sin(lon)
+    z = (a / xi * (1 - constants.WGS84.esq) + alt) * np.sin(lat)
+    return np.array([x, y, z])
+
+
 
 def get_IERS_EOP(fname = None):
     '''Loads the IERS EOP data into memory. 
@@ -563,7 +584,7 @@ def _sgp4_elems2cart(kep):
     _kep[4] = _kep[3]
     _kep[3] = tmp
     _kep[5] = pyorb.mean_to_true(_kep[5], _kep[1], degrees=False)
-    cart = pyorb.kep_to_cart(kep, mu=constants.M_earth*pyorb.G, degrees=False)
+    cart = pyorb.kep_to_cart(kep, mu=constants.WGS72.M_earth*pyorb.G, degrees=False)
     return cart
 
 def _cart2sgp4_elems(cart, degrees=False):
@@ -571,7 +592,7 @@ def _cart2sgp4_elems(cart, degrees=False):
     
     Neglecting mass is sufficient for this calculation (the standard gravitational parameter is 24 orders larger then the change).
     '''
-    kep = pyorb.cart_to_kep(cart, mu=constants.M_earth*pyorb.G, degrees=False)
+    kep = pyorb.cart_to_kep(cart, mu=constants.WGS72.M_earth*pyorb.G, degrees=False)
     kep[0] *= 1e-3
     tmp = kep[4]
     kep[4] = kep[3]
@@ -652,7 +673,7 @@ def TEME_to_TLE(state, mjd0, kepler=False, tol=1e-3, tol_v=1e-4):
 
     #method        : Forces use of SGP4 or SDP4 depending on string 'n' or 'd', None is automatic method
     # Fix used model (SGP or SDP)
-    T = 2.0*np.pi*np.sqrt(np.power(state_kep[0]*1e-3, 3) / constants.MU_earth)/60.0
+    T = 2.0*np.pi*np.sqrt(np.power(state_kep[0]*1e-3, 3) / constants.WGS72.MU_earth)/60.0
     if T > 220.0:
         method = 'd'
     else:

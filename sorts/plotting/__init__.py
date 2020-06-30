@@ -4,4 +4,4 @@
 
 '''
 
-from .general import hist2d, posterior, hist, scatter, orbits
+from .general import hist2d, posterior, hist, scatter, orbits, grid_earth

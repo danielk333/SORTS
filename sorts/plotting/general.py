@@ -15,6 +15,45 @@ import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
 
 #Local import
+from .. import constants
+
+
+
+def grid_earth(ax, num_lat=25, num_lon=50, alpha=0.1, res = 100, color='black', hide_ax=True):
+    '''Add a 3d spherical grid to the given axis that represent the Earth.
+
+    '''
+    lons = np.linspace(-180, 180, num_lon+1) * np.pi/180 
+    lons = lons[:-1]
+    lats = np.linspace(-90, 90, num_lat) * np.pi/180 
+
+    lonsl = np.linspace(-180, 180, res) * np.pi/180 
+    latsl = np.linspace(-90, 90, res) * np.pi/180 
+
+    r_e = constants.R_earth
+    for lat in lats:
+        x = r_e*np.cos(lonsl)*np.cos(lat)
+        y = r_e*np.sin(lonsl)*np.cos(lat)
+        z = r_e*np.ones(np.size(lonsl))*np.sin(lat)
+        ax.plot(x,y,z,alpha=alpha,linestyle='-', marker='',color=color)
+
+    for lon in lons:
+        x = r_e*np.cos(lon)*np.cos(latsl)
+        y = r_e*np.sin(lon)*np.cos(latsl)
+        z = r_e*np.sin(latsl)
+        ax.plot(x,y,z,alpha=alpha,color=color)
+    
+    if hide_ax:
+        # Hide grid lines
+        ax.grid(False)
+
+        # Hide axes ticks
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_zticks([])
+        plt.axis('off')
+
+    return ax
 
 
 def hist2d(x, y, **options):

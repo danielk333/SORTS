@@ -86,15 +86,12 @@ class Profiler:
                     ret[key] = self.exec_times[key]['spent']
             return ret
 
-
-    def __str__(self):
+    def fmt(self, normalize=None):
         max_key_len = 5
         for key in self.exec_times:
             if len(key) > max_key_len:
                 max_key_len = len(key)
-        header_ = f'{"Name":<{max_key_len}}| Executions | Mean time | Total time'
-
-
+        header_ = f'{"Name":<{max_key_len}} | Executions | Mean time | Total time'
 
         str_ = ''
         str_ += f'{" Performance analysis ".center(len(header_), "-")}\n'
@@ -114,13 +111,20 @@ class Profiler:
                 mu = f'{means[key]:.5e}'
             else:
                 mu = str(datetime.timedelta(seconds=means[key]))
-            if totals[key] < 60:
-                su = f'{totals[key]:.5e}'
+            if normalize is not None:
+                su = f'{totals[key]/totals[normalize]*100.0:.2f} %'
             else:
-                su = str(datetime.timedelta(seconds=totals[key]))
+                if totals[key] < 60:
+                    su = f'{totals[key]:.5e}'
+                else:
+                    su = str(datetime.timedelta(seconds=totals[key]))
             
-            str_ += f'{key:<{max_key_len}}| {num:<10} | {mu:<9} | {su} \n'
+            str_ += f'{key:<{max_key_len}} | {num:<10} | {mu:<9} | {su} \n'
         return str_
+
+
+    def __str__(self):
+        return self.fmt()
 
 
 

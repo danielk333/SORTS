@@ -259,7 +259,7 @@ class Population:
 
         self.objs = np.empty((length,), dtype=_dtype)
 
-    def get_states(self, M_cent = constants.M_earth):
+    def get_states(self, M_cent = constants.WGS72.M_earth):
         '''Use the orbital parameters and get the state.'''
         orbs = self.get_all_orbits(order_angs = True).T
         orbs[:,5] = pyorb.mean_to_true(orbs[:,5], orbs[:,1], radians=False)
