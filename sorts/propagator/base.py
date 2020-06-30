@@ -21,9 +21,11 @@ class Propagator(ABC):
 
     DEFAULT_SETTINGS = dict()
 
-    def __init__(self):
+    def __init__(self, profiler=None, logger=None):
         self.settings = dict()
         self._check_args()
+        self.profiler = profiler
+        self.logger = logger
 
 
     def _check_args(self):

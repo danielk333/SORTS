@@ -201,8 +201,8 @@ class SGP4(Propagator):
                 raise ValueError('Setting "{}" does not support "{}"'.format(key_s, type(val_s)))
 
 
-    def __init__(self, settings=None):
-        super(SGP4, self).__init__()
+    def __init__(self, settings=None, **kwargs):
+        super(SGP4, self).__init__(**kwargs)
 
         self.settings.update(SGP4.DEFAULT_SETTINGS)
         if settings is not None:

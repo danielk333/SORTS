@@ -137,7 +137,7 @@ logging.Logger.always = add_logging_level(100, 'ALWAYS')
 
 
 def get_logger(
-        name,
+        name = 'sorts',
         path = None,
         file_level = logging.INFO,
         term_level = logging.INFO,
@@ -148,6 +148,8 @@ def get_logger(
     '''
     now = datetime.datetime.now()
     datetime_str = now.strftime("%Y-%m-%d_at_%H-%M")
+    datefmt = '%Y-%m-%d %H:%M:%S'
+    msecfmt = '%s.%03d'
 
     try:
         from mpi4py import MPI
@@ -189,18 +191,47 @@ def get_logger(
     if path is not None:
         fh = logging.FileHandler(log_fname)
         fh.setLevel(file_level) #debug and worse
-        form_fh = logging.Formatter(
-            format_str,
-            '%Y-%m-%d %H:%M:%S'
-            )
+        form_fh = logging.Formatter(format_str)
+        form_fh.default_time_format = datefmt
+        form_fh.default_msec_format = msecfmt
         fh.setFormatter(form_fh)
         logger.addHandler(fh) #id 0
 
     ch = logging.StreamHandler()
     ch.setLevel(term_level)
     form_ch = logging.Formatter(format_str)
+    form_ch.default_time_format = datefmt
+    form_ch.default_msec_format = msecfmt
+
     ch.setFormatter(form_ch)
     logger.addHandler(ch) #id 1
 
     return logger
 
+
+def term_level(logger, level):
+    if len(logger.handlers) == 1:
+        term_id = 0
+    else:
+        term_id = 1
+
+    if isinstance(level, str):
+        level = getattr(logging, level)
+
+    logger.handlers[term_id].setLevel(level)
+
+    return logger
+
+
+def file_level(logger, level):
+    if len(logger.handlers) == 1:
+        return logger
+    else:
+        file_id = 0
+
+    if isinstance(level, str):
+        level = getattr(logging, level)
+
+    logger.handlers[file_id].setLevel(level)
+
+    return logger
