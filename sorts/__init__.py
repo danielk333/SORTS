@@ -23,3 +23,4 @@ from . import frames
 from . import dates
 from . import plotting
 from . import profiling
+from . import radar

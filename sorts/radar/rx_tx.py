@@ -64,16 +64,16 @@ class Station(object):
     def point_ecef(self, point):
         '''Point Station beam in location of ECEF coordinate. Returns local pointing direction.
         '''
-        k_obj = frames.ecef_to_local(
-            lat = self.lat,
-            lon = self.lon,
-            alt = self.alt,
-            x = point[0],
-            y = point[1],
-            z = point[2],
+        k = frames.ecef_to_enu(
+            self.lat,
+            self.lon,
+            self.alt,
+            point,
+            radians=False,
         )
-        self.beam.point(k_obj)
-        return k_obj/n.linalg.norm(k_obj, axis=0)
+        self.beam.point(k)
+        return k/n.linalg.norm(k, axis=0)
+
 
     def get_pointing_ecef(self, t):
         '''Return the instantaneous pointing of the Station based on the currently running scan.
@@ -81,7 +81,8 @@ class Station(object):
            :param float/numpy.ndarray t: Time past reference epoch in seconds.
            :return: Current pointing direction in ECEF. Is a :code:`(3,)` numpy ndarray if :code:`len(t) == 1`, else return a :code:`(3, len(t))`.
         '''
-        return self.scan.station_pointing(t, self)
+        return self.scan.ecef_pointing(t, self)
+
 
     def get_pointing(self, t):
         '''Return the instantaneous pointing of the Station based on the currently running scan.
@@ -91,13 +92,26 @@ class Station(object):
         '''
         return self.scan.pointing(t)
 
+    def scan_pointing(self, t):
+        '''Set the current pointing to the scan pointing. If `t` is iterable, sets pointing and yields self.'''
+        iter_ = False
+        if isinstance(t, np.ndarray) or isinstance(t, list) or isinstance(t, set):
+            if len(t) > 1:
+                iter_ = True
+
+        if iter_:
+            k = self.get_pointing(t)
+            for ind in range(len(t)):
+                self.point(k[:,ind])
+                yield self
+        else:
+            k = self.get_pointing(t)
+            self.point(k)
+
+
     def __str__(self):
-        members = [attr for attr in dir(self) if not callable(getattr(self, attr)) and not attr.startswith("_")]
-        string = "Antenna %s\n\n"%(self.name)
-        for m in members:
-            string += ("%s = %s\n"%(m, str(getattr(self, m))))
-        return(string)
-    
+        pass
+
 
 class RX(Station):
     '''A radar receiving system.

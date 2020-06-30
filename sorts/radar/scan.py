@@ -18,7 +18,7 @@ from .. import frames
 class Scan(ABC):
     '''Encapsulates the observation schema of a radar system, i.e. its "scan".
 
-    :param str coordinates: The coordinate system used, can be :code:`'azelr'`, :code:`'ned'` or :code:`'enu'`
+    :param str coordinates: The coordinate system used, can be :code:`'azelr'`, :code:`'ned'` or :code:`'enu'`. If `azelr` is used, degrees are assumed.
 
     **Pointing function:**
     
@@ -36,7 +36,7 @@ class Scan(ABC):
 
         import numpy as np
         
-        
+
 
     **Coordinate systems:**
 
@@ -57,17 +57,22 @@ class Scan(ABC):
         pass
 
 
-    @abstractmethod
     def min_dwell(self):
         '''If there are dynamic dwell times, this is the minimum dwell time. Otherwise, returns same as :code:`dwell`.
         '''
-        pass
+        raise NotImplementedError()
+
+
+    def cycle(self):
+        '''The cycle time of the scan if applicable.
+        '''
+        raise NotImplementedError()
 
 
     def copy(self):
         '''Return a copy of the current instance of :class:`radar_scans.RadarScan`.
         '''
-        pass
+        raise NotImplementedError()
 
 
     def check_dwell_tx(self, tx):
@@ -98,24 +103,24 @@ class Scan(ABC):
             point[2,...] = -point[2,...]
         elif self.coordinates == 'enu':
             pass
-        elif self.coordinates == 'azel':
-            point = frames.sph_to_cart(point)
+        elif self.coordinates == 'azelr':
+            point = frames.sph_to_cart(point, radians=False)
 
         return point
     
 
-    def station_pointing(self, t, ant):
+    def ecef_pointing(self, t, ant):
         '''Returns the instantaneous WGS84 ECEF pointing direction and the radar geographical location in WGS84 ECEF coordinates.
         
             :param float t: Seconds past a reference epoch to retrieve the pointing at.
         '''
-        point = self.local_pointing(t)
+        point = self.pointing(t)
 
         if self.coordinates == 'ned':
             k0 = coord.ned_to_ecef(ant.lat, ant.lon, ant.alt, point, radians=False)
         elif self.coordinates == 'enu':
             k0 = coord.enu_to_ecef(ant.lat, ant.lon, ant.alt, point, radians=False)
-        elif self.coordinates == 'azel':
-            k0 = coord.azel_ecef(ant.lat, ant.lon, ant.alt, point, radians=False)
+        elif self.coordinates == 'azelr':
+            k0 = coord.azel_to_ecef(ant.lat, ant.lon, ant.alt, point[0,...], point[1,...], radians=False)
         
         return k0

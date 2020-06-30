@@ -68,7 +68,7 @@ def ecef_to_enu(lat, lon, alt, ecef, radians=False):
     return enu
 
 
-def azel_ecef(lat, lon, alt, az, el, radians=False):
+def azel_to_ecef(lat, lon, alt, az, el, radians=False):
     '''Radar pointing (az,el) to unit vector in ECEF.
 
     TODO: Docstring
