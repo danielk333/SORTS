@@ -15,6 +15,56 @@ import numpy as np
 #Local import
 from .. import frames
 
+class MultiScan:
+
+    def __init__(self, scans):
+        self.scans = scans
+
+
+    def enu_pointing(self, t):
+        '''Returns the instantaneous pointing in East, North, Up (ENU) local coordinates.
+        
+            :param float/numpy.ndarray t: Seconds past a reference epoch to retrieve the pointing at.
+        '''
+
+        return point
+    
+
+    def ecef_pointing(self, t, ant):
+        '''Returns the instantaneous WGS84 ECEF pointing direction and the radar geographical location in WGS84 ECEF coordinates.
+        
+            :param float t: Seconds past a reference epoch to retrieve the pointing at.
+        '''
+
+    def dwell(self, t):
+        '''The current dwell time of the scan. 
+        '''
+        pass
+
+
+    def min_dwell(self):
+        '''If there are dynamic dwell times, this is the minimum dwell time. Otherwise, returns same as :code:`dwell`.
+        '''
+        raise NotImplementedError()
+
+
+    def cycle(self):
+        '''The cycle time of the scan if applicable.
+        '''
+        raise NotImplementedError()
+
+
+    def copy(self):
+        '''Return a copy of the current instance.
+        '''
+        return 
+
+
+    def pointing(self, t):
+        pass
+
+
+
 class Scan(ABC):
     '''Encapsulates the observation schema of a radar system, i.e. its "scan".
 
@@ -70,7 +120,7 @@ class Scan(ABC):
 
 
     def copy(self):
-        '''Return a copy of the current instance of :class:`radar_scans.RadarScan`.
+        '''Return a copy of the current instance.
         '''
         raise NotImplementedError()
 

@@ -135,24 +135,21 @@ class TX(Station):
         :param float pulse_length: Length of transmission pulse.
         :param float ipp: Time between consecutive pulses.
         :param int n_ipp: Number of pulses to coherently integrate.
-        :param float enr_limit: Minimum detectable target SNR (after coherent integration)
 
         :ivar float tx_bandwidth: Transmissions bandwidth.
         :ivar float duty_cycle: Maximum duty cycle, i.e. fraction of time transmission can occur at maximum power.
         :ivar float tx_power: Transmissions power in watts.
-        :ivar float enr_limit: Minimum detectable target SNR (after coherent integration) in linear units.
         :ivar float pulse_length: Length of transmission pulse.
         :ivar float ipp: Time between consecutive pulses.
         :ivar int n_ipp: Number of pulses to coherently integrate.
         :ivar float coh_int_bandwidth: Effective bandwidth of receiver noise after coherent integration.
     '''
-    def __init__(self, lat, lon, alt, min_elevation, beam, tx_power, tx_bandwidth, duty_cycle, scan = None, pulse_length=1e-3, ipp=10e-3, n_ipp=20, enr_limit=10.0):
+    def __init__(self, lat, lon, alt, min_elevation, beam, tx_power, tx_bandwidth, duty_cycle, scan = None, pulse_length=1e-3, ipp=10e-3, n_ipp=20):
         super().__init__(lat, lon, alt, min_elevation, beam, scan = scan)
 
         self.tx_bandwidth = tx_bandwidth
         self.duty_cycle = duty_cycle
         self.tx_power = tx_power
-        self.enr_limit = enr_limit
         self.pulse_length = pulse_length
         self.ipp = ipp
         self.n_ipp = n_ipp
