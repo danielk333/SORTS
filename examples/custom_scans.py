@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''Example showing how populations can be used
+'''
 
 '''
 
@@ -25,18 +25,18 @@ class NEFence(sorts.radar.Scan):
 
         self._el[inds_] = 180.0 - self._el[inds_]
 
+
     def dwell(self, t=None):
-        '''The current dwell time of the scan in seconds. 
-        '''
-        if t is None:
-            return self._dwell
-        else:
-            return t*0 + self._dwell
+        return self._dwell
+
+
+    def min_dwell(self):
+        return self._dwell
+
 
     def cycle(self):
-        '''The cycle time of the scan if applicable.
-        '''
         return self.resolution*self._dwell
+
 
     def pointing(self, t):
         ind = (np.mod(t/self.cycle(), 1)*self.resolution).astype(np.int)
@@ -63,6 +63,9 @@ class RNG(sorts.radar.Scan):
             return self._dwell
         else:
             return t*0 + self._dwell
+
+    def cycle(self):
+        return np.inf
 
     def pointing(self, t):
         if not isinstance(t, float):

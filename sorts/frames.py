@@ -64,7 +64,7 @@ def ecef_to_enu(lat, lon, alt, ecef, radians=False):
     mx = np.array([[-np.sin(lon), -np.sin(lat) * np.cos(lon), np.cos(lat) * np.cos(lon)],
                 [np.cos(lon), -np.sin(lat) * np.sin(lon), np.cos(lat) * np.sin(lon)],
                 [0, np.cos(lat), np.sin(lat)]])
-    enu = np.dot(numpy.linalg.inv(mx),ecef)
+    enu = np.dot(np.linalg.inv(mx),ecef)
     return enu
 
 
@@ -97,9 +97,9 @@ def geodetic_to_ecef(lat, lon, alt, radians=False):
     if not radians:
         lat, lon = np.radians(lat), np.radians(lon)
     xi = np.sqrt(1 - constants.WGS84.esq * np.sin(lat)**2)
-    x = (a / xi + alt) * np.cos(lat) * np.cos(lon)
-    y = (a / xi + alt) * np.cos(lat) * np.sin(lon)
-    z = (a / xi * (1 - constants.WGS84.esq) + alt) * np.sin(lat)
+    x = (constants.WGS84.a / xi + alt) * np.cos(lat) * np.cos(lon)
+    y = (constants.WGS84.a / xi + alt) * np.cos(lat) * np.sin(lon)
+    z = (constants.WGS84.a / xi * (1 - constants.WGS84.esq) + alt) * np.sin(lat)
     return np.array([x, y, z])
 
 

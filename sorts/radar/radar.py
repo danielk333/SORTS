@@ -14,28 +14,19 @@ class Radar(object):
         :ivar float max_off_axis: Maximum angle between pointing direction and a received signal.
         :ivar float min_SNRdb: Minimum SNR detectable by radar system in dB (after coherent integration).
 
-        :param list tx: List of transmitting sites, i.e. instances of :class:`antenna.AntennaTX`
-        :param list rx: List of receiving sites, i.e. instances of :class:`antenna.AntennaRX`
+        :param list tx: List of transmitting sites, i.e. instances of :class:`sorts.radar.TX`
+        :param list rx: List of receiving sites, i.e. instances of :class:`sorts.radar.RX`
         :param float max_off_axis: Maximum angle between pointing direction and a received signal.
-        :param float min_SNRdb: Minimum SNR detectable by radar system in dB.
+        :param float min_SNRdb: Minimum SNR detectable by radar system in dB (after coherent integration).
+
     '''
     def __init__(self, tx, rx, max_off_axis=90.0, min_SNRdb=10.0):
-        self.tx = tx_lst
-        self.rx = rx_lst
+        self.tx = tx
+        self.rx = rx
         self.max_off_axis = max_off_axis
         self.min_SNRdb = min_SNRdb
 
 
-    def set_tx_bandwith(self, bw):
-        '''Set the transmission bandwidth in Hz of all transmitters in the radar system.
-        
-        :param float bw: Transmission bandwidth in Hz. This is basically what range of frequencies available for wave forming the transmission, e.g. how fast bit-key-shifting code can switch from 0 to :math:`\pi` and can then be calculated as the inverse of the baud length.
-        
-        '''
-        for tx in self.tx:
-            tx.tx_bandwidth = bw
-    
-    
     def set_beam(self, beam):
         '''Sets the radiation pattern for transmitters and receivers.
         
