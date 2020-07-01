@@ -7,7 +7,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.animation import FuncAnimation
+import matplotlib.animation as animation
 
 import sorts
 from sorts.radar.scans import Fence
@@ -84,10 +84,13 @@ for rx in e3d.radar.rx:
         ln_rx[-1].append(ln)
 
 
+
+dr = 1000e3
+
 def init():
-    ax.set_xlim([e3d.radar.tx[0].ecef[0]-600e3, e3d.radar.tx[0].ecef[0]+600e3])
-    ax.set_ylim([e3d.radar.tx[0].ecef[1]-600e3, e3d.radar.tx[0].ecef[1]+600e3])
-    ax.set_zlim([e3d.radar.tx[0].ecef[2]-600e3, e3d.radar.tx[0].ecef[2]+600e3])
+    ax.set_xlim([e3d.radar.tx[0].ecef[0]-dr, e3d.radar.tx[0].ecef[0]+dr])
+    ax.set_ylim([e3d.radar.tx[0].ecef[1]-dr, e3d.radar.tx[0].ecef[1]+dr])
+    ax.set_zlim([e3d.radar.tx[0].ecef[2]-dr, e3d.radar.tx[0].ecef[2]+dr])
     ax.view_init(elev=20, azim=120)
     lst = ln_tx+[ttl]
     for ln in ln_rx:
@@ -101,28 +104,37 @@ def update(ind):
 
     ttl.set_text(f'Time: {t[ind]:2f} s')
     for ln, tx in zip(ln_tx, radar.tx):
-        point = tx.pointing_ecef*e3d.r.max() + tx.ecef
-        ln.set_data([tx.ecef[0], point[0]], [tx.ecef[1], point[1]])
-        ln.set_3d_properties([tx.ecef[2], point[2]])
-    for ln, rx in zip(ln_rx, radar.rx):
-        pecef = rx.pointing_ecef
-        for ri in range(len(e3d.r)):
-            point = pecef[:,ri]*(e3d.r[ri] + 1000e3) + rx.ecef
-            ln[ri].set_data([rx.ecef[0], point[0]], [rx.ecef[1], point[1]])
-            ln[ri].set_3d_properties([rx.ecef[2], point[2]])
+        point_tx = tx.pointing_ecef/np.linalg.norm(tx.pointing_ecef, axis=0)*e3d.r.max() + tx.ecef
+        ln.set_data([tx.ecef[0], point_tx[0]], [tx.ecef[1], point_tx[1]])
+        ln.set_3d_properties([tx.ecef[2], point_tx[2]])
+
+        for ln, rx in zip(ln_rx, radar.rx):
+            pecef = rx.pointing_ecef/np.linalg.norm(rx.pointing_ecef, axis=0)
+            for ri in range(len(e3d.r)):
+                point_tx = tx.pointing_ecef/np.linalg.norm(tx.pointing_ecef, axis=0)*e3d.r[ri] + tx.ecef
+
+                point = pecef[:,ri]*np.linalg.norm(rx.ecef - point_tx) + rx.ecef
+                ln[ri].set_data([rx.ecef[0], point[0]], [rx.ecef[1], point[1]])
+                ln[ri].set_3d_properties([rx.ecef[2], point[2]])
     lst = ln_tx+[ttl]
     for ln in ln_rx:
         lst += ln
     return lst + [ax]
 
-ani = FuncAnimation(
+
+interval = (t.max() - t.min())/len(t)
+ani = animation.FuncAnimation(
     fig, 
     update, 
     frames=range(len(t)), 
     init_func=init, 
     blit=True,
-    interval=(t.max() - t.min())/len(t)
+    interval=interval,
 )
 
+# Set up formatting for the movie files
+# Writer = animation.writers['ffmpeg']
+# writer = Writer(fps=30, metadata=dict(artist='Daniel Kastinen'), bitrate=1800)
+# ani.save('/home/danielk/e3d_controller_multi_beam_test.mp4', writer=writer)
 
 plt.show()
