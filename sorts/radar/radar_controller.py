@@ -42,14 +42,32 @@ class RadarController(ABC):
 
         return ret
 
+    def point_rx_ecef(self, ecef):
+        '''Point all rx sites into the direction of given ECEF coordinate, relative Earth Center.
+        '''
+        for rx in self.radar.rx:
+            if len(ecef.shape) > 1:
+                rx.point_ecef(ecef - rx.ecef[:,None])
+            else:
+                rx.point_ecef(ecef - rx.ecef)
+
+
+    def point_tx_ecef(self, ecef):
+        '''Point all tx sites into the direction of given ECEF coordinate, relative Earth Center.
+        '''
+        for tx in self.radar.tx:
+            if len(ecef.shape) > 1:
+                tx.point_ecef(ecef - tx.ecef[:,None])
+            else:
+                tx.point_ecef(ecef - tx.ecef)
+
 
     def point_ecef(self, ecef):
         '''Point all sites into the direction of given ECEF coordinate, relative Earth Center.
         '''
-        for tx in self.radar.tx:
-            tx.point_ecef(ecef - tx.ecef)
-        for rx in self.radar.rx:
-            rx.point_ecef(ecef - rx.ecef)
+        self.point_tx_ecef(ecef)
+        self.point_rx_ecef(ecef)
+
 
 
     def point(self, enu):

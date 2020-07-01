@@ -15,8 +15,8 @@ from sorts.radar.instances import eiscat3d
 from sorts.radar import RadarController
 
 
-scan1 = Fence(azimuth=45.0, num=100, dwell=0.1)
-scan2 = Fence(azimuth=0.0, num=20, dwell=0.2, min_elevation=60.0)
+scan1 = Fence(azimuth=90, num=100, dwell=0.1)
+scan2 = Fence(azimuth=0.0, num=100, dwell=0.1, min_elevation=75.0)
 
 class MyController(RadarController):
     '''Takes a set of scans that are interleaved according to their cycles, i.e. one cycle each.
@@ -25,7 +25,7 @@ class MyController(RadarController):
     TX scan and the given range.
     '''
 
-    def __init__(self, radar, scans, r = 400e3):
+    def __init__(self, radar, scans, r = np.linspace(300e3,1000e3,num=10)):
         super().__init__(radar)
         self.scans = scans
         self.cycles = np.array([sc.cycle() for sc in scans])
@@ -35,9 +35,14 @@ class MyController(RadarController):
         self.r = r
 
     def point_radar(self, t, ind):
-        point = self.scans[ind].ecef_pointing(t, self.radar.tx[0])*self.r
-        point += self.radar.tx[0].ecef
-        self.point_ecef(point)
+        point = self.scans[ind].ecef_pointing(t, self.radar.tx[0])
+
+        point_tx = point + self.radar.tx[0].ecef
+        point_rx = point[:,None]*self.r[None,:] + self.radar.tx[0].ecef[:,None]
+        
+        self.point_tx_ecef(point_tx)
+        self.point_rx_ecef(point_rx)
+
         return self.radar
 
     def generator(self, t):
@@ -48,8 +53,12 @@ class MyController(RadarController):
 
 
 e3d = MyController(radar = eiscat3d, scans=[scan1, scan2])
-t = np.linspace(0,np.sum(e3d.cycles),num=300)
+t = np.linspace(0,np.sum(e3d.cycles)*2,num=300)
 
+
+# radar = e3d(t=0)
+# print(radar.rx[0].pointing)
+# exit()
 
 fig = plt.figure(figsize=(15,15))
 ax = fig.add_subplot(111, projection='3d')
@@ -69,29 +78,42 @@ for tx in e3d.radar.tx:
     ln, = ax.plot([], [], [], 'm-')
     ln_tx.append(ln)
 for rx in e3d.radar.rx:
-    ln, = ax.plot([], [], [], 'g-')
-    ln_rx.append(ln)
+    ln_rx.append([])
+    for ri in range(len(e3d.r)):
+        ln, = ax.plot([], [], [], 'g-')
+        ln_rx[-1].append(ln)
 
 
 def init():
     ax.set_xlim([e3d.radar.tx[0].ecef[0]-600e3, e3d.radar.tx[0].ecef[0]+600e3])
     ax.set_ylim([e3d.radar.tx[0].ecef[1]-600e3, e3d.radar.tx[0].ecef[1]+600e3])
     ax.set_zlim([e3d.radar.tx[0].ecef[2]-600e3, e3d.radar.tx[0].ecef[2]+600e3])
-    return ln_tx+ln_rx+[ttl]
+    ax.view_init(elev=20, azim=120)
+    lst = ln_tx+[ttl]
+    for ln in ln_rx:
+        lst += ln
+    return lst
 
 def update(ind):
     radar = e3d(t[ind])
+
+    ax.view_init(elev=20, azim=120.0 + ind*0.2)
+
     ttl.set_text(f'Time: {t[ind]:2f} s')
     for ln, tx in zip(ln_tx, radar.tx):
-        point = tx.pointing_ecef*e3d.r*1.25 + tx.ecef
+        point = tx.pointing_ecef*e3d.r.max() + tx.ecef
         ln.set_data([tx.ecef[0], point[0]], [tx.ecef[1], point[1]])
         ln.set_3d_properties([tx.ecef[2], point[2]])
     for ln, rx in zip(ln_rx, radar.rx):
-        point = rx.pointing_ecef*e3d.r*1.25 + rx.ecef
-        ln.set_data([rx.ecef[0], point[0]], [rx.ecef[1], point[1]])
-        ln.set_3d_properties([rx.ecef[2], point[2]])
-
-    return ln_tx+ln_rx+[ttl]
+        pecef = rx.pointing_ecef
+        for ri in range(len(e3d.r)):
+            point = pecef[:,ri]*(e3d.r[ri] + 1000e3) + rx.ecef
+            ln[ri].set_data([rx.ecef[0], point[0]], [rx.ecef[1], point[1]])
+            ln[ri].set_3d_properties([rx.ecef[2], point[2]])
+    lst = ln_tx+[ttl]
+    for ln in ln_rx:
+        lst += ln
+    return lst + [ax]
 
 ani = FuncAnimation(
     fig, 
