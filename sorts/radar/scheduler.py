@@ -17,10 +17,9 @@ class Scheduler(ABC):
     '''A Scheduler for executing time-slices of different radar controllers.
     '''
 
-    def __init__(self, radar, controllers):
+    def __init__(self, radar):
         self.radar = radar
-        self.controllers = controllers
-        self.order = [] #the order of controllers to execute
+        self.event_list = [] #the order of controllers to execute
         self.samplings = [] #a list of numpy arrays of sampling times for schedule generation
 
 
@@ -32,7 +31,7 @@ class Scheduler(ABC):
 
 
     @abstractmethod
-    def get_controller(self, ind, t):
+    def get_controller(self, event, t):
         '''This should init a controller and call it to return the generator for that controllers time-slice.
         '''
         pass
@@ -50,8 +49,8 @@ class Scheduler(ABC):
 
 
     def schedule(self):
-        ctrls = [self.get_controller(cind, self.samplings[tind]) 
-            for tind,cind in enumerate(self.order)
+        ctrls = [self.get_controller(event, self.samplings[ind]) 
+            for ind,event in enumerate(self.event_list)
         ]
         samples = np.concatenate(self.samplings, axis=0)
         sched = Scheduler.chain_generators(ctrls)
