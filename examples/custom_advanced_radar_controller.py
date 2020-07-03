@@ -25,7 +25,7 @@ class MyController(RadarController):
     TX scan and the given range.
     '''
 
-    def __init__(self, radar, scans, r = np.linspace(300e3,1000e3,num=10)):
+    def __init__(self, radar, scans, r=np.linspace(300e3,1000e3,num=10)):
         super().__init__(radar)
         self.scans = scans
         self.cycles = np.array([sc.cycle() for sc in scans])

@@ -33,6 +33,7 @@ class Station(object):
         :ivar float min_elevation: Elevation threshold for the radar station, i.e. it cannot detect or point below this elevation.
         :ivar numpy.array ecef: The ECEF coordinates of the radar station calculated using :func:`frames.geodetic_to_ecef`.
         :ivar pyant.Beam beam: Radiation pattern for radar station.
+        :ivar bool enabled: Indicates if this station is turned on or off.
 
     '''
     def __init__(self, lat, lon, alt, min_elevation, beam):
@@ -42,6 +43,7 @@ class Station(object):
         self.min_elevation = min_elevation
         self.ecef = frames.geodetic_to_ecef(lat, lon, alt, radians = False)
         self.beam = beam
+        self.enabled = True
 
 
     @property
