@@ -17,8 +17,14 @@ class RadarController(ABC):
     '''A radar controller.
     '''
 
-    def __init__(self, radar):
+    def __init__(self, radar, t=None, t0=0.0):
         self.radar = radar
+        self.t = t
+        self.t0 = t0
+
+
+    def run(self):
+        return self(self.t - self.t0)
 
 
     @abstractmethod
@@ -41,6 +47,7 @@ class RadarController(ABC):
                 ret = list(self.generator(t, **kwargs))[0]
 
         return ret
+
 
     def point_rx_ecef(self, ecef):
         '''Point all rx sites into the direction of given ECEF coordinate, relative Earth Center.

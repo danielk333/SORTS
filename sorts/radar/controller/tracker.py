@@ -13,10 +13,9 @@ class Tracker(RadarController):
     '''Takes in ECEF points and a time vector and creates a tracking control.
     '''
 
-    def __init__(self, radar, t, ecefs):
-        super().__init__(radar)
+    def __init__(self, radar, t, ecefs, t0=0.0):
+        super().__init__(radar, t=t, t0=t0)
         self.ecefs = ecefs
-        self.t = t
 
     def point_radar(self, ind):
         self.point_tx_ecef(self.ecefs[:3,ind])

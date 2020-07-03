@@ -36,19 +36,25 @@ class MyScheduler(Scheduler):
         '''Update the scheduler information.
         '''
         self.orbits = orbits
-        self.event_list = list(range(len(orbits)))
-        self.samplings = [np.linspace(x*20,x*20+10,num=5) for x in range(len(orbits))]
 
 
-    def get_controller(self, event, t):
+    def get_controllers(self):
         '''This should init a controller and call it to return the generator for that controllers time-slice.
         '''
-        states = self.propagator.propagate(t, self.orbits.cartesian[:,event], orb.epoch, A=1.0, C_R = 1.0, C_D = 1.0)
-        ctrl = Tracker(radar = self.radar, t=t, ecefs = states[:3,:])
-        return ctrl(t)
+
+        tv = [np.linspace(x*20,x*20+10,num=5) for x in range(len(self.orbits))]
+
+        ctrls = []
+        for ind in range(len(self.orbits)):
+            states = self.propagator.propagate(tv[ind], self.orbits.cartesian[:,ind], orb.epoch, A=1.0, C_R = 1.0, C_D = 1.0)
+
+            ctrl = Tracker(radar = self.radar, t=tv[ind], ecefs = states[:3,:])
+            ctrls.append(ctrl)
+        
+        return ctrls
 
 
-    def format_schedule(self, t, generator):
+    def generate_schedule(self, t, generator):
         data = np.empty((len(t),len(self.radar.rx)*2+2), dtype=np.float64)
         data[:,0] = t
         data[:,len(self.radar.rx)*2+1] = 0.2
