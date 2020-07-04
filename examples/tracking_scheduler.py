@@ -11,9 +11,8 @@ from matplotlib.animation import FuncAnimation
 import pyorb
 
 import sorts
-from sorts.radar.controller import Tracker
 from sorts.radar.instances import eiscat3d
-from sorts.radar import Scheduler
+from sorts.radar.scheduler import Tracking
 from sorts.propagator import SGP4
 
 prop = SGP4(
@@ -22,53 +21,30 @@ prop = SGP4(
     ),
 )
 
-class MyScheduler(Scheduler):
+
+class MyTracking(Tracking):
     '''
     '''
 
-    def __init__(self, radar, propagator):
-        super().__init__(radar)
-        self.propagator = propagator
-        self.orbits = None
-
-
-    def update(self, orbits):
-        '''Update the scheduler information.
-        '''
-        self.orbits = orbits
-
-
-    def get_controllers(self):
-        '''This should init all controllers and return a list of them.
-        '''
-
-        tv = [np.linspace(x*20,x*20+10,num=5) for x in range(len(self.orbits))]
-
-        ctrls = []
-        for ind in range(len(self.orbits)):
-            states = self.propagator.propagate(tv[ind], self.orbits.cartesian[:,ind], orb.epoch, A=1.0, C_R = 1.0, C_D = 1.0)
-
-            ctrl = Tracker(radar = self.radar, t=tv[ind], ecefs = states[:3,:])
-            ctrls.append(ctrl)
-        
-        return ctrls
-
+    def get_priority(self):
+        return np.ones((len(self.orbits,)), dtype=np.float64)
 
     def generate_schedule(self, t, generator):
         data = np.empty((len(t),len(self.radar.rx)*2+2), dtype=np.float64)
         data[:,0] = t
         data[:,len(self.radar.rx)*2+1] = 0.2
-        for ind,radar in enumerate(generator):
+        for ind, radar in enumerate(generator):
             for ri, rx in enumerate(radar.rx):
                 data[ind,1+ri*2] = rx.beam.azimuth
                 data[ind,2+ri*2] = rx.beam.elevation
         return data
 
 
+
 orb = pyorb.Orbit(M0 = pyorb.M_earth, direct_update=True, auto_update=True, degrees=True, num=3, a=6700e3, e=0, i=75, omega=0, Omega=np.linspace(79,82,num=3), anom=72, epoch=53005)
 print(orb)
 
-e3d = MyScheduler(radar = eiscat3d, propagator=prop)
+e3d = MyTracking(radar = eiscat3d, propagator=prop)
 
 e3d.update(orb)
 data = e3d.schedule()

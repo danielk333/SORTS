@@ -55,6 +55,19 @@ class Station(object):
         return self.beam.wavelength
 
 
+    def enu(self, ecefs):
+        '''Converts a set of ECEF states to local ENU coordinates.
+
+        '''
+        return frames.ecef_to_enu(
+            self.lat,
+            self.lon,
+            self.alt,
+            ecefs - self.ecef[:,None],
+            radians=False,
+        )
+
+
     def point(self, k):
         '''Point Station beam in local ENU coordinates.
         '''
