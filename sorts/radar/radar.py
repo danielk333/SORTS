@@ -63,9 +63,11 @@ class Radar(object):
             :rtype: list of list of sorts.Pass
         '''
         rd_ps = []
-        for tx in self.tx:
+        for txi,tx in enumerate(self.tx):
             rd_ps.append([])
-            for rx in self.rx:
+            for rxi,rx in enumerate(self.rx):
                 txrx = passes.find_simultaneous_passes(t, states, [tx, rx])
+                for ps in txrx:
+                    ps.station_id = [txi, rxi]
                 rd_ps[-1].append(txrx)
         return rd_ps

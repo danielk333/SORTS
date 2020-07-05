@@ -15,12 +15,13 @@ class Pass:
     '''Saves the local coordinate data for a single pass. Optionally also indicates the location of that pass in a bigger dataset.
     '''
 
-    def __init__(self, t, enu, inds=None, cache=True, stations=1):
+    def __init__(self, t, enu, inds=None, cache=True, station_id=None):
         self.inds = inds
         self.t = t
         self.enu = enu
         self.cache = cache
-        self.stations = stations
+
+        self.station_id = station_id
 
         self.snr = None
 
@@ -30,7 +31,17 @@ class Pass:
         self._v = None
         self._zang = None
 
-        self.__zenith = np.array([0,0,1], dtype=np.float64)
+
+    @property
+    def stations(self):
+        if self.station_id is not None:
+            if isinstance(self.station_id, list):
+                return len(self.station_id)
+            else:
+                return 1
+        else:
+            return 1
+
 
     def start(self):
         if self.cache:
@@ -48,12 +59,23 @@ class Pass:
         else:
             return self.t.max()
 
+    @staticmethod
+    def calculate_range(enu):
+        return np.linalg.norm(enu[:3,:], axis=0)
+
+    @staticmethod
+    def calculate_range_rate(enu):
+        return np.sum(enu[3:,:]*(enu[:3,:]/np.linalg.norm(enu[:3,:], axis=0)), axis=0)
+
+    @staticmethod
+    def calculate_zenith_angle(enu, radians=False):
+        return pyant.coordinates.vector_angle(np.array([0,0,1], dtype=np.float64), enu[:3,:], radians=radians)
 
     def get_range(self):
         if self.stations > 1:
-            return [np.linalg.norm(enu[:3,:], axis=0) for enu in self.enu]
+            return [Pass.calculate_range(enu) for enu in self.enu]
         else:
-            return np.linalg.norm(self.enu[:3,:], axis=0)
+            return Pass.calculate_range(self.enu)
 
     def range(self):
         if self.cache:
@@ -65,9 +87,9 @@ class Pass:
 
     def get_range_rate(self):
         if self.stations > 1:
-            return [np.sum(enu[3:,:]*(enu[:3,:]/np.linalg.norm(enu[:3,:], axis=0)), axis=0) for enu in self.enu]
+            return [Pass.calculate_range_rate(enu) for enu in self.enu]
         else:
-            return np.sum(self.enu[3:,:]*(self.enu[:3,:]/np.linalg.norm(self.enu[:3,:], axis=0)), axis=0)
+            return Pass.calculate_range_rate(self.enu)
 
     def range_rate(self):
         if self.cache:
@@ -81,11 +103,11 @@ class Pass:
     def get_zenith_angle(self, radians=False):
         if self.stations > 1:
             return [
-                pyant.coordinates.vector_angle(self.__zenith, enu[:3,:], radians=radians)
+                Pass.calculate_zenith_angle(enu, radians=radians)
                 for enu in self.enu
             ]
         else:
-            return pyant.coordinates.vector_angle(self.__zenith, self.enu[:3,:], radians=radians)
+            return Pass.calculate_zenith_angle(self.enu, radians=radians)
 
     def zenith_angle(self, radians=False):
         if self.cache:
@@ -174,7 +196,6 @@ def find_passes(t, states, station):
             enu=enu[:,ps_inds], 
             inds=ps_inds, 
             cache=True,
-            stations=1,
         )
         ps._zang = zenith_ang[ps_inds]
         passes.append(ps)
@@ -223,7 +244,7 @@ def find_simultaneous_passes(t, states, stations):
             enu=[xv[:,ps_inds] for xv in enu], 
             inds=ps_inds, 
             cache=True,
-            stations=2,
+            station_id=[None, None],
         )
         ps._zang = [z[ps_inds] for z in zenith_ang]
         passes.append(ps)
