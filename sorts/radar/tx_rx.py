@@ -59,13 +59,24 @@ class Station(object):
         '''Converts a set of ECEF states to local ENU coordinates.
 
         '''
-        return frames.ecef_to_enu(
+        rel_ = ecefs.copy()
+        rel_[:3,:] = rel_[:3,:] - self.ecef[:,None]
+        rel_[:3,:] = frames.ecef_to_enu(
             self.lat,
             self.lon,
             self.alt,
-            ecefs - self.ecef[:,None],
+            rel_[:3,:],
             radians=False,
         )
+        if ecefs.shape[0] > 3:
+            rel_[3:,:] = frames.ecef_to_enu(
+                self.lat,
+                self.lon,
+                self.alt,
+                rel_[3:,:],
+                radians=False,
+            )
+        return rel_
 
 
     def point(self, k):

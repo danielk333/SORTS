@@ -27,6 +27,7 @@ class Pass:
         self._start = None
         self._end = None
         self._r = None
+        self._v = None
         self._zang = None
 
         self.__zenith = np.array([0,0,1], dtype=np.float64)
@@ -50,9 +51,9 @@ class Pass:
 
     def get_range(self):
         if self.stations > 1:
-            return [np.linalg.norm(enu, axis=0) for enu in self.enu]
+            return [np.linalg.norm(enu[:3,:], axis=0) for enu in self.enu]
         else:
-            return np.linalg.norm(self.enu, axis=0)
+            return np.linalg.norm(self.enu[:3,:], axis=0)
 
     def range(self):
         if self.cache:
@@ -62,15 +63,29 @@ class Pass:
         else:
             return self.get_range()
 
+    def get_range_rate(self):
+        if self.stations > 1:
+            return [np.sum(enu[3:,:]*(enu[:3,:]/np.linalg.norm(enu[:3,:], axis=0)), axis=0) for enu in self.enu]
+        else:
+            return np.sum(self.enu[3:,:]*(self.enu[:3,:]/np.linalg.norm(self.enu[:3,:], axis=0)), axis=0)
+
+    def range_rate(self):
+        if self.cache:
+            if self._v is None:
+                self._v = self.get_range_rate()
+            return self._v
+        else:
+            return self.get_range_rate()
+
 
     def get_zenith_angle(self, radians=False):
         if self.stations > 1:
             return [
-                pyant.coordinates.vector_angle(self.__zenith, enu, radians=radians)
+                pyant.coordinates.vector_angle(self.__zenith, enu[:3,:], radians=radians)
                 for enu in self.enu
             ]
         else:
-            return pyant.coordinates.vector_angle(self.__zenith, self.enu, radians=radians)
+            return pyant.coordinates.vector_angle(self.__zenith, self.enu[:3,:], radians=radians)
 
     def zenith_angle(self, radians=False):
         if self.cache:
@@ -185,10 +200,10 @@ def find_simultaneous_passes(t, states, stations):
     check = np.full((len(t),), True, dtype=np.bool)
     for station in stations:
 
-        enu_st = station.enu(states[:3,:])
+        enu_st = station.enu(states)
         enu.append(enu_st)
 
-        zenith_st_ang = pyant.coordinates.vector_angle(zenith, enu_st, radians=False)
+        zenith_st_ang = pyant.coordinates.vector_angle(zenith, enu_st[:3,:], radians=False)
         zenith_ang.append(zenith_st_ang)
 
         check_st = zenith_st_ang < 90.0-station.min_elevation
@@ -205,7 +220,7 @@ def find_simultaneous_passes(t, states, stations):
         ps_inds = inds[(splits[si]+1):splits[si+1]]
         ps = Pass(
             t=t[ps_inds], 
-            enu=[r[:3,ps_inds] for r in enu], 
+            enu=[xv[:,ps_inds] for xv in enu], 
             inds=ps_inds, 
             cache=True,
             stations=2,
