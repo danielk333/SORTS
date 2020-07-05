@@ -22,6 +22,8 @@ class Pass:
         self.cache = cache
         self.stations = stations
 
+        self.snr = None
+
         self._start = None
         self._end = None
         self._r = None
@@ -46,40 +48,37 @@ class Pass:
             return self.t.max()
 
 
+    def get_range(self):
+        if self.stations > 1:
+            return [np.linalg.norm(enu, axis=0) for enu in self.enu]
+        else:
+            return np.linalg.norm(self.enu, axis=0)
+
     def range(self):
         if self.cache:
             if self._r is None:
-                if self.stations > 1:
-                    self._r = [np.linalg.norm(enu, axis=0) for enu in self.enu]
-                else:
-                    self._r = np.linalg.norm(self.enu, axis=0)
+                self._r = self.get_range()
             return self._r
         else:
-            if self.stations > 1:
-                return [np.linalg.norm(enu, axis=0) for enu in self.enu]
-            else:
-                return np.linalg.norm(self.enu, axis=0)
+            return self.get_range()
 
+
+    def get_zenith_angle(self, radians=False):
+        if self.stations > 1:
+            return [
+                pyant.coordinates.vector_angle(self.__zenith, enu, radians=radians)
+                for enu in self.enu
+            ]
+        else:
+            return pyant.coordinates.vector_angle(self.__zenith, self.enu, radians=radians)
 
     def zenith_angle(self, radians=False):
         if self.cache:
             if self._zang is None:
-                if self.stations > 1:
-                    self._zang = [
-                        pyant.coordinates.vector_angle(self.__zenith, enu, radians=radians)
-                        for enu in self.enu
-                    ]
-                else:
-                    self._zang = pyant.coordinates.vector_angle(self.__zenith, self.enu, radians=radians)
+                self._zang = self.get_zenith_angle(radians=radians)
             return self._zang
         else:
-            if self.stations > 1:
-                return [
-                    pyant.coordinates.vector_angle(self.__zenith, enu, radians=radians)
-                    for enu in self.enu
-                ]
-            else:
-                return pyant.coordinates.vector_angle(self.__zenith, self.enu, radians=radians)
+            return self.get_zenith_angle(radians=radians)
 
 
 

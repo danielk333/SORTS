@@ -30,7 +30,7 @@ class Scheduler(ABC):
 
     @abstractmethod
     def get_controllers(self):
-        '''This should init a list of controllers and set the `t` variables on them for their individual time samplings.
+        '''This should init a list of controllers and set the `t` (global time) and `t0` (global time reference for controller) variables on them for their individual time samplings.
         '''
         pass
 
@@ -53,11 +53,30 @@ class Scheduler(ABC):
         return self.generate_schedule(times, sched)
 
 
-    def turn_off(self):
-        for st in self.radar.tx + self.radar.rx:
-            st.enabled = False
+    def __call__(self, start, stop):
+        ctrls = self.get_controllers()
+
+        check_t = lambda c: np.logical_and(c.t >= start, c.t <= stop)
+
+        ctrls = [c for c in ctrls if np.any(check_t(c))]
+        times = np.concatenate([c.t[check_t(c)] for c in ctrls], axis=0)
+        return times, Scheduler.chain_generators([c(c.t[check_t(c)] - c.t0) for c in ctrls])
 
 
-    def turn_on(self):
-        for st in self.radar.tx + self.radar.rx:
-            st.enabled = True
+    @abstractmethod
+    def calculate_observation(self, txrx_pass, times, generator):
+        pass
+
+
+    def observe_passes(self, passes):
+        data = []
+        for txi in range(len(passes)):
+            data.append([])
+            for rxi in range(len(passes[txi])):
+                data[-1].append([])
+                for ps in passes[txi][rxi]:
+                    times, generator = self(ps.start(), ps.end())
+                    data[-1][-1].append(
+                        self.calculate_observation(ps, times, generator)
+                    )
+        return data

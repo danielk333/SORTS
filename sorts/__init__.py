@@ -18,8 +18,9 @@ from .population import Population
 from .propagator import Propagator
 from .radar import Scan
 from .radar import Station, TX, RX
-from .radar import RadarController
-from .radar import Scheduler
+from .controller import RadarController
+from .scheduler import Scheduler
+from .passes import Pass
 
 #modules
 from . import constants
@@ -28,7 +29,10 @@ from . import dates
 from . import plotting
 from . import profiling
 from . import radar
+from . import controller
+from . import scheduler
+from . import passes
 
 from .passes import equidistant_sampling
 from .passes import find_passes, find_simultaneous_passes
-from .passes import Pass
+from .signals import hard_target_snr

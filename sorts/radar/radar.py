@@ -56,6 +56,11 @@ class Radar(object):
 
     def find_passes(self, t, states):
         '''Finds all passes that are simultaneously inside a transmitter station FOV and a receiver station FOV. 
+
+            :param numpy.ndarray t: Vector of times in seconds to use as a base to find passes.
+            :param numpy.ndarray states: ECEF states of the object to find passes for.
+            :return: list of passes indexed by first tx-station and then rx-station.
+            :rtype: list of list of sorts.Pass
         '''
         rd_ps = []
         for tx in self.tx:

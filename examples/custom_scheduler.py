@@ -11,9 +11,9 @@ from matplotlib.animation import FuncAnimation
 import pyorb
 
 import sorts
-from sorts.radar.controller import Tracker
+from sorts.controller import Tracker
 from sorts.radar.instances import eiscat3d
-from sorts.radar import Scheduler
+from sorts import Scheduler
 from sorts.propagator import SGP4
 
 prop = SGP4(

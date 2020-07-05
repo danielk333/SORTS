@@ -85,3 +85,12 @@ class RadarController(ABC):
         for rx in self.radar.rx:
             rx.point(enu)
 
+
+    def turn_off(self):
+        for st in self.radar.tx + self.radar.rx:
+            st.enabled = False
+
+
+    def turn_on(self):
+        for st in self.radar.tx + self.radar.rx:
+            st.enabled = True
