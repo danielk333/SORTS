@@ -5,6 +5,7 @@
 '''
 import numpy as np
 
+from .. import passes
 
 class Radar(object):
     '''A network of transmitting and receiving radar stations.
@@ -51,3 +52,15 @@ class Radar(object):
         '''
         for rx in self.rx:
             rx.beam = beam.copy()
+
+
+    def find_passes(self, t, states):
+        '''Finds all passes that are simultaneously inside a transmitter station FOV and a receiver station FOV. 
+        '''
+        rd_ps = []
+        for tx in self.tx:
+            rd_ps.append([])
+            for rx in self.rx:
+                txrx = passes.find_simultaneous_passes(t, states, [tx, rx])
+                rd_ps[-1].append(txrx)
+        return rd_ps

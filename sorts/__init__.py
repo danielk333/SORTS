@@ -30,5 +30,5 @@ from . import profiling
 from . import radar
 
 from .passes import equidistant_sampling
-from .passes import find_passes
+from .passes import find_passes, find_simultaneous_passes
 from .passes import Pass
