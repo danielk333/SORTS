@@ -12,7 +12,7 @@ from matplotlib.animation import FuncAnimation
 import sorts
 from sorts.radar.scans import Fence
 from sorts.radar.instances import eiscat3d
-from sorts.radar import RadarController
+from sorts import RadarController
 
 
 scan = Fence(azimuth=90, num=100, dwell=0.1, min_elevation=30)

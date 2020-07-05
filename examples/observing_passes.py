@@ -11,7 +11,7 @@ import pyorb
 import sorts
 from sorts.propagator import Orekit
 from sorts.radar.instances import eiscat3d
-from sorts.radar.scheduler import StaticList
+from sorts.scheduler import StaticList
 
 
 orb = pyorb.Orbit(M0 = pyorb.M_earth, direct_update=True, auto_update=True, degrees=True, a=7200e3, e=0.1, i=75, omega=0, Omega=79, anom=72, epoch=53005.0)
@@ -56,27 +56,33 @@ axes = [
 ps = passes[0][0][0]
 e3d_tracker = Tracker(radar = eiscat3d, t=ps.t, ecefs=states[:3,ps.inds])
 
-snr = np.empty((len(ps.t),), dtype=np.float64)
-enus = ps.enu
-ranges = ps.range()
+class MyStaticList(StaticList):
 
-for ti, radar in enumerate(rgen):
-    if radar.tx[txi].enabled and radar.rx[rxi].enabled:
-        snr[ti] = hard_target_snr(
-            radar.tx[txi].beam.gain(enus[0][:,ti]),
-            radar.rx[rxi].beam.gain(enus[1][:,ti]),
-            radar.rx[rxi].wavelength,
-            radar.tx[txi].power,
-            ranges[0][ti],
-            ranges[1][ti],
-            diameter_m=diameter,
-            bandwidth=radar.tx[txi].coh_int_bandwidth,
-            rx_noise_temp=radar.rx[rxi].noise,
-        )
-    else:
-        snr[ti] = np.nan
+    def calculate_observation(self, txrx_pass, t, generator, **kwargs):
+        snr = np.empty((len(txrx_pass.t),), dtype=np.float64)
+        enus = txrx_pass.enu
+        ranges = txrx_pass.range()
 
-ps.snr = snr
+        for ti, radar in enumerate(rgen):
+            if radar.tx[txi].enabled and radar.rx[rxi].enabled:
+                snr[ti] = hard_target_snr(
+                    radar.tx[txi].beam.gain(enus[0][:,ti]),
+                    radar.rx[rxi].beam.gain(enus[1][:,ti]),
+                    radar.rx[rxi].wavelength,
+                    radar.tx[txi].power,
+                    ranges[0][ti],
+                    ranges[1][ti],
+                    diameter_m=kwargs['diameter'],
+                    bandwidth=radar.tx[txi].coh_int_bandwidth,
+                    rx_noise_temp=radar.rx[rxi].noise,
+                )
+            else:
+                snr[ti] = np.nan
+
+
+scheduler = MyStaticList(radar = eiscat3d, controllers=[e3d_tracker])
+
+
 
 for pi, ps in enumerate(passes[0][0]):
     zang = ps.zenith_angle()

@@ -16,7 +16,7 @@ class Tracker(RadarController):
     def __init__(self, radar, t, ecefs, t0=0.0, dwell=0.1):
         super().__init__(radar, t=t, t0=t0)
         self.ecefs = ecefs
-        self.dwell
+        self.dwell = dwell
 
     def point_radar(self, ind):
         self.point_tx_ecef(self.ecefs[:3,ind])
@@ -26,7 +26,7 @@ class Tracker(RadarController):
     def generator(self, t):
         for ti in range(len(t)):
             dt = t[ti] - self.t
-            check = np.logical_and(dt > 0, dt < self.dwell)
+            check = np.logical_and(dt >= 0, dt <= self.dwell)
 
             if np.any(check):
                 ind = np.argmax(check)

@@ -59,24 +59,28 @@ class Scheduler(ABC):
         check_t = lambda c: np.logical_and(c.t >= start, c.t <= stop)
 
         ctrls = [c for c in ctrls if np.any(check_t(c))]
-        times = np.concatenate([c.t[check_t(c)] for c in ctrls], axis=0)
-        return times, Scheduler.chain_generators([c(c.t[check_t(c)] - c.t0) for c in ctrls])
+        if len(ctrls) == 0:
+            return None, None
+        else:
+            t = np.concatenate([c.t[check_t(c)] for c in ctrls], axis=0)
+            return t, Scheduler.chain_generators([c(c.t[check_t(c)] - c.t0) for c in ctrls])
 
 
-    @abstractmethod
-    def calculate_observation(self, txrx_pass, times, generator):
-        pass
+    def calculate_observation(self, txrx_pass, t, generator, **kwargs):
+        raise NotImplementedError()
 
 
-    def observe_passes(self, passes):
+    def observe_passes(self, passes, **kwargs):
         data = []
         for txi in range(len(passes)):
             data.append([])
             for rxi in range(len(passes[txi])):
                 data[-1].append([])
                 for ps in passes[txi][rxi]:
-                    times, generator = self(ps.start(), ps.end())
-                    data[-1][-1].append(
-                        self.calculate_observation(ps, times, generator)
-                    )
+                    t, generator = self(ps.start(), ps.end())
+                    if generator is not None:
+                        pass_data = self.calculate_observation(ps, t, generator, **kwargs)
+                    else:
+                        pass_data = None
+                    data[-1][-1].append(pass_data)
         return data
