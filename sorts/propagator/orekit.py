@@ -177,7 +177,7 @@ class Orekit(Propagator):
 
             t_filt = np.logical_and(np.abs(self.t) >= np.abs(t0), np.abs(self.t) <= np.abs(t1))
 
-            for ti, t in zip(np.where(t_filt), self.t[t_filt]):
+            for ti, t in zip(np.where(t_filt)[0], self.t[t_filt]):
                 if self.profiler is not None:
                     self.profiler.start('orekit-StepHandler-handle-getState')
 
