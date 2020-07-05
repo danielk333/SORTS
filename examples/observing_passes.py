@@ -16,13 +16,13 @@ from sorts.scheduler import StaticList
 from sorts import Pass
 
 
-orb = pyorb.Orbit(M0 = pyorb.M_earth, direct_update=True, auto_update=True, degrees=True, a=7200e3, e=0.1, i=75, omega=0, Omega=79, anom=72, epoch=53005.0)
+orb = pyorb.Orbit(M0 = pyorb.M_earth, direct_update=True, auto_update=True, degrees=True, num=2, a=7200e3, e=0.1, i=75, omega=0, Omega=np.array([79, 81]), anom=np.array([72.0,71.9]), epoch=53005.0)
 print(orb)
 
 t = sorts.equidistant_sampling(
-    orbit = orb, 
+    orbit = orb[0], 
     start_t = 0, 
-    end_t = 3600*24*1, 
+    end_t = 3600*6, 
     max_dpos=1e3,
 )
 
@@ -39,8 +39,10 @@ prop = Orekit(
 )
 print(f'Temporal points: {len(t)}')
 states = prop.propagate(t, orb.cartesian[:,0], orb.epoch, A=1.0, C_R = 1.0, C_D = 1.0)
+states2 = prop.propagate(t, orb.cartesian[:,1], orb.epoch, A=1.0, C_R = 1.0, C_D = 1.0)
 
 passes = eiscat3d.find_passes(t, states)
+passes2 = eiscat3d.find_passes(t, states2)
 
 
 #just the first pass
@@ -118,8 +120,8 @@ sched_tab = tabulate(sched_data, headers=["t [s]"] + rx_head + ['dwell'])
 print(sched_tab)
 
 
-data = scheduler.observe_passes(passes, orbit = orb, diameter = 0.1)
-
+data = scheduler.observe_passes(passes, orbit = orb[0], diameter = 0.1)
+data2 = scheduler.observe_passes(passes2, orbit = orb[1], diameter = 0.1)
 
 fig = plt.figure(figsize=(15,15))
 axes = [
@@ -137,11 +139,17 @@ print(data)
 
 for pi in range(len(passes[0][0])):
     dat = data[0][0][pi]
+    dat2 = data2[0][0][pi]
     if dat is not None:
         axes[0][0].plot(passes[0][0][pi].enu[0][0,:], passes[0][0][pi].enu[0][1,:], passes[0][0][pi].enu[0][2,:], '-', label=f'pass-{pi}')
         axes[0][1].plot(dat['t']/3600.0, dat['range'], '-', label=f'pass-{pi}')
         axes[1][0].plot(dat['t']/3600.0, dat['range_rate'], '-', label=f'pass-{pi}')
         axes[1][1].plot(dat['t']/3600.0, 10*np.log10(dat['snr']), '-', label=f'pass-{pi}')
+    if dat2 is not None:
+        axes[0][0].plot(passes2[0][0][pi].enu[0][0,:], passes2[0][0][pi].enu[0][1,:], passes2[0][0][pi].enu[0][2,:], '-', label=f'obj2 pass-{pi}')
+        axes[0][1].plot(dat2['t']/3600.0, dat2['range'], '-', label=f'obj2 pass-{pi}')
+        axes[1][0].plot(dat2['t']/3600.0, dat2['range_rate'], '-', label=f'obj2 pass-{pi}')
+        axes[1][1].plot(dat2['t']/3600.0, 10*np.log10(dat2['snr']), '-', label=f'obj2 pass-{pi}')
 
 axes[0][1].legend()
 plt.show()
