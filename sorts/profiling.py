@@ -7,6 +7,8 @@ import datetime
 import pathlib
 import time
 
+from tabulate import tabulate
+
 class Profiler:
     '''Performance profiler class.
 
@@ -86,20 +88,11 @@ class Profiler:
                     ret[key] = self.exec_times[key]['spent']
             return ret
 
-    def fmt(self, normalize=None):
-        max_key_len = 5
-        for key in self.exec_times:
-            if len(key) > max_key_len:
-                max_key_len = len(key)
-        header_ = f'{"Name":<{max_key_len}} | Executions | Mean time | Total time'
-
-        str_ = ''
-        str_ += f'{" Performance analysis ".center(len(header_), "-")}\n'
-        str_ += header_ + '\n'
-        str_ += '-'*len(header_) + '\n'
-
+    def fmt(self, normalize=None, timedelta=False):
         means = self.mean()
         totals = self.total()
+
+        data = []
 
         for key in self.exec_times:
             if self.distribution:
@@ -107,19 +100,31 @@ class Profiler:
             else:
                 num = str(self.exec_times[key]['num'])
 
-            if means[key] < 60:
-                mu = f'{means[key]:.5e}'
-            else:
+            if timedelta:
                 mu = str(datetime.timedelta(seconds=means[key]))
+            else:
+                mu = f'{means[key]:.5e}'
+
             if normalize is not None:
                 su = f'{totals[key]/totals[normalize]*100.0:.2f} %'
             else:
-                if totals[key] < 60:
-                    su = f'{totals[key]:.5e}'
-                else:
+                if timedelta:
                     su = str(datetime.timedelta(seconds=totals[key]))
+                else:
+                    su = f'{totals[key]:.5e}'
             
-            str_ += f'{key:<{max_key_len}} | {num:<10} | {mu:<9} | {su} \n'
+            data.append([key, num, mu, su])
+        
+        
+        header = ['Name', 'Executions', 'Mean time', 'Total time']
+        tab = str(tabulate(data, header, tablefmt="presto"))
+
+        width = tab.find('\n', 0)
+
+        str_ = f'{" Performance analysis ".center(width, "-")}\n'
+        str_ += tab + '\n'
+        str_ += '-'*width + '\n'
+
         return str_
 
 

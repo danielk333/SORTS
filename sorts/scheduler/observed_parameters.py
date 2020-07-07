@@ -63,9 +63,31 @@ class ObservedParameters(Scheduler):
 
             if radar.tx[txi].enabled and radar.rx[rxi].enabled:
 
+                if self.profiler is not None:
+                    self.profiler.start('Obs.Param.:calculate_observation:snr-step:gain')
+                if len(radar.tx[txi].beam.pointing.shape) > 1:
+                    tx_g = np.max([
+                        radar.tx[txi].beam.gain(enus[0][:3,ti], ind={'pointing': pi})
+                        for pi in range(radar.tx[txi].beam.pointing.shape[1])
+                    ])
+                else:
+                    tx_g = radar.tx[txi].beam.gain(enus[0][:3,ti])
+
+                if len(radar.rx[rxi].beam.pointing.shape) > 1:
+                    rx_g = np.max([
+                        radar.rx[rxi].beam.gain(enus[1][:3,ti], ind={'pointing': pi})
+                        for pi in range(radar.rx[rxi].beam.pointing.shape[1])
+                    ])
+                else:
+                    rx_g = radar.rx[rxi].beam.gain(enus[1][:3,ti])
+
+                if self.profiler is not None:
+                    self.profiler.stop('Obs.Param.:calculate_observation:snr-step:gain')
+                    self.profiler.start('Obs.Param.:calculate_observation:snr-step:snr')
+
                 snr[ti] = hard_target_snr(
-                    radar.tx[txi].beam.gain(enus[0][:3,ti]),
-                    radar.rx[rxi].beam.gain(enus[1][:3,ti]),
+                    tx_g,
+                    rx_g,
                     radar.rx[rxi].wavelength,
                     radar.tx[txi].power,
                     ranges[0][ti],
@@ -74,6 +96,9 @@ class ObservedParameters(Scheduler):
                     bandwidth=radar.tx[txi].coh_int_bandwidth,
                     rx_noise_temp=radar.rx[rxi].noise,
                 )
+                if self.profiler is not None:
+                    self.profiler.stop('Obs.Param.:calculate_observation:snr-step:snr')
+                
                 rcs[ti] = hard_target_rcs(
                     wavelength=radar.rx[rxi].wavelength,
                     diameter=space_object.d,

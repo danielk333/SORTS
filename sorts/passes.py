@@ -271,6 +271,9 @@ def find_simultaneous_passes(t, states, stations, cache_data=True):
 
     inds = np.where(check)[0]
 
+    if len(inds) == 0:
+        return passes
+
     dind = np.diff(inds)
     splits = np.where(dind > 1)[0]
 
@@ -306,6 +309,9 @@ def find_simultaneous_passes(t, states, stations, cache_data=True):
 
 
 def select_simultaneous_passes(passes):
+    '''TODO, should this be a thing????
+
+    '''
 
     def overlap(ps1, ps2):
         return ps1.start() <= ps2.end() and ps2.start() <= ps1.end()

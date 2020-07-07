@@ -1,0 +1,142 @@
+#!/usr/bin/env python
+
+'''
+
+'''
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+import sorts
+from sorts.propagator import Orekit
+from sorts.radar.instances import eiscat3d
+from sorts.scheduler import StaticList, ObservedParameters
+from sorts.controller import Scanner
+from sorts import SpaceObject
+from sorts.profiling import Profiler
+from sorts.radar.scans import Fence
+
+
+end_t = 600.0
+scan = Fence(azimuth=90, num=100, dwell=0.1, min_elevation=30)
+
+p = Profiler()
+
+orekit_data = '/home/danielk/IRF/IRF_GITLAB/orekit_build/orekit-data-master.zip'
+opts = dict(
+    orekit_data = orekit_data, 
+    settings=dict(
+        in_frame='EME',
+        out_frame='ITRF',
+        drag_force = False,
+        radiation_pressure = False,
+    ),
+)
+
+
+logger = sorts.profiling.get_logger('scanning')
+
+objs = [
+    SpaceObject(
+        Orekit,
+        propagator_options = opts,
+        a = 7200e3, 
+        e = 0.1, 
+        i = 75, 
+        raan = 79,
+        aop = 0,
+        mu0 = 60,
+        mjd0 = 53005.0,
+        d = 1.0,
+    ),
+    SpaceObject(
+        Orekit,
+        propagator_options = opts,
+        a = 7200e3, 
+        e = 0.1, 
+        i = 69, 
+        raan = 74,
+        aop = 0,
+        mu0 = 0,
+        mjd0 = 53005.0,
+        d = 1.0,
+    )
+]
+
+objs = objs[:1]
+
+for obj in objs: print(obj)
+
+class ObservedScanning(StaticList, ObservedParameters):
+    pass
+
+scan_sched = Scanner(eiscat3d, scan)
+scan_sched.t = np.arange(0, end_t, scan.dwell())
+
+p.start('total')
+scheduler = ObservedScanning(
+    radar = eiscat3d, 
+    controllers = [scan_sched], 
+    logger = logger,
+    profiler = p,
+)
+
+
+
+datas = []
+passes = []
+for ind in range(len(objs)):
+    p.start('equidistant_sampling')
+    t = sorts.equidistant_sampling(
+        orbit = objs[ind].orbit, 
+        start_t = 0, 
+        end_t = end_t, 
+        max_dpos=1e3,
+    )
+    p.stop('equidistant_sampling')
+
+    print(f'Temporal points obj {ind}: {len(t)}')
+    
+    p.start('get_state')
+    states = objs[ind].get_state(t)
+    p.stop('get_state')
+
+    p.start('find_passes')
+    passes += [eiscat3d.find_passes(t, states, cache_data = True)]
+    p.stop('find_passes')
+
+    p.start('observe_passes')
+    data = scheduler.observe_passes(passes[ind], space_object = objs[ind], remove_failed=False)
+    p.stop('observe_passes')
+
+    datas.append(data)
+
+p.stop('total')
+print(p.fmt(normalize='total'))
+
+fig = plt.figure(figsize=(15,15))
+axes = [
+    [
+        fig.add_subplot(221, projection='3d'),
+        fig.add_subplot(222),
+    ],
+    [
+        fig.add_subplot(223),
+        fig.add_subplot(224),
+    ],
+]
+
+for ind in range(len(objs)):
+    for pi in range(len(passes[ind][0][0])):
+        ps = passes[ind][0][0][pi]
+        axes[0][0].plot(ps.enu[0][0,:], ps.enu[0][1,:], ps.enu[0][2,:], '-')
+        dat = datas[ind][0][0][pi]
+
+        if dat is not None:
+            axes[0][1].plot(dat['t']/3600.0, dat['range'], '-', label=f'obj{ind}-pass{pi}')
+            axes[1][0].plot(dat['t']/3600.0, dat['range_rate'], '-')
+            axes[1][1].plot(dat['t']/3600.0, 10*np.log10(dat['snr']), '-')
+
+
+axes[0][1].legend()
+plt.show()
