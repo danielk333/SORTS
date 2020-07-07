@@ -10,6 +10,7 @@ import pyant
 
 #Local import
 from . import frames
+from .signals import hard_target_snr
 
 class Pass:
     '''Saves the local coordinate data for a single pass. Optionally also indicates the location of that pass in a bigger dataset.
@@ -30,6 +31,32 @@ class Pass:
         self._r = None
         self._v = None
         self._zang = None
+
+
+    def calculate_max_snr(self, tx, rx, diameter):
+        assert self.stations == 2, 'Can only calculate SNR for TX-RX pairs'
+
+        ranges = self.range()
+        enus = self.enu
+
+        self.snr = np.empty((len(self.t),), dtype=np.float64)
+        for ti in range(len(self.t)):
+
+            tx.beam.point(enus[0][:3,ti])
+            rx.beam.point(enus[1][:3,ti])
+
+            self.snr[ti] = hard_target_snr(
+                tx.beam.gain(enus[0][:3,ti]),
+                rx.beam.gain(enus[1][:3,ti]),
+                rx.wavelength,
+                tx.power,
+                ranges[0][ti],
+                ranges[1][ti],
+                diameter=diameter,
+                bandwidth=tx.coh_int_bandwidth,
+                rx_noise_temp=rx.noise,
+            )
+
 
 
     @property
@@ -191,19 +218,31 @@ def find_passes(t, states, station):
     splits = np.insert(splits, len(splits), inds[-1])
     for si in range(len(splits)-1):
         ps_inds = inds[(splits[si]+1):splits[si+1]]
-        ps = Pass(
-            t=t[ps_inds], 
-            enu=enu[:,ps_inds], 
-            inds=ps_inds, 
-            cache=True,
-        )
-        ps._zang = zenith_ang[ps_inds]
+
+        if cache_data:
+            ps = Pass(
+                t=t[ps_inds], 
+                enu=enu[:,ps_inds], 
+                inds=ps_inds, 
+                cache=True,
+            )
+            ps._zang = zenith_ang[ps_inds]
+        else:
+            ps = Pass(
+                t=None, 
+                enu=None, 
+                inds=ps_inds, 
+                cache=True,
+            )
+            ps._start = t[ps_inds].min()
+            ps._end = t[ps_inds].max()
+
         passes.append(ps)
 
     return passes
 
 
-def find_simultaneous_passes(t, states, stations):
+def find_simultaneous_passes(t, states, stations, cache_data=True):
     '''Finds all passes that are simultaneously inside a multiple stations FOV's.
     
     :param numpy.ndarray t: Vector of times in seconds to use as a base to find passes.
@@ -239,14 +278,47 @@ def find_simultaneous_passes(t, states, stations):
     splits = np.insert(splits, len(splits), inds[-1])
     for si in range(len(splits)-1):
         ps_inds = inds[(splits[si]+1):splits[si+1]]
-        ps = Pass(
-            t=t[ps_inds], 
-            enu=[xv[:,ps_inds] for xv in enu], 
-            inds=ps_inds, 
-            cache=True,
-            station_id=[None, None],
-        )
-        ps._zang = [z[ps_inds] for z in zenith_ang]
+        if len(ps_inds) == 0:
+            continue
+        if cache_data:
+            ps = Pass(
+                t=t[ps_inds], 
+                enu=[xv[:,ps_inds] for xv in enu], 
+                inds=ps_inds, 
+                cache=True,
+                station_id=[None, None],
+            )
+            ps._zang = [z[ps_inds] for z in zenith_ang]
+        else:
+            ps = Pass(
+                t=None, 
+                enu=None, 
+                inds=ps_inds, 
+                cache=True,
+                station_id=[None, None],
+            )
+            ps._start = t[ps_inds].min()
+            ps._end = t[ps_inds].max()
+
         passes.append(ps)
 
     return passes
+
+
+def select_simultaneous_passes(passes):
+
+    def overlap(ps1, ps2):
+        return ps1.start() <= ps2.end() and ps2.start() <= ps1.end()
+
+    grouped_passes = []
+    added = np.full((len(passes),), False, dtype=np.bool)
+    for x in range(len(passes)):
+        if not added[x]:
+            grouped_passes.append([passes[x]])
+            added[x] = True
+        for y in range(x+1, len(passes)):
+            if not added[y]:
+                if overlap(passes[x], passes[y]):
+                    grouped_passes[-1].append(passes[y])
+                    added[y] = True
+    return grouped_passes

@@ -167,7 +167,7 @@ class Orekit(Propagator):
 
         def handleStep(self, interpolator, isLast):
             if self.profiler is not None:
-                self.profiler.start('orekit-StepHandler-handle')
+                self.profiler.start('Orekit:propagate:steps:step-handler')
 
             state1 = interpolator.getCurrentState()
             state0 = interpolator.getPreviousState()
@@ -179,7 +179,7 @@ class Orekit(Propagator):
 
             for ti, t in zip(np.where(t_filt)[0], self.t[t_filt]):
                 if self.profiler is not None:
-                    self.profiler.start('orekit-StepHandler-handle-getState')
+                    self.profiler.start('Orekit:propagate:steps:step-handler:getState')
 
                 t_date = self.start_date.shiftedBy(float(t))
 
@@ -198,10 +198,10 @@ class Orekit(Propagator):
                 self.states_pointer[5,ti] = v_tmp.getZ()
 
                 if self.profiler is not None:
-                    self.profiler.stop('orekit-StepHandler-handle-getState')
+                    self.profiler.stop('Orekit:propagate:steps:step-handler:getState')
 
             if self.profiler is not None:
-                self.profiler.stop('orekit-StepHandler-handle')
+                self.profiler.stop('Orekit:propagate:steps:step-handler')
 
     DEFAULT_SETTINGS = dict(
             in_frame='EME',
@@ -242,7 +242,7 @@ class Orekit(Propagator):
         if self.logger is not None:
             self.logger.info(f'sorts.propagator.Orekit:init')
         if self.profiler is not None:
-            self.profiler.start('orekit-init')
+            self.profiler.start('Orekit:init')
 
         self.settings.update(Orekit.DEFAULT_SETTINGS)
         if settings is not None:
@@ -323,7 +323,7 @@ class Orekit(Propagator):
                     self.logger.debug(f'Orekit:init:_forces:{key} = None')
 
         if self.profiler is not None:
-            self.profiler.stop('orekit-init')
+            self.profiler.stop('Orekit:init')
 
     def __str__(self):
         
@@ -363,7 +363,7 @@ class Orekit(Propagator):
         '''
 
         if self.profiler is not None:
-            self.profiler.start('orekit-get_frame')
+            self.profiler.start('Orekit:get_frame')
 
         if name == 'EME':
             frame = FramesFactory.getEME2000()
@@ -383,7 +383,7 @@ class Orekit(Propagator):
             raise Exception('Frame "{}" not recognized'.format(name))
 
         if self.profiler is not None:
-            self.profiler.stop('orekit-get_frame')
+            self.profiler.stop('Orekit:get_frame')
 
         return frame
 
@@ -395,7 +395,7 @@ class Orekit(Propagator):
         '''
 
         if self.profiler is not None:
-            self.profiler.start('orekit-construct_propagator')
+            self.profiler.start('Orekit:propagate:construct_propagator')
 
         self._tolerances = NumericalPropagator.tolerances(
                 self.settings['position_tolerance'],
@@ -421,7 +421,7 @@ class Orekit(Propagator):
         self.propagator = propagator
 
         if self.profiler is not None:
-            self.profiler.stop('orekit-construct_propagator')
+            self.profiler.stop('Orekit:propagate:construct_propagator')
 
 
     def _set_forces(self, A, cd, cr):
@@ -433,7 +433,7 @@ class Orekit(Propagator):
         '''
 
         if self.profiler is not None:
-            self.profiler.start('orekit-set_forces')
+            self.profiler.start('Orekit:propagate:set_forces')
 
         if self.logger is not None:
             self.logger.debug(f'Orekit:set_forces:A = {A}')
@@ -492,7 +492,7 @@ class Orekit(Propagator):
                 self.propagator.addForceModel(force)
 
         if self.profiler is not None:
-            self.profiler.stop('orekit-set_forces')
+            self.profiler.stop('Orekit:propagate:set_forces')
         
 
     def propagate(self,t,state0,mjd0, **kwargs):
@@ -519,7 +519,7 @@ class Orekit(Propagator):
         See :func:`propagator_base.PropagatorBase.get_orbit`.
         '''
         if self.profiler is not None:
-            self.profiler.start('orekit-propagate')
+            self.profiler.start('Orekit:propagate')
 
         if self.settings['radiation_pressure']:
             if 'C_R' not in kwargs:
@@ -581,7 +581,7 @@ class Orekit(Propagator):
         step_handler = Orekit.OrekitVariableStep()
 
         if self.profiler is not None:
-            self.profiler.start('orekit-propagate-steps')
+            self.profiler.start('Orekit:propagate:steps')
 
         if len(t_back) > 0:
             _t = t_back
@@ -614,8 +614,8 @@ class Orekit(Propagator):
             state[:, tf_indst] = _state[:, _t_res]
 
         if self.profiler is not None:
-            self.profiler.stop('orekit-propagate-steps')
-            self.profiler.stop('orekit-propagate')
+            self.profiler.stop('Orekit:propagate:steps')
+            self.profiler.stop('Orekit:propagate')
 
         if self.logger is not None:
             self.logger.info(f'Orekit:propagate:completed')

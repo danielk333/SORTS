@@ -54,7 +54,7 @@ class Radar(object):
             rx.beam = beam.copy()
 
 
-    def find_passes(self, t, states):
+    def find_passes(self, t, states, cache_data=True):
         '''Finds all passes that are simultaneously inside a transmitter station FOV and a receiver station FOV. 
 
             :param numpy.ndarray t: Vector of times in seconds to use as a base to find passes.
@@ -66,7 +66,7 @@ class Radar(object):
         for txi,tx in enumerate(self.tx):
             rd_ps.append([])
             for rxi,rx in enumerate(self.rx):
-                txrx = passes.find_simultaneous_passes(t, states, [tx, rx])
+                txrx = passes.find_simultaneous_passes(t, states, [tx, rx], cache_data=cache_data)
                 for ps in txrx:
                     ps.station_id = [txi, rxi]
                 rd_ps[-1].append(txrx)

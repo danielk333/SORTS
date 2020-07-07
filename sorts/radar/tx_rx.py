@@ -23,14 +23,14 @@ class Station(object):
         :param float lat: Geographical latitude of radar station in decimal degrees  (North+).
         :param float lon: Geographical longitude of radar station in decimal degrees (East+).
         :param float alt: Geographical altitude above geoid surface of radar station in meter.
-        :param float min_elevation: Elevation threshold for the radar station, i.e. it cannot detect or point below this elevation.
+        :param float min_elevation: Elevation threshold for the radar station in degrees, i.e. it cannot detect or point below this elevation.
         :param pyant.Beam beam: Radiation pattern for radar station.
 
 
         :ivar float lat: Geographical latitude of radar station in decimal degrees  (North+).
         :ivar float lon: Geographical longitude of radar station in decimal degrees (East+).
         :ivar float alt: Geographical altitude above geoid surface of radar station in meter.
-        :ivar float min_elevation: Elevation threshold for the radar station, i.e. it cannot detect or point below this elevation.
+        :ivar float min_elevation: Elevation threshold for the radar station in degrees, i.e. it cannot detect or point below this elevation.
         :ivar numpy.array ecef: The ECEF coordinates of the radar station calculated using :func:`frames.geodetic_to_ecef`.
         :ivar pyant.Beam beam: Radiation pattern for radar station.
         :ivar bool enabled: Indicates if this station is turned on or off.

@@ -240,7 +240,7 @@ class SGP4(Propagator):
 
         '''
         if self.profiler is not None:
-            self.profiler.start('SGP4-propagate')
+            self.profiler.start('SGP4:propagate')
 
         t = self._make_numpy(t)
 
@@ -269,14 +269,14 @@ class SGP4(Propagator):
 
         for mi,mjd in enumerate(mjdates):
             if self.profiler is not None:
-                self.profiler.start('SGP4-propagate-step')
+                self.profiler.start('SGP4:propagate:step')
 
             y = obj.state(mjd)
             pos[:,mi] = y[:3]
             vel[:,mi] = y[3:]
 
             if self.profiler is not None:
-                self.profiler.stop('SGP4-propagate-step')
+                self.profiler.stop('SGP4:propagate:step')
 
         if self.settings['out_frame'] == 'TEME':
             states=np.empty((6,t.size), dtype=np.float)
@@ -300,7 +300,7 @@ class SGP4(Propagator):
             raise Exception('Output frame {} not found'.format(self.out_frame))
 
         if self.profiler is not None:
-            self.profiler.stop('SGP4-propagate')
+            self.profiler.stop('SGP4:propagate')
         if self.logger is not None:
             self.logger.info(f'SGP4:propagate:completed')
 

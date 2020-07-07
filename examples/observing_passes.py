@@ -6,55 +6,77 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-import pyorb
 
 import sorts
 from sorts.propagator import Orekit
 from sorts.radar.instances import eiscat3d
 from sorts.controller import Tracker
-from sorts.scheduler import StaticList
-from sorts import Pass
+from sorts.scheduler import StaticList, ObservedParameters
+from sorts import SpaceObject
+from sorts.profiling import Profiler
 
-
-orb = pyorb.Orbit(M0 = pyorb.M_earth, direct_update=True, auto_update=True, degrees=True, num=2, a=7200e3, e=0.1, i=75, omega=0, Omega=np.array([79, 81]), anom=np.array([72.0,71.9]), epoch=53005.0)
-print(orb)
-
-t = sorts.equidistant_sampling(
-    orbit = orb[0], 
-    start_t = 0, 
-    end_t = 3600*6, 
-    max_dpos=1e3,
-)
 
 orekit_data = '/home/danielk/IRF/IRF_GITLAB/orekit_build/orekit-data-master.zip'
-prop = Orekit(
+opts = dict(
     orekit_data = orekit_data, 
     settings=dict(
         in_frame='EME',
         out_frame='ITRF',
         drag_force = False,
         radiation_pressure = False,
-        max_step=10.0,
     ),
 )
+
+
+objs = [
+    SpaceObject(
+        Orekit,
+        propagator_options = opts,
+        a = 7200e3, 
+        e = 0.1, 
+        i = 75, 
+        raan = 79,
+        aop = 0,
+        mu0 = mu0,
+        mjd0 = 53005.0,
+        d = 1.0,
+    )
+    for mu0 in [62.0, 61.9]
+]
+
+for obj in objs: print(obj)
+
+t = sorts.equidistant_sampling(
+    orbit = objs[0].orbit, 
+    start_t = 0, 
+    end_t = 3600*6, 
+    max_dpos=1e3,
+)
+
 print(f'Temporal points: {len(t)}')
-states = prop.propagate(t, orb.cartesian[:,0], orb.epoch, A=1.0, C_R = 1.0, C_D = 1.0)
-states2 = prop.propagate(t, orb.cartesian[:,1], orb.epoch, A=1.0, C_R = 1.0, C_D = 1.0)
+states0 = objs[0].get_state(t)
+states1 = objs[1].get_state(t)
 
-passes = eiscat3d.find_passes(t, states)
-passes2 = eiscat3d.find_passes(t, states2)
+#set cache_data = True to save the data in local coordinates 
+#for each pass inside the Pass instance, setting to false saves RAM
+passes0 = eiscat3d.find_passes(t, states0, cache_data = False) 
+passes1 = eiscat3d.find_passes(t, states1, cache_data = False)
 
 
-#just the first pass
-ps = passes[0][0][0]
-use_inds = np.arange(0,len(ps.t),len(ps.t)//10)
-e3d_tracker = Tracker(radar = eiscat3d, t=ps.t[use_inds], ecefs=states[:3,ps.inds[use_inds]])
+#just create a controller for observing 10 points of the first pass
+ps = passes0[0][0][0]
+use_inds = np.arange(0,len(ps.inds),len(ps.inds)//10)
+e3d_tracker = Tracker(radar = eiscat3d, t=t[ps.inds[use_inds]], ecefs=states0[:3,ps.inds[use_inds]])
 
-class MyStaticList(StaticList):
+class MyStaticList(StaticList, ObservedParameters):
 
-    def __init__(self, radar, controllers, propagator):
-        super().__init__(radar, controllers)
-        self.propagator = propagator
+    def __init__(self, radar, controllers, profiler=None, logger=None):
+        super().__init__(
+            radar=radar, 
+            controllers=controllers, 
+            profiler=profiler,
+            logger=logger,
+        )
 
     def generate_schedule(self, t, generator):
         data = np.empty((len(t),len(self.radar.rx)*2+2), dtype=np.float64)
@@ -66,50 +88,10 @@ class MyStaticList(StaticList):
                 data[ind,2+ri*2] = rx.beam.elevation
         return data
 
-    def calculate_observation(self, txrx_pass, t, generator, **kwargs):
-        orb = kwargs['orbit']
-        states = prop.propagate(t, orb.cartesian[:,0], orb.epoch, A=1.0, C_R = 1.0, C_D = 1.0)
 
-        snr = np.empty((len(t),), dtype=np.float64)
-        txi, rxi = txrx_pass.station_id
+p = Profiler()
 
-        enus = [
-            self.radar.tx[txi].enu(states),
-            self.radar.rx[rxi].enu(states),
-        ]
-        ranges = [Pass.calculate_range(enu) for enu in enus]
-        range_rates = [Pass.calculate_range_rate(enu) for enu in enus]
-        zang = Pass.calculate_zenith_angle(enus[0])
-
-        for ti, radar in enumerate(generator):
-            if radar.tx[txi].enabled and radar.rx[rxi].enabled:
-
-                snr[ti] = sorts.hard_target_snr(
-                    radar.tx[txi].beam.gain(enus[0][:3,ti]),
-                    radar.rx[rxi].beam.gain(enus[1][:3,ti]),
-                    radar.rx[rxi].wavelength,
-                    radar.tx[txi].power,
-                    ranges[0][ti],
-                    ranges[1][ti],
-                    diameter_m=kwargs['diameter'],
-                    bandwidth=radar.tx[txi].coh_int_bandwidth,
-                    rx_noise_temp=radar.rx[rxi].noise,
-                )
-
-            else:
-                snr[ti] = np.nan
-
-        data = dict(
-            t = t,
-            snr = snr,
-            range = ranges[0] + ranges[1],
-            range_rate = range_rates[0] + range_rates[1],
-            tx_zenith = zang,
-        )
-        return data
-
-
-scheduler = MyStaticList(radar = eiscat3d, controllers=[e3d_tracker], propagator = prop)
+scheduler = MyStaticList(radar = eiscat3d, controllers=[e3d_tracker], profiler=p)
 
 sched_data = scheduler.schedule()
 from tabulate import tabulate
@@ -119,9 +101,13 @@ sched_tab = tabulate(sched_data, headers=["t [s]"] + rx_head + ['dwell'])
 
 print(sched_tab)
 
+p.start('total')
+data0 = scheduler.observe_passes(passes0, space_object = objs[0], remove_failed=False)
+p.stop('total')
+print(p.fmt(normalize='total'))
 
-data = scheduler.observe_passes(passes, orbit = orb[0], diameter = 0.1)
-data2 = scheduler.observe_passes(passes2, orbit = orb[1], diameter = 0.1)
+data1 = scheduler.observe_passes(passes1, space_object = objs[1], remove_failed=False)
+
 
 fig = plt.figure(figsize=(15,15))
 axes = [
@@ -135,18 +121,21 @@ axes = [
     ],
 ]
 
-print(data)
+for tx in scheduler.radar.tx:
+    axes[0][0].plot([tx.ecef[0]],[tx.ecef[1]],[tx.ecef[2]], 'or')
+for rx in scheduler.radar.rx:
+    axes[0][0].plot([rx.ecef[0]],[rx.ecef[1]],[rx.ecef[2]], 'og')
 
-for pi in range(len(passes[0][0])):
-    dat = data[0][0][pi]
-    dat2 = data2[0][0][pi]
+for pi in range(len(passes0[0][0])):
+    dat = data0[0][0][pi]
+    dat2 = data1[0][0][pi]
     if dat is not None:
-        axes[0][0].plot(passes[0][0][pi].enu[0][0,:], passes[0][0][pi].enu[0][1,:], passes[0][0][pi].enu[0][2,:], '-', label=f'pass-{pi}')
+        axes[0][0].plot(states0[0,passes0[0][0][pi].inds], states0[1,passes0[0][0][pi].inds], states0[2,passes0[0][0][pi].inds], '-', label=f'pass-{pi}')
         axes[0][1].plot(dat['t']/3600.0, dat['range'], '-', label=f'pass-{pi}')
         axes[1][0].plot(dat['t']/3600.0, dat['range_rate'], '-', label=f'pass-{pi}')
         axes[1][1].plot(dat['t']/3600.0, 10*np.log10(dat['snr']), '-', label=f'pass-{pi}')
     if dat2 is not None:
-        axes[0][0].plot(passes2[0][0][pi].enu[0][0,:], passes2[0][0][pi].enu[0][1,:], passes2[0][0][pi].enu[0][2,:], '-', label=f'obj2 pass-{pi}')
+        axes[0][0].plot(states1[0,passes1[0][0][pi].inds], states1[1,passes1[0][0][pi].inds], states1[2,passes1[0][0][pi].inds], '-', label=f'obj2 pass-{pi}')
         axes[0][1].plot(dat2['t']/3600.0, dat2['range'], '-', label=f'obj2 pass-{pi}')
         axes[1][0].plot(dat2['t']/3600.0, dat2['range_rate'], '-', label=f'obj2 pass-{pi}')
         axes[1][1].plot(dat2['t']/3600.0, 10*np.log10(dat2['snr']), '-', label=f'obj2 pass-{pi}')

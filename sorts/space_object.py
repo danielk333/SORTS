@@ -130,7 +130,7 @@ class SpaceObject(object):
     :param dict kwargs: All additional keywords are used to initialize the orbit
     
     :Keyword arguments:
-        * *a* (``float``) -- Semi-major axis in km
+        * *a* (``float``) -- Semi-major axis in meters
         * *e* (``float``) -- Eccentricity
         * *i* (``float``) -- Inclination in degrees
         * *aop* (``float``) -- Argument of perigee in degrees

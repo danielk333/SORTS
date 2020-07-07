@@ -17,10 +17,12 @@ class RadarController(ABC):
     '''A radar controller.
     '''
 
-    def __init__(self, radar, t=None, t0=0.0):
+    def __init__(self, radar, t=None, t0=0.0, profiler=None, logger=None):
         self.radar = radar
         self.t = t
         self.t0 = t0
+        self.logger = logger
+        self.profiler = profiler
 
 
     def run(self):
@@ -49,24 +51,41 @@ class RadarController(ABC):
         return ret
 
 
+    @staticmethod
+    def _point_station(station, ecef):
+        if len(ecef.shape) > 1:
+            k = station.point_ecef(ecef - station.ecef[:,None])
+        else:
+            k = station.point_ecef(ecef - station.ecef)
+
+        #pointing turns on station
+        station.enabled = True
+
+        #error check pointing
+        keep = k[2,...] >= np.sin(np.radians(station.min_elevation))
+        if len(ecef.shape) > 1:
+            if not np.any(keep):
+                station.enabled = False
+            else:
+                new_k = k[:,keep]
+                station.point(new_k)
+        else:
+            if not keep:
+                station.enabled = False
+
+
     def point_rx_ecef(self, ecef):
         '''Point all rx sites into the direction of given ECEF coordinate, relative Earth Center.
         '''
         for rx in self.radar.rx:
-            if len(ecef.shape) > 1:
-                rx.point_ecef(ecef - rx.ecef[:,None])
-            else:
-                rx.point_ecef(ecef - rx.ecef)
+            RadarController._point_station(rx, ecef)
 
 
     def point_tx_ecef(self, ecef):
         '''Point all tx sites into the direction of given ECEF coordinate, relative Earth Center.
         '''
         for tx in self.radar.tx:
-            if len(ecef.shape) > 1:
-                tx.point_ecef(ecef - tx.ecef[:,None])
-            else:
-                tx.point_ecef(ecef - tx.ecef)
+            RadarController._point_station(tx, ecef)
 
 
     def point_ecef(self, ecef):
