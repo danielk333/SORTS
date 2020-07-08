@@ -8,7 +8,10 @@ Install
 
 .. code-block:: bash
 
-   git clone
+   pip install git+https://github.com/danielk333/pyant
+   pip install git+https://github.com/danielk333/pyorb
+   
+   git clone https://github.com/danielk333/SORTS
    cd sorts
    pip install .
 

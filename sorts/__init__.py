@@ -21,6 +21,8 @@ from .radar import Station, TX, RX
 from .controller import RadarController
 from .scheduler import Scheduler
 from .passes import Pass
+from .errors import Errors
+
 
 #modules
 from . import constants
@@ -32,6 +34,8 @@ from . import radar
 from . import controller
 from . import scheduler
 from . import passes
+from . import errors
+
 
 from .passes import equidistant_sampling
 from .passes import find_passes, find_simultaneous_passes
