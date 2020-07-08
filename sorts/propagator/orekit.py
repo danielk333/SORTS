@@ -57,7 +57,7 @@ def npdt2absdate(dt, utc):
     Converts a numpy datetime64 value to an orekit AbsoluteDate
     '''
 
-    year, month, day, hour, minutes, seconds, microsecond = dates.npdt2date(dt)
+    year, month, day, hour, minutes, seconds, microsecond = dates.npdt_to_date(dt)
     return AbsoluteDate(
         int(year),
         int(month),
@@ -74,7 +74,7 @@ def mjd2absdate(mjd, utc):
     Converts a Modified Julian Date value to an orekit AbsoluteDate
     '''
 
-    return npdt2absdate(dates.mjd2npdt(mjd), utc)
+    return npdt2absdate(dates.mjd_to_npdt(mjd), utc)
 
 
 

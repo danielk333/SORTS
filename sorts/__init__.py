@@ -35,6 +35,7 @@ from . import controller
 from . import scheduler
 from . import passes
 from . import errors
+from . import io
 
 
 from .passes import equidistant_sampling

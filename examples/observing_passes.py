@@ -3,6 +3,7 @@
 '''
 
 '''
+import pathlib
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -107,6 +108,29 @@ p.stop('total')
 print(p.fmt(normalize='total'))
 
 data1 = scheduler.observe_passes(passes1, space_object = objs[1], snr_limit=False)
+
+#create a tdm file 
+
+
+pth = pathlib.Path(__file__).parent / 'data' / 'test_tdm.tdm'
+print(f'Writing TDM data to: {pth}')
+
+dat = data0[0][0][0]
+sorts.io.write_tdm(
+    pth,
+    dat['t'],
+    dat['range'],
+    dat['range_rate'],
+    np.ones(dat['range'].shape),
+    np.ones(dat['range_rate'].shape),
+    freq=eiscat3d.tx[0].beam.frequency,
+    tx_ecef=eiscat3d.tx[0].ecef,
+    rx_ecef=eiscat3d.rx[0].ecef,
+    tx_name="EISCAT 3D Skiboten",
+    rx_name="EISCAT 3D Skiboten",
+    oid="Some cool space object",
+    tdm_type="track",
+)
 
 
 fig = plt.figure(figsize=(15,15))
