@@ -1,51 +1,68 @@
 SORTS
 =========
 
-feature list
+
+
+Install
+-----------------
+
+.. code-block:: bash
+
+   git clone
+   cd sorts
+   pip install .
+
+
+
+Feature list
 -------------
 
 * stuff
+* more stuff
 
-simple example
+
+Example
 ---------------
 
 
-.. code-block:python
+.. code-block:: python
 
    import sorts
 
 
-to test
+For developers
+===============
+
+To install developer dependencies 
+------------------------------------
+
+.. code-block:: bash
+
+   pip install -e .[dev]
+
+
+To test
 -----------------
 
-.. code-block:bash
+.. code-block:: bash
 
    pytest
 
 
 
-to make doc
+To make doc
 -----------------
 
-.. code-block:bash
+.. code-block:: bash
 
-   git clone
    git checkout gh-pages
+   git cd docsrc
    make github
 
 
 
-to install
------------------
-
-.. code-block:bash
-
-   pip install sorts
-
-
-
-to pay respects
------------------
+When used for publications
+===========================
 
 @article{
     autor="",
