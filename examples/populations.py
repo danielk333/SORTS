@@ -11,7 +11,7 @@ from sorts.propagator import SGP4
 from sorts import Population
 from sorts import plotting
 
-t = np.linspace(0,3600*10,num=200)
+t = np.linspace(0,3600*10,num=2000)
 
 pop = Population(
     name='Test',
@@ -28,7 +28,7 @@ pop = Population(
 pop.allocate(100)
 
 # * 0: oid - Object ID
-# * 1: a - Semi-major axis in km
+# * 1: a - Semi-major axis in m
 # * 2: e - Eccentricity 
 # * 3: i - Inclination in degrees
 # * 4: raan - Right Ascension of ascending node in degrees
@@ -36,9 +36,8 @@ pop.allocate(100)
 # * 6: mu0 - Mean anoamly in degrees
 # * 7: mjd0 - Epoch of object given in Modified Julian Days
 pop['oid'] = np.arange(100)
-pop['a'] = 7000
-pop['e'] = np.random.randn(100)*0.1 + 0.2
-pop['e'][pop['e'] < 0] = 0
+pop['a'] = np.random.randn(100)*100e3 + 6950e3
+pop['e'] = np.random.randn(100)*0.02 + 0.2
 pop['i'] = 69.0
 pop['raan'] = 0
 pop['aop'] = 0

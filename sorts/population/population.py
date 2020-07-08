@@ -13,9 +13,9 @@ import numpy as np
 import pyorb
 
 #Local import
-from . import space_object as so
-from . import plotting
-from . import constants
+from .. import space_object as so
+from .. import plotting
+from .. import constants
 
 class Population:
     '''Encapsulates a population of space objects as an array and functions for returning instances of space objects.
@@ -23,7 +23,7 @@ class Population:
     **Default columns:**
 
         * 0: oid - Object ID
-        * 1: a - Semi-major axis in km
+        * 1: a - Semi-major axis in m
         * 2: e - Eccentricity 
         * 3: i - Inclination in degrees
         * 4: raan - Right Ascension of ascending node in degrees
