@@ -105,21 +105,37 @@ def precalculate_dr(txlen, bw, ipp=20e-3, n_ipp=20, n_interp=20):
 
 
 class LinearizedCoded(Errors):
+    '''
+     Determine linearized errors for range and range-rate error
+     for a psuedorandom binary phase coded radar transmit pulse
+     with a certain transmit bandwidth (inverse of bit length)
+
+     calculate line of sight range and range-rate error,
+     given ENR after coherent integration (pulse compression)
+     txlen in microseconds.
+
+    Simulate a measurement and do a linearized error estimate.
+
+        Unknown doppler shift due to ionosphere can be up to 0.1 Hz,
+        estimate based on typical GNU Ionospheric tomography receiver phase curves.
+
+    '''
     VARIABLES = [
         'range', 
         'doppler',
         'range_rate',
     ]
 
-    def __init__(self, tx, seed=None, cache_folder=None, diameter=None):
+    def __init__(self, tx, seed=None, cache_folder=None, min_range_rate_std=0.1, min_range_std=0.1):
         super().__init__(seed=seed)
 
-        self.diameter = diameter
+        self.min_range_std = min_range_std
+        self.min_range_rate_std = min_range_rate_std
 
         bw = tx.bandwidth
         txlen = tx.pulse_length*1e6 # pulse length in microseconds
-        ipp = tx.ipp # pulse length in microseconds
-        n_ipp = int(tx.n_ipp) # pulse length in microseconds
+        ipp = tx.ipp
+        n_ipp = int(tx.n_ipp)
         self.freq = tx.beam.frequency
 
         fname = f'MCerr_n{n_ipp}_tx{int(txlen)}_ipp{int(ipp*1e6)}_bw{int(bw)}.h5'
@@ -161,12 +177,12 @@ class LinearizedCoded(Errors):
         dr = 10.0**(self.rfun(np.log10(snr)))
 
         # if object diameter is larger than range error, make it at least as big as target
-        if self.diameter is not None:
+        if self.min_range_std is not None:
             if len(dr.shape) == 0:
-                if dr < self.diameter:
-                    dr = self.diameter
+                if dr < self.min_range_std:
+                    dr = self.min_range_std
             else:
-                dr[dr < self.diameter] = self.diameter
+                dr[dr < self.min_range_std] = self.min_range_std
 
         self.set_numpy_seed()
         return data + np.random.randn(*data.shape)*dr
@@ -175,13 +191,12 @@ class LinearizedCoded(Errors):
     def _get_ddop(self, snr):
         ddop = 10.0**(self.dopfun(np.log10(snr)))
 
-        # Unknown doppler shift due to ionosphere can be up to 0.1 Hz,
-        # estimate based on typical GNU Ionospheric tomography receiver phase curves.
+
         if len(ddop.shape) == 0:
-            if ddop < 0.1:
-                ddop = 0.1
+            if ddop < self.min_range_rate_std:
+                ddop = self.min_range_rate_std
         else:
-            ddop[ddop < 0.1] = 0.1
+            ddop[ddop < self.min_range_rate_std] = self.min_range_rate_std
         return ddop
 
 
@@ -206,7 +221,8 @@ class LinearizedCoded(Errors):
 
 
 class LinearizedCodedIonospheric(LinearizedCoded):
-
+    '''233e6 Hz worst case scenario at zenith only!
+    '''
 
     def __init__(self, tx, seed=None, cache_folder=None, diameter=None):
         super().__init__(tx, seed=seed, cache_folder=cache_folder, diameter=diameter)
@@ -225,12 +241,12 @@ class LinearizedCodedIonospheric(LinearizedCoded):
         # add ionospheric error
         dr = np.sqrt(dr**2.0 + self.iono_errfun(tx_range/1e3)**2.0)
 
-        if self.diameter is not None:
+        if self.min_range_std is not None:
             if len(dr.shape) == 0:
-                if dr < self.diameter:
-                    dr = self.diameter
+                if dr < self.min_range_std:
+                    dr = self.min_range_std
             else:
-                dr[dr < self.diameter] = self.diameter
+                dr[dr < self.min_range_std] = self.min_range_std
 
         self.set_numpy_seed()
         return data + np.random.randn(*data.shape)*dr
