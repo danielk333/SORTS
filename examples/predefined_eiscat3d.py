@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import sorts
 import pyant
 
-from sorts.radar.instances import eiscat3d
+from sorts.radar import eiscat3d
 
 fig = plt.figure(figsize=(15,15))
 axes = [

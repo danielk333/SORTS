@@ -38,6 +38,7 @@ states = prop.propagate(t, state0, mjd0, A=1.0, C_R = 1.0, C_D = 1.0)
 p.stop('total')
 
 print(p)
+print(p.fmt(timedelta=True))
 print(p.fmt(normalize='total'))
 
 print('\n Enable Drag Force \n')

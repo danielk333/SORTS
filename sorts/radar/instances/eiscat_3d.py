@@ -2,18 +2,64 @@
 
 '''
 '''
+#Python standard import
+import importlib.resources
+
 
 import numpy as np
 import pyant.instances as alib
+import pyant
 
 from ..radar import Radar
 from ..tx_rx import TX, RX
 
-def gen_eiscat3d_sites(beam='array', stage=1):
-    '''The EISCAT 3D sites.
+
+def eiscat3d_interp(tx_fnames=None, rx_fnames=None):
+    
+    tx_intp = []
+    for txi in range(1):
+        tx_intp += [pyant.PlaneArrayInterp(
+            azimuth=0,
+            elevation=90, 
+            frequency=233e6,
+        )]
+        #This is for generating
+        #tx_intp[-1].generate_interpolation(tx.beam, resolution=res)
+        #tx_intp[-1].save(f'../sorts/data/e3d_tx{len(tx_intp)}_res{res}_interp.h5')
+
+        if tx_fnames is None:
+            with importlib.resources.path('sorts.data', f'e3d_tx{txi}_res{res}_interp') as pth:
+                tx_intp[-1].load(str(pth))
+        else:    
+            tx_intp[-1].load(tx_fnames[txi])
+    
+    rx_intp = []
+    for rxi in range(3):
+        rx_intp += [pyant.PlaneArrayInterp(
+            azimuth=0,
+            elevation=90, 
+            frequency=233e6,
+        )]
+        #This is for generating
+        #rx_intp[-1].generate_interpolation(rx.beam, resolution=res)
+        #rx_intp[-1].save(f'../sorts/data/e3d_tx{len(rx_intp)}_res{res}_interp.h5')
+        if rx_fnames is None:
+            with importlib.resources.path('sorts.data', f'e3d_rx{rxi}_res{res}_interp') as pth:
+                rx_intp[-1].load(str(pth))
+        else:    
+            rx_intp[-1].load(rx_fnames[rxi])
+        
+
+    return tx_intp, rx_intp
+
+
+def gen_eiscat3d(beam='array', stage=1):
+    '''The EISCAT 3D system.
 
     :param str beam: Decides what initial antenna radiation-model to use.
     :param int stage: The stage of development of EISCAT 3D. 
+
+    The EISCAT 3D system in stage 1.
 
     For more information see:
       * `EISCAT <https://eiscat.se/>`_
@@ -34,10 +80,15 @@ def gen_eiscat3d_sites(beam='array', stage=1):
       * array: Ideal summation of all antennas in the array :func:`antenna_library.e3d_array_beam_stage1` and :func:`antenna_library.e3d_array_beam`.
 
     '''
-    tx_beam_ski = alib.e3d_array_stage1.copy()
-    rx_beam_ski = alib.e3d_array_stage2.copy()
-    rx_beam_kar = alib.e3d_array_stage2.copy()
-    rx_beam_kai = alib.e3d_array_stage2.copy()
+    if beam=='array':
+        tx_beam_ski = alib.e3d_array_stage1.copy()
+        rx_beam_ski = alib.e3d_array_stage2.copy()
+        rx_beam_kar = alib.e3d_array_stage2.copy()
+        rx_beam_kai = alib.e3d_array_stage2.copy()
+    elif beam=='interp':
+        tx_intp, rx_intp = eiscat3d_interp()
+        tx_beam_ski, = tx_intp
+        rx_beam_ski, rx_beam_kar, rx_beam_kai = rx_intp
 
     ski_lat = 69.34023844
     ski_lon = 20.313166
@@ -92,26 +143,11 @@ def gen_eiscat3d_sites(beam='array', stage=1):
     tx=[ski_tx]
     rx=[ski, kar, kai]
 
-    return tx, rx
+    eiscat3d = Radar(
+        tx=tx, 
+        rx=rx, 
+        max_off_axis=120.0, 
+        min_SNRdb=10.0,
+    )
+    return eiscat3d
 
-
-e3d_tx, e3x_rx = gen_eiscat3d_sites(beam='array', stage=1)
-
-eiscat3d = Radar(
-    tx=e3d_tx, 
-    rx=e3x_rx, 
-    max_off_axis=120.0, 
-    min_SNRdb=10.0,
-)
-'''The EISCAT 3D system in stage 1.
-
-    For more information see:
-      * `EISCAT <https://eiscat.se/>`_
-      * `EISCAT 3D <https://www.eiscat.se/eiscat3d/>`_
-
-    **EISCAT 3D Stages:**
-
-      * Stage 1: As of writing it is assumed to have all of the antennas in place but only transmitters on half of the antennas in a dense core ,i.e. TX will have 42 dB peak gain while RX still has 45 dB peak gain. 3 Sites will exist, one is a TX and RX, the other 2 RX sites.
-      * Stage 2: Both TX and RX sites will have 45 dB peak gain.
-      * Stage 3: (NOT IMPLEMENTED HERE) 2 additional RX sites will be added.
-'''
