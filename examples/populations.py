@@ -14,7 +14,6 @@ from sorts import plotting
 t = np.linspace(0,3600*10,num=2000)
 
 pop = Population(
-    name='Test',
     extra_columns = ['m', 'A', 'C_R', 'C_D'],
     dtypes = ['f']*4,
     space_object_uses = [True]*4,

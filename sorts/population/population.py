@@ -86,7 +86,6 @@ class Population:
     _default_dtype = 'float64'
 
     def __init__(self,
-                name='Unnamed population',
                 extra_columns = [],
                 dtypes = [],
                 space_object_uses = [],
@@ -94,7 +93,6 @@ class Population:
                 propagator_args = {},
                 propagator_options = {},
             ):
-        self.name = name
         
         self.header = ['oid','a','e','i','raan','aop','mu0','mjd0']
         self.space_object_uses = [True]*len(self.header)
@@ -114,6 +112,7 @@ class Population:
         
         self.propagator = propagator
         self.propagator_options = propagator_options
+        self.propagator_args = propagator_args
 
     def __len__(self):
         return(self.objs.shape[0])
@@ -123,7 +122,6 @@ class Population:
         '''
         pop = Population(
                 propagator = self.propagator,
-                name=self.name,
                 extra_columns = [],
                 dtypes = [],
                 space_object_uses = [],
@@ -315,6 +313,7 @@ class Population:
         o=so.SpaceObject(
             propagator = self.propagator,
             propagator_options = self.propagator_options,
+            propagator_args = self.propagator_args,
             **kw
         )
         return o
@@ -460,7 +459,6 @@ class Population:
             hf.create_dataset('dtypes',
                 data=np.array(self.dtypes),
             )
-            hf.attrs['name'] = self.name
 
     @classmethod
     def load(cls, fname, propagator, propagator_options = {}, propagator_args = {}):
@@ -480,8 +478,6 @@ class Population:
             pop.space_object_uses = hf['space_object_uses'].value.tolist()
             pop.dtypes = hf['dtypes'].value.tolist()
 
-            pop.name = hf.attrs['name']
-
         return pop
 
 
@@ -499,7 +495,7 @@ class Population:
             if dist=='orbits':
                 fig, ax = plotting.orbits(
                     self.get_all_orbits(order_angs=True), 
-                    title = "Orbit distribution: {}".format(self.name),
+                    title = "Orbit distribution",
                     show = False,
                 )
             elif dist in self.header:
@@ -509,7 +505,7 @@ class Population:
                     x_label = label
                 fig, ax = plotting.hist(
                     self.objs[dist],
-                    title = "{} distribution: {}".format(dist, self.name),
+                    title = "{} distribution".format(dist),
                     show = False,
                     xlabel = x_label,
                     logx = logx,
@@ -528,7 +524,7 @@ class Population:
             fig, ax = plotting.hist2d(
                 self.objs[dist[0]],
                 self.objs[dist[1]],
-                title = "{} vs {} distribution: {}".format(dist[0], dist[1], self.name),
+                title = "{} vs {} distribution".format(dist[0], dist[1]),
                 show = False,
                 xlabel = x_label,
                 ylabel = y_label,
