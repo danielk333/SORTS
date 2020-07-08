@@ -49,7 +49,7 @@ setuptools.setup(
         'sorts': ['data/*'],
     },
     # metadata to display on PyPI
-    author='Daniel Kastinen',
+    author='Daniel Kastinen, Juha Vierinen',
     author_email='daniel.kastinen@irf.se',
     description='SORTS',
     license='MIT',
