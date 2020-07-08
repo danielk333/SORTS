@@ -89,7 +89,7 @@ print(sched_tab)
 
 datas = []
 for ind in range(len(objs)):
-    data = scheduler.observe_passes(scheduler.passes[ind], space_object = objs[ind], remove_failed=False)
+    data = scheduler.observe_passes(scheduler.passes[ind], space_object = objs[ind], snr_limit=False)
     datas.append(data)
 
 # print(data)

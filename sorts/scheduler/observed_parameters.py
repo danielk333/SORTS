@@ -24,7 +24,7 @@ class ObservedParameters(Scheduler):
         )
 
 
-    def calculate_observation(self, txrx_pass, t, generator, space_object, remove_failed=True):
+    def calculate_observation(self, txrx_pass, t, generator, space_object, snr_limit=True):
         txi, rxi = txrx_pass.station_id
 
         if self.logger is not None:
@@ -98,14 +98,17 @@ class ObservedParameters(Scheduler):
                 )
                 if self.profiler is not None:
                     self.profiler.stop('Obs.Param.:calculate_observation:snr-step:snr')
-                
+
                 rcs[ti] = hard_target_rcs(
                     wavelength=radar.rx[rxi].wavelength,
                     diameter=space_object.d,
                 )
-
-                keep[ti] = np.log10(snr[ti])*10.0 > radar.min_SNRdb
-
+                if snr_limit:
+                    snr_db = np.log10(snr[ti])*10.0
+                    if np.isnan(snr_db) or np.isinf(snr_db):
+                        keep[ti] = False
+                    else:
+                        keep[ti] = snr_db > radar.min_SNRdb
             else:
                 snr[ti] = np.nan
                 rcs[ti] = np.nan
@@ -124,7 +127,7 @@ class ObservedParameters(Scheduler):
             rcs = rcs,
         )
 
-        if remove_failed:
+        if snr_limit:
             if np.any(keep):
                 for key in data:
                     data[key] = data[key][...,keep]

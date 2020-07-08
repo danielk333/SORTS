@@ -51,7 +51,7 @@ def grid_earth(ax, num_lat=25, num_lon=50, alpha=0.1, res = 100, color='black', 
         ax.set_xticks([])
         ax.set_yticks([])
         ax.set_zticks([])
-        plt.axis('off')
+        ax.set_axis_off()
 
     return ax
 

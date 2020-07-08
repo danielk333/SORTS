@@ -22,13 +22,27 @@ class Scanner(RadarController):
             self.logger.info(f'Scanner:init')
 
     def point_radar(self, t):
-        point = self.scan.ecef_pointing(t, self.radar.tx[0])
+        point_rx_to_tx = []
+        point_tx = []
+        for tx in self.radar.tx:
+            point = self.scan.ecef_pointing(t, tx)
 
-        point_tx = point + self.radar.tx[0].ecef
-        point_rx = point[:,None]*self.r[None,:] + self.radar.tx[0].ecef[:,None]
-        
-        self.point_tx_ecef(point_tx)
-        self.point_rx_ecef(point_rx)
+            point_tx.append(point + tx.ecef)
+            point_rx_to_tx.append(point[:,None]*self.r[None,:] + tx.ecef[:,None])
+            
+            RadarController._point_station(tx, point_tx[-1])
+
+        for rx in self.radar.rx:
+            rx_point = []
+            for txi, tx in enumerate(self.radar.tx):
+                #< 200 meters apart = same location for pointing
+                if np.linalg.norm(tx.ecef - rx.ecef) < 200.0:
+                    rx_point.append(point_tx[txi].reshape(3,1))
+                else:
+                    rx_point.append(point_rx_to_tx[txi])
+            rx_point = np.concatenate(rx_point, axis=1)
+
+            RadarController._point_station(rx, rx_point)
 
         return self.radar
 

@@ -11,6 +11,11 @@ import pyant
 
 from sorts.radar import eiscat3d
 
+#dig trough the documentation to find how to generate alternative configurations of the predefined instances
+eiscat3d_interp = sorts.radar.eiscat3d_interp
+
+pyant.plotting.gain_heatmap(eiscat3d_interp.tx[0].beam, resolution=100, min_elevation=80.0)
+
 fig = plt.figure(figsize=(15,15))
 axes = [
     [

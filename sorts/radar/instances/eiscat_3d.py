@@ -14,7 +14,7 @@ from ..radar import Radar
 from ..tx_rx import TX, RX
 
 
-def eiscat3d_interp(tx_fnames=None, rx_fnames=None):
+def eiscat3d_interp(tx_fnames=None, rx_fnames=None, res=500):
     
     tx_intp = []
     for txi in range(1):
@@ -28,7 +28,7 @@ def eiscat3d_interp(tx_fnames=None, rx_fnames=None):
         #tx_intp[-1].save(f'../sorts/data/e3d_tx{len(tx_intp)}_res{res}_interp.h5')
 
         if tx_fnames is None:
-            with importlib.resources.path('sorts.data', f'e3d_tx{txi}_res{res}_interp') as pth:
+            with importlib.resources.path('sorts.data', f'e3d_tx{txi}_res{res}_interp.npy') as pth:
                 tx_intp[-1].load(str(pth))
         else:    
             tx_intp[-1].load(tx_fnames[txi])
@@ -44,7 +44,7 @@ def eiscat3d_interp(tx_fnames=None, rx_fnames=None):
         #rx_intp[-1].generate_interpolation(rx.beam, resolution=res)
         #rx_intp[-1].save(f'../sorts/data/e3d_tx{len(rx_intp)}_res{res}_interp.h5')
         if rx_fnames is None:
-            with importlib.resources.path('sorts.data', f'e3d_rx{rxi}_res{res}_interp') as pth:
+            with importlib.resources.path('sorts.data', f'e3d_rx{rxi}_res{res}_interp.npy') as pth:
                 rx_intp[-1].load(str(pth))
         else:    
             rx_intp[-1].load(rx_fnames[rxi])

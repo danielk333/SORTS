@@ -102,11 +102,11 @@ sched_tab = tabulate(sched_data, headers=["t [s]"] + rx_head + ['dwell'])
 print(sched_tab)
 
 p.start('total')
-data0 = scheduler.observe_passes(passes0, space_object = objs[0], remove_failed=False)
+data0 = scheduler.observe_passes(passes0, space_object = objs[0], snr_limit=False)
 p.stop('total')
 print(p.fmt(normalize='total'))
 
-data1 = scheduler.observe_passes(passes1, space_object = objs[1], remove_failed=False)
+data1 = scheduler.observe_passes(passes1, space_object = objs[1], snr_limit=False)
 
 
 fig = plt.figure(figsize=(15,15))
