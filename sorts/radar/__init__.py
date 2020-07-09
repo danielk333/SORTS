@@ -7,9 +7,6 @@
 from .scans import Scan
 from .tx_rx import Station, TX, RX
 
-from . import instances
+from .instances import RadarSystemsGetter
 
-def __getattr__(name):
-    if name in instances.radar_instances:
-        return getattr(instances, name)
-    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+instances = RadarSystemsGetter()
