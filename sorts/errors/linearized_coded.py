@@ -5,7 +5,7 @@
 '''
 #Python standard import
 import pathlib
-import importlib.resources
+import pkg_resources
 
 #Third party import
 import numpy as np
@@ -142,12 +142,12 @@ class LinearizedCoded(Errors):
 
         if cache_folder is None:
             try:
-                with importlib.resources.path('sorts.data', fname) as pth:
-                    h = h5py.File(pth,'r')
-                    enrs = np.copy(h['enrs'][()])
-                    drs = np.copy(h['drs'][()])
-                    ddops = np.copy(h['ddops'][()])
-                    h.close()
+                stream = pkg_resources.resource_stream('sorts.data', fname)
+                h = h5py.File(stream,'r')
+                enrs = np.copy(h['enrs'][()])
+                drs = np.copy(h['drs'][()])
+                ddops = np.copy(h['ddops'][()])
+                h.close()
             except:
                 enrs, drs, ddops = precalculate_dr(txlen, bw, ipp=ipp, n_ipp=n_ipp, n_interp=20)
         else:

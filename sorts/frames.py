@@ -5,7 +5,7 @@
 '''
 
 #Python standard import
-import importlib.resources
+import pkg_resources
 
 #Third party import
 import numpy as np
@@ -118,8 +118,8 @@ def get_IERS_EOP(fname = None):
     global _EOP_data, _EOP_header
 
     if fname is None:
-        with importlib.resources.path('sorts.data', 'eopc04_IAU2000.62-now') as pth:
-            data = np.genfromtxt(str(pth), skip_header=14)
+        stream = pkg_resources.resource_stream('sorts.data', 'eopc04_IAU2000.62-now')
+        data = np.genfromtxt(stream, skip_header=14)
     else:    
         data = np.genfromtxt(fname, skip_header=14)
 
@@ -143,8 +143,11 @@ def get_IERS_EOP(fname = None):
     ]
     _EOP_data, _EOP_header = data, header
 
-#Run to load data
-get_IERS_EOP()
+try:
+    #Run to load data
+    get_IERS_EOP()
+except:
+    pass
 
 
 def _get_jd_rows(jd_ut1):

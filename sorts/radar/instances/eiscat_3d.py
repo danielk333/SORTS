@@ -3,8 +3,7 @@
 '''
 '''
 #Python standard import
-import importlib.resources
-
+import pkg_resources
 
 import numpy as np
 import pyant.instances as alib
@@ -23,13 +22,10 @@ def eiscat3d_interp(tx_fnames=None, rx_fnames=None, res=500):
             elevation=90, 
             frequency=233e6,
         )]
-        #This is for generating
-        #tx_intp[-1].generate_interpolation(tx.beam, resolution=res)
-        #tx_intp[-1].save(f'../sorts/data/e3d_tx{len(tx_intp)}_res{res}_interp.h5')
 
         if tx_fnames is None:
-            with importlib.resources.path('sorts.data', f'e3d_tx{txi}_res{res}_interp.npy') as pth:
-                tx_intp[-1].load(str(pth))
+            stream = pkg_resources.resource_stream('sorts.data', f'e3d_tx{txi}_res{res}_interp.npy')
+            tx_intp[-1].load(stream)
         else:    
             tx_intp[-1].load(tx_fnames[txi])
     
@@ -40,16 +36,13 @@ def eiscat3d_interp(tx_fnames=None, rx_fnames=None, res=500):
             elevation=90, 
             frequency=233e6,
         )]
-        #This is for generating
-        #rx_intp[-1].generate_interpolation(rx.beam, resolution=res)
-        #rx_intp[-1].save(f'../sorts/data/e3d_tx{len(rx_intp)}_res{res}_interp.h5')
+
         if rx_fnames is None:
-            with importlib.resources.path('sorts.data', f'e3d_rx{rxi}_res{res}_interp.npy') as pth:
-                rx_intp[-1].load(str(pth))
+            stream = pkg_resources.resource_stream('sorts.data', f'e3d_rx{rxi}_res{res}_interp.npy')
+            rx_intp[-1].load(stream)
         else:    
             rx_intp[-1].load(rx_fnames[rxi])
         
-
     return tx_intp, rx_intp
 
 
