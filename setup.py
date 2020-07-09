@@ -44,6 +44,10 @@ setuptools.setup(
         'Operating System :: OS Independent',
     ],
     install_requires=pip_req,
+    dependency_links=[
+        'http://github.com/danielk333/pyant/tarball/master#egg=package-0.5.0',
+        'http://github.com/danielk333/pyorb/tarball/master#egg=package-0.3.2',
+    ],
     packages=setuptools.find_packages(),
     package_data={
         'sorts': ['data/*'],
