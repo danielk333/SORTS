@@ -44,14 +44,14 @@ setuptools.setup(
         'Operating System :: OS Independent',
     ],
     install_requires=pip_req,
-    dependency_links=[
-        'http://github.com/danielk333/pyant/tarball/master#egg=package-0.5.0',
-        'http://github.com/danielk333/pyorb/tarball/master#egg=package-0.3.2',
-    ],
     packages=setuptools.find_packages(),
     package_data={
         'sorts': ['data/*'],
     },
+    dependency_links=[
+        'git+https://github.com/danielk333/pyant.git#egg=0.5.0',
+        'git+https://github.com/danielk333/pyorb.git#egg=0.3.2',
+    ],
     # metadata to display on PyPI
     author='Daniel Kastinen, Juha Vierinen',
     author_email='daniel.kastinen@irf.se',

@@ -3,6 +3,5 @@ matplotlib>=2.2.2
 numpy>=1.14.3
 scipy>=1.1.0
 sgp4==1.4
-pyorb>=0.2
 tabulate>=0.8.7
 tqdm>=4.46.0
