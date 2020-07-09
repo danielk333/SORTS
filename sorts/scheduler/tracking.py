@@ -24,7 +24,7 @@ class Tracking(Scheduler):
             end_time, 
             start_time = 0.0, 
             controller = Tracker,
-            controller_args = dict(return_copy=True, copy_radar=True),
+            controller_args = dict(return_copy=True),
             max_dpos = 1e3,
             profiler = None, 
             logger = None,

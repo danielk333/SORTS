@@ -17,11 +17,8 @@ class RadarController(ABC):
     '''A radar controller.
     '''
 
-    def __init__(self, radar, t=None, t0=0.0, profiler=None, logger=None, copy_radar=True):
-        if copy_radar:
-            self.radar = radar.copy()
-        else:
-            self.radar = radar
+    def __init__(self, radar, t=None, t0=0.0, profiler=None, logger=None):
+        self.radar = radar
         self.t = t
         self.t0 = t0
         self.logger = logger
@@ -46,10 +43,8 @@ class RadarController(ABC):
         if isinstance(t, float) or isinstance(t, int):
             ret = list(self.generator([t], **kwargs))[0]
         else:
-            if len(t) > 1:
+            if len(t) > 0:
                 ret = self.generator(t, **kwargs)
-            elif len(t) == 1:
-                ret = list(self.generator(t, **kwargs))[0]
             else:
                 ret = []
 
