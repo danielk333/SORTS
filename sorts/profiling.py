@@ -1,7 +1,7 @@
 '''Sets up a logging framework that can be imported and used anywhere.
 
 '''
-
+import json
 import logging
 import datetime
 import pathlib
@@ -130,6 +130,26 @@ class Profiler:
 
     def __str__(self):
         return self.fmt()
+
+
+    @classmethod
+    def from_txt(cls, path):
+        with open(path, 'r') as f:
+            dat = json.load(f)
+
+        p = cls(distribution = dat['distribution'])
+        p.exec_times = dat['exec_times']
+        return p
+
+
+    def to_txt(self, path):
+        dat = dict(
+            distribution = self.distribution,
+            exec_times = self.exec_times,
+        )
+        with open(path, 'w') as f:
+            json.dump(dat, f)
+
 
 
 
