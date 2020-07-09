@@ -25,17 +25,18 @@ from .errors import Errors
 
 
 #modules
+from .radar import scans
 from . import constants
 from . import frames
 from . import dates
 from . import plotting
 from . import profiling
-from . import radar
 from . import controller
 from . import scheduler
 from . import passes
 from . import errors
 from . import io
+from .radar import instances as radars
 
 
 from .passes import equidistant_sampling
