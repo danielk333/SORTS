@@ -110,7 +110,7 @@ def update(ind):
 
         for ln, rx in zip(ln_rx, radar.rx):
             pecef = rx.pointing_ecef/np.linalg.norm(rx.pointing_ecef, axis=0)
-            for ri in range(len(e3d.r)):
+            for ri in range(pecef.shape[1]):
                 point_tx = tx.pointing_ecef/np.linalg.norm(tx.pointing_ecef, axis=0)*e3d.r[ri] + tx.ecef
 
                 point = pecef[:,ri]*np.linalg.norm(rx.ecef - point_tx) + rx.ecef
