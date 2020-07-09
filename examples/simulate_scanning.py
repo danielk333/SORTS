@@ -43,7 +43,7 @@ objs = [
         aop = 0,
         mu0 = 60,
         mjd0 = 53005.0,
-        d = 1.0,
+        d = 0.3,
     ),
     SpaceObject(
         Prop_cls,
@@ -55,7 +55,7 @@ objs = [
         aop = 0,
         mu0 = 0,
         mjd0 = 53005.0,
-        d = 1.0,
+        d = 0.3,
     )
 ]
 

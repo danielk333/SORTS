@@ -17,8 +17,11 @@ class RadarController(ABC):
     '''A radar controller.
     '''
 
-    def __init__(self, radar, t=None, t0=0.0, profiler=None, logger=None):
-        self.radar = radar
+    def __init__(self, radar, t=None, t0=0.0, profiler=None, logger=None, copy_radar=True):
+        if copy_radar:
+            self.radar = radar.copy()
+        else:
+            self.radar = radar
         self.t = t
         self.t0 = t0
         self.logger = logger
@@ -45,8 +48,10 @@ class RadarController(ABC):
         else:
             if len(t) > 1:
                 ret = self.generator(t, **kwargs)
-            else:
+            elif len(t) == 1:
                 ret = list(self.generator(t, **kwargs))[0]
+            else:
+                ret = []
 
         return ret
 
@@ -73,43 +78,43 @@ class RadarController(ABC):
             if not keep:
                 station.enabled = False
 
-
-    def point_rx_ecef(self, ecef):
+    @staticmethod
+    def point_rx_ecef(radar, ecef):
         '''Point all rx sites into the direction of given ECEF coordinate, relative Earth Center.
         '''
-        for rx in self.radar.rx:
+        for rx in radar.rx:
             RadarController._point_station(rx, ecef)
 
-
-    def point_tx_ecef(self, ecef):
+    @staticmethod
+    def point_tx_ecef(radar, ecef):
         '''Point all tx sites into the direction of given ECEF coordinate, relative Earth Center.
         '''
-        for tx in self.radar.tx:
+        for tx in radar.tx:
             RadarController._point_station(tx, ecef)
 
-
-    def point_ecef(self, ecef):
+    @staticmethod
+    def point_ecef(radar, ecef):
         '''Point all sites into the direction of given ECEF coordinate, relative Earth Center.
         '''
-        self.point_tx_ecef(ecef)
-        self.point_rx_ecef(ecef)
+        RadarController.point_tx_ecef(radar, ecef)
+        RadarController.point_rx_ecef(radar, ecef)
 
 
-
-    def point(self, enu):
+    @staticmethod
+    def point(radar, enu):
         '''Point all sites into the direction of a given East, North, Up (ENU) local coordinate system.
         '''
-        for tx in self.radar.tx:
+        for tx in radar.tx:
             tx.point(enu)
-        for rx in self.radar.rx:
+        for rx in radar.rx:
             rx.point(enu)
 
-
-    def turn_off(self):
-        for st in self.radar.tx + self.radar.rx:
+    @staticmethod
+    def turn_off(radar):
+        for st in radar.tx + radar.rx:
             st.enabled = False
 
-
-    def turn_on(self):
-        for st in self.radar.tx + self.radar.rx:
+    @staticmethod
+    def turn_on(radar):
+        for st in radar.tx + radar.rx:
             st.enabled = True

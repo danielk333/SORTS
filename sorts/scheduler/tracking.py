@@ -24,6 +24,7 @@ class Tracking(Scheduler):
             end_time, 
             start_time = 0.0, 
             controller = Tracker,
+            controller_args = dict(return_copy=True, copy_radar=True),
             max_dpos = 1e3,
             profiler = None, 
             logger = None,
@@ -32,6 +33,7 @@ class Tracking(Scheduler):
         ):
         super().__init__(radar, profiler=profiler, logger=logger)
         self.controller = controller
+        self.controller_args = controller_args
         self.space_objects = space_objects
         self.timeslice = timeslice
         self.allocation = allocation
@@ -131,7 +133,13 @@ class Tracking(Scheduler):
                 t = self.measurements[ind]
                 states = self.space_objects[ind].get_state(t)
 
-            ctrl = self.controller(radar = self.radar, t=t, t0=0.0, ecefs = states[:3,:])
+            ctrl = self.controller(
+                radar = self.radar, 
+                t=t, 
+                t0=0.0, 
+                ecefs = states[:3,:],
+                **self.controller_args
+            )
             ctrls.append(ctrl)
         
         return ctrls
@@ -166,6 +174,9 @@ class PriorityTracking(Tracking):
                 for txi in range(len(self.passes[ind])):
                     for rxi in range(len(self.passes[ind][txi])):
                         all_inds += [ps.inds for ps in self.passes[ind][txi][rxi]]
+                if len(all_inds) == 0:
+                    measurement_times.append(np.empty((0,), dtype=np.int64))
+                    continue
                 all_inds = np.concatenate(all_inds, axis=0)
                 all_inds = np.unique(all_inds)
                 

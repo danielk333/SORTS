@@ -193,7 +193,7 @@ def equidistant_sampling(orbit, start_t, end_t, max_dpos=1e3, eccentricity_tol=0
     return np.array(t, dtype=np.float64)
 
 
-def find_passes(t, states, station):
+def find_passes(t, states, station, cache_data=True):
     '''Find passes inside the FOV of a radar station given a series of times for a space object.
     
     :param numpy.ndarray t: Vector of times in seconds to use as a base to find passes.

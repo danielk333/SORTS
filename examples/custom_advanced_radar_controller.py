@@ -41,8 +41,8 @@ class MyController(RadarController):
         point_tx = point + self.radar.tx[0].ecef
         point_rx = point[:,None]*self.r[None,:] + self.radar.tx[0].ecef[:,None]
         
-        self.point_tx_ecef(point_tx)
-        self.point_rx_ecef(point_rx)
+        self.point_tx_ecef(self.radar, point_tx)
+        self.point_rx_ecef(self.radar, point_rx)
 
         return self.radar
 

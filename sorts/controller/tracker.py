@@ -13,20 +13,21 @@ class Tracker(RadarController):
     '''Takes in ECEF points and a time vector and creates a tracking control.
     '''
 
-    def __init__(self, radar, t, ecefs, t0=0.0, dwell=0.1, profiler=None, logger=None):
+    def __init__(self, radar, t, ecefs, t0=0.0, dwell=0.1, return_copy=False, profiler=None, logger=None):
         super().__init__(radar, t=t, t0=t0, profiler=profiler, logger=logger)
         self.ecefs = ecefs
         self.dwell = dwell
+        self.return_copy = return_copy
 
         if self.logger is not None:
             self.logger.info(f'Tracker:init')
 
-    def point_radar(self, ind):
+    def point_radar(self, radar, ind):
         if self.profiler is not None:
             self.profiler.start('Tracker:generator:point_radar')
 
-        self.point_tx_ecef(self.ecefs[:3,ind])
-        self.point_rx_ecef(self.ecefs[:3,ind])
+        RadarController.point_tx_ecef(radar, self.ecefs[:3,ind])
+        RadarController.point_rx_ecef(radar, self.ecefs[:3,ind])
 
         if self.profiler is not None:
             self.profiler.stop('Tracker:generator:point_radar')
@@ -41,20 +42,25 @@ class Tracker(RadarController):
             if self.profiler is not None:
                 self.profiler.start('Tracker:generator:step')
 
+            if self.return_copy:
+                radar = self.radar.copy()
+            else:
+                radar = self.radar
+
             dt = t[ti] - self.t
             check = np.logical_and(dt >= 0, dt <= self.dwell)
 
             if np.any(check):
                 ind = np.argmax(check)
-                self.turn_on()
-                self.point_radar(ind)
+                RadarController.turn_on(radar)
+                self.point_radar(radar, ind)
             else:
-                self.turn_off()
+                RadarController.turn_off(radar)
 
             if self.profiler is not None:
                 self.profiler.stop('Tracker:generator:step')
 
-            yield self.radar
+            yield radar
 
         if self.profiler is not None:
             self.profiler.stop('Tracker:generator')

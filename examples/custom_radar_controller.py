@@ -30,7 +30,7 @@ class MyController(RadarController):
 
     def generator(self, t):
         for ti in range(len(t)):
-            self.point(self.scan.enu_pointing(t[ti]))
+            RadarController.point(self.radar, self.scan.enu_pointing(t[ti]))
             for tx, p0 in zip(self.radar.tx, self.p0):
                 tx.power = self.duty_cycle_func(t[ti], p0)
 
