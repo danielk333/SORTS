@@ -26,6 +26,7 @@ from .errors import Errors
 
 #modules
 from .radar import scans
+from . import functions
 from . import constants
 from . import frames
 from . import dates

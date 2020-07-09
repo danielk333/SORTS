@@ -44,7 +44,7 @@ class MyController(RadarController):
         self.point_tx_ecef(self.radar, point_tx)
         self.point_rx_ecef(self.radar, point_rx)
 
-        return self.radar
+        return self.radar, self.default_meta()
 
     def generator(self, t):
         for ti in range(len(t)):
@@ -99,7 +99,7 @@ def init():
     return lst
 
 def update(ind):
-    radar = e3d(t[ind])
+    radar, meta = e3d(t[ind])
 
     ax.view_init(elev=20, azim=120.0 + ind*0.2)
 

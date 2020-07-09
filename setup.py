@@ -4,7 +4,7 @@ from setuptools.command.develop import develop
 from setuptools.command.install import install
 import subprocess
 
-__version__ = '3.12.0'
+__version__ = '3.13.0'
 
 class PostDevelopCommand(develop):
     """Post-installation for development mode."""

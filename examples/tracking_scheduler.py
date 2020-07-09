@@ -37,6 +37,7 @@ objs = [
         mu0 = 60,
         mjd0 = 53005.0,
         d = 1.0,
+        oid = 1,
     ),
     SpaceObject(
         Prop_cls,
@@ -49,6 +50,7 @@ objs = [
         mu0 = 0,
         mjd0 = 53005.0,
         d = 1.0,
+        oid = 2,
     )
 ]
 
@@ -58,10 +60,17 @@ class ObservedTracking(PriorityTracking, ObservedParameters):
     def generate_schedule(self, t, generator):
         data = np.empty((len(t),len(self.radar.rx)*2+1), dtype=np.float64)
         data[:,0] = t
-        for ind,radar in enumerate(generator):
+        names = []
+        targets = []
+        for ind,mrad in enumerate(generator):
+            radar, meta = mrad
+            names.append(meta['controller_type'].__name__)
+            targets.append(meta['target'])
             for ri, rx in enumerate(radar.rx):
                 data[ind,1+ri*2] = rx.beam.azimuth
                 data[ind,2+ri*2] = rx.beam.elevation
+        data = data.T.tolist() + [names, targets]
+        data = list(map(list, zip(*data)))
         return data
 
 
@@ -78,7 +87,7 @@ scheduler = ObservedTracking(
 
 sched_data = scheduler.schedule()
 rx_head = [f'rx{i} {co}' for i in range(len(scheduler.radar.rx)) for co in ['az', 'el']]
-sched_tab = tabulate(sched_data, headers=["t [s]"] + rx_head)
+sched_tab = tabulate(sched_data, headers=["t [s]"] + rx_head + ['Controller', 'Target'])
 
 print(sched_tab)
 

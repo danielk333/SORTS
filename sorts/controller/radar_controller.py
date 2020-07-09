@@ -17,6 +17,10 @@ class RadarController(ABC):
     '''A radar controller.
     '''
 
+    META_FIELDS = [
+        'controller_type',
+    ]
+
     def __init__(self, radar, t=None, t0=0.0, profiler=None, logger=None):
         self.radar = radar
         self.t = t
@@ -24,17 +28,28 @@ class RadarController(ABC):
         self.logger = logger
         self.profiler = profiler
 
+        self.meta = dict()
+
 
     def run(self):
         return self(self.t - self.t0)
 
 
+    def default_meta(self):
+        '''This is used to generate meta data on the fly, rather then the static data that can be set in the `self.meta`.
+        '''
+        return dict(
+            controller_type = self.__class__,
+        )
+
+
     @abstractmethod
     def generator(self, t, **kwargs):
         '''This will configure the radar system and return a pointer to the contained radar system instance with the correct configuration. 
-        It should always assume the input `t` is a iterable and use `yield` to return `self.radar`.
+        It should always assume the input `t` is an iterable and use `yield` to return `radar, meta`. The `meta` variable should be 
+        a dict with the fields defined in `META_FIELDS`
 
-        **NOTE:** This is NOT guaranteed to return a copy of the radar system, but rather just a pointer to it.
+        **NOTE:** This is NOT guaranteed to return a copy of the radar system, however, the subclass should implement this as a option.
         '''
         pass
 

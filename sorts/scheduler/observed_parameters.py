@@ -57,7 +57,8 @@ class ObservedParameters(Scheduler):
         if self.profiler is not None:
             self.profiler.stop('Obs.Param.:calculate_observation:enus,range,range_rate')
 
-        for ti, radar in enumerate(generator):
+        for ti, mrad in enumerate(generator):
+            radar, meta = mrad
             if self.profiler is not None:
                 self.profiler.start('Obs.Param.:calculate_observation:snr-step')
 

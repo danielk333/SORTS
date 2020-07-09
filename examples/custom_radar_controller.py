@@ -34,7 +34,7 @@ class MyController(RadarController):
             for tx, p0 in zip(self.radar.tx, self.p0):
                 tx.power = self.duty_cycle_func(t[ti], p0)
 
-            yield self.radar
+            yield self.radar, self.default_meta()
 
 
 
@@ -52,7 +52,8 @@ for rx in e3d.radar.rx:
     ax.plot([rx.ecef[0]],[rx.ecef[1]],[rx.ecef[2]],'og')
 
 pw = np.zeros((len(t),))
-for radar, ti in zip(e3d(t),range(len(t))):
+for mrad, ti in zip(e3d(t),range(len(t))):
+    radar, meta = mrad
     pw[ti] = radar.tx[0].power
 
     for tx in radar.tx:

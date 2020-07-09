@@ -13,6 +13,11 @@ class Scanner(RadarController):
     '''Takes in ECEF points and a time vector and creates a tracking control.
     '''
 
+    META_FIELDS = RadarController.META_FIELDS + [
+        'scan_type',
+        'dwell',
+    ]
+
     def __init__(self, radar, scan, r=np.linspace(300e3,1000e3,num=10), profiler=None, logger=None, return_copy=False, **kwargs):
         super().__init__(radar, profiler=profiler, logger=logger)
         self.scan = scan
@@ -22,11 +27,20 @@ class Scanner(RadarController):
         if self.logger is not None:
             self.logger.info(f'Scanner:init')
 
+    def default_meta(self):
+        dic = super().default_meta()
+        dic['scan_type'] = self.scan.__class__
+        return dic
+
     def point_radar(self, t):
         if self.return_copy:
             radar = self.radar.copy()
         else:
             radar = self.radar
+
+        meta = self.default_meta()
+        meta['dwell'] = self.scan.dwell(t[ti])
+    
         point_rx_to_tx = []
         point_tx = []
         for tx in radar.tx:
@@ -49,7 +63,7 @@ class Scanner(RadarController):
 
             RadarController._point_station(rx, rx_point)
 
-        return radar
+        return radar, meta
 
     def generator(self, t):
         for ti in range(len(t)):

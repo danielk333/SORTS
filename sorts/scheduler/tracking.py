@@ -140,6 +140,7 @@ class Tracking(Scheduler):
                 ecefs = states[:3,:],
                 **self.controller_args
             )
+            ctrl.meta['target'] = f'Object {self.space_objects[ind].oid}'
             ctrls.append(ctrl)
         
         return ctrls

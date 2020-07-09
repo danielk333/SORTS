@@ -12,15 +12,27 @@ from .radar_controller import RadarController
 class Tracker(RadarController):
     '''Takes in ECEF points and a time vector and creates a tracking control.
     '''
+    
+    META_FIELDS = RadarController.META_FIELDS + [
+        'dwell',
+        'target',
+    ]
 
     def __init__(self, radar, t, ecefs, t0=0.0, dwell=0.1, return_copy=False, profiler=None, logger=None):
         super().__init__(radar, t=t, t0=t0, profiler=profiler, logger=logger)
         self.ecefs = ecefs
         self.dwell = dwell
         self.return_copy = return_copy
+        self.meta['target'] = ''
 
         if self.logger is not None:
             self.logger.info(f'Tracker:init')
+
+    def default_meta(self):
+        dic = super().default_meta()
+        dic.update(self.meta)
+        dic['dwell'] = self.dwell
+        return dic
 
     def point_radar(self, radar, ind):
         if self.profiler is not None:
@@ -60,7 +72,7 @@ class Tracker(RadarController):
             if self.profiler is not None:
                 self.profiler.stop('Tracker:generator:step')
 
-            yield radar
+            yield radar, self.default_meta()
 
         if self.profiler is not None:
             self.profiler.stop('Tracker:generator')

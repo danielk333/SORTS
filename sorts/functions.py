@@ -4,6 +4,18 @@
 
 '''
 
+import numpy as np
+import scipy.constants
+
+
+def signal_delay(st1, st2, ecef):
+    '''Signal delay due to speed of light between station-1 to ecef position to station-2
+    '''
+    r1 = np.linalg.norm(ecef - st1.ecef[:,None], axis=0)
+    r2 = np.linalg.norm(ecef - st1.ecef[:,None], axis=0)
+    dt = (r1 + r2)/scipy.constants.c
+    return dt
+
 
 def instantaneous_to_coherrent(gain, groups, N_IPP, IPP_scale=1.0, units = 'dB'):
     '''Using pulse encoding schema, subgroup setup and coherent integration setup; convert from instantaneous gain to coherently integrated gain.
@@ -17,7 +29,7 @@ def instantaneous_to_coherrent(gain, groups, N_IPP, IPP_scale=1.0, units = 'dB')
     :return float: Gain after coherent integration, linear units or in dB.
     '''
     if units == 'dB':
-        return gain + 10.0*n.log10( groups*N_IPP*IPP_scale )
+        return gain + 10.0*np.log10( groups*N_IPP*IPP_scale )
     else:
         return gain*(groups*N_IPP*IPP_scale)
 
@@ -34,6 +46,6 @@ def coherrent_to_instantaneous(gain,groups,N_IPP,IPP_scale=1.0,units = 'dB'):
     :return float: Instantaneous gain, linear units or in dB.
     '''
     if units == 'dB':
-        return gain - 10.0*n.log10( groups*N_IPP*IPP_scale )
+        return gain - 10.0*np.log10( groups*N_IPP*IPP_scale )
     else:
         return gain/(groups*N_IPP*IPP_scale)

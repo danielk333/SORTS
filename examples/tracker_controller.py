@@ -45,7 +45,8 @@ for tx in e3d.radar.tx:
 for rx in e3d.radar.rx:
     ax.plot([rx.ecef[0]],[rx.ecef[1]],[rx.ecef[2]],'og')
 
-for radar, ti in zip(e3d(t),range(len(t))):
+for radm, ti in zip(e3d(t),range(len(t))):
+    radar, meta = radm
 
     p.start('Tracker:generator:step:plot')
     for tx in radar.tx:
