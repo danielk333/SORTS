@@ -171,7 +171,6 @@ def get_logger(
         parallel = None
 
 
-
     if path is not None:
         if not isinstance(path, pathlib.Path):
             path = pathlib.Path(path)

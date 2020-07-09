@@ -14,7 +14,7 @@ import copy
 #Packages
 import numpy as np
 
-from mpi4py import MPI
+# from mpi4py import MPI
 import h5py
 from tqdm import tqdm
 import scipy
@@ -22,7 +22,7 @@ import scipy
 # SORTS imports
 
 
-comm = MPI.COMM_WORLD
+# comm = MPI.COMM_WORLD
 
 
 # class Simulation:
