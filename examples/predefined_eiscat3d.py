@@ -9,10 +9,11 @@ import matplotlib.pyplot as plt
 import sorts
 import pyant
 
-from sorts.radar import eiscat3d
+import sorts
+eiscat3d = sorts.radars.eiscat3d
 
 #dig trough the documentation to find how to generate alternative configurations of the predefined instances
-eiscat3d_interp = sorts.radar.eiscat3d_interp
+eiscat3d_interp = sorts.radars.eiscat3d_interp
 
 pyant.plotting.gain_heatmap(eiscat3d_interp.tx[0].beam, resolution=100, min_elevation=80.0)
 

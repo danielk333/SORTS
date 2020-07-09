@@ -11,7 +11,8 @@ import matplotlib.animation as animation
 
 import sorts
 from sorts.radar.scans import Fence
-from sorts.radar.instances import eiscat3d
+import sorts
+eiscat3d = sorts.radars.eiscat3d
 from sorts import RadarController
 
 

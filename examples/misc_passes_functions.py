@@ -11,13 +11,18 @@ import pyorb
 
 import sorts
 from sorts.propagator import SGP4
+Prop_cls = SGP4
+Prop_opts = dict(
+    settings = dict(
+        out_frame='ITRF',
+    ),
+)
+prop = Prop_cls(**Prop_opts)
 
 orb = pyorb.Orbit(M0 = pyorb.M_earth, direct_update=True, auto_update=True, degrees=True, a=13000e3, e=0.8, i=75, omega=0, Omega=79, anom=72, epoch=53005.0)
 print(orb)
 
-
-
-t = sorts.find_passes.equidistant_sampling(
+t = sorts.equidistant_sampling(
     orbit = orb, 
     start_t = 0, 
     end_t = 3600*6, 
@@ -29,11 +34,8 @@ fig = plt.figure(figsize=(15,15))
 ax = fig.add_subplot(111)
 ax.plot(range(len(t)), t/3600.0,"-b")
 
-prop = SGP4(
-    settings = dict(
-        out_frame='ITRF',
-    ),
-)
+#For some reason there is something messed up with this SGP4 propagation
+# TODO: figure out what
 
 states0 = prop.propagate(np.linspace(0,3600*6,num=len(t)), orb.cartesian[:,0], orb.epoch, A=1.0, C_R = 1.0, C_D = 1.0)
 states = prop.propagate(t, orb.cartesian[:,0], orb.epoch, A=1.0, C_R = 1.0, C_D = 1.0)

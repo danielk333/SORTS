@@ -12,15 +12,19 @@ import pyorb
 
 import sorts
 from sorts.controller import Tracker
-from sorts.radar.instances import eiscat3d
+import sorts
+eiscat3d = sorts.radars.eiscat3d
 from sorts import Scheduler
-from sorts.propagator import SGP4
 
-prop = SGP4(
+from sorts.propagator import SGP4
+Prop_cls = SGP4
+Prop_opts = dict(
     settings = dict(
         out_frame='ITRF',
     ),
 )
+prop = Prop_cls(**Prop_opts)
+
 
 class MyScheduler(Scheduler):
     '''

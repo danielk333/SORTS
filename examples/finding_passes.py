@@ -9,9 +9,17 @@ import matplotlib.pyplot as plt
 import pyorb
 
 import sorts
-from sorts.propagator import Orekit
-from sorts.radar.instances import eiscat3d
+eiscat3d = sorts.radars.eiscat3d
 from sorts.profiling import Profiler
+
+from sorts.propagator import SGP4
+Prop_cls = SGP4
+Prop_opts = dict(
+    settings = dict(
+        out_frame='ITRF',
+    ),
+)
+prop = Prop_cls(**Prop_opts)
 
 p = Profiler()
 p.start('total')
@@ -32,17 +40,6 @@ p.stop('equidistant_sampling')
 print(f'Temporal points: {len(t)}')
 
 p.start('propagate')
-
-orekit_data = '/home/danielk/IRF/IRF_GITLAB/orekit_build/orekit-data-master.zip'
-prop = Orekit(
-    orekit_data = orekit_data, 
-    settings=dict(
-        in_frame='EME',
-        out_frame='ITRF',
-        drag_force = False,
-        radiation_pressure = False,
-    ),
-)
 
 states = prop.propagate(t, orb.cartesian[:,0], orb.epoch, A=1.0, C_R = 1.0, C_D = 1.0)
 p.stop('propagate')

@@ -7,11 +7,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-import sorts
-from sorts.propagator import Orekit
 
-#from sorts.radar import eiscat3d
-from sorts.radar import eiscat3d_interp as eiscat3d
+import sorts
+eiscat3d = sorts.radars.eiscat3d_interp
 
 from sorts.scheduler import StaticList, ObservedParameters
 from sorts.controller import Scanner
@@ -19,30 +17,25 @@ from sorts import SpaceObject
 from sorts.profiling import Profiler
 from sorts.radar.scans import Fence
 
+from sorts.propagator import SGP4
+Prop_cls = SGP4
+Prop_opts = dict(
+    settings = dict(
+        out_frame='ITRF',
+    ),
+)
 
 end_t = 600.0
 scan = Fence(azimuth=90, num=40, dwell=0.1, min_elevation=30)
 
 p = Profiler()
 
-orekit_data = '/home/danielk/IRF/IRF_GITLAB/orekit_build/orekit-data-master.zip'
-opts = dict(
-    orekit_data = orekit_data, 
-    settings=dict(
-        in_frame='EME',
-        out_frame='ITRF',
-        drag_force = False,
-        radiation_pressure = False,
-    ),
-)
-
-
 logger = sorts.profiling.get_logger('scanning')
 
 objs = [
     SpaceObject(
-        Orekit,
-        propagator_options = opts,
+        Prop_cls,
+        propagator_options = Prop_opts,
         a = 7200e3, 
         e = 0.1, 
         i = 75, 
@@ -53,8 +46,8 @@ objs = [
         d = 1.0,
     ),
     SpaceObject(
-        Orekit,
-        propagator_options = opts,
+        Prop_cls,
+        propagator_options = Prop_opts,
         a = 7200e3, 
         e = 0.1, 
         i = 69, 

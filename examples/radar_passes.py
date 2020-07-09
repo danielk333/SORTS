@@ -9,9 +9,16 @@ import matplotlib.pyplot as plt
 import pyorb
 
 import sorts
-from sorts.propagator import Orekit
-from sorts.radar.instances import eiscat3d
+eiscat3d = sorts.radars.eiscat3d
 
+from sorts.propagator import SGP4
+Prop_cls = SGP4
+Prop_opts = dict(
+    settings = dict(
+        out_frame='ITRF',
+    ),
+)
+prop = Prop_cls(**Prop_opts)
 
 orb = pyorb.Orbit(M0 = pyorb.M_earth, direct_update=True, auto_update=True, degrees=True, a=7200e3, e=0.1, i=75, omega=0, Omega=79, anom=72, epoch=53005.0)
 print(orb)
@@ -23,17 +30,6 @@ t = sorts.equidistant_sampling(
     max_dpos=1e3,
 )
 
-orekit_data = '/home/danielk/IRF/IRF_GITLAB/orekit_build/orekit-data-master.zip'
-prop = Orekit(
-    orekit_data = orekit_data, 
-    settings=dict(
-        in_frame='EME',
-        out_frame='ITRF',
-        drag_force = False,
-        radiation_pressure = False,
-        max_step=10.0,
-    ),
-)
 print(f'Temporal points: {len(t)}')
 states = prop.propagate(t, orb.cartesian[:,0], orb.epoch, A=1.0, C_R = 1.0, C_D = 1.0)
 

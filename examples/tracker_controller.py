@@ -11,7 +11,8 @@ import pyorb
 
 
 import sorts
-from sorts.radar.instances import eiscat3d
+import sorts
+eiscat3d = sorts.radars.eiscat3d
 from sorts.controller import Tracker
 from sorts.propagator import SGP4
 from sorts.profiling import Profiler

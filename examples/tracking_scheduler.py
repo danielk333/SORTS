@@ -9,31 +9,26 @@ import matplotlib.pyplot as plt
 from tabulate import tabulate
 
 import sorts
-from sorts.propagator import Orekit
-from sorts.radar.instances import eiscat3d
+eiscat3d = sorts.radars.eiscat3d
 from sorts.scheduler import PriorityTracking, ObservedParameters
 from sorts import SpaceObject
 from sorts.profiling import Profiler
 
 
-orekit_data = '/home/danielk/IRF/IRF_GITLAB/orekit_build/orekit-data-master.zip'
-opts = dict(
-    orekit_data = orekit_data, 
-    settings=dict(
-        in_frame='EME',
+from sorts.propagator import SGP4
+Prop_cls = SGP4
+Prop_opts = dict(
+    settings = dict(
         out_frame='ITRF',
-        drag_force = False,
-        radiation_pressure = False,
     ),
 )
-
 
 logger = sorts.profiling.get_logger('tracking')
 
 objs = [
     SpaceObject(
-        Orekit,
-        propagator_options = opts,
+        Prop_cls,
+        propagator_options = Prop_opts,
         a = 7200e3, 
         e = 0.1, 
         i = 75, 
@@ -44,8 +39,8 @@ objs = [
         d = 1.0,
     ),
     SpaceObject(
-        Orekit,
-        propagator_options = opts,
+        Prop_cls,
+        propagator_options = Prop_opts,
         a = 7200e3, 
         e = 0.1, 
         i = 69, 

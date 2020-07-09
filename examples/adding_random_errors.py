@@ -9,7 +9,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import sorts.errors as errors
-from sorts.radar import eiscat3d
+import sorts
+eiscat3d = sorts.radars.eiscat3d
 
 pth = pathlib.Path(__file__).parent / 'data'
 

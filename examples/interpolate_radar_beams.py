@@ -18,8 +18,8 @@ for txi,tx in enumerate(rlib.eiscat3d.tx):
         frequency=tx.beam.frequency,
     )]
     tx_intp[-1].generate_interpolation(tx.beam, resolution=res)
-    tx_intp[-1].save(f'./sorts/data/e3d_tx{txi}_res{res}_interp')
-    print('saved')
+    # tx_intp[-1].save(f'./sorts/data/e3d_tx{txi}_res{res}_interp')
+    # print('saved')
 
 rx_intp = []
 for rxi,rx in enumerate(rlib.eiscat3d.rx):
@@ -29,6 +29,6 @@ for rxi,rx in enumerate(rlib.eiscat3d.rx):
         frequency=rx.beam.frequency,
     )]
     rx_intp[-1].generate_interpolation(rx.beam, resolution=res)
-    rx_intp[-1].save(f'./sorts/data/e3d_rx{rxi}_res{res}_interp')
-    print('saved')
+    # rx_intp[-1].save(f'./sorts/data/e3d_rx{rxi}_res{res}_interp')
+    # print('saved')
 
