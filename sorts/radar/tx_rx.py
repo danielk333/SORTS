@@ -46,6 +46,18 @@ class Station(object):
         self.enabled = True
 
 
+    def copy(self):
+        st = Station(
+            lat = self.lat,
+            lon = self.lon,
+            alt = self.alt,
+            min_elevation = self.min_elevation,
+            beam = self.beam.copy(),
+        )
+        st.enabled = self.enabled
+        return st
+
+
     @property
     def frequency(self):
         return self.beam.frequency
@@ -134,6 +146,18 @@ class RX(Station):
         super().__init__(lat, lon, alt, min_elevation, beam)
         self.noise = noise
 
+    def copy(self):
+        st = RX(
+            lat = self.lat,
+            lon = self.lon,
+            alt = self.alt,
+            min_elevation = self.min_elevation,
+            beam = self.beam.copy(),
+            noise = self.noise,
+        )
+        st.enabled = self.enabled
+        return st
+
 
 
 class TX(Station):
@@ -164,3 +188,21 @@ class TX(Station):
         self.ipp = ipp
         self.n_ipp = n_ipp
         self.coh_int_bandwidth = 1.0/(pulse_length*n_ipp)
+
+
+    def copy(self):
+        st = TX(
+            lat = self.lat,
+            lon = self.lon,
+            alt = self.alt,
+            min_elevation = self.min_elevation,
+            beam = self.beam.copy(),
+            power = self.power,
+            bandwidth = self.bandwidth,
+            duty_cycle = self.duty_cycle,
+            pulse_length = self.pulse_length,
+            ipp = self.ipp,
+            n_ipp = self.n_ipp,
+        )
+        st.enabled = self.enabled
+        return st

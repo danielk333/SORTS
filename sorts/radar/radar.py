@@ -3,6 +3,7 @@
 '''This module is used to define the radar network configuration.
 
 '''
+import copy
 import numpy as np
 
 from .. import passes
@@ -26,6 +27,22 @@ class Radar(object):
         self.rx = rx
         self.max_off_axis = max_off_axis
         self.min_SNRdb = min_SNRdb
+
+
+    def copy(self):
+        '''Create a deep copy of the radar system.
+        '''
+        ret = Radar(
+            tx = [],
+            rx = [],
+            max_off_axis = copy.deepcopy(self.max_off_axis),
+            min_SNRdb = copy.deepcopy(self.min_SNRdb),
+        )
+        for tx in self.tx:
+            ret.tx.append(tx.copy())
+        for rx in self.rx:
+            ret.rx.append(rx.copy())
+        return ret
 
 
     def set_beam(self, beam):
