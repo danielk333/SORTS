@@ -18,8 +18,8 @@ class Scanner(RadarController):
         'dwell',
     ]
 
-    def __init__(self, radar, scan, r=np.linspace(300e3,1000e3,num=10), profiler=None, logger=None, return_copy=False, **kwargs):
-        super().__init__(radar, profiler=profiler, logger=logger)
+    def __init__(self, radar, scan, r=np.linspace(300e3,1000e3,num=10), profiler=None, logger=None, return_copy=False, meta=None, **kwargs):
+        super().__init__(radar, profiler=profiler, logger=logger, meta=meta)
         self.scan = scan
         self.r = r
         self.return_copy = return_copy

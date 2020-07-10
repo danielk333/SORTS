@@ -5,7 +5,7 @@
 '''
 #Python standard import
 from abc import ABC, abstractmethod
-
+import copy
 
 #Third party import
 import numpy as np
@@ -21,7 +21,7 @@ class RadarController(ABC):
         'controller_type',
     ]
 
-    def __init__(self, radar, t=None, t0=0.0, profiler=None, logger=None):
+    def __init__(self, radar, t=None, t0=0.0, profiler=None, logger=None, meta=None):
         self.radar = radar
         self.t = t
         self.t0 = t0
@@ -29,6 +29,11 @@ class RadarController(ABC):
         self.profiler = profiler
 
         self.meta = dict()
+        if meta is not None:
+            self.meta.update(meta)
+        for key in self.META_FIELDS:
+            if key not in self.meta:
+                self.meta[key] = None
 
 
     def run(self):
@@ -38,9 +43,10 @@ class RadarController(ABC):
     def default_meta(self):
         '''This is used to generate meta data on the fly, rather then the static data that can be set in the `self.meta`.
         '''
-        return dict(
-            controller_type = self.__class__,
-        )
+        meta = dict()
+        meta.update(self.meta)
+        meta['controller_type'] = self.__class__
+        return meta
 
 
     @abstractmethod
