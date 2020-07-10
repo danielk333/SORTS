@@ -18,31 +18,31 @@ from tqdm import tqdm
 #Local import
 from .errors import Errors
 
-def simulate_echo(codes,t_vecs,bw=1e6,dop_Hz=0.0,range_m=1e3,sr=5e6):
+def simulate_echo(codes, t_vecs, bw=1e6, dop_Hz=0.0, range_m=1e3, sr=5e6):
     '''
-    Simulate a radar echo with range and doppler.
+    Simulate a radar echo with range and Doppler.
     Use windowing to simulate a continuous finite bandwidth signal.
     This is used for linearized error estimates of range and range-rate errors.
     '''
 
-    codelen=len(codes[0])
-    n_codes=len(codes)
-    tvec=np.zeros(codelen*n_codes)
-    z=np.zeros(codelen*n_codes,dtype=np.complex64)
-    for ci,code in enumerate(codes):
-        z[np.arange(codelen)+ci*codelen]=code
-        tvec[np.arange(codelen)+ci*codelen]=t_vecs[ci]
-    tvec_i=np.copy(tvec)
-    tvec_i[0]=tvec[0]-1e99
-    tvec_i[len(tvec)-1]=tvec[len(tvec)-1]+1e99        
-    zfun=scipy.interpolate.interp1d(tvec_i,z,kind="linear")
+    codelen = len(codes[0])
+    n_codes = len(codes)
+    tvec = np.zeros(codelen*n_codes)
+    z = np.zeros(codelen*n_codes,dtype=np.complex64)
+    for ci, code in enumerate(codes):
+        z[np.arange(codelen)+ci*codelen] = code
+        tvec[np.arange(codelen)+ci*codelen] = t_vecs[ci]
+    tvec_i = np.copy(tvec)
+    tvec_i[0] = tvec[0] - 1e99
+    tvec_i[len(tvec)-1] = tvec[len(tvec)-1] + 1e99
+    zfun = scipy.interpolate.interp1d(tvec_i,z,kind="linear")
     dt = 2.0*range_m/scipy.constants.c
 
-    z=zfun(tvec+dt)*np.exp(1j*np.pi*2.0*dop_Hz*tvec)
+    z = zfun(tvec+dt)*np.exp(1j*np.pi*2.0*dop_Hz*tvec)
 
-    return(z)
+    return z
 
-def lin_error(enr=10.0,txlen=1000.0,n_ipp=10,ipp=20e-3,bw=1e6,dr=10.0,ddop=1.0,sr=100e6):
+def lin_error(enr=10.0, txlen=1000.0, n_ipp=10, ipp=20e-3, bw=1e6, dr=10.0, ddop=1.0, sr=100e6):
     '''
      Determine linearized errors for range and range-rate error
      for a psuedorandom binary phase coded radar transmit pulse
@@ -55,50 +55,51 @@ def lin_error(enr=10.0,txlen=1000.0,n_ipp=10,ipp=20e-3,bw=1e6,dr=10.0,ddop=1.0,s
     Simulate a measurement and do a linearized error estimate.
 
     '''
-    codes=[]
-    t_vecs=[]    
+    codes = []
+    t_vecs = []    
     n_bits = int(bw*txlen/1e6)
-    oversample=int(sr/bw)
-    wfun=scipy.signal.hamming(oversample)
-    wfun=wfun/np.sum(wfun)
+    oversample = int(sr/bw)
+    wfun = scipy.signal.hamming(oversample)
+    wfun = wfun/np.sum(wfun)
     for i in range(n_ipp):
-        bits=np.array(np.sign(np.random.randn(n_bits)),dtype=np.complex64)
-        zcode=np.zeros(n_bits*oversample+2*oversample,dtype=np.complex64)
+        bits = np.array(np.sign(np.random.randn(n_bits)),dtype=np.complex64)
+        zcode = np.zeros(n_bits*oversample+2*oversample,dtype=np.complex64)
         for j in range(oversample):
-            zcode[np.arange(n_bits)*oversample+j+oversample]=bits
+            zcode[np.arange(n_bits)*oversample+j+oversample] = bits
+
         # filter signal so that phase transitions are not too sharp
-        zcode=np.convolve(wfun,zcode,mode="same")
+        zcode = np.convolve(wfun,zcode,mode="same")
         codes.append(zcode)
-        tcode=np.arange(n_bits*oversample+2*oversample)/sr + float(i)*ipp
+        tcode = np.arange(n_bits*oversample+2*oversample)/sr + float(i)*ipp
         t_vecs.append(tcode)
 
-    z0=simulate_echo(codes,t_vecs,dop_Hz=0.0,range_m=0.0,bw=bw,sr=sr)
-    tau=(float(n_ipp)*txlen/1e6)
+    z0 = simulate_echo(codes,t_vecs,dop_Hz=0.0,range_m=0.0,bw=bw,sr=sr)
+    tau = float(n_ipp)*txlen/1e6
     
     # convert coherently integrated ENR to SNR (variance of the measurement errors at receiver bandwidth)
     snr = enr/(tau*sr)
 
-    z_dr=simulate_echo(codes,t_vecs,dop_Hz=0.0,range_m=dr,bw=bw,sr=sr)
-    z_diff_r=(z0-z_dr)/dr    
+    z_dr = simulate_echo(codes,t_vecs,dop_Hz=0.0,range_m=dr,bw=bw,sr=sr)
+    z_diff_r = (z0 - z_dr)/dr    
 
-    z_ddop=simulate_echo(codes,t_vecs,dop_Hz=ddop,range_m=0.0,bw=bw,sr=sr)
-    z_diff_dop=(z0-z_ddop)/ddop
+    z_ddop = simulate_echo(codes,t_vecs,dop_Hz=ddop,range_m=0.0,bw=bw,sr=sr)
+    z_diff_dop = (z0 - z_ddop)/ddop
     
-    t_l=len(z_dr)
-    A=np.zeros([t_l,2],dtype=np.complex64)
-    A[:,0]=z_diff_r
-    A[:,1]=z_diff_dop
-    S=np.real(np.linalg.inv(np.dot(np.transpose(np.conj(A)),A))/snr)
+    t_l = len(z_dr)
+    A = np.zeros([t_l,2],dtype=np.complex64)
+    A[:,0] = z_diff_r
+    A[:,1] = z_diff_dop
+    S = np.real(np.linalg.inv(np.dot(np.transpose(np.conj(A)),A))/snr)
 
     return np.sqrt(np.diag(S))
 
 
 def precalculate_dr(txlen, bw, ipp=20e-3, n_ipp=20, n_interp=20):
-    enrs = 10.0**np.linspace(-3,10,num=n_interp)
+    enrs = 10.0**np.linspace(-3, 10, num=n_interp)
     drs = np.zeros(n_interp)
     ddops = np.zeros(n_interp)    
     for ei, s in tqdm(enumerate(enrs)):
-        dr, ddop = lin_error(enr=s,txlen=txlen,bw=bw,ipp=ipp,n_ipp=n_ipp)
+        dr, ddop = lin_error(enr=s, txlen=txlen, bw=bw, ipp=ipp, n_ipp=n_ipp)
         drs[ei] = dr
         ddops[ei] = ddop
     return enrs, drs, ddops
@@ -116,7 +117,7 @@ class LinearizedCoded(Errors):
 
     Simulate a measurement and do a linearized error estimate.
 
-        Unknown doppler shift due to ionosphere can be up to 0.1 Hz,
+        Unknown Doppler shift due to ionosphere can be up to 0.1 Hz,
         estimate based on typical GNU Ionospheric tomography receiver phase curves.
 
     '''
