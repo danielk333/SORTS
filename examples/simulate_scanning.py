@@ -129,7 +129,7 @@ for tx in eiscat3d.tx:
 for rx in eiscat3d.rx:
     axes[0][0].plot([rx.ecef[0]],[rx.ecef[1]],[rx.ecef[2]],'og')
 
-for radar in scan_sched(np.arange(0,scan.cycle(),scan.dwell())):
+for radar, meta in scan_sched(np.arange(0,scan.cycle(),scan.dwell())):
     for tx in radar.tx:
         point_tx = tx.pointing_ecef/np.linalg.norm(tx.pointing_ecef, axis=0)*scan_sched.r.max() + tx.ecef
         axes[0][0].plot([tx.ecef[0], point_tx[0]], [tx.ecef[1], point_tx[1]], [tx.ecef[2], point_tx[2]], 'r-', alpha=0.15)

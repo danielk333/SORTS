@@ -39,7 +39,7 @@ class Scanner(RadarController):
             radar = self.radar
 
         meta = self.default_meta()
-        meta['dwell'] = self.scan.dwell(t[ti])
+        meta['dwell'] = self.scan.dwell(t)
     
         point_rx_to_tx = []
         point_tx = []
