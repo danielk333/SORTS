@@ -1,0 +1,42 @@
+Pass
+====
+
+.. currentmodule:: sorts.passes
+
+.. autoclass:: Pass
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Pass.__init__
+      ~Pass.calculate_max_snr
+      ~Pass.calculate_range
+      ~Pass.calculate_range_rate
+      ~Pass.calculate_zenith_angle
+      ~Pass.end
+      ~Pass.get_range
+      ~Pass.get_range_rate
+      ~Pass.get_zenith_angle
+      ~Pass.range
+      ~Pass.range_rate
+      ~Pass.start
+      ~Pass.zenith_angle
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Pass.stations
+   
+   

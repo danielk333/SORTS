@@ -1,0 +1,8 @@
+mjd\_to\_jd
+===========
+
+.. currentmodule:: sorts.dates
+
+.. rubric:: mjd_to_jd
+
+.. autofunction:: mjd_to_jd

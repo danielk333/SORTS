@@ -1,0 +1,6 @@
+sorts.propagator.base.Propagator.DEFAULT\_SETTINGS
+==================================================
+
+.. currentmodule:: sorts.propagator.base
+
+.. autoattribute:: Propagator.DEFAULT_SETTINGS

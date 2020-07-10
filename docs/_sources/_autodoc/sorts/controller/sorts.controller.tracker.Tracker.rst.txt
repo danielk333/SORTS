@@ -1,0 +1,40 @@
+Tracker
+=======
+
+.. currentmodule:: sorts.controller.tracker
+
+.. autoclass:: Tracker
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Tracker.__init__
+      ~Tracker.default_meta
+      ~Tracker.generator
+      ~Tracker.point
+      ~Tracker.point_ecef
+      ~Tracker.point_radar
+      ~Tracker.point_rx_ecef
+      ~Tracker.point_tx_ecef
+      ~Tracker.run
+      ~Tracker.turn_off
+      ~Tracker.turn_on
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Tracker.META_FIELDS
+   
+   

@@ -1,0 +1,46 @@
+scheduler
+=========
+
+.. automodule:: sorts.scheduler.scheduler
+
+.. currentmodule:: sorts.scheduler.scheduler
+
+Module summary
+--------------
+
+
+
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    Scheduler
+    
+
+
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: Scheduler
+
+.. autoclass:: Scheduler
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
+
+
+
+

@@ -1,0 +1,8 @@
+mjd2absdate
+===========
+
+.. currentmodule:: sorts.propagator.orekit
+
+.. rubric:: mjd2absdate
+
+.. autofunction:: mjd2absdate

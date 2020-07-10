@@ -1,0 +1,70 @@
+orekit
+======
+
+.. automodule:: sorts.propagator.orekit
+
+.. currentmodule:: sorts.propagator.orekit
+
+Module summary
+--------------
+
+
+
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    Orekit
+    
+
+
+
+
+.. rubric:: Functions
+
+.. autosummary::
+    :toctree: .
+    
+    mjd2absdate
+    
+    npdt2absdate
+    
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: Orekit
+
+.. autoclass:: Orekit
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
+
+
+
+
+
+.. rubric:: Functions
+
+
+.. autofunction:: mjd2absdate
+   :noindex:
+
+
+
+.. autofunction:: npdt2absdate
+   :noindex:
+
+

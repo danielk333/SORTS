@@ -1,0 +1,8 @@
+Tracking.\_\_init\_\_
+=====================
+
+.. currentmodule:: sorts.scheduler.tracking
+
+.. rubric:: Tracking.__init__
+
+.. automethod:: Tracking.__init__

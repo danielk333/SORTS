@@ -1,0 +1,8 @@
+Profiler.total
+==============
+
+.. currentmodule:: sorts.profiling
+
+.. rubric:: Profiler.total
+
+.. automethod:: Profiler.total

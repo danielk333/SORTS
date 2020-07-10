@@ -1,0 +1,8 @@
+StaticList.calculate\_observation
+=================================
+
+.. currentmodule:: sorts.scheduler.static_list
+
+.. rubric:: StaticList.calculate_observation
+
+.. automethod:: StaticList.calculate_observation

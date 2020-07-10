@@ -1,0 +1,30 @@
+ObservedParameters
+==================
+
+.. currentmodule:: sorts.scheduler.observed_parameters
+
+.. autoclass:: ObservedParameters
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~ObservedParameters.__init__
+      ~ObservedParameters.calculate_observation
+      ~ObservedParameters.chain_generators
+      ~ObservedParameters.generate_schedule
+      ~ObservedParameters.get_controllers
+      ~ObservedParameters.observe_passes
+      ~ObservedParameters.schedule
+      ~ObservedParameters.update
+   
+   
+
+   
+   
+   

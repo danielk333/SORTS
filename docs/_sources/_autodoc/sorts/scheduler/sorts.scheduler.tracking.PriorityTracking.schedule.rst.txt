@@ -1,0 +1,8 @@
+PriorityTracking.schedule
+=========================
+
+.. currentmodule:: sorts.scheduler.tracking
+
+.. rubric:: PriorityTracking.schedule
+
+.. automethod:: PriorityTracking.schedule

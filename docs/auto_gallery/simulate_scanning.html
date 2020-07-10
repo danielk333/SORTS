@@ -1,0 +1,345 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Simulate scanning for objects &#8212; SORTS 3.13.0 documentation</title>
+    <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Observing a set of passes" href="observing_passes.html" />
+    <link rel="prev" title="Custom Scheduler" href="custom_scheduler.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="observing_passes.html" title="Observing a set of passes"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="custom_scheduler.html" title="Custom Scheduler"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Examples</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="custom_scheduler.html"
+                        title="previous chapter">Custom Scheduler</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="observing_passes.html"
+                        title="next chapter">Observing a set of passes</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/auto_gallery/simulate_scanning.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-auto-gallery-simulate-scanning-py"><span class="std std-ref">here</span></a>     to download the full example code</p>
+</div>
+<div class="sphx-glr-example-title section" id="simulate-scanning-for-objects">
+<span id="sphx-glr-auto-gallery-simulate-scanning-py"></span><h1>Simulate scanning for objects<a class="headerlink" href="#simulate-scanning-for-objects" title="Permalink to this headline">¶</a></h1>
+<img alt="simulate scanning" class="sphx-glr-single-img" src="../_images/sphx_glr_simulate_scanning_001.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Space object 1 at epoch 53005.0 MJD:
+a    : 7.2000e+06   x : -1.2134e+06
+e    : 1.0000e-01   y : 2.5788e+06
+i    : 7.5000e+01   z : 6.2817e+06
+omega: 0.0000e+00   vx: -2.1687e+03
+Omega: 7.9000e+01   vy: -6.7605e+03
+anom : 6.0000e+01   vz: 3.1307e+03
+PARAMETERS: diameter = 0.300 m, drag coefficient = 2.300, albedo = 1.000, area = 1.000, mass = 1.000 kg
+
+Temporal points obj 0: 4936
+2020-07-10 16:50:08.039 INFO    ; Scheduler:__call__:2082 events found between 0.1 and 208.4
+2020-07-10 16:50:08.039 INFO    ; Obs.Param.:calculate_observation:(tx=0, rx=0), len(t) = 2082
+/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/scheduler/observed_parameters.py:108: RuntimeWarning: divide by zero encountered in log10
+  snr_db = np.log10(snr[ti])*10.0
+2020-07-10 16:50:10.680 INFO    ; Obs.Param.:calculate_observation:complete
+2020-07-10 16:50:10.680 INFO    ; Scheduler:__call__:2072 events found between 0.1 and 207.4
+2020-07-10 16:50:10.680 INFO    ; Obs.Param.:calculate_observation:(tx=1, rx=1), len(t) = 2072
+2020-07-10 16:50:14.734 INFO    ; Obs.Param.:calculate_observation:complete
+2020-07-10 16:50:14.734 INFO    ; Scheduler:__call__:1896 events found between 0.1 and 189.8
+2020-07-10 16:50:14.734 INFO    ; Obs.Param.:calculate_observation:(tx=2, rx=2), len(t) = 1896
+2020-07-10 16:50:18.986 INFO    ; Obs.Param.:calculate_observation:complete
+-------------------------------------- Performance analysis --------------------------------------
+ Name                                                   |   Executions |    Mean time | Total time
+--------------------------------------------------------+--------------+--------------+--------------
+ equidistant_sampling                                   |            1 |  7.20024e-05 | 0.00 %
+ get_state                                              |            1 |  0.361191    | 3.19 %
+ find_passes                                            |            1 |  0.00671434  | 0.06 %
+ Obs.Param.:calculate_observation:get_state             |            3 |  0.190155    | 5.04 %
+ Obs.Param.:calculate_observation:enus,range,range_rate |            3 |  0.000506481 | 0.01 %
+ Obs.Param.:calculate_observation:snr-step:gain         |         5896 |  0.000686825 | 35.79 %
+ Obs.Param.:calculate_observation:snr-step:snr          |         5896 |  2.57083e-05 | 1.34 %
+ Obs.Param.:calculate_observation:snr-step              |         6050 |  0.000720883 | 38.54 %
+ Obs.Param.:calculate_observation                       |            3 |  3.64868     | 96.73 %
+ observe_passes                                         |            1 | 10.9478      | 96.75 %
+ total                                                  |            1 | 11.3159      | 100.00 %
+--------------------------------------------------------------------------------------------------
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+
+<span class="kn">import</span> <span class="nn">sorts</span>
+<span class="n">eiscat3d</span> <span class="o">=</span> <span class="n">sorts</span><span class="o">.</span><span class="n">radars</span><span class="o">.</span><span class="n">eiscat3d_interp</span>
+
+<span class="kn">from</span> <span class="nn">sorts.scheduler</span> <span class="kn">import</span> <span class="n">StaticList</span><span class="p">,</span> <span class="n">ObservedParameters</span>
+<span class="kn">from</span> <span class="nn">sorts.controller</span> <span class="kn">import</span> <span class="n">Scanner</span>
+<span class="kn">from</span> <span class="nn">sorts</span> <span class="kn">import</span> <span class="n">SpaceObject</span>
+<span class="kn">from</span> <span class="nn">sorts.profiling</span> <span class="kn">import</span> <span class="n">Profiler</span>
+<span class="kn">from</span> <span class="nn">sorts.radar.scans</span> <span class="kn">import</span> <span class="n">Fence</span>
+
+<span class="kn">from</span> <span class="nn">sorts.propagator</span> <span class="kn">import</span> <span class="n">SGP4</span>
+<span class="n">Prop_cls</span> <span class="o">=</span> <span class="n">SGP4</span>
+<span class="n">Prop_opts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">out_frame</span><span class="o">=</span><span class="s1">&#39;ITRF&#39;</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">end_t</span> <span class="o">=</span> <span class="mf">600.0</span>
+<span class="n">scan</span> <span class="o">=</span> <span class="n">Fence</span><span class="p">(</span><span class="n">azimuth</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">dwell</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">min_elevation</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+
+<span class="n">p</span> <span class="o">=</span> <span class="n">Profiler</span><span class="p">()</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">sorts</span><span class="o">.</span><span class="n">profiling</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="s1">&#39;scanning&#39;</span><span class="p">)</span>
+
+<span class="n">objs</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">SpaceObject</span><span class="p">(</span>
+        <span class="n">Prop_cls</span><span class="p">,</span>
+        <span class="n">propagator_options</span> <span class="o">=</span> <span class="n">Prop_opts</span><span class="p">,</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="mf">7200e3</span><span class="p">,</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">75</span><span class="p">,</span>
+        <span class="n">raan</span> <span class="o">=</span> <span class="mi">79</span><span class="p">,</span>
+        <span class="n">aop</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">mu0</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span>
+        <span class="n">mjd0</span> <span class="o">=</span> <span class="mf">53005.0</span><span class="p">,</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">SpaceObject</span><span class="p">(</span>
+        <span class="n">Prop_cls</span><span class="p">,</span>
+        <span class="n">propagator_options</span> <span class="o">=</span> <span class="n">Prop_opts</span><span class="p">,</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="mf">7200e3</span><span class="p">,</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">69</span><span class="p">,</span>
+        <span class="n">raan</span> <span class="o">=</span> <span class="mi">74</span><span class="p">,</span>
+        <span class="n">aop</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">mu0</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">mjd0</span> <span class="o">=</span> <span class="mf">53005.0</span><span class="p">,</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">]</span>
+
+<span class="n">objs</span> <span class="o">=</span> <span class="n">objs</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objs</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">ObservedScanning</span><span class="p">(</span><span class="n">StaticList</span><span class="p">,</span> <span class="n">ObservedParameters</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="n">scan_sched</span> <span class="o">=</span> <span class="n">Scanner</span><span class="p">(</span><span class="n">eiscat3d</span><span class="p">,</span> <span class="n">scan</span><span class="p">)</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">scan_sched</span><span class="o">.</span><span class="n">t</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">end_t</span><span class="p">,</span> <span class="n">scan</span><span class="o">.</span><span class="n">dwell</span><span class="p">())</span>
+
+<span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;total&#39;</span><span class="p">)</span>
+<span class="n">scheduler</span> <span class="o">=</span> <span class="n">ObservedScanning</span><span class="p">(</span>
+    <span class="n">radar</span> <span class="o">=</span> <span class="n">eiscat3d</span><span class="p">,</span>
+    <span class="n">controllers</span> <span class="o">=</span> <span class="p">[</span><span class="n">scan_sched</span><span class="p">],</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span><span class="p">,</span>
+    <span class="n">profiler</span> <span class="o">=</span> <span class="n">p</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+
+<span class="n">datas</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">passes</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">states</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">objs</span><span class="p">)):</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;equidistant_sampling&#39;</span><span class="p">)</span>
+    <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">t</span></a> <span class="o">=</span> <span class="n">sorts</span><span class="o">.</span><span class="n">equidistant_sampling</span><span class="p">(</span>
+        <span class="n">orbit</span> <span class="o">=</span> <span class="n">objs</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">.</span><span class="n">orbit</span><span class="p">,</span>
+        <span class="n">start_t</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">end_t</span> <span class="o">=</span> <span class="n">end_t</span><span class="p">,</span>
+        <span class="n">max_dpos</span><span class="o">=</span><span class="mf">1e3</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;equidistant_sampling&#39;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Temporal points obj </span><span class="si">{</span><span class="n">ind</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">t</span></a><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;get_state&#39;</span><span class="p">)</span>
+    <span class="n">states</span> <span class="o">+=</span> <span class="p">[</span><span class="n">objs</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">t</span></a><span class="p">)]</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;get_state&#39;</span><span class="p">)</span>
+
+    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;find_passes&#39;</span><span class="p">)</span>
+    <span class="n">passes</span> <span class="o">+=</span> <span class="p">[</span><span class="n">eiscat3d</span><span class="o">.</span><span class="n">find_passes</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">t</span></a><span class="p">,</span> <span class="n">states</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">cache_data</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)]</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;find_passes&#39;</span><span class="p">)</span>
+
+    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;observe_passes&#39;</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">observe_passes</span><span class="p">(</span><span class="n">passes</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">space_object</span> <span class="o">=</span> <span class="n">objs</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">snr_limit</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;observe_passes&#39;</span><span class="p">)</span>
+
+    <span class="n">datas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="n">p</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;total&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">fmt</span><span class="p">(</span><span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;total&#39;</span><span class="p">))</span>
+
+<a href="https://matplotlib.org/api/_as_gen/matplotlib.figure.Figure.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fig</span></a> <span class="o">=</span> <a href="https://matplotlib.org/api/_as_gen/matplotlib.pyplot.figure.html#matplotlib.pyplot.figure" title="matplotlib.pyplot.figure" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="mi">15</span><span class="p">))</span>
+<span class="n">axes</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">[</span>
+        <a href="https://matplotlib.org/api/_as_gen/matplotlib.figure.Figure.html#matplotlib.figure.Figure.add_subplot" title="matplotlib.figure.Figure.add_subplot" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-method"><span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span></a><span class="p">(</span><span class="mi">221</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">),</span>
+        <a href="https://matplotlib.org/api/_as_gen/matplotlib.figure.Figure.html#matplotlib.figure.Figure.add_subplot" title="matplotlib.figure.Figure.add_subplot" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-method"><span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span></a><span class="p">(</span><span class="mi">222</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="p">[</span>
+        <a href="https://matplotlib.org/api/_as_gen/matplotlib.figure.Figure.html#matplotlib.figure.Figure.add_subplot" title="matplotlib.figure.Figure.add_subplot" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-method"><span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span></a><span class="p">(</span><span class="mi">223</span><span class="p">),</span>
+        <a href="https://matplotlib.org/api/_as_gen/matplotlib.figure.Figure.html#matplotlib.figure.Figure.add_subplot" title="matplotlib.figure.Figure.add_subplot" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-method"><span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span></a><span class="p">(</span><span class="mi">224</span><span class="p">),</span>
+    <span class="p">],</span>
+<span class="p">]</span>
+
+<span class="n">sorts</span><span class="o">.</span><span class="n">plotting</span><span class="o">.</span><span class="n">grid_earth</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+<span class="k">for</span> <span class="n">tx</span> <span class="ow">in</span> <span class="n">eiscat3d</span><span class="o">.</span><span class="n">tx</span><span class="p">:</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tx</span><span class="o">.</span><span class="n">ecef</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]],[</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tx</span><span class="o">.</span><span class="n">ecef</span></a><span class="p">[</span><span class="mi">1</span><span class="p">]],[</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tx</span><span class="o">.</span><span class="n">ecef</span></a><span class="p">[</span><span class="mi">2</span><span class="p">]],</span><span class="s1">&#39;or&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">rx</span> <span class="ow">in</span> <span class="n">eiscat3d</span><span class="o">.</span><span class="n">rx</span><span class="p">:</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">rx</span><span class="o">.</span><span class="n">ecef</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]],[</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">rx</span><span class="o">.</span><span class="n">ecef</span></a><span class="p">[</span><span class="mi">1</span><span class="p">]],[</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">rx</span><span class="o">.</span><span class="n">ecef</span></a><span class="p">[</span><span class="mi">2</span><span class="p">]],</span><span class="s1">&#39;og&#39;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">radar</span><span class="p">,</span> <span class="n">meta</span> <span class="ow">in</span> <span class="n">scan_sched</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">scan</span><span class="o">.</span><span class="n">cycle</span><span class="p">(),</span><span class="n">scan</span><span class="o">.</span><span class="n">dwell</span><span class="p">())):</span>
+    <span class="k">for</span> <span class="n">tx</span> <span class="ow">in</span> <span class="n">radar</span><span class="o">.</span><span class="n">tx</span><span class="p">:</span>
+        <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">point_tx</span></a> <span class="o">=</span> <span class="n">tx</span><span class="o">.</span><span class="n">pointing_ecef</span><span class="o">/</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.linalg.norm.html#numpy.linalg.norm" title="numpy.linalg.norm" class="sphx-glr-backref-module-numpy-linalg sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span></a><span class="p">(</span><span class="n">tx</span><span class="o">.</span><span class="n">pointing_ecef</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">*</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">scan_sched</span><span class="o">.</span><span class="n">r</span></a><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tx</span><span class="o">.</span><span class="n">ecef</span></a>
+        <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tx</span><span class="o">.</span><span class="n">ecef</span></a><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">point_tx</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="p">[</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tx</span><span class="o">.</span><span class="n">ecef</span></a><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">point_tx</span></a><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="p">[</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tx</span><span class="o">.</span><span class="n">ecef</span></a><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">point_tx</span></a><span class="p">[</span><span class="mi">2</span><span class="p">]],</span> <span class="s1">&#39;r-&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.15</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">rx</span> <span class="ow">in</span> <span class="n">radar</span><span class="o">.</span><span class="n">rx</span><span class="p">:</span>
+            <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pecef</span></a> <span class="o">=</span> <span class="n">rx</span><span class="o">.</span><span class="n">pointing_ecef</span><span class="o">/</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.linalg.norm.html#numpy.linalg.norm" title="numpy.linalg.norm" class="sphx-glr-backref-module-numpy-linalg sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span></a><span class="p">(</span><span class="n">rx</span><span class="o">.</span><span class="n">pointing_ecef</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">ri</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pecef</span></a><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">point_tx</span></a> <span class="o">=</span> <span class="n">tx</span><span class="o">.</span><span class="n">pointing_ecef</span><span class="o">/</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.linalg.norm.html#numpy.linalg.norm" title="numpy.linalg.norm" class="sphx-glr-backref-module-numpy-linalg sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span></a><span class="p">(</span><span class="n">tx</span><span class="o">.</span><span class="n">pointing_ecef</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">*</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">scan_sched</span><span class="o">.</span><span class="n">r</span></a><span class="p">[</span><span class="n">ri</span><span class="p">]</span> <span class="o">+</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tx</span><span class="o">.</span><span class="n">ecef</span></a>
+                <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">point</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pecef</span></a><span class="p">[:,</span><span class="n">ri</span><span class="p">]</span><span class="o">*</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.linalg.norm.html#numpy.linalg.norm" title="numpy.linalg.norm" class="sphx-glr-backref-module-numpy-linalg sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span></a><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">rx</span><span class="o">.</span><span class="n">ecef</span></a> <span class="o">-</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">point_tx</span></a><span class="p">)</span> <span class="o">+</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">rx</span><span class="o">.</span><span class="n">ecef</span></a>
+
+                <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">rx</span><span class="o">.</span><span class="n">ecef</span></a><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">point</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="p">[</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">rx</span><span class="o">.</span><span class="n">ecef</span></a><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">point</span></a><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="p">[</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">rx</span><span class="o">.</span><span class="n">ecef</span></a><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">point</span></a><span class="p">[</span><span class="mi">2</span><span class="p">]],</span> <span class="s1">&#39;g-&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">objs</span><span class="p">)):</span>
+    <span class="k">for</span> <span class="n">pi</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">passes</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])):</span>
+        <span class="n">ps</span> <span class="o">=</span> <span class="n">passes</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">pi</span><span class="p">]</span>
+        <span class="n">dat</span> <span class="o">=</span> <span class="n">datas</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">pi</span><span class="p">]</span>
+
+        <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ps</span><span class="o">.</span><span class="n">inds</span></a><span class="p">],</span> <span class="n">states</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="mi">1</span><span class="p">,</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ps</span><span class="o">.</span><span class="n">inds</span></a><span class="p">],</span> <span class="n">states</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="mi">2</span><span class="p">,</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ps</span><span class="o">.</span><span class="n">inds</span></a><span class="p">],</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dat</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">/</span><span class="mf">3600.0</span><span class="p">,</span> <span class="n">dat</span><span class="p">[</span><span class="s1">&#39;range&#39;</span><span class="p">]</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;obj</span><span class="si">{</span><span class="n">ind</span><span class="si">}</span><span class="s1">-pass</span><span class="si">{</span><span class="n">pi</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dat</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">/</span><span class="mf">3600.0</span><span class="p">,</span> <span class="n">dat</span><span class="p">[</span><span class="s1">&#39;range_rate&#39;</span><span class="p">]</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+            <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dat</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">/</span><span class="mf">3600.0</span><span class="p">,</span> <span class="mi">10</span><span class="o">*</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.log10.html#numpy.log10" title="numpy.log10" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-data"><span class="n">np</span><span class="o">.</span><span class="n">log10</span></a><span class="p">(</span><span class="n">dat</span><span class="p">[</span><span class="s1">&#39;snr&#39;</span><span class="p">]),</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+
+
+<span class="n">font_</span> <span class="o">=</span> <span class="mi">18</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time [h]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">font_</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time [h]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">font_</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time [h]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">font_</span><span class="p">)</span>
+
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Two way range [km]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">font_</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Two way range rate [km/s]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">font_</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;SNR [dB]&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">font_</span><span class="p">)</span>
+
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="n">dr</span> <span class="o">=</span> <span class="mf">600e3</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="n">eiscat3d</span><span class="o">.</span><span class="n">tx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ecef</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">dr</span><span class="p">,</span> <span class="n">eiscat3d</span><span class="o">.</span><span class="n">tx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ecef</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">dr</span><span class="p">])</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="n">eiscat3d</span><span class="o">.</span><span class="n">tx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ecef</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">dr</span><span class="p">,</span> <span class="n">eiscat3d</span><span class="o">.</span><span class="n">tx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ecef</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">dr</span><span class="p">])</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_zlim</span><span class="p">([</span><span class="n">eiscat3d</span><span class="o">.</span><span class="n">tx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ecef</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">dr</span><span class="p">,</span> <span class="n">eiscat3d</span><span class="o">.</span><span class="n">tx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ecef</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="n">dr</span><span class="p">])</span>
+
+<a href="https://matplotlib.org/api/_as_gen/matplotlib.pyplot.show.html#matplotlib.pyplot.show" title="matplotlib.pyplot.show" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  13.231 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-gallery-simulate-scanning-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/96935fa3ec095968fc1f971dc88c7c08/simulate_scanning.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">simulate_scanning.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/4dedb033800624f5ebd375155c869eb1/simulate_scanning.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">simulate_scanning.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="observing_passes.html" title="Observing a set of passes"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="custom_scheduler.html" title="Custom Scheduler"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Examples</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

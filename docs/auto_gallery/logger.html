@@ -1,0 +1,219 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Logging &#8212; SORTS 3.13.0 documentation</title>
+    <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="SGP4 propagator usage" href="sgp4_propagator.html" />
+    <link rel="prev" title="Profiling SGP4" href="profiler_sgp4.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sgp4_propagator.html" title="SGP4 propagator usage"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="profiler_sgp4.html" title="Profiling SGP4"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Examples</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="profiler_sgp4.html"
+                        title="previous chapter">Profiling SGP4</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sgp4_propagator.html"
+                        title="next chapter">SGP4 propagator usage</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/auto_gallery/logger.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-auto-gallery-logger-py"><span class="std std-ref">here</span></a>     to download the full example code</p>
+</div>
+<div class="sphx-glr-example-title section" id="logging">
+<span id="sphx-glr-auto-gallery-logger-py"></span><h1>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h1>
+<p>CRITICAL    50
+ERROR   40
+WARNING 30
+INFO    20
+DEBUG   10</p>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2020-07-10 16:47:25.381 INFO    ; info message 0
+2020-07-10 16:47:25.381 WARNING ; warning message 0
+2020-07-10 16:47:25.381 ERROR   ; error message 0
+2020-07-10 16:47:25.381 CRITICAL; critical message 0
+2020-07-10 16:47:25.382 ALWAYS  ; always message 0
+2020-07-10 16:47:25.382 INFO    ; info message 1
+2020-07-10 16:47:25.382 WARNING ; warning message 1
+2020-07-10 16:47:25.382 ERROR   ; error message 1
+2020-07-10 16:47:25.382 CRITICAL; critical message 1
+2020-07-10 16:47:25.382 ALWAYS  ; always message 1
+2020-07-10 16:47:25.382 INFO    ; info message 2
+2020-07-10 16:47:25.382 WARNING ; warning message 2
+2020-07-10 16:47:25.382 ERROR   ; error message 2
+2020-07-10 16:47:25.382 CRITICAL; critical message 2
+2020-07-10 16:47:25.382 ALWAYS  ; always message 2
+2020-07-10 16:47:25.382 INFO    ; info message 3
+2020-07-10 16:47:25.382 WARNING ; warning message 3
+2020-07-10 16:47:25.382 ERROR   ; error message 3
+2020-07-10 16:47:25.382 CRITICAL; critical message 3
+2020-07-10 16:47:25.382 ALWAYS  ; always message 3
+2020-07-10 16:47:25.382 INFO    ; info message 4
+2020-07-10 16:47:25.382 WARNING ; warning message 4
+2020-07-10 16:47:25.382 ERROR   ; error message 4
+2020-07-10 16:47:25.383 CRITICAL; critical message 4
+2020-07-10 16:47:25.383 ALWAYS  ; always message 4
+2020-07-10 16:47:25.383 INFO    ; info message 5
+2020-07-10 16:47:25.383 WARNING ; warning message 5
+2020-07-10 16:47:25.383 ERROR   ; error message 5
+2020-07-10 16:47:25.383 CRITICAL; critical message 5
+2020-07-10 16:47:25.383 ALWAYS  ; always message 5
+2020-07-10 16:47:25.383 INFO    ; info message 6
+2020-07-10 16:47:25.383 WARNING ; warning message 6
+2020-07-10 16:47:25.383 ERROR   ; error message 6
+2020-07-10 16:47:25.383 CRITICAL; critical message 6
+2020-07-10 16:47:25.383 ALWAYS  ; always message 6
+2020-07-10 16:47:25.383 INFO    ; info message 7
+2020-07-10 16:47:25.383 WARNING ; warning message 7
+2020-07-10 16:47:25.383 ERROR   ; error message 7
+2020-07-10 16:47:25.383 CRITICAL; critical message 7
+2020-07-10 16:47:25.383 ALWAYS  ; always message 7
+2020-07-10 16:47:25.383 INFO    ; info message 8
+2020-07-10 16:47:25.384 WARNING ; warning message 8
+2020-07-10 16:47:25.384 ERROR   ; error message 8
+2020-07-10 16:47:25.384 CRITICAL; critical message 8
+2020-07-10 16:47:25.384 ALWAYS  ; always message 8
+2020-07-10 16:47:25.384 INFO    ; info message 9
+2020-07-10 16:47:25.384 WARNING ; warning message 9
+2020-07-10 16:47:25.384 ERROR   ; error message 9
+2020-07-10 16:47:25.384 CRITICAL; critical message 9
+2020-07-10 16:47:25.384 ALWAYS  ; always message 9
+2020-07-10 16:47:25.384 INFO    ; --------------- Performance analysis --------------
+2020-07-10 16:47:25.384 INFO    ;  Name   |   Executions |   Mean time |   Total time
+2020-07-10 16:47:25.385 INFO    ; --------+--------------+-------------+--------------
+2020-07-10 16:47:25.385 INFO    ;  log    |           10 | 0.000291586 |   0.00291586
+2020-07-10 16:47:25.385 INFO    ; ---------------------------------------------------
+2020-07-10 16:47:25.385 INFO    ;
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sorts</span>
+
+<span class="n">p</span> <span class="o">=</span> <span class="n">sorts</span><span class="o">.</span><span class="n">profiling</span><span class="o">.</span><span class="n">Profiler</span><span class="p">()</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">sorts</span><span class="o">.</span><span class="n">profiling</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="s1">&#39;example&#39;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="c1"># &#39;application&#39; code</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug message </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;info message </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning message </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error message </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s1">&#39;critical message </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">always</span><span class="p">(</span><span class="s1">&#39;always message </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.009 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-gallery-logger-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/7096d0bc9e83ed647fcf564817b94299/logger.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">logger.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/a4b086756170066b6c641da9e704343c/logger.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">logger.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sgp4_propagator.html" title="SGP4 propagator usage"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="profiler_sgp4.html" title="Profiling SGP4"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Examples</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

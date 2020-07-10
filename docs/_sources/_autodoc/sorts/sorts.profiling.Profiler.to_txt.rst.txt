@@ -1,0 +1,8 @@
+Profiler.to\_txt
+================
+
+.. currentmodule:: sorts.profiling
+
+.. rubric:: Profiler.to_txt
+
+.. automethod:: Profiler.to_txt

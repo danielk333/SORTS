@@ -1,0 +1,8 @@
+SGP4\_module\_wrapper.\_\_init\_\_
+==================================
+
+.. currentmodule:: sorts.propagator.pysgp4
+
+.. rubric:: SGP4_module_wrapper.__init__
+
+.. automethod:: SGP4_module_wrapper.__init__

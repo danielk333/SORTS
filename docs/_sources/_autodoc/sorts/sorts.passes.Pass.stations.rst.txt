@@ -1,0 +1,8 @@
+Pass.stations
+=============
+
+.. currentmodule:: sorts.passes
+
+.. rubric:: Pass.stations
+
+.. autoproperty:: sorts.passes.Pass.stations

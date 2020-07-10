@@ -1,0 +1,8 @@
+Scanner.default\_meta
+=====================
+
+.. currentmodule:: sorts.controller.scanner
+
+.. rubric:: Scanner.default_meta
+
+.. automethod:: Scanner.default_meta

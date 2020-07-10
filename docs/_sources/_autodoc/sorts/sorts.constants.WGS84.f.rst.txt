@@ -1,0 +1,6 @@
+sorts.constants.WGS84.f
+=======================
+
+.. currentmodule:: sorts.constants
+
+.. autoattribute:: WGS84.f

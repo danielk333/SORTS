@@ -1,0 +1,8 @@
+SGP4.settings
+=============
+
+.. currentmodule:: sorts.propagator.pysgp4
+
+.. rubric:: SGP4.settings
+
+.. automethod:: SGP4.settings

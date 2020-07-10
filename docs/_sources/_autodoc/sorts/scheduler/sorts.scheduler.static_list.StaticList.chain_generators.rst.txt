@@ -1,0 +1,8 @@
+StaticList.chain\_generators
+============================
+
+.. currentmodule:: sorts.scheduler.static_list
+
+.. rubric:: StaticList.chain_generators
+
+.. automethod:: StaticList.chain_generators

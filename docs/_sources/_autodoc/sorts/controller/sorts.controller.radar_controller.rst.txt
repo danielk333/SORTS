@@ -1,0 +1,46 @@
+radar\_controller
+=================
+
+.. automodule:: sorts.controller.radar_controller
+
+.. currentmodule:: sorts.controller.radar_controller
+
+Module summary
+--------------
+
+
+
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    RadarController
+    
+
+
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: RadarController
+
+.. autoclass:: RadarController
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
+
+
+
+

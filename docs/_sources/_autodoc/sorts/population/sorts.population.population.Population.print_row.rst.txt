@@ -1,0 +1,8 @@
+Population.print\_row
+=====================
+
+.. currentmodule:: sorts.population.population
+
+.. rubric:: Population.print_row
+
+.. automethod:: Population.print_row

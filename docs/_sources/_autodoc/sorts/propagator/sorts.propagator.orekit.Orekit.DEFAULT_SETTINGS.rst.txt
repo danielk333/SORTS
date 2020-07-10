@@ -1,0 +1,6 @@
+sorts.propagator.orekit.Orekit.DEFAULT\_SETTINGS
+================================================
+
+.. currentmodule:: sorts.propagator.orekit
+
+.. autoattribute:: Orekit.DEFAULT_SETTINGS

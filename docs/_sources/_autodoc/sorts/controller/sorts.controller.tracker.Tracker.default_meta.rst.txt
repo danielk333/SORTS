@@ -1,0 +1,8 @@
+Tracker.default\_meta
+=====================
+
+.. currentmodule:: sorts.controller.tracker
+
+.. rubric:: Tracker.default_meta
+
+.. automethod:: Tracker.default_meta

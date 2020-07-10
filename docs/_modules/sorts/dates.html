@@ -1,0 +1,277 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>sorts.dates &#8212; SORTS 3.13.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for sorts.dates</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="c1">#Python standard import</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1">#Third party import</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1">#Local import</span>
+
+
+
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;TZ&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;GMT&#39;</span>
+<span class="n">time</span><span class="o">.</span><span class="n">tzset</span><span class="p">()</span>
+
+<div class="viewcode-block" id="date_to_unix"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.dates.date_to_unix.html#sorts.dates.date_to_unix">[docs]</a><span class="k">def</span> <span class="nf">date_to_unix</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="p">,</span> <span class="n">hour</span><span class="p">,</span> <span class="n">minute</span><span class="p">,</span> <span class="n">second</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Convert date to unix time in seconds</span>
+
+
+<span class="sd">    :param int year: Year as integer. Years preceding 1 A.D. should be 0 or negative. The year before 1 A.D. is 0, 10 B.C. is year -9.</span>
+<span class="sd">    :param int month: Month as integer, Jan = 1, Feb. = 2, etc.</span>
+<span class="sd">    :param int day:  Day</span>
+<span class="sd">    :param int hour:  Hour in 24h format</span>
+<span class="sd">    :param int minute:  Minute</span>
+<span class="sd">    :param float second:  Second, may contain fractional part.</span>
+<span class="sd">    :return: Unix time in seconds</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="p">,</span> <span class="n">hour</span><span class="p">,</span> <span class="n">minute</span><span class="p">,</span> <span class="n">second</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">time</span><span class="o">.</span><span class="n">mktime</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">timetuple</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="unix_to_date"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.dates.unix_to_date.html#sorts.dates.unix_to_date">[docs]</a><span class="k">def</span> <span class="nf">unix_to_date</span><span class="p">(</span><span class="n">unix</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Convert unix time in seconds to UTC date datetime object</span>
+
+<span class="sd">    :param float unix: Unix time in seconds.</span>
+<span class="sd">    :return: Datetime object in UTC</span>
+<span class="sd">    :rtype: datetime.datetime</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcfromtimestamp</span><span class="p">(</span><span class="n">unix</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="unix_to_datestr"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.dates.unix_to_datestr.html#sorts.dates.unix_to_datestr">[docs]</a><span class="k">def</span> <span class="nf">unix_to_datestr</span><span class="p">(</span><span class="n">unix</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Convert unix time in seconds to Gregorian calendar UTC date-time formatted string</span>
+
+<span class="sd">    :param float unix: Unix time in seconds.</span>
+<span class="sd">    :return: Gregorian calendar UTC date-time formatted string</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">unix_to_date</span><span class="p">(</span><span class="n">unix</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="unix_to_datestrf"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.dates.unix_to_datestrf.html#sorts.dates.unix_to_datestrf">[docs]</a><span class="k">def</span> <span class="nf">unix_to_datestrf</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Convert unix time in seconds to Gregorian calendar UTC date-time formatted string</span>
+<span class="sd">    </span>
+<span class="sd">    Different implementation?</span>
+
+<span class="sd">    :param float unix: Unix time in seconds.</span>
+<span class="sd">    :return: Gregorian calendar UTC date-time formatted string</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">unix_to_date</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S.</span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">))</span></div>
+
+
+<span class="n">sec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="mi">1000000000</span><span class="p">,</span> <span class="s1">&#39;ns&#39;</span><span class="p">)</span>
+<span class="sd">&#39;&#39;&#39;numpy.datetime64: Interval of 1 second</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="jd_to_mjd"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.dates.jd_to_mjd.html#sorts.dates.jd_to_mjd">[docs]</a><span class="k">def</span> <span class="nf">jd_to_mjd</span><span class="p">(</span><span class="n">jd</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Convert Julian Date (relative 12h Jan 1, 4713 BC) to Modified Julian Date (relative 0h Nov 17, 1858)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">jd</span> <span class="o">-</span> <span class="mf">2400000.5</span></div>
+
+
+<div class="viewcode-block" id="mjd_to_jd"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.dates.mjd_to_jd.html#sorts.dates.mjd_to_jd">[docs]</a><span class="k">def</span> <span class="nf">mjd_to_jd</span><span class="p">(</span><span class="n">mjd</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Convert Modified Julian Date (relative 0h Nov 17, 1858) to Julian Date (relative 12h Jan 1, 4713 BC)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">mjd</span> <span class="o">+</span> <span class="mf">2400000.5</span></div>
+
+
+<div class="viewcode-block" id="npdt_to_date"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.dates.npdt_to_date.html#sorts.dates.npdt_to_date">[docs]</a><span class="k">def</span> <span class="nf">npdt_to_date</span><span class="p">(</span><span class="n">dt</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Converts a numpy datetime64 value to a date tuple</span>
+
+<span class="sd">    :param numpy.datetime64 dt: Date and time (UTC) in numpy datetime64 format</span>
+
+<span class="sd">    :return: tuple (year, month, day, hours, minutes, seconds, microsecond)</span>
+<span class="sd">             all except usec are integer</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span><span class="s1">&#39;1970-01-01&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">)</span>
+    <span class="n">ts</span> <span class="o">=</span> <span class="p">(</span><span class="n">dt</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span><span class="o">/</span><span class="n">sec</span>
+
+    <span class="n">it</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">ts</span><span class="p">))</span>
+    <span class="n">usec</span> <span class="o">=</span> <span class="mf">1e6</span> <span class="o">*</span> <span class="p">(</span><span class="n">dt</span> <span class="o">-</span> <span class="p">(</span><span class="n">t0</span> <span class="o">+</span> <span class="n">it</span><span class="o">*</span><span class="n">sec</span><span class="p">))</span><span class="o">/</span><span class="n">sec</span>
+
+    <span class="n">tm</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="n">it</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tm</span><span class="o">.</span><span class="n">tm_year</span><span class="p">,</span> <span class="n">tm</span><span class="o">.</span><span class="n">tm_mon</span><span class="p">,</span> <span class="n">tm</span><span class="o">.</span><span class="n">tm_mday</span><span class="p">,</span> <span class="n">tm</span><span class="o">.</span><span class="n">tm_hour</span><span class="p">,</span> <span class="n">tm</span><span class="o">.</span><span class="n">tm_min</span><span class="p">,</span> <span class="n">tm</span><span class="o">.</span><span class="n">tm_sec</span><span class="p">,</span> <span class="n">usec</span></div>
+
+
+<div class="viewcode-block" id="npdt_to_mjd"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.dates.npdt_to_mjd.html#sorts.dates.npdt_to_mjd">[docs]</a><span class="k">def</span> <span class="nf">npdt_to_mjd</span><span class="p">(</span><span class="n">dt</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Converts a numpy datetime64 value (UTC) to a modified Julian date</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">dt</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span><span class="s1">&#39;1858-11-17&#39;</span><span class="p">))</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="mjd_to_npdt"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.dates.mjd_to_npdt.html#sorts.dates.mjd_to_npdt">[docs]</a><span class="k">def</span> <span class="nf">mjd_to_npdt</span><span class="p">(</span><span class="n">mjd</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Converts a modified Julian date to a numpy datetime64 value (UTC)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">day</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="mi">24</span><span class="o">*</span><span class="mi">3600</span><span class="o">*</span><span class="mi">1000</span><span class="o">*</span><span class="mi">1000</span><span class="p">,</span> <span class="s1">&#39;us&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span><span class="s1">&#39;1858-11-17&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">day</span> <span class="o">*</span> <span class="n">mjd</span></div>
+
+
+<div class="viewcode-block" id="unix_to_npdt"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.dates.unix_to_npdt.html#sorts.dates.unix_to_npdt">[docs]</a><span class="k">def</span> <span class="nf">unix_to_npdt</span><span class="p">(</span><span class="n">unix</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Converts unix seconds to a numpy datetime64 value (UTC)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span><span class="s1">&#39;1970-01-01&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="mi">1000</span><span class="o">*</span><span class="mi">1000</span><span class="p">,</span><span class="s1">&#39;us&#39;</span><span class="p">)</span><span class="o">*</span><span class="n">unix</span></div>
+
+
+<div class="viewcode-block" id="npdt_to_unix"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.dates.npdt_to_unix.html#sorts.dates.npdt_to_unix">[docs]</a><span class="k">def</span> <span class="nf">npdt_to_unix</span><span class="p">(</span><span class="n">dt</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Converts a numpy datetime64 value (UTC) to unix seconds</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">dt</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span><span class="s1">&#39;1970-01-01&#39;</span><span class="p">))</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;s&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="gstime"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.dates.gstime.html#sorts.dates.gstime">[docs]</a><span class="k">def</span> <span class="nf">gstime</span><span class="p">(</span><span class="n">jdut1</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;This function finds the greenwich sidereal time (iau-82).</span>
+
+<span class="sd">    *References:* Vallado 2007, 193, Eq 3-43</span>
+
+<span class="sd">    Author: David Vallado 719-573-2600 7 jun 2002</span>
+<span class="sd">    Adapted to Python, Daniel Kastinen 2018</span>
+
+<span class="sd">    :param float jdut1: Julian date of ut1 in days from 4713 bc</span>
+
+<span class="sd">    :return: Greenwich sidereal time in radians, 0 to :math:`2\pi`</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">twopi</span>      <span class="o">=</span> <span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">;</span>
+    <span class="n">deg2rad</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">180.0</span><span class="p">;</span>
+
+    <span class="c1"># ------------------------  implementation   ------------------</span>
+    <span class="n">tut1</span><span class="o">=</span> <span class="p">(</span> <span class="n">jdut1</span> <span class="o">-</span> <span class="mf">2451545.0</span> <span class="p">)</span> <span class="o">/</span> <span class="mf">36525.0</span>
+
+    <span class="n">temp</span> <span class="o">=</span> <span class="o">-</span> <span class="mf">6.2e-6</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">tut1</span><span class="p">,</span><span class="n">tut1</span><span class="p">),</span><span class="n">tut1</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.093104</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">tut1</span><span class="p">,</span><span class="n">tut1</span><span class="p">)</span> \
+           <span class="o">+</span> <span class="p">(</span><span class="mf">876600.0</span> <span class="o">*</span> <span class="mf">3600.0</span> <span class="o">+</span> <span class="mf">8640184.812866</span><span class="p">)</span> <span class="o">*</span> <span class="n">tut1</span> <span class="o">+</span> <span class="mf">67310.54841</span>
+
+    <span class="c1"># 360/86400 = 1/240, to deg, to rad</span>
+    <span class="n">temp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fmod</span><span class="p">(</span> <span class="n">temp</span><span class="o">*</span><span class="n">deg2rad</span><span class="o">/</span><span class="mf">240.0</span><span class="p">,</span><span class="n">twopi</span> <span class="p">)</span>
+
+    <span class="c1"># ------------------------ check quadrants --------------------</span>
+    <span class="n">temp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">temp</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">temp</span><span class="o">+</span><span class="n">twopi</span><span class="p">,</span> <span class="n">temp</span><span class="p">)</span>
+
+
+    <span class="n">gst</span> <span class="o">=</span> <span class="n">temp</span>
+    <span class="k">return</span> <span class="n">gst</span></div>
+
+
+<div class="viewcode-block" id="GMST1982"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.dates.GMST1982.html#sorts.dates.GMST1982">[docs]</a><span class="k">def</span> <span class="nf">GMST1982</span><span class="p">(</span><span class="n">jd_ut1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the angle of Greenwich Mean Standard Time 1982 given the JD.</span>
+<span class="sd">    This angle defines the difference between the idiosyncratic True</span>
+<span class="sd">    Equator Mean Equinox (TEME) frame of reference used by SGP4 and the</span>
+<span class="sd">    more standard Pseudo Earth Fixed (PEF) frame of reference.</span>
+
+
+<span class="sd">    *Reference:* AIAA 2006-6753 Appendix C.</span>
+
+<span class="sd">    Original work Copyright (c) 2013-2018 Brandon Rhodes under the MIT license</span>
+<span class="sd">    Modified work Copyright (c) 2019 Daniel Kastinen</span>
+
+<span class="sd">    :param float jd_ut1: UT1 Julian date.</span>
+<span class="sd">    :returns: tuple of (Earth rotation [rad], Earth angular velocity [rad/day])</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_second</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">24.0</span> <span class="o">*</span> <span class="mf">60.0</span> <span class="o">*</span> <span class="mf">60.0</span><span class="p">)</span>
+
+    <span class="n">T0</span> <span class="o">=</span> <span class="mf">2451545.0</span>
+
+    <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">jd_ut1</span> <span class="o">-</span> <span class="n">T0</span><span class="p">)</span> <span class="o">/</span> <span class="mf">36525.0</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="mf">67310.54841</span> <span class="o">+</span> <span class="p">(</span><span class="mf">8640184.812866</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.093104</span> <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="mf">6.2e-6</span><span class="p">)</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span> <span class="o">*</span> <span class="n">t</span>
+    <span class="n">dg</span> <span class="o">=</span> <span class="mf">8640184.812866</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.093104</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="mf">6.2e-6</span> <span class="o">*</span> <span class="mf">3.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span> <span class="o">*</span> <span class="n">t</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="p">(</span><span class="n">jd_ut1</span> <span class="o">%</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="n">g</span> <span class="o">*</span> <span class="n">_second</span> <span class="o">%</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+    <span class="n">theta_dot</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">dg</span> <span class="o">*</span> <span class="n">_second</span> <span class="o">/</span> <span class="mf">36525.0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+    <span class="k">return</span> <span class="n">theta</span><span class="p">,</span> <span class="n">theta_dot</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

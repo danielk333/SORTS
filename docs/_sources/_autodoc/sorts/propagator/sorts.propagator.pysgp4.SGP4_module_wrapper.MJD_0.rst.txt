@@ -1,0 +1,6 @@
+sorts.propagator.pysgp4.SGP4\_module\_wrapper.MJD\_0
+====================================================
+
+.. currentmodule:: sorts.propagator.pysgp4
+
+.. autoattribute:: SGP4_module_wrapper.MJD_0

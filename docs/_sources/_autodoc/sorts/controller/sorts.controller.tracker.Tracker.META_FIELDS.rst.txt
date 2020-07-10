@@ -1,0 +1,6 @@
+sorts.controller.tracker.Tracker.META\_FIELDS
+=============================================
+
+.. currentmodule:: sorts.controller.tracker
+
+.. autoattribute:: Tracker.META_FIELDS

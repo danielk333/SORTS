@@ -1,0 +1,8 @@
+Population.get\_all\_orbits
+===========================
+
+.. currentmodule:: sorts.population.population
+
+.. rubric:: Population.get_all_orbits
+
+.. automethod:: Population.get_all_orbits

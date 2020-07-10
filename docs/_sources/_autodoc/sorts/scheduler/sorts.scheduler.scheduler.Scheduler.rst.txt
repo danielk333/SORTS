@@ -1,0 +1,30 @@
+Scheduler
+=========
+
+.. currentmodule:: sorts.scheduler.scheduler
+
+.. autoclass:: Scheduler
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Scheduler.__init__
+      ~Scheduler.calculate_observation
+      ~Scheduler.chain_generators
+      ~Scheduler.generate_schedule
+      ~Scheduler.get_controllers
+      ~Scheduler.observe_passes
+      ~Scheduler.schedule
+      ~Scheduler.update
+   
+   
+
+   
+   
+   

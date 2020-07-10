@@ -1,0 +1,8 @@
+Tracking.chain\_generators
+==========================
+
+.. currentmodule:: sorts.scheduler.tracking
+
+.. rubric:: Tracking.chain_generators
+
+.. automethod:: Tracking.chain_generators

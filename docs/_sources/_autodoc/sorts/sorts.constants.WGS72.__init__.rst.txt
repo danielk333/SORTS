@@ -1,0 +1,8 @@
+WGS72.\_\_init\_\_
+==================
+
+.. currentmodule:: sorts.constants
+
+.. rubric:: WGS72.__init__
+
+.. automethod:: WGS72.__init__

@@ -1,0 +1,141 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>sorts.signals &#8212; SORTS 3.13.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for sorts.signals</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="sd">&#39;&#39;&#39;This module is used to define the radar network configuration.</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.constants</span>
+
+
+<div class="viewcode-block" id="hard_target_rcs"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.signals.hard_target_rcs.html#sorts.signals.hard_target_rcs">[docs]</a><span class="k">def</span> <span class="nf">hard_target_rcs</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">diameter</span><span class="p">):</span>
+    <span class="n">is_rayleigh</span> <span class="o">=</span> <span class="n">diameter</span> <span class="o">&lt;</span> <span class="n">wavelength</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">3.0</span><span class="p">))</span>
+    <span class="n">is_optical</span> <span class="o">=</span> <span class="n">diameter</span> <span class="o">&gt;=</span> <span class="n">wavelength</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">3.0</span><span class="p">))</span>
+    <span class="n">optical_rcs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">diameter</span><span class="o">**</span><span class="mf">2.0</span><span class="o">/</span><span class="mf">4.0</span>
+    <span class="n">rayleigh_rcs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">diameter</span><span class="o">**</span><span class="mf">2.0</span><span class="o">*</span><span class="mf">7.11</span><span class="o">/</span><span class="mf">4.0</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">diameter</span><span class="o">/</span><span class="n">wavelength</span><span class="p">)</span><span class="o">**</span><span class="mi">4</span>
+    <span class="n">rcs</span> <span class="o">=</span> <span class="n">is_rayleigh</span><span class="o">*</span><span class="n">rayleigh_rcs</span> <span class="o">+</span> <span class="n">is_optical</span><span class="o">*</span><span class="n">optical_rcs</span>
+    <span class="k">return</span> <span class="n">rcs</span> </div>
+
+
+<div class="viewcode-block" id="hard_target_snr"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.signals.hard_target_snr.html#sorts.signals.hard_target_snr">[docs]</a><span class="k">def</span> <span class="nf">hard_target_snr</span><span class="p">(</span><span class="n">gain_tx</span><span class="p">,</span> <span class="n">gain_rx</span><span class="p">,</span>
+                    <span class="n">wavelength</span><span class="p">,</span> <span class="n">power_tx</span><span class="p">,</span>
+                    <span class="n">range_tx_m</span><span class="p">,</span> <span class="n">range_rx_m</span><span class="p">,</span>
+                    <span class="n">diameter</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">bandwidth</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                    <span class="n">rx_noise_temp</span><span class="o">=</span><span class="mf">150.0</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Determine the signal-to-noise ratio (energy-to-noise) ratio for a hard target.</span>
+<span class="sd">    Assume a smooth transition between Rayleigh and optical scattering. </span>
+<span class="sd">    Ignore Mie regime and use either optical or Rayleigh scatter.</span>
+
+<span class="sd">    :param float/numpy.ndarray gain_tx: transmit antenna gain, linear</span>
+<span class="sd">    :param float/numpy.ndarray gain_rx: receiver antenna gain, linear</span>
+<span class="sd">    :param float wavelength: radar wavelength (meters)</span>
+<span class="sd">    :param float power_tx: transmit power (W)</span>
+<span class="sd">    :param float/numpy.ndarray range_tx_m: range from transmitter to target (meters)</span>
+<span class="sd">    :param float/numpy.ndarray range_rx_m: range from target to receiver (meters)</span>
+<span class="sd">    :param float diameter: object diameter (meters)</span>
+<span class="sd">    :param float bandwidth: effective receiver noise bandwidth for incoherent integration (tx_len*n_ipp/sample_rate)</span>
+<span class="sd">    :param float rx_noise_temp: receiver noise temperature (K)</span>
+<span class="sd">    :return: signal-to-noise ratio</span>
+<span class="sd">    :rtype: float/numpy.ndarray</span>
+
+
+<span class="sd">    **Reference:** Markkanen et.al., 1999</span>
+<span class="sd">    </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">is_rayleigh</span> <span class="o">=</span> <span class="n">diameter</span> <span class="o">&lt;</span> <span class="n">wavelength</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">3.0</span><span class="p">))</span>
+    <span class="n">is_optical</span> <span class="o">=</span> <span class="n">diameter</span> <span class="o">&gt;=</span> <span class="n">wavelength</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">3.0</span><span class="p">))</span>
+    <span class="n">rayleigh_power</span> <span class="o">=</span> <span class="p">(</span><span class="mf">9.0</span><span class="o">*</span><span class="n">power_tx</span><span class="o">*</span><span class="p">(((</span><span class="n">gain_tx</span><span class="o">*</span><span class="n">gain_rx</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">diameter</span><span class="o">**</span><span class="mf">6.0</span><span class="p">))</span><span class="o">/</span><span class="p">(</span><span class="mf">256.0</span><span class="o">*</span><span class="p">(</span><span class="n">wavelength</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">range_rx_m</span><span class="o">**</span><span class="mf">2.0</span><span class="o">*</span><span class="n">range_tx_m</span><span class="o">**</span><span class="mf">2.0</span><span class="p">))))</span>
+    <span class="n">optical_power</span> <span class="o">=</span> <span class="p">(</span><span class="n">power_tx</span><span class="o">*</span><span class="p">(((</span><span class="n">gain_tx</span><span class="o">*</span><span class="n">gain_rx</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">wavelength</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">diameter</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)))</span><span class="o">/</span><span class="p">(</span><span class="mf">256.0</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">range_rx_m</span><span class="o">**</span><span class="mf">2.0</span><span class="o">*</span><span class="n">range_tx_m</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)))</span>
+    <span class="n">rx_noise</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">k</span><span class="o">*</span><span class="n">rx_noise_temp</span><span class="o">*</span><span class="n">bandwidth</span>
+    <span class="n">snr</span> <span class="o">=</span> <span class="p">((</span><span class="n">is_rayleigh</span><span class="p">)</span><span class="o">*</span><span class="n">rayleigh_power</span> <span class="o">+</span> <span class="p">(</span><span class="n">is_optical</span><span class="p">)</span><span class="o">*</span><span class="n">optical_power</span><span class="p">)</span><span class="o">/</span><span class="n">rx_noise</span>
+    <span class="k">return</span> <span class="n">snr</span></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,8 @@
+ObservedParameters.generate\_schedule
+=====================================
+
+.. currentmodule:: sorts.scheduler.observed_parameters
+
+.. rubric:: ObservedParameters.generate_schedule
+
+.. automethod:: ObservedParameters.generate_schedule

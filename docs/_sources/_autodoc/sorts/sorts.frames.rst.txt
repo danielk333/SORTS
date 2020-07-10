@@ -1,0 +1,147 @@
+frames
+======
+
+.. automodule:: sorts.frames
+
+.. currentmodule:: sorts.frames
+
+Module summary
+--------------
+
+
+
+
+
+
+
+.. rubric:: Functions
+
+.. autosummary::
+    :toctree: .
+    
+    ECEF_to_TEME
+    
+    ITRF_to_TEME
+    
+    TEME_to_ECEF
+    
+    TEME_to_ITRF
+    
+    TEME_to_TLE
+    
+    TEME_to_TLE_OPTIM
+    
+    TLE_to_TEME
+    
+    azel_to_ecef
+    
+    ecef_to_enu
+    
+    enu_to_ecef
+    
+    geodetic_to_ecef
+    
+    get_DUT
+    
+    get_IERS_EOP
+    
+    get_polar_motion
+    
+    ned_to_ecef
+    
+    polar_motion_matrix
+    
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: Functions
+
+
+.. autofunction:: ECEF_to_TEME
+   :noindex:
+
+
+
+.. autofunction:: ITRF_to_TEME
+   :noindex:
+
+
+
+.. autofunction:: TEME_to_ECEF
+   :noindex:
+
+
+
+.. autofunction:: TEME_to_ITRF
+   :noindex:
+
+
+
+.. autofunction:: TEME_to_TLE
+   :noindex:
+
+
+
+.. autofunction:: TEME_to_TLE_OPTIM
+   :noindex:
+
+
+
+.. autofunction:: TLE_to_TEME
+   :noindex:
+
+
+
+.. autofunction:: azel_to_ecef
+   :noindex:
+
+
+
+.. autofunction:: ecef_to_enu
+   :noindex:
+
+
+
+.. autofunction:: enu_to_ecef
+   :noindex:
+
+
+
+.. autofunction:: geodetic_to_ecef
+   :noindex:
+
+
+
+.. autofunction:: get_DUT
+   :noindex:
+
+
+
+.. autofunction:: get_IERS_EOP
+   :noindex:
+
+
+
+.. autofunction:: get_polar_motion
+   :noindex:
+
+
+
+.. autofunction:: ned_to_ecef
+   :noindex:
+
+
+
+.. autofunction:: polar_motion_matrix
+   :noindex:
+
+

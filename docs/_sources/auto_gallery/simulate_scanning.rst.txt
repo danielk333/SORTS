@@ -1,0 +1,278 @@
+.. only:: html
+
+    .. note::
+        :class: sphx-glr-download-link-note
+
+        Click :ref:`here <sphx_glr_download_auto_gallery_simulate_scanning.py>`     to download the full example code
+    .. rst-class:: sphx-glr-example-title
+
+    .. _sphx_glr_auto_gallery_simulate_scanning.py:
+
+
+Simulate scanning for objects
+======================================
+
+
+
+.. image:: /auto_gallery/images/sphx_glr_simulate_scanning_001.png
+    :alt: simulate scanning
+    :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    Space object 1 at epoch 53005.0 MJD:
+    a    : 7.2000e+06   x : -1.2134e+06
+    e    : 1.0000e-01   y : 2.5788e+06
+    i    : 7.5000e+01   z : 6.2817e+06
+    omega: 0.0000e+00   vx: -2.1687e+03
+    Omega: 7.9000e+01   vy: -6.7605e+03
+    anom : 6.0000e+01   vz: 3.1307e+03
+    PARAMETERS: diameter = 0.300 m, drag coefficient = 2.300, albedo = 1.000, area = 1.000, mass = 1.000 kg
+
+    Temporal points obj 0: 4936
+    2020-07-10 16:50:08.039 INFO    ; Scheduler:__call__:2082 events found between 0.1 and 208.4
+    2020-07-10 16:50:08.039 INFO    ; Obs.Param.:calculate_observation:(tx=0, rx=0), len(t) = 2082
+    /home/danielk/IRF/IRF_GITLAB/SORTS/sorts/scheduler/observed_parameters.py:108: RuntimeWarning: divide by zero encountered in log10
+      snr_db = np.log10(snr[ti])*10.0
+    2020-07-10 16:50:10.680 INFO    ; Obs.Param.:calculate_observation:complete
+    2020-07-10 16:50:10.680 INFO    ; Scheduler:__call__:2072 events found between 0.1 and 207.4
+    2020-07-10 16:50:10.680 INFO    ; Obs.Param.:calculate_observation:(tx=1, rx=1), len(t) = 2072
+    2020-07-10 16:50:14.734 INFO    ; Obs.Param.:calculate_observation:complete
+    2020-07-10 16:50:14.734 INFO    ; Scheduler:__call__:1896 events found between 0.1 and 189.8
+    2020-07-10 16:50:14.734 INFO    ; Obs.Param.:calculate_observation:(tx=2, rx=2), len(t) = 1896
+    2020-07-10 16:50:18.986 INFO    ; Obs.Param.:calculate_observation:complete
+    -------------------------------------- Performance analysis --------------------------------------
+     Name                                                   |   Executions |    Mean time | Total time
+    --------------------------------------------------------+--------------+--------------+--------------
+     equidistant_sampling                                   |            1 |  7.20024e-05 | 0.00 %
+     get_state                                              |            1 |  0.361191    | 3.19 %
+     find_passes                                            |            1 |  0.00671434  | 0.06 %
+     Obs.Param.:calculate_observation:get_state             |            3 |  0.190155    | 5.04 %
+     Obs.Param.:calculate_observation:enus,range,range_rate |            3 |  0.000506481 | 0.01 %
+     Obs.Param.:calculate_observation:snr-step:gain         |         5896 |  0.000686825 | 35.79 %
+     Obs.Param.:calculate_observation:snr-step:snr          |         5896 |  2.57083e-05 | 1.34 %
+     Obs.Param.:calculate_observation:snr-step              |         6050 |  0.000720883 | 38.54 %
+     Obs.Param.:calculate_observation                       |            3 |  3.64868     | 96.73 %
+     observe_passes                                         |            1 | 10.9478      | 96.75 %
+     total                                                  |            1 | 11.3159      | 100.00 %
+    --------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+|
+
+
+.. code-block:: default
+
+
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+
+    import sorts
+    eiscat3d = sorts.radars.eiscat3d_interp
+
+    from sorts.scheduler import StaticList, ObservedParameters
+    from sorts.controller import Scanner
+    from sorts import SpaceObject
+    from sorts.profiling import Profiler
+    from sorts.radar.scans import Fence
+
+    from sorts.propagator import SGP4
+    Prop_cls = SGP4
+    Prop_opts = dict(
+        settings = dict(
+            out_frame='ITRF',
+        ),
+    )
+
+    end_t = 600.0
+    scan = Fence(azimuth=90, num=40, dwell=0.1, min_elevation=30)
+
+    p = Profiler()
+
+    logger = sorts.profiling.get_logger('scanning')
+
+    objs = [
+        SpaceObject(
+            Prop_cls,
+            propagator_options = Prop_opts,
+            a = 7200e3, 
+            e = 0.1, 
+            i = 75, 
+            raan = 79,
+            aop = 0,
+            mu0 = 60,
+            mjd0 = 53005.0,
+            d = 0.3,
+        ),
+        SpaceObject(
+            Prop_cls,
+            propagator_options = Prop_opts,
+            a = 7200e3, 
+            e = 0.1, 
+            i = 69, 
+            raan = 74,
+            aop = 0,
+            mu0 = 0,
+            mjd0 = 53005.0,
+            d = 0.3,
+        )
+    ]
+
+    objs = objs[:1]
+
+    for obj in objs: print(obj)
+
+    class ObservedScanning(StaticList, ObservedParameters):
+        pass
+
+    scan_sched = Scanner(eiscat3d, scan)
+    scan_sched.t = np.arange(0, end_t, scan.dwell())
+
+    p.start('total')
+    scheduler = ObservedScanning(
+        radar = eiscat3d, 
+        controllers = [scan_sched], 
+        logger = logger,
+        profiler = p,
+    )
+
+
+
+    datas = []
+    passes = []
+    states = []
+    for ind in range(len(objs)):
+        p.start('equidistant_sampling')
+        t = sorts.equidistant_sampling(
+            orbit = objs[ind].orbit, 
+            start_t = 0, 
+            end_t = end_t, 
+            max_dpos=1e3,
+        )
+        p.stop('equidistant_sampling')
+
+        print(f'Temporal points obj {ind}: {len(t)}')
+    
+        p.start('get_state')
+        states += [objs[ind].get_state(t)]
+        p.stop('get_state')
+
+        p.start('find_passes')
+        passes += [eiscat3d.find_passes(t, states[ind], cache_data = True)]
+        p.stop('find_passes')
+
+        p.start('observe_passes')
+        data = scheduler.observe_passes(passes[ind], space_object = objs[ind], snr_limit=True)
+        p.stop('observe_passes')
+
+        datas.append(data)
+
+    p.stop('total')
+    print(p.fmt(normalize='total'))
+
+    fig = plt.figure(figsize=(15,15))
+    axes = [
+        [
+            fig.add_subplot(221, projection='3d'),
+            fig.add_subplot(222),
+        ],
+        [
+            fig.add_subplot(223),
+            fig.add_subplot(224),
+        ],
+    ]
+
+    sorts.plotting.grid_earth(axes[0][0])
+    for tx in eiscat3d.tx:
+        axes[0][0].plot([tx.ecef[0]],[tx.ecef[1]],[tx.ecef[2]],'or')
+    for rx in eiscat3d.rx:
+        axes[0][0].plot([rx.ecef[0]],[rx.ecef[1]],[rx.ecef[2]],'og')
+
+    for radar, meta in scan_sched(np.arange(0,scan.cycle(),scan.dwell())):
+        for tx in radar.tx:
+            point_tx = tx.pointing_ecef/np.linalg.norm(tx.pointing_ecef, axis=0)*scan_sched.r.max() + tx.ecef
+            axes[0][0].plot([tx.ecef[0], point_tx[0]], [tx.ecef[1], point_tx[1]], [tx.ecef[2], point_tx[2]], 'r-', alpha=0.15)
+
+            for rx in radar.rx:
+                pecef = rx.pointing_ecef/np.linalg.norm(rx.pointing_ecef, axis=0)
+
+                for ri in range(pecef.shape[1]):
+                    point_tx = tx.pointing_ecef/np.linalg.norm(tx.pointing_ecef, axis=0)*scan_sched.r[ri] + tx.ecef
+                    point = pecef[:,ri]*np.linalg.norm(rx.ecef - point_tx) + rx.ecef
+
+                    axes[0][0].plot([rx.ecef[0], point[0]], [rx.ecef[1], point[1]], [rx.ecef[2], point[2]], 'g-', alpha=0.05)
+
+    for ind in range(len(objs)):
+        for pi in range(len(passes[ind][0][0])):
+            ps = passes[ind][0][0][pi]
+            dat = datas[ind][0][0][pi]
+        
+            axes[0][0].plot(states[ind][0,ps.inds], states[ind][1,ps.inds], states[ind][2,ps.inds], '-')
+
+            if dat is not None:
+                axes[0][1].plot(dat['t']/3600.0, dat['range']*1e-3, '-', label=f'obj{ind}-pass{pi}')
+                axes[1][0].plot(dat['t']/3600.0, dat['range_rate']*1e-3, '-')
+                axes[1][1].plot(dat['t']/3600.0, 10*np.log10(dat['snr']), '-')
+
+
+    font_ = 18
+    axes[0][1].set_xlabel('Time [h]', fontsize=font_)
+    axes[1][0].set_xlabel('Time [h]', fontsize=font_)
+    axes[1][1].set_xlabel('Time [h]', fontsize=font_)
+
+    axes[0][1].set_ylabel('Two way range [km]', fontsize=font_)
+    axes[1][0].set_ylabel('Two way range rate [km/s]', fontsize=font_)
+    axes[1][1].set_ylabel('SNR [dB]', fontsize=font_)
+
+    axes[0][1].legend()
+
+    dr = 600e3
+    axes[0][0].set_xlim([eiscat3d.tx[0].ecef[0]-dr, eiscat3d.tx[0].ecef[0]+dr])
+    axes[0][0].set_ylim([eiscat3d.tx[0].ecef[1]-dr, eiscat3d.tx[0].ecef[1]+dr])
+    axes[0][0].set_zlim([eiscat3d.tx[0].ecef[2]-dr, eiscat3d.tx[0].ecef[2]+dr])
+
+    plt.show()
+
+.. rst-class:: sphx-glr-timing
+
+   **Total running time of the script:** ( 0 minutes  13.231 seconds)
+
+
+.. _sphx_glr_download_auto_gallery_simulate_scanning.py:
+
+
+.. only :: html
+
+ .. container:: sphx-glr-footer
+    :class: sphx-glr-footer-example
+
+
+
+  .. container:: sphx-glr-download sphx-glr-download-python
+
+     :download:`Download Python source code: simulate_scanning.py <simulate_scanning.py>`
+
+
+
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+     :download:`Download Jupyter notebook: simulate_scanning.ipynb <simulate_scanning.ipynb>`
+
+
+.. only:: html
+
+ .. rst-class:: sphx-glr-signature
+
+    `Gallery generated by Sphinx-Gallery <https://sphinx-gallery.github.io>`_

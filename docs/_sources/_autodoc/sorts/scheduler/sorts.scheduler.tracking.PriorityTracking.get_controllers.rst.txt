@@ -1,0 +1,8 @@
+PriorityTracking.get\_controllers
+=================================
+
+.. currentmodule:: sorts.scheduler.tracking
+
+.. rubric:: PriorityTracking.get_controllers
+
+.. automethod:: PriorityTracking.get_controllers

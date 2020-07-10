@@ -1,0 +1,159 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>master_catalog &#8212; SORTS 3.13.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="master_catalog_factor" href="sorts.population.master.master_catalog_factor.html" />
+    <link rel="prev" title="master" href="sorts.population.master.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.population.master.master_catalog_factor.html" title="master_catalog_factor"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sorts.population.master.html" title="master"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.population.master.html" accesskey="U">master</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sorts.population.master.html"
+                        title="previous chapter">master</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sorts.population.master.master_catalog_factor.html"
+                        title="next chapter">master_catalog_factor</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/_autodoc/sorts/population/sorts.population.master.master_catalog.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="master-catalog">
+<h1>master_catalog<a class="headerlink" href="#master-catalog" title="Permalink to this headline">¶</a></h1>
+<p class="rubric">master_catalog</p>
+<dl class="py function">
+<dt id="sorts.population.master.master_catalog">
+<code class="sig-prename descclassname">sorts.population.master.</code><code class="sig-name descname">master_catalog</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_file</span></em>, <em class="sig-param"><span class="n">mjd0</span><span class="o">=</span><span class="default_value">54952.0</span></em>, <em class="sig-param"><span class="n">sort</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">propagator</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">propagator_options</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">propagator_args</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/population/master.html#master_catalog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.population.master.master_catalog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the master catalog specified in the input file as a population instance. The catalog only contains the master sampling objects and not an actual realization of the population using the factor.</p>
+<p>The format of the input master files is:</p>
+<blockquote>
+<div><ol class="arabic simple" start="0">
+<li><p>ID</p></li>
+<li><p>Factor</p></li>
+<li><p>Mass [kg]</p></li>
+<li><p>Diameter [m]</p></li>
+<li><p>m/A [kg/m2]</p></li>
+<li><p>a [km]</p></li>
+<li><p>e</p></li>
+<li><p>i [deg]</p></li>
+<li><p>RAAN [deg]</p></li>
+<li><p>AoP [deg]</p></li>
+<li><p>M [deg]</p></li>
+</ol>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_file</strong> (<em>str</em>) – Path to the input MASTER file.</p></li>
+<li><p><strong>sort</strong> (<em>bool</em>) – If <code class="code docutils literal notranslate"><span class="pre">True</span></code> sort according to diameters in descending order.</p></li>
+<li><p><strong>mjd0</strong> (<em>float</em>) – The epoch of the catalog file in Modified Julian Days.</p></li>
+<li><p><strong>propagator</strong> (<em>PropagatorBase</em>) – Propagator class pointer used for <code class="xref py py-class docutils literal notranslate"><span class="pre">space_object.SpaceObject</span></code>.</p></li>
+<li><p><strong>propagator_options</strong> (<em>dict</em>) – Propagator initialization keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Master catalog</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="sorts.population.population.Population.html#sorts.population.population.Population" title="sorts.population.population.Population">population.Population</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.population.master.master_catalog_factor.html" title="master_catalog_factor"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sorts.population.master.html" title="master"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.population.master.html" >master</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

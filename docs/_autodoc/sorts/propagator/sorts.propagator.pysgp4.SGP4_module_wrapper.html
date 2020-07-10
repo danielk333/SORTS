@@ -1,0 +1,179 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>SGP4_module_wrapper &#8212; SORTS 3.13.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="SGP4_module_wrapper.__init__" href="sorts.propagator.pysgp4.SGP4_module_wrapper.__init__.html" />
+    <link rel="prev" title="sorts.propagator.pysgp4.SGP4.DEFAULT_SETTINGS" href="sorts.propagator.pysgp4.SGP4.DEFAULT_SETTINGS.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.propagator.pysgp4.SGP4_module_wrapper.__init__.html" title="SGP4_module_wrapper.__init__"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sorts.propagator.pysgp4.SGP4.DEFAULT_SETTINGS.html" title="sorts.propagator.pysgp4.SGP4.DEFAULT_SETTINGS"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.propagator.pysgp4.html" accesskey="U">pysgp4</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sorts.propagator.pysgp4.SGP4.DEFAULT_SETTINGS.html"
+                        title="previous chapter">sorts.propagator.pysgp4.SGP4.DEFAULT_SETTINGS</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sorts.propagator.pysgp4.SGP4_module_wrapper.__init__.html"
+                        title="next chapter">SGP4_module_wrapper.__init__</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/_autodoc/sorts/propagator/sorts.propagator.pysgp4.SGP4_module_wrapper.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="sgp4-module-wrapper">
+<h1>SGP4_module_wrapper<a class="headerlink" href="#sgp4-module-wrapper" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="sorts.propagator.pysgp4.SGP4_module_wrapper">
+<em class="property">class </em><code class="sig-prename descclassname">sorts.propagator.pysgp4.</code><code class="sig-name descname">SGP4_module_wrapper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mjd_epoch</span></em>, <em class="sig-param"><span class="n">mean_elements</span></em>, <em class="sig-param"><span class="n">B</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/propagator/pysgp4.html#SGP4_module_wrapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.propagator.pysgp4.SGP4_module_wrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The SGP4 class acts as a wrapper around the sgp4 module
+uploaded by Brandon Rhodes (<a class="reference external" href="http://pypi.python.org/pypi/sgp4/">http://pypi.python.org/pypi/sgp4/</a>).</p>
+<p>It converts orbital elements into the TLE-like ‘satellite’-structure which
+is used by the module for the propagation.</p>
+<dl class="simple">
+<dt>Notes:</dt><dd><p>The class can be directly used for propagation. Alternatively,
+a simple propagator function is provided below.</p>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.pysgp4.SGP4_module_wrapper.__init__.html#sorts.propagator.pysgp4.SGP4_module_wrapper.__init__" title="sorts.propagator.pysgp4.SGP4_module_wrapper.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(mjd_epoch, mean_elements, B)</p></td>
+<td><p>Initialize SGP4 object from mean orbital elements and ballistic coefficient</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.propagator.pysgp4.SGP4_module_wrapper.state.html#sorts.propagator.pysgp4.SGP4_module_wrapper.state" title="sorts.propagator.pysgp4.SGP4_module_wrapper.state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state</span></code></a>(mjd)</p></td>
+<td><p>Inertial position and velocity ([m], [m/s]) at epoch mjd</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.pysgp4.SGP4_module_wrapper.GM.html#sorts.propagator.pysgp4.SGP4_module_wrapper.GM" title="sorts.propagator.pysgp4.SGP4_module_wrapper.GM"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GM</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.propagator.pysgp4.SGP4_module_wrapper.MJD_0.html#sorts.propagator.pysgp4.SGP4_module_wrapper.MJD_0" title="sorts.propagator.pysgp4.SGP4_module_wrapper.MJD_0"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MJD_0</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.pysgp4.SGP4_module_wrapper.Q0.html#sorts.propagator.pysgp4.SGP4_module_wrapper.Q0" title="sorts.propagator.pysgp4.SGP4_module_wrapper.Q0"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Q0</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.propagator.pysgp4.SGP4_module_wrapper.RHO0.html#sorts.propagator.pysgp4.SGP4_module_wrapper.RHO0" title="sorts.propagator.pysgp4.SGP4_module_wrapper.RHO0"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RHO0</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.pysgp4.SGP4_module_wrapper.R_EARTH.html#sorts.propagator.pysgp4.SGP4_module_wrapper.R_EARTH" title="sorts.propagator.pysgp4.SGP4_module_wrapper.R_EARTH"><code class="xref py py-obj docutils literal notranslate"><span class="pre">R_EARTH</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.propagator.pysgp4.SGP4_module_wrapper.S0.html#sorts.propagator.pysgp4.SGP4_module_wrapper.S0" title="sorts.propagator.pysgp4.SGP4_module_wrapper.S0"><code class="xref py py-obj docutils literal notranslate"><span class="pre">S0</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.pysgp4.SGP4_module_wrapper.WGS.html#sorts.propagator.pysgp4.SGP4_module_wrapper.WGS" title="sorts.propagator.pysgp4.SGP4_module_wrapper.WGS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WGS</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.propagator.pysgp4.SGP4_module_wrapper.__init__.html" title="SGP4_module_wrapper.__init__"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sorts.propagator.pysgp4.SGP4.DEFAULT_SETTINGS.html" title="sorts.propagator.pysgp4.SGP4.DEFAULT_SETTINGS"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.propagator.pysgp4.html" >pysgp4</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

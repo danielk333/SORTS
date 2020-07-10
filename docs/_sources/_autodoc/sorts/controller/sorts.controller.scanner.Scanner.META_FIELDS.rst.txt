@@ -1,0 +1,6 @@
+sorts.controller.scanner.Scanner.META\_FIELDS
+=============================================
+
+.. currentmodule:: sorts.controller.scanner
+
+.. autoattribute:: Scanner.META_FIELDS

@@ -1,0 +1,46 @@
+static\_list
+============
+
+.. automodule:: sorts.scheduler.static_list
+
+.. currentmodule:: sorts.scheduler.static_list
+
+Module summary
+--------------
+
+
+
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    StaticList
+    
+
+
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: StaticList
+
+.. autoclass:: StaticList
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
+
+
+
+

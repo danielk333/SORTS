@@ -1,0 +1,8 @@
+Profiler.mean
+=============
+
+.. currentmodule:: sorts.profiling
+
+.. rubric:: Profiler.mean
+
+.. automethod:: Profiler.mean

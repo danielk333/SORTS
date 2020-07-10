@@ -1,0 +1,32 @@
+SGP4
+====
+
+.. currentmodule:: sorts.propagator.pysgp4
+
+.. autoclass:: SGP4
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~SGP4.__init__
+      ~SGP4.propagate
+      ~SGP4.settings
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~SGP4.DEFAULT_SETTINGS
+   
+   

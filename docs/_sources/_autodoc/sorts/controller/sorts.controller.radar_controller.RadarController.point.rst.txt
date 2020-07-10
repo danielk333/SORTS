@@ -1,0 +1,8 @@
+RadarController.point
+=====================
+
+.. currentmodule:: sorts.controller.radar_controller
+
+.. rubric:: RadarController.point
+
+.. automethod:: RadarController.point

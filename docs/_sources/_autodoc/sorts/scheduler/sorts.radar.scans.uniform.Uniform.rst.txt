@@ -1,0 +1,31 @@
+Uniform
+=======
+
+.. currentmodule:: sorts.radar.scans.uniform
+
+.. autoclass:: Uniform
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Uniform.__init__
+      ~Uniform.check_dwell_tx
+      ~Uniform.copy
+      ~Uniform.cycle
+      ~Uniform.dwell
+      ~Uniform.ecef_pointing
+      ~Uniform.enu_pointing
+      ~Uniform.min_dwell
+      ~Uniform.pointing
+   
+   
+
+   
+   
+   

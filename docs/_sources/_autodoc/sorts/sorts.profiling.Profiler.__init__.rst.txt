@@ -1,0 +1,8 @@
+Profiler.\_\_init\_\_
+=====================
+
+.. currentmodule:: sorts.profiling
+
+.. rubric:: Profiler.__init__
+
+.. automethod:: Profiler.__init__

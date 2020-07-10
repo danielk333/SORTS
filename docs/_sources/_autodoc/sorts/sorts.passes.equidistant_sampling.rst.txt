@@ -1,0 +1,8 @@
+equidistant\_sampling
+=====================
+
+.. currentmodule:: sorts.passes
+
+.. rubric:: equidistant_sampling
+
+.. autofunction:: equidistant_sampling

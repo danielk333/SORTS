@@ -1,0 +1,192 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>radar_controller &#8212; SORTS 3.13.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="RadarController" href="sorts.controller.radar_controller.RadarController.html" />
+    <link rel="prev" title="master_catalog_factor" href="../population/sorts.population.master.master_catalog_factor.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.controller.radar_controller.RadarController.html" title="RadarController"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../population/sorts.population.master.master_catalog_factor.html" title="master_catalog_factor"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" accesskey="U">API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">radar_controller</a><ul>
+<li><a class="reference internal" href="#module-summary">Module summary</a></li>
+<li><a class="reference internal" href="#contents">Contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../population/sorts.population.master.master_catalog_factor.html"
+                        title="previous chapter">master_catalog_factor</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sorts.controller.radar_controller.RadarController.html"
+                        title="next chapter">RadarController</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/_autodoc/sorts/controller/sorts.controller.radar_controller.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-sorts.controller.radar_controller">
+<span id="radar-controller"></span><h1>radar_controller<a class="headerlink" href="#module-sorts.controller.radar_controller" title="Permalink to this headline">¶</a></h1>
+<p>This module is used to define the radar controller</p>
+<div class="section" id="module-summary">
+<h2>Module summary<a class="headerlink" href="#module-summary" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Classes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.controller.radar_controller.RadarController.html#sorts.controller.radar_controller.RadarController" title="sorts.controller.radar_controller.RadarController"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RadarController</span></code></a>(radar[, t, t0, profiler, …])</p></td>
+<td><p>A radar controller.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">RadarController</p>
+<dl class="py class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">sorts.controller.radar_controller.</code><code class="sig-name descname">RadarController</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">radar</span></em>, <em class="sig-param"><span class="n">t</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">t0</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">profiler</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">logger</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">meta</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/controller/radar_controller.html#RadarController"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>A radar controller.</p>
+<dl class="py method">
+<dt>
+<code class="sig-name descname">default_meta</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/controller/radar_controller.html#RadarController.default_meta"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>This is used to generate meta data on the fly, rather then the static data that can be set in the <cite>self.meta</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">abstract </em><code class="sig-name descname">generator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/controller/radar_controller.html#RadarController.generator"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>This will configure the radar system and return a pointer to the contained radar system instance with the correct configuration. 
+It should always assume the input <cite>t</cite> is an iterable and use <cite>yield</cite> to return <cite>radar, meta</cite>. The <cite>meta</cite> variable should be 
+a dict with the fields defined in <cite>META_FIELDS</cite></p>
+<p><strong>NOTE:</strong> This is NOT guaranteed to return a copy of the radar system, however, the subclass should implement this as a option.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">static </em><code class="sig-name descname">point</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">radar</span></em>, <em class="sig-param"><span class="n">enu</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/controller/radar_controller.html#RadarController.point"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Point all sites into the direction of a given East, North, Up (ENU) local coordinate system.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">static </em><code class="sig-name descname">point_ecef</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">radar</span></em>, <em class="sig-param"><span class="n">ecef</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/controller/radar_controller.html#RadarController.point_ecef"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Point all sites into the direction of given ECEF coordinate, relative Earth Center.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">static </em><code class="sig-name descname">point_rx_ecef</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">radar</span></em>, <em class="sig-param"><span class="n">ecef</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/controller/radar_controller.html#RadarController.point_rx_ecef"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Point all rx sites into the direction of given ECEF coordinate, relative Earth Center.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">static </em><code class="sig-name descname">point_tx_ecef</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">radar</span></em>, <em class="sig-param"><span class="n">ecef</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/controller/radar_controller.html#RadarController.point_tx_ecef"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Point all tx sites into the direction of given ECEF coordinate, relative Earth Center.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.controller.radar_controller.RadarController.html" title="RadarController"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../population/sorts.population.master.master_catalog_factor.html" title="master_catalog_factor"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

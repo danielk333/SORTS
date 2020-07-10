@@ -1,0 +1,46 @@
+scan
+====
+
+.. automodule:: sorts.radar.scans.scan
+
+.. currentmodule:: sorts.radar.scans.scan
+
+Module summary
+--------------
+
+
+
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    Scan
+    
+
+
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: Scan
+
+.. autoclass:: Scan
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
+
+
+
+

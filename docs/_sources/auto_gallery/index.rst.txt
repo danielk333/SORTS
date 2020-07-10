@@ -1,0 +1,565 @@
+:orphan:
+
+
+
+.. _sphx_glr_auto_gallery:
+
+Examples
+==========
+
+This is all the examples and tutorials
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Profiling">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_profiler_thumb.png
+     :alt: Profiling
+
+     :ref:`sphx_glr_auto_gallery_profiler.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/profiler
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Profiling SGP4">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_profiler_sgp4_thumb.png
+     :alt: Profiling SGP4
+
+     :ref:`sphx_glr_auto_gallery_profiler_sgp4.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/profiler_sgp4
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip=" CRITICAL    50 ERROR   40 WARNING 30 INFO    20 DEBUG   10">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_logger_thumb.png
+     :alt: Logging
+
+     :ref:`sphx_glr_auto_gallery_logger.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/logger
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="SGP4 propagator usage">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_sgp4_propagator_thumb.png
+     :alt: SGP4 propagator usage
+
+     :ref:`sphx_glr_auto_gallery_sgp4_propagator.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/sgp4_propagator
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Adding random errors">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_adding_random_errors_thumb.png
+     :alt: Adding random errors
+
+     :ref:`sphx_glr_auto_gallery_adding_random_errors.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/adding_random_errors
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Profiling components">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_logger_orekit_thumb.png
+     :alt: Profiling components
+
+     :ref:`sphx_glr_auto_gallery_logger_orekit.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/logger_orekit
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Orekit propagator usage">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_orekit_propagator_thumb.png
+     :alt: Orekit propagator usage
+
+     :ref:`sphx_glr_auto_gallery_orekit_propagator.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/orekit_propagator
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Predefined EISCAT 3D Radar">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_predefined_eiscat3d_thumb.png
+     :alt: Predefined EISCAT 3D Radar
+
+     :ref:`sphx_glr_auto_gallery_predefined_eiscat3d.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/predefined_eiscat3d
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The SpaceObject class">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_space_object_thumb.png
+     :alt: The SpaceObject class
+
+     :ref:`sphx_glr_auto_gallery_space_object.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/space_object
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Profiling Orekit">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_profiler_orekit_thumb.png
+     :alt: Profiling Orekit
+
+     :ref:`sphx_glr_auto_gallery_profiler_orekit.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/profiler_orekit
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Some predefined scans">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_predefined_scans_thumb.png
+     :alt: Some predefined scans
+
+     :ref:`sphx_glr_auto_gallery_predefined_scans.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/predefined_scans
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Misc functions for passes">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_misc_passes_functions_thumb.png
+     :alt: Misc functions for passes
+
+     :ref:`sphx_glr_auto_gallery_misc_passes_functions.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/misc_passes_functions
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Finding passes over radar system">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_radar_passes_thumb.png
+     :alt: Finding passes over radar system
+
+     :ref:`sphx_glr_auto_gallery_radar_passes.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/radar_passes
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Populations">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_populations_thumb.png
+     :alt: Populations
+
+     :ref:`sphx_glr_auto_gallery_populations.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/populations
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Radar controller return copy">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_radar_copy_from_controllers_thumb.png
+     :alt: Radar controller return copy
+
+     :ref:`sphx_glr_auto_gallery_radar_copy_from_controllers.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/radar_copy_from_controllers
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Radar controller returning reference">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_radar_reference_from_controllers_thumb.png
+     :alt: Radar controller returning reference
+
+     :ref:`sphx_glr_auto_gallery_radar_reference_from_controllers.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/radar_reference_from_controllers
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A controller for tracing">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_tracker_controller_thumb.png
+     :alt: A controller for tracing
+
+     :ref:`sphx_glr_auto_gallery_tracker_controller.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/tracker_controller
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Custom radar controller">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_custom_radar_controller_thumb.png
+     :alt: Custom radar controller
+
+     :ref:`sphx_glr_auto_gallery_custom_radar_controller.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/custom_radar_controller
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Finding passes over sites">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_finding_passes_thumb.png
+     :alt: Finding passes over sites
+
+     :ref:`sphx_glr_auto_gallery_finding_passes.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/finding_passes
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="TEME transformations">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_teme_coordinates_thumb.png
+     :alt: TEME transformations
+
+     :ref:`sphx_glr_auto_gallery_teme_coordinates.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/teme_coordinates
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Custom Scans">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_custom_scans_thumb.png
+     :alt: Custom Scans
+
+     :ref:`sphx_glr_auto_gallery_custom_scans.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/custom_scans
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="An example scheduler for tracking">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_tracking_scheduler_thumb.png
+     :alt: An example scheduler for tracking
+
+     :ref:`sphx_glr_auto_gallery_tracking_scheduler.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/tracking_scheduler
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Custom Scheduler">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_custom_scheduler_thumb.png
+     :alt: Custom Scheduler
+
+     :ref:`sphx_glr_auto_gallery_custom_scheduler.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/custom_scheduler
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Simulate scanning for objects">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_simulate_scanning_thumb.png
+     :alt: Simulate scanning for objects
+
+     :ref:`sphx_glr_auto_gallery_simulate_scanning.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/simulate_scanning
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Observing a set of passes">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_observing_passes_thumb.png
+     :alt: Observing a set of passes
+
+     :ref:`sphx_glr_auto_gallery_observing_passes.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/observing_passes
+.. raw:: html
+
+    <div class="sphx-glr-clear"></div>
+
+
+
+.. only :: html
+
+ .. container:: sphx-glr-footer
+    :class: sphx-glr-footer-gallery
+
+
+  .. container:: sphx-glr-download sphx-glr-download-python
+
+    :download:`Download all examples in Python source code: auto_gallery_python.zip <//home/danielk/IRF/IRF_GITLAB/SORTS/docsrc/source/auto_gallery/auto_gallery_python.zip>`
+
+
+
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+    :download:`Download all examples in Jupyter notebooks: auto_gallery_jupyter.zip <//home/danielk/IRF/IRF_GITLAB/SORTS/docsrc/source/auto_gallery/auto_gallery_jupyter.zip>`
+
+
+.. only:: html
+
+ .. rst-class:: sphx-glr-signature
+
+    `Gallery generated by Sphinx-Gallery <https://sphinx-gallery.github.io>`_

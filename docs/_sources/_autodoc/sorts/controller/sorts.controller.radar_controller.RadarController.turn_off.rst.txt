@@ -1,0 +1,8 @@
+RadarController.turn\_off
+=========================
+
+.. currentmodule:: sorts.controller.radar_controller
+
+.. rubric:: RadarController.turn_off
+
+.. automethod:: RadarController.turn_off

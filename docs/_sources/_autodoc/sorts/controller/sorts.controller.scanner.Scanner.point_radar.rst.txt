@@ -1,0 +1,8 @@
+Scanner.point\_radar
+====================
+
+.. currentmodule:: sorts.controller.scanner
+
+.. rubric:: Scanner.point_radar
+
+.. automethod:: Scanner.point_radar

@@ -1,0 +1,140 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>coherrent_to_instantaneous &#8212; SORTS 3.13.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="instantaneous_to_coherrent" href="sorts.functions.instantaneous_to_coherrent.html" />
+    <link rel="prev" title="functions" href="sorts.functions.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.functions.instantaneous_to_coherrent.html" title="instantaneous_to_coherrent"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sorts.functions.html" title="functions"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.functions.html" accesskey="U">functions</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sorts.functions.html"
+                        title="previous chapter">functions</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sorts.functions.instantaneous_to_coherrent.html"
+                        title="next chapter">instantaneous_to_coherrent</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/_autodoc/sorts/sorts.functions.coherrent_to_instantaneous.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="coherrent-to-instantaneous">
+<h1>coherrent_to_instantaneous<a class="headerlink" href="#coherrent-to-instantaneous" title="Permalink to this headline">¶</a></h1>
+<p class="rubric">coherrent_to_instantaneous</p>
+<dl class="py function">
+<dt id="sorts.functions.coherrent_to_instantaneous">
+<code class="sig-prename descclassname">sorts.functions.</code><code class="sig-name descname">coherrent_to_instantaneous</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">gain</span></em>, <em class="sig-param"><span class="n">groups</span></em>, <em class="sig-param"><span class="n">N_IPP</span></em>, <em class="sig-param"><span class="n">IPP_scale</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">units</span><span class="o">=</span><span class="default_value">'dB'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/functions.html#coherrent_to_instantaneous"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.functions.coherrent_to_instantaneous" title="Permalink to this definition">¶</a></dt>
+<dd><p>Using pulse encoding schema, subgroup setup and coherent integration setup; convert from coherently integrated gain to instantaneous gain.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gain</strong> (<em>float</em>) – Coherently integrated gain, linear units or in dB.</p></li>
+<li><p><strong>groups</strong> (<em>int</em>) – Number of subgroups from witch signals are coherently combined, assumes subgroups are identical.</p></li>
+<li><p><strong>N_IPP</strong> (<em>int</em>) – Number of pulses to coherently integrate.</p></li>
+<li><p><strong>IPP_scale</strong> (<em>float</em>) – Scale the IPP effective length in case e.g. the IPP is the same but the actual TX length is lowered.</p></li>
+<li><p><strong>units</strong> (<em>str</em>) – If string equals ‘dB’, assume input and output units should be dB, else use linear scale.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return float</dt>
+<dd class="field-even"><p>Instantaneous gain, linear units or in dB.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.functions.instantaneous_to_coherrent.html" title="instantaneous_to_coherrent"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sorts.functions.html" title="functions"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.functions.html" >functions</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

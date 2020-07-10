@@ -1,0 +1,8 @@
+signal\_delay
+=============
+
+.. currentmodule:: sorts.functions
+
+.. rubric:: signal_delay
+
+.. autofunction:: signal_delay

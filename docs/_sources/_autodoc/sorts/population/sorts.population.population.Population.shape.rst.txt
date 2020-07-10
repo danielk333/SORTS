@@ -1,0 +1,8 @@
+Population.shape
+================
+
+.. currentmodule:: sorts.population.population
+
+.. rubric:: Population.shape
+
+.. autoproperty:: sorts.population.population.Population.shape

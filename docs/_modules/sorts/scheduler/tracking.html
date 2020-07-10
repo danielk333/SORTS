@@ -1,0 +1,280 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>sorts.scheduler.tracking &#8212; SORTS 3.13.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for sorts.scheduler.tracking</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pyorb</span>
+
+<span class="kn">from</span> <span class="nn">..controller</span> <span class="kn">import</span> <span class="n">Tracker</span>
+<span class="kn">from</span> <span class="nn">.scheduler</span> <span class="kn">import</span> <span class="n">Scheduler</span>
+<span class="kn">from</span> <span class="nn">..passes</span> <span class="kn">import</span> <span class="n">equidistant_sampling</span><span class="p">,</span> <span class="n">select_simultaneous_passes</span>
+
+<div class="viewcode-block" id="Tracking"><a class="viewcode-back" href="../../../_autodoc/sorts/scheduler/sorts.scheduler.tracking.Tracking.html#sorts.scheduler.tracking.Tracking">[docs]</a><span class="k">class</span> <span class="nc">Tracking</span><span class="p">(</span><span class="n">Scheduler</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="Tracking.__init__"><a class="viewcode-back" href="../../../_autodoc/sorts/scheduler/sorts.scheduler.tracking.Tracking.__init__.html#sorts.scheduler.tracking.Tracking.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+            <span class="n">radar</span><span class="p">,</span> 
+            <span class="n">space_objects</span><span class="p">,</span> 
+            <span class="n">timeslice</span><span class="p">,</span> 
+            <span class="n">allocation</span><span class="p">,</span> 
+            <span class="n">end_time</span><span class="p">,</span> 
+            <span class="n">start_time</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> 
+            <span class="n">controller</span> <span class="o">=</span> <span class="n">Tracker</span><span class="p">,</span>
+            <span class="n">controller_args</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">return_copy</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">max_dpos</span> <span class="o">=</span> <span class="mf">1e3</span><span class="p">,</span>
+            <span class="n">profiler</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+            <span class="n">logger</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">use_pass_states</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">calculate_max_snr</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">radar</span><span class="p">,</span> <span class="n">profiler</span><span class="o">=</span><span class="n">profiler</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller</span> <span class="o">=</span> <span class="n">controller</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller_args</span> <span class="o">=</span> <span class="n">controller_args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">space_objects</span> <span class="o">=</span> <span class="n">space_objects</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeslice</span> <span class="o">=</span> <span class="n">timeslice</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allocation</span> <span class="o">=</span> <span class="n">allocation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span> <span class="o">=</span> <span class="n">start_time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_time</span> <span class="o">=</span> <span class="n">end_time</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_dpos</span> <span class="o">=</span> <span class="n">max_dpos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_pass_states</span> <span class="o">=</span> <span class="n">use_pass_states</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculate_max_snr</span> <span class="o">=</span> <span class="n">calculate_max_snr</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">states</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">space_objects</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">states_t</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">space_objects</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">passes</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">space_objects</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">space_objects</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_passes</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Tracking.get_measurements"><a class="viewcode-back" href="../../../_autodoc/sorts/scheduler/sorts.scheduler.tracking.Tracking.get_measurements.html#sorts.scheduler.tracking.Tracking.get_measurements">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">get_measurements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Tracking.update"><a class="viewcode-back" href="../../../_autodoc/sorts/scheduler/sorts.scheduler.tracking.Tracking.update.html#sorts.scheduler.tracking.Tracking.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">allocation</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span> <span class="o">=</span> <span class="n">start_time</span>
+        <span class="k">if</span> <span class="n">allocation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">allocation</span> <span class="o">=</span> <span class="n">allocation</span>
+
+        <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">space_objects</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_passes</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Tracking.get_passes"><a class="viewcode-back" href="../../../_autodoc/sorts/scheduler/sorts.scheduler.tracking.Tracking.get_passes.html#sorts.scheduler.tracking.Tracking.get_passes">[docs]</a>    <span class="k">def</span> <span class="nf">get_passes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">equidistant_sampling</span><span class="p">(</span>
+            <span class="n">orbit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">space_objects</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">.</span><span class="n">orbit</span><span class="p">,</span> 
+            <span class="n">start_t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">,</span> 
+            <span class="n">end_t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_time</span><span class="p">,</span> 
+            <span class="n">max_dpos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_dpos</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Tracking:get_passes(ind=</span><span class="si">{</span><span class="n">ind</span><span class="si">}</span><span class="s1">):propagating </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="si">}</span><span class="s1"> steps&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;Tracking:get_passes:propagating&#39;</span><span class="p">)</span>
+
+        <span class="n">states</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">space_objects</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_pass_states</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">states</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">states</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">states_t</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;Tracking:get_passes:propagating&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Tracking:get_passes(ind=</span><span class="si">{</span><span class="n">ind</span><span class="si">}</span><span class="s1">):propagating complete&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;Tracking:get_passes:find_passes&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">passes</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">find_passes</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">states</span><span class="p">,</span> <span class="n">cache_data</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;Tracking:get_passes:find_passes&#39;</span><span class="p">)</span>
+
+        <span class="c1">#we may need SNR to plan observations</span>
+        <span class="k">for</span> <span class="n">txi</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">tx</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">rxi</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">rx</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Tracking:get_passes(ind=</span><span class="si">{</span><span class="n">ind</span><span class="si">}</span><span class="s1">):tx</span><span class="si">{</span><span class="n">txi</span><span class="si">}</span><span class="s1">-rx</span><span class="si">{</span><span class="n">rxi</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">passes</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="n">txi</span><span class="p">][</span><span class="n">rxi</span><span class="p">])</span><span class="si">}</span><span class="s1"> passes&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_max_snr</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">for</span> <span class="n">ps</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">passes</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="n">txi</span><span class="p">][</span><span class="n">rxi</span><span class="p">]:</span>
+
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;Tracking:get_passes:calculate_max_snr&#39;</span><span class="p">)</span>
+                    <span class="n">ps</span><span class="o">.</span><span class="n">calculate_max_snr</span><span class="p">(</span>
+                        <span class="n">rx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">rx</span><span class="p">[</span><span class="n">rxi</span><span class="p">],</span> 
+                        <span class="n">tx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">tx</span><span class="p">[</span><span class="n">txi</span><span class="p">],</span> 
+                        <span class="n">diameter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">space_objects</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">.</span><span class="n">d</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;Tracking:get_passes:calculate_max_snr&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Tracking.get_controllers"><a class="viewcode-back" href="../../../_autodoc/sorts/scheduler/sorts.scheduler.tracking.Tracking.get_controllers.html#sorts.scheduler.tracking.Tracking.get_controllers">[docs]</a>    <span class="k">def</span> <span class="nf">get_controllers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Tracking:get_controllers&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;Tracking:get_measurements&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_measurements</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;Tracking:get_measurements&#39;</span><span class="p">)</span>
+
+        <span class="n">ctrls</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">space_objects</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_pass_states</span><span class="p">:</span>
+                <span class="n">minds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+                <span class="n">states</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">states</span><span class="p">[</span><span class="n">ind</span><span class="p">][:</span><span class="mi">3</span><span class="p">,</span><span class="n">minds</span><span class="p">]</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">states_t</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="n">minds</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+                <span class="n">states</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">space_objects</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+            <span class="n">ctrl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="p">(</span>
+                <span class="n">radar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">radar</span><span class="p">,</span> 
+                <span class="n">t</span><span class="o">=</span><span class="n">t</span><span class="p">,</span> 
+                <span class="n">t0</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> 
+                <span class="n">ecefs</span> <span class="o">=</span> <span class="n">states</span><span class="p">[:</span><span class="mi">3</span><span class="p">,:],</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">controller_args</span>
+            <span class="p">)</span>
+            <span class="n">ctrl</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Object </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">space_objects</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">.</span><span class="n">oid</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="n">ctrls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ctrl</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">ctrls</span></div></div>
+
+
+<div class="viewcode-block" id="PriorityTracking"><a class="viewcode-back" href="../../../_autodoc/sorts/scheduler/sorts.scheduler.tracking.PriorityTracking.html#sorts.scheduler.tracking.PriorityTracking">[docs]</a><span class="k">class</span> <span class="nc">PriorityTracking</span><span class="p">(</span><span class="n">Tracking</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PriorityTracking.__init__"><a class="viewcode-back" href="../../../_autodoc/sorts/scheduler/sorts.scheduler.tracking.PriorityTracking.__init__.html#sorts.scheduler.tracking.PriorityTracking.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">priority</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;priority&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">priority</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">priority</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">space_objects</span><span class="p">),),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span></div>
+        
+
+<div class="viewcode-block" id="PriorityTracking.get_measurements"><a class="viewcode-back" href="../../../_autodoc/sorts/scheduler/sorts.scheduler.tracking.PriorityTracking.get_measurements.html#sorts.scheduler.tracking.PriorityTracking.get_measurements">[docs]</a>    <span class="k">def</span> <span class="nf">get_measurements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">total_measurements</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allocation</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">timeslice</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="n">pri</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">priority</span><span class="p">)</span>
+            <span class="n">pri</span> <span class="o">=</span> <span class="n">pri</span><span class="o">/</span><span class="n">pri</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pri</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">priority</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">priority</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+        <span class="c1">#per object</span>
+        <span class="n">measurements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">pri</span><span class="o">*</span><span class="n">total_measurements</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+
+        <span class="n">measurement_times</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">space_objects</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_pass_states</span><span class="p">:</span>
+                <span class="n">all_inds</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">txi</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">passes</span><span class="p">[</span><span class="n">ind</span><span class="p">])):</span>
+                    <span class="k">for</span> <span class="n">rxi</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">passes</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="n">txi</span><span class="p">])):</span>
+                        <span class="n">all_inds</span> <span class="o">+=</span> <span class="p">[</span><span class="n">ps</span><span class="o">.</span><span class="n">inds</span> <span class="k">for</span> <span class="n">ps</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">passes</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="n">txi</span><span class="p">][</span><span class="n">rxi</span><span class="p">]]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_inds</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">measurement_times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">))</span>
+                    <span class="k">continue</span>
+                <span class="n">all_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">all_inds</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">all_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">all_inds</span><span class="p">)</span>
+                
+                <span class="c1">#uniform distribution</span>
+                <span class="n">dt</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_inds</span><span class="p">)</span><span class="o">/</span><span class="n">measurements</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+                <span class="n">all_inds</span> <span class="o">=</span> <span class="n">all_inds</span><span class="p">[::</span><span class="n">dt</span><span class="p">]</span>
+                <span class="n">measurement_times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">all_inds</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">measurement_times</span></div></div>
+            
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

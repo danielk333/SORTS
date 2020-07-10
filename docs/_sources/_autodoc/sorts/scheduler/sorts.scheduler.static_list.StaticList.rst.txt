@@ -1,0 +1,30 @@
+StaticList
+==========
+
+.. currentmodule:: sorts.scheduler.static_list
+
+.. autoclass:: StaticList
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~StaticList.__init__
+      ~StaticList.calculate_observation
+      ~StaticList.chain_generators
+      ~StaticList.generate_schedule
+      ~StaticList.get_controllers
+      ~StaticList.observe_passes
+      ~StaticList.schedule
+      ~StaticList.update
+   
+   
+
+   
+   
+   

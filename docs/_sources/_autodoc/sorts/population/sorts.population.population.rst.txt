@@ -1,0 +1,46 @@
+population
+==========
+
+.. automodule:: sorts.population.population
+
+.. currentmodule:: sorts.population.population
+
+Module summary
+--------------
+
+
+
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    Population
+    
+
+
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: Population
+
+.. autoclass:: Population
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
+
+
+
+

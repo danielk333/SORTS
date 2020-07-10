@@ -1,0 +1,8 @@
+Scheduler.observe\_passes
+=========================
+
+.. currentmodule:: sorts.scheduler.scheduler
+
+.. rubric:: Scheduler.observe_passes
+
+.. automethod:: Scheduler.observe_passes

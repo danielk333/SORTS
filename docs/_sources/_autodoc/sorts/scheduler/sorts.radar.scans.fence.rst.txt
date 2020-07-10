@@ -1,0 +1,46 @@
+fence
+=====
+
+.. automodule:: sorts.radar.scans.fence
+
+.. currentmodule:: sorts.radar.scans.fence
+
+Module summary
+--------------
+
+
+
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    Fence
+    
+
+
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: Fence
+
+.. autoclass:: Fence
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
+
+
+
+

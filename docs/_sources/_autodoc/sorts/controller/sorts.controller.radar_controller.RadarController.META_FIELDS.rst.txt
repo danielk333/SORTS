@@ -1,0 +1,6 @@
+sorts.controller.radar\_controller.RadarController.META\_FIELDS
+===============================================================
+
+.. currentmodule:: sorts.controller.radar_controller
+
+.. autoattribute:: RadarController.META_FIELDS

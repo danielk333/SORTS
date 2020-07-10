@@ -1,0 +1,8 @@
+find\_simultaneous\_passes
+==========================
+
+.. currentmodule:: sorts.passes
+
+.. rubric:: find_simultaneous_passes
+
+.. autofunction:: find_simultaneous_passes

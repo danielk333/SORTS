@@ -1,0 +1,126 @@
+dates
+=====
+
+.. automodule:: sorts.dates
+
+.. currentmodule:: sorts.dates
+
+Module summary
+--------------
+
+
+
+
+
+
+
+.. rubric:: Functions
+
+.. autosummary::
+    :toctree: .
+    
+    GMST1982
+    
+    date_to_unix
+    
+    gstime
+    
+    jd_to_mjd
+    
+    mjd_to_jd
+    
+    mjd_to_npdt
+    
+    npdt_to_date
+    
+    npdt_to_mjd
+    
+    npdt_to_unix
+    
+    unix_to_date
+    
+    unix_to_datestr
+    
+    unix_to_datestrf
+    
+    unix_to_npdt
+    
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: Functions
+
+
+.. autofunction:: GMST1982
+   :noindex:
+
+
+
+.. autofunction:: date_to_unix
+   :noindex:
+
+
+
+.. autofunction:: gstime
+   :noindex:
+
+
+
+.. autofunction:: jd_to_mjd
+   :noindex:
+
+
+
+.. autofunction:: mjd_to_jd
+   :noindex:
+
+
+
+.. autofunction:: mjd_to_npdt
+   :noindex:
+
+
+
+.. autofunction:: npdt_to_date
+   :noindex:
+
+
+
+.. autofunction:: npdt_to_mjd
+   :noindex:
+
+
+
+.. autofunction:: npdt_to_unix
+   :noindex:
+
+
+
+.. autofunction:: unix_to_date
+   :noindex:
+
+
+
+.. autofunction:: unix_to_datestr
+   :noindex:
+
+
+
+.. autofunction:: unix_to_datestrf
+   :noindex:
+
+
+
+.. autofunction:: unix_to_npdt
+   :noindex:
+
+

@@ -1,0 +1,6 @@
+sorts.propagator.pysgp4.SGP4\_module\_wrapper.WGS
+=================================================
+
+.. currentmodule:: sorts.propagator.pysgp4
+
+.. autoattribute:: SGP4_module_wrapper.WGS

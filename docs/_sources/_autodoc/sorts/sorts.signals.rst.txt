@@ -1,0 +1,49 @@
+signals
+=======
+
+.. automodule:: sorts.signals
+
+.. currentmodule:: sorts.signals
+
+Module summary
+--------------
+
+
+
+
+
+
+
+.. rubric:: Functions
+
+.. autosummary::
+    :toctree: .
+    
+    hard_target_rcs
+    
+    hard_target_snr
+    
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: Functions
+
+
+.. autofunction:: hard_target_rcs
+   :noindex:
+
+
+
+.. autofunction:: hard_target_snr
+   :noindex:
+
+

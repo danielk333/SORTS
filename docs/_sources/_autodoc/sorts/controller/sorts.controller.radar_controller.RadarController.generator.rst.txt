@@ -1,0 +1,8 @@
+RadarController.generator
+=========================
+
+.. currentmodule:: sorts.controller.radar_controller
+
+.. rubric:: RadarController.generator
+
+.. automethod:: RadarController.generator

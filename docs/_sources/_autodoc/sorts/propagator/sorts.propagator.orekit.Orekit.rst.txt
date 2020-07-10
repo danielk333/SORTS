@@ -1,0 +1,32 @@
+Orekit
+======
+
+.. currentmodule:: sorts.propagator.orekit
+
+.. autoclass:: Orekit
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Orekit.__init__
+      ~Orekit.propagate
+      ~Orekit.settings
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Orekit.DEFAULT_SETTINGS
+   
+   

@@ -1,0 +1,34 @@
+WGS84
+=====
+
+.. currentmodule:: sorts.constants
+
+.. autoclass:: WGS84
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~WGS84.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~WGS84.a
+      ~WGS84.b
+      ~WGS84.e1sq
+      ~WGS84.esq
+      ~WGS84.f
+   
+   

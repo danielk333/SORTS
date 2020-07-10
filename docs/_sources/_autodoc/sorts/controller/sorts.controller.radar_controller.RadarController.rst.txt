@@ -1,0 +1,39 @@
+RadarController
+===============
+
+.. currentmodule:: sorts.controller.radar_controller
+
+.. autoclass:: RadarController
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~RadarController.__init__
+      ~RadarController.default_meta
+      ~RadarController.generator
+      ~RadarController.point
+      ~RadarController.point_ecef
+      ~RadarController.point_rx_ecef
+      ~RadarController.point_tx_ecef
+      ~RadarController.run
+      ~RadarController.turn_off
+      ~RadarController.turn_on
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~RadarController.META_FIELDS
+   
+   

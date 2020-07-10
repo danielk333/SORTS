@@ -1,0 +1,8 @@
+Scheduler.chain\_generators
+===========================
+
+.. currentmodule:: sorts.scheduler.scheduler
+
+.. rubric:: Scheduler.chain_generators
+
+.. automethod:: Scheduler.chain_generators

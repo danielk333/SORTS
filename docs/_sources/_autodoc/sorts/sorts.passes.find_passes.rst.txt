@@ -1,0 +1,8 @@
+find\_passes
+============
+
+.. currentmodule:: sorts.passes
+
+.. rubric:: find_passes
+
+.. autofunction:: find_passes

@@ -1,0 +1,40 @@
+Scanner
+=======
+
+.. currentmodule:: sorts.controller.scanner
+
+.. autoclass:: Scanner
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Scanner.__init__
+      ~Scanner.default_meta
+      ~Scanner.generator
+      ~Scanner.point
+      ~Scanner.point_ecef
+      ~Scanner.point_radar
+      ~Scanner.point_rx_ecef
+      ~Scanner.point_tx_ecef
+      ~Scanner.run
+      ~Scanner.turn_off
+      ~Scanner.turn_on
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Scanner.META_FIELDS
+   
+   

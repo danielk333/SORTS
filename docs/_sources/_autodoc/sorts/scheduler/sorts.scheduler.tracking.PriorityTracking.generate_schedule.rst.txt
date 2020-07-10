@@ -1,0 +1,8 @@
+PriorityTracking.generate\_schedule
+===================================
+
+.. currentmodule:: sorts.scheduler.tracking
+
+.. rubric:: PriorityTracking.generate_schedule
+
+.. automethod:: PriorityTracking.generate_schedule

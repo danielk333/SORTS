@@ -1,0 +1,8 @@
+PriorityTracking.\_\_init\_\_
+=============================
+
+.. currentmodule:: sorts.scheduler.tracking
+
+.. rubric:: PriorityTracking.__init__
+
+.. automethod:: PriorityTracking.__init__

@@ -1,0 +1,8 @@
+hard\_target\_snr
+=================
+
+.. currentmodule:: sorts.signals
+
+.. rubric:: hard_target_snr
+
+.. autofunction:: hard_target_snr

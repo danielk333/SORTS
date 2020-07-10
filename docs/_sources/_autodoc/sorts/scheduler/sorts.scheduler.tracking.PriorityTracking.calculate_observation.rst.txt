@@ -1,0 +1,8 @@
+PriorityTracking.calculate\_observation
+=======================================
+
+.. currentmodule:: sorts.scheduler.tracking
+
+.. rubric:: PriorityTracking.calculate_observation
+
+.. automethod:: PriorityTracking.calculate_observation

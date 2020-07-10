@@ -1,0 +1,8 @@
+StaticList.schedule
+===================
+
+.. currentmodule:: sorts.scheduler.static_list
+
+.. rubric:: StaticList.schedule
+
+.. automethod:: StaticList.schedule

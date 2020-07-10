@@ -1,0 +1,150 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>hard_target_snr &#8212; SORTS 3.13.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="base" href="propagator/sorts.propagator.base.html" />
+    <link rel="prev" title="hard_target_rcs" href="sorts.signals.hard_target_rcs.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="propagator/sorts.propagator.base.html" title="base"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sorts.signals.hard_target_rcs.html" title="hard_target_rcs"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.signals.html" accesskey="U">signals</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sorts.signals.hard_target_rcs.html"
+                        title="previous chapter">hard_target_rcs</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="propagator/sorts.propagator.base.html"
+                        title="next chapter">base</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/_autodoc/sorts/sorts.signals.hard_target_snr.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="hard-target-snr">
+<h1>hard_target_snr<a class="headerlink" href="#hard-target-snr" title="Permalink to this headline">¶</a></h1>
+<p class="rubric">hard_target_snr</p>
+<dl class="py function">
+<dt id="sorts.signals.hard_target_snr">
+<code class="sig-prename descclassname">sorts.signals.</code><code class="sig-name descname">hard_target_snr</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">gain_tx</span></em>, <em class="sig-param"><span class="n">gain_rx</span></em>, <em class="sig-param"><span class="n">wavelength</span></em>, <em class="sig-param"><span class="n">power_tx</span></em>, <em class="sig-param"><span class="n">range_tx_m</span></em>, <em class="sig-param"><span class="n">range_rx_m</span></em>, <em class="sig-param"><span class="n">diameter</span><span class="o">=</span><span class="default_value">0.01</span></em>, <em class="sig-param"><span class="n">bandwidth</span><span class="o">=</span><span class="default_value">10</span></em>, <em class="sig-param"><span class="n">rx_noise_temp</span><span class="o">=</span><span class="default_value">150.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/signals.html#hard_target_snr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.signals.hard_target_snr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine the signal-to-noise ratio (energy-to-noise) ratio for a hard target.
+Assume a smooth transition between Rayleigh and optical scattering. 
+Ignore Mie regime and use either optical or Rayleigh scatter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gain_tx</strong> (<em>float/numpy.ndarray</em>) – transmit antenna gain, linear</p></li>
+<li><p><strong>gain_rx</strong> (<em>float/numpy.ndarray</em>) – receiver antenna gain, linear</p></li>
+<li><p><strong>wavelength</strong> (<em>float</em>) – radar wavelength (meters)</p></li>
+<li><p><strong>power_tx</strong> (<em>float</em>) – transmit power (W)</p></li>
+<li><p><strong>range_tx_m</strong> (<em>float/numpy.ndarray</em>) – range from transmitter to target (meters)</p></li>
+<li><p><strong>range_rx_m</strong> (<em>float/numpy.ndarray</em>) – range from target to receiver (meters)</p></li>
+<li><p><strong>diameter</strong> (<em>float</em>) – object diameter (meters)</p></li>
+<li><p><strong>bandwidth</strong> (<em>float</em>) – effective receiver noise bandwidth for incoherent integration (tx_len*n_ipp/sample_rate)</p></li>
+<li><p><strong>rx_noise_temp</strong> (<em>float</em>) – receiver noise temperature (K)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>signal-to-noise ratio</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float/numpy.ndarray</p>
+</dd>
+</dl>
+<p><strong>Reference:</strong> Markkanen et.al., 1999</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="propagator/sorts.propagator.base.html" title="base"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sorts.signals.hard_target_rcs.html" title="hard_target_rcs"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.signals.html" >signals</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

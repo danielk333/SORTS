@@ -1,0 +1,8 @@
+Scheduler.generate\_schedule
+============================
+
+.. currentmodule:: sorts.scheduler.scheduler
+
+.. rubric:: Scheduler.generate_schedule
+
+.. automethod:: Scheduler.generate_schedule

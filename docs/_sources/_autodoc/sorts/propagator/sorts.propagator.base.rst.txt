@@ -1,0 +1,46 @@
+base
+====
+
+.. automodule:: sorts.propagator.base
+
+.. currentmodule:: sorts.propagator.base
+
+Module summary
+--------------
+
+
+
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    Propagator
+    
+
+
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: Propagator
+
+.. autoclass:: Propagator
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
+
+
+
+

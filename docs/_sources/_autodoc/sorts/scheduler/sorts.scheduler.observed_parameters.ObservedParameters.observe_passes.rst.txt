@@ -1,0 +1,8 @@
+ObservedParameters.observe\_passes
+==================================
+
+.. currentmodule:: sorts.scheduler.observed_parameters
+
+.. rubric:: ObservedParameters.observe_passes
+
+.. automethod:: ObservedParameters.observe_passes

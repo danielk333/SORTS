@@ -1,0 +1,6 @@
+sorts.propagator.pysgp4.SGP4.DEFAULT\_SETTINGS
+==============================================
+
+.. currentmodule:: sorts.propagator.pysgp4
+
+.. autoattribute:: SGP4.DEFAULT_SETTINGS

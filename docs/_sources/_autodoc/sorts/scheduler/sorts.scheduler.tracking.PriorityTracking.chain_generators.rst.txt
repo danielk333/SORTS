@@ -1,0 +1,8 @@
+PriorityTracking.chain\_generators
+==================================
+
+.. currentmodule:: sorts.scheduler.tracking
+
+.. rubric:: PriorityTracking.chain_generators
+
+.. automethod:: PriorityTracking.chain_generators

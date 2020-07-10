@@ -1,0 +1,84 @@
+profiling
+=========
+
+.. automodule:: sorts.profiling
+
+.. currentmodule:: sorts.profiling
+
+Module summary
+--------------
+
+
+
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    Profiler
+    
+
+
+
+
+.. rubric:: Functions
+
+.. autosummary::
+    :toctree: .
+    
+    add_logging_level
+    
+    file_level
+    
+    get_logger
+    
+    term_level
+    
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: Profiler
+
+.. autoclass:: Profiler
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
+
+
+
+
+
+.. rubric:: Functions
+
+
+.. autofunction:: add_logging_level
+   :noindex:
+
+
+
+.. autofunction:: file_level
+   :noindex:
+
+
+
+.. autofunction:: get_logger
+   :noindex:
+
+
+
+.. autofunction:: term_level
+   :noindex:
+
+

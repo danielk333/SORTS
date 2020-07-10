@@ -1,0 +1,31 @@
+Plane
+=====
+
+.. currentmodule:: sorts.radar.scans.plane
+
+.. autoclass:: Plane
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Plane.__init__
+      ~Plane.check_dwell_tx
+      ~Plane.copy
+      ~Plane.cycle
+      ~Plane.dwell
+      ~Plane.ecef_pointing
+      ~Plane.enu_pointing
+      ~Plane.min_dwell
+      ~Plane.pointing
+   
+   
+
+   
+   
+   

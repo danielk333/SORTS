@@ -1,0 +1,226 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Coordinate conventions &#8212; SORTS 3.13.0 documentation</title>
+    <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Installing propagators" href="propagators.html" />
+    <link rel="prev" title="Introduction" href="introduction.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="propagators.html" title="Installing propagators"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="introduction.html" title="Introduction"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.13.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Coordinate conventions</a><ul>
+<li><a class="reference internal" href="#orbit-conventions">Orbit conventions</a></li>
+<li><a class="reference internal" href="#coordinate-transformation-guide">Coordinate transformation guide</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="introduction.html"
+                        title="previous chapter">Introduction</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="propagators.html"
+                        title="next chapter">Installing propagators</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/introduction/conventions.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="coordinate-conventions">
+<h1>Coordinate conventions<a class="headerlink" href="#coordinate-conventions" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="orbit-conventions">
+<h2>Orbit conventions<a class="headerlink" href="#orbit-conventions" title="Permalink to this headline">¶</a></h2>
+<dl class="simple">
+<dt><strong>Orientation of the ellipse in the coordinate system:</strong></dt><dd><ul class="simple">
+<li><p>For zero inclination <span class="math notranslate nohighlight">\(i\)</span>: the ellipse is located in the x-y plane.</p></li>
+<li><p>The direction of motion as True anoamly <span class="math notranslate nohighlight">\(\\nu\)</span>: increases for a zero inclination <span class="math notranslate nohighlight">\(i\)</span>: orbit is anti-coockwise, i.e. from +x towards +y.</p></li>
+<li><p>If the eccentricity <span class="math notranslate nohighlight">\(e\)</span>: is increased, the periapsis will lie in +x direction.</p></li>
+<li><p>If the inclination <span class="math notranslate nohighlight">\(i\)</span>: is increased, the ellipse will rotate around the x-axis, so that +y is rotated toward +z.</p></li>
+<li><p>An increase in Longitude of ascending node <span class="math notranslate nohighlight">\(\Omega\)</span>: corresponds to a rotation around the z-axis so that +x is rotated toward +y.</p></li>
+<li><p>Changing argument of perihelion <span class="math notranslate nohighlight">\(\omega\)</span>: will not change the plane of the orbit, it will rotate the orbit in the plane.</p></li>
+<li><p>The periapsis is shifted in the direction of motion.</p></li>
+<li><p>True anomaly measures from the +x axis, i.e <span class="math notranslate nohighlight">\(\\nu = 0\)</span> is located at periapsis and <span class="math notranslate nohighlight">\(\\nu = \pi\)</span> at apoapsis.</p></li>
+<li><p>All anomalies and orientation angles reach between 0 and <span class="math notranslate nohighlight">\(2\pi\)</span></p></li>
+</ul>
+</dd>
+</dl>
+<p><em>Reference:</em> “Orbital Motion” by A.E. Roy.</p>
+</div>
+<div class="section" id="coordinate-transformation-guide">
+<h2>Coordinate transformation guide<a class="headerlink" href="#coordinate-transformation-guide" title="Permalink to this headline">¶</a></h2>
+<p>In general there are 2 classes of coordinate systems:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Earth Centered Inertial (ECI)</p></li>
+<li><p>Earth Centered Earth Fixed (ECEF)</p></li>
+</ul>
+</div></blockquote>
+<p>There are several realizations of these classes of coordinate systems that take into account different effects and perturbations. The difference between an Inertial and an Earth Fixed frame is that in an inertial system all motion comes from classical orbit dynamics (N-body solutions) and are not caused by the coordinate frame transformation.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 8%" />
+<col style="width: 75%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Reference</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Coordinate frame name</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>ITRF</p></td>
+<td><p>ECEF</p></td>
+<td><p>International Terrestrial Reference Frame</p></td>
+</tr>
+<tr class="row-odd"><td><p>PEF</p></td>
+<td><p>ECEF</p></td>
+<td><p>Pseudo-Earth Fixed reference frame</p></td>
+</tr>
+<tr class="row-even"><td><p>CIRF</p></td>
+<td><p>ECI</p></td>
+<td><p>Celestial Intermediate Reference Frame</p></td>
+</tr>
+<tr class="row-odd"><td><p>MOD</p></td>
+<td><p>ECI</p></td>
+<td><p>Mean-Of-Date reference frame</p></td>
+</tr>
+<tr class="row-even"><td><p>TOD</p></td>
+<td><p>ECI</p></td>
+<td><p>True-Of-Data reference frame</p></td>
+</tr>
+<tr class="row-odd"><td><p>GCRF</p></td>
+<td><p>ECI</p></td>
+<td><p>Geocentric Celestial Reference Frame (GCRF)</p></td>
+</tr>
+<tr class="row-even"><td><p>J2000</p></td>
+<td><p>ECI</p></td>
+<td><p>J2000 reference frame (Also called EME2000)</p></td>
+</tr>
+<tr class="row-odd"><td><p>TEME</p></td>
+<td><p>ECI</p></td>
+<td><p>True Equator, Mean Equinox reference frame</p></td>
+</tr>
+</tbody>
+</table>
+<p><a class="reference external" href="https://www.orekit.org/site-orekit-9.3.1/architecture/frames.html">https://www.orekit.org/site-orekit-9.3.1/architecture/frames.html</a></p>
+<div class="figure align-default" id="id1">
+<a class="reference internal image-reference" href="../_images/frames.png"><img alt="Connection of different coordinate frames" src="../_images/frames.png" style="width: 459.0px; height: 533.0px;" /></a>
+<p class="caption"><span class="caption-text">Flowchart describing the relation between different frames. Original image Copyright (c) 2018 Jules David under the MIT license. Source: <a class="reference external" href="https://github.com/galactics/beyond">beyond</a>.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+<p>As an example, consider a Keplerian orbit (i.e. a point moving on a ellipse) around the Earth. An inertial frame here is any barycentric Cartesian fixed frame (barycentric can be approximated as the Earth Centric due to the small mass of the orbiting object). An example of a non-inertial frame could be a translating Cartesian frame, here the object would seem to be “spiraling” away from us. In this frame the movement away from us is not induced by fundamental orbital dynamics but due to the coordinate frame transformation. The same is true in a Earth Fixed system, the orbit would seem to rotate at the speed of the Earths rotation.</p>
+<p>Since any barycentric Cartesian fixed frame is Inertial it is customary to choose 2 reference directions to make the frame choice unique. These reference directions are usually the rotational axis of the Earth and the Vernal Equinox, i.e. the direction in space formed by the intersection of the Earths orbital plane around the Sun and the Earth equatorial plane. The direction chosen for the +x axis is usually defined so that it is aligned with the direction when axial tilt of the Earth in +z direction (the Earth moving counter-clockwise) is moving from towards the Sun to away from the Sun. The Vernal Equinox with this definition is also the ascending node of the ecliptic on the celestial equator.</p>
+<p>Since the orbital dynamics of the Earth in the solar-system has no analytic solutions due to perturbations, the definition of Vernal Equinox and the Earth ecliptic also changes with respect to time, thus is it customary to choose the common reference direction for the Vernal Equinox at a specific time, called the Epoch of that equinox.</p>
+<p>From numerical simulations the drift of the Obliquity of the ecliptic (inclination of ecliptic with respect to the celestial equator) does not vary more then 1 degree on the order of 10,000 years.</p>
+<p>Most commonly used ECI’s are:</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">True Equator Mean Equinox (TEME)</dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+<p>This is the frame after a Two-Line Element (TLE) orbit has been converted to an Cartesian state. The Mean Equinox refers to the Vernal Equinox but averaged over time to remove nutation. The Mean Vernal Equinox here is aligned to coincide with the +x axis. Thus the instantaneous Vernal Equinox is different at any point in time and needs to be modeled. True Equator refers to the fact that the instantaneous axis of rotation of the Earth is used to align the +z axis with.</p>
+<dl class="field-list simple">
+<dt class="field-odd">The International Terrestrial Reference Frame (ITRF)</dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+</div></blockquote>
+<p>The ITRF contains models of movement of both the Earth and the Equinox. Thus the frame itself is a function of time. As the models are updated it is customary to denote the reference frame by a Epoch, or the time around witch they “center”.</p>
+<p>Going from a “Mean” element definition to a Instantaneous one requires a model of nutation.</p>
+<p>To transform from e.g. TEME to ITRF one would first need to find the difference between the instantanius mean equionox</p>
+<p>Then find the instantanius earth rotation….</p>
+<p>then find the rotation of the earth, also known as GMST</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="propagators.html" title="Installing propagators"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="introduction.html" title="Introduction"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.13.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

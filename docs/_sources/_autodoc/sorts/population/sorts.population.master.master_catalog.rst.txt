@@ -1,0 +1,8 @@
+master\_catalog
+===============
+
+.. currentmodule:: sorts.population.master
+
+.. rubric:: master_catalog
+
+.. autofunction:: master_catalog

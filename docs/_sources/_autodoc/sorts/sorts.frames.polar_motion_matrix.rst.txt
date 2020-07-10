@@ -1,0 +1,8 @@
+polar\_motion\_matrix
+=====================
+
+.. currentmodule:: sorts.frames
+
+.. rubric:: polar_motion_matrix
+
+.. autofunction:: polar_motion_matrix

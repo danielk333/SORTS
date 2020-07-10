@@ -1,0 +1,84 @@
+passes
+======
+
+.. automodule:: sorts.passes
+
+.. currentmodule:: sorts.passes
+
+Module summary
+--------------
+
+
+
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    Pass
+    
+
+
+
+
+.. rubric:: Functions
+
+.. autosummary::
+    :toctree: .
+    
+    equidistant_sampling
+    
+    find_passes
+    
+    find_simultaneous_passes
+    
+    select_simultaneous_passes
+    
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: Pass
+
+.. autoclass:: Pass
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
+
+
+
+
+
+.. rubric:: Functions
+
+
+.. autofunction:: equidistant_sampling
+   :noindex:
+
+
+
+.. autofunction:: find_passes
+   :noindex:
+
+
+
+.. autofunction:: find_simultaneous_passes
+   :noindex:
+
+
+
+.. autofunction:: select_simultaneous_passes
+   :noindex:
+
+

@@ -1,0 +1,8 @@
+PriorityTracking.update
+=======================
+
+.. currentmodule:: sorts.scheduler.tracking
+
+.. rubric:: PriorityTracking.update
+
+.. automethod:: PriorityTracking.update

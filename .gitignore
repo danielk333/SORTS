@@ -1,9 +1,6 @@
 # Compiled source #
 ###################
 
-# Compiled source #
-###################
-
 #Sublime
 *.sublime*
 
@@ -63,9 +60,6 @@ coverage.xml
 *.mo
 *.pot
 
- # Sphinx documentation
-docs/_build/
-
 # PyBuilder
 target/
 
@@ -84,26 +78,12 @@ ipython_config.py
 .venv
 env/
 venv/
-ENV/
 env.bak/
 venv.bak/
-env2.7/
 
 # mypy
 .mypy_cache/
 .dmypy.json
 dmypy.json
 
-# misc output and logs
-logfile
-*.png
-cache_error*
 *.log
-*.mp4
-
-#temporary test data
-tests/tmp_test_data/*
-
-#do not version control some data
-data/spice/*.bsp
-data/spice/*.tls

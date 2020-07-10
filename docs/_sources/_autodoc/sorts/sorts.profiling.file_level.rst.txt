@@ -1,0 +1,8 @@
+file\_level
+===========
+
+.. currentmodule:: sorts.profiling
+
+.. rubric:: file_level
+
+.. autofunction:: file_level

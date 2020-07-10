@@ -1,0 +1,8 @@
+geodetic\_to\_ecef
+==================
+
+.. currentmodule:: sorts.frames
+
+.. rubric:: geodetic_to_ecef
+
+.. autofunction:: geodetic_to_ecef

@@ -1,0 +1,162 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Fence &#8212; SORTS 3.13.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Fence.__init__" href="sorts.radar.scans.fence.Fence.__init__.html" />
+    <link rel="prev" title="fence" href="sorts.radar.scans.fence.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.radar.scans.fence.Fence.__init__.html" title="Fence.__init__"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sorts.radar.scans.fence.html" title="fence"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.radar.scans.fence.html" accesskey="U">fence</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sorts.radar.scans.fence.html"
+                        title="previous chapter">fence</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sorts.radar.scans.fence.Fence.__init__.html"
+                        title="next chapter">Fence.__init__</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/_autodoc/sorts/scheduler/sorts.radar.scans.fence.Fence.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="fence">
+<h1>Fence<a class="headerlink" href="#fence" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="sorts.radar.scans.fence.Fence">
+<em class="property">class </em><code class="sig-prename descclassname">sorts.radar.scans.fence.</code><code class="sig-name descname">Fence</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">azimuth</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">min_elevation</span><span class="o">=</span><span class="default_value">30.0</span></em>, <em class="sig-param"><span class="n">dwell</span><span class="o">=</span><span class="default_value">0.2</span></em>, <em class="sig-param"><span class="n">num</span><span class="o">=</span><span class="default_value">20</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/radar/scans/fence.html#Fence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.radar.scans.fence.Fence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="sorts.radar.scans.scan.Scan.html#sorts.radar.scans.scan.Scan" title="sorts.radar.scans.scan.Scan"><code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.radar.scans.scan.Scan</span></code></a></p>
+<p>General fence scan.</p>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.radar.scans.fence.Fence.__init__.html#sorts.radar.scans.fence.Fence.__init__" title="sorts.radar.scans.fence.Fence.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([azimuth, min_elevation, dwell, num])</p></td>
+<td><p>Initialize self.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.radar.scans.fence.Fence.check_dwell_tx.html#sorts.radar.scans.fence.Fence.check_dwell_tx" title="sorts.radar.scans.fence.Fence.check_dwell_tx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_dwell_tx</span></code></a>(tx)</p></td>
+<td><p>Checks if the transmitting antenna pulse pattern and coherent integration schema is compatible with the observation schema.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.radar.scans.fence.Fence.copy.html#sorts.radar.scans.fence.Fence.copy" title="sorts.radar.scans.fence.Fence.copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code></a>()</p></td>
+<td><p>Return a copy of the current instance.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.radar.scans.fence.Fence.cycle.html#sorts.radar.scans.fence.Fence.cycle" title="sorts.radar.scans.fence.Fence.cycle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cycle</span></code></a>()</p></td>
+<td><p>The cycle time of the scan if applicable.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.radar.scans.fence.Fence.dwell.html#sorts.radar.scans.fence.Fence.dwell" title="sorts.radar.scans.fence.Fence.dwell"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dwell</span></code></a>([t])</p></td>
+<td><p>The current dwell time of the scan.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.radar.scans.fence.Fence.ecef_pointing.html#sorts.radar.scans.fence.Fence.ecef_pointing" title="sorts.radar.scans.fence.Fence.ecef_pointing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ecef_pointing</span></code></a>(t, ant)</p></td>
+<td><p>Returns the instantaneous WGS84 ECEF pointing direction and the radar geographical location in WGS84 ECEF coordinates.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.radar.scans.fence.Fence.enu_pointing.html#sorts.radar.scans.fence.Fence.enu_pointing" title="sorts.radar.scans.fence.Fence.enu_pointing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">enu_pointing</span></code></a>(t)</p></td>
+<td><p>Returns the instantaneous pointing in East, North, Up (ENU) local coordinates.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.radar.scans.fence.Fence.min_dwell.html#sorts.radar.scans.fence.Fence.min_dwell" title="sorts.radar.scans.fence.Fence.min_dwell"><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_dwell</span></code></a>()</p></td>
+<td><p>If there are dynamic dwell times, this is the minimum dwell time.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.radar.scans.fence.Fence.pointing.html#sorts.radar.scans.fence.Fence.pointing" title="sorts.radar.scans.fence.Fence.pointing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pointing</span></code></a>(t)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.radar.scans.fence.Fence.__init__.html" title="Fence.__init__"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sorts.radar.scans.fence.html" title="fence"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.radar.scans.fence.html" >fence</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

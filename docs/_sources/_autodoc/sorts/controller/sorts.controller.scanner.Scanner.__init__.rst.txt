@@ -1,0 +1,8 @@
+Scanner.\_\_init\_\_
+====================
+
+.. currentmodule:: sorts.controller.scanner
+
+.. rubric:: Scanner.__init__
+
+.. automethod:: Scanner.__init__

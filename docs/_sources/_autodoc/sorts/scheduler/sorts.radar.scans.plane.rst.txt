@@ -1,0 +1,46 @@
+plane
+=====
+
+.. automodule:: sorts.radar.scans.plane
+
+.. currentmodule:: sorts.radar.scans.plane
+
+Module summary
+--------------
+
+
+
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    Plane
+    
+
+
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: Plane
+
+.. autoclass:: Plane
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
+
+
+
+

@@ -1,0 +1,8 @@
+Population.delete
+=================
+
+.. currentmodule:: sorts.population.population
+
+.. rubric:: Population.delete
+
+.. automethod:: Population.delete

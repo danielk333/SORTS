@@ -1,0 +1,8 @@
+npdt\_to\_unix
+==============
+
+.. currentmodule:: sorts.dates
+
+.. rubric:: npdt_to_unix
+
+.. autofunction:: npdt_to_unix

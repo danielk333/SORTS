@@ -1,0 +1,8 @@
+Profiler.fmt
+============
+
+.. currentmodule:: sorts.profiling
+
+.. rubric:: Profiler.fmt
+
+.. automethod:: Profiler.fmt

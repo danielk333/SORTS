@@ -1,0 +1,8 @@
+Population.copy
+===============
+
+.. currentmodule:: sorts.population.population
+
+.. rubric:: Population.copy
+
+.. automethod:: Population.copy

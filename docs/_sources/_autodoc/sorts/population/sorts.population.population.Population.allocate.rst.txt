@@ -1,0 +1,8 @@
+Population.allocate
+===================
+
+.. currentmodule:: sorts.population.population
+
+.. rubric:: Population.allocate
+
+.. automethod:: Population.allocate

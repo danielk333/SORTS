@@ -1,0 +1,8 @@
+Profiler.stop
+=============
+
+.. currentmodule:: sorts.profiling
+
+.. rubric:: Profiler.stop
+
+.. automethod:: Profiler.stop

@@ -1,0 +1,8 @@
+Scanner.point\_tx\_ecef
+=======================
+
+.. currentmodule:: sorts.controller.scanner
+
+.. rubric:: Scanner.point_tx_ecef
+
+.. automethod:: Scanner.point_tx_ecef

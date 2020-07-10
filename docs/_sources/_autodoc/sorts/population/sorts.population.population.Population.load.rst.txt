@@ -1,0 +1,8 @@
+Population.load
+===============
+
+.. currentmodule:: sorts.population.population
+
+.. rubric:: Population.load
+
+.. automethod:: Population.load

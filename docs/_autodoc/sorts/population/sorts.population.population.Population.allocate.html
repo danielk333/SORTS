@@ -1,0 +1,149 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Population.allocate &#8212; SORTS 3.13.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Population.copy" href="sorts.population.population.Population.copy.html" />
+    <link rel="prev" title="Population.add_column" href="sorts.population.population.Population.add_column.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.population.population.Population.copy.html" title="Population.copy"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sorts.population.population.Population.add_column.html" title="Population.add_column"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.population.population.html" >population</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="sorts.population.population.Population.html" accesskey="U">Population</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sorts.population.population.Population.add_column.html"
+                        title="previous chapter">Population.add_column</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sorts.population.population.Population.copy.html"
+                        title="next chapter">Population.copy</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/_autodoc/sorts/population/sorts.population.population.Population.allocate.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="population-allocate">
+<h1>Population.allocate<a class="headerlink" href="#population-allocate" title="Permalink to this headline">¶</a></h1>
+<p class="rubric">Population.allocate</p>
+<dl class="py method">
+<dt id="sorts.population.population.Population.allocate">
+<code class="sig-prename descclassname">Population.</code><code class="sig-name descname">allocate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">length</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/population/population.html#Population.allocate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.population.population.Population.allocate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allocate the internal data array for assignment of objects.</p>
+<p><strong>Warning:</strong> This removes all internal data.</p>
+<p><strong>Example:</strong></p>
+<p>Create a population with two objects. Here the <code class="code docutils literal notranslate"><span class="pre">load_data</span></code> function is a fictional function that creates a row with the needed data.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">population</span> <span class="kn">import</span> <span class="n">Population</span>
+<span class="kn">from</span> <span class="nn">my_data_loader</span> <span class="kn">import</span> <span class="n">load_data</span>
+
+<span class="n">my_pop</span> <span class="o">=</span> <span class="n">Population</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;two objects&#39;</span><span class="p">,</span>
+    <span class="n">extra_columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;color&#39;</span><span class="p">],</span>
+    <span class="n">dtypes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Float64&#39;</span><span class="p">,</span> <span class="s1">&#39;U20&#39;</span><span class="p">],</span>
+    <span class="n">space_object_uses</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">my_pop</span><span class="p">))</span> <span class="c1">#will output 0</span>
+<span class="n">my_pop</span><span class="o">.</span><span class="n">allocate</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">my_pop</span><span class="p">))</span> <span class="c1">#will output 2</span>
+
+<span class="n">my_pop</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span><span class="s1">&#39;obj1&#39;</span><span class="p">)</span>
+<span class="n">my_pop</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span><span class="s1">&#39;obj2&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.population.population.Population.copy.html" title="Population.copy"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sorts.population.population.Population.add_column.html" title="Population.add_column"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.population.population.html" >population</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="sorts.population.population.Population.html" >Population</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

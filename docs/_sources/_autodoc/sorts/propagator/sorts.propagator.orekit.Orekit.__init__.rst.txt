@@ -1,0 +1,8 @@
+Orekit.\_\_init\_\_
+===================
+
+.. currentmodule:: sorts.propagator.orekit
+
+.. rubric:: Orekit.__init__
+
+.. automethod:: Orekit.__init__

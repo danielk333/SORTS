@@ -1,0 +1,8 @@
+Tracker.point\_tx\_ecef
+=======================
+
+.. currentmodule:: sorts.controller.tracker
+
+.. rubric:: Tracker.point_tx_ecef
+
+.. automethod:: Tracker.point_tx_ecef

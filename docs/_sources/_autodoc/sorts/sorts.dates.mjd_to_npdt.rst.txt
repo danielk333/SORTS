@@ -1,0 +1,8 @@
+mjd\_to\_npdt
+=============
+
+.. currentmodule:: sorts.dates
+
+.. rubric:: mjd_to_npdt
+
+.. autofunction:: mjd_to_npdt

@@ -1,0 +1,150 @@
+.. only:: html
+
+    .. note::
+        :class: sphx-glr-download-link-note
+
+        Click :ref:`here <sphx_glr_download_auto_gallery_logger.py>`     to download the full example code
+    .. rst-class:: sphx-glr-example-title
+
+    .. _sphx_glr_auto_gallery_logger.py:
+
+
+Logging
+==========
+
+
+CRITICAL    50
+ERROR   40
+WARNING 30
+INFO    20
+DEBUG   10
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    2020-07-10 16:47:25.381 INFO    ; info message 0
+    2020-07-10 16:47:25.381 WARNING ; warning message 0
+    2020-07-10 16:47:25.381 ERROR   ; error message 0
+    2020-07-10 16:47:25.381 CRITICAL; critical message 0
+    2020-07-10 16:47:25.382 ALWAYS  ; always message 0
+    2020-07-10 16:47:25.382 INFO    ; info message 1
+    2020-07-10 16:47:25.382 WARNING ; warning message 1
+    2020-07-10 16:47:25.382 ERROR   ; error message 1
+    2020-07-10 16:47:25.382 CRITICAL; critical message 1
+    2020-07-10 16:47:25.382 ALWAYS  ; always message 1
+    2020-07-10 16:47:25.382 INFO    ; info message 2
+    2020-07-10 16:47:25.382 WARNING ; warning message 2
+    2020-07-10 16:47:25.382 ERROR   ; error message 2
+    2020-07-10 16:47:25.382 CRITICAL; critical message 2
+    2020-07-10 16:47:25.382 ALWAYS  ; always message 2
+    2020-07-10 16:47:25.382 INFO    ; info message 3
+    2020-07-10 16:47:25.382 WARNING ; warning message 3
+    2020-07-10 16:47:25.382 ERROR   ; error message 3
+    2020-07-10 16:47:25.382 CRITICAL; critical message 3
+    2020-07-10 16:47:25.382 ALWAYS  ; always message 3
+    2020-07-10 16:47:25.382 INFO    ; info message 4
+    2020-07-10 16:47:25.382 WARNING ; warning message 4
+    2020-07-10 16:47:25.382 ERROR   ; error message 4
+    2020-07-10 16:47:25.383 CRITICAL; critical message 4
+    2020-07-10 16:47:25.383 ALWAYS  ; always message 4
+    2020-07-10 16:47:25.383 INFO    ; info message 5
+    2020-07-10 16:47:25.383 WARNING ; warning message 5
+    2020-07-10 16:47:25.383 ERROR   ; error message 5
+    2020-07-10 16:47:25.383 CRITICAL; critical message 5
+    2020-07-10 16:47:25.383 ALWAYS  ; always message 5
+    2020-07-10 16:47:25.383 INFO    ; info message 6
+    2020-07-10 16:47:25.383 WARNING ; warning message 6
+    2020-07-10 16:47:25.383 ERROR   ; error message 6
+    2020-07-10 16:47:25.383 CRITICAL; critical message 6
+    2020-07-10 16:47:25.383 ALWAYS  ; always message 6
+    2020-07-10 16:47:25.383 INFO    ; info message 7
+    2020-07-10 16:47:25.383 WARNING ; warning message 7
+    2020-07-10 16:47:25.383 ERROR   ; error message 7
+    2020-07-10 16:47:25.383 CRITICAL; critical message 7
+    2020-07-10 16:47:25.383 ALWAYS  ; always message 7
+    2020-07-10 16:47:25.383 INFO    ; info message 8
+    2020-07-10 16:47:25.384 WARNING ; warning message 8
+    2020-07-10 16:47:25.384 ERROR   ; error message 8
+    2020-07-10 16:47:25.384 CRITICAL; critical message 8
+    2020-07-10 16:47:25.384 ALWAYS  ; always message 8
+    2020-07-10 16:47:25.384 INFO    ; info message 9
+    2020-07-10 16:47:25.384 WARNING ; warning message 9
+    2020-07-10 16:47:25.384 ERROR   ; error message 9
+    2020-07-10 16:47:25.384 CRITICAL; critical message 9
+    2020-07-10 16:47:25.384 ALWAYS  ; always message 9
+    2020-07-10 16:47:25.384 INFO    ; --------------- Performance analysis --------------
+    2020-07-10 16:47:25.384 INFO    ;  Name   |   Executions |   Mean time |   Total time
+    2020-07-10 16:47:25.385 INFO    ; --------+--------------+-------------+--------------
+    2020-07-10 16:47:25.385 INFO    ;  log    |           10 | 0.000291586 |   0.00291586
+    2020-07-10 16:47:25.385 INFO    ; ---------------------------------------------------
+    2020-07-10 16:47:25.385 INFO    ; 
+
+
+
+
+
+
+|
+
+
+.. code-block:: default
+
+
+    import sorts
+
+    p = sorts.profiling.Profiler()
+
+    logger = sorts.profiling.get_logger('example')
+
+    for i in range(10):
+        # 'application' code
+        p.start('log')
+        logger.debug('debug message {}'.format(i))
+        logger.info('info message {}'.format(i))
+        logger.warning('warning message {}'.format(i))
+        logger.error('error message {}'.format(i))
+        logger.critical('critical message {}'.format(i))
+        logger.always('always message {}'.format(i))
+        p.stop('log')
+
+    for line in str(p).split('\n'):
+        logger.info(line)
+
+
+.. rst-class:: sphx-glr-timing
+
+   **Total running time of the script:** ( 0 minutes  0.009 seconds)
+
+
+.. _sphx_glr_download_auto_gallery_logger.py:
+
+
+.. only :: html
+
+ .. container:: sphx-glr-footer
+    :class: sphx-glr-footer-example
+
+
+
+  .. container:: sphx-glr-download sphx-glr-download-python
+
+     :download:`Download Python source code: logger.py <logger.py>`
+
+
+
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+     :download:`Download Jupyter notebook: logger.ipynb <logger.ipynb>`
+
+
+.. only:: html
+
+ .. rst-class:: sphx-glr-signature
+
+    `Gallery generated by Sphinx-Gallery <https://sphinx-gallery.github.io>`_

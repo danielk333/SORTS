@@ -1,0 +1,8 @@
+Tracking.schedule
+=================
+
+.. currentmodule:: sorts.scheduler.tracking
+
+.. rubric:: Tracking.schedule
+
+.. automethod:: Tracking.schedule

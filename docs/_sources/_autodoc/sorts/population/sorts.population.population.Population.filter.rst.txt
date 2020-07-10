@@ -1,0 +1,8 @@
+Population.filter
+=================
+
+.. currentmodule:: sorts.population.population
+
+.. rubric:: Population.filter
+
+.. automethod:: Population.filter

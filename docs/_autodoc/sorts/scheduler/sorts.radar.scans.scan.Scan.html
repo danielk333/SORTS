@@ -1,0 +1,196 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Scan &#8212; SORTS 3.13.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Scan.__init__" href="sorts.radar.scans.scan.Scan.__init__.html" />
+    <link rel="prev" title="scan" href="sorts.radar.scans.scan.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.radar.scans.scan.Scan.__init__.html" title="Scan.__init__"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sorts.radar.scans.scan.html" title="scan"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.radar.scans.scan.html" accesskey="U">scan</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sorts.radar.scans.scan.html"
+                        title="previous chapter">scan</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sorts.radar.scans.scan.Scan.__init__.html"
+                        title="next chapter">Scan.__init__</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="scan">
+<h1>Scan<a class="headerlink" href="#scan" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="sorts.radar.scans.scan.Scan">
+<em class="property">class </em><code class="sig-prename descclassname">sorts.radar.scans.scan.</code><code class="sig-name descname">Scan</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coordinates</span><span class="o">=</span><span class="default_value">'enu'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/radar/scans/scan.html#Scan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.radar.scans.scan.Scan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Encapsulates the observation schema of a radar system, i.e. its “scan”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>coordinates</strong> (<em>str</em>) – The coordinate system used, can be <code class="code docutils literal notranslate"><span class="pre">'azelr'</span></code>, <code class="code docutils literal notranslate"><span class="pre">'ned'</span></code> or <code class="code docutils literal notranslate"><span class="pre">'enu'</span></code>. If <cite>azelr</cite> is used, degrees are assumed.</p>
+</dd>
+</dl>
+<p><strong>Pointing function:</strong></p>
+<p>The pointing function must follow the following standard:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Take in time in seconds past reference epoch in seconds as first argument.</p></li>
+<li><p>Take any number of keyword arguments.</p></li>
+<li><p>It must return the pointing coordinates as an <cite>(3,)</cite>, <cite>(3,n)</cite> or <cite>(3,n,m)</cite> numpy ndarray where <cite>n</cite> is the length of the input time vector and <cite>m</cite> is the number of simultaneous pointing directions.</p></li>
+<li><p>Units are in meters.</p></li>
+<li><p>Should be vectorized according to time as the second axis.</p></li>
+</ul>
+</div></blockquote>
+<p>Example pointing function:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+<p><strong>Coordinate systems:</strong></p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">azelr</dt>
+<dd class="field-odd"><p>Azimuth, Elevation, Range in degrees east of north and above horizon.</p>
+</dd>
+<dt class="field-even">ned</dt>
+<dd class="field-even"><p>Cartesian coordinates in North, East, Down.</p>
+</dd>
+<dt class="field-odd">enu</dt>
+<dd class="field-odd"><p>Cartesian coordinates in East, North, Up.</p>
+</dd>
+</dl>
+</div></blockquote>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.radar.scans.scan.Scan.__init__.html#sorts.radar.scans.scan.Scan.__init__" title="sorts.radar.scans.scan.Scan.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([coordinates])</p></td>
+<td><p>Initialize self.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.radar.scans.scan.Scan.check_dwell_tx.html#sorts.radar.scans.scan.Scan.check_dwell_tx" title="sorts.radar.scans.scan.Scan.check_dwell_tx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_dwell_tx</span></code></a>(tx)</p></td>
+<td><p>Checks if the transmitting antenna pulse pattern and coherent integration schema is compatible with the observation schema.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.radar.scans.scan.Scan.copy.html#sorts.radar.scans.scan.Scan.copy" title="sorts.radar.scans.scan.Scan.copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code></a>()</p></td>
+<td><p>Return a copy of the current instance.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.radar.scans.scan.Scan.cycle.html#sorts.radar.scans.scan.Scan.cycle" title="sorts.radar.scans.scan.Scan.cycle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cycle</span></code></a>()</p></td>
+<td><p>The cycle time of the scan if applicable.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.radar.scans.scan.Scan.dwell.html#sorts.radar.scans.scan.Scan.dwell" title="sorts.radar.scans.scan.Scan.dwell"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dwell</span></code></a>(t)</p></td>
+<td><p>The current dwell time of the scan.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.radar.scans.scan.Scan.ecef_pointing.html#sorts.radar.scans.scan.Scan.ecef_pointing" title="sorts.radar.scans.scan.Scan.ecef_pointing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ecef_pointing</span></code></a>(t, ant)</p></td>
+<td><p>Returns the instantaneous WGS84 ECEF pointing direction and the radar geographical location in WGS84 ECEF coordinates.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.radar.scans.scan.Scan.enu_pointing.html#sorts.radar.scans.scan.Scan.enu_pointing" title="sorts.radar.scans.scan.Scan.enu_pointing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">enu_pointing</span></code></a>(t)</p></td>
+<td><p>Returns the instantaneous pointing in East, North, Up (ENU) local coordinates.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.radar.scans.scan.Scan.min_dwell.html#sorts.radar.scans.scan.Scan.min_dwell" title="sorts.radar.scans.scan.Scan.min_dwell"><code class="xref py py-obj docutils literal notranslate"><span class="pre">min_dwell</span></code></a>()</p></td>
+<td><p>If there are dynamic dwell times, this is the minimum dwell time.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.radar.scans.scan.Scan.pointing.html#sorts.radar.scans.scan.Scan.pointing" title="sorts.radar.scans.scan.Scan.pointing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pointing</span></code></a>(t)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.radar.scans.scan.Scan.__init__.html" title="Scan.__init__"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sorts.radar.scans.scan.html" title="scan"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.radar.scans.scan.html" >scan</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

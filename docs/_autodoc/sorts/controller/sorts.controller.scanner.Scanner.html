@@ -1,0 +1,180 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Scanner &#8212; SORTS 3.13.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Scanner.__init__" href="sorts.controller.scanner.Scanner.__init__.html" />
+    <link rel="prev" title="scanner" href="sorts.controller.scanner.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.controller.scanner.Scanner.__init__.html" title="Scanner.__init__"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sorts.controller.scanner.html" title="scanner"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.controller.scanner.html" accesskey="U">scanner</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sorts.controller.scanner.html"
+                        title="previous chapter">scanner</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sorts.controller.scanner.Scanner.__init__.html"
+                        title="next chapter">Scanner.__init__</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/_autodoc/sorts/controller/sorts.controller.scanner.Scanner.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="scanner">
+<h1>Scanner<a class="headerlink" href="#scanner" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="sorts.controller.scanner.Scanner">
+<em class="property">class </em><code class="sig-prename descclassname">sorts.controller.scanner.</code><code class="sig-name descname">Scanner</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">radar</span></em>, <em class="sig-param"><span class="n">scan</span></em>, <em class="sig-param"><span class="n">r</span><span class="o">=</span><span class="default_value">array([300000.0, 377777.77777778, 455555.55555556, 533333.33333333, 611111.11111111, 688888.88888889, 766666.66666667, 844444.44444444, 922222.22222222, 1000000.0])</span></em>, <em class="sig-param"><span class="n">profiler</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">logger</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">return_copy</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">meta</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/controller/scanner.html#Scanner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.controller.scanner.Scanner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="sorts.controller.radar_controller.RadarController.html#sorts.controller.radar_controller.RadarController" title="sorts.controller.radar_controller.RadarController"><code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.controller.radar_controller.RadarController</span></code></a></p>
+<p>Takes in ECEF points and a time vector and creates a tracking control.</p>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.controller.scanner.Scanner.__init__.html#sorts.controller.scanner.Scanner.__init__" title="sorts.controller.scanner.Scanner.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(radar, scan[, r, profiler, logger, …])</p></td>
+<td><p>Initialize self.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.controller.scanner.Scanner.default_meta.html#sorts.controller.scanner.Scanner.default_meta" title="sorts.controller.scanner.Scanner.default_meta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_meta</span></code></a>()</p></td>
+<td><p>This is used to generate meta data on the fly, rather then the static data that can be set in the <cite>self.meta</cite>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.controller.scanner.Scanner.generator.html#sorts.controller.scanner.Scanner.generator" title="sorts.controller.scanner.Scanner.generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generator</span></code></a>(t)</p></td>
+<td><p>This will configure the radar system and return a pointer to the contained radar system instance with the correct configuration.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.controller.scanner.Scanner.point.html#sorts.controller.scanner.Scanner.point" title="sorts.controller.scanner.Scanner.point"><code class="xref py py-obj docutils literal notranslate"><span class="pre">point</span></code></a>(radar, enu)</p></td>
+<td><p>Point all sites into the direction of a given East, North, Up (ENU) local coordinate system.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.controller.scanner.Scanner.point_ecef.html#sorts.controller.scanner.Scanner.point_ecef" title="sorts.controller.scanner.Scanner.point_ecef"><code class="xref py py-obj docutils literal notranslate"><span class="pre">point_ecef</span></code></a>(radar, ecef)</p></td>
+<td><p>Point all sites into the direction of given ECEF coordinate, relative Earth Center.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.controller.scanner.Scanner.point_radar.html#sorts.controller.scanner.Scanner.point_radar" title="sorts.controller.scanner.Scanner.point_radar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">point_radar</span></code></a>(t)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.controller.scanner.Scanner.point_rx_ecef.html#sorts.controller.scanner.Scanner.point_rx_ecef" title="sorts.controller.scanner.Scanner.point_rx_ecef"><code class="xref py py-obj docutils literal notranslate"><span class="pre">point_rx_ecef</span></code></a>(radar, ecef)</p></td>
+<td><p>Point all rx sites into the direction of given ECEF coordinate, relative Earth Center.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.controller.scanner.Scanner.point_tx_ecef.html#sorts.controller.scanner.Scanner.point_tx_ecef" title="sorts.controller.scanner.Scanner.point_tx_ecef"><code class="xref py py-obj docutils literal notranslate"><span class="pre">point_tx_ecef</span></code></a>(radar, ecef)</p></td>
+<td><p>Point all tx sites into the direction of given ECEF coordinate, relative Earth Center.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.controller.scanner.Scanner.run.html#sorts.controller.scanner.Scanner.run" title="sorts.controller.scanner.Scanner.run"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.controller.scanner.Scanner.turn_off.html#sorts.controller.scanner.Scanner.turn_off" title="sorts.controller.scanner.Scanner.turn_off"><code class="xref py py-obj docutils literal notranslate"><span class="pre">turn_off</span></code></a>(radar)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.controller.scanner.Scanner.turn_on.html#sorts.controller.scanner.Scanner.turn_on" title="sorts.controller.scanner.Scanner.turn_on"><code class="xref py py-obj docutils literal notranslate"><span class="pre">turn_on</span></code></a>(radar)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.controller.scanner.Scanner.META_FIELDS.html#sorts.controller.scanner.Scanner.META_FIELDS" title="sorts.controller.scanner.Scanner.META_FIELDS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">META_FIELDS</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.controller.scanner.Scanner.__init__.html" title="Scanner.__init__"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sorts.controller.scanner.html" title="scanner"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.controller.scanner.html" >scanner</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

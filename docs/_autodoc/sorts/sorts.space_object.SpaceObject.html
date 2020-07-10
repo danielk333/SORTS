@@ -1,0 +1,249 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>SpaceObject &#8212; SORTS 3.13.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="SpaceObject.__init__" href="sorts.space_object.SpaceObject.__init__.html" />
+    <link rel="prev" title="space_object" href="sorts.space_object.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.space_object.SpaceObject.__init__.html" title="SpaceObject.__init__"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sorts.space_object.html" title="space_object"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.space_object.html" accesskey="U">space_object</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sorts.space_object.html"
+                        title="previous chapter">space_object</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sorts.space_object.SpaceObject.__init__.html"
+                        title="next chapter">SpaceObject.__init__</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/_autodoc/sorts/sorts.space_object.SpaceObject.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="spaceobject">
+<h1>SpaceObject<a class="headerlink" href="#spaceobject" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="sorts.space_object.SpaceObject">
+<em class="property">class </em><code class="sig-prename descclassname">sorts.space_object.</code><code class="sig-name descname">SpaceObject</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">propagator</span></em>, <em class="sig-param"><span class="n">d</span><span class="o">=</span><span class="default_value">0.01</span></em>, <em class="sig-param"><span class="n">C_D</span><span class="o">=</span><span class="default_value">2.3</span></em>, <em class="sig-param"><span class="n">A</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">m</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">mjd0</span><span class="o">=</span><span class="default_value">57125.7729</span></em>, <em class="sig-param"><span class="n">oid</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">M_cent</span><span class="o">=</span><span class="default_value">5.972169366075844e+24</span></em>, <em class="sig-param"><span class="n">C_R</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">propagator_options</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">propagator_args</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/space_object.html#SpaceObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.space_object.SpaceObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Encapsulates a object in space who’s dynamics is governed in time by a propagator.</p>
+<p>The relation between the Cartesian and Kepler states are a direct transformation according to the below orientation rules.
+If the Kepler elements are given in a Inertial system, to reference the Cartesian to a Earth-fixed system a earth rotation transformation
+must be applied externally of the method.</p>
+<dl>
+<dt><strong>Orientation of the ellipse in the coordinate system:</strong></dt><dd><ul class="simple">
+<li><p>For zero inclination <span class="math notranslate nohighlight">\(i\)</span>: the ellipse is located in the x-y plane.</p></li>
+<li><p>The direction of motion as True anoamly <span class="math notranslate nohighlight">\(\nu\)</span>: increases for a zero inclination <span class="math notranslate nohighlight">\(i\)</span>: orbit is anti-coockwise, i.e. from +x towards +y.</p></li>
+<li><p>If the eccentricity <span class="math notranslate nohighlight">\(e\)</span>: is increased, the periapsis will lie in +x direction.</p></li>
+<li><p>If the inclination <span class="math notranslate nohighlight">\(i\)</span>: is increased, the ellipse will rotate around the x-axis, so that +y is rotated toward +z.</p></li>
+<li><p>An increase in Longitude of ascending node <span class="math notranslate nohighlight">\(\Omega\)</span>: corresponds to a rotation around the z-axis so that +x is rotated toward +y.</p></li>
+<li><p>Changing argument of perihelion <span class="math notranslate nohighlight">\(\omega\)</span>: will not change the plane of the orbit, it will rotate the orbit in the plane.</p></li>
+<li><p>The periapsis is shifted in the direction of motion.</p></li>
+<li><p>True anomaly measures from the +x axis, i.e <span class="math notranslate nohighlight">\(\nu = 0\)</span> is located at periapsis and <span class="math notranslate nohighlight">\(\nu = \pi\)</span> at apoapsis.</p></li>
+<li><p>All anomalies and orientation angles reach between 0 and <span class="math notranslate nohighlight">\(2\pi\)</span></p></li>
+</ul>
+<p><em>Reference:</em> “Orbital Motion” by A.E. Roy.</p>
+</dd>
+<dt><strong>Variables:</strong></dt><dd><ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(a\)</span>: Semi-major axis</p></li>
+<li><p><span class="math notranslate nohighlight">\(e\)</span>: Eccentricity</p></li>
+<li><p><span class="math notranslate nohighlight">\(i\)</span>: Inclination</p></li>
+<li><p><span class="math notranslate nohighlight">\(\omega\)</span>: Argument of perihelion</p></li>
+<li><p><span class="math notranslate nohighlight">\(\Omega\)</span>: Longitude of ascending node</p></li>
+<li><p><span class="math notranslate nohighlight">\(\nu\)</span>: True anoamly</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>orbit</strong> (<em>pyorb.Orbit</em>) – Orbit instance</p></li>
+<li><p><strong>oid</strong> (<em>int</em>) – Identifying object ID</p></li>
+<li><p><strong>C_D</strong> (<em>float</em>) – Drag coefficient</p></li>
+<li><p><strong>C_R</strong> (<em>float</em>) – Radiation pressure coefficient</p></li>
+<li><p><strong>A</strong> (<em>float</em>) – Area [<span class="math notranslate nohighlight">\(m^2\)</span>]</p></li>
+<li><p><a class="reference internal" href="sorts.space_object.SpaceObject.m.html#sorts.space_object.SpaceObject.m" title="sorts.space_object.SpaceObject.m"><strong>m</strong></a> (<em>float</em>) – Mass [kg]</p></li>
+<li><p><strong>d</strong> (<em>float</em>) – Diameter [m]</p></li>
+<li><p><strong>mjd0</strong> (<em>float</em>) – Epoch for state [BC-relative JD]</p></li>
+<li><p><strong>prop</strong> (<em>float</em>) – Propagator instance, child of <code class="xref py py-class docutils literal notranslate"><span class="pre">PropagatorBase</span></code></p></li>
+<li><p><strong>propagator_options</strong> (<em>dict</em>) – Propagator initialization keyword arguments</p></li>
+<li><p><strong>propagator_args</strong> (<em>dict</em>) – Propagator call keyword arguments</p></li>
+</ul>
+</dd>
+</dl>
+<p>The constructor creates a space object using Kepler elements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> (<em>float</em>) – Area in square meters</p></li>
+<li><p><strong>m</strong> (<em>float</em>) – Mass in kg</p></li>
+<li><p><strong>C_D</strong> (<em>float</em>) – Drag coefficient</p></li>
+<li><p><strong>C_R</strong> (<em>float</em>) – Radiation pressure coefficient</p></li>
+<li><p><strong>mjd0</strong> (<em>float</em>) – Epoch for state</p></li>
+<li><p><strong>oid</strong> (<em>int</em>) – Identifying object ID</p></li>
+<li><p><strong>d</strong> (<em>float</em>) – Diameter in meters</p></li>
+<li><p><strong>propagator</strong> (<em>PropagatorBase</em>) – Propagator class pointer</p></li>
+<li><p><strong>propagator_options</strong> (<em>dict</em>) – Propagator initialization keyword arguments</p></li>
+<li><p><strong>propagator_args</strong> (<em>dict</em>) – Keyword arguments to be passed to the propagator call</p></li>
+<li><p><strong>kwargs</strong> (<em>dict</em>) – All additional keywords are used to initialize the orbit</p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword arguments</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><em>a</em> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – Semi-major axis in meters</p></li>
+<li><p><em>e</em> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – Eccentricity</p></li>
+<li><p><em>i</em> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – Inclination in degrees</p></li>
+<li><p><em>aop</em> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – Argument of perigee in degrees</p></li>
+<li><p><em>raan</em> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – Right ascension of the ascending node in degrees</p></li>
+<li><p><em>mu0</em> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – Mean anomaly in degrees</p></li>
+<li><p><em>x</em> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – X-position</p></li>
+<li><p><em>y</em> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – Y-position</p></li>
+<li><p><em>z</em> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – Z-position</p></li>
+<li><p><em>vx</em> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – X-velocity</p></li>
+<li><p><em>vy</em> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – Y-velocity</p></li>
+<li><p><em>vz</em> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – Z-velocity</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.space_object.SpaceObject.__init__.html#sorts.space_object.SpaceObject.__init__" title="sorts.space_object.SpaceObject.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(propagator[, d, C_D, A, m, mjd0, …])</p></td>
+<td><p>Initialize self.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.space_object.SpaceObject.copy.html#sorts.space_object.SpaceObject.copy" title="sorts.space_object.SpaceObject.copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code></a>()</p></td>
+<td><p>Returns a copy of the SpaceObject instance.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.space_object.SpaceObject.get_position.html#sorts.space_object.SpaceObject.get_position" title="sorts.space_object.SpaceObject.get_position"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_position</span></code></a>(t)</p></td>
+<td><p>Gets position at specified times using propagator instance.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.space_object.SpaceObject.get_state.html#sorts.space_object.SpaceObject.get_state" title="sorts.space_object.SpaceObject.get_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_state</span></code></a>(t)</p></td>
+<td><p>Gets ECEF state at specified times using propagator instance.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.space_object.SpaceObject.get_velocity.html#sorts.space_object.SpaceObject.get_velocity" title="sorts.space_object.SpaceObject.get_velocity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_velocity</span></code></a>(t)</p></td>
+<td><p>Gets velocity at specified times using propagator instance.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.space_object.SpaceObject.propagate.html#sorts.space_object.SpaceObject.propagate" title="sorts.space_object.SpaceObject.propagate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">propagate</span></code></a>(dt[, frame_transformation, …])</p></td>
+<td><p>Propagate and change the epoch of this space object</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.space_object.SpaceObject.update.html#sorts.space_object.SpaceObject.update" title="sorts.space_object.SpaceObject.update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update</span></code></a>(**kwargs)</p></td>
+<td><p>Updates the orbital elements and Cartesian state vector of the space object.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.space_object.SpaceObject.diam.html#sorts.space_object.SpaceObject.diam" title="sorts.space_object.SpaceObject.diam"><code class="xref py py-obj docutils literal notranslate"><span class="pre">diam</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.space_object.SpaceObject.m.html#sorts.space_object.SpaceObject.m" title="sorts.space_object.SpaceObject.m"><code class="xref py py-obj docutils literal notranslate"><span class="pre">m</span></code></a></p></td>
+<td><p>Object mass, if changed the Kepler elements stays constant</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.space_object.SpaceObject.__init__.html" title="SpaceObject.__init__"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sorts.space_object.html" title="space_object"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.space_object.html" >space_object</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

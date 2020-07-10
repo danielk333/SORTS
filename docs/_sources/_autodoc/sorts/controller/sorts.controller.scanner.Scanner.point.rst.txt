@@ -1,0 +1,8 @@
+Scanner.point
+=============
+
+.. currentmodule:: sorts.controller.scanner
+
+.. rubric:: Scanner.point
+
+.. automethod:: Scanner.point

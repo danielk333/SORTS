@@ -1,0 +1,46 @@
+observed\_parameters
+====================
+
+.. automodule:: sorts.scheduler.observed_parameters
+
+.. currentmodule:: sorts.scheduler.observed_parameters
+
+Module summary
+--------------
+
+
+
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    ObservedParameters
+    
+
+
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: ObservedParameters
+
+.. autoclass:: ObservedParameters
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
+
+
+
+

@@ -1,0 +1,8 @@
+Scheduler.calculate\_observation
+================================
+
+.. currentmodule:: sorts.scheduler.scheduler
+
+.. rubric:: Scheduler.calculate_observation
+
+.. automethod:: Scheduler.calculate_observation

@@ -1,0 +1,229 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>sorts.radar.scans.scan &#8212; SORTS 3.13.0 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for sorts.radar.scans.scan</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="sd">&#39;&#39;&#39;Defines what a radar observation schema is in the form of a class.</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="c1">#Python standard import</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+
+
+<span class="c1">#Third party import</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1">#Local import</span>
+<span class="kn">from</span> <span class="nn">...</span> <span class="kn">import</span> <span class="n">frames</span>
+
+
+<div class="viewcode-block" id="Scan"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.html#sorts.radar.scans.fence.Scan">[docs]</a><span class="k">class</span> <span class="nc">Scan</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Encapsulates the observation schema of a radar system, i.e. its &quot;scan&quot;.</span>
+
+<span class="sd">    :param str coordinates: The coordinate system used, can be :code:`&#39;azelr&#39;`, :code:`&#39;ned&#39;` or :code:`&#39;enu&#39;`. If `azelr` is used, degrees are assumed.</span>
+
+<span class="sd">    **Pointing function:**</span>
+<span class="sd">    </span>
+<span class="sd">    The pointing function must follow the following standard:</span>
+
+<span class="sd">     * Take in time in seconds past reference epoch in seconds as first argument.</span>
+<span class="sd">     * Take any number of keyword arguments.</span>
+<span class="sd">     * It must return the pointing coordinates as an `(3,)`, `(3,n)` or `(3,n,m)` numpy ndarray where `n` is the length of the input time vector and `m` is the number of simultaneous pointing directions.</span>
+<span class="sd">     * Units are in meters.</span>
+<span class="sd">     * Should be vectorized according to time as the second axis.</span>
+<span class="sd">     </span>
+<span class="sd">    Example pointing function:</span>
+<span class="sd">    </span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        import numpy as np</span>
+<span class="sd">        </span>
+
+
+<span class="sd">    **Coordinate systems:**</span>
+
+<span class="sd">     :azelr: Azimuth, Elevation, Range in degrees east of north and above horizon.</span>
+<span class="sd">     :ned: Cartesian coordinates in North, East, Down.</span>
+<span class="sd">     :enu: Cartesian coordinates in East, North, Up.</span>
+
+
+<span class="sd">    &#39;&#39;&#39;</span>
+<div class="viewcode-block" id="Scan.__init__"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.__init__.html#sorts.radar.scans.fence.Scan.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="o">=</span><span class="s1">&#39;enu&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="n">coordinates</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Scan.dwell"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.dwell.html#sorts.radar.scans.fence.Scan.dwell">[docs]</a>    <span class="k">def</span> <span class="nf">dwell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;The current dwell time of the scan. </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="Scan.min_dwell"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.min_dwell.html#sorts.radar.scans.fence.Scan.min_dwell">[docs]</a>    <span class="k">def</span> <span class="nf">min_dwell</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;If there are dynamic dwell times, this is the minimum dwell time. Otherwise, returns same as :code:`dwell`.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="Scan.cycle"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.cycle.html#sorts.radar.scans.fence.Scan.cycle">[docs]</a>    <span class="k">def</span> <span class="nf">cycle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;The cycle time of the scan if applicable.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="Scan.copy"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.copy.html#sorts.radar.scans.fence.Scan.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Return a copy of the current instance.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Scan.check_dwell_tx"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.check_dwell_tx.html#sorts.radar.scans.fence.Scan.check_dwell_tx">[docs]</a>    <span class="k">def</span> <span class="nf">check_dwell_tx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tx</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Checks if the transmitting antenna pulse pattern and coherent integration schema is compatible with the observation schema. Raises an Exception if not.</span>
+<span class="sd">        </span>
+<span class="sd">            :param sorts.radar.TX tx: The antenna that should perform this scan.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">time_slice</span> <span class="o">=</span> <span class="n">tx</span><span class="o">.</span><span class="n">n_ipp</span><span class="o">*</span><span class="n">tx</span><span class="o">.</span><span class="n">ipp</span>
+        <span class="n">dwell_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_dwell</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">dwell_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">time_slice</span> <span class="o">&gt;</span> <span class="n">dwell_time</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;TX time_slice of </span><span class="si">{</span><span class="n">time_slice</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1"> s incompatible with minimum dwell time of scan </span><span class="si">{</span><span class="n">dwell_time</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1"> s&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Scan.pointing"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.pointing.html#sorts.radar.scans.fence.Scan.pointing">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">pointing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Scan.enu_pointing"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.enu_pointing.html#sorts.radar.scans.fence.Scan.enu_pointing">[docs]</a>    <span class="k">def</span> <span class="nf">enu_pointing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Returns the instantaneous pointing in East, North, Up (ENU) local coordinates.</span>
+<span class="sd">        </span>
+<span class="sd">            :param float/numpy.ndarray t: Seconds past a reference epoch to retrieve the pointing at.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">point</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pointing</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">==</span> <span class="s1">&#39;ned&#39;</span><span class="p">:</span>
+            <span class="n">point</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">point</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="o">...</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">==</span> <span class="s1">&#39;enu&#39;</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">==</span> <span class="s1">&#39;azelr&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">point</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">p_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">point</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">point</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">point</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+                    <span class="n">p_</span><span class="p">[:,:,</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">sph_to_cart</span><span class="p">(</span><span class="n">point</span><span class="p">[:,:,</span><span class="n">ind</span><span class="p">],</span> <span class="n">radians</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">point</span> <span class="o">=</span> <span class="n">p_</span>
+                <span class="k">del</span> <span class="n">p_</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">point</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">sph_to_cart</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">radians</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">point</span></div>
+    
+
+    <span class="k">def</span> <span class="nf">_transform_ecef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">ant</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">==</span> <span class="s1">&#39;ned&#39;</span><span class="p">:</span>
+            <span class="n">k0</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">ned_to_ecef</span><span class="p">(</span><span class="n">ant</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="n">ant</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span> <span class="n">ant</span><span class="o">.</span><span class="n">alt</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">radians</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">==</span> <span class="s1">&#39;enu&#39;</span><span class="p">:</span>
+            <span class="n">k0</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">enu_to_ecef</span><span class="p">(</span><span class="n">ant</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="n">ant</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span> <span class="n">ant</span><span class="o">.</span><span class="n">alt</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">radians</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">==</span> <span class="s1">&#39;azelr&#39;</span><span class="p">:</span>
+            <span class="n">k0</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">azel_to_ecef</span><span class="p">(</span><span class="n">ant</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="n">ant</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span> <span class="n">ant</span><span class="o">.</span><span class="n">alt</span><span class="p">,</span> <span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="o">...</span><span class="p">],</span> <span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="o">...</span><span class="p">],</span> <span class="n">radians</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">k0</span>
+
+
+<div class="viewcode-block" id="Scan.ecef_pointing"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.ecef_pointing.html#sorts.radar.scans.fence.Scan.ecef_pointing">[docs]</a>    <span class="k">def</span> <span class="nf">ecef_pointing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">ant</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Returns the instantaneous WGS84 ECEF pointing direction and the radar geographical location in WGS84 ECEF coordinates.</span>
+<span class="sd">        </span>
+<span class="sd">            :param float t: Seconds past a reference epoch to retrieve the pointing at.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">point</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pointing</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">point</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">k0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">point</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">point</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">point</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+                <span class="n">k0</span><span class="p">[:,:,</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform_ecef</span><span class="p">(</span><span class="n">point</span><span class="p">[:,:,</span><span class="n">ind</span><span class="p">],</span> <span class="n">ant</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">k0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform_ecef</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">ant</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">k0</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,8 @@
+Scheduler.get\_controllers
+==========================
+
+.. currentmodule:: sorts.scheduler.scheduler
+
+.. rubric:: Scheduler.get_controllers
+
+.. automethod:: Scheduler.get_controllers

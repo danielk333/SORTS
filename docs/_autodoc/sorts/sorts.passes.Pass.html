@@ -1,0 +1,186 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Pass &#8212; SORTS 3.13.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Pass.__init__" href="sorts.passes.Pass.__init__.html" />
+    <link rel="prev" title="passes" href="sorts.passes.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.passes.Pass.__init__.html" title="Pass.__init__"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sorts.passes.html" title="passes"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.passes.html" accesskey="U">passes</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sorts.passes.html"
+                        title="previous chapter">passes</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sorts.passes.Pass.__init__.html"
+                        title="next chapter">Pass.__init__</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/_autodoc/sorts/sorts.passes.Pass.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="pass">
+<h1>Pass<a class="headerlink" href="#pass" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="sorts.passes.Pass">
+<em class="property">class </em><code class="sig-prename descclassname">sorts.passes.</code><code class="sig-name descname">Pass</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">enu</span></em>, <em class="sig-param"><span class="n">inds</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cache</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">station_id</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/passes.html#Pass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.passes.Pass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Saves the local coordinate data for a single pass. Optionally also indicates the location of that pass in a bigger dataset.</p>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.passes.Pass.__init__.html#sorts.passes.Pass.__init__" title="sorts.passes.Pass.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(t, enu[, inds, cache, station_id])</p></td>
+<td><p>Initialize self.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.passes.Pass.calculate_max_snr.html#sorts.passes.Pass.calculate_max_snr" title="sorts.passes.Pass.calculate_max_snr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_max_snr</span></code></a>(tx, rx, diameter)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.passes.Pass.calculate_range.html#sorts.passes.Pass.calculate_range" title="sorts.passes.Pass.calculate_range"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_range</span></code></a>(enu)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.passes.Pass.calculate_range_rate.html#sorts.passes.Pass.calculate_range_rate" title="sorts.passes.Pass.calculate_range_rate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_range_rate</span></code></a>(enu)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.passes.Pass.calculate_zenith_angle.html#sorts.passes.Pass.calculate_zenith_angle" title="sorts.passes.Pass.calculate_zenith_angle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_zenith_angle</span></code></a>(enu[, radians])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.passes.Pass.end.html#sorts.passes.Pass.end" title="sorts.passes.Pass.end"><code class="xref py py-obj docutils literal notranslate"><span class="pre">end</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.passes.Pass.get_range.html#sorts.passes.Pass.get_range" title="sorts.passes.Pass.get_range"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_range</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.passes.Pass.get_range_rate.html#sorts.passes.Pass.get_range_rate" title="sorts.passes.Pass.get_range_rate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_range_rate</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.passes.Pass.get_zenith_angle.html#sorts.passes.Pass.get_zenith_angle" title="sorts.passes.Pass.get_zenith_angle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_zenith_angle</span></code></a>([radians])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.passes.Pass.range.html#sorts.passes.Pass.range" title="sorts.passes.Pass.range"><code class="xref py py-obj docutils literal notranslate"><span class="pre">range</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.passes.Pass.range_rate.html#sorts.passes.Pass.range_rate" title="sorts.passes.Pass.range_rate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">range_rate</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.passes.Pass.start.html#sorts.passes.Pass.start" title="sorts.passes.Pass.start"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.passes.Pass.zenith_angle.html#sorts.passes.Pass.zenith_angle" title="sorts.passes.Pass.zenith_angle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zenith_angle</span></code></a>([radians])</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.passes.Pass.stations.html#sorts.passes.Pass.stations" title="sorts.passes.Pass.stations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stations</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.passes.Pass.__init__.html" title="Pass.__init__"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sorts.passes.html" title="passes"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.passes.html" >passes</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

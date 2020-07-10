@@ -1,0 +1,8 @@
+RadarController.point\_rx\_ecef
+===============================
+
+.. currentmodule:: sorts.controller.radar_controller
+
+.. rubric:: RadarController.point_rx_ecef
+
+.. automethod:: RadarController.point_rx_ecef

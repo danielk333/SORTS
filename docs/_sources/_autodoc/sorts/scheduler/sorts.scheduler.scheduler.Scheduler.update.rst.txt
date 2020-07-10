@@ -1,0 +1,8 @@
+Scheduler.update
+================
+
+.. currentmodule:: sorts.scheduler.scheduler
+
+.. rubric:: Scheduler.update
+
+.. automethod:: Scheduler.update

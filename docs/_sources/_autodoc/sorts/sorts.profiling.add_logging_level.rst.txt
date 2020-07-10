@@ -1,0 +1,8 @@
+add\_logging\_level
+===================
+
+.. currentmodule:: sorts.profiling
+
+.. rubric:: add_logging_level
+
+.. autofunction:: add_logging_level

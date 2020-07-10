@@ -1,0 +1,6 @@
+sorts.constants.WGS84.e1sq
+==========================
+
+.. currentmodule:: sorts.constants
+
+.. autoattribute:: WGS84.e1sq

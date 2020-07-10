@@ -1,0 +1,8 @@
+ObservedParameters.get\_controllers
+===================================
+
+.. currentmodule:: sorts.scheduler.observed_parameters
+
+.. rubric:: ObservedParameters.get_controllers
+
+.. automethod:: ObservedParameters.get_controllers

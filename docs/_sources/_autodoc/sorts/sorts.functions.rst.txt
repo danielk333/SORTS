@@ -1,0 +1,56 @@
+functions
+=========
+
+.. automodule:: sorts.functions
+
+.. currentmodule:: sorts.functions
+
+Module summary
+--------------
+
+
+
+
+
+
+
+.. rubric:: Functions
+
+.. autosummary::
+    :toctree: .
+    
+    coherrent_to_instantaneous
+    
+    instantaneous_to_coherrent
+    
+    signal_delay
+    
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: Functions
+
+
+.. autofunction:: coherrent_to_instantaneous
+   :noindex:
+
+
+
+.. autofunction:: instantaneous_to_coherrent
+   :noindex:
+
+
+
+.. autofunction:: signal_delay
+   :noindex:
+
+

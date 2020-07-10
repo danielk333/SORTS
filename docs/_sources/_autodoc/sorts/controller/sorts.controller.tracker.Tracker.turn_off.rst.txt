@@ -1,0 +1,8 @@
+Tracker.turn\_off
+=================
+
+.. currentmodule:: sorts.controller.tracker
+
+.. rubric:: Tracker.turn_off
+
+.. automethod:: Tracker.turn_off

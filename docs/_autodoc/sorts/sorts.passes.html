@@ -1,0 +1,249 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>passes &#8212; SORTS 3.13.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Pass" href="sorts.passes.Pass.html" />
+    <link rel="prev" title="SpaceObject.m" href="sorts.space_object.SpaceObject.m.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.passes.Pass.html" title="Pass"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sorts.space_object.SpaceObject.m.html" title="SpaceObject.m"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../api.html" accesskey="U">API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">passes</a><ul>
+<li><a class="reference internal" href="#module-summary">Module summary</a><ul>
+</ul>
+</li>
+<li><a class="reference internal" href="#contents">Contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sorts.space_object.SpaceObject.m.html"
+                        title="previous chapter">SpaceObject.m</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sorts.passes.Pass.html"
+                        title="next chapter">Pass</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/_autodoc/sorts/sorts.passes.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-sorts.passes">
+<span id="passes"></span><h1>passes<a class="headerlink" href="#module-sorts.passes" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-summary">
+<h2>Module summary<a class="headerlink" href="#module-summary" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Classes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.passes.Pass.html#sorts.passes.Pass" title="sorts.passes.Pass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Pass</span></code></a>(t, enu[, inds, cache, station_id])</p></td>
+<td><p>Saves the local coordinate data for a single pass.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Functions</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.passes.equidistant_sampling.html#sorts.passes.equidistant_sampling" title="sorts.passes.equidistant_sampling"><code class="xref py py-obj docutils literal notranslate"><span class="pre">equidistant_sampling</span></code></a>(orbit, start_t, end_t)</p></td>
+<td><p>Find the temporal sampling of an orbit which is sufficient to achieve a maximum spatial separation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.passes.find_passes.html#sorts.passes.find_passes" title="sorts.passes.find_passes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_passes</span></code></a>(t, states, station[, cache_data])</p></td>
+<td><p>Find passes inside the FOV of a radar station given a series of times for a space object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.passes.find_simultaneous_passes.html#sorts.passes.find_simultaneous_passes" title="sorts.passes.find_simultaneous_passes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_simultaneous_passes</span></code></a>(t, states, stations)</p></td>
+<td><p>Finds all passes that are simultaneously inside a multiple stations FOV’s.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.passes.select_simultaneous_passes.html#sorts.passes.select_simultaneous_passes" title="sorts.passes.select_simultaneous_passes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">select_simultaneous_passes</span></code></a>(passes)</p></td>
+<td><p>TODO, should this be a thing????</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Pass</p>
+<dl class="py class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">sorts.passes.</code><code class="sig-name descname">Pass</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">enu</span></em>, <em class="sig-param"><span class="n">inds</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cache</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">station_id</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/passes.html#Pass"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Saves the local coordinate data for a single pass. Optionally also indicates the location of that pass in a bigger dataset.</p>
+</dd></dl>
+
+<p class="rubric">Functions</p>
+<dl class="py function">
+<dt>
+<code class="sig-prename descclassname">sorts.passes.</code><code class="sig-name descname">equidistant_sampling</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">orbit</span></em>, <em class="sig-param"><span class="n">start_t</span></em>, <em class="sig-param"><span class="n">end_t</span></em>, <em class="sig-param"><span class="n">max_dpos</span><span class="o">=</span><span class="default_value">1000.0</span></em>, <em class="sig-param"><span class="n">eccentricity_tol</span><span class="o">=</span><span class="default_value">0.3</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/passes.html#equidistant_sampling"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Find the temporal sampling of an orbit which is sufficient to achieve a maximum spatial separation.
+Assume elliptic orbit and uses Keplerian propagation to find sampling, does not take perturbation patterns into account. 
+If eccentricity is small, uses periapsis speed and uniform sampling in time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>orbit</strong> (<em>pyorb.Orbit</em>) – Orbit to find temporal sampling of.</p></li>
+<li><p><strong>start_t</strong> (<em>float</em>) – Start time in seconds</p></li>
+<li><p><strong>end_t</strong> (<em>float</em>) – End time in seconds</p></li>
+<li><p><strong>max_dpos</strong> (<em>float</em>) – Maximum separation between evaluation points in meters.</p></li>
+<li><p><strong>eccentricity_tol</strong> (<em>float</em>) – Minimum eccentricity below which the orbit is approximated as a circle and temporal samples are uniform in time.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Vector of sample times in seconds.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt>
+<code class="sig-prename descclassname">sorts.passes.</code><code class="sig-name descname">find_passes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">states</span></em>, <em class="sig-param"><span class="n">station</span></em>, <em class="sig-param"><span class="n">cache_data</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/passes.html#find_passes"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Find passes inside the FOV of a radar station given a series of times for a space object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Vector of times in seconds to use as a base to find passes.</p></li>
+<li><p><strong>states</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – ECEF states of the object to find passes for.</p></li>
+<li><p><strong>station</strong> (<em>sorts.Station</em>) – Radar station that defines the FOV.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of passes</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>sorts.Pass</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt>
+<code class="sig-prename descclassname">sorts.passes.</code><code class="sig-name descname">find_simultaneous_passes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">states</span></em>, <em class="sig-param"><span class="n">stations</span></em>, <em class="sig-param"><span class="n">cache_data</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/passes.html#find_simultaneous_passes"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Finds all passes that are simultaneously inside a multiple stations FOV’s.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Vector of times in seconds to use as a base to find passes.</p></li>
+<li><p><strong>states</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – ECEF states of the object to find passes for.</p></li>
+<li><p><strong>of sorts.Station stations</strong> (<em>list</em>) – Radar stations that defines the FOV’s.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of passes</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of sorts.Pass</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt>
+<code class="sig-prename descclassname">sorts.passes.</code><code class="sig-name descname">select_simultaneous_passes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">passes</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/passes.html#select_simultaneous_passes"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>TODO, should this be a thing????</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.passes.Pass.html" title="Pass"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sorts.space_object.SpaceObject.m.html" title="SpaceObject.m"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

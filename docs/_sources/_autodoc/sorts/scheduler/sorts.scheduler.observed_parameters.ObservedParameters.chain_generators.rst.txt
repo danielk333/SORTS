@@ -1,0 +1,8 @@
+ObservedParameters.chain\_generators
+====================================
+
+.. currentmodule:: sorts.scheduler.observed_parameters
+
+.. rubric:: ObservedParameters.chain_generators
+
+.. automethod:: ObservedParameters.chain_generators

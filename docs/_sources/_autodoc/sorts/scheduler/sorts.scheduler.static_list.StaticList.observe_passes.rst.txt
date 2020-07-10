@@ -1,0 +1,8 @@
+StaticList.observe\_passes
+==========================
+
+.. currentmodule:: sorts.scheduler.static_list
+
+.. rubric:: StaticList.observe_passes
+
+.. automethod:: StaticList.observe_passes

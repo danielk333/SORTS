@@ -1,0 +1,274 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Profiling Orekit &#8212; SORTS 3.13.0 documentation</title>
+    <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Some predefined scans" href="predefined_scans.html" />
+    <link rel="prev" title="The SpaceObject class" href="space_object.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="predefined_scans.html" title="Some predefined scans"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="space_object.html" title="The SpaceObject class"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Examples</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="space_object.html"
+                        title="previous chapter">The SpaceObject class</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="predefined_scans.html"
+                        title="next chapter">Some predefined scans</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/auto_gallery/profiler_orekit.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-auto-gallery-profiler-orekit-py"><span class="std std-ref">here</span></a>     to download the full example code</p>
+</div>
+<div class="sphx-glr-example-title section" id="profiling-orekit">
+<span id="sphx-glr-auto-gallery-profiler-orekit-py"></span><h1>Profiling Orekit<a class="headerlink" href="#profiling-orekit" title="Permalink to this headline">¶</a></h1>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Orekit instance @ -9223363300610199934:
+-------------------------
+Integrator          : DormandPrince853
+Minimum step        : 0.001 s
+Maximum step        : 120.0 s
+Position Tolerance  : 10.0 m
+
+Input frame         : ITRF
+Output frame        : EME
+Gravity model       : HolmesFeatherstone
+                     - Harmonic expansion order (10, 10)
+Atmosphere model    : DTM2000
+Solar model         : Marshall
+Constants           : WGS84
+Included forces:
+ - earth gravity
+ - perturbation Moon
+ - perturbation Sun
+Third body perturbations:
+ - Moon
+ - Sun
+
+---------------------------------- Performance analysis ---------------------------------
+ Name                                         |   Executions |   Mean time |   Total time
+----------------------------------------------+--------------+-------------+--------------
+ Orekit:get_frame                             |            2 | 1.19209e-05 |  2.38419e-05
+ Orekit:init                                  |            1 | 0.155833    |  0.155833
+ Orekit:propagate:construct_propagator        |            1 | 7.70092e-05 |  7.70092e-05
+ Orekit:propagate:set_forces                  |            1 | 1.07288e-05 |  1.07288e-05
+ Orekit:propagate:steps:step-handler:getState |         5000 | 1.54157e-05 |  0.0770783
+ Orekit:propagate:steps:step-handler          |         1443 | 9.29867e-05 |  0.13418
+ Orekit:propagate:steps                       |            1 | 0.457373    |  0.457373
+ Orekit:propagate                             |            1 | 0.457782    |  0.457782
+ total                                        |            1 | 0.614431    |  0.614431
+-----------------------------------------------------------------------------------------
+
+---------------------------------- Performance analysis ----------------------------------
+ Name                                         |   Executions | Mean time      | Total time
+----------------------------------------------+--------------+----------------+----------------
+ Orekit:get_frame                             |            2 | 0:00:00.000012 | 0:00:00.000024
+ Orekit:init                                  |            1 | 0:00:00.155833 | 0:00:00.155833
+ Orekit:propagate:construct_propagator        |            1 | 0:00:00.000077 | 0:00:00.000077
+ Orekit:propagate:set_forces                  |            1 | 0:00:00.000011 | 0:00:00.000011
+ Orekit:propagate:steps:step-handler:getState |         5000 | 0:00:00.000015 | 0:00:00.077078
+ Orekit:propagate:steps:step-handler          |         1443 | 0:00:00.000093 | 0:00:00.134180
+ Orekit:propagate:steps                       |            1 | 0:00:00.457373 | 0:00:00.457373
+ Orekit:propagate                             |            1 | 0:00:00.457782 | 0:00:00.457782
+ total                                        |            1 | 0:00:00.614431 | 0:00:00.614431
+------------------------------------------------------------------------------------------
+
+--------------------------------- Performance analysis --------------------------------
+ Name                                         |   Executions |   Mean time | Total time
+----------------------------------------------+--------------+-------------+--------------
+ Orekit:get_frame                             |            2 | 1.19209e-05 | 0.00 %
+ Orekit:init                                  |            1 | 0.155833    | 25.36 %
+ Orekit:propagate:construct_propagator        |            1 | 7.70092e-05 | 0.01 %
+ Orekit:propagate:set_forces                  |            1 | 1.07288e-05 | 0.00 %
+ Orekit:propagate:steps:step-handler:getState |         5000 | 1.54157e-05 | 12.54 %
+ Orekit:propagate:steps:step-handler          |         1443 | 9.29867e-05 | 21.84 %
+ Orekit:propagate:steps                       |            1 | 0.457373    | 74.44 %
+ Orekit:propagate                             |            1 | 0.457782    | 74.50 %
+ total                                        |            1 | 0.614431    | 100.00 %
+---------------------------------------------------------------------------------------
+
+
+ Enable Drag Force
+
+--------------------------------- Performance analysis --------------------------------
+ Name                                         |   Executions |   Mean time | Total time
+----------------------------------------------+--------------+-------------+--------------
+ Orekit:get_frame                             |            2 | 8.22544e-06 | 0.00 %
+ Orekit:init                                  |            1 | 0.149706    | 7.87 %
+ Orekit:propagate:construct_propagator        |            1 | 8.22544e-05 | 0.00 %
+ Orekit:propagate:set_forces                  |            1 | 0.982052    | 51.64 %
+ Orekit:propagate:steps:step-handler:getState |         5000 | 1.69882e-05 | 4.47 %
+ Orekit:propagate:steps:step-handler          |         1443 | 0.000103429 | 7.85 %
+ Orekit:propagate:steps                       |            1 | 0.769279    | 40.45 %
+ Orekit:propagate                             |            1 | 1.75172     | 92.12 %
+ total                                        |            1 | 1.90157     | 100.00 %
+---------------------------------------------------------------------------------------
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">sorts.profiling</span> <span class="kn">import</span> <span class="n">Profiler</span>
+<span class="kn">from</span> <span class="nn">sorts.propagator</span> <span class="kn">import</span> <span class="n">Orekit</span>
+
+<span class="n">p</span> <span class="o">=</span> <span class="n">Profiler</span><span class="p">()</span>
+<span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;total&#39;</span><span class="p">)</span>
+
+<span class="n">orekit_data</span> <span class="o">=</span> <span class="s1">&#39;/home/danielk/IRF/IRF_GITLAB/orekit_build/orekit-data-master.zip&#39;</span>
+
+<span class="n">prop</span> <span class="o">=</span> <span class="n">Orekit</span><span class="p">(</span>
+    <span class="n">orekit_data</span> <span class="o">=</span> <span class="n">orekit_data</span><span class="p">,</span>
+    <span class="n">settings</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">in_frame</span><span class="o">=</span><span class="s1">&#39;ITRF&#39;</span><span class="p">,</span>
+        <span class="n">out_frame</span><span class="o">=</span><span class="s1">&#39;EME&#39;</span><span class="p">,</span>
+        <span class="n">drag_force</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">radiation_pressure</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">profiler</span> <span class="o">=</span> <span class="n">p</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">prop</span><span class="p">)</span>
+
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">state0</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><span class="o">-</span><span class="mf">7100297.113</span><span class="p">,</span><span class="o">-</span><span class="mf">3897715.442</span><span class="p">,</span><span class="mf">18568433.707</span><span class="p">,</span><span class="mf">86.771</span><span class="p">,</span><span class="o">-</span><span class="mf">3407.231</span><span class="p">,</span><span class="mf">2961.571</span><span class="p">])</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">t</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.linspace.html#numpy.linspace" title="numpy.linspace" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3600</span><span class="o">*</span><span class="mf">24.0</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
+<span class="n">mjd0</span> <span class="o">=</span> <span class="mi">53005</span>
+
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">states</span></a> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">t</span></a><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">state0</span></a><span class="p">,</span> <span class="n">mjd0</span><span class="p">,</span> <span class="n">A</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">C_R</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">C_D</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span>
+
+
+<span class="n">p</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;total&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">fmt</span><span class="p">(</span><span class="n">timedelta</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">fmt</span><span class="p">(</span><span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;total&#39;</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"> Enable Drag Force </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="n">p2</span> <span class="o">=</span> <span class="n">Profiler</span><span class="p">()</span>
+<span class="n">p2</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;total&#39;</span><span class="p">)</span>
+
+<span class="n">prop</span> <span class="o">=</span> <span class="n">Orekit</span><span class="p">(</span>
+    <span class="n">orekit_data</span> <span class="o">=</span> <span class="n">orekit_data</span><span class="p">,</span>
+    <span class="n">settings</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">in_frame</span><span class="o">=</span><span class="s1">&#39;ITRF&#39;</span><span class="p">,</span>
+        <span class="n">out_frame</span><span class="o">=</span><span class="s1">&#39;EME&#39;</span><span class="p">,</span>
+        <span class="n">drag_force</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">radiation_pressure</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">profiler</span> <span class="o">=</span> <span class="n">p2</span><span class="p">,</span>
+<span class="p">)</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">states</span></a> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">t</span></a><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">state0</span></a><span class="p">,</span> <span class="n">mjd0</span><span class="p">,</span> <span class="n">A</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">C_R</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">C_D</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span>
+
+<span class="n">p2</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;total&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">p2</span><span class="o">.</span><span class="n">fmt</span><span class="p">(</span><span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;total&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  2.523 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-gallery-profiler-orekit-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/7be1be9183b6dc6eb87102d309a3c6c1/profiler_orekit.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">profiler_orekit.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/080ae9276169fd013f678951a16ef94d/profiler_orekit.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">profiler_orekit.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="predefined_scans.html" title="Some predefined scans"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="space_object.html" title="The SpaceObject class"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Examples</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

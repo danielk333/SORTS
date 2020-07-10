@@ -1,0 +1,37 @@
+SpaceObject
+===========
+
+.. currentmodule:: sorts.space_object
+
+.. autoclass:: SpaceObject
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~SpaceObject.__init__
+      ~SpaceObject.copy
+      ~SpaceObject.get_position
+      ~SpaceObject.get_state
+      ~SpaceObject.get_velocity
+      ~SpaceObject.propagate
+      ~SpaceObject.update
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~SpaceObject.diam
+      ~SpaceObject.m
+   
+   

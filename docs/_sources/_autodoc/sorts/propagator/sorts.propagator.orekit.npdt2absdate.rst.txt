@@ -1,0 +1,8 @@
+npdt2absdate
+============
+
+.. currentmodule:: sorts.propagator.orekit
+
+.. rubric:: npdt2absdate
+
+.. autofunction:: npdt2absdate

@@ -1,0 +1,8 @@
+SpaceObject.diam
+================
+
+.. currentmodule:: sorts.space_object
+
+.. rubric:: SpaceObject.diam
+
+.. autoproperty:: sorts.space_object.SpaceObject.diam

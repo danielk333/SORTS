@@ -1,0 +1,297 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>orekit &#8212; SORTS 3.13.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Orekit" href="sorts.propagator.orekit.Orekit.html" />
+    <link rel="prev" title="sorts.propagator.base.Propagator.DEFAULT_SETTINGS" href="sorts.propagator.base.Propagator.DEFAULT_SETTINGS.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.propagator.orekit.Orekit.html" title="Orekit"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sorts.propagator.base.Propagator.DEFAULT_SETTINGS.html" title="sorts.propagator.base.Propagator.DEFAULT_SETTINGS"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" accesskey="U">API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">orekit</a><ul>
+<li><a class="reference internal" href="#module-summary">Module summary</a><ul>
+</ul>
+</li>
+<li><a class="reference internal" href="#contents">Contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sorts.propagator.base.Propagator.DEFAULT_SETTINGS.html"
+                        title="previous chapter">sorts.propagator.base.Propagator.DEFAULT_SETTINGS</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sorts.propagator.orekit.Orekit.html"
+                        title="next chapter">Orekit</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/_autodoc/sorts/propagator/sorts.propagator.orekit.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-sorts.propagator.orekit">
+<span id="orekit"></span><h1>orekit<a class="headerlink" href="#module-sorts.propagator.orekit" title="Permalink to this headline">¶</a></h1>
+<p>Wrapper for the Orekit propagator</p>
+<dl class="simple">
+<dt><strong>Links:</strong></dt><dd><ul class="simple">
+<li><p><a class="reference external" href="https://www.orekit.org/">orekit</a></p></li>
+<li><p><a class="reference external" href="https://gitlab.orekit.org/orekit-labs/python-wrapper">orekit python</a></p></li>
+<li><p><a class="reference external" href="https://gitlab.orekit.org/orekit-labs/python-wrapper/wikis/Manual-Installation-of-Python-Wrapper">orekit python guide</a></p></li>
+<li><p><a class="reference external" href="https://www.hipparchus.org/">Hipparchus</a></p></li>
+<li><p><a class="reference external" href="https://www.orekit.org/static/apidocs/index.html">orekit 9.3 api</a></p></li>
+<li><p><a class="reference external" href="https://pypi.org/project/JCC/">JCC</a></p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Example usage:</strong></p>
+<p>Simple propagation showing time difference due to loading of model data.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sorts.propagator</span> <span class="kn">import</span> <span class="n">Orekit</span>
+</pre></div>
+</div>
+<div class="section" id="module-summary">
+<h2>Module summary<a class="headerlink" href="#module-summary" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Classes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.orekit.Orekit.html#sorts.propagator.orekit.Orekit" title="sorts.propagator.orekit.Orekit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Orekit</span></code></a>(orekit_data[, settings])</p></td>
+<td><p>Propagator class implementing the Orekit propagator.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Functions</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.orekit.mjd2absdate.html#sorts.propagator.orekit.mjd2absdate" title="sorts.propagator.orekit.mjd2absdate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mjd2absdate</span></code></a>(mjd, utc)</p></td>
+<td><p>Converts a Modified Julian Date value to an orekit AbsoluteDate</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.propagator.orekit.npdt2absdate.html#sorts.propagator.orekit.npdt2absdate" title="sorts.propagator.orekit.npdt2absdate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">npdt2absdate</span></code></a>(dt, utc)</p></td>
+<td><p>Converts a numpy datetime64 value to an orekit AbsoluteDate</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Orekit</p>
+<dl class="py class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">sorts.propagator.orekit.</code><code class="sig-name descname">Orekit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">orekit_data</span></em>, <em class="sig-param"><span class="n">settings</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/propagator/orekit.html#Orekit"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="sorts.propagator.base.Propagator.html#sorts.propagator.base.Propagator" title="sorts.propagator.base.Propagator"><code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.propagator.base.Propagator</span></code></a></p>
+<p>Propagator class implementing the Orekit propagator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>solarsystem_perturbers</strong> (<em>list</em>) – List of strings of names of objects in the solarsystem that should be used for third body perturbation calculations. All objects listed at <a class="reference external" href="https://www.orekit.org/static/apidocs/org/orekit/bodies/CelestialBodyFactory.html">CelestialBodyFactory</a> are available.</p></li>
+<li><p><strong>in_frame</strong> (<em>str</em>) – String identifying the input frame to be used. All frames listed at <a class="reference external" href="https://www.orekit.org/static/apidocs/org/orekit/frames/FramesFactory.html">FramesFactory</a> are available.</p></li>
+<li><p><strong>out_frame</strong> (<em>str</em>) – <p>String identifying the output frame to be used. All frames listed at <a class="reference external" href="https://www.orekit.org/static/apidocs/org/orekit/frames/FramesFactory.html">FramesFactory</a> are available.</p>
+</p></li>
+<li><p><strong>drag_force</strong> (<em>bool</em>) – Should drag force be included in propagation.</p></li>
+<li><p><strong>radiation_pressure</strong> (<em>bool</em>) – Should radiation pressure force be included in propagation.</p></li>
+<li><p><strong>frame_tidal_effects</strong> (<em>bool</em>) – Should coordinate frames include Tidal effects.</p></li>
+<li><p><strong>integrator</strong> (<em>str</em>) – String representing the numerical integrator from the Hipparchus package to use. Any integrator listed at <a class="reference external" href="https://www.hipparchus.org/apidocs/org/hipparchus/ode/nonstiff/package-summary.html">Hipparchus nonstiff ode</a> is available.</p></li>
+<li><p><strong>minStep</strong> (<em>float</em>) – Minimum time step allowed in the numerical orbit propagation given in seconds.</p></li>
+<li><p><strong>maxStep</strong> (<em>float</em>) – Maximum time step allowed in the numerical orbit propagation given in seconds.</p></li>
+<li><p><strong>position_tolerance</strong> (<em>float</em>) – Position tolerance in numerical orbit propagation errors given in meters.</p></li>
+<li><p><strong>earth_gravity</strong> (<em>str</em>) – Gravitation model to use for calculating central acceleration force. Currently avalible options are <cite>‘HolmesFeatherstone’</cite> and <cite>‘Newtonian’</cite>. See <a class="reference external" href="https://www.orekit.org/static/apidocs/org/orekit/forces/gravity/package-summary.html">gravity</a>.</p></li>
+<li><p><strong>gravity_order</strong> (<em>tuple</em>) – A tuple of two integers for describing the order of spherical harmonics used in the <a class="reference external" href="https://www.orekit.org/static/apidocs/org/orekit/forces/gravity/HolmesFeatherstoneAttractionModel.html">HolmesFeatherstoneAttractionModel</a> model.</p></li>
+<li><p><strong>atmosphere</strong> (<em>str</em>) – Atmosphere model used to calculate atmospheric drag. Currently available options are <cite>‘DTM2000’</cite>. See <a class="reference external" href="https://www.orekit.org/static/apidocs/org/orekit/forces/drag/atmosphere/package-summary.html">atmospheres</a>.</p></li>
+<li><p><strong>solar_activity</strong> (<em>str</em>) – The model used for calculating solar activity and thereby the influx of solar radiation. Used in the atmospheric drag force model. Currently available options are <cite>‘Marshall’</cite> for the <a class="reference external" href="https://www.orekit.org/static/apidocs/org/orekit/forces/drag/atmosphere/data/MarshallSolarActivityFutureEstimation.html">MarshallSolarActivityFutureEstimation</a>.</p></li>
+<li><p><strong>constants_source</strong> (<em>str</em>) – Controls which source for Earth constants to use. Currently avalible options are <cite>‘WGS84’</cite> and <cite>‘JPL-IAU’</cite>. See <a class="reference external" href="https://www.orekit.org/static/apidocs/org/orekit/utils/Constants.html">constants</a>.</p></li>
+<li><p><strong>mu</strong> (<em>float</em>) – Standard gravitational constant for the Earth.  Definition depend on the <code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.propagator.Orekit</span></code> constructor parameter <code class="code docutils literal notranslate"><span class="pre">constants_source</span></code></p></li>
+<li><p><strong>R_earth</strong> (<em>float</em>) – Radius of the Earth in m. Definition depend on the <code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.propagator.Orekit</span></code> constructor parameter <code class="code docutils literal notranslate"><span class="pre">constants_source</span></code></p></li>
+<li><p><strong>f_earth</strong> (<em>float</em>) – Flattening of the Earth (i.e. <span class="math notranslate nohighlight">\(\frac{a-b}{a}\)</span> ). Definition depend on the <code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.propagator.Orekit</span></code> constructor parameter <code class="code docutils literal notranslate"><span class="pre">constants_source</span></code>.</p></li>
+<li><p><a class="reference internal" href="../sorts.constants.WGS72.M_earth.html#sorts.constants.WGS72.M_earth" title="sorts.constants.WGS72.M_earth"><strong>M_earth</strong></a> (<em>float</em>) – Mass of the Earth in kg. Definition depend on the <code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.propagator.Orekit</span></code> constructor parameter <code class="code docutils literal notranslate"><span class="pre">constants_source</span></code></p></li>
+<li><p><strong>inputFrame</strong> (<em>org.orekit.frames.Frame</em>) – The orekit frame instance for the input frame.</p></li>
+<li><p><strong>outputFrame</strong> (<em>org.orekit.frames.Frame</em>) – The orekit frame instance for the output frame.</p></li>
+<li><p><strong>inertialFrame</strong> (<em>org.orekit.frames.Frame</em>) – The orekit frame instance for the inertial frame. If inputFrame is pseudo innertial this is the same as inputFrame.</p></li>
+<li><p><strong>body</strong> (<em>org.orekit.bodies.OneAxisEllipsoid</em>) – The model ellipsoid representing the Earth.</p></li>
+<li><p><strong>_forces</strong> (<em>dict</em>) – Dictionary of forces to include in the numerical integration. Contains instances of children of <code class="xref py py-class docutils literal notranslate"><span class="pre">org.orekit.forces.AbstractForceModel</span></code>.</p></li>
+<li><p><strong>_tolerances</strong> (<em>list</em>) – Contains the absolute and relative tolerances calculated by the <a class="reference external" href="https://www.orekit.org/static/apidocs/org/orekit/propagation/numerical/NumericalPropagator.html#tolerances(double,org.orekit.orbits.Orbit,org.orekit.orbits.OrbitType)">tolerances</a> function.</p></li>
+<li><p><strong>propagator</strong> (<em>org.orekit.propagation.numerical.NumericalPropagator</em>) – The numerical propagator instance.</p></li>
+<li><p><strong>SolarStrengthLevel</strong> (<em>org.orekit.forces.drag.atmosphere.data.MarshallSolarActivityFutureEstimation.StrengthLevel</em>) – The strength of the solar activity. Options are ‘AVRAGE’, ‘STRONG’, ‘WEAK’.</p></li>
+</ul>
+</dd>
+</dl>
+<p>The constructor creates a propagator instance with supplied options.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>solarsystem_perturbers</strong> (<em>list</em>) – <p>List of strings of names of objects in the solarsystem that should be used for third body perturbation calculations. All objects listed at <a class="reference external" href="https://www.orekit.org/static/apidocs/org/orekit/bodies/CelestialBodyFactory.html">CelestialBodyFactory</a> are available.</p>
+</p></li>
+<li><p><strong>in_frame</strong> (<em>str</em>) – <p>String identifying the input frame to be used. All frames listed at <a class="reference external" href="https://www.orekit.org/static/apidocs/org/orekit/frames/FramesFactory.html">FramesFactory</a> are available.</p>
+</p></li>
+<li><p><strong>out_frame</strong> (<em>str</em>) – <p>String identifying the output frame to be used. All frames listed at <a class="reference external" href="https://www.orekit.org/static/apidocs/org/orekit/frames/FramesFactory.html">FramesFactory</a> are available.</p>
+</p></li>
+<li><p><strong>drag_force</strong> (<em>bool</em>) – Should drag force be included in propagation.</p></li>
+<li><p><strong>radiation_pressure</strong> (<em>bool</em>) – Should radiation pressure force be included in propagation.</p></li>
+<li><p><strong>frame_tidal_effects</strong> (<em>bool</em>) – Should coordinate frames include Tidal effects.</p></li>
+<li><p><strong>integrator</strong> (<em>str</em>) – <p>String representing the numerical integrator from the Hipparchus package to use. Any integrator listed at <a class="reference external" href="https://www.hipparchus.org/apidocs/org/hipparchus/ode/nonstiff/package-summary.html">Hipparchus nonstiff ode</a> is available.</p>
+</p></li>
+<li><p><strong>min_step</strong> (<em>float</em>) – Minimum time step allowed in the numerical orbit propagation given in seconds.</p></li>
+<li><p><strong>max_step</strong> (<em>float</em>) – Maximum time step allowed in the numerical orbit propagation given in seconds.</p></li>
+<li><p><strong>position_tolerance</strong> (<em>float</em>) – Position tolerance in numerical orbit propagation errors given in meters.</p></li>
+<li><p><strong>atmosphere</strong> (<em>str</em>) – <p>Atmosphere model used to calculate atmospheric drag. Currently available options are <cite>‘DTM2000’</cite>. See <a class="reference external" href="https://www.orekit.org/static/apidocs/org/orekit/forces/drag/atmosphere/package-summary.html">atmospheres</a>.</p>
+</p></li>
+<li><p><strong>solar_activity</strong> (<em>str</em>) – <p>The model used for calculating solar activity and thereby the influx of solar radiation. Used in the atmospheric drag force model. Currently available options are <cite>‘Marshall’</cite> for the <a class="reference external" href="https://www.orekit.org/static/apidocs/org/orekit/forces/drag/atmosphere/data/MarshallSolarActivityFutureEstimation.html">MarshallSolarActivityFutureEstimation</a>.</p>
+</p></li>
+<li><p><strong>constants_source</strong> (<em>str</em>) – <p>Controls which source for Earth constants to use. Currently avalible options are <cite>‘WGS84’</cite> and <cite>‘JPL-IAU’</cite>. See <a class="reference external" href="https://www.orekit.org/static/apidocs/org/orekit/utils/Constants.html">constants</a>.</p>
+</p></li>
+<li><p><strong>earth_gravity</strong> (<em>str</em>) – <p>Gravitation model to use for calculating central acceleration force. Currently avalible options are <cite>‘HolmesFeatherstone’</cite> and <cite>‘Newtonian’</cite>. See <a class="reference external" href="https://www.orekit.org/static/apidocs/org/orekit/forces/gravity/package-summary.html">gravity</a>.</p>
+</p></li>
+<li><p><strong>gravity_order</strong> (<em>tuple</em>) – <p>A tuple of two integers for describing the order of spherical harmonics used in the <a class="reference external" href="https://www.orekit.org/static/apidocs/org/orekit/forces/gravity/HolmesFeatherstoneAttractionModel.html">HolmesFeatherstoneAttractionModel</a> model.</p>
+</p></li>
+<li><p><strong>solar_activity_strength</strong> (<em>str</em>) – The strength of the solar activity. Options are ‘AVRAGE’, ‘STRONG’, ‘WEAK’.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py class">
+<dt>
+<em class="property">class </em><code class="sig-name descname">OrekitVariableStep</code><a class="reference internal" href="../../../_modules/sorts/propagator/orekit.html#Orekit.OrekitVariableStep"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">org.orekit.python.PythonOrekitStepHandler</span></code></p>
+<p>Class for handling the steps.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">propagate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">state0</span></em>, <em class="sig-param"><span class="n">mjd0</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/propagator/orekit.html#Orekit.propagate"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p><strong>Implementation:</strong></p>
+<p>Units are in meters and degrees.</p>
+<p>Keyword arguments are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>float A: Area in m^2</p></li>
+<li><p>float C_D: Drag coefficient</p></li>
+<li><p>float C_R: Radiation pressure coefficient</p></li>
+<li><p>float m: Mass of object in kg</p></li>
+</ul>
+</div></blockquote>
+<dl class="simple">
+<dt><em>NOTE:</em></dt><dd><ul class="simple">
+<li><p>If the eccentricity is below 1e-10 the eccentricity will be set to 1e-10 to prevent Keplerian Jacobian becoming singular.</p></li>
+</ul>
+</dd>
+</dl>
+<p>The implementation first checks if the input frame is Pseudo inertial, if this is true this is used as the propagation frame. If not it is automatically converted to EME (ECI-J2000).</p>
+<p>Since there are forces that are dependent on the space-craft parameters, if these parameter has been changed since the last iteration the numerical integrator is re-initialized at every call of this method. The forces that can be initialized without spacecraft parameters (e.g. Earth gravitational field) are done at propagator construction.</p>
+<p>See <code class="xref py py-func docutils literal notranslate"><span class="pre">propagator_base.PropagatorBase.get_orbit()</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<p class="rubric">Functions</p>
+<dl class="py function">
+<dt>
+<code class="sig-prename descclassname">sorts.propagator.orekit.</code><code class="sig-name descname">mjd2absdate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mjd</span></em>, <em class="sig-param"><span class="n">utc</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/propagator/orekit.html#mjd2absdate"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Converts a Modified Julian Date value to an orekit AbsoluteDate</p>
+</dd></dl>
+
+<dl class="py function">
+<dt>
+<code class="sig-prename descclassname">sorts.propagator.orekit.</code><code class="sig-name descname">npdt2absdate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dt</span></em>, <em class="sig-param"><span class="n">utc</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/propagator/orekit.html#npdt2absdate"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Converts a numpy datetime64 value to an orekit AbsoluteDate</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.propagator.orekit.Orekit.html" title="Orekit"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sorts.propagator.base.Propagator.DEFAULT_SETTINGS.html" title="sorts.propagator.base.Propagator.DEFAULT_SETTINGS"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

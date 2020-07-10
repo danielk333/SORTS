@@ -1,0 +1,58 @@
+constants
+=========
+
+.. automodule:: sorts.constants
+
+.. currentmodule:: sorts.constants
+
+Module summary
+--------------
+
+
+
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    WGS72
+    
+    WGS84
+    
+
+
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: WGS72
+
+.. autoclass:: WGS72
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
+
+
+
+.. rubric:: WGS84
+
+.. autoclass:: WGS84
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
+
+
+
+

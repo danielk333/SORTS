@@ -1,0 +1,8 @@
+ObservedParameters.schedule
+===========================
+
+.. currentmodule:: sorts.scheduler.observed_parameters
+
+.. rubric:: ObservedParameters.schedule
+
+.. automethod:: ObservedParameters.schedule

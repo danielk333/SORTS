@@ -1,0 +1,32 @@
+PriorityTracking
+================
+
+.. currentmodule:: sorts.scheduler.tracking
+
+.. autoclass:: PriorityTracking
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~PriorityTracking.__init__
+      ~PriorityTracking.calculate_observation
+      ~PriorityTracking.chain_generators
+      ~PriorityTracking.generate_schedule
+      ~PriorityTracking.get_controllers
+      ~PriorityTracking.get_measurements
+      ~PriorityTracking.get_passes
+      ~PriorityTracking.observe_passes
+      ~PriorityTracking.schedule
+      ~PriorityTracking.update
+   
+   
+
+   
+   
+   

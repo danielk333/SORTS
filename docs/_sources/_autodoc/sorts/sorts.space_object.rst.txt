@@ -1,0 +1,46 @@
+space\_object
+=============
+
+.. automodule:: sorts.space_object
+
+.. currentmodule:: sorts.space_object
+
+Module summary
+--------------
+
+
+
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    SpaceObject
+    
+
+
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: SpaceObject
+
+.. autoclass:: SpaceObject
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
+
+
+
+

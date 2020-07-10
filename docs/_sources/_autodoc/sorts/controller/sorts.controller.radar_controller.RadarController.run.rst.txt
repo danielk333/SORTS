@@ -1,0 +1,8 @@
+RadarController.run
+===================
+
+.. currentmodule:: sorts.controller.radar_controller
+
+.. rubric:: RadarController.run
+
+.. automethod:: RadarController.run

@@ -1,0 +1,8 @@
+StaticList.get\_controllers
+===========================
+
+.. currentmodule:: sorts.scheduler.static_list
+
+.. rubric:: StaticList.get_controllers
+
+.. automethod:: StaticList.get_controllers

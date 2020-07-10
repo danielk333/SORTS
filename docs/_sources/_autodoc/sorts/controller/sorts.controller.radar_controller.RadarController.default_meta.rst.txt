@@ -1,0 +1,8 @@
+RadarController.default\_meta
+=============================
+
+.. currentmodule:: sorts.controller.radar_controller
+
+.. rubric:: RadarController.default_meta
+
+.. automethod:: RadarController.default_meta

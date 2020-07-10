@@ -1,0 +1,32 @@
+Propagator
+==========
+
+.. currentmodule:: sorts.propagator.base
+
+.. autoclass:: Propagator
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Propagator.__init__
+      ~Propagator.propagate
+      ~Propagator.settings
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Propagator.DEFAULT_SETTINGS
+   
+   

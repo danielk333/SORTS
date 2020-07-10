@@ -1,0 +1,8 @@
+Scanner.turn\_off
+=================
+
+.. currentmodule:: sorts.controller.scanner
+
+.. rubric:: Scanner.turn_off
+
+.. automethod:: Scanner.turn_off

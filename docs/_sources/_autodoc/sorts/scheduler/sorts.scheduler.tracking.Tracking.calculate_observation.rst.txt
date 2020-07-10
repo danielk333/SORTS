@@ -1,0 +1,8 @@
+Tracking.calculate\_observation
+===============================
+
+.. currentmodule:: sorts.scheduler.tracking
+
+.. rubric:: Tracking.calculate_observation
+
+.. automethod:: Tracking.calculate_observation

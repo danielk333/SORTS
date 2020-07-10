@@ -1,0 +1,8 @@
+Scanner.run
+===========
+
+.. currentmodule:: sorts.controller.scanner
+
+.. rubric:: Scanner.run
+
+.. automethod:: Scanner.run

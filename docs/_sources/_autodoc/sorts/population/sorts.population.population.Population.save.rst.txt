@@ -1,0 +1,8 @@
+Population.save
+===============
+
+.. currentmodule:: sorts.population.population
+
+.. rubric:: Population.save
+
+.. automethod:: Population.save

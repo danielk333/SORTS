@@ -1,0 +1,8 @@
+Scheduler.\_\_init\_\_
+======================
+
+.. currentmodule:: sorts.scheduler.scheduler
+
+.. rubric:: Scheduler.__init__
+
+.. automethod:: Scheduler.__init__

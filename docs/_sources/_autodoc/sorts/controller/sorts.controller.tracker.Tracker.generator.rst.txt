@@ -1,0 +1,8 @@
+Tracker.generator
+=================
+
+.. currentmodule:: sorts.controller.tracker
+
+.. rubric:: Tracker.generator
+
+.. automethod:: Tracker.generator

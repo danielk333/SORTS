@@ -1,0 +1,226 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>sorts.population.master &#8212; SORTS 3.13.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for sorts.population.master</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">.population</span> <span class="kn">import</span> <span class="n">Population</span>
+
+
+
+<div class="viewcode-block" id="master_catalog"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.master.master_catalog.html#sorts.population.master.master_catalog">[docs]</a><span class="k">def</span> <span class="nf">master_catalog</span><span class="p">(</span>
+        <span class="n">input_file</span><span class="p">,</span>
+        <span class="n">mjd0</span> <span class="o">=</span> <span class="mf">54952.0</span><span class="p">,</span>
+        <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">propagator</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">propagator_options</span> <span class="o">=</span> <span class="p">{},</span>
+        <span class="n">propagator_args</span> <span class="o">=</span> <span class="p">{},</span>
+    <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Return the master catalog specified in the input file as a population instance. The catalog only contains the master sampling objects and not an actual realization of the population using the factor.</span>
+
+<span class="sd">    The format of the input master files is:</span>
+
+<span class="sd">        0. ID</span>
+<span class="sd">        1. Factor</span>
+<span class="sd">        2. Mass [kg]</span>
+<span class="sd">        3. Diameter [m]</span>
+<span class="sd">        4. m/A [kg/m2]</span>
+<span class="sd">        5. a [km]</span>
+<span class="sd">        6. e</span>
+<span class="sd">        7. i [deg]</span>
+<span class="sd">        8. RAAN [deg]</span>
+<span class="sd">        9. AoP [deg]</span>
+<span class="sd">        10. M [deg]</span>
+
+
+<span class="sd">    :param str input_file: Path to the input MASTER file.</span>
+<span class="sd">    :param bool sort: If :code:`True` sort according to diameters in descending order.</span>
+<span class="sd">    :param float mjd0: The epoch of the catalog file in Modified Julian Days.</span>
+<span class="sd">    :param PropagatorBase propagator: Propagator class pointer used for :class:`space_object.SpaceObject`.</span>
+<span class="sd">    :param dict propagator_options: Propagator initialization keyword arguments.</span>
+<span class="sd">    </span>
+
+<span class="sd">    :return: Master catalog</span>
+<span class="sd">    :rtype: population.Population</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">master_raw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="n">input_file</span><span class="p">);</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">]</span>
+
+    <span class="n">master</span> <span class="o">=</span> <span class="n">Population</span><span class="p">(</span>
+        <span class="n">extra_columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s1">&#39;C_D&#39;</span><span class="p">,</span> <span class="s1">&#39;C_R&#39;</span><span class="p">,</span> <span class="s1">&#39;Factor&#39;</span><span class="p">,</span> <span class="s1">&#39;MASTER-ID&#39;</span><span class="p">],</span>
+        <span class="n">space_object_uses</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
+        <span class="n">propagator</span> <span class="o">=</span> <span class="n">propagator</span><span class="p">,</span>
+        <span class="n">propagator_options</span> <span class="o">=</span> <span class="n">propagator_options</span><span class="p">,</span>
+        <span class="n">propagator_args</span> <span class="o">=</span> <span class="n">propagator_args</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">master</span><span class="o">.</span><span class="n">allocate</span><span class="p">(</span><span class="n">master_raw</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">master</span><span class="p">[:,:</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">master_raw</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span>
+    <span class="n">master</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="s1">&#39;mjd0&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mjd0</span>
+    <span class="n">master</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">master_raw</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">master_raw</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">])</span>
+    <span class="n">master</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="s1">&#39;m&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">master_raw</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="n">master</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="s1">&#39;d&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">master_raw</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
+    <span class="n">master</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="s1">&#39;C_D&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.3</span>
+    <span class="n">master</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="s1">&#39;C_R&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">master</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="s1">&#39;Factor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">master_raw</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">master</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="s1">&#39;MASTER-ID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">master_raw</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">diams</span> <span class="o">=</span> <span class="n">master_raw</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">sort</span><span class="p">:</span>
+        <span class="n">idxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">diams</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">idxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">diams</span><span class="p">))</span>
+
+    <span class="n">master</span><span class="o">.</span><span class="n">objs</span> <span class="o">=</span> <span class="n">master</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="n">idxs</span><span class="p">]</span>
+    
+    <span class="k">return</span> <span class="n">master</span></div>
+
+
+
+<div class="viewcode-block" id="master_catalog_factor"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.master.master_catalog_factor.html#sorts.population.master.master_catalog_factor">[docs]</a><span class="k">def</span> <span class="nf">master_catalog_factor</span><span class="p">(</span>
+        <span class="n">master_base</span><span class="p">,</span>
+        <span class="n">copy</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">treshhold</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Returns a random realization of the master population specified by the input file/population. In other words, each sampling object in the catalog is sampled a &quot;factor&quot; number of times with random mean anomalies to create the population.</span>
+
+<span class="sd">    :param str input_file: Path to the input MASTER file. Is not used if :code:`master_base` is given.</span>
+<span class="sd">    :param float mjd0: The epoch of the catalog file in Modified Julian Days. Is not used if :code:`master_base` is given.</span>
+<span class="sd">    :param population.Population master_base: A master catalog consisting only of sampling objects. This catalog will be modified and the pointer to it returned.</span>
+<span class="sd">    :param bool sort: If :code:`True` sort according to diameters in ascending order.</span>
+<span class="sd">    :param float treshhold: Diameter limit in meters below witch sampling objects are not included. Can be :code:`None` to skip filtering.</span>
+<span class="sd">    :param int seed: Random number generator seed given to :code:`numpy.random.seed` to allow for consisted generation of a random realization of the population. If seed is :code:`None` a random seed from high-entropy data is used.</span>
+<span class="sd">    :param PropagatorBase propagator: Propagator class pointer used for :class:`space_object.SpaceObject`. Is not used if :code:`master_base` is given.</span>
+<span class="sd">    :param dict propagator_options: Propagator initialization keyword arguments. Is not used if :code:`master_base` is given.</span>
+<span class="sd">    </span>
+
+<span class="sd">    :return: Master population</span>
+<span class="sd">    :rtype: population.Population</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">copy</span><span class="p">:</span>
+        <span class="n">master</span> <span class="o">=</span> <span class="n">master_base</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">master</span> <span class="o">=</span> <span class="n">master_base</span>
+
+    <span class="k">if</span> <span class="n">treshhold</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">master</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span> <span class="o">&gt;=</span> <span class="n">treshhold</span><span class="p">)</span>
+
+    <span class="n">full_objs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">master</span><span class="p">[</span><span class="s1">&#39;Factor&#39;</span><span class="p">]))),</span><span class="n">master</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+    
+    <span class="n">max_oid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">master</span><span class="p">[</span><span class="s1">&#39;oid&#39;</span><span class="p">])</span>
+    <span class="n">max_factor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">master</span><span class="p">[</span><span class="s1">&#39;Factor&#39;</span><span class="p">])))</span>
+    <span class="n">oid_extend</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">max_oid</span><span class="p">))</span><span class="o">+</span><span class="n">max_factor</span><span class="o">+</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">oid_mag</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">max_oid</span><span class="p">)))</span>
+
+    <span class="n">i</span><span class="o">=</span><span class="mi">0</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">master</span><span class="o">.</span><span class="n">objs</span><span class="p">:</span>
+        <span class="n">f_int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">13</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">f_int</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">ip</span> <span class="o">=</span> <span class="n">i</span><span class="o">+</span><span class="n">f_int</span>
+            <span class="k">for</span> <span class="n">coli</span><span class="p">,</span> <span class="n">head</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">master</span><span class="o">.</span><span class="n">header</span><span class="p">):</span>
+                <span class="n">full_objs</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">ip</span><span class="p">,</span><span class="n">coli</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">head</span><span class="p">]</span>
+
+            <span class="n">full_objs</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">ip</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">ip</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+            <span class="n">full_objs</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">ip</span><span class="p">,</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">f_int</span><span class="p">)</span><span class="o">*</span><span class="mf">360.0</span>
+            <span class="n">i</span><span class="o">=</span><span class="n">ip</span>
+
+    <span class="n">master</span><span class="o">.</span><span class="n">allocate</span><span class="p">(</span><span class="n">full_objs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">master</span><span class="p">[:,:]</span> <span class="o">=</span> <span class="n">full_objs</span>
+
+    <span class="k">return</span> <span class="n">master</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

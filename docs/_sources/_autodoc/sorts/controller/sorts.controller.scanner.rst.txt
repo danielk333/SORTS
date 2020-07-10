@@ -1,0 +1,46 @@
+scanner
+=======
+
+.. automodule:: sorts.controller.scanner
+
+.. currentmodule:: sorts.controller.scanner
+
+Module summary
+--------------
+
+
+
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    Scanner
+    
+
+
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: Scanner
+
+.. autoclass:: Scanner
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
+
+
+
+

@@ -1,0 +1,8 @@
+Tracking.observe\_passes
+========================
+
+.. currentmodule:: sorts.scheduler.tracking
+
+.. rubric:: Tracking.observe_passes
+
+.. automethod:: Tracking.observe_passes

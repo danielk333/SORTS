@@ -1,0 +1,8 @@
+Population.add\_column
+======================
+
+.. currentmodule:: sorts.population.population
+
+.. rubric:: Population.add_column
+
+.. automethod:: Population.add_column

@@ -1,0 +1,8 @@
+ObservedParameters.calculate\_observation
+=========================================
+
+.. currentmodule:: sorts.scheduler.observed_parameters
+
+.. rubric:: ObservedParameters.calculate_observation
+
+.. automethod:: ObservedParameters.calculate_observation

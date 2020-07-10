@@ -1,0 +1,46 @@
+tracker
+=======
+
+.. automodule:: sorts.controller.tracker
+
+.. currentmodule:: sorts.controller.tracker
+
+Module summary
+--------------
+
+
+
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    Tracker
+    
+
+
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: Tracker
+
+.. autoclass:: Tracker
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
+
+
+
+

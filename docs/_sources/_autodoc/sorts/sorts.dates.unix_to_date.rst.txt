@@ -1,0 +1,8 @@
+unix\_to\_date
+==============
+
+.. currentmodule:: sorts.dates
+
+.. rubric:: unix_to_date
+
+.. autofunction:: unix_to_date

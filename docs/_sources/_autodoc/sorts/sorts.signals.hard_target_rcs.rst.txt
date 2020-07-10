@@ -1,0 +1,8 @@
+hard\_target\_rcs
+=================
+
+.. currentmodule:: sorts.signals
+
+.. rubric:: hard_target_rcs
+
+.. autofunction:: hard_target_rcs

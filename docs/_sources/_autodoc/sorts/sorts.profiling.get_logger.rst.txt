@@ -1,0 +1,8 @@
+get\_logger
+===========
+
+.. currentmodule:: sorts.profiling
+
+.. rubric:: get_logger
+
+.. autofunction:: get_logger

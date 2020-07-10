@@ -1,0 +1,8 @@
+get\_polar\_motion
+==================
+
+.. currentmodule:: sorts.frames
+
+.. rubric:: get_polar_motion
+
+.. autofunction:: get_polar_motion

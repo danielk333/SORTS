@@ -1,0 +1,203 @@
+.. only:: html
+
+    .. note::
+        :class: sphx-glr-download-link-note
+
+        Click :ref:`here <sphx_glr_download_auto_gallery_profiler_orekit.py>`     to download the full example code
+    .. rst-class:: sphx-glr-example-title
+
+    .. _sphx_glr_auto_gallery_profiler_orekit.py:
+
+
+Profiling Orekit
+======================
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Orekit instance @ -9223363300610199934:
+    -------------------------
+    Integrator          : DormandPrince853
+    Minimum step        : 0.001 s
+    Maximum step        : 120.0 s
+    Position Tolerance  : 10.0 m
+
+    Input frame         : ITRF
+    Output frame        : EME
+    Gravity model       : HolmesFeatherstone
+                         - Harmonic expansion order (10, 10)
+    Atmosphere model    : DTM2000
+    Solar model         : Marshall
+    Constants           : WGS84
+    Included forces:
+     - earth gravity
+     - perturbation Moon
+     - perturbation Sun
+    Third body perturbations:
+     - Moon
+     - Sun
+
+    ---------------------------------- Performance analysis ---------------------------------
+     Name                                         |   Executions |   Mean time |   Total time
+    ----------------------------------------------+--------------+-------------+--------------
+     Orekit:get_frame                             |            2 | 1.19209e-05 |  2.38419e-05
+     Orekit:init                                  |            1 | 0.155833    |  0.155833
+     Orekit:propagate:construct_propagator        |            1 | 7.70092e-05 |  7.70092e-05
+     Orekit:propagate:set_forces                  |            1 | 1.07288e-05 |  1.07288e-05
+     Orekit:propagate:steps:step-handler:getState |         5000 | 1.54157e-05 |  0.0770783
+     Orekit:propagate:steps:step-handler          |         1443 | 9.29867e-05 |  0.13418
+     Orekit:propagate:steps                       |            1 | 0.457373    |  0.457373
+     Orekit:propagate                             |            1 | 0.457782    |  0.457782
+     total                                        |            1 | 0.614431    |  0.614431
+    -----------------------------------------------------------------------------------------
+
+    ---------------------------------- Performance analysis ----------------------------------
+     Name                                         |   Executions | Mean time      | Total time
+    ----------------------------------------------+--------------+----------------+----------------
+     Orekit:get_frame                             |            2 | 0:00:00.000012 | 0:00:00.000024
+     Orekit:init                                  |            1 | 0:00:00.155833 | 0:00:00.155833
+     Orekit:propagate:construct_propagator        |            1 | 0:00:00.000077 | 0:00:00.000077
+     Orekit:propagate:set_forces                  |            1 | 0:00:00.000011 | 0:00:00.000011
+     Orekit:propagate:steps:step-handler:getState |         5000 | 0:00:00.000015 | 0:00:00.077078
+     Orekit:propagate:steps:step-handler          |         1443 | 0:00:00.000093 | 0:00:00.134180
+     Orekit:propagate:steps                       |            1 | 0:00:00.457373 | 0:00:00.457373
+     Orekit:propagate                             |            1 | 0:00:00.457782 | 0:00:00.457782
+     total                                        |            1 | 0:00:00.614431 | 0:00:00.614431
+    ------------------------------------------------------------------------------------------
+
+    --------------------------------- Performance analysis --------------------------------
+     Name                                         |   Executions |   Mean time | Total time
+    ----------------------------------------------+--------------+-------------+--------------
+     Orekit:get_frame                             |            2 | 1.19209e-05 | 0.00 %
+     Orekit:init                                  |            1 | 0.155833    | 25.36 %
+     Orekit:propagate:construct_propagator        |            1 | 7.70092e-05 | 0.01 %
+     Orekit:propagate:set_forces                  |            1 | 1.07288e-05 | 0.00 %
+     Orekit:propagate:steps:step-handler:getState |         5000 | 1.54157e-05 | 12.54 %
+     Orekit:propagate:steps:step-handler          |         1443 | 9.29867e-05 | 21.84 %
+     Orekit:propagate:steps                       |            1 | 0.457373    | 74.44 %
+     Orekit:propagate                             |            1 | 0.457782    | 74.50 %
+     total                                        |            1 | 0.614431    | 100.00 %
+    ---------------------------------------------------------------------------------------
+
+
+     Enable Drag Force 
+
+    --------------------------------- Performance analysis --------------------------------
+     Name                                         |   Executions |   Mean time | Total time
+    ----------------------------------------------+--------------+-------------+--------------
+     Orekit:get_frame                             |            2 | 8.22544e-06 | 0.00 %
+     Orekit:init                                  |            1 | 0.149706    | 7.87 %
+     Orekit:propagate:construct_propagator        |            1 | 8.22544e-05 | 0.00 %
+     Orekit:propagate:set_forces                  |            1 | 0.982052    | 51.64 %
+     Orekit:propagate:steps:step-handler:getState |         5000 | 1.69882e-05 | 4.47 %
+     Orekit:propagate:steps:step-handler          |         1443 | 0.000103429 | 7.85 %
+     Orekit:propagate:steps                       |            1 | 0.769279    | 40.45 %
+     Orekit:propagate                             |            1 | 1.75172     | 92.12 %
+     total                                        |            1 | 1.90157     | 100.00 %
+    ---------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+|
+
+
+.. code-block:: default
+
+    import numpy as np
+
+    from sorts.profiling import Profiler
+    from sorts.propagator import Orekit
+
+    p = Profiler()
+    p.start('total')
+
+    orekit_data = '/home/danielk/IRF/IRF_GITLAB/orekit_build/orekit-data-master.zip'
+
+    prop = Orekit(
+        orekit_data = orekit_data, 
+        settings=dict(
+            in_frame='ITRF',
+            out_frame='EME',
+            drag_force = False,
+            radiation_pressure = False,
+        ),
+        profiler = p,
+    )
+
+    print(prop)
+
+    state0 = np.array([-7100297.113,-3897715.442,18568433.707,86.771,-3407.231,2961.571])
+    t = np.linspace(0,3600*24.0*2,num=5000)
+    mjd0 = 53005
+
+    states = prop.propagate(t, state0, mjd0, A=1.0, C_R = 1.0, C_D = 1.0)
+
+
+    p.stop('total')
+
+    print(p)
+    print(p.fmt(timedelta=True))
+    print(p.fmt(normalize='total'))
+
+    print('\n Enable Drag Force \n')
+
+    p2 = Profiler()
+    p2.start('total')
+
+    prop = Orekit(
+        orekit_data = orekit_data, 
+        settings=dict(
+            in_frame='ITRF',
+            out_frame='EME',
+            drag_force = True,
+            radiation_pressure = False,
+        ),
+        profiler = p2,
+    )
+    states = prop.propagate(t, state0, mjd0, A=1.0, C_R = 1.0, C_D = 1.0)
+
+    p2.stop('total')
+    print(p2.fmt(normalize='total'))
+
+
+.. rst-class:: sphx-glr-timing
+
+   **Total running time of the script:** ( 0 minutes  2.523 seconds)
+
+
+.. _sphx_glr_download_auto_gallery_profiler_orekit.py:
+
+
+.. only :: html
+
+ .. container:: sphx-glr-footer
+    :class: sphx-glr-footer-example
+
+
+
+  .. container:: sphx-glr-download sphx-glr-download-python
+
+     :download:`Download Python source code: profiler_orekit.py <profiler_orekit.py>`
+
+
+
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+     :download:`Download Jupyter notebook: profiler_orekit.ipynb <profiler_orekit.ipynb>`
+
+
+.. only:: html
+
+ .. rst-class:: sphx-glr-signature
+
+    `Gallery generated by Sphinx-Gallery <https://sphinx-gallery.github.io>`_

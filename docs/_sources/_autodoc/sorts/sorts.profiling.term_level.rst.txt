@@ -1,0 +1,8 @@
+term\_level
+===========
+
+.. currentmodule:: sorts.profiling
+
+.. rubric:: term_level
+
+.. autofunction:: term_level

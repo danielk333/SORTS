@@ -1,0 +1,8 @@
+RadarController.turn\_on
+========================
+
+.. currentmodule:: sorts.controller.radar_controller
+
+.. rubric:: RadarController.turn_on
+
+.. automethod:: RadarController.turn_on

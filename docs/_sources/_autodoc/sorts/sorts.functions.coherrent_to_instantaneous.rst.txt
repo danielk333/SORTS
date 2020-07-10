@@ -1,0 +1,8 @@
+coherrent\_to\_instantaneous
+============================
+
+.. currentmodule:: sorts.functions
+
+.. rubric:: coherrent_to_instantaneous
+
+.. autofunction:: coherrent_to_instantaneous

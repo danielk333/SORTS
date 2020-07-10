@@ -1,0 +1,8 @@
+PriorityTracking.get\_passes
+============================
+
+.. currentmodule:: sorts.scheduler.tracking
+
+.. rubric:: PriorityTracking.get_passes
+
+.. automethod:: PriorityTracking.get_passes

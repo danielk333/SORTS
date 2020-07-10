@@ -1,0 +1,8 @@
+Tracking.get\_passes
+====================
+
+.. currentmodule:: sorts.scheduler.tracking
+
+.. rubric:: Tracking.get_passes
+
+.. automethod:: Tracking.get_passes

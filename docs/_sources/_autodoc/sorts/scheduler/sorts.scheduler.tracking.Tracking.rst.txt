@@ -1,0 +1,32 @@
+Tracking
+========
+
+.. currentmodule:: sorts.scheduler.tracking
+
+.. autoclass:: Tracking
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Tracking.__init__
+      ~Tracking.calculate_observation
+      ~Tracking.chain_generators
+      ~Tracking.generate_schedule
+      ~Tracking.get_controllers
+      ~Tracking.get_measurements
+      ~Tracking.get_passes
+      ~Tracking.observe_passes
+      ~Tracking.schedule
+      ~Tracking.update
+   
+   
+
+   
+   
+   

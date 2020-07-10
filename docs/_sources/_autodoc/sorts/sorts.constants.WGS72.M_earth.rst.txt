@@ -1,0 +1,6 @@
+sorts.constants.WGS72.M\_earth
+==============================
+
+.. currentmodule:: sorts.constants
+
+.. autoattribute:: WGS72.M_earth

@@ -1,0 +1,30 @@
+Profiler
+========
+
+.. currentmodule:: sorts.profiling
+
+.. autoclass:: Profiler
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Profiler.__init__
+      ~Profiler.fmt
+      ~Profiler.from_txt
+      ~Profiler.mean
+      ~Profiler.start
+      ~Profiler.stop
+      ~Profiler.to_txt
+      ~Profiler.total
+   
+   
+
+   
+   
+   

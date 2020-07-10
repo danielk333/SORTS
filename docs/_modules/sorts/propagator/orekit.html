@@ -1,0 +1,711 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>sorts.propagator.orekit &#8212; SORTS 3.13.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for sorts.propagator.orekit</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="sd">&#39;&#39;&#39;Wrapper for the Orekit propagator</span>
+
+<span class="sd">**Links:**</span>
+<span class="sd">    * `orekit &lt;https://www.orekit.org/&gt;`_</span>
+<span class="sd">    * `orekit python &lt;https://gitlab.orekit.org/orekit-labs/python-wrapper&gt;`_</span>
+<span class="sd">    * `orekit python guide &lt;https://gitlab.orekit.org/orekit-labs/python-wrapper/wikis/Manual-Installation-of-Python-Wrapper&gt;`_</span>
+<span class="sd">    * `Hipparchus &lt;https://www.hipparchus.org/&gt;`_</span>
+<span class="sd">    * `orekit 9.3 api &lt;https://www.orekit.org/static/apidocs/index.html&gt;`_</span>
+<span class="sd">    * `JCC &lt;https://pypi.org/project/JCC/&gt;`_</span>
+
+
+<span class="sd">**Example usage:**</span>
+
+<span class="sd">Simple propagation showing time difference due to loading of model data.</span>
+
+<span class="sd">.. code-block:: python</span>
+
+<span class="sd">    from sorts.propagator import Orekit</span>
+<span class="sd"> </span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="c1">#Python standard import</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="c1">#Third party import</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+<span class="kn">import</span> <span class="nn">scipy.constants</span>
+<span class="kn">import</span> <span class="nn">orekit</span>
+
+<span class="c1">#Local import</span>
+<span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">Propagator</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">dates</span> <span class="k">as</span> <span class="n">dates</span>
+
+
+<span class="n">orekit</span><span class="o">.</span><span class="n">initVM</span><span class="p">()</span>
+
+<span class="kn">from</span> <span class="nn">orekit.pyhelpers</span> <span class="kn">import</span> <span class="n">setup_orekit_curdir</span>
+<span class="kn">from</span> <span class="nn">org.orekit.propagation.numerical</span> <span class="kn">import</span> <span class="n">NumericalPropagator</span>
+<span class="kn">from</span> <span class="nn">org.orekit.propagation</span> <span class="kn">import</span> <span class="n">SpacecraftState</span>
+<span class="kn">from</span> <span class="nn">org.orekit.frames</span> <span class="kn">import</span> <span class="n">FramesFactory</span>
+<span class="kn">from</span> <span class="nn">org.orekit.time</span> <span class="kn">import</span> <span class="n">TimeScalesFactory</span><span class="p">,</span> <span class="n">AbsoluteDate</span>
+<span class="kn">from</span> <span class="nn">org.orekit.orbits</span> <span class="kn">import</span> <span class="n">KeplerianOrbit</span><span class="p">,</span> <span class="n">EquinoctialOrbit</span><span class="p">,</span> <span class="n">CartesianOrbit</span><span class="p">,</span> <span class="n">PositionAngle</span>
+<span class="kn">from</span> <span class="nn">org.orekit.utils</span> <span class="kn">import</span> <span class="n">Constants</span><span class="p">,</span> <span class="n">IERSConventions</span><span class="p">,</span> <span class="n">PVCoordinates</span>
+<span class="kn">from</span> <span class="nn">org.orekit.bodies</span> <span class="kn">import</span> <span class="n">CelestialBodyFactory</span><span class="p">,</span> <span class="n">OneAxisEllipsoid</span>
+<span class="kn">from</span> <span class="nn">org.orekit.python</span> <span class="kn">import</span> <span class="n">PythonOrekitStepHandler</span>
+<span class="kn">import</span> <span class="nn">org</span>
+
+<span class="kn">from</span> <span class="nn">orekit</span> <span class="kn">import</span> <span class="n">JArray_double</span>
+
+
+<div class="viewcode-block" id="npdt2absdate"><a class="viewcode-back" href="../../../_autodoc/sorts/propagator/sorts.propagator.orekit.npdt2absdate.html#sorts.propagator.orekit.npdt2absdate">[docs]</a><span class="k">def</span> <span class="nf">npdt2absdate</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">utc</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Converts a numpy datetime64 value to an orekit AbsoluteDate</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="p">,</span> <span class="n">hour</span><span class="p">,</span> <span class="n">minutes</span><span class="p">,</span> <span class="n">seconds</span><span class="p">,</span> <span class="n">microsecond</span> <span class="o">=</span> <span class="n">dates</span><span class="o">.</span><span class="n">npdt_to_date</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">AbsoluteDate</span><span class="p">(</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">year</span><span class="p">),</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">month</span><span class="p">),</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">day</span><span class="p">),</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">hour</span><span class="p">),</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">minutes</span><span class="p">),</span>
+        <span class="nb">float</span><span class="p">(</span><span class="n">seconds</span> <span class="o">+</span> <span class="n">microsecond</span><span class="o">*</span><span class="mf">1e-6</span><span class="p">),</span>
+        <span class="n">utc</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="mjd2absdate"><a class="viewcode-back" href="../../../_autodoc/sorts/propagator/sorts.propagator.orekit.mjd2absdate.html#sorts.propagator.orekit.mjd2absdate">[docs]</a><span class="k">def</span> <span class="nf">mjd2absdate</span><span class="p">(</span><span class="n">mjd</span><span class="p">,</span> <span class="n">utc</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Converts a Modified Julian Date value to an orekit AbsoluteDate</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">return</span> <span class="n">npdt2absdate</span><span class="p">(</span><span class="n">dates</span><span class="o">.</span><span class="n">mjd_to_npdt</span><span class="p">(</span><span class="n">mjd</span><span class="p">),</span> <span class="n">utc</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">_get_frame</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">frame_tidal_effects</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Uses a string to identify which coordinate frame to initialize from Orekit package.</span>
+
+<span class="sd">    See `Orekit FramesFactory &lt;https://www.orekit.org/static/apidocs/org/orekit/frames/FramesFactory.html&gt;`_</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;EME&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">FramesFactory</span><span class="o">.</span><span class="n">getEME2000</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;CIRF&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">FramesFactory</span><span class="o">.</span><span class="n">getCIRF</span><span class="p">(</span><span class="n">IERSConventions</span><span class="o">.</span><span class="n">IERS_2010</span><span class="p">,</span> <span class="ow">not</span> <span class="n">frame_tidal_effects</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;ITRF&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">FramesFactory</span><span class="o">.</span><span class="n">getITRF</span><span class="p">(</span><span class="n">IERSConventions</span><span class="o">.</span><span class="n">IERS_2010</span><span class="p">,</span> <span class="ow">not</span> <span class="n">frame_tidal_effects</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;TIRF&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">FramesFactory</span><span class="o">.</span><span class="n">getTIRF</span><span class="p">(</span><span class="n">IERSConventions</span><span class="o">.</span><span class="n">IERS_2010</span><span class="p">,</span> <span class="ow">not</span> <span class="n">frame_tidal_effects</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;ITRFEquinox&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">FramesFactory</span><span class="o">.</span><span class="n">getITRFEquinox</span><span class="p">(</span><span class="n">IERSConventions</span><span class="o">.</span><span class="n">IERS_2010</span><span class="p">,</span> <span class="ow">not</span> <span class="n">frame_tidal_effects</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;TEME&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">FramesFactory</span><span class="o">.</span><span class="n">getTEME</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Frame &quot;</span><span class="si">{}</span><span class="s1">&quot; not recognized&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+
+
+
+<div class="viewcode-block" id="Orekit"><a class="viewcode-back" href="../../../_autodoc/sorts/propagator/sorts.propagator.orekit.Orekit.html#sorts.propagator.orekit.Orekit">[docs]</a><span class="k">class</span> <span class="nc">Orekit</span><span class="p">(</span><span class="n">Propagator</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Propagator class implementing the Orekit propagator.</span>
+
+<span class="sd">    :ivar list solarsystem_perturbers: List of strings of names of objects in the solarsystem that should be used for third body perturbation calculations. All objects listed at `CelestialBodyFactory &lt;https://www.orekit.org/static/apidocs/org/orekit/bodies/CelestialBodyFactory.html&gt;`_ are available.</span>
+<span class="sd">    :ivar str in_frame: String identifying the input frame to be used. All frames listed at `FramesFactory &lt;https://www.orekit.org/static/apidocs/org/orekit/frames/FramesFactory.html&gt;`_ are available.</span>
+<span class="sd">    :ivar str out_frame: String identifying the output frame to be used. All frames listed at `FramesFactory &lt;https://www.orekit.org/static/apidocs/org/orekit/frames/FramesFactory.html&gt;`_ are available.</span>
+<span class="sd">    :ivar bool drag_force: Should drag force be included in propagation.</span>
+<span class="sd">    :ivar bool radiation_pressure: Should radiation pressure force be included in propagation.</span>
+<span class="sd">    :ivar bool frame_tidal_effects: Should coordinate frames include Tidal effects.</span>
+<span class="sd">    :ivar str integrator: String representing the numerical integrator from the Hipparchus package to use. Any integrator listed at `Hipparchus nonstiff ode &lt;https://www.hipparchus.org/apidocs/org/hipparchus/ode/nonstiff/package-summary.html&gt;`_ is available.</span>
+<span class="sd">    :ivar float minStep: Minimum time step allowed in the numerical orbit propagation given in seconds.</span>
+<span class="sd">    :ivar float maxStep: Maximum time step allowed in the numerical orbit propagation given in seconds.</span>
+<span class="sd">    :ivar float position_tolerance: Position tolerance in numerical orbit propagation errors given in meters.</span>
+<span class="sd">    :ivar str earth_gravity: Gravitation model to use for calculating central acceleration force. Currently avalible options are `&#39;HolmesFeatherstone&#39;` and `&#39;Newtonian&#39;`. See `gravity &lt;https://www.orekit.org/static/apidocs/org/orekit/forces/gravity/package-summary.html&gt;`_.</span>
+<span class="sd">    :ivar tuple gravity_order: A tuple of two integers for describing the order of spherical harmonics used in the `HolmesFeatherstoneAttractionModel &lt;https://www.orekit.org/static/apidocs/org/orekit/forces/gravity/HolmesFeatherstoneAttractionModel.html&gt;`_ model.</span>
+<span class="sd">    :ivar str atmosphere: Atmosphere model used to calculate atmospheric drag. Currently available options are `&#39;DTM2000&#39;`. See `atmospheres &lt;https://www.orekit.org/static/apidocs/org/orekit/forces/drag/atmosphere/package-summary.html&gt;`_.</span>
+<span class="sd">    :ivar str solar_activity: The model used for calculating solar activity and thereby the influx of solar radiation. Used in the atmospheric drag force model. Currently available options are `&#39;Marshall&#39;` for the `MarshallSolarActivityFutureEstimation &lt;https://www.orekit.org/static/apidocs/org/orekit/forces/drag/atmosphere/data/MarshallSolarActivityFutureEstimation.html&gt;`_.</span>
+<span class="sd">    :ivar str constants_source: Controls which source for Earth constants to use. Currently avalible options are `&#39;WGS84&#39;` and `&#39;JPL-IAU&#39;`. See `constants &lt;https://www.orekit.org/static/apidocs/org/orekit/utils/Constants.html&gt;`_.</span>
+<span class="sd">    :ivar float mu: Standard gravitational constant for the Earth.  Definition depend on the :class:`sorts.propagator.Orekit` constructor parameter :code:`constants_source`</span>
+<span class="sd">    :ivar float R_earth: Radius of the Earth in m. Definition depend on the :class:`sorts.propagator.Orekit` constructor parameter :code:`constants_source`</span>
+<span class="sd">    :ivar float f_earth: Flattening of the Earth (i.e. :math:`\\frac{a-b}{a}` ). Definition depend on the :class:`sorts.propagator.Orekit` constructor parameter :code:`constants_source`.</span>
+<span class="sd">    :ivar float M_earth: Mass of the Earth in kg. Definition depend on the :class:`sorts.propagator.Orekit` constructor parameter :code:`constants_source`</span>
+<span class="sd">    :ivar org.orekit.frames.Frame inputFrame: The orekit frame instance for the input frame.</span>
+<span class="sd">    :ivar org.orekit.frames.Frame outputFrame: The orekit frame instance for the output frame.</span>
+<span class="sd">    :ivar org.orekit.frames.Frame inertialFrame: The orekit frame instance for the inertial frame. If inputFrame is pseudo innertial this is the same as inputFrame.</span>
+<span class="sd">    :ivar org.orekit.bodies.OneAxisEllipsoid body: The model ellipsoid representing the Earth.</span>
+<span class="sd">    :ivar dict _forces: Dictionary of forces to include in the numerical integration. Contains instances of children of :class:`org.orekit.forces.AbstractForceModel`.</span>
+<span class="sd">    :ivar list _tolerances: Contains the absolute and relative tolerances calculated by the `tolerances &lt;https://www.orekit.org/static/apidocs/org/orekit/propagation/numerical/NumericalPropagator.html#tolerances(double,org.orekit.orbits.Orbit,org.orekit.orbits.OrbitType)&gt;`_ function.</span>
+<span class="sd">    :ivar org.orekit.propagation.numerical.NumericalPropagator propagator: The numerical propagator instance.</span>
+<span class="sd">    :ivar org.orekit.forces.drag.atmosphere.data.MarshallSolarActivityFutureEstimation.StrengthLevel SolarStrengthLevel: The strength of the solar activity. Options are &#39;AVRAGE&#39;, &#39;STRONG&#39;, &#39;WEAK&#39;.</span>
+
+<span class="sd">    The constructor creates a propagator instance with supplied options.</span>
+
+<span class="sd">    :param list solarsystem_perturbers: List of strings of names of objects in the solarsystem that should be used for third body perturbation calculations. All objects listed at `CelestialBodyFactory &lt;https://www.orekit.org/static/apidocs/org/orekit/bodies/CelestialBodyFactory.html&gt;`_ are available.</span>
+<span class="sd">    :param str in_frame: String identifying the input frame to be used. All frames listed at `FramesFactory &lt;https://www.orekit.org/static/apidocs/org/orekit/frames/FramesFactory.html&gt;`_ are available.</span>
+<span class="sd">    :param str out_frame: String identifying the output frame to be used. All frames listed at `FramesFactory &lt;https://www.orekit.org/static/apidocs/org/orekit/frames/FramesFactory.html&gt;`_ are available.</span>
+<span class="sd">    :param bool drag_force: Should drag force be included in propagation.</span>
+<span class="sd">    :param bool radiation_pressure: Should radiation pressure force be included in propagation.</span>
+<span class="sd">    :param bool frame_tidal_effects: Should coordinate frames include Tidal effects.</span>
+<span class="sd">    :param str integrator: String representing the numerical integrator from the Hipparchus package to use. Any integrator listed at `Hipparchus nonstiff ode &lt;https://www.hipparchus.org/apidocs/org/hipparchus/ode/nonstiff/package-summary.html&gt;`_ is available.</span>
+<span class="sd">    :param float min_step: Minimum time step allowed in the numerical orbit propagation given in seconds.</span>
+<span class="sd">    :param float max_step: Maximum time step allowed in the numerical orbit propagation given in seconds.</span>
+<span class="sd">    :param float position_tolerance: Position tolerance in numerical orbit propagation errors given in meters.</span>
+<span class="sd">    :param str atmosphere: Atmosphere model used to calculate atmospheric drag. Currently available options are `&#39;DTM2000&#39;`. See `atmospheres &lt;https://www.orekit.org/static/apidocs/org/orekit/forces/drag/atmosphere/package-summary.html&gt;`_.</span>
+<span class="sd">    :param str solar_activity: The model used for calculating solar activity and thereby the influx of solar radiation. Used in the atmospheric drag force model. Currently available options are `&#39;Marshall&#39;` for the `MarshallSolarActivityFutureEstimation &lt;https://www.orekit.org/static/apidocs/org/orekit/forces/drag/atmosphere/data/MarshallSolarActivityFutureEstimation.html&gt;`_.</span>
+<span class="sd">    :param str constants_source: Controls which source for Earth constants to use. Currently avalible options are `&#39;WGS84&#39;` and `&#39;JPL-IAU&#39;`. See `constants &lt;https://www.orekit.org/static/apidocs/org/orekit/utils/Constants.html&gt;`_.</span>
+<span class="sd">    :param str earth_gravity: Gravitation model to use for calculating central acceleration force. Currently avalible options are `&#39;HolmesFeatherstone&#39;` and `&#39;Newtonian&#39;`. See `gravity &lt;https://www.orekit.org/static/apidocs/org/orekit/forces/gravity/package-summary.html&gt;`_.</span>
+<span class="sd">    :param tuple gravity_order: A tuple of two integers for describing the order of spherical harmonics used in the `HolmesFeatherstoneAttractionModel &lt;https://www.orekit.org/static/apidocs/org/orekit/forces/gravity/HolmesFeatherstoneAttractionModel.html&gt;`_ model.</span>
+<span class="sd">    :param str solar_activity_strength: The strength of the solar activity. Options are &#39;AVRAGE&#39;, &#39;STRONG&#39;, &#39;WEAK&#39;.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+
+<div class="viewcode-block" id="Orekit.OrekitVariableStep"><a class="viewcode-back" href="../../../_autodoc/sorts/propagator/sorts.propagator.orekit.html#sorts.propagator.orekit.Orekit.OrekitVariableStep">[docs]</a>    <span class="k">class</span> <span class="nc">OrekitVariableStep</span><span class="p">(</span><span class="n">PythonOrekitStepHandler</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Class for handling the steps.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">def</span> <span class="nf">set_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">start_date</span><span class="p">,</span> <span class="n">states_pointer</span><span class="p">,</span> <span class="n">outputFrame</span><span class="p">,</span> <span class="n">profiler</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">t</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start_date</span> <span class="o">=</span> <span class="n">start_date</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">states_pointer</span> <span class="o">=</span> <span class="n">states_pointer</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">outputFrame</span> <span class="o">=</span> <span class="n">outputFrame</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="o">=</span> <span class="n">profiler</span>
+
+        <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s0</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+            <span class="k">pass</span>
+
+        <span class="k">def</span> <span class="nf">handleStep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interpolator</span><span class="p">,</span> <span class="n">isLast</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;Orekit:propagate:steps:step-handler&#39;</span><span class="p">)</span>
+
+            <span class="n">state1</span> <span class="o">=</span> <span class="n">interpolator</span><span class="o">.</span><span class="n">getCurrentState</span><span class="p">()</span>
+            <span class="n">state0</span> <span class="o">=</span> <span class="n">interpolator</span><span class="o">.</span><span class="n">getPreviousState</span><span class="p">()</span>
+
+            <span class="n">t0</span> <span class="o">=</span> <span class="n">state0</span><span class="o">.</span><span class="n">getDate</span><span class="p">()</span><span class="o">.</span><span class="n">durationFrom</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_date</span><span class="p">)</span>
+            <span class="n">t1</span> <span class="o">=</span> <span class="n">state1</span><span class="o">.</span><span class="n">getDate</span><span class="p">()</span><span class="o">.</span><span class="n">durationFrom</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_date</span><span class="p">)</span>
+
+            <span class="n">t_filt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">t0</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">t1</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">ti</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">t_filt</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">t_filt</span><span class="p">]):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;Orekit:propagate:steps:step-handler:getState&#39;</span><span class="p">)</span>
+
+                <span class="n">t_date</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_date</span><span class="o">.</span><span class="n">shiftedBy</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+
+                <span class="n">_state</span> <span class="o">=</span> <span class="n">interpolator</span><span class="o">.</span><span class="n">getInterpolatedState</span><span class="p">(</span><span class="n">t_date</span><span class="p">)</span>
+
+                <span class="n">PVCoord</span> <span class="o">=</span> <span class="n">_state</span><span class="o">.</span><span class="n">getPVCoordinates</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outputFrame</span><span class="p">)</span>
+
+                <span class="n">x_tmp</span> <span class="o">=</span> <span class="n">PVCoord</span><span class="o">.</span><span class="n">getPosition</span><span class="p">()</span>
+                <span class="n">v_tmp</span> <span class="o">=</span> <span class="n">PVCoord</span><span class="o">.</span><span class="n">getVelocity</span><span class="p">()</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">states_pointer</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">ti</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_tmp</span><span class="o">.</span><span class="n">getX</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">states_pointer</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="n">ti</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_tmp</span><span class="o">.</span><span class="n">getY</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">states_pointer</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="n">ti</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_tmp</span><span class="o">.</span><span class="n">getZ</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">states_pointer</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="n">ti</span><span class="p">]</span> <span class="o">=</span> <span class="n">v_tmp</span><span class="o">.</span><span class="n">getX</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">states_pointer</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="n">ti</span><span class="p">]</span> <span class="o">=</span> <span class="n">v_tmp</span><span class="o">.</span><span class="n">getY</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">states_pointer</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span><span class="n">ti</span><span class="p">]</span> <span class="o">=</span> <span class="n">v_tmp</span><span class="o">.</span><span class="n">getZ</span><span class="p">()</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;Orekit:propagate:steps:step-handler:getState&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;Orekit:propagate:steps:step-handler&#39;</span><span class="p">)</span></div>
+
+    <span class="n">DEFAULT_SETTINGS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">in_frame</span><span class="o">=</span><span class="s1">&#39;EME&#39;</span><span class="p">,</span>
+            <span class="n">out_frame</span><span class="o">=</span><span class="s1">&#39;ITRF&#39;</span><span class="p">,</span>
+            <span class="n">frame_tidal_effects</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">integrator</span><span class="o">=</span><span class="s1">&#39;DormandPrince853&#39;</span><span class="p">,</span>
+            <span class="n">min_step</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span>
+            <span class="n">max_step</span><span class="o">=</span><span class="mf">120.0</span><span class="p">,</span>
+            <span class="n">position_tolerance</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>
+            <span class="n">earth_gravity</span><span class="o">=</span><span class="s1">&#39;HolmesFeatherstone&#39;</span><span class="p">,</span>
+            <span class="n">gravity_order</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span>
+            <span class="n">solarsystem_perturbers</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Moon&#39;</span><span class="p">,</span> <span class="s1">&#39;Sun&#39;</span><span class="p">],</span>
+            <span class="n">drag_force</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">atmosphere</span><span class="o">=</span><span class="s1">&#39;DTM2000&#39;</span><span class="p">,</span>
+            <span class="n">radiation_pressure</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">solar_activity</span><span class="o">=</span><span class="s1">&#39;Marshall&#39;</span><span class="p">,</span>
+            <span class="n">constants_source</span><span class="o">=</span><span class="s1">&#39;WGS84&#39;</span><span class="p">,</span>
+            <span class="n">solar_activity_strength</span><span class="o">=</span><span class="s1">&#39;WEAK&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_check_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">key_s</span><span class="p">,</span> <span class="n">val_s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key_s</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Orekit</span><span class="o">.</span><span class="n">DEFAULT_SETTINGS</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;Setting &quot;</span><span class="si">{}</span><span class="s1">&quot; does not exist&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key_s</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">Orekit</span><span class="o">.</span><span class="n">DEFAULT_SETTINGS</span><span class="p">[</span><span class="n">key_s</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">type</span><span class="p">(</span><span class="n">val_s</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Setting &quot;</span><span class="si">{}</span><span class="s1">&quot; does not support &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key_s</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">val_s</span><span class="p">)))</span>
+
+
+<div class="viewcode-block" id="Orekit.__init__"><a class="viewcode-back" href="../../../_autodoc/sorts/propagator/sorts.propagator.orekit.Orekit.__init__.html#sorts.propagator.orekit.Orekit.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">orekit_data</span><span class="p">,</span>
+                <span class="n">settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">Orekit</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;sorts.propagator.Orekit:init&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;Orekit:init&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">Orekit</span><span class="o">.</span><span class="n">DEFAULT_SETTINGS</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">settings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_settings</span><span class="p">()</span>
+
+        <span class="n">setup_orekit_curdir</span><span class="p">(</span><span class="n">filename</span> <span class="o">=</span> <span class="n">orekit_data</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Orekit:init:orekit-data = </span><span class="si">{</span><span class="n">orekit_data</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Orekit:settings:</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">utc</span> <span class="o">=</span> <span class="n">TimeScalesFactory</span><span class="o">.</span><span class="n">getUTC</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__settings</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__settings</span><span class="p">[</span><span class="s1">&#39;SolarStrengthLevel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">org</span><span class="o">.</span><span class="n">orekit</span><span class="o">.</span><span class="n">forces</span><span class="o">.</span><span class="n">drag</span><span class="o">.</span><span class="n">atmosphere</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">MarshallSolarActivityFutureEstimation</span><span class="o">.</span><span class="n">StrengthLevel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;solar_activity_strength&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tolerances</span> <span class="o">=</span> <span class="kc">None</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;constants_source&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;JPL-IAU&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mu</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">JPL_SSD_EARTH_GM</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">R_earth</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">IAU_2015_NOMINAL_EARTH_EQUATORIAL_RADIUS</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">f_earth</span> <span class="o">=</span> <span class="p">(</span><span class="n">Constants</span><span class="o">.</span><span class="n">IAU_2015_NOMINAL_EARTH_EQUATORIAL_RADIUS</span> <span class="o">-</span> <span class="n">Constants</span><span class="o">.</span><span class="n">IAU_2015_NOMINAL_EARTH_POLAR_RADIUS</span><span class="p">)</span><span class="o">/</span><span class="n">Constants</span><span class="o">.</span><span class="n">IAU_2015_NOMINAL_EARTH_POLAR_RADIUS</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mu</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">WGS84_EARTH_MU</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">R_earth</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">WGS84_EARTH_EQUATORIAL_RADIUS</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">f_earth</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">WGS84_EARTH_FLATTENING</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">M_earth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="o">/</span><span class="n">scipy</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">G</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__params</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;in_frame&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outputFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;out_frame&#39;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputFrame</span><span class="o">.</span><span class="n">isPseudoInertial</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inertialFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputFrame</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inertialFrame</span> <span class="o">=</span> <span class="n">FramesFactory</span><span class="o">.</span><span class="n">getEME2000</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">OneAxisEllipsoid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">R_earth</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_earth</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputFrame</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_forces</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;radiation_pressure&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_forces</span><span class="p">[</span><span class="s1">&#39;radiation_pressure&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;drag_force&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_forces</span><span class="p">[</span><span class="s1">&#39;drag_force&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;earth_gravity&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;HolmesFeatherstone&#39;</span><span class="p">:</span>
+            <span class="n">provider</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">orekit</span><span class="o">.</span><span class="n">forces</span><span class="o">.</span><span class="n">gravity</span><span class="o">.</span><span class="n">potential</span><span class="o">.</span><span class="n">GravityFieldFactory</span><span class="o">.</span><span class="n">getNormalizedProvider</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;gravity_order&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;gravity_order&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">holmesFeatherstone</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">orekit</span><span class="o">.</span><span class="n">forces</span><span class="o">.</span><span class="n">gravity</span><span class="o">.</span><span class="n">HolmesFeatherstoneAttractionModel</span><span class="p">(</span>
+                <span class="n">FramesFactory</span><span class="o">.</span><span class="n">getITRF</span><span class="p">(</span><span class="n">IERSConventions</span><span class="o">.</span><span class="n">IERS_2010</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+                <span class="n">provider</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_forces</span><span class="p">[</span><span class="s1">&#39;earth_gravity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">holmesFeatherstone</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;earth_gravity&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Newtonian&#39;</span><span class="p">:</span>
+            <span class="n">Newtonian</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">orekit</span><span class="o">.</span><span class="n">forces</span><span class="o">.</span><span class="n">gravity</span><span class="o">.</span><span class="n">NewtonianAttraction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_forces</span><span class="p">[</span><span class="s1">&#39;earth_gravity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Newtonian</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Supplied Earth gravity model &quot;</span><span class="si">{}</span><span class="s1">&quot; not recognized&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;earth_gravity&#39;</span><span class="p">]))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;solarsystem_perturbers&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">body</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;solarsystem_perturbers&#39;</span><span class="p">]:</span>
+                <span class="n">body_template</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">CelestialBodyFactory</span><span class="p">,</span> <span class="s1">&#39;get</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">body</span><span class="p">))</span>
+                <span class="n">body_instance</span> <span class="o">=</span> <span class="n">body_template</span><span class="p">()</span>
+                <span class="n">perturbation</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">orekit</span><span class="o">.</span><span class="n">forces</span><span class="o">.</span><span class="n">gravity</span><span class="o">.</span><span class="n">ThirdBodyAttraction</span><span class="p">(</span><span class="n">body_instance</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_forces</span><span class="p">[</span><span class="s1">&#39;perturbation_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">body</span><span class="p">)]</span> <span class="o">=</span> <span class="n">perturbation</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forces</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forces</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>                
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Orekit:init:_forces:</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_forces</span><span class="p">[</span><span class="n">key</span><span class="p">])</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Orekit:init:_forces:</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1"> = None&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;Orekit:init&#39;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        
+        <span class="n">ret</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;Orekit instance @ </span><span class="si">{}</span><span class="s1">:&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span><span class="o">*</span><span class="mi">25</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">{:20s}</span><span class="s1">: &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;Integrator&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;integrator&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">{:20s}</span><span class="s1">: &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;Minimum step&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;min_step&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; s&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">{:20s}</span><span class="s1">: &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;Maximum step&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;max_step&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; s&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">{:20s}</span><span class="s1">: &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;Position Tolerance&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;position_tolerance&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; m&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tolerances</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">{:20s}</span><span class="s1">: &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;Absolute Tolerance&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">JArray_double</span><span class="o">.</span><span class="n">cast_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tolerances</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">+</span> <span class="s1">&#39; m&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">{:20s}</span><span class="s1">: &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;Relative Tolerance&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">JArray_double</span><span class="o">.</span><span class="n">cast_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tolerances</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span> <span class="o">+</span> <span class="s1">&#39; m&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">{:20s}</span><span class="s1">: &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;Input frame&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;in_frame&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">{:20s}</span><span class="s1">: &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;Output frame&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;out_frame&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">{:20s}</span><span class="s1">: &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;Gravity model&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;earth_gravity&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;earth_gravity&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;HolmesFeatherstone&#39;</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">{:20s}</span><span class="s1"> - Harmonic expansion order </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;gravity_order&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">{:20s}</span><span class="s1">: &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;Atmosphere model&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;atmosphere&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">{:20s}</span><span class="s1">: &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;Solar model&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;solar_activity&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">{:20s}</span><span class="s1">: &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;Constants&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;constants_source&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;Included forces:&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forces</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39; - </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)))</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39;Third body perturbations:&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">for</span> <span class="n">body</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;solarsystem_perturbers&#39;</span><span class="p">]:</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="s1">&#39; - </span><span class="si">{:}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">body</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        
+        <span class="k">return</span> <span class="n">ret</span>
+
+
+
+    <span class="k">def</span> <span class="nf">_get_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Uses a string to identify which coordinate frame to initialize from Orekit package.</span>
+
+<span class="sd">        See `Orekit FramesFactory &lt;https://www.orekit.org/static/apidocs/org/orekit/frames/FramesFactory.html&gt;`_</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;Orekit:get_frame&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;EME&#39;</span><span class="p">:</span>
+            <span class="n">frame</span> <span class="o">=</span> <span class="n">FramesFactory</span><span class="o">.</span><span class="n">getEME2000</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;EME2000&#39;</span><span class="p">:</span>
+            <span class="n">frame</span> <span class="o">=</span> <span class="n">FramesFactory</span><span class="o">.</span><span class="n">getEME2000</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;CIRF&#39;</span><span class="p">:</span>
+            <span class="n">frame</span> <span class="o">=</span> <span class="n">FramesFactory</span><span class="o">.</span><span class="n">getCIRF</span><span class="p">(</span><span class="n">IERSConventions</span><span class="o">.</span><span class="n">IERS_2010</span><span class="p">,</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;frame_tidal_effects&#39;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;ITRF&#39;</span><span class="p">:</span>
+            <span class="n">frame</span> <span class="o">=</span> <span class="n">FramesFactory</span><span class="o">.</span><span class="n">getITRF</span><span class="p">(</span><span class="n">IERSConventions</span><span class="o">.</span><span class="n">IERS_2010</span><span class="p">,</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;frame_tidal_effects&#39;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;TIRF&#39;</span><span class="p">:</span>
+            <span class="n">frame</span> <span class="o">=</span> <span class="n">FramesFactory</span><span class="o">.</span><span class="n">getTIRF</span><span class="p">(</span><span class="n">IERSConventions</span><span class="o">.</span><span class="n">IERS_2010</span><span class="p">,</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;frame_tidal_effects&#39;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;ITRFEquinox&#39;</span><span class="p">:</span>
+            <span class="n">frame</span> <span class="o">=</span> <span class="n">FramesFactory</span><span class="o">.</span><span class="n">getITRFEquinox</span><span class="p">(</span><span class="n">IERSConventions</span><span class="o">.</span><span class="n">IERS_2010</span><span class="p">,</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;frame_tidal_effects&#39;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;TEME&#39;</span><span class="p">:</span>
+            <span class="n">frame</span> <span class="o">=</span> <span class="n">FramesFactory</span><span class="o">.</span><span class="n">getTEME</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Frame &quot;</span><span class="si">{}</span><span class="s1">&quot; not recognized&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;Orekit:get_frame&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">frame</span>
+
+    <span class="k">def</span> <span class="nf">_construct_propagator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initialOrbit</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Get the specified integrator from hipparchus package. List available at: `nonstiff ode &lt;https://www.hipparchus.org/apidocs/org/hipparchus/ode/nonstiff/package-summary.html&gt;`_</span>
+
+<span class="sd">        Configure the integrator tolerances using the orbit.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;Orekit:propagate:construct_propagator&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tolerances</span> <span class="o">=</span> <span class="n">NumericalPropagator</span><span class="o">.</span><span class="n">tolerances</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;position_tolerance&#39;</span><span class="p">],</span>
+                <span class="n">initialOrbit</span><span class="p">,</span>
+                <span class="n">initialOrbit</span><span class="o">.</span><span class="n">getType</span><span class="p">()</span>
+            <span class="p">)</span>
+
+        <span class="n">integrator_constructor</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
+            <span class="n">org</span><span class="o">.</span><span class="n">hipparchus</span><span class="o">.</span><span class="n">ode</span><span class="o">.</span><span class="n">nonstiff</span><span class="p">,</span>
+            <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">Integrator&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;integrator&#39;</span><span class="p">]),</span>
+        <span class="p">)</span>
+
+        <span class="n">integrator</span> <span class="o">=</span> <span class="n">integrator_constructor</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;min_step&#39;</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;max_step&#39;</span><span class="p">],</span> 
+            <span class="n">JArray_double</span><span class="o">.</span><span class="n">cast_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tolerances</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+            <span class="n">JArray_double</span><span class="o">.</span><span class="n">cast_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tolerances</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+        <span class="p">)</span>
+
+        <span class="n">propagator</span> <span class="o">=</span> <span class="n">NumericalPropagator</span><span class="p">(</span><span class="n">integrator</span><span class="p">)</span>
+        <span class="n">propagator</span><span class="o">.</span><span class="n">setOrbitType</span><span class="p">(</span><span class="n">initialOrbit</span><span class="o">.</span><span class="n">getType</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">propagator</span> <span class="o">=</span> <span class="n">propagator</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;Orekit:propagate:construct_propagator&#39;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_set_forces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">cr</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Using the spacecraft specific parameters, set the drag force and radiation pressure models.</span>
+<span class="sd">        </span>
+<span class="sd">        **See:**</span>
+<span class="sd">            * `drag &lt;https://www.orekit.org/static/apidocs/org/orekit/forces/drag/package-summary.html&gt;`_</span>
+<span class="sd">            * `radiation &lt;https://www.orekit.org/static/apidocs/org/orekit/forces/radiation/package-summary.html&gt;`_</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;Orekit:propagate:set_forces&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Orekit:set_forces:A = </span><span class="si">{</span><span class="n">A</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Orekit:set_forces:cd = </span><span class="si">{</span><span class="n">cd</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Orekit:set_forces:cr = </span><span class="si">{</span><span class="n">cr</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">__params</span> <span class="o">=</span> <span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">cd</span><span class="p">,</span> <span class="n">cr</span><span class="p">]</span>
+
+        <span class="n">re_calc</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">re_calc</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">__params</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">__params</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">):</span>
+                <span class="n">re_calc</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Orekit:set_forces:re_calc = </span><span class="si">{</span><span class="n">re_calc</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">re_calc</span><span class="p">:</span>        
+            <span class="bp">self</span><span class="o">.</span><span class="n">__params</span> <span class="o">=</span> <span class="n">__params</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;drag_force&#39;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;solar_activity&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Marshall&#39;</span><span class="p">:</span>
+                    <span class="n">msafe</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">orekit</span><span class="o">.</span><span class="n">forces</span><span class="o">.</span><span class="n">drag</span><span class="o">.</span><span class="n">atmosphere</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">MarshallSolarActivityFutureEstimation</span><span class="p">(</span>
+                        <span class="s2">&quot;(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)</span><span class="se">\\</span><span class="s2">p</span><span class="si">{Digit}</span><span class="se">\\</span><span class="s2">p</span><span class="si">{Digit}</span><span class="se">\\</span><span class="s2">p</span><span class="si">{Digit}</span><span class="se">\\</span><span class="s2">p</span><span class="si">{Digit}</span><span class="s2">F10</span><span class="se">\\</span><span class="s2">.(?:txt|TXT)&quot;</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">__settings</span><span class="p">[</span><span class="s1">&#39;SolarStrengthLevel&#39;</span><span class="p">],</span>
+                    <span class="p">)</span>
+                    <span class="n">manager</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">orekit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataProvidersManager</span><span class="o">.</span><span class="n">getInstance</span><span class="p">()</span>
+                    <span class="n">manager</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">msafe</span><span class="o">.</span><span class="n">getSupportedNames</span><span class="p">(),</span> <span class="n">msafe</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;atmosphere&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;DTM2000&#39;</span><span class="p">:</span>
+                        <span class="n">atmosphere_instance</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">orekit</span><span class="o">.</span><span class="n">forces</span><span class="o">.</span><span class="n">drag</span><span class="o">.</span><span class="n">atmosphere</span><span class="o">.</span><span class="n">DTM2000</span><span class="p">(</span><span class="n">msafe</span><span class="p">,</span> <span class="n">CelestialBodyFactory</span><span class="o">.</span><span class="n">getSun</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Atmosphere model not recognized&#39;</span><span class="p">)</span>
+
+                    <span class="n">drag_model</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">orekit</span><span class="o">.</span><span class="n">forces</span><span class="o">.</span><span class="n">drag</span><span class="o">.</span><span class="n">DragForce</span><span class="p">(</span>
+                        <span class="n">atmosphere_instance</span><span class="p">,</span>
+                        <span class="n">org</span><span class="o">.</span><span class="n">orekit</span><span class="o">.</span><span class="n">forces</span><span class="o">.</span><span class="n">drag</span><span class="o">.</span><span class="n">IsotropicDrag</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">A</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">cd</span><span class="p">)),</span>
+                    <span class="p">)</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_forces</span><span class="p">[</span><span class="s1">&#39;drag_force&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">drag_model</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Solar activity model not recognized&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;radiation_pressure&#39;</span><span class="p">]:</span>
+                <span class="n">radiation_pressure_model</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">orekit</span><span class="o">.</span><span class="n">forces</span><span class="o">.</span><span class="n">radiation</span><span class="o">.</span><span class="n">SolarRadiationPressure</span><span class="p">(</span>
+                    <span class="n">CelestialBodyFactory</span><span class="o">.</span><span class="n">getSun</span><span class="p">(),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">getEquatorialRadius</span><span class="p">(),</span>
+                    <span class="n">org</span><span class="o">.</span><span class="n">orekit</span><span class="o">.</span><span class="n">forces</span><span class="o">.</span><span class="n">radiation</span><span class="o">.</span><span class="n">IsotropicRadiationSingleCoefficient</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">A</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">cr</span><span class="p">)),</span>
+                <span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_forces</span><span class="p">[</span><span class="s1">&#39;radiation_pressure&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">radiation_pressure_model</span>
+
+            <span class="c1">#self.propagator.removeForceModels()</span>
+
+            <span class="k">for</span> <span class="n">force_name</span><span class="p">,</span> <span class="n">force</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forces</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">propagator</span><span class="o">.</span><span class="n">addForceModel</span><span class="p">(</span><span class="n">force</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;Orekit:propagate:set_forces&#39;</span><span class="p">)</span>
+        
+
+<div class="viewcode-block" id="Orekit.propagate"><a class="viewcode-back" href="../../../_autodoc/sorts/propagator/sorts.propagator.orekit.Orekit.propagate.html#sorts.propagator.orekit.Orekit.propagate">[docs]</a>    <span class="k">def</span> <span class="nf">propagate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">t</span><span class="p">,</span><span class="n">state0</span><span class="p">,</span><span class="n">mjd0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        **Implementation:**</span>
+<span class="sd">    </span>
+<span class="sd">        Units are in meters and degrees.</span>
+
+<span class="sd">        Keyword arguments are:</span>
+
+<span class="sd">            * float A: Area in m^2</span>
+<span class="sd">            * float C_D: Drag coefficient</span>
+<span class="sd">            * float C_R: Radiation pressure coefficient</span>
+<span class="sd">            * float m: Mass of object in kg</span>
+
+<span class="sd">        *NOTE:*</span>
+<span class="sd">            * If the eccentricity is below 1e-10 the eccentricity will be set to 1e-10 to prevent Keplerian Jacobian becoming singular.</span>
+<span class="sd">        </span>
+
+<span class="sd">        The implementation first checks if the input frame is Pseudo inertial, if this is true this is used as the propagation frame. If not it is automatically converted to EME (ECI-J2000).</span>
+
+<span class="sd">        Since there are forces that are dependent on the space-craft parameters, if these parameter has been changed since the last iteration the numerical integrator is re-initialized at every call of this method. The forces that can be initialized without spacecraft parameters (e.g. Earth gravitational field) are done at propagator construction.</span>
+
+<span class="sd">        See :func:`propagator_base.PropagatorBase.get_orbit`.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;Orekit:propagate&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;radiation_pressure&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="s1">&#39;C_R&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Radiation pressure force enabled but no coefficient &quot;C_R&quot; given&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;C_R&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;drag_force&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="s1">&#39;C_D&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Drag force enabled but no drag coefficient &quot;C_D&quot; given&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;C_D&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+        <span class="k">if</span> <span class="s1">&#39;m&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;m&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_numpy</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Orekit:propagate:len(t) = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">initialDate</span> <span class="o">=</span> <span class="n">mjd2absdate</span><span class="p">(</span><span class="n">mjd0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">hipparchus</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">euclidean</span><span class="o">.</span><span class="n">threed</span><span class="o">.</span><span class="n">Vector3D</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">state0</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">state0</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">state0</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+        <span class="n">vel</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="n">hipparchus</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">euclidean</span><span class="o">.</span><span class="n">threed</span><span class="o">.</span><span class="n">Vector3D</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">state0</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">state0</span><span class="p">[</span><span class="mi">4</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">state0</span><span class="p">[</span><span class="mi">5</span><span class="p">]))</span>
+        <span class="n">PV_state</span> <span class="o">=</span> <span class="n">PVCoordinates</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">vel</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputFrame</span><span class="o">.</span><span class="n">isPseudoInertial</span><span class="p">():</span>
+            <span class="n">transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputFrame</span><span class="o">.</span><span class="n">getTransformTo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inertialFrame</span><span class="p">,</span> <span class="n">initialDate</span><span class="p">)</span>
+            <span class="n">PV_state</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">transformPVCoordinates</span><span class="p">(</span><span class="n">PV_state</span><span class="p">)</span>
+
+        <span class="n">initialOrbit</span> <span class="o">=</span> <span class="n">CartesianOrbit</span><span class="p">(</span>
+            <span class="n">PV_state</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inertialFrame</span><span class="p">,</span>
+            <span class="n">initialDate</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mu</span> <span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="n">scipy</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">G</span><span class="o">*</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;m&#39;</span><span class="p">]),</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_construct_propagator</span><span class="p">(</span><span class="n">initialOrbit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_forces</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">],</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;C_D&#39;</span><span class="p">],</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;C_R&#39;</span><span class="p">])</span>
+
+        <span class="n">initialState</span> <span class="o">=</span> <span class="n">SpacecraftState</span><span class="p">(</span><span class="n">initialOrbit</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">propagator</span><span class="o">.</span><span class="n">setInitialState</span><span class="p">(</span><span class="n">initialState</span><span class="p">)</span>
+
+        <span class="n">tb_inds</span> <span class="o">=</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="mf">0.0</span>
+        <span class="n">t_back</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">tb_inds</span><span class="p">]</span>
+
+        <span class="n">tf_indst</span> <span class="o">=</span> <span class="n">t</span> <span class="o">&gt;=</span> <span class="mf">0.0</span>
+        <span class="n">t_forward</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">tf_indst</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">t_forward</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">t_forward</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">):</span>
+                <span class="n">t_back</span> <span class="o">=</span> <span class="n">t</span>
+                <span class="n">t_forward</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">tb_inds</span> <span class="o">=</span> <span class="n">t</span> <span class="o">&lt;=</span> <span class="mi">0</span>
+
+        <span class="n">state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="n">step_handler</span> <span class="o">=</span> <span class="n">Orekit</span><span class="o">.</span><span class="n">OrekitVariableStep</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;Orekit:propagate:steps&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">t_back</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">_t</span> <span class="o">=</span> <span class="n">t_back</span>
+            <span class="n">_t_order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">_t</span><span class="p">))</span>
+            <span class="n">_t_res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">_t_order</span><span class="p">)</span>
+            <span class="n">_t</span> <span class="o">=</span> <span class="n">_t</span><span class="p">[</span><span class="n">_t_order</span><span class="p">]</span>
+            <span class="n">_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">_t</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span> 
+            <span class="n">step_handler</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="n">_t</span><span class="p">,</span> <span class="n">initialDate</span><span class="p">,</span> <span class="n">_state</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputFrame</span><span class="p">,</span> <span class="n">profiler</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">propagator</span><span class="o">.</span><span class="n">setMasterMode</span><span class="p">(</span><span class="n">step_handler</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">propagator</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">initialDate</span><span class="o">.</span><span class="n">shiftedBy</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">_t</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])))</span>
+            
+            <span class="c1">#now _state is full and in the order of _t</span>
+            <span class="n">state</span><span class="p">[:,</span> <span class="n">tb_inds</span><span class="p">]</span> <span class="o">=</span> <span class="n">_state</span><span class="p">[:,</span> <span class="n">_t_res</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">t_forward</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">_t</span> <span class="o">=</span> <span class="n">t_forward</span>
+            <span class="n">_t_order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">_t</span><span class="p">))</span>
+            <span class="n">_t_res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">_t_order</span><span class="p">)</span>
+            <span class="n">_t</span> <span class="o">=</span> <span class="n">_t</span><span class="p">[</span><span class="n">_t_order</span><span class="p">]</span>
+            <span class="n">_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">_t</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span> 
+            <span class="n">step_handler</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="n">_t</span><span class="p">,</span> <span class="n">initialDate</span><span class="p">,</span> <span class="n">_state</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputFrame</span><span class="p">,</span> <span class="n">profiler</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">propagator</span><span class="o">.</span><span class="n">setMasterMode</span><span class="p">(</span><span class="n">step_handler</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">propagator</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">initialDate</span><span class="o">.</span><span class="n">shiftedBy</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">_t</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])))</span>
+            
+            <span class="c1">#now _state is full and in the order of _t</span>
+            <span class="n">state</span><span class="p">[:,</span> <span class="n">tf_indst</span><span class="p">]</span> <span class="o">=</span> <span class="n">_state</span><span class="p">[:,</span> <span class="n">_t_res</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;Orekit:propagate:steps&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;Orekit:propagate&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Orekit:propagate:completed&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">state</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

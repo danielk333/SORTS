@@ -1,0 +1,209 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>plane &#8212; SORTS 3.13.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Plane" href="sorts.radar.scans.plane.Plane.html" />
+    <link rel="prev" title="Fence.pointing" href="sorts.radar.scans.fence.Fence.pointing.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.radar.scans.plane.Plane.html" title="Plane"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sorts.radar.scans.fence.Fence.pointing.html" title="Fence.pointing"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" accesskey="U">API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">plane</a><ul>
+<li><a class="reference internal" href="#module-summary">Module summary</a></li>
+<li><a class="reference internal" href="#contents">Contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sorts.radar.scans.fence.Fence.pointing.html"
+                        title="previous chapter">Fence.pointing</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sorts.radar.scans.plane.Plane.html"
+                        title="next chapter">Plane</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/_autodoc/sorts/scheduler/sorts.radar.scans.plane.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-sorts.radar.scans.plane">
+<span id="plane"></span><h1>plane<a class="headerlink" href="#module-sorts.radar.scans.plane" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-summary">
+<h2>Module summary<a class="headerlink" href="#module-summary" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Classes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.radar.scans.plane.Plane.html#sorts.radar.scans.plane.Plane" title="sorts.radar.scans.plane.Plane"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Plane</span></code></a>([min_elevation, altitude, x_size, …])</p></td>
+<td><p>A uniform sampling of a horizontal plane.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Plane</p>
+<dl class="py class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">sorts.radar.scans.plane.</code><code class="sig-name descname">Plane</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">min_elevation</span><span class="o">=</span><span class="default_value">30.0</span></em>, <em class="sig-param"><span class="n">altitude</span><span class="o">=</span><span class="default_value">200000.0</span></em>, <em class="sig-param"><span class="n">x_size</span><span class="o">=</span><span class="default_value">50000.0</span></em>, <em class="sig-param"><span class="n">y_size</span><span class="o">=</span><span class="default_value">50000.0</span></em>, <em class="sig-param"><span class="n">x_num</span><span class="o">=</span><span class="default_value">20</span></em>, <em class="sig-param"><span class="n">y_num</span><span class="o">=</span><span class="default_value">20</span></em>, <em class="sig-param"><span class="n">dwell</span><span class="o">=</span><span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">x_offset</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">y_offset</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/radar/scans/plane.html#Plane"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="sorts.radar.scans.scan.Scan.html#sorts.radar.scans.scan.Scan" title="sorts.radar.scans.scan.Scan"><code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.radar.scans.scan.Scan</span></code></a></p>
+<p>A uniform sampling of a horizontal plane.</p>
+<dl class="py method">
+<dt>
+<code class="sig-name descname">check_dwell_tx</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tx</span></em><span class="sig-paren">)</span></dt>
+<dd><p>Checks if the transmitting antenna pulse pattern and coherent integration schema is compatible with the observation schema. Raises an Exception if not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>tx</strong> (<em>sorts.radar.TX</em>) – The antenna that should perform this scan.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Return a copy of the current instance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">cycle</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/radar/scans/plane.html#Plane.cycle"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>The cycle time of the scan if applicable.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">dwell</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/radar/scans/plane.html#Plane.dwell"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>The current dwell time of the scan.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">ecef_pointing</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">ant</span></em><span class="sig-paren">)</span></dt>
+<dd><p>Returns the instantaneous WGS84 ECEF pointing direction and the radar geographical location in WGS84 ECEF coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>t</strong> (<em>float</em>) – Seconds past a reference epoch to retrieve the pointing at.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">enu_pointing</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em><span class="sig-paren">)</span></dt>
+<dd><p>Returns the instantaneous pointing in East, North, Up (ENU) local coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>t</strong> (<em>float/numpy.ndarray</em>) – Seconds past a reference epoch to retrieve the pointing at.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">min_dwell</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/radar/scans/plane.html#Plane.min_dwell"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>If there are dynamic dwell times, this is the minimum dwell time. Otherwise, returns same as <code class="code docutils literal notranslate"><span class="pre">dwell</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.radar.scans.plane.Plane.html" title="Plane"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sorts.radar.scans.fence.Fence.pointing.html" title="Fence.pointing"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

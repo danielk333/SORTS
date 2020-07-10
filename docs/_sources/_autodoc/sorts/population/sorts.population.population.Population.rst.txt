@@ -1,0 +1,45 @@
+Population
+==========
+
+.. currentmodule:: sorts.population.population
+
+.. autoclass:: Population
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Population.__init__
+      ~Population.add_column
+      ~Population.allocate
+      ~Population.copy
+      ~Population.delete
+      ~Population.filter
+      ~Population.get_all_orbits
+      ~Population.get_object
+      ~Population.get_orbit
+      ~Population.get_states
+      ~Population.load
+      ~Population.next
+      ~Population.object_generator
+      ~Population.plot_distribution
+      ~Population.print_row
+      ~Population.save
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Population.shape
+   
+   

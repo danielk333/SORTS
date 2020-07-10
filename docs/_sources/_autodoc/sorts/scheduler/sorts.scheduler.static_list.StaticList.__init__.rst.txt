@@ -1,0 +1,8 @@
+StaticList.\_\_init\_\_
+=======================
+
+.. currentmodule:: sorts.scheduler.static_list
+
+.. rubric:: StaticList.__init__
+
+.. automethod:: StaticList.__init__

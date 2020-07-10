@@ -1,0 +1,8 @@
+Scanner.generator
+=================
+
+.. currentmodule:: sorts.controller.scanner
+
+.. rubric:: Scanner.generator
+
+.. automethod:: Scanner.generator
