@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 '''
+Radar controller returning reference 
+======================================
 
 '''
 
@@ -36,7 +38,7 @@ print(f'eiscat3d.tx.pointing         : {eiscat3d.tx[0].beam.pointing}')
 print(f'tcontroller.radar.tx.pointing: {tcontroller.radar.tx[0].beam.pointing} \n\n')
 
 print('setting "return_copy" to false makes the returned radar from the controller as just a reference')
-for radar in tcontroller([t[3]]):
+for radar, meta in tcontroller([t[3]]):
 
     print(f'tcontroller.radar.tx.pointing: {tcontroller.radar.tx[0].beam.pointing}')
     print(f'radar.tx.pointing            : {radar.tx[0].beam.pointing}')

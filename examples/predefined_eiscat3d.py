@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 '''
-
+Predefined EISCAT 3D Radar
+================================
 '''
 
 import matplotlib.pyplot as plt

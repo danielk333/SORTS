@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
-'''Example showing how populations can be used
-
+'''
+Populations
+================================
 '''
 
 import numpy as np

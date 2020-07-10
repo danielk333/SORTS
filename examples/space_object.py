@@ -1,7 +1,9 @@
 
 #!/usr/bin/env python
 
-'''Example showing how space object can be used
+'''
+The SpaceObject class
+======================================
 
 '''
 

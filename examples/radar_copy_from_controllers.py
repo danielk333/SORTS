@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 '''
-
+Radar controller return copy
+================================
 '''
 
 import numpy as np
@@ -36,7 +37,7 @@ print(f'eiscat3d.tx.pointing         : {eiscat3d.tx[0].beam.pointing}')
 print(f'tcontroller.radar.tx.pointing: {tcontroller.radar.tx[0].beam.pointing} \n\n')
 
 print('using "return_copy" ensures that the returned radar from the controller is always its own object')
-for radar in tcontroller([t[3]]):
+for radar, meta in tcontroller([t[3]]):
 
     print(f'tcontroller.radar.tx.pointing: {tcontroller.radar.tx[0].beam.pointing}')
     print(f'radar.tx.pointing            : {radar.tx[0].beam.pointing}')

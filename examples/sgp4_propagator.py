@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
-'''Example showing how SGP4 propagator can be used
-
+'''
+SGP4 propagator usage
+======================================
 '''
 
 import numpy as np

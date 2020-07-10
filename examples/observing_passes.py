@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
 '''
+Observing a set of passes
+================================
 
 '''
 import pathlib
-
+from tabulate import tabulate
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -64,6 +66,7 @@ passes1 = eiscat3d.find_passes(t, states1, cache_data = False)
 ps = passes0[0][0][0]
 use_inds = np.arange(0,len(ps.inds),len(ps.inds)//10)
 e3d_tracker = Tracker(radar = eiscat3d, t=t[ps.inds[use_inds]], ecefs=states0[:3,ps.inds[use_inds]])
+e3d_tracker.meta['target'] = 'Cool object 1'
 
 class MyStaticList(StaticList, ObservedParameters):
 
@@ -76,13 +79,19 @@ class MyStaticList(StaticList, ObservedParameters):
         )
 
     def generate_schedule(self, t, generator):
-        data = np.empty((len(t),len(self.radar.rx)*2+2), dtype=np.float64)
+        data = np.empty((len(t),len(self.radar.rx)*2+1), dtype=np.float64)
         data[:,0] = t
-        data[:,len(self.radar.rx)*2+1] = 0.2
-        for ind,radar in enumerate(generator):
+        names = []
+        targets = []
+        for ind,mrad in enumerate(generator):
+            radar, meta = mrad
+            names.append(meta['controller_type'].__name__)
+            targets.append(meta['target'])
             for ri, rx in enumerate(radar.rx):
                 data[ind,1+ri*2] = rx.beam.azimuth
                 data[ind,2+ri*2] = rx.beam.elevation
+        data = data.T.tolist() + [names, targets]
+        data = list(map(list, zip(*data)))
         return data
 
 
@@ -91,10 +100,9 @@ p = Profiler()
 scheduler = MyStaticList(radar = eiscat3d, controllers=[e3d_tracker], profiler=p)
 
 sched_data = scheduler.schedule()
-from tabulate import tabulate
 
 rx_head = [f'rx{i} {co}' for i in range(len(scheduler.radar.rx)) for co in ['az', 'el']]
-sched_tab = tabulate(sched_data, headers=["t [s]"] + rx_head + ['dwell'])
+sched_tab = tabulate(sched_data, headers=["t [s]"] + rx_head + ['Controller', 'Target'])
 
 print(sched_tab)
 
@@ -105,28 +113,26 @@ print(p.fmt(normalize='total'))
 
 data1 = scheduler.observe_passes(passes1, space_object = objs[1], snr_limit=False)
 
-#create a tdm file 
+#create a tdm file example
+# pth = pathlib.Path(__file__).parent / 'data' / 'test_tdm.tdm'
+# print(f'Writing TDM data to: {pth}')
 
-
-pth = pathlib.Path(__file__).parent / 'data' / 'test_tdm.tdm'
-print(f'Writing TDM data to: {pth}')
-
-dat = data0[0][0][0]
-sorts.io.write_tdm(
-    pth,
-    dat['t'],
-    dat['range'],
-    dat['range_rate'],
-    np.ones(dat['range'].shape),
-    np.ones(dat['range_rate'].shape),
-    freq=eiscat3d.tx[0].beam.frequency,
-    tx_ecef=eiscat3d.tx[0].ecef,
-    rx_ecef=eiscat3d.rx[0].ecef,
-    tx_name="EISCAT 3D Skiboten",
-    rx_name="EISCAT 3D Skiboten",
-    oid="Some cool space object",
-    tdm_type="track",
-)
+# dat = data0[0][0][0]
+# sorts.io.write_tdm(
+#     pth,
+#     dat['t'],
+#     dat['range'],
+#     dat['range_rate'],
+#     np.ones(dat['range'].shape),
+#     np.ones(dat['range_rate'].shape),
+#     freq=eiscat3d.tx[0].beam.frequency,
+#     tx_ecef=eiscat3d.tx[0].ecef,
+#     rx_ecef=eiscat3d.rx[0].ecef,
+#     tx_name="EISCAT 3D Skiboten",
+#     rx_name="EISCAT 3D Skiboten",
+#     oid="Some cool space object",
+#     tdm_type="track",
+# )
 
 
 fig = plt.figure(figsize=(15,15))

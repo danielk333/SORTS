@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 '''
+Adding random errors
+================================
 
 '''
 import pathlib
@@ -12,11 +14,10 @@ import sorts.errors as errors
 import sorts
 eiscat3d = sorts.radars.eiscat3d
 
-pth = pathlib.Path(__file__).parent / 'data'
-
-print(f'Caching error calculation data to: {pth}')
-
-err = errors.LinearizedCoded(eiscat3d.tx[0], seed=123, cache_folder=pth)
+# pth = pathlib.Path(__file__).parent / 'data'
+# print(f'Caching error calculation data to: {pth}')
+# err = errors.LinearizedCoded(eiscat3d.tx[0], seed=123, cache_folder=pth)
+err = errors.LinearizedCoded(eiscat3d.tx[0], seed=123)
 
 num = 1000
 

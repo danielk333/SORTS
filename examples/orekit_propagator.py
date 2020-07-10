@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
-'''Example showing how Orekit propagator can be used
-
+'''
+Orekit propagator usage
+================================
 '''
 
 import numpy as np

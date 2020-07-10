@@ -5,7 +5,7 @@ API Reference
 Modules
 ========
 
-.. autosummary ::
+.. autosummary::
    :template: autosummary/module.rst
    :toctree: _autodoc/sorts
 
@@ -17,7 +17,6 @@ Modules
     sorts.scheduler
     sorts.passes
     sorts.errors
-
     sorts.radar.scans
     sorts.functions
     sorts.constants

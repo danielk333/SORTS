@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 '''
-Profiling components
+Profiling SGP4
 ======================
 
 '''

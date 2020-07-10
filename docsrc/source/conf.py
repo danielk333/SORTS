@@ -13,6 +13,8 @@
 # import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
+import warnings
+from datetime import date
 
 import sorts
 
@@ -70,6 +72,7 @@ sphinx_gallery_conf = {
      'examples_dirs': '../../examples',   # path to your example scripts
      'gallery_dirs': 'auto_gallery',  # path where to save gallery generated examples
      'filename_pattern': '/*.py',
+     'ignore_pattern': r'.*__ngl\.py',
 }
 
 # Remove matplotlib agg warnings from generated doc when using plt.show

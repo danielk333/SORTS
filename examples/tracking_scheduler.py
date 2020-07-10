@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 '''
-
+An example scheduler for tracking
+======================================
 '''
 
 import numpy as np
