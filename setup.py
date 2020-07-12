@@ -2,35 +2,45 @@ import os
 import setuptools
 from setuptools.command.develop import develop
 from setuptools.command.install import install
+from setuptools.command.egg_info import egg_info
 import subprocess
+import pip
 
-__version__ = '3.13.0'
-
-class PostDevelopCommand(develop):
-    """Post-installation for development mode."""
-    
-
-    def run(self):
-
-        develop.run(self)
+__version__ = '3.14.0'
 
 
-class PostInstallCommand(install):
-    """Post-installation for installation mode."""
-    
-
-    def run(self):
-
-        install.run(self)
-
+with open('dependency-links', 'r') as fh:
+    dep_links = fh.read().split('\n')
+    dep_links = [x.strip() for x in dep_links if len(x.strip()) > 0]
 
 with open('README.rst', 'r') as fh:
     long_description = fh.read()
 
-
 with open('requirements', 'r') as fh:
     pip_req = fh.read().split('\n')
     pip_req = [x.strip() for x in pip_req if len(x.strip()) > 0]
+
+
+class CustomDevelopCommand(develop):
+    """Post-installation for development mode."""
+    def run(self):
+        for link in dep_links:
+            pip.main(['install', link])
+        develop.run(self)
+
+class CustomInstallCommand(install):
+    """Post-installation for installation mode."""
+    def run(self):
+        for link in dep_links:
+            pip.main(['install', link])
+        install.run(self)
+
+class CustomEggCommand(egg_info):
+    """Post-installation for installation mode."""
+    def run(self):
+        for link in dep_links:
+            pip.main(['install', link])
+        egg_info.run(self)
 
 
 setuptools.setup(
@@ -48,17 +58,14 @@ setuptools.setup(
     package_data={
         'sorts': ['data/*'],
     },
-    dependency_links=[
-        'git+https://github.com/danielk333/pyant.git#egg=0.5.0',
-        'git+https://github.com/danielk333/pyorb.git#egg=0.3.2',
-    ],
     # metadata to display on PyPI
     author='Daniel Kastinen, Juha Vierinen',
     author_email='daniel.kastinen@irf.se',
     description='SORTS',
     license='MIT',
     cmdclass={
-        'develop': PostDevelopCommand,
-        'install': PostInstallCommand,
+        'develop': CustomDevelopCommand,
+        'install': CustomInstallCommand,
+        'egg_info': CustomEggCommand,
     },
 )
