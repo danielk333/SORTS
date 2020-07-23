@@ -12,8 +12,26 @@ import scipy.constants as consts
 # import TLE_tools as tle
 # import dpt_tools as dpt
 
-from sgp4.io import twoline2rv
-from sgp4.earth_gravity import wgs72, wgs84
+import sgp4
+if hasattr(sgp4, 'api'):
+    # version 2.0 of sgp4 or newer
+    from sgp4.Satrec import twoline2rv
+    def _propagate(rv, t):
+        e, p, v = rv.sgp4(t.jd1, t.jd2)
+        if e != 0: raise
+        return p, v
+    sgp4_v2 = True
+else:
+    from sgp4.io import twoline2rv as _twoline
+    from sgp4.earth_gravity import wgs72
+    def twoline2rv(lin1, lin2):
+        return _twoline(lin1, lin2, wgs72)
+    def _propagate(rv, t):
+        dt = Time(t, format='datetime').value
+        return rv.propagate(dt.year, dt.month, dt.day,
+                    dt.hour, dt.minute, dt.second + 1e-6*dt.microsecond)
+
+    sgp4_v2 = False
 
 from sorts import frames, dates
 from sorts import using_astropy as uap
@@ -21,6 +39,8 @@ from sorts.propagator.pysgp4 import SGP4
 
 import astropy.units as u
 from astropy.time import Time, TimeDelta
+from astropy.coordinates import CartesianRepresentation, CartesianDifferential
+from astropy.coordinates.builtin_frames import ITRS
 
 
 def vdot(va, vb):
@@ -39,7 +59,7 @@ def load_tle_table(fname):
             name = next(src).strip()
             line1 = next(src)
             line2 = next(src)
-            tab[name] = twoline2rv(line1, line2, wgs72)
+            tab[name] = twoline2rv(line1, line2)
     except StopIteration:
         src.close()
         return tab
@@ -131,10 +151,7 @@ class TestFrames(unittest.TestCase):
         self.resorb = read_statevectors('tests/S1A_OPER_AUX_RESORB_OPOD_20200721T073339_V20200721T023852_20200721T055622.EOF')
 
 
-    def no_test_TLE_to_ITRS(self, wgs=wgs72):
-
-        # rv = twoline2rv(self.line1, self.line2, wgs)
-
+    def test_sgp4_version_workaround(self):
         rv = self.tab['SENTINEL-1A']
 
         # epoch is in UTC or UT1 (not clear which). The difference is < 1 sec always.
@@ -145,45 +162,25 @@ class TestFrames(unittest.TestCase):
         epochdate = dates.npdt_to_date(dates.mjd_to_npdt(dates.jd_to_mjd(rv.jdsatepoch)))
         year, month, day, hour, minute, sec, microseconds = epochdate
 
-        # These figures for the hand-coded ISS example. Sentinel-1A example similar.
-        # Compare to rv.epoch (datetime.datetime object)
-        # rv.epoch = datetime.datetime(2008, 9, 20, 12, 25, 40, 104192)
-        # Lack of precision gives less than optimal value for microseconds:
-        # (microseconds = 104179.0)
-        # rv.jdsatepoch = 2454730.01782528
-        # rv.jdsatepoch - 2400000.5 = 54729.51782527985
-
-        # (hour + (minute + (sec + 104192/1e6)/60)/60)/24 = 0.5178252799999999
-        # (hour + (minute + (sec + microseconds/1e6)/60)/60)/24 = 0.517825279849537
-
-        # fix it now:
-        microseconds = 0.0 + rv.epoch.microsecond
+        # microseconds are off. Recreate (float) number of seconds from rv.epoch
+        seconds = rv.epoch.second + 1e-6 * rv.epoch.microsecond
 
         # Find first given statevector _after_ TLE epoch:
         rvep_utc = np.datetime64(rv.epoch, 'us')
 
 
         # Extract TEME Cartesian state vector at epoch
-        pos, vel = rv.propagate(year, month, day, hour, minute, second=sec + 1e-6*microseconds)
-        state_cart = np.array(pos + vel) * 1e3
+        if sgp4_v2:
+            err, po0, ve0 = rv.sgp4(rv_ept.jd1, rv_ept.jd2)
+            assert err == 0
+        else:
+            po0, ve0 = rv.propagate(year, month, day, hour, minute, seconds)
 
-        # Convert to (Kepler elements?)
-        elems = frames._cart2sgp4_elems(state_cart) 
+        # unified
+        pos, vel = _propagate(rv, rv_ept)
 
-        # this was the old calling order.
-        # state, epoch = tle.TLE_to_TEME(self.line1, self.line2)
-
-
-        # What is the new one? What is `state` here?
-        mjd0 = dates.jd_to_mjd(rv.jdsatepoch)
-        pos, vel = frames.TLE_to_TEME(state_cart, mjd0, kepler=False)
-
-        # yy, mm, dd = dpt.jd_to_date(epoch)
-
-        nt.assert_almost_equal(yy, 2008, decimal=8)
-        nt.assert_almost_equal(mm, 9, decimal=8)
-        nt.assert_almost_equal(dd, 20.51782528, decimal=8)
-        assert state.shape==(6,)
+        assert po0 == pos
+        assert ve0 == vel
 
 
     def test_one_astropy_ITRF(self):
@@ -198,17 +195,16 @@ class TestFrames(unittest.TestCase):
         rv = self.tab['SENTINEL-1A']
         s1_res = self.resorb
 
-        # rv_ept = Time(rv.epoch, scale='utc')                # Astropy Time object
         rv_epd = np.datetime64(rv.epoch, 'us')              # Numpy datetime64 value
 
         # Find first statevector past TLE epoch
         ix = np.where(s1_res.UTC > rv_epd)[0][0]
         svec = s1_res[ix]
 
-        yr, mth, day, hr, mn, sec, usec = dates.npdt_to_date(svec.UTC)
-        pos, vel = rv.propagate(yr, mth, day, hr, mn, second=sec+1e-6*usec)
+        svt = Time(svec.UTC, scale='utc')                # Astropy Time object
+        pos, vel = _propagate(rv, svt)
 
-        pmat, pmatp = uap.teme_to_itrs_mat(Time(svec.UTC, scale='utc'), derivative=True)
+        pmat, pmatp = uap.teme_to_itrs_mat(svt, derivative=True)
         rpos = 1e3 *  pmat @ pos
         rvel = 1e3 * (pmat @ vel + pmatp @ pos)
 
@@ -226,7 +222,7 @@ class TestFrames(unittest.TestCase):
         rv = self.tab['SENTINEL-1A']
         s1_res = self.resorb
 
-        # rv_ept = Time(rv.epoch, scale='utc')                # Astropy Time object
+        rv_ept = Time(rv.epoch, scale='utc')                # Astropy Time object
         rv_epd = np.datetime64(rv.epoch, 'us')              # Numpy datetime64 value
 
         # Find first statevector past TLE epoch
@@ -235,10 +231,10 @@ class TestFrames(unittest.TestCase):
         svec = s1_res[ix]
         for ii in ix:
             svec = s1_res[ii]
-            yr, mth, day, hr, mn, sec, usec = dates.npdt_to_date(svec.UTC)
-            pos, vel = rv.propagate(yr, mth, day, hr, mn, second=sec+1e-6*usec)
+            svt = Time(svec.UTC, scale='utc')                # Astropy Time object
+            pos, vel = _propagate(rv, svt)
 
-            pmat, pmatp = uap.teme_to_itrs_mat(Time(svec.UTC, scale='utc'), derivative=True)
+            pmat, pmatp = uap.teme_to_itrs_mat(svt, derivative=True)
             rpos = 1e3 *  pmat @ pos
             rvel = 1e3 * (pmat @ vel + pmatp @ pos)
 
@@ -249,6 +245,38 @@ class TestFrames(unittest.TestCase):
             assert vnorm2(svec.VEL - rvel) < 1.0,   'Inaccurate velocity'
 
         return True
+
+    def test_astropythonesque(self):
+        """
+        As above, but using the astropy frame transform framework
+        """
+        rv = self.tab['SENTINEL-1A']
+        s1_res = self.resorb
+
+        # rv_ept = Time(rv.epoch, scale='utc')                # Astropy Time object
+        rv_epd = np.datetime64(rv.epoch, 'us')              # Numpy datetime64 value
+
+        # Find first statevector past TLE epoch
+        ix = np.where(s1_res.UTC > rv_epd)[0][0]
+        svec = s1_res[ix]
+
+        svt = Time(svec.UTC, scale='utc')
+        pos, vel = _propagate(rv, svt)
+
+        teme_p = CartesianRepresentation(pos * u.km)
+        teme_v = CartesianDifferential(vel * u.km/u.s)
+        teme = uap.TEME(teme_p.with_differentials(teme_v), obstime=svt)
+
+        itrs = teme.transform_to(ITRS(obstime=teme.obstime))
+
+        pmat, pmatp = uap.teme_to_itrs_mat(svt, derivative=True)
+        rpos = 1e3 *  pmat @ pos
+        rvel = 1e3 * (pmat @ vel + pmatp @ pos)
+
+        np.testing.assert_allclose(rpos*u.m, itrs.data.xyz)
+        np.testing.assert_allclose(rvel*u.m/u.s, itrs.velocity.d_xyz)
+
+
 
     def test_tle_init(self):
         """
@@ -353,7 +381,7 @@ class TestFrames(unittest.TestCase):
             assert vnorm2(svec.VEL - pvel) < 1.0,   'Inaccurate velocity'
 
 
-    def test_TEME_to_ITRF(self):
+    def skip_test_TEME_to_ITRF(self):
 
         # First, try without polar motion
 

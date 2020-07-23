@@ -1,5 +1,6 @@
 # TEME:True equator, mean equinox frame use for NORAD TLE files
 
+import astropy.units as u
 from astropy.coordinates.matrix_utilities import matrix_transpose
 from astropy.coordinates.builtin_frames.utils import get_polar_motion, get_jd12
 from astropy.time import Time, TimeDelta
@@ -48,12 +49,33 @@ def function_and_derivative(f):
     return r_rdot
 
 
+def coord_from_svec(svec, frame):
+    """
+    params:
+      svec: structured scalar with fields POS, VEL, UTC
+      frame: Some Cartesian coordinate frame, e.g. ITRS or TEME
+    """
+    p = CartesianRepresentation(svec.POS * u.m)
+    v = CartesianDifferential(svec.VEL * u.m/u.s)
+    return frame(p.with_differentials(v), obstime=Time(svec.UTC, scale='utc'))
 
 
 class TEME(BaseCoordinateFrame):
+    """
+    A coordinate or frame in the True Equator Mean Equinox frame (TEME).
+
+    This frame is a geocentric system similar to CIRS or geocentric apparent place,
+    except that the mean sidereal time is used to rotate from TIRS. TEME coordinates
+    are most often used in combination with orbital data for satellites in the
+    two-line-ephemeris format.
+
+    Different implementations of the TEME frame exist. For clarity, this frame follows the
+    conventions and relations to other frames that are set out in Vallado et al (2006).
+    """
     default_representation = CartesianRepresentation
     default_differential = CartesianDifferential
-    obstime = TimeAttribute(default=Time("J2000"))
+    obstime = TimeAttribute()
+    # obstime = TimeAttribute(default=Time("J2000"))
 
 @function_and_derivative
 def teme_to_itrs_mat(time):
