@@ -185,7 +185,7 @@ class TestFrames(unittest.TestCase):
 
     def test_one_astropy_ITRF(self):
         """
-        Using TLE and restituted orbit files for Sentinel-1A, 
+        Using TLE and restituted orbit files for Sentinel-1A,
         ensure that we can get a reasonably accurate ITRF statevector
         from the underlying SGP4 propagator and the astropy-provided
         matrix for rotating TEME into ITRF
@@ -240,7 +240,7 @@ class TestFrames(unittest.TestCase):
 
             # print(f"diff |pRES - pTEME->ITRF| {vnorm2(svec.POS - rpos)} (m)")
             # print(f"diff |vRES - vTEME->ITRF| {vnorm2(svec.VEL - rvel)} (m/s)")
-    
+
             assert vnorm2(svec.POS - rpos) < 800.0, 'Inaccurate position'
             assert vnorm2(svec.VEL - rvel) < 1.0,   'Inaccurate velocity'
 
@@ -249,6 +249,8 @@ class TestFrames(unittest.TestCase):
     def test_astropythonesque(self):
         """
         As above, but using the astropy frame transform framework
+
+        Compare hand-unrolled transformations with those from astropy
         """
         rv = self.tab['SENTINEL-1A']
         s1_res = self.resorb
@@ -275,6 +277,12 @@ class TestFrames(unittest.TestCase):
 
         np.testing.assert_allclose(rpos*u.m, itrs.data.xyz)
         np.testing.assert_allclose(rvel*u.m/u.s, itrs.velocity.d_xyz)
+
+        # How about inverse transform?
+        teme2 = itrs.transform_to(uap.TEME(obstime=itrs.obstime))
+
+        np.testing.assert_allclose(teme.data.xyz, teme2.data.xyz)
+        np.testing.assert_allclose(teme.velocity.d_xyz, teme2.velocity.d_xyz)
 
 
 
@@ -306,7 +314,7 @@ class TestFrames(unittest.TestCase):
         pos, vel = rv.propagate(yr, mth, day, hr, mn, second=sec+1e-6*usec)
         state_eci = np.array(pos + vel) * 1e3
         epoch_mjd = dates.npdt_to_mjd(svec.UTC)
-        
+
         # SORTS-style SGP4 propagator
         prp = SGP4()
 
@@ -380,6 +388,79 @@ class TestFrames(unittest.TestCase):
             assert vnorm2(svec.POS - ppos) < 800.0, 'Inaccurate position'
             assert vnorm2(svec.VEL - pvel) < 1.0,   'Inaccurate velocity'
 
+    def propagate_from_RES(self, nprop=400):
+        """
+        Initialise SPG4 propagation from a RES statevector, and compare to
+        actually observed trajectory.
+        """
+        # Extract one statevector for initialization
+        rv = self.tab['SENTINEL-1A']
+        s1_res = self.resorb
+
+        ix = 50
+        svec = s1_res[ix]
+
+        p = CartesianRepresentation(svec.POS * u.m)
+        v = CartesianDifferential(svec.VEL * u.m/u.s)
+        svt = Time(svec.UTC, scale='utc')
+        itrs = ITRS(p.with_differentials(v), obstime=svt)
+
+        teme = itrs.transform_to(uap.TEME(obstime=itrs.obstime))
+        state_eci = np.r_[teme.data.xyz.to(u.m).value,
+                          teme.velocity.d_xyz.to(u.m/u.s).value]
+
+        # Find mean elements from osculating elements
+        state = frames.TEME_to_TLE(state_eci, svt.mjd)
+        # SORTS-style SGP4 propagator
+        prp = SGP4()
+        prp.settings['out_frame'] = 'ITRF'
+
+        ii = np.arange(nprop)
+
+        pv_itrf = prp.propagate(10*ii, state_eci, svt.mjd)
+        pos = pv_itrf[:3].T
+        vel = pv_itrf[3:].T
+
+        rpos = s1_res[ix+ii].POS
+        rvel = s1_res[ix+ii].VEL
+
+        return pos, vel, rpos, rvel
+
+    def test_propagate_from_RES(self, nprop=400):
+
+        pos, vel, rpos, rvel = propagate_from_RES(self, nprop)
+
+        np.testing.assert_array_less(vnorm2(pos[:150]-rpos[:150]), 100), \
+            'Position errors too large'
+
+        np.testing.assert_array_less(vnorm2(vel[:150]-rvel[:150]), 0.24), \
+            'Position errors too large'
+
+    def plot_propagation_errors(self, nprop=400):
+        from matplotlib import pyplot as plt
+        fig, ax = plt.subplots(2, 2, sharex='col')
+
+        pos, vel, rpos, rvel = self.propagate_from_RES(nprop)
+
+        tt = 10 * np.arange(len(pos))
+
+        def do_plot(ax, t, comp, rcomp, lab):
+            ax.plot(t, comp[:,0]-rcomp[:,0], 'r-')
+            ax.plot(t, comp[:,1]-rcomp[:,1], 'g-')
+            ax.plot(t, comp[:,2]-rcomp[:,2], 'b-')
+            ax.plot(t, vnorm2(comp-rcomp), 'k--')
+            ax.legend([ lab + ' x', lab + ' y', lab + ' z', '|' + lab + '|'])
+
+        do_plot(ax[0,0], tt[:150], pos[:150], rpos[:150], 'pos error')
+        do_plot(ax[0,1], tt, pos, rpos, 'pos error')
+
+        do_plot(ax[1,0], tt[:150], vel[:150], rvel[:150], 'vel error')
+        do_plot(ax[1,1], tt, vel, rvel, 'vel error')
+
+
+
+
+
 
     def skip_test_TEME_to_ITRF(self):
 
@@ -403,7 +484,7 @@ class TestFrames(unittest.TestCase):
         pos, vel = rv.propagate(yr, mth, day, hr, mn, second=sec+1e-6*usec)
         state_eci = np.array(pos + vel) * 1e3
         epoch_mjd = dates.npdt_to_mjd(svec.UTC)
-        
+
         # SORTS-style SGP4 propagator
         prp = SGP4()
 
@@ -429,7 +510,11 @@ class TestFrames(unittest.TestCase):
 
 if __name__ == '__main__':
 
-    if 1:
+    import sys
+
+    print(sys.argv)
+
+    if len(sys.argv) > 1:
         unittest.main()
 
     else:
@@ -443,4 +528,5 @@ if __name__ == '__main__':
         ix = np.where(s1_res.UTC > rv_epd)[0][0]
         svec = s1_res[ix]
 
+        svt = Time(svec.UTC, scale='utc')
 
