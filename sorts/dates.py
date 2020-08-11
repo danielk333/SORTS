@@ -145,6 +145,7 @@ def gstime(jdut1):
     deg2rad    = np.pi/180.0;
 
     # ------------------------  implementation   ------------------
+    # Julian centuries since the epoch; 2000-01-01T12:00 (UT1)
     tut1= ( jdut1 - 2451545.0 ) / 36525.0
 
     temp = - 6.2e-6 * np.multiply(np.multiply(tut1,tut1),tut1) + 0.093104 * np.multiply(tut1,tut1) \
@@ -181,6 +182,7 @@ def GMST1982(jd_ut1):
 
     T0 = 2451545.0
 
+    # t is Julian centuries since the epoch; 2000-01-01T12:00 (UT1)
     t = (jd_ut1 - T0) / 36525.0
     g = 67310.54841 + (8640184.812866 + (0.093104 + (-6.2e-6) * t) * t) * t
     dg = 8640184.812866 + (0.093104 * 2.0 + (-6.2e-6 * 3.0) * t) * t
