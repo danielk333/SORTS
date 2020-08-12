@@ -14,6 +14,17 @@ from ..passes import Pass
 
 class ObservedParameters(Scheduler):
     '''Bi-static radar observation parameters of hard targets.
+
+    **Parameters calculated**
+
+        * time
+        * signal to noise ratio
+        * range
+        * range rate
+        * transmitter local pointing to target k
+        * receiver pointing to target k
+        * radar cross section
+
     ''' 
 
     def __init__(self, radar, logger=None, profiler=None, **kwargs):
