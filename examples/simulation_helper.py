@@ -14,7 +14,7 @@ eiscat3d = sorts.radars.eiscat3d_interp
 
 from sorts.scheduler import StaticList, ObservedParameters
 from sorts.controller import Scanner
-from sorts import SpaceObject, Simulation
+from sorts import SpaceObject, Simulation, simulation_step
 from sorts.radar.scans import Fence
 
 from sorts.propagator import SGP4
@@ -65,38 +65,26 @@ class Scanning(Simulation):
         super().__init__(*args, **kwargs)
 
 
-        self.steps['get_states'] = self.get_states
-        self.steps['find_passes'] = self.find_passes
-        self.steps['observe_passes'] = self.observe_passes
+        self.steps['propagate'] = self.get_states
+        self.steps['passes'] = self.find_passes
+        self.steps['observe'] = self.observe_passes
 
         self.datas = [None]*len(objs)
         self.passes = [None]*len(objs)
         self.states = [None]*len(objs)
         self.ts = [None]*len(objs)
 
-    def get_states(self):
+    @simulation_step(MPI='objs', h5_cache=True)
+    def get_states(self, index, item):
+        t = sorts.equidistant_sampling(
+            orbit = item.orbit, 
+            start_t = self.scheduler.controllers[0].t.min(), 
+            end_t = self.scheduler.controllers[0].t.max(), 
+            max_dpos=1e3,
+        )
+        state = item.get_state(t)
+        return t, state
 
-        for ind in range(len(self.objs)):
-            fname = self.get_path('objs') / f'obj{ind}.h5'
-
-            if fname.is_file():
-                with h5py.File(fname,'r') as h:
-                    t = h['t'][()]
-                    state = h['state'][()]
-            else:
-                t = sorts.equidistant_sampling(
-                    orbit = self.objs[ind].orbit, 
-                    start_t = self.scheduler.controllers[0].t.min(), 
-                    end_t = self.scheduler.controllers[0].t.max(), 
-                    max_dpos=1e3,
-                )
-                state = self.objs[ind].get_state(t)
-                with h5py.File(fname,'w') as h:
-                    h.create_dataset('t', data=t)
-                    h.create_dataset('state', data=state)
-
-            self.states[ind] = state
-            self.ts[ind] = t
 
     def find_passes(self):
         for ind in range(len(self.objs)):
