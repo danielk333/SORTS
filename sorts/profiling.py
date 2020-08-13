@@ -164,6 +164,33 @@ def add_logging_level(num, name):
 
 logging.Logger.always = add_logging_level(100, 'ALWAYS')
 
+def _get_parallel():
+    try:
+        from mpi4py import MPI
+        comm = MPI.COMM_WORLD
+        if comm.size > 1:
+            parallel = comm.rank
+        else:
+            parallel = None
+    except ImportError:
+        parallel = None
+    return parallel
+
+
+def get_logger_formats():
+    datefmt = '%Y-%m-%d %H:%M:%S'
+    msecfmt = '%s.%03d'
+
+    parallel = _get_parallel()
+
+    if parallel is not None:
+        format_str = f'%(asctime)s PID{parallel} %(levelname)-8s; %(message)s'
+    else:
+        format_str = '%(asctime)s %(levelname)-8s; %(message)s'
+
+    return datefmt, msecfmt, format_str
+
+
 
 def get_logger(
         name = 'sorts',
@@ -177,19 +204,12 @@ def get_logger(
     '''
     now = datetime.datetime.now()
     datetime_str = now.strftime("%Y-%m-%d_at_%H-%M")
-    datefmt = '%Y-%m-%d %H:%M:%S'
-    msecfmt = '%s.%03d'
 
-    try:
-        from mpi4py import MPI
-        comm = MPI.COMM_WORLD
-        if comm.size > 1:
-            parallel = comm.rank
-        else:
-            parallel = None
-    except ImportError:
-        parallel = None
+    datefmt, msecfmt, format_str = get_logger_formats()
+    parallel = _get_parallel()
 
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)
 
     if path is not None:
         if not isinstance(path, pathlib.Path):
@@ -197,9 +217,9 @@ def get_logger(
 
         if path.is_dir():
             if parallel is None:
-                log_fname = f'{name}_{datetime_str}.log'
+                log_fname = path / f'{name}_{datetime_str}.log'
             else:
-                log_fname = f'{name}_{datetime_str}_process{parallel}.log'
+                log_fname = path / f'{name}_{datetime_str}_process{parallel}.log'
         else:
             if parallel is None:
                 log_fname = str(path)
@@ -207,23 +227,13 @@ def get_logger(
                 new_name = path.name.replace(path.suffix, '') + f'_process{parallel}'
                 log_fname = path.parent / f'{new_name}{path.suffix}'
 
-
-    logger = logging.getLogger(name)
-    logger.setLevel(logging.DEBUG)
-
-    if parallel is not None:
-        format_str = f'%(asctime)s PID{parallel} %(levelname)-8s; %(message)s'
-    else:
-        format_str = '%(asctime)s %(levelname)-8s; %(message)s'
-
-    if path is not None:
         fh = logging.FileHandler(log_fname)
         fh.setLevel(file_level) #debug and worse
         form_fh = logging.Formatter(format_str)
         form_fh.default_time_format = datefmt
         form_fh.default_msec_format = msecfmt
         fh.setFormatter(form_fh)
-        logger.addHandler(fh) #id 0
+        logger.addHandler(fh)
 
     ch = logging.StreamHandler()
     ch.setLevel(term_level)
@@ -232,34 +242,72 @@ def get_logger(
     form_ch.default_msec_format = msecfmt
 
     ch.setFormatter(form_ch)
-    logger.addHandler(ch) #id 1
+    logger.addHandler(ch)
 
     return logger
 
 
-def term_level(logger, level):
-    if len(logger.handlers) == 1:
-        term_id = 0
+def change_logfile(logger, path):
+    now = datetime.datetime.now()
+    datetime_str = now.strftime("%Y-%m-%d_at_%H-%M")
+
+    name = logger.get_name()
+
+    datefmt, msecfmt, format_str = get_logger_formats()
+    parallel = _get_parallel()
+
+    if not isinstance(path, pathlib.Path):
+        path = pathlib.Path(path)
+
+    if path.is_dir():
+        if parallel is None:
+            log_fname = path / f'{name}_{datetime_str}.log'
+        else:
+            log_fname = path / f'{name}_{datetime_str}_process{parallel}.log'
     else:
-        term_id = 1
+        if parallel is None:
+            log_fname = str(path)
+        else:
+            new_name = path.name.replace(path.suffix, '') + f'_process{parallel}'
+            log_fname = path.parent / f'{new_name}{path.suffix}'
 
-    if isinstance(level, str):
-        level = getattr(logging, level)
+    fh = logging.FileHandler(log_fname)
+    fh.setLevel(file_level) #debug and worse
+    form_fh = logging.Formatter(format_str)
+    form_fh.default_time_format = datefmt
+    form_fh.default_msec_format = msecfmt
+    fh.setFormatter(form_fh)
 
-    logger.handlers[term_id].setLevel(level)
+    for hdl in logger.handlers[:]:
+        if isinstance(hdl, logging.FileHandler):
+            logger.removeHandler(hdl)
+    logger.addHandler(fh)
+
+    return logger
+
+
+
+def term_level(logger, level):
+    for hdl in logger.handlers[:]:
+        if not isinstance(hdl, logging.StreamHandler):
+            continue
+
+        if isinstance(level, str):
+            level = getattr(logging, level)
+
+        hdl.setLevel(level)
 
     return logger
 
 
 def file_level(logger, level):
-    if len(logger.handlers) == 1:
-        return logger
-    else:
-        file_id = 0
+    for hdl in logger.handlers[:]:
+        if not isinstance(hdl, logging.FileHandler):
+            continue
+        
+        if isinstance(level, str):
+            level = getattr(logging, level)
 
-    if isinstance(level, str):
-        level = getattr(logging, level)
-
-    logger.handlers[file_id].setLevel(level)
+        hdl.setLevel(level)
 
     return logger

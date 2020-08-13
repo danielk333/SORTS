@@ -100,7 +100,8 @@ for ind in range(len(objs)):
     p.stop('get_state')
 
     p.start('find_passes')
-    passes += [eiscat3d.find_passes(t, states[ind], cache_data = True)]
+    #rename cache_data to something more descriptive
+    passes += [eiscat3d.find_passes(t, states[ind], cache_data = True)] 
     p.stop('find_passes')
 
     p.start('observe_passes')
