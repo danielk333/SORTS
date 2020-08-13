@@ -32,7 +32,7 @@ objs = [
     SpaceObject(
         Prop_cls,
         propagator_options = Prop_opts,
-        a = 7200e3, 
+        a = a, 
         e = 0.1, 
         i = 75, 
         raan = 79,
@@ -40,7 +40,7 @@ objs = [
         mu0 = 60,
         mjd0 = 53005.0,
         d = 0.3,
-    )
+    ) for a in np.linspace(7200e3, 8400e3, 4)
 ]
 
 class ObservedScanning(StaticList, ObservedParameters):
@@ -57,24 +57,15 @@ scheduler = ObservedScanning(
 class Scanning(Simulation):
     def __init__(self, objs, *args, **kwargs):
         self.objs = objs
-        if 'paths' in kwargs:
-            if 'objs' not in kwargs['paths']:
-                kwargs['paths'].append('objs')
-        else:
-            kwargs['paths'] = ['logs', 'objs']
-        super().__init__(*args, **kwargs)
 
+        super().__init__(*args, **kwargs)
 
         self.steps['propagate'] = self.get_states
         self.steps['passes'] = self.find_passes
         self.steps['observe'] = self.observe_passes
 
-        self.datas = [None]*len(objs)
-        self.passes = [None]*len(objs)
-        self.states = [None]*len(objs)
-        self.ts = [None]*len(objs)
 
-    @simulation_step(MPI='objs', h5_cache=True)
+    @simulation_step(iterable='objs', store='props', MPI=True, h5_cache=True)
     def get_states(self, index, item):
         t = sorts.equidistant_sampling(
             orbit = item.orbit, 
@@ -83,16 +74,17 @@ class Scanning(Simulation):
             max_dpos=1e3,
         )
         state = item.get_state(t)
-        return t, state
+        return {'t': t, 'state': state}
 
+    @simulation_step(iterable='props', store='passes', MPI=True)
+    def find_passes(self, index, item):
+        passes = scheduler.radar.find_passes(item['t'], item['state'], cache_data = False)
+        return {'passes': passes}
 
-    def find_passes(self):
-        for ind in range(len(self.objs)):
-            self.passes[ind] = scheduler.radar.find_passes(self.ts[ind], self.states[ind], cache_data = False)
-
-    def observe_passes(self):
-        for ind in range(len(self.objs)):
-            self.datas[ind] = scheduler.observe_passes(self.passes[ind], space_object = self.objs[ind], snr_limit=True)
+    @simulation_step(iterable='passes', store='obs_data', MPI=True, pickle_cache=True, MPI_mode='gather')
+    def observe_passes(self, index, item):
+        data = scheduler.observe_passes(item['passes'], space_object = self.objs[index], snr_limit=True)
+        return {'data': data}
 
 
 
@@ -101,6 +93,8 @@ sim = Scanning(
     scheduler = scheduler,
     root = '/home/danielk/IRF/E3D_PA/sorts_v4_tests/sim1',
 )
+# sim.delete('master')
+
 sim.profiler.start('total')
 
 sim.run()

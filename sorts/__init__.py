@@ -44,3 +44,4 @@ from .radar import instances as radars
 from .passes import equidistant_sampling
 from .passes import find_passes, find_simultaneous_passes
 from .signals import hard_target_snr
+from .simulation import simulation_step

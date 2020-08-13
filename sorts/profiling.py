@@ -261,9 +261,9 @@ def change_logfile(logger, path):
 
     if path.is_dir():
         if parallel is None:
-            log_fname = f'{name}_{datetime_str}.log'
+            log_fname = path / f'{name}_{datetime_str}.log'
         else:
-            log_fname = f'{name}_{datetime_str}_process{parallel}.log'
+            log_fname = path / f'{name}_{datetime_str}_process{parallel}.log'
     else:
         if parallel is None:
             log_fname = str(path)
@@ -291,7 +291,7 @@ def term_level(logger, level):
     for hdl in logger.handlers[:]:
         if not isinstance(hdl, logging.StreamHandler):
             continue
-        
+
         if isinstance(level, str):
             level = getattr(logging, level)
 
