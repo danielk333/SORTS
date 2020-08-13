@@ -100,7 +100,7 @@ sim.profiler.start('total')
 sim.run()
 
 sim.profiler.stop('total')
-sim.logger.always(sim.profiler.fmt(normalize='total'))
+sim.logger.always('\n'+sim.profiler.fmt(normalize='total'))
 
 
 

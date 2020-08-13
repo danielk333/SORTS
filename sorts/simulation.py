@@ -211,7 +211,7 @@ class Simulation:
     '''Convenience simulation handler, creates a step-by-step simulation sequence and creates file system structure for saving of data to disk.
     '''
     def __init__(self, scheduler, root, logger=True, profiler=True, **kwargs):
-
+        self.steps = OrderedDict()
         self.scheduler = scheduler
         if not isinstance(root, pathlib.Path):
             root = pathlib.Path(root)
@@ -227,6 +227,7 @@ class Simulation:
         if not _master.is_dir():
             mpi_mkdir(_master)
 
+        self.make_paths()
 
         if logger:
             self.logger = profiling.get_logger(
@@ -245,7 +246,6 @@ class Simulation:
         else:
             self.profiler = None
 
-        self.steps = OrderedDict()
 
 
     def make_paths(self):
@@ -255,7 +255,7 @@ class Simulation:
 
     @property
     def paths(self):
-        return [key for key in self.steps]
+        return [key for key in self.steps] + ['logs']
 
 
     @property

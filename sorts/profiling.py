@@ -217,9 +217,9 @@ def get_logger(
 
         if path.is_dir():
             if parallel is None:
-                log_fname = f'{name}_{datetime_str}.log'
+                log_fname = path / f'{name}_{datetime_str}.log'
             else:
-                log_fname = f'{name}_{datetime_str}_process{parallel}.log'
+                log_fname = path / f'{name}_{datetime_str}_process{parallel}.log'
         else:
             if parallel is None:
                 log_fname = str(path)
