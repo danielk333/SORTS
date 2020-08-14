@@ -38,10 +38,14 @@ class Scheduler(ABC):
 
 
     def generate_schedule(self, t, generator):
+        '''Takes times and a corresponding generator that returns radar instances to generate a radar schedule.
+        '''
         raise NotImplementedError()
 
 
     def calculate_observation(self, txrx_pass, t, generator, **kwargs):
+        '''Takes a pass over a tx-rx pair and the corresponding evaluated times and generator that returns radar instances to generate a set of observed data.
+        '''
         raise NotImplementedError()
 
 
