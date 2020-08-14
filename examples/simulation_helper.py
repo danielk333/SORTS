@@ -8,6 +8,7 @@ Simulate scanning for objects
 import numpy as np
 import matplotlib.pyplot as plt
 import h5py
+import pickle
 
 import sorts
 eiscat3d = sorts.radars.eiscat3d_interp
@@ -76,7 +77,7 @@ class Scanning(Simulation):
         state = item.get_state(t)
         return {'t': t, 'state': state}
 
-    @simulation_step(iterable='props', store='passes', MPI=True)
+    @simulation_step(iterable='props', store='passes', custom_cache='passes', MPI=True)
     def find_passes(self, index, item):
         passes = scheduler.radar.find_passes(item['t'], item['state'], cache_data = False)
         return {'passes': passes}
@@ -85,6 +86,16 @@ class Scanning(Simulation):
     def observe_passes(self, index, item):
         data = scheduler.observe_passes(item['passes'], space_object = self.objs[index], snr_limit=True)
         return {'data': data}
+
+
+    def save_passes(self, path, passes):
+        with open(path, 'wb') as h:
+            pickle.dump(passes, h)
+
+    def load_passes(self, path):
+        with open(path, 'rb') as h:
+            passes = pickle.load(h)
+        return passes
 
 
 

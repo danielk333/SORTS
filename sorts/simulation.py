@@ -58,8 +58,10 @@ def mpi_copy(src, dst):
 
 
 
-def simulation_step(iterable=None, store=None, MPI=False, h5_cache=False, pickle_cache=False, MPI_mode=None):
+def simulation_step(iterable=None, store=None, MPI=False, h5_cache=False, custom_cache=None, pickle_cache=False, MPI_mode=None):
     '''Simulation step decorator
+
+custom cache is None or a string with is prefixed with load_ and save_
 
     :param str MPI_mode: Mode of operations on node-data communication, available options are "gather", None, "allgather" and "barrier".
 
@@ -69,7 +71,7 @@ def simulation_step(iterable=None, store=None, MPI=False, h5_cache=False, pickle
 
         def wrapped_step(self, step, *args, **kwargs):
 
-            if h5_cache or pickle_cache:
+            if h5_cache or pickle_cache or custom_cache is not None:
                 dir_ = self.get_path(step)
                 if not dir_.is_dir():
                     mpi_mkdir(dir_)
@@ -85,9 +87,11 @@ def simulation_step(iterable=None, store=None, MPI=False, h5_cache=False, pickle
 
                 for index in _iter:
                     item = attr[index]
+                    calculated_ = False
                     if h5_cache:
                         fname = dir_ / f'{iterable}_{index}.h5'
                         if fname.is_file():
+                            calculated_ = True
                             with h5py.File(fname,'r') as h:
                                 ret = {}
                                 for key in h:
@@ -96,6 +100,7 @@ def simulation_step(iterable=None, store=None, MPI=False, h5_cache=False, pickle
                                     ret[key] = copy.copy(h.attrs[key])
                         else:
                             ret = func(self, index, item, *args, **kwargs)
+                            calculated_ = True
                             if ret is None: ret = {}
 
                             with h5py.File(fname,'w') as h:
@@ -104,19 +109,42 @@ def simulation_step(iterable=None, store=None, MPI=False, h5_cache=False, pickle
                                         h.create_dataset(key, data=ret[key])
                                     else:
                                         h.attrs[key] = ret[key]
-                    elif pickle_cache:
+
+                    if pickle_cache:
                         fname = dir_ / f'{iterable}_{index}.pickle'
                         if fname.is_file():
-                            with open(fname, 'rb') as h:
-                                ret = pickle.load(h)
+                            if not calculated_:
+                                calculated_ = True
+                                with open(fname, 'rb') as h:
+                                    ret = pickle.load(h)
                         else:
-                            ret = func(self, index, item, *args, **kwargs)
+                            if not calculated_:
+                                ret = func(self, index, item, *args, **kwargs)
+                                calculated_ = True
+
                             if ret is None: ret = {}
 
                             with open(fname, 'wb') as h:
                                 pickle.dump(ret, h)
 
-                    else:
+                    if custom_cache is not None:
+                        fname = dir_ / f'{iterable}_{index}'
+                        if fname.is_file():
+                            if not calculated_:
+                                calculated_ = True
+                                lfunc = getattr(self, f'load_{custom_cache}')
+                                ret = lfunc(fname)
+                        else:
+                            if not calculated_:
+                                ret = func(self, index, item, *args, **kwargs)
+                                calculated_ = True
+
+                            if ret is None: ret = {}
+
+                            lfunc = getattr(self, f'save_{custom_cache}')
+                            lfunc(fname, ret)
+
+                    if not calculated_:
                         ret = func(self, index, item, *args, **kwargs)
                         if ret is None: ret = {}
 
@@ -158,6 +186,7 @@ def simulation_step(iterable=None, store=None, MPI=False, h5_cache=False, pickle
                     raise ValueError(f'MPI_mode "{MPI_mode}" not valid')
 
             else:
+                calculated_ = False
                 if h5_cache:
                     fname = dir_ / f'data.h5'
                     if fname.is_file():
@@ -169,6 +198,7 @@ def simulation_step(iterable=None, store=None, MPI=False, h5_cache=False, pickle
                                 rets[key] = copy.copy(h.attrs[key])
                     else:
                         rets = func(self, *args, **kwargs)
+                        calculated_ = True
                         if rets is None: rets = {}
 
                         with h5py.File(fname,'w') as h:
@@ -177,18 +207,38 @@ def simulation_step(iterable=None, store=None, MPI=False, h5_cache=False, pickle
                                     h.create_dataset(key, data=rets[key])
                                 else:
                                     h.attrs[key] = rets[key]
-                elif pickle_cache:
+
+                if custom_cache is not None:
+                    fname = dir_ / f'data'
+                    if fname.is_file():
+                        lfunc = getattr(self, f'load_{custom_cache}')
+                        rets = lfunc(fname)
+                    else:
+                        if not calculated_:
+                            rets = func(self, *args, **kwargs)
+                            calculated_ = True
+
+                        if rets is None: rets = {}
+
+                        lfunc = getattr(self, f'save_{custom_cache}')
+                        lfunc(fname, ret)
+
+                if pickle_cache:
                     fname = dir_ / f'data.pickle'
                     if fname.is_file():
                         with open(fname, 'rb') as h:
                             rets = pickle.load(h)
                     else:
-                        rets = func(self, *args, **kwargs)
+                        if not calculated_:
+                            rets = func(self, *args, **kwargs)
+                            calculated_ = True
+
                         if rets is None: rets = {}
 
                         with open(fname, 'wb') as h:
                             pickle.dump(rets, h)
-                else:
+
+                if not calculated_:
                     rets = func(self, *args, **kwargs)
                     if rets is None: rets = {}
                 
