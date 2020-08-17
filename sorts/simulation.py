@@ -57,19 +57,30 @@ def mpi_copy(src, dst):
         shutil.copy2(src, dst)
 
 
-def MPI_mono_simulation_step(process_id):
+def MPI_mono_simulation_step(process_id, post_MPI = None):
 
     def step_wrapping(func):
 
-        def wrapped_step(self, *args, **kwargs):
+        def wrapped_step(self, step, *args, **kwargs):
             if comm is not None:
                 if comm.rank == process_id:
-                    rets = func(self, *args, **kwargs)
+                    if hasattr(func, '_simulation_step'):
+                        rets = func(self, step, *args, **kwargs)
+                    else:
+                        rets = func(self, *args, **kwargs)
                 else:
                     rets = None
+
+                if post_MPI is None:
+                    pass
+                elif post_MPI == 'bcast':
+                    rets = comm.bcast(rets, root=process_id)
+
             return rets
 
+        wrapped_step._simulation_step = True
         return wrapped_step
+
     return step_wrapping
 
 
@@ -270,14 +281,14 @@ class Simulation:
 
 
     @staticmethod
-    def MPI_bcast(process_id, data)
+    def MPI_bcast(process_id, data):
         if comm is not None:
             data = comm.bcast(data, root=process_id)
         return data
 
 
     @staticmethod
-    def MPI_barrier()
+    def MPI_barrier():
         if comm is not None:
             comm.barrier()
 

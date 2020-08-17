@@ -86,6 +86,7 @@ scheduler = ObservedTracking(
 )
 
 scheduler.update()
+scheduler.calculate_measurements()
 
 
 sched_data = scheduler.schedule()
