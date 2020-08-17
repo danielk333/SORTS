@@ -251,7 +251,7 @@ def change_logfile(logger, path):
     now = datetime.datetime.now()
     datetime_str = now.strftime("%Y-%m-%d_at_%H-%M")
 
-    name = logger.get_name()
+    name = logger.name
 
     datefmt, msecfmt, format_str = get_logger_formats()
     parallel = _get_parallel()
@@ -266,13 +266,12 @@ def change_logfile(logger, path):
             log_fname = path / f'{name}_{datetime_str}_process{parallel}.log'
     else:
         if parallel is None:
-            log_fname = str(path)
+            log_fname = path
         else:
             new_name = path.name.replace(path.suffix, '') + f'_process{parallel}'
             log_fname = path.parent / f'{new_name}{path.suffix}'
 
     fh = logging.FileHandler(log_fname)
-    fh.setLevel(file_level) #debug and worse
     form_fh = logging.Formatter(format_str)
     form_fh.default_time_format = datefmt
     form_fh.default_msec_format = msecfmt
@@ -280,7 +279,9 @@ def change_logfile(logger, path):
 
     for hdl in logger.handlers[:]:
         if isinstance(hdl, logging.FileHandler):
+            fh.setLevel(hdl.level)
             logger.removeHandler(hdl)
+            
     logger.addHandler(fh)
 
     return logger

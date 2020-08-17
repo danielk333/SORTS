@@ -66,7 +66,7 @@ class Scanning(Simulation):
         self.steps['observe'] = self.observe_passes
 
 
-    @simulation_step(iterable='objs', store='props', MPI=True, h5_cache=True)
+    @simulation_step(iterable='objs', store='props', MPI=True, caches=['h5', 'pickle'])
     def get_states(self, index, item):
         t = sorts.equidistant_sampling(
             orbit = item.orbit, 
@@ -77,12 +77,12 @@ class Scanning(Simulation):
         state = item.get_state(t)
         return {'t': t, 'state': state}
 
-    @simulation_step(iterable='props', store='passes', custom_cache='passes', MPI=True)
+    @simulation_step(iterable='props', store='passes', caches=['passes'], MPI=True)
     def find_passes(self, index, item):
         passes = scheduler.radar.find_passes(item['t'], item['state'], cache_data = False)
         return {'passes': passes}
 
-    @simulation_step(iterable='passes', store='obs_data', MPI=True, pickle_cache=True, MPI_mode='gather')
+    @simulation_step(iterable='passes', store='obs_data', MPI=True, caches=['pickle'], MPI_mode='gather')
     def observe_passes(self, index, item):
         data = scheduler.observe_passes(item['passes'], space_object = self.objs[index], snr_limit=True)
         return {'data': data}
@@ -104,7 +104,8 @@ sim = Scanning(
     scheduler = scheduler,
     root = '/home/danielk/IRF/E3D_PA/sorts_v4_tests/sim1',
 )
-# sim.delete('master')
+sim.delete('test')
+sim.branch('test', empty=True)
 
 sim.profiler.start('total')
 

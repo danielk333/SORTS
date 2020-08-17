@@ -58,11 +58,11 @@ def mpi_copy(src, dst):
 
 
 
-def simulation_step(iterable=None, store=None, MPI=False, h5_cache=False, custom_cache=None, pickle_cache=False, MPI_mode=None):
+def simulation_step(iterable=None, store=None, MPI=False, caches=[], MPI_mode=None):
     '''Simulation step decorator
 
-custom cache is None or a string with is prefixed with load_ and save_
-
+ 
+    :param str caches: Is a list of strings for the caches to be used, available by default is "h5" and "pickle". Custom caches are implemented by implementing methods with the string name but prefixed with load_ and save_.
     :param str MPI_mode: Mode of operations on node-data communication, available options are "gather", None, "allgather" and "barrier".
 
     '''
@@ -71,10 +71,12 @@ custom cache is None or a string with is prefixed with load_ and save_
 
         def wrapped_step(self, step, *args, **kwargs):
 
-            if h5_cache or pickle_cache or custom_cache is not None:
+            if len(caches) > 0:
                 dir_ = self.get_path(step)
                 if not dir_.is_dir():
                     mpi_mkdir(dir_)
+            else:
+                dir_ = None
 
             if iterable is not None:
                 attr = getattr(self, iterable)
@@ -87,66 +89,27 @@ custom cache is None or a string with is prefixed with load_ and save_
 
                 for index in _iter:
                     item = attr[index]
-                    calculated_ = False
-                    if h5_cache:
-                        fname = dir_ / f'{iterable}_{index}.h5'
+                    loaded_ = False
+
+                    #load
+                    for cache in caches:
+                        fname = dir_ / f'{iterable}_{index}.{cache}'
                         if fname.is_file():
-                            calculated_ = True
-                            with h5py.File(fname,'r') as h:
-                                ret = {}
-                                for key in h:
-                                    ret[key] = h[key][()].copy()
-                                for key in h.attrs:
-                                    ret[key] = copy.copy(h.attrs[key])
-                        else:
-                            ret = func(self, index, item, *args, **kwargs)
-                            calculated_ = True
-                            if ret is None: ret = {}
+                            lfunc = getattr(self, f'load_{cache}')
+                            ret = lfunc(fname)
+                            loaded_ = True
+                            break
 
-                            with h5py.File(fname,'w') as h:
-                                for key in ret:
-                                    if isinstance(ret[key], np.ndarray):
-                                        h.create_dataset(key, data=ret[key])
-                                    else:
-                                        h.attrs[key] = ret[key]
-
-                    if pickle_cache:
-                        fname = dir_ / f'{iterable}_{index}.pickle'
-                        if fname.is_file():
-                            if not calculated_:
-                                calculated_ = True
-                                with open(fname, 'rb') as h:
-                                    ret = pickle.load(h)
-                        else:
-                            if not calculated_:
-                                ret = func(self, index, item, *args, **kwargs)
-                                calculated_ = True
-
-                            if ret is None: ret = {}
-
-                            with open(fname, 'wb') as h:
-                                pickle.dump(ret, h)
-
-                    if custom_cache is not None:
-                        fname = dir_ / f'{iterable}_{index}'
-                        if fname.is_file():
-                            if not calculated_:
-                                calculated_ = True
-                                lfunc = getattr(self, f'load_{custom_cache}')
-                                ret = lfunc(fname)
-                        else:
-                            if not calculated_:
-                                ret = func(self, index, item, *args, **kwargs)
-                                calculated_ = True
-
-                            if ret is None: ret = {}
-
-                            lfunc = getattr(self, f'save_{custom_cache}')
-                            lfunc(fname, ret)
-
-                    if not calculated_:
+                    #if there are no caches
+                    if not loaded_:
                         ret = func(self, index, item, *args, **kwargs)
                         if ret is None: ret = {}
+
+                        #save
+                        for cache in caches:
+                            fname = dir_ / f'{iterable}_{index}.{cache}'
+                            sfunc = getattr(self, f'save_{cache}')
+                            sfunc(fname, ret)
 
                     rets[index] = ret
 
@@ -186,62 +149,27 @@ custom cache is None or a string with is prefixed with load_ and save_
                     raise ValueError(f'MPI_mode "{MPI_mode}" not valid')
 
             else:
-                calculated_ = False
-                if h5_cache:
-                    fname = dir_ / f'data.h5'
-                    if fname.is_file():
-                        with h5py.File(fname,'r') as h:
-                            rets = {}
-                            for key in h:
-                                rets[key] = h[key][()].copy()
-                            for key in h.attrs:
-                                rets[key] = copy.copy(h.attrs[key])
-                    else:
-                        rets = func(self, *args, **kwargs)
-                        calculated_ = True
-                        if rets is None: rets = {}
+                loaded_ = False
 
-                        with h5py.File(fname,'w') as h:
-                            for key in rets:
-                                if isinstance(rets[key], np.ndarray):
-                                    h.create_dataset(key, data=rets[key])
-                                else:
-                                    h.attrs[key] = rets[key]
-
-                if custom_cache is not None:
-                    fname = dir_ / f'data'
+                #load
+                for cache in caches:
+                    fname = dir_ / f'{step}.{cache}'
                     if fname.is_file():
-                        lfunc = getattr(self, f'load_{custom_cache}')
+                        lfunc = getattr(self, f'load_{cache}')
                         rets = lfunc(fname)
-                    else:
-                        if not calculated_:
-                            rets = func(self, *args, **kwargs)
-                            calculated_ = True
+                        loaded_ = True
+                        break
 
-                        if rets is None: rets = {}
-
-                        lfunc = getattr(self, f'save_{custom_cache}')
-                        lfunc(fname, ret)
-
-                if pickle_cache:
-                    fname = dir_ / f'data.pickle'
-                    if fname.is_file():
-                        with open(fname, 'rb') as h:
-                            rets = pickle.load(h)
-                    else:
-                        if not calculated_:
-                            rets = func(self, *args, **kwargs)
-                            calculated_ = True
-
-                        if rets is None: rets = {}
-
-                        with open(fname, 'wb') as h:
-                            pickle.dump(rets, h)
-
-                if not calculated_:
+                #if there are no caches
+                if not loaded_:
                     rets = func(self, *args, **kwargs)
                     if rets is None: rets = {}
-                
+
+                    #save
+                    for cache in caches:
+                        fname = dir_ / f'{step}.{cache}'
+                        sfunc = getattr(self, f'save_{cache}')
+                        sfunc(fname, rets)
 
             if store is not None:
                 setattr(self, store, rets)
@@ -297,6 +225,36 @@ class Simulation:
             self.profiler = None
 
 
+    def save_pickle(self, path, data):
+        with open(path, 'wb') as h:
+            pickle.dump(data, h)
+
+    def load_pickle(self, path):
+        if path.is_file():
+            with open(path, 'rb') as h:
+                ret = pickle.load(h)
+            return ret
+
+    def save_h5(self, path, data):
+        with h5py.File(path,'w') as h:
+            for key in data:
+                if isinstance(data[key], np.ndarray):
+                    h.create_dataset(key, data=data[key])
+                else:
+                    h.attrs[key] = data[key]
+
+    def load_h5(self, path):
+        if path.is_file():
+            with h5py.File(path,'r') as h:
+                ret = {}
+                for key in h:
+                    ret[key] = h[key][()].copy()
+                for key in h.attrs:
+                    ret[key] = copy.copy(h.attrs[key])
+            return ret
+
+
+
 
     def make_paths(self):
         for path in self.paths:
@@ -324,20 +282,29 @@ class Simulation:
     def delete(self, branch):
         '''Delete branch.
         '''
-        mpi_rmdir(self.root / branch)
+        if (self.root / branch).is_dir():
+            mpi_rmdir(self.root / branch)
         if self.branch_name == branch:
             mpi_mkdir(self.root / self.branch_name)
             self.make_paths()
 
 
-    def branch(self, name):
+    def branch(self, name, empty=False):
         '''Create branch.
         '''
         if (self.root / name).is_dir():
             raise ValueError(f'Branch "{name}" already exists')
 
-        mpi_copy(self.root / self.branch_name, self.root / name)
-        self.branch_name = name
+        if empty:
+            mpi_mkdir(self.root / name)
+            for path in self.paths:
+                mpi_mkdir(self.root / name / path)
+        else:
+            mpi_copy(self.root / self.branch_name, self.root / name)
+            self.checkout(name)
+
+        self.checkout(name)
+
 
 
     def checkout(self, branch):
