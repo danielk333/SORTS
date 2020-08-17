@@ -57,13 +57,28 @@ def mpi_copy(src, dst):
         shutil.copy2(src, dst)
 
 
+def MPI_mono_simulation_step(process_id):
 
-def simulation_step(iterable=None, store=None, MPI=False, caches=[], MPI_mode=None):
+    def step_wrapping(func):
+
+        def wrapped_step(self, *args, **kwargs):
+            if comm is not None:
+                if comm.rank == process_id:
+                    rets = func(self, *args, **kwargs)
+                else:
+                    rets = None
+            return rets
+
+        return wrapped_step
+    return step_wrapping
+
+
+def simulation_step(iterable=None, store=None, MPI=False, caches=[], post_MPI=None):
     '''Simulation step decorator
 
  
     :param str caches: Is a list of strings for the caches to be used, available by default is "h5" and "pickle". Custom caches are implemented by implementing methods with the string name but prefixed with load_ and save_.
-    :param str MPI_mode: Mode of operations on node-data communication, available options are "gather", None, "allgather" and "barrier".
+    :param str post_MPI: Mode of operations on node-data communication, available options are None, "gather", "allbcast" and "barrier".
 
     '''
 
@@ -118,11 +133,11 @@ def simulation_step(iterable=None, store=None, MPI=False, caches=[], MPI_mode=No
                     for thrid in range(comm.size):
                         mpi_inds.append(range(thrid, len(attr), comm.size))
 
-                    if MPI_mode is None:
+                    if post_MPI is None:
                         pass
-                    elif MPI_mode == 'barrier':
+                    elif post_MPI == 'barrier':
                         comm.barrier()
-                    elif MPI_mode == 'gather':
+                    elif post_MPI == 'gather':
 
                         if comm.rank == 0:
                             for thr_id in range(comm.size):
@@ -139,14 +154,14 @@ def simulation_step(iterable=None, store=None, MPI=False, caches=[], MPI_mode=No
                             for ind in mpi_inds[comm.rank]:
                                 rets[ind] = None
 
-                    elif MPI_mode == 'allgather':
+                    elif post_MPI == 'allbcast':
 
                         for thr_id in range(comm.size):
                             for ind in mpi_inds[thr_id]:
                                 rets[ind] = comm.bcast(rets[ind], root=thr_id)
 
                 else:
-                    raise ValueError(f'MPI_mode "{MPI_mode}" not valid')
+                    raise ValueError(f'post_MPI "{post_MPI}" not valid')
 
             else:
                 loaded_ = False
@@ -254,6 +269,19 @@ class Simulation:
             return ret
 
 
+    @staticmethod
+    def MPI_bcast(process_id, data)
+        if comm is not None:
+            data = comm.bcast(data, root=process_id)
+        return data
+
+
+    @staticmethod
+    def MPI_barrier()
+        if comm is not None:
+            comm.barrier()
+
+    
 
 
     def make_paths(self):

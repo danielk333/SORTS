@@ -85,6 +85,8 @@ scheduler = ObservedTracking(
     logger = logger,
 )
 
+scheduler.update()
+
 
 sched_data = scheduler.schedule()
 rx_head = [f'rx{i} {co}' for i in range(len(scheduler.radar.rx)) for co in ['az', 'el']]

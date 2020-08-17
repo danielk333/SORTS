@@ -82,7 +82,7 @@ class Scanning(Simulation):
         passes = scheduler.radar.find_passes(item['t'], item['state'], cache_data = False)
         return {'passes': passes}
 
-    @simulation_step(iterable='passes', store='obs_data', MPI=True, caches=['pickle'], MPI_mode='gather')
+    @simulation_step(iterable='passes', store='obs_data', MPI=True, caches=['pickle'], post_MPI='gather')
     def observe_passes(self, index, item):
         data = scheduler.observe_passes(item['passes'], space_object = self.objs[index], snr_limit=True)
         return {'data': data}

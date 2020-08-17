@@ -47,8 +47,6 @@ class Tracking(Scheduler):
         self.states = [None]*len(space_objects)
         self.states_t = [None]*len(space_objects)
         self.passes = [None]*len(space_objects)
-        for ind in range(len(space_objects)):
-            self.get_passes(ind)
 
 
     @abstractmethod
@@ -56,12 +54,8 @@ class Tracking(Scheduler):
         pass
 
 
-    def update(self, start_time, allocation=None):
-        self.start_time = start_time
-        if allocation is not None:
-            self.allocation = allocation
-
-        for ind in range(len(space_objects)):
+    def update(self):
+        for ind in range(len(self.space_objects)):
             self.get_passes(ind)
 
 
