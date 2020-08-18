@@ -56,128 +56,250 @@ def mpi_copy(src, dst):
     else:
         shutil.copy2(src, dst)
 
+def MPI_single_process(process_id):
+    '''Simulation step single process method restriction decorator
+
+    '''
+    def step_wrapping(func):
+
+        def wrapped_step(self, *args, **kwargs):
+            if comm is not None:
+                if comm.rank == process_id:
+                    rets = func(self, *args, **kwargs)
+                else:
+                    rets = None
+            else:
+                rets = func(self, *args, **kwargs)
+            return rets
+
+        if hasattr(func, '_cached_step'):
+            wrapped_step._cached_step = func._cached_step
+        return wrapped_step
+
+    return step_wrapping
 
 
-def simulation_step(iterable=None, store=None, MPI=False, caches=[], MPI_mode=None):
-    '''Simulation step decorator
+def MPI_action(action, iterable = False, root = 0):
+    '''Simulation step MPI post step action decorator
 
- 
-    :param str caches: Is a list of strings for the caches to be used, available by default is "h5" and "pickle". Custom caches are implemented by implementing methods with the string name but prefixed with load_ and save_.
-    :param str MPI_mode: Mode of operations on node-data communication, available options are "gather", None, "allgather" and "barrier".
-
+    :param str action: Mode of operations on node-data communication, available options are "gather", "gather-clear", "bcast" and "barrier".
     '''
 
     def step_wrapping(func):
 
-        def wrapped_step(self, step, *args, **kwargs):
+        def wrapped_step(self, *args, **kwargs):
+            rets = func(self, *args, **kwargs)
 
-            if len(caches) > 0:
-                dir_ = self.get_path(step)
-                if not dir_.is_dir():
-                    mpi_mkdir(dir_)
-            else:
-                dir_ = None
+            if comm is None:
+                return rets
 
-            if iterable is not None:
-                attr = getattr(self, iterable)
-                if MPI and comm is not None:
-                    _iter = list(range(comm.rank, len(attr), comm.size))
-                else:
-                    _iter = list(range(len(attr)))
+            if iterable:
+                mpi_inds = []
+                for thrid in range(comm.size):
+                    mpi_inds.append(range(thrid, len(rets), comm.size))
 
-                rets = [None]*len(attr)
 
-                for index in _iter:
-                    item = attr[index]
-                    loaded_ = False
+            if action == 'barrier':
+                comm.barrier()
+            elif action.startswith('gather'):
+                if iterable:
+                    if comm.rank == root:
+                        for thr_id in range(comm.size):
+                            if thr_id != root:
+                                for ind in mpi_inds[thr_id]:
+                                    rets[ind] = comm.recv(source=thr_id, tag=ind)
 
-                    #load
-                    for cache in caches:
-                        fname = dir_ / f'{iterable}_{index}.{cache}'
-                        if fname.is_file():
-                            lfunc = getattr(self, f'load_{cache}')
-                            ret = lfunc(fname)
-                            loaded_ = True
-                            break
-
-                    #if there are no caches
-                    if not loaded_:
-                        ret = func(self, index, item, *args, **kwargs)
-                        if ret is None: ret = {}
-
-                        #save
-                        for cache in caches:
-                            fname = dir_ / f'{iterable}_{index}.{cache}'
-                            sfunc = getattr(self, f'save_{cache}')
-                            sfunc(fname, ret)
-
-                    rets[index] = ret
-
-                if MPI and comm is not None:
-                    mpi_inds = []
-                    for thrid in range(comm.size):
-                        mpi_inds.append(range(thrid, len(attr), comm.size))
-
-                    if MPI_mode is None:
-                        pass
-                    elif MPI_mode == 'barrier':
-                        comm.barrier()
-                    elif MPI_mode == 'gather':
-
-                        if comm.rank == 0:
-                            for thr_id in range(comm.size):
-                                if thr_id != 0:
-                                    for ind in mpi_inds[thr_id]:
-                                        rets[ind] = comm.recv(source=thr_id, tag=ind)
-
-                        else:
-                            for ind in mpi_inds[comm.rank]:
-                                comm.send(rets[ind], dest=0, tag=ind)
-                        
-                        #delete data from threads to save memory
-                        if comm.rank != 0:
+                    else:
+                        for ind in mpi_inds[comm.rank]:
+                            comm.send(rets[ind], dest=root, tag=ind)
+                    
+                    if action == 'gather-clear':
+                        if comm.rank != root:
                             for ind in mpi_inds[comm.rank]:
                                 rets[ind] = None
-
-                    elif MPI_mode == 'allgather':
-
-                        for thr_id in range(comm.size):
-                            for ind in mpi_inds[thr_id]:
-                                rets[ind] = comm.bcast(rets[ind], root=thr_id)
-
                 else:
-                    raise ValueError(f'MPI_mode "{MPI_mode}" not valid')
+                    raise ValueError('Can only gather iterable')
 
-            else:
-                loaded_ = False
+            elif action == 'bcast':
 
-                #load
-                for cache in caches:
-                    fname = dir_ / f'{step}.{cache}'
-                    if fname.is_file():
-                        lfunc = getattr(self, f'load_{cache}')
-                        rets = lfunc(fname)
-                        loaded_ = True
-                        break
-
-                #if there are no caches
-                if not loaded_:
-                    rets = func(self, *args, **kwargs)
-                    if rets is None: rets = {}
-
-                    #save
-                    for cache in caches:
-                        fname = dir_ / f'{step}.{cache}'
-                        sfunc = getattr(self, f'save_{cache}')
-                        sfunc(fname, rets)
-
-            if store is not None:
-                setattr(self, store, rets)
+                if iterable:
+                    for thr_id in range(comm.size):
+                        for ind in mpi_inds[thr_id]:
+                            rets[ind] = comm.bcast(rets[ind], root=thr_id)
+                else:     
+                    rets = comm.bcast(rets, root=root)
 
             return rets
 
-        wrapped_step._simulation_step = True
+        if hasattr(func, '_cached_step'):
+            wrapped_step._cached_step = func._cached_step
+        return wrapped_step
 
+    return step_wrapping
+
+
+def iterable_step(iterable, MPI=False):
+    '''Simulation step iteration decorator
+
+ 
+    '''
+    if isinstance(iterable, str):
+        iterable = [iterable]
+
+    def step_wrapping(func):
+
+        def wrapped_step(self, *args, **kwargs):
+
+            all_attrs = []
+            for var in iterable:
+                subvars = var.split('.')
+                for vari, subvar in enumerate(subvars):
+                    if vari == 0:
+                        obj = getattr(self, subvar)
+                    else:
+                        obj = getattr(obj, subvar)
+                all_attrs.append(obj)
+
+            if len(all_attrs) == 1:
+                attr = all_attrs[0]
+            else:
+                attr = list(zip(*all_attrs))
+
+
+            if MPI and comm is not None:
+                _iter = list(range(comm.rank, len(attr), comm.size))
+            else:
+                _iter = list(range(len(attr)))
+
+            rets = [None]*len(attr)
+
+            if hasattr(func, '_cached_step'):
+                if '_fname_parts' in kwargs:
+                    kwargs['_fname_parts'] += [None]
+                else:
+                    kwargs['_fname_parts'] = [None]
+
+            for index in _iter:
+                item = attr[index]
+
+                if hasattr(func, '_cached_step'):
+                    kwargs['_fname_parts'][-1] = f'{index}'
+
+                rets[index] = func(self, index, item, *args, **kwargs)
+
+
+            return rets
+
+        if hasattr(func, '_cached_step'):
+            wrapped_step._cached_step = func._cached_step
+        return wrapped_step
+
+    return step_wrapping
+
+
+
+def store_step(store, iterable=False):
+    '''Simulation step storing decorator
+
+ 
+    '''
+    if isinstance(store, str):
+        store = [store]
+
+    def step_wrapping(func):
+
+        def wrapped_step(self, *args, **kwargs):
+
+            if hasattr(func, '_cached_step'):
+                if '_fname_parts' in kwargs:
+                    kwargs['_fname_parts'] += [var.split('.')[-1] for var in store]
+                else:
+                    kwargs['_fname_parts'] = [var.split('.')[-1] for var in store]
+
+            rets = func(self, *args, **kwargs)
+
+            for si, var in enumerate(store):
+                subvars = var.split('.')
+                if len(subvars) == 1:
+                    obj = self
+                    name = subvars[0]
+                else:
+                    for vari, subvar in enumerate(subvars[:-1]):
+                        if vari == 0:
+                            obj = getattr(self, subvar)
+                        else:
+                            obj = getattr(obj, subvar)
+                    name = subvars[-1]
+                
+                if iterable:
+                    iter_obj = [None]*len(rets)
+                    for index in range(len(rets)):
+                        if len(store) == 1 or rets[index] is None:
+                            iter_obj[index] = rets[index]
+                        else:
+                            iter_obj[index] = rets[index][si]
+                    setattr(obj, name, iter_obj)
+                else:
+                    if len(store) == 1 or rets is None:
+                        setattr(obj, name, rets)
+                    else:
+                        setattr(obj, name, rets[si])
+
+            return rets
+
+        if hasattr(func, '_cached_step'):
+            wrapped_step._cached_step = func._cached_step
+        return wrapped_step
+
+    return step_wrapping
+
+
+
+def cached_step(caches):
+    '''Simulation step caching decorator
+
+ 
+    :param str caches: Is a list of strings for the caches to be used, available by default is "h5" and "pickle". Custom caches are implemented by implementing methods with the string name but prefixed with load_ and save_.
+
+    '''
+    if isinstance(caches, str):
+        caches = [caches]
+
+    def step_wrapping(func):
+
+        def wrapped_step(self, *args, **kwargs):
+
+            step = kwargs.pop('_step_name', 'cached_data')
+            fname_parts = kwargs.pop('_fname_parts', ['data'])
+
+            dir_ = self.get_path(step)
+            if not dir_.is_dir():
+                mpi_mkdir(dir_)
+
+            loaded_ = False
+
+            #load
+            for cache in caches:
+                fname = dir_ / f'{"_".join(fname_parts)}.{cache}'
+                if fname.is_file():
+                    lfunc = getattr(self, f'load_{cache}')
+                    ret = lfunc(fname)
+                    loaded_ = True
+                    break
+
+            #if there are no caches
+            if not loaded_:
+                ret = func(self, *args, **kwargs)
+
+                #save
+                for cache in caches:
+                    fname = dir_ / f'{"_".join(fname_parts)}.{cache}'
+                    sfunc = getattr(self, f'save_{cache}')
+                    sfunc(fname, ret)
+
+            return ret
+
+        wrapped_step._cached_step = True
         return wrapped_step
 
     return step_wrapping
@@ -237,20 +359,43 @@ class Simulation:
 
     def save_h5(self, path, data):
         with h5py.File(path,'w') as h:
-            for key in data:
-                if isinstance(data[key], np.ndarray):
-                    h.create_dataset(key, data=data[key])
-                else:
-                    h.attrs[key] = data[key]
+            if isinstance(data, dict):
+                for key in data:
+                    if isinstance(data[key], np.ndarray):
+                        h.create_dataset(key, data=data[key])
+                    else:
+                        h.attrs[key] = data[key]
+            if isinstance(data, list) or isinstance(data, tuple):
+                for ind in range(len(data)):
+                    h.attrs['__ret_len'] = len(data)
+                    if isinstance(data[ind], np.ndarray):
+                        h.create_dataset(f'saved_data__{ind}', data=data[ind])
+                    else:
+                        h.attrs[f'saved_data__{ind}'] = data[ind]
+            else:
+                h.create_dataset('__saved_data', data=data)
 
     def load_h5(self, path):
         if path.is_file():
             with h5py.File(path,'r') as h:
-                ret = {}
-                for key in h:
-                    ret[key] = h[key][()].copy()
-                for key in h.attrs:
-                    ret[key] = copy.copy(h.attrs[key])
+                if '__saved_data' in h:
+                    ret = h['__saved_data'][()].copy()
+
+                elif '__ret_len' in h.attrs:
+                    ret = [None]*copy.copy(h.attrs['__ret_len'])
+                    for ind in range(len(ret)):
+                        key = f'saved_data__{ind}'
+                        if key in h:
+                            ret[ind] = h[key][()].copy()
+                        else:
+                            ret[ind] = copy.copy(h.attrs[key])
+                            
+                else:
+                    ret = {}
+                    for key in h:
+                        ret[key] = h[key][()].copy()
+                    for key in h.attrs:
+                        ret[key] = copy.copy(h.attrs[key])
             return ret
 
 
@@ -321,16 +466,16 @@ class Simulation:
         if step is None:
             for name, func in self.steps.items():
                 if self.profiler is not None: self.profiler.start(f'Simulation:run:{name}')
-                if hasattr(func, '_simulation_step'):
-                    func(name, *args, **kwargs)
+                if hasattr(func, '_cached_step'):
+                    func(*args, _step_name=name, **kwargs)
                 else:
                     func(*args, **kwargs)
                 if self.profiler is not None: self.profiler.stop(f'Simulation:run:{name}')
         else:
             func = self.steps[step]
             if self.profiler is not None: self.profiler.start(f'Simulation:run:{step}')
-            if hasattr(func, '_simulation_step'):
-                func(step, *args, **kwargs)
+            if hasattr(func, '_cached_step'):
+                func(*args, _step_name=step, **kwargs)
             else:
                 func(*args, **kwargs)
             if self.profiler is not None: self.profiler.stop(f'Simulation:run:{step}')
