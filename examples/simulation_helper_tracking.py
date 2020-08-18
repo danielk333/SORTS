@@ -96,7 +96,7 @@ class Tracking(Simulation):
 
 
     @MPI_single_process(process_id = 0)
-    def plot(self, tx=0, rx=0):
+    def plot(self, oid = None, tx=0, rx=0):
 
         fig = plt.figure(figsize=(15,15))
         axes = [
@@ -111,6 +111,9 @@ class Tracking(Simulation):
         ]
 
         for ind in range(len(self.obs_data)):
+            if oid is not None:
+                if oid != ind:
+                    continue
             for pi in range(len(self.scheduler.passes[ind][tx][rx])):
 
                 ps = self.scheduler.passes[ind][tx][rx][pi]
@@ -145,5 +148,5 @@ sim.run()
 sim.profiler.stop('total')
 sim.logger.always('\n'+sim.profiler.fmt(normalize='total'))
 
-sim.plot()
+sim.plot(oid=0)
 plt.show()
