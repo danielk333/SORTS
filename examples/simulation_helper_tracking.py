@@ -15,7 +15,8 @@ eiscat3d = sorts.radars.eiscat3d_interp
 
 from sorts.scheduler import PriorityTracking, ObservedParameters
 from sorts.controller import Scanner
-from sorts import SpaceObject, Simulation, simulation_step, MPI_single_process
+from sorts import SpaceObject, Simulation
+from sorts import MPI_single_process, MPI_action, iterable_step, store_step, cached_step
 from sorts.radar.scans import Fence
 
 from sorts.propagator import SGP4
@@ -64,29 +65,31 @@ class Tracking(Simulation):
         self.steps['calculate_measurements'] = self.calculate_measurements
         self.steps['observe_passes'] = self.observe_passes
 
-    @simulation_step(
-            iterable='scheduler.space_objects', 
-            store=[
-                'scheduler.passes', 
-                'scheduler.states', 
-                'scheduler.states_t',
-            ], 
-            MPI=True, 
-            caches=['pickle'], 
-            post_MPI = 'allbcast',
-        )
+
+
+    @store_step(store=[f'scheduler.{x}' for x in ['passes', 'states', 'states_t']], iterable=True)
+    @MPI_action(action='bcast', iterable=True)
+    @iterable_step(iterable='scheduler.space_objects', MPI=True)
+    @cached_step(caches='pickle')
     def find_passes(self, index, item):
         passes, states, t = self.scheduler.get_passes(index)
         return passes, states, t
 
 
-    @simulation_step(store='scheduler.measurements', MPI=True, MPI_only=0, caches=['pickle'], post_MPI='bcast')
+    @store_step(store='scheduler.measurements')
+    @MPI_action(action='bcast')
+    @MPI_single_process(process_id = 0)
+    @cached_step(caches='pickle')
     def calculate_measurements(self):
         self.scheduler.calculate_measurements()
         return self.scheduler.measurements
 
 
-    @simulation_step(iterable='scheduler.passes', store='obs_data', MPI=True, caches=['pickle'], post_MPI='gather-clear')
+
+    @store_step(store='obs_data', iterable=True)
+    @MPI_action(action='gather-clear', iterable=True)
+    @iterable_step(iterable='scheduler.passes', MPI=True)
+    @cached_step(caches='pickle')
     def observe_passes(self, index, item):
         data = scheduler.observe_passes(item, space_object = self.scheduler.space_objects[index], snr_limit=True)
         return data
@@ -130,8 +133,10 @@ sim = Tracking(
     root = '/home/danielk/IRF/E3D_PA/sorts_v4_tests/sim2',
 )
 # sim.delete('test')
-sim.branch('mpi', empty=True)
-# sim.checkout('test')
+# sim.branch('test', empty=True)
+# sim.branch('mpi', empty=True)
+sim.checkout('test')
+# sim.branch('test-no-mpi', empty=True)
 
 sim.profiler.start('total')
 
