@@ -75,11 +75,18 @@ def azel_to_ecef(lat, lon, alt, az, el, radians=False):
     '''
     shape = (3,)
     if isinstance(az,np.ndarray):    
-        if len(az.shape) > 1:
-            shape = (3,az.shape[1])
-    elif isinstance(el,np.ndarray):    
-        if len(el.shape) > 1:
-            shape = (3,el.shape[1])
+        if len(az) > 1:
+            shape = (3,len(az))
+            az = az.flatten()
+        else:
+            az = az[0]
+    
+    if isinstance(el,np.ndarray):
+        if len(el) > 1:
+            shape = (3,len(el))
+            el = el.flatten()
+        else:
+            el = el[0]
 
     sph = np.empty(shape, dtype=np.float64)
     sph[0,...] = az

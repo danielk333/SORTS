@@ -19,17 +19,29 @@ def gen_tromso_space_debris_radar(fence=False):
     alt = 85.0
 
     if fence:
-        rx_beam = alib.tsdr_fence.copy()
-        tx_beam = alib.tsdr_fence.copy()
+        rx_beam = alib.tsdr.copy()
+        tx_beam = alib.tsdr.copy()
+
+        rx_beam.sph_point(azimuth=[90.0, 90.0, 90.0, 270.0], elevation=[30.0, 60.0, 90.0, 60.0])
+        rx_beam.width /= 4
+        rx_beam.I0 /= 4
+
+        tx_beam.sph_point(azimuth=[90.0, 90.0, 90.0, 270.0], elevation=[30.0, 60.0, 90.0, 60.0])
+        tx_beam.width /= 4
+        tx_beam.I0 /= 4
     else:
         rx_beam = alib.tsdr.copy()
         tx_beam = alib.tsdr.copy()
 
-    tsr_tx = antenna.AntennaTX(
+        rx_beam.sph_point(azimuth=90.0, elevation=90.0)
+        tx_beam.sph_point(azimuth=90.0, elevation=90.0)
+
+
+    tsr_tx = TX(
         lat = lat,
         lon = lon,
         alt = alt,
-        min_elevation = 30.0,
+        min_elevation = 0,
         beam = tx_beam,
         power = 500.0e3,
         bandwidth = 1e6,
@@ -43,7 +55,7 @@ def gen_tromso_space_debris_radar(fence=False):
         lat = lat,
         lon = lon,
         alt = alt,
-        min_elevation = 30.0,
+        min_elevation = 0,
         noise = 100,
         beam = rx_beam,
     )
@@ -51,7 +63,9 @@ def gen_tromso_space_debris_radar(fence=False):
     tx=[tsr_tx]
     rx=[tsr_rx]
 
-    tsdr_r = Radar(tx, rx
+    tsdr_r = Radar(
+        tx, 
+        rx,
         max_off_axis=120.0, 
         min_SNRdb=10.0,
     )

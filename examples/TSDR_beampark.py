@@ -11,13 +11,16 @@ import h5py
 import pickle
 
 import sorts
-radar = sorts.radars.tsdr
+import pyant
+
+# radar = sorts.radars.tsdr
+radar = sorts.radars.tsdr_fence
 
 from sorts.scheduler import StaticList, ObservedParameters
 from sorts.controller import Scanner
 from sorts import SpaceObject, Simulation
 from sorts import MPI_single_process, MPI_action, iterable_step, store_step, cached_step
-from sorts.radar.scans import Fence
+from sorts.radar.scans import Beampark
 
 from sorts.propagator import SGP4
 Prop_cls = SGP4
@@ -27,8 +30,12 @@ Prop_opts = dict(
     ),
 )
 
+# pyant.plotting.gain_heatmap(radar.tx[0].beam, resolution=300, min_elevation=80.0)
+# plt.show()
+
+
 end_t = 600.0
-scan = Fence(azimuth=90, num=40, dwell=0.1, min_elevation=30)
+scan = Beampark(azimuth=radar.tx[0].beam.azimuth, elevation=radar.tx[0].beam.elevation)
 
 objs = [
     SpaceObject(
@@ -42,17 +49,17 @@ objs = [
         mu0 = 60,
         mjd0 = 53005.0,
         d = 0.3,
-    ) for a in np.linspace(7200e3, 8400e3, 4)
+    ) for a in np.linspace(7200e3, 8400e3, 1)
 ]
 
 class ObservedScanning(StaticList, ObservedParameters):
     pass
 
-scan_sched = Scanner(eiscat3d, scan)
+scan_sched = Scanner(radar, scan)
 scan_sched.t = np.arange(0, end_t, scan.dwell())
 
 scheduler = ObservedScanning(
-    radar = eiscat3d, 
+    radar = radar, 
     controllers = [scan_sched], 
 )
 
@@ -97,7 +104,7 @@ class Scanning(Simulation):
     @iterable_step(iterable='passes', MPI=True)
     @cached_step(caches='pickle')
     def observe_passes(self, index, item):
-        data = scheduler.observe_passes(item, space_object = self.objs[index], snr_limit=True)
+        data = scheduler.observe_passes(item, space_object = self.objs[index], snr_limit=False)
         return data
 
 
@@ -133,17 +140,27 @@ class Scanning(Simulation):
         for rx in self.scheduler.radar.rx:
             axes[0][0].plot([rx.ecef[0]],[rx.ecef[1]],[rx.ecef[2]],'og')
 
-        for radar, meta in scan_sched(np.arange(0,scan.cycle(),scan.dwell())):
+        for radar, meta in scan_sched(np.arange(0,scan.dwell(),scan.dwell())):
             for tx in radar.tx:
-                point_tx = tx.pointing_ecef/np.linalg.norm(tx.pointing_ecef, axis=0)*scan_sched.r.max() + tx.ecef
-                axes[0][0].plot([tx.ecef[0], point_tx[0]], [tx.ecef[1], point_tx[1]], [tx.ecef[2], point_tx[2]], 'r-', alpha=0.15)
+                point_tx = tx.pointing_ecef/np.linalg.norm(tx.pointing_ecef, axis=0)*scan_sched.r.max()
+                if len(point_tx.shape) > 1:
+                    point_tx += tx.ecef[:,None]
+                else:
+                    point_tx += tx.ecef
+                    point_tx = point_tx.reshape(3,1)
+                for ti in range(point_tx.shape[1]):
+                    axes[0][0].plot([tx.ecef[0], point_tx[0,ti]], [tx.ecef[1], point_tx[1,ti]], [tx.ecef[2], point_tx[2,ti]], 'r-', alpha=0.15)
 
                 for rx in radar.rx:
                     pecef = rx.pointing_ecef/np.linalg.norm(rx.pointing_ecef, axis=0)
 
                     for ri in range(pecef.shape[1]):
-                        point_tx = tx.pointing_ecef/np.linalg.norm(tx.pointing_ecef, axis=0)*scan_sched.r[ri] + tx.ecef
-                        point = pecef[:,ri]*np.linalg.norm(rx.ecef - point_tx) + rx.ecef
+                        point_tx = tx.pointing_ecef/np.linalg.norm(tx.pointing_ecef, axis=0)*scan_sched.r[ri]
+                        if len(point_tx.shape) > 1:
+                            point_tx += tx.ecef[:,None]
+                        else:
+                            point_tx += tx.ecef
+                        point = pecef[:,ri]*np.linalg.norm(rx.ecef - point_tx[:,0]) + rx.ecef
 
                         axes[0][0].plot([rx.ecef[0], point[0]], [rx.ecef[1], point[1]], [rx.ecef[2], point[2]], 'g-', alpha=0.05)
 
@@ -172,9 +189,9 @@ class Scanning(Simulation):
         axes[0][1].legend()
 
         dr = 600e3
-        axes[0][0].set_xlim([eiscat3d.tx[0].ecef[0]-dr, eiscat3d.tx[0].ecef[0]+dr])
-        axes[0][0].set_ylim([eiscat3d.tx[0].ecef[1]-dr, eiscat3d.tx[0].ecef[1]+dr])
-        axes[0][0].set_zlim([eiscat3d.tx[0].ecef[2]-dr, eiscat3d.tx[0].ecef[2]+dr])
+        axes[0][0].set_xlim([self.scheduler.radar.tx[0].ecef[0]-dr, self.scheduler.radar.tx[0].ecef[0]+dr])
+        axes[0][0].set_ylim([self.scheduler.radar.tx[0].ecef[1]-dr, self.scheduler.radar.tx[0].ecef[1]+dr])
+        axes[0][0].set_zlim([self.scheduler.radar.tx[0].ecef[2]-dr, self.scheduler.radar.tx[0].ecef[2]+dr])
 
         
 
@@ -183,13 +200,28 @@ class Scanning(Simulation):
 sim = Scanning(
     objs = objs,
     scheduler = scheduler,
-    root = '/home/danielk/IRF/E3D_PA/sorts_v4_tests/sim1',
+    root = '/home/danielk/IRF/E3D_PA/sorts_v4_tests/sim3',
 )
 # sim.delete('test')
 # sim.branch('test', empty=True)
 sim.checkout('test')
 
 sim.profiler.start('total')
+
+
+## EX
+
+# sim.run('propagate')
+# sim.run('passes')
+# for ind, freq in enumerate([1.2e6, 2.4e6]):
+#     sim.checkout('master')
+#     sim.branch(f'f{ind}')
+#     sim.scheduler.radar.tx[0].beam.frequency = freq
+#     sim.scheduler.radar.rx[0].beam.frequency = freq
+#     sim.run('observe')
+
+##
+
 
 sim.run()
 

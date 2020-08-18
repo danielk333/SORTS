@@ -33,6 +33,8 @@ class Scanner(RadarController):
         return dic
 
     def point_radar(self, t):
+        '''Assumes t is not array
+        '''
         if self.return_copy:
             radar = self.radar.copy()
         else:
@@ -46,8 +48,13 @@ class Scanner(RadarController):
         for tx in radar.tx:
             point = self.scan.ecef_pointing(t, tx)
 
-            point_tx.append(point + tx.ecef)
-            point_rx_to_tx.append(point[:,None]*self.r[None,:] + tx.ecef[:,None])
+            if len(point.shape) > 1:
+                point_tx.append(point + tx.ecef[:,None])
+                __ptx = point[:,:,None]*self.r[None,None,:] + tx.ecef[:,None,None]
+                point_rx_to_tx.append(__ptx.reshape(3, __ptx.shape[1]*__ptx.shape[2]))
+            else:
+                point_tx.append(point + tx.ecef)
+                point_rx_to_tx.append(point[:,None]*self.r[None,:] + tx.ecef[:,None])
             
             RadarController._point_station(tx, point_tx[-1])
 
@@ -56,7 +63,10 @@ class Scanner(RadarController):
             for txi, tx in enumerate(radar.tx):
                 #< 200 meters apart = same location for pointing
                 if np.linalg.norm(tx.ecef - rx.ecef) < 200.0:
-                    rx_point.append(point_tx[txi].reshape(3,1))
+                    __ptx = point_tx[txi]
+                    if len(__ptx.shape) == 1:
+                        __ptx = __ptx.reshape(3,1)
+                    rx_point.append(__ptx)
                 else:
                     rx_point.append(point_rx_to_tx[txi])
             rx_point = np.concatenate(rx_point, axis=1)
