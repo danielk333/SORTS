@@ -57,34 +57,25 @@ def mpi_copy(src, dst):
         shutil.copy2(src, dst)
 
 
-def MPI_mono_simulation_step(process_id, post_MPI = None):
+def MPI_single_process(process_id):
 
     def step_wrapping(func):
 
-        def wrapped_step(self, step, *args, **kwargs):
+        def wrapped_step(self, *args, **kwargs):
             if comm is not None:
                 if comm.rank == process_id:
-                    if hasattr(func, '_simulation_step'):
-                        rets = func(self, step, *args, **kwargs)
-                    else:
-                        rets = func(self, *args, **kwargs)
+                    rets = func(self, *args, **kwargs)
                 else:
                     rets = None
-
-                if post_MPI is None:
-                    pass
-                elif post_MPI == 'bcast':
-                    rets = comm.bcast(rets, root=process_id)
-
+            else:
+                rets = func(self, *args, **kwargs)
             return rets
-
-        wrapped_step._simulation_step = True
         return wrapped_step
 
     return step_wrapping
 
 
-def simulation_step(iterable=None, store=None, MPI=False, caches=[], post_MPI=None):
+def simulation_step(iterable=None, store=None, MPI=False, caches=[], post_MPI=None, MPI_only=None):
     '''Simulation step decorator
 
  
@@ -92,6 +83,13 @@ def simulation_step(iterable=None, store=None, MPI=False, caches=[], post_MPI=No
     :param str post_MPI: Mode of operations on node-data communication, available options are None, "gather", "allbcast" and "barrier".
 
     '''
+
+    if isinstance(caches, str):
+        caches = [caches]
+    if isinstance(iterable, str):
+        iterable = [iterable]
+    if isinstance(store, str):
+        store = [store]
 
     def step_wrapping(func):
 
@@ -105,8 +103,23 @@ def simulation_step(iterable=None, store=None, MPI=False, caches=[], post_MPI=No
                 dir_ = None
 
             if iterable is not None:
-                attr = getattr(self, iterable)
-                if MPI and comm is not None:
+                all_attrs = []
+                for var in iterable:
+                    subvars = var.split('.')
+                    for vari, subvar in enumerate(subvars):
+                        if vari == 0:
+                            obj = getattr(self, subvar)
+                        else:
+                            obj = getattr(obj, subvar)
+                    all_attrs.append(obj)
+
+                if len(all_attrs) == 1:
+                    attr = all_attrs[0]
+                else:
+                    attr = list(zip(*all_attrs))
+
+
+                if MPI and comm is not None and MPI_only is None:
                     _iter = list(range(comm.rank, len(attr), comm.size))
                 else:
                     _iter = list(range(len(attr)))
@@ -114,12 +127,15 @@ def simulation_step(iterable=None, store=None, MPI=False, caches=[], post_MPI=No
                 rets = [None]*len(attr)
 
                 for index in _iter:
+                    if comm is not None and MPI_only is not None:
+                        if comm.rank != MPI_only:
+                            continue
                     item = attr[index]
                     loaded_ = False
 
                     #load
                     for cache in caches:
-                        fname = dir_ / f'{iterable}_{index}.{cache}'
+                        fname = dir_ / f'{"_".join(iterable)}_{index}.{cache}'
                         if fname.is_file():
                             lfunc = getattr(self, f'load_{cache}')
                             ret = lfunc(fname)
@@ -129,11 +145,10 @@ def simulation_step(iterable=None, store=None, MPI=False, caches=[], post_MPI=No
                     #if there are no caches
                     if not loaded_:
                         ret = func(self, index, item, *args, **kwargs)
-                        if ret is None: ret = {}
 
                         #save
                         for cache in caches:
-                            fname = dir_ / f'{iterable}_{index}.{cache}'
+                            fname = dir_ / f'{"_".join(iterable)}_{index}.{cache}'
                             sfunc = getattr(self, f'save_{cache}')
                             sfunc(fname, ret)
 
@@ -148,7 +163,7 @@ def simulation_step(iterable=None, store=None, MPI=False, caches=[], post_MPI=No
                         pass
                     elif post_MPI == 'barrier':
                         comm.barrier()
-                    elif post_MPI == 'gather':
+                    elif post_MPI.startswith('gather'):
 
                         if comm.rank == 0:
                             for thr_id in range(comm.size):
@@ -160,10 +175,10 @@ def simulation_step(iterable=None, store=None, MPI=False, caches=[], post_MPI=No
                             for ind in mpi_inds[comm.rank]:
                                 comm.send(rets[ind], dest=0, tag=ind)
                         
-                        #delete data from threads to save memory
-                        if comm.rank != 0:
-                            for ind in mpi_inds[comm.rank]:
-                                rets[ind] = None
+                        if post_MPI == 'gather-clear':
+                            if comm.rank != 0:
+                                for ind in mpi_inds[comm.rank]:
+                                    rets[ind] = None
 
                     elif post_MPI == 'allbcast':
 
@@ -171,34 +186,74 @@ def simulation_step(iterable=None, store=None, MPI=False, caches=[], post_MPI=No
                             for ind in mpi_inds[thr_id]:
                                 rets[ind] = comm.bcast(rets[ind], root=thr_id)
 
+                    elif post_MPI == 'bcast' and MPI_only is not None:
+                        for ind in _iter:
+                            rets[ind] = comm.bcast(rets[ind], root=MPI_only)
+
                 else:
                     raise ValueError(f'post_MPI "{post_MPI}" not valid')
 
             else:
                 loaded_ = False
+                rets = None
 
-                #load
-                for cache in caches:
-                    fname = dir_ / f'{step}.{cache}'
-                    if fname.is_file():
-                        lfunc = getattr(self, f'load_{cache}')
-                        rets = lfunc(fname)
-                        loaded_ = True
-                        break
+                do_func = True
+                if comm is not None and MPI_only is not None:
+                    if comm.rank != MPI_only:
+                        do_func = False
 
-                #if there are no caches
-                if not loaded_:
-                    rets = func(self, *args, **kwargs)
-                    if rets is None: rets = {}
-
-                    #save
+                if do_func:
+                    #load
                     for cache in caches:
                         fname = dir_ / f'{step}.{cache}'
-                        sfunc = getattr(self, f'save_{cache}')
-                        sfunc(fname, rets)
+                        if fname.is_file():
+                            lfunc = getattr(self, f'load_{cache}')
+                            rets = lfunc(fname)
+                            loaded_ = True
+                            break
+
+                    #if there are no caches
+                    if not loaded_:
+                        rets = func(self, *args, **kwargs)
+
+                        #save
+                        for cache in caches:
+                            fname = dir_ / f'{step}.{cache}'
+                            sfunc = getattr(self, f'save_{cache}')
+                            sfunc(fname, rets)
+
+                if post_MPI is None:
+                    pass
+                elif post_MPI == 'bcast' and MPI_only is not None:
+                    rets = comm.bcast(rets, root=MPI_only)
 
             if store is not None:
-                setattr(self, store, rets)
+                for si, var in enumerate(store):
+                    subvars = var.split('.')
+                    if len(subvars) == 1:
+                        obj = self
+                        name = subvars[0]
+                    else:
+                        for vari, subvar in enumerate(subvars[:-1]):
+                            if vari == 0:
+                                obj = getattr(self, subvar)
+                            else:
+                                obj = getattr(obj, subvar)
+                        name = subvars[-1]
+                    
+                    if iterable is not None:
+                        iter_obj = [None]*len(attr)
+                        for index in range(len(attr)):
+                            if len(store) == 1 or rets[index] is None:
+                                iter_obj[index] = rets[index]
+                            else:
+                                iter_obj[index] = rets[index][si]
+                        setattr(obj, name, iter_obj)
+                    else:
+                        if len(store) == 1 or rets is None:
+                            setattr(obj, name, rets)
+                        else:
+                            setattr(obj, name, rets[si])
 
             return rets
 
@@ -263,20 +318,26 @@ class Simulation:
 
     def save_h5(self, path, data):
         with h5py.File(path,'w') as h:
-            for key in data:
-                if isinstance(data[key], np.ndarray):
-                    h.create_dataset(key, data=data[key])
-                else:
-                    h.attrs[key] = data[key]
+            if isinstance(data, dict):
+                for key in data:
+                    if isinstance(data[key], np.ndarray):
+                        h.create_dataset(key, data=data[key])
+                    else:
+                        h.attrs[key] = data[key]
+            else:
+                h.create_dataset('saved_data__', data=data)
 
     def load_h5(self, path):
         if path.is_file():
             with h5py.File(path,'r') as h:
-                ret = {}
-                for key in h:
-                    ret[key] = h[key][()].copy()
-                for key in h.attrs:
-                    ret[key] = copy.copy(h.attrs[key])
+                if 'saved_data__' in h:
+                    ret = h['saved_data__'][()].copy()
+                else:
+                    ret = {}
+                    for key in h:
+                        ret[key] = h[key][()].copy()
+                    for key in h.attrs:
+                        ret[key] = copy.copy(h.attrs[key])
             return ret
 
 

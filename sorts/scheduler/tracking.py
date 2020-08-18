@@ -106,6 +106,8 @@ class Tracking(Scheduler):
                     if self.profiler is not None:
                         self.profiler.stop('Tracking:get_passes:calculate_max_snr')
 
+        return self.passes[ind], states, t
+
 
     def get_controllers(self):
         if self.logger is not None:
