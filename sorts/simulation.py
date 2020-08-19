@@ -11,6 +11,7 @@ from collections import OrderedDict
 import logging
 import copy
 import pickle
+import datetime
 
 #Third party import
 import h5py
@@ -138,7 +139,7 @@ def MPI_action(action, iterable = False, root = 0):
     return step_wrapping
 
 
-def iterable_step(iterable, MPI=False):
+def iterable_step(iterable, MPI=False, log=False):
     '''Simulation step iteration decorator
 
  
@@ -179,7 +180,12 @@ def iterable_step(iterable, MPI=False):
                 else:
                     kwargs['_fname_parts'] = [None]
 
+            _iters = 0
+            _total = len(_iter)
+
             for index in _iter:
+                if log and self.profiler is not None:
+                    self.profiler.start('Simulation:iterable_step__')
                 item = attr[index]
 
                 if hasattr(func, '_cached_step'):
@@ -187,6 +193,19 @@ def iterable_step(iterable, MPI=False):
 
                 rets[index] = func(self, index, item, *args, **kwargs)
 
+                if log and self.profiler is not None:
+                    self.profiler.stop('Simulation:iterable_step__')
+                _iters += 1
+                if log and self.logger is not None:
+                    _spent = self.profiler.total(name='Simulation:iterable_step__')
+                    _est_left = (_total - _iters)*self.profiler.mean(name='Simulation:iterable_step__')
+                    self.logger.always(f'Simulation:iterable_step: {_iters}/{_total}\n'
+                        + f'[Elapsed  ] {str(datetime.timedelta(seconds=_spent))} | '
+                        + f'[Time left] {str(datetime.timedelta(seconds=_est_left))}'
+                    )
+
+            if log and self.profiler is not None:
+                del self.profiler.exec_times['Simulation:iterable_step__']
 
             return rets
 
@@ -389,7 +408,7 @@ class Simulation:
                             ret[ind] = h[key][()].copy()
                         else:
                             ret[ind] = copy.copy(h.attrs[key])
-                            
+
                 else:
                     ret = {}
                     for key in h:
