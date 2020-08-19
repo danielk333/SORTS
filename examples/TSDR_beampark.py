@@ -21,6 +21,7 @@ from sorts.controller import Scanner
 from sorts import SpaceObject, Simulation
 from sorts import MPI_single_process, MPI_action, iterable_step, store_step, cached_step
 from sorts.radar.scans import Beampark
+from sorts.population import master_catalog, master_catalog_factor
 
 from sorts.propagator import SGP4
 Prop_cls = SGP4
@@ -37,20 +38,15 @@ Prop_opts = dict(
 end_t = 600.0
 scan = Beampark(azimuth=radar.tx[0].beam.azimuth, elevation=radar.tx[0].beam.elevation)
 
-objs = [
-    SpaceObject(
-        Prop_cls,
-        propagator_options = Prop_opts,
-        a = a, 
-        e = 0.1, 
-        i = 75, 
-        raan = 79,
-        aop = 0,
-        mu0 = 60,
-        mjd0 = 53005.0,
-        d = 0.3,
-    ) for a in np.linspace(7200e3, 8400e3, 1)
-]
+master_path = '/home/danielk/IRF/IRF_GITLAB/SORTSpp/master/celn_20090501_00.sim'
+
+pop = master_catalog(
+    master_path,
+    propagator = Prop_cls,
+    propagator_args = Prop_opts,
+)
+pop = master_catalog_factor(pop, treshhold = 0.1)
+
 
 class ObservedScanning(StaticList, ObservedParameters):
     pass
@@ -64,10 +60,14 @@ scheduler = ObservedScanning(
 )
 
 class Scanning(Simulation):
-    def __init__(self, objs, *args, **kwargs):
-        self.objs = objs
+    def __init__(self, population, *args, **kwargs):
+        self.population = population
+        self.inds = list(range(len(population)))
 
         super().__init__(*args, **kwargs)
+
+        if self.logger is not None:
+            self.logger.always(f'Population of size {len(population)} objects loaded.')
 
         self.steps['propagate'] = self.get_states
         self.steps['passes'] = self.find_passes
@@ -76,23 +76,24 @@ class Scanning(Simulation):
 
     @store_step(store=['states', 't'], iterable=True)
     @MPI_action(action='gather', iterable=True, root=0)
-    @iterable_step(iterable='objs', MPI=True)
+    @iterable_step(iterable='inds', MPI=True, log=True)
     @cached_step(caches='h5')
     def get_states(self, index, item):
+        obj = self.population.get_object(item)
         t = sorts.equidistant_sampling(
-            orbit = item.orbit, 
+            orbit = obj.orbit, 
             start_t = self.scheduler.controllers[0].t.min(), 
             end_t = self.scheduler.controllers[0].t.max(), 
             max_dpos=1e3,
         )
-        state = item.get_state(t)
+        state = obj.get_state(t)
         return state, t
 
 
     @store_step(store='passes', iterable=True)
     @MPI_action(action='gather', iterable=True, root=0)
     @iterable_step(iterable=['states', 't'], MPI=True)
-    @cached_step(caches='passes')
+    @cached_step(caches='pickle')
     def find_passes(self, index, item):
         state, t = item
         passes = scheduler.radar.find_passes(t, state, cache_data = False)
@@ -104,19 +105,8 @@ class Scanning(Simulation):
     @iterable_step(iterable='passes', MPI=True)
     @cached_step(caches='pickle')
     def observe_passes(self, index, item):
-        data = scheduler.observe_passes(item, space_object = self.objs[index], snr_limit=False)
+        data = scheduler.observe_passes(item, space_object = self.population.get_object(index), snr_limit=False)
         return data
-
-
-    def save_passes(self, path, passes):
-        with open(path, 'wb') as h:
-            pickle.dump(passes, h)
-
-
-    def load_passes(self, path):
-        with open(path, 'rb') as h:
-            passes = pickle.load(h)
-        return passes
 
 
     @MPI_single_process(process_id = 0)
@@ -198,9 +188,11 @@ class Scanning(Simulation):
 
 
 sim = Scanning(
-    objs = objs,
+    population = pop,
     scheduler = scheduler,
-    root = '/home/danielk/IRF/E3D_PA/sorts_v4_tests/sim3',
+    root = '/home/danielk/IRF/E3D_PA/sorts_v4_tests/sim_tsdr',
+    logger=True, 
+    profiler=True,
 )
 # sim.delete('test')
 # sim.branch('test', empty=True)
