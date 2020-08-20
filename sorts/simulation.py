@@ -57,6 +57,26 @@ def mpi_copy(src, dst):
     else:
         shutil.copy2(src, dst)
 
+
+def log_exceptions(func):
+
+    def wrapped_step(self, *args, **kwargs):
+
+        try:
+            rets = func(self, *args, **kwargs)
+        except BaseException as err:
+            if hasattr(self, 'logger'):
+                if self.logger is not None:
+                    self.logger.exception(f'\nargs: {args}\n kwargs: {kwargs}')
+            raise err
+            
+        return rets
+
+    return wrapped_step
+
+
+
+
 def MPI_single_process(process_id):
     '''Simulation step single process method restriction decorator
 
@@ -175,17 +195,22 @@ def iterable_step(iterable, MPI=False, log=False):
             rets = [None]*len(attr)
 
             if hasattr(func, '_cached_step'):
+                step_name = kwargs['_step_name']
                 if '_fname_parts' in kwargs:
                     kwargs['_fname_parts'] += [None]
                 else:
                     kwargs['_fname_parts'] = [None]
+            else:
+                step_name = None
+
+            profiler_name = f'Simulation:iterable_step_{step_name}'
 
             _iters = 0
             _total = len(_iter)
 
             for index in _iter:
                 if log and self.profiler is not None:
-                    self.profiler.start('Simulation:iterable_step__')
+                    self.profiler.start(profiler_name)
                 item = attr[index]
 
                 if hasattr(func, '_cached_step'):
@@ -194,18 +219,19 @@ def iterable_step(iterable, MPI=False, log=False):
                 rets[index] = func(self, index, item, *args, **kwargs)
 
                 if log and self.profiler is not None:
-                    self.profiler.stop('Simulation:iterable_step__')
+                    self.profiler.stop(profiler_name)
                 _iters += 1
                 if log and self.logger is not None:
-                    _spent = self.profiler.total(name='Simulation:iterable_step__')
-                    _est_left = (_total - _iters)*self.profiler.mean(name='Simulation:iterable_step__')
-                    self.logger.always(f'Simulation:iterable_step: {_iters}/{_total}\n'
+                    _spent = self.profiler.total(name=profiler_name)
+                    _est_left = (_total - _iters)*self.profiler.mean(name=profiler_name)
+                    self.logger.always(f'Simulation:{step_name}:iterable_step: {_iters}/{_total}\n'
                         + f'[Elapsed  ] {str(datetime.timedelta(seconds=_spent))} | '
                         + f'[Time left] {str(datetime.timedelta(seconds=_est_left))}'
                     )
 
             if log and self.profiler is not None:
-                del self.profiler.exec_times['Simulation:iterable_step__']
+                if step_name is None:
+                    del self.profiler.exec_times[profiler_name]
 
             return rets
 
@@ -478,6 +504,7 @@ class Simulation:
         self.logger = profiling.change_logfile(self.logger, self.log_path)
 
 
+    @log_exceptions
     def run(self, step = None, *args, **kwargs):
 
         self.make_paths()
