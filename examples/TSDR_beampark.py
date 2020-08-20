@@ -47,6 +47,7 @@ pop = master_catalog(
 )
 pop = master_catalog_factor(pop, treshhold = 0.1)
 
+# pop.delete(slice(100,None,None)) #DELETE ALL BUT THE FIRST 100
 
 class ObservedScanning(StaticList, ObservedParameters):
     pass
@@ -92,7 +93,7 @@ class Scanning(Simulation):
 
     @store_step(store='passes', iterable=True)
     @MPI_action(action='gather', iterable=True, root=0)
-    @iterable_step(iterable=['states', 't'], MPI=True)
+    @iterable_step(iterable=['states', 't'], MPI=True, log=True)
     @cached_step(caches='pickle')
     def find_passes(self, index, item):
         state, t = item
@@ -102,7 +103,7 @@ class Scanning(Simulation):
 
     @store_step(store='obs_data', iterable=True)
     @MPI_action(action='gather-clear', iterable=True, root=0)
-    @iterable_step(iterable='passes', MPI=True)
+    @iterable_step(iterable='passes', MPI=True, log=True)
     @cached_step(caches='pickle')
     def observe_passes(self, index, item):
         data = scheduler.observe_passes(item, space_object = self.population.get_object(index), snr_limit=False)
@@ -110,7 +111,7 @@ class Scanning(Simulation):
 
 
     @MPI_single_process(process_id = 0)
-    def plot(self, txi=0, rxi=0):
+    def plot(self, ind=0, txi=0, rxi=0):
 
         fig = plt.figure(figsize=(15,15))
         axes = [
@@ -154,17 +155,17 @@ class Scanning(Simulation):
 
                         axes[0][0].plot([rx.ecef[0], point[0]], [rx.ecef[1], point[1]], [rx.ecef[2], point[2]], 'g-', alpha=0.05)
 
-        for ind in range(len(objs)):
-            for pi in range(len(self.passes[ind][txi][rxi])):
-                ps = self.passes[ind][txi][rxi][pi]
-                dat = self.obs_data[ind][txi][rxi][pi]
-                
-                axes[0][0].plot(self.states[ind][0,ps.inds], self.states[ind][1,ps.inds], self.states[ind][2,ps.inds], '-')
+        
+        for pi in range(len(self.passes[ind][txi][rxi])):
+            ps = self.passes[ind][txi][rxi][pi]
+            dat = self.obs_data[ind][txi][rxi][pi]
+            
+            axes[0][0].plot(self.states[ind][0,ps.inds], self.states[ind][1,ps.inds], self.states[ind][2,ps.inds], '-')
 
-                if dat is not None:
-                    axes[0][1].plot(dat['t']/3600.0, dat['range']*1e-3, '-', label=f'obj{ind}-pass{pi}')
-                    axes[1][0].plot(dat['t']/3600.0, dat['range_rate']*1e-3, '-')
-                    axes[1][1].plot(dat['t']/3600.0, 10*np.log10(dat['snr']), '-')
+            if dat is not None:
+                axes[0][1].plot(dat['t']/3600.0, dat['range']*1e-3, '-', label=f'obj{ind}-pass{pi}')
+                axes[1][0].plot(dat['t']/3600.0, dat['range_rate']*1e-3, '-')
+                axes[1][1].plot(dat['t']/3600.0, 10*np.log10(dat['snr']), '-')
 
 
         font_ = 18
@@ -196,7 +197,7 @@ sim = Scanning(
 )
 # sim.delete('test')
 # sim.branch('test', empty=True)
-sim.checkout('test')
+# sim.checkout('test')
 
 sim.profiler.start('total')
 
