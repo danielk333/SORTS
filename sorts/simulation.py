@@ -12,6 +12,7 @@ import logging
 import copy
 import pickle
 import datetime
+from glob import glob
 
 #Third party import
 import h5py
@@ -139,7 +140,20 @@ def MPI_action(action, iterable = False, root = 0):
                             for ind in mpi_inds[comm.rank]:
                                 rets[ind] = None
                 else:
-                    raise ValueError('Can only gather iterable')
+                    all_rets = [None]*comm.size
+                    all_rets[comm.rank] = rets
+
+                    if comm.rank == root:
+                        for thr_id in range(comm.size):
+                            if thr_id != root:
+                                all_rets[thr_id] = comm.recv(source=thr_id, tag=thr_id)
+                    else:
+                        comm.send(all_rets[comm.rank], dest=root, tag=comm.rank)
+                    
+                    if action == 'gather-clear':
+                        if comm.rank != root:
+                            all_rets[comm.rank] = None
+                    rets = all_rets
 
             elif action == 'bcast':
 
@@ -159,11 +173,13 @@ def MPI_action(action, iterable = False, root = 0):
     return step_wrapping
 
 
-def iterable_step(iterable, MPI=False, log=False):
+def iterable_step(iterable, MPI=False, log=False, reduce=None):
     '''Simulation step iteration decorator
 
  
     '''
+    reduce_ = reduce;
+
     if isinstance(iterable, str):
         iterable = [iterable]
 
@@ -192,14 +208,14 @@ def iterable_step(iterable, MPI=False, log=False):
             else:
                 _iter = list(range(len(attr)))
 
-            rets = [None]*len(attr)
+            if reduce_ is None:
+                rets = [None]*len(attr)
+            else:
+                rets = None
+
 
             if hasattr(func, '_cached_step'):
                 step_name = kwargs['_step_name']
-                if '_fname_parts' in kwargs:
-                    kwargs['_fname_parts'] += [None]
-                else:
-                    kwargs['_fname_parts'] = [None]
             else:
                 step_name = None
 
@@ -214,9 +230,14 @@ def iterable_step(iterable, MPI=False, log=False):
                 item = attr[index]
 
                 if hasattr(func, '_cached_step'):
-                    kwargs['_fname_parts'][-1] = f'{index}'
+                    kwargs['_iterable_index'] = index
 
-                rets[index] = func(self, index, item, *args, **kwargs)
+                ret = func(self, index, item, *args, **kwargs)
+                if reduce_ is None:
+                    rets[index] = ret
+                else:
+                    rets = reduce_(rets, ret)
+                    del ret
 
                 if log and self.profiler is not None:
                     self.profiler.stop(profiler_name)
@@ -258,12 +279,6 @@ def store_step(store, iterable=False):
 
         def wrapped_step(self, *args, **kwargs):
 
-            if hasattr(func, '_cached_step'):
-                if '_fname_parts' in kwargs:
-                    kwargs['_fname_parts'] += [var.split('.')[-1] for var in store]
-                else:
-                    kwargs['_fname_parts'] = [var.split('.')[-1] for var in store]
-
             rets = func(self, *args, **kwargs)
 
             for si, var in enumerate(store):
@@ -303,6 +318,123 @@ def store_step(store, iterable=False):
 
 
 
+def iterable_cache(steps, caches, MPI=False, log=False, reduce=None):
+    '''Simulation step iteration decorator
+
+ 
+    '''
+    reduce_ = reduce;
+
+    if isinstance(steps, str):
+        steps = [steps]
+    if isinstance(caches, str):
+        caches = [caches]
+
+
+    def step_wrapping(func):
+
+        def wrapped_step(self, *args, **kwargs):
+
+            all_files = []
+            all_indecies = []
+            for step, cache in zip(steps, caches):
+                dir_ = self.get_path(step)
+                if not dir_.is_dir():
+                    raise ValueError(f'Input step {step} has no cache {cache}')
+                files = [pathlib.Path(x) for x in glob(str(dir_ / f'*.{cache}'))]
+                indecies = [int(file.stem.split('_')[0]) for file in files]
+                
+                files = [x for _, x in sorted(zip(indecies,files), key=lambda pair: pair[0])]
+                indecies = sorted(indecies)
+
+                all_files += [files]
+                all_indecies += [indecies]
+
+            if len(steps) == 1:
+                files_lst = [[x] for x in all_files[0]]
+            else:
+                #check all inds exist
+                for index, inds in enumerate(zip(*all_indecies)):
+                    if len(set(inds)) > 1:
+                        raise ValueError(f'Missing index {inds}')
+                files_lst = list(zip(*all_files))
+            indecies = all_indecies[0]
+
+            if MPI and comm is not None:
+                _iter = list(range(comm.rank, len(indecies), comm.size))
+            else:
+                _iter = list(range(len(indecies)))
+
+            if reduce_ is None:
+                rets = [None]*len(indecies)
+            else:
+                rets = None
+
+            if hasattr(func, '_cached_step'):
+                step_name = kwargs['_step_name']
+            else:
+                step_name = None
+
+            profiler_name = f'Simulation:iterable_cache{step_name}'
+
+            _iters = 0
+            _total = len(_iter)
+
+            for index__ in _iter:
+                index = indecies[index__]
+                files = files_lst[index__]
+
+                if log and self.profiler is not None:
+                    self.profiler.start(profiler_name)
+                
+                item = []
+                for cache, fname in zip(caches, files):
+                    lfunc = getattr(self, f'load_{cache}')
+                    item += [lfunc(fname)]
+
+                if len(caches) == 1:
+                    item = item[0]
+
+                if hasattr(func, '_cached_step'):
+                    kwargs['_iterable_index'] = index
+
+                ret = func(self, index, item, *args, **kwargs)
+                if reduce_ is None:
+                    rets[index__] = ret
+                else:
+                    rets = reduce_(rets, ret)
+                    del ret
+
+                if log and self.profiler is not None:
+                    self.profiler.stop(profiler_name)
+                _iters += 1
+                if log and self.logger is not None:
+                    if self.profiler is not None:
+                        _spent = self.profiler.total(name=profiler_name)
+                        _est_left = (_total - _iters)*self.profiler.mean(name=profiler_name)
+                        self.logger.always(f'Simulation:{step_name}:iterable_cache: {_iters}/{_total}\n'
+                            + f'[Elapsed  ] {str(datetime.timedelta(seconds=_spent))} | '
+                            + f'[Time left] {str(datetime.timedelta(seconds=_est_left))}'
+                        )
+                    else:
+                        self.logger.always(f'Simulation:{step_name}:iterable_cache: {_iters}/{_total}')
+
+            if log and self.profiler is not None:
+                if step_name is None:
+                    del self.profiler.exec_times[profiler_name]
+
+            return rets
+
+
+        if hasattr(func, '_cached_step'):
+            wrapped_step._cached_step = func._cached_step
+        return wrapped_step
+
+    return step_wrapping
+
+
+
+
 def cached_step(caches):
     '''Simulation step caching decorator
 
@@ -319,6 +451,11 @@ def cached_step(caches):
 
             step = kwargs.pop('_step_name', 'cached_data')
             fname_parts = kwargs.pop('_fname_parts', ['data'])
+            index = kwargs.pop('_iterable_index', None)
+            if index is None:
+                index_lst = []
+            else:
+                index_lst = [str(index)]
 
             dir_ = self.get_path(step)
             if not dir_.is_dir():
@@ -328,13 +465,13 @@ def cached_step(caches):
 
             #load
             for cache in caches:
-                fname = dir_ / f'{"_".join(fname_parts)}.{cache}'
+                fname = dir_ / f'{"_".join(index_lst + fname_parts)}.{cache}'
                 if fname.is_file():
                     lfunc = getattr(self, f'load_{cache}')
                     try:
                         ret = lfunc(fname)
                         loaded_ = True
-                    except OSError, EOFError, UnicodeError:
+                    except (OSError, EOFError, UnicodeError, ):
                         fname.unlink()
 
                 if loaded_:
@@ -347,7 +484,7 @@ def cached_step(caches):
 
                 #save
                 for cache in caches:
-                    fname = dir_ / f'{"_".join(fname_parts)}.{cache}'
+                    fname = dir_ / f'{"_".join(index_lst + fname_parts)}.{cache}'
                     sfunc = getattr(self, f'save_{cache}')
                     sfunc(fname, ret)
 
@@ -521,17 +658,22 @@ class Simulation:
         if step is None:
             for name, func in self.steps.items():
                 if self.profiler is not None: self.profiler.start(f'Simulation:run:{name}')
+                if self.logger is not None: self.logger.info(f'Simulation:run:{name}')
+
                 if hasattr(func, '_cached_step'):
                     func(*args, _step_name=name, **kwargs)
                 else:
                     func(*args, **kwargs)
                 if self.profiler is not None: self.profiler.stop(f'Simulation:run:{name}')
+                if self.logger is not None: self.logger.info(f'Simulation:run:{name} [completed]')
         else:
             func = self.steps[step]
             if self.profiler is not None: self.profiler.start(f'Simulation:run:{step}')
+            if self.logger is not None: self.logger.info(f'Simulation:run:{step}')
             if hasattr(func, '_cached_step'):
                 func(*args, _step_name=step, **kwargs)
             else:
                 func(*args, **kwargs)
             if self.profiler is not None: self.profiler.stop(f'Simulation:run:{step}')
+            if self.logger is not None: self.logger.info(f'Simulation:run:{step} [completed]')
 
