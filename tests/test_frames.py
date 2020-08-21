@@ -428,7 +428,7 @@ class TestFrames(unittest.TestCase):
 
     def test_propagate_from_RES(self, nprop=400):
 
-        pos, vel, rpos, rvel = propagate_from_RES(self, nprop)
+        pos, vel, rpos, rvel = self.propagate_from_RES(nprop)
 
         np.testing.assert_array_less(vnorm2(pos[:150]-rpos[:150]), 100), \
             'Position errors too large'
