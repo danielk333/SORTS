@@ -77,6 +77,7 @@ def hist2d(x, y, **options):
         :logx [bool]: Determines if x-axis should be the logarithmic.
         :logy [bool]: Determines if y-axis should be the logarithmic.
         :log_freq [bool]: Determines if frequency should be the logarithmic.
+        :usetex [bool]: whether to typeset labels using TeX syntax
 
     Example::
         
@@ -116,8 +117,9 @@ def hist2d(x, y, **options):
         _y = np.log10(_y)
 
 
-    #turn on TeX interperter
-    plt.rc('text', usetex=True)
+    #turn on TeX interpreter (or not)
+    usetex = options['usetex'] if 'usetex' in options else True
+    plt.rc('text', usetex=usetex)
 
     if 'window' in options:
         size_in = options['window']
@@ -197,14 +199,16 @@ def posterior(post, variables, **options):
         :save [string]: will not display figure and will instead save it to this path
         :show [bool]: if False will do draw() instead of show() allowing script to continue
         :tight_rect [list of 4 floats]: configuration for the tight_layout function
+        :usetex [bool]: whether to typeset labels using TeX syntax
 
 
     """
     if type(post) != np.ndarray:
         post = np.array(post)
 
-    #turn on TeX interperter
-    plt.rc('text', usetex=True)
+    #turn on TeX interpreter (or not)
+    usetex = options['usetex'] if 'usetex' in options else True
+    plt.rc('text', usetex=usetex)
 
     lis = list(range(post.shape[1]))
     axis_plot = list(combinations(lis, 2))
@@ -301,6 +305,7 @@ def hist(x, **options):
         :plot [tuple]: A tuple with the :code:`(fig, ax)` objects from matplotlib. Then no new figure and axis will be created.
         :logx [bool]: Determines if x-axis should be the logarithmic.
         :logy [bool]: Determines if y-axis should be the logarithmic.
+        :usetex [bool]: whether to typeset labels using TeX syntax
 
     Example::
         
@@ -328,8 +333,9 @@ def hist(x, **options):
     if options.setdefault('logx', False ):
         _x = np.log10(_x)
 
-    #turn on TeX interperter
-    plt.rc('text', usetex=True)
+    #turn on TeX interpreter (or not)
+    usetex = options['usetex'] if 'usetex' in options else True
+    plt.rc('text', usetex=usetex)
 
     if 'window' in options:
         size_in = options['window']
@@ -394,6 +400,7 @@ def scatter(x, y, **options):
         :save [string]: Will not display figure and will instead save it to this path
         :show [bool]: If False will do draw() instead of show() allowing script to continue
         :plot [tuple]: A tuple with the :code:`(fig, ax)` objects from matplotlib. Then no new figure and axis will be created.
+        :usetex [bool]: whether to typeset labels using TeX syntax
 
     :param numpy.ndarray x:  x-axis data vector.
     :param numpy.ndarray y:  y-axis data vector.
@@ -418,8 +425,9 @@ def scatter(x, y, **options):
     if type(y) != np.ndarray:
         y = np.array(y)
 
-    #turn on TeX interperter
-    plt.rc('text', usetex=True)
+    #turn on TeX interpreter (or not)
+    usetex = options['usetex'] if 'usetex' in options else True
+    plt.rc('text', usetex=usetex)
 
     if 'window' in options:
         size_in = options['window']
@@ -476,6 +484,7 @@ def orbits(o, **options):
         :save [string]: will not display figure and will instead save it to this path
         :show [bool]: if False will do draw() instead of show() allowing script to continue
         :tight_rect [list of 4 floats]: configuration for the tight_layout function
+        :usetex [bool]: whether to typeset labels using TeX syntax
 
 
     Example::
@@ -510,14 +519,20 @@ def orbits(o, **options):
     else:
         o[:,0] = o[:,0]/6353.0
 
-    #turn on TeX interperter
-    plt.rc('text', usetex=True)
+    #turn on TeX interpreter (or not)
+    usetex = options['usetex'] if 'usetex' in options else True
+    print(f'usetex: {usetex}')
+    plt.rc('text', usetex=usetex)
 
     lis = list(range(o.shape[1]))
     axis_plot = list(combinations(lis, 2))
 
-    axis_label = options.setdefault('axis_labels', \
-        [ "$a$ [$R_E$]","$e$ [1]","$i$ [deg]","$\omega$ [deg]","$\Omega$ [deg]","$M_0$ [deg]" ])
+    if usetex:
+        axis_label = options.setdefault('axis_labels', \
+            [ "$a$ [$R_E$]","$e$ [1]","$i$ [deg]","$\omega$ [deg]","$\Omega$ [deg]","$M_0$ [deg]" ])
+    else:
+        axis_label = options.setdefault('axis_labels', \
+            [ "a [R_E]","e [1]","i [deg]","om [deg]","Om [deg]","M_0 [deg]" ])
     
     if o.shape[1] == 2:
         subplot_cnt = (1,2)

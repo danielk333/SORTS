@@ -38,7 +38,8 @@ Prop_opts = dict(
 end_t = 600.0
 scan = Beampark(azimuth=radar.tx[0].beam.azimuth, elevation=radar.tx[0].beam.elevation)
 
-master_path = '/home/danielk/IRF/IRF_GITLAB/SORTSpp/master/celn_20090501_00.sim'
+# master_path = '/home/danielk/IRF/IRF_GITLAB/SORTSpp/master/celn_20090501_00.sim'
+master_path = '/processed/projects/AO9884_RDPP/simulations/master/celn_20090501_00.sim'
 
 pop = master_catalog(
     master_path,
@@ -191,7 +192,8 @@ class Scanning(Simulation):
 sim = Scanning(
     population = pop,
     scheduler = scheduler,
-    root = '/home/danielk/IRF/E3D_PA/sorts_v4_tests/sim_tsdr',
+    # root = '/home/danielk/IRF/E3D_PA/sorts_v4_tests/sim_tsdr',
+    root = '/processed/projects/AO9884_RDPP/simulations/sim3',
     logger=True, 
     profiler=True,
 )
@@ -201,6 +203,16 @@ sim = Scanning(
 
 sim.profiler.start('total')
 
+
+sim.run()
+
+sim.profiler.stop('total')
+sim.logger.always('\n'+sim.profiler.fmt(normalize='total'))
+
+
+sim.plot()
+
+plt.show()
 
 ## EX
 
@@ -216,12 +228,3 @@ sim.profiler.start('total')
 ##
 
 
-sim.run()
-
-sim.profiler.stop('total')
-sim.logger.always('\n'+sim.profiler.fmt(normalize='total'))
-
-
-sim.plot()
-
-plt.show()
