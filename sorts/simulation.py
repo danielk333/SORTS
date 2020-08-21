@@ -222,12 +222,15 @@ def iterable_step(iterable, MPI=False, log=False):
                     self.profiler.stop(profiler_name)
                 _iters += 1
                 if log and self.logger is not None:
-                    _spent = self.profiler.total(name=profiler_name)
-                    _est_left = (_total - _iters)*self.profiler.mean(name=profiler_name)
-                    self.logger.always(f'Simulation:{step_name}:iterable_step: {_iters}/{_total}\n'
-                        + f'[Elapsed  ] {str(datetime.timedelta(seconds=_spent))} | '
-                        + f'[Time left] {str(datetime.timedelta(seconds=_est_left))}'
-                    )
+                    if self.profiler is not None:
+                        _spent = self.profiler.total(name=profiler_name)
+                        _est_left = (_total - _iters)*self.profiler.mean(name=profiler_name)
+                        self.logger.always(f'Simulation:{step_name}:iterable_step: {_iters}/{_total}\n'
+                            + f'[Elapsed  ] {str(datetime.timedelta(seconds=_spent))} | '
+                            + f'[Time left] {str(datetime.timedelta(seconds=_est_left))}'
+                        )
+                    else:
+                        self.logger.always(f'Simulation:{step_name}:iterable_step: {_iters}/{_total}')
 
             if log and self.profiler is not None:
                 if step_name is None:
@@ -328,9 +331,15 @@ def cached_step(caches):
                 fname = dir_ / f'{"_".join(fname_parts)}.{cache}'
                 if fname.is_file():
                     lfunc = getattr(self, f'load_{cache}')
-                    ret = lfunc(fname)
-                    loaded_ = True
+                    try:
+                        ret = lfunc(fname)
+                        loaded_ = True
+                    except OSError, EOFError, UnicodeError:
+                        fname.unlink()
+
+                if loaded_:
                     break
+                    
 
             #if there are no caches
             if not loaded_:
