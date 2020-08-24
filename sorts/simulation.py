@@ -214,10 +214,7 @@ def iterable_step(iterable, MPI=False, log=False, reduce=None):
                 rets = None
 
 
-            if hasattr(func, '_simulation_step'):
-                step_name = kwargs['_step_name']
-            else:
-                step_name = None
+            step_name = kwargs.get('_step_name', None)
 
             profiler_name = f'Simulation:iterable_step_{step_name}'
 
@@ -368,10 +365,7 @@ def iterable_cache(steps, caches, MPI=False, log=False, reduce=None):
             else:
                 rets = None
 
-            if hasattr(func, '_simulation_step'):
-                step_name = kwargs['_step_name']
-            else:
-                step_name = None
+            step_name = kwargs.get('_step_name', None)
 
             profiler_name = f'Simulation:iterable_cache{step_name}'
 
@@ -446,9 +440,9 @@ def cached_step(caches):
 
         def wrapped_step(self, *args, **kwargs):
 
-            step = kwargs.pop('_step_name', 'cached_data')
+            step = kwargs.get('_step_name', 'cached_data')
             fname_parts = kwargs.pop('_fname_parts', ['data'])
-            index = kwargs.pop('_iterable_index', None)
+            index = kwargs.get('_iterable_index', None)
             if index is None:
                 index_lst = []
             else:
