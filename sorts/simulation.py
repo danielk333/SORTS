@@ -94,8 +94,8 @@ def MPI_single_process(process_id):
                 rets = func(self, *args, **kwargs)
             return rets
 
-        if hasattr(func, '_cached_step'):
-            wrapped_step._cached_step = func._cached_step
+        if hasattr(func, '_simulation_step'):
+            wrapped_step._simulation_step = func._simulation_step
         return wrapped_step
 
     return step_wrapping
@@ -166,8 +166,8 @@ def MPI_action(action, iterable = False, root = 0):
 
             return rets
 
-        if hasattr(func, '_cached_step'):
-            wrapped_step._cached_step = func._cached_step
+        if hasattr(func, '_simulation_step'):
+            wrapped_step._simulation_step = func._simulation_step
         return wrapped_step
 
     return step_wrapping
@@ -214,7 +214,7 @@ def iterable_step(iterable, MPI=False, log=False, reduce=None):
                 rets = None
 
 
-            if hasattr(func, '_cached_step'):
+            if hasattr(func, '_simulation_step'):
                 step_name = kwargs['_step_name']
             else:
                 step_name = None
@@ -229,7 +229,7 @@ def iterable_step(iterable, MPI=False, log=False, reduce=None):
                     self.profiler.start(profiler_name)
                 item = attr[index]
 
-                if hasattr(func, '_cached_step'):
+                if hasattr(func, '_simulation_step'):
                     kwargs['_iterable_index'] = index
 
                 ret = func(self, index, item, *args, **kwargs)
@@ -259,8 +259,7 @@ def iterable_step(iterable, MPI=False, log=False, reduce=None):
 
             return rets
 
-        if hasattr(func, '_cached_step'):
-            wrapped_step._cached_step = func._cached_step
+        wrapped_step._simulation_step = True
         return wrapped_step
 
     return step_wrapping
@@ -310,8 +309,7 @@ def store_step(store, iterable=False):
 
             return rets
 
-        if hasattr(func, '_cached_step'):
-            wrapped_step._cached_step = func._cached_step
+        wrapped_step._simulation_step = True
         return wrapped_step
 
     return step_wrapping
@@ -370,7 +368,7 @@ def iterable_cache(steps, caches, MPI=False, log=False, reduce=None):
             else:
                 rets = None
 
-            if hasattr(func, '_cached_step'):
+            if hasattr(func, '_simulation_step'):
                 step_name = kwargs['_step_name']
             else:
                 step_name = None
@@ -395,7 +393,7 @@ def iterable_cache(steps, caches, MPI=False, log=False, reduce=None):
                 if len(caches) == 1:
                     item = item[0]
 
-                if hasattr(func, '_cached_step'):
+                if hasattr(func, '_simulation_step'):
                     kwargs['_iterable_index'] = index
 
                 ret = func(self, index, item, *args, **kwargs)
@@ -426,8 +424,7 @@ def iterable_cache(steps, caches, MPI=False, log=False, reduce=None):
             return rets
 
 
-        if hasattr(func, '_cached_step'):
-            wrapped_step._cached_step = func._cached_step
+        wrapped_step._simulation_step = True
         return wrapped_step
 
     return step_wrapping
@@ -490,7 +487,7 @@ def cached_step(caches):
 
             return ret
 
-        wrapped_step._cached_step = True
+        wrapped_step._simulation_step = True
         return wrapped_step
 
     return step_wrapping
@@ -660,7 +657,7 @@ class Simulation:
                 if self.profiler is not None: self.profiler.start(f'Simulation:run:{name}')
                 if self.logger is not None: self.logger.info(f'Simulation:run:{name}')
 
-                if hasattr(func, '_cached_step'):
+                if hasattr(func, '_simulation_step'):
                     func(*args, _step_name=name, **kwargs)
                 else:
                     func(*args, **kwargs)
@@ -670,7 +667,7 @@ class Simulation:
             func = self.steps[step]
             if self.profiler is not None: self.profiler.start(f'Simulation:run:{step}')
             if self.logger is not None: self.logger.info(f'Simulation:run:{step}')
-            if hasattr(func, '_cached_step'):
+            if hasattr(func, '_simulation_step'):
                 func(*args, _step_name=step, **kwargs)
             else:
                 func(*args, **kwargs)
