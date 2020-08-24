@@ -155,7 +155,8 @@ sim = Scanning(
     population = pop,
     scheduler = scheduler,
     # root = '/home/danielk/IRF/ESA_E3D/SORTS/tsdr_fence',
-    root = '/processed/projects/AO9884_RDPP/simulations/sim3',
+    # root = '/home/danielk/IRF/E3D_PA/sorts_v4_tests/sim_tsdr',
+    root = '/processed/projects/AO9884_RDPP/simulations/sim_tsdr',
     logger=True, 
     profiler=True,
 )
