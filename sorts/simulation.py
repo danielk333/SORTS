@@ -367,7 +367,7 @@ def iterable_cache(steps, caches, MPI=False, log=False, reduce=None):
 
             step_name = kwargs.get('_step_name', None)
 
-            profiler_name = f'Simulation:iterable_cache{step_name}'
+            profiler_name = f'Simulation:iterable_cache:{step_name}'
 
             _iters = 0
             _total = len(_iter)
