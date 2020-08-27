@@ -367,7 +367,7 @@ def iterable_cache(steps, caches, MPI=False, log=False, reduce=None):
 
             step_name = kwargs.get('_step_name', None)
 
-            profiler_name = f'Simulation:iterable_cache{step_name}'
+            profiler_name = f'Simulation:iterable_cache:{step_name}'
 
             _iters = 0
             _total = len(_iter)
@@ -620,15 +620,16 @@ class Simulation:
         '''Create branch.
         '''
         if (self.root / name).is_dir():
-            raise ValueError(f'Branch "{name}" already exists')
-
-        if empty:
-            mpi_mkdir(self.root / name)
-            for path in self.paths:
-                mpi_mkdir(self.root / name / path)
+            if self.logger is not None:
+                self.logger.info(f'Branch "{name}" already exists')
+                return
         else:
-            mpi_copy(self.root / self.branch_name, self.root / name)
-            self.checkout(name)
+            if empty:
+                mpi_mkdir(self.root / name)
+                for path in self.paths:
+                    mpi_mkdir(self.root / name / path)
+            else:
+                mpi_copy(self.root / self.branch_name, self.root / name)
 
         self.checkout(name)
 
