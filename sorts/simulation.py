@@ -58,11 +58,17 @@ def mpi_rmdir(path):
 
 
 @mpi_wrap_master_thread
-def mpi_copy(src, dst):
+def mpi_copy(src, dst, linkfiles=False):
     if src.is_dir():
-        shutil.copytree(src, dst)
+        if linkfiles:
+            shutil.copytree(src, dst, copy_function=os.link)
+        else:
+            shutil.copytree(src, dst)
     else:
-        shutil.copy2(src, dst)
+        if linkfiles:
+            os.link(src, dst)
+        else:
+            shutil.copy2(src, dst)
 
 
 def log_exceptions(func):
@@ -623,7 +629,7 @@ class Simulation:
             self.make_paths()
 
 
-    def branch(self, name, empty=False):
+    def branch(self, name, empty=False, linkfiles=None):
         '''Create branch.
         '''
         if (self.root / name).is_dir():
@@ -635,7 +641,18 @@ class Simulation:
                 for path in self.paths:
                     mpi_mkdir(self.root / name / path)
             else:
-                mpi_copy(self.root / self.branch_name, self.root / name)
+                if linkfiles is None:
+                    mpi_copy(self.root / self.branch_name, self.root / name, linkfiles=False)
+                else:
+                    listing = pathlib.Path(self.root / self.branch_name).glob('./*')
+                    for pth in listing:
+                        if pth.name in linkfiles:
+                            mpi_copy(pth, self.root / name / pth.name, linkfiles=True)
+                        else:
+                            mpi_copy(pth, self.root / name / pth.name, linkfiles=False)
+
+        # Make sure log directory exists
+        mpi_mkdir(self.root / name / 'logs')
 
         self.checkout(name)
 
