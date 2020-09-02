@@ -59,6 +59,7 @@ def master_catalog(
     master.allocate(master_raw.shape[0])
 
     master[:,:7] = master_raw[:, i]
+    master.objs['a'] *= 1e3 #km to m
     master.objs['mjd0'] = mjd0
     master.objs['A'] = np.divide(master_raw[:, 2], master_raw[:, 4])
     master.objs['m'] = master_raw[:, 2]

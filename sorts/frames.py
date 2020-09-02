@@ -75,11 +75,18 @@ def azel_to_ecef(lat, lon, alt, az, el, radians=False):
     '''
     shape = (3,)
     if isinstance(az,np.ndarray):    
-        if len(az.shape) > 1:
-            shape = (3,az.shape[1])
-    elif isinstance(el,np.ndarray):    
-        if len(el.shape) > 1:
-            shape = (3,el.shape[1])
+        if len(az) > 1:
+            shape = (3,len(az))
+            az = az.flatten()
+        else:
+            az = az[0]
+    
+    if isinstance(el,np.ndarray):
+        if len(el) > 1:
+            shape = (3,len(el))
+            el = el.flatten()
+        else:
+            el = el[0]
 
     sph = np.empty(shape, dtype=np.float64)
     sph[0,...] = az
@@ -485,7 +492,7 @@ def ECEF_to_TEME( t, p, v, mjd0=57084, xp=0.0, yp=0.0, model='80', lod=0.0015563
     return teme
 
 def TEME_to_ECEF( t, p, v, mjd0=57084, xp=0.0, yp=0.0, model='80', lod=0.0015563):
-    '''This function trsnforms a vector from the true equator mean equniox frame
+    '''This function tranforms a vector from the true equator mean equinox frame
     (teme), to an earth fixed (ITRF) frame.  the results take into account
     the effects of sidereal time, and polar motion.
 
@@ -710,6 +717,7 @@ def TEME_to_TLE_OPTIM(state, mjd0, kepler=False, tol=1e-6, tol_v=1e-7, method=No
 
 def TLE_to_TEME(state, mjd0, kepler=False):
     '''Convert mean elements used in two line element sets (TLE's) to osculating orbital elements in TEME.
+        :param list/numpy.ndarray state : [a0,e0,i0,raan0,aop0,M0]
     '''
     return propagator.pysgp4.sgp4_propagation(mjd0, state, B=0.0, dt=0.0)
 

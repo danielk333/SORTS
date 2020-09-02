@@ -14,6 +14,17 @@ from ..passes import Pass
 
 class ObservedParameters(Scheduler):
     '''Bi-static radar observation parameters of hard targets.
+
+    **Parameters calculated**
+
+        * time
+        * signal to noise ratio
+        * range
+        * range rate
+        * transmitter local pointing to target k
+        * receiver pointing to target k
+        * radar cross section
+
     ''' 
 
     def __init__(self, radar, logger=None, profiler=None, **kwargs):
@@ -28,7 +39,7 @@ class ObservedParameters(Scheduler):
         txi, rxi = txrx_pass.station_id
 
         if self.logger is not None:
-            self.logger.info(f'Obs.Param.:calculate_observation:(tx={rxi}, rx={rxi}), len(t) = {len(t)}')
+            self.logger.info(f'Obs.Param.:calculate_observation:(tx={txi}, rx={rxi}), len(t) = {len(t)}')
 
         if self.profiler is not None:
             self.profiler.start('Obs.Param.:calculate_observation')
