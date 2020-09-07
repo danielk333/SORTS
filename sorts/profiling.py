@@ -6,7 +6,9 @@ import logging
 import datetime
 import pathlib
 import time
+import tracemalloc
 
+import numpy as np
 from tabulate import tabulate
 
 class Profiler:
@@ -32,10 +34,62 @@ class Profiler:
             print(p)
 
     '''
-    def __init__(self, distribution=False):
+    def __init__(self, distribution=False, track_memory=False, snapshot_total=True):
         self.distribution = distribution
+        self.snapshot_total = snapshot_total
+        self.track_memory = track_memory
+
+        if self.track_memory:
+            tracemalloc.start()
+
         self.exec_times = dict()
         self.start_times = dict()
+
+        self.memory_stats = dict()
+        self.snapshots = dict()
+
+
+    def __del__(self):
+        if self.track_memory:
+            tracemalloc.stop()
+
+
+    def snapshot(self, name):
+        if not self.track_memory:
+            return
+
+        if self.snapshot_total:
+            snap_ = tracemalloc.take_snapshot()
+            alloc = snap_.statistics('lineno')
+            size = sum([x.size for x in alloc])
+            self.snapshots[name] = size
+        else:
+            self.snapshots[name] = tracemalloc.take_snapshot()
+
+
+    def memory_diff(self, name, save=None):
+        if not self.track_memory:
+            return
+
+        if save is None:
+            save = name
+
+        new_snapshot = tracemalloc.take_snapshot()
+
+        if self.snapshot_total:
+            new_alloc = new_snapshot.statistics('lineno')
+            new_size = sum([x.size for x in new_alloc])
+
+            data = new_size - self.snapshots[name]
+        else:
+            data = new_snapshot.compare_to(self.snapshots[name], 'lineno')
+            data.sort(key=lambda x: x.size_diff, reverse = True)
+
+        if save in self.memory_stats:
+            self.memory_stats[save].append(data)
+        else:
+            self.memory_stats[save] = [data]
+    
 
     def start(self, name):
         '''Records a start time for named call.
@@ -124,6 +178,32 @@ class Profiler:
         str_ = f'{" Performance analysis ".center(width, "-")}\n'
         str_ += tab + '\n'
         str_ += '-'*width + '\n'
+
+        if self.track_memory and self.snapshot_total:
+
+            data = []
+
+            for key in self.memory_stats:
+                if len(self.memory_stats[key]) == 0:
+                    continue
+                else:
+                    sum_ = np.sum(self.memory_stats[key])/1024.0
+                    mean_ = sum_/len(self.memory_stats[key])
+
+                    su = f'{sum_:.5e} kB'
+                    mu = f'{mean_:.5e} kB'
+
+                data.append([key, len(self.memory_stats[key]), mu, su])
+
+
+            header = ['Name', 'Executions', 'Mean size change', 'Total size change']
+            tab = str(tabulate(data, header, tablefmt="presto"))
+
+            width = tab.find('\n', 0)
+
+            str_ += '\n'*2 + f'{" Memory analysis ".center(width, "-")}\n'
+            str_ += tab + '\n'
+            str_ += '-'*width + '\n'
 
         return str_
 
