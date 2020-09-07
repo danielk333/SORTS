@@ -26,7 +26,7 @@ _EOP_header = None
 
 
 def enu_to_ecef(lat, lon, alt, enu, radians=False):
-    '''ENU (east/north/up) to ECEF coordinate system conversion. 
+    '''ENU (east/north/up) to ECEF coordinate system conversion, not including translation. 
 
     TODO: Docstring
     '''
@@ -42,7 +42,7 @@ def enu_to_ecef(lat, lon, alt, enu, radians=False):
 
 
 def ned_to_ecef(lat, lon, alt, ned, radians=False):
-    '''NED (north/east/down) to ECEF coordinate system conversion.
+    '''NED (north/east/down) to ECEF coordinate system conversion, not including translation.
 
     TODO: Docstring
     '''
@@ -54,7 +54,7 @@ def ned_to_ecef(lat, lon, alt, ned, radians=False):
 
 
 def ecef_to_enu(lat, lon, alt, ecef, radians=False):
-    '''ECEF coordinate system to local ENU (east,north,up).
+    '''ECEF coordinate system to local ENU (east,north,up), not including translation.
 
     TODO: Docstring
     '''
@@ -69,7 +69,7 @@ def ecef_to_enu(lat, lon, alt, ecef, radians=False):
 
 
 def azel_to_ecef(lat, lon, alt, az, el, radians=False):
-    '''Radar pointing (az,el) to unit vector in ECEF.
+    '''Radar pointing (az,el) to unit vector in ECEF, not including translation.
 
     TODO: Docstring
     '''

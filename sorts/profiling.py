@@ -55,6 +55,10 @@ class Profiler:
 
 
     def snapshot(self, name):
+        '''Take a tracemalloc snapshot.
+
+        :param str name: Name of the profiling location.
+        '''
         if not self.track_memory:
             return
 
@@ -68,6 +72,11 @@ class Profiler:
 
 
     def memory_diff(self, name, save=None):
+        '''Calculate a memory difference between the latest snapshot and now.
+
+        :param str name: Name of the profiling location.
+        :param str save: Save memory difference to this name, default is same as :code:`name`.
+        '''
         if not self.track_memory:
             return
 
@@ -93,10 +102,16 @@ class Profiler:
 
     def start(self, name):
         '''Records a start time for named call.
+
+        :param str name: Name of the profiling location.
         '''
         self.start_times[name] = time.time()
 
     def stop(self, name):
+        '''Records a time elapsed since the latest start time for named call.
+
+        :param str name: Name of the profiling location.
+        '''
         dt = time.time() - self.start_times[name]
         self.start_times[name] = None
 
@@ -143,6 +158,11 @@ class Profiler:
             return ret
 
     def fmt(self, normalize=None, timedelta=False):
+        '''Format summary of the profiler into a string.
+
+        :param str normalize: Name of the profiling location to normalize execution time towards.
+        :param bool timedelta: Print execution times as time-deltas.
+        '''
         means = self.mean()
         totals = self.total()
 
@@ -234,6 +254,11 @@ class Profiler:
 
 
 def add_logging_level(num, name):
+    '''Adds a custom logging level to all loggers.
+
+    :param int num: Integer level for logging level.
+    :param str name: Name of logging level.
+    '''
     def fn(self, message, *args, **kwargs):
         if self.isEnabledFor(num):
             self._log(num, message, args, **kwargs)
@@ -278,9 +303,14 @@ def get_logger(
         file_level = logging.INFO,
         term_level = logging.INFO,
     ):
-    '''Returns a logger object
-    
-    Formats to output both to terminal and a log file
+    '''Creates a pre-configured logger. Formats to output both to terminal and a log file.
+
+    **Note:** Can only use folders as paths for MPI usage.
+
+    :param str name: Name of the logger. 
+    :param str/pathlib.Path path: Path to the logfile output. Can be a file, a folder or `None`. 
+    :param int file_level: Logging level of the file handler.
+    :param int term_level: Logging level of the terminal handler.
     '''
     now = datetime.datetime.now()
     datetime_str = now.strftime("%Y-%m-%d_at_%H-%M")
@@ -328,6 +358,13 @@ def get_logger(
 
 
 def change_logfile(logger, path):
+    '''Deletes any previous `FileHandler` handlers and creates a new `FileHandler` to the new path with the same level as the previous one.
+
+    :param logging.Logger logger: Logger object.
+    :param str/pathlib.Path path: Path to the logfile output. Can be a file or folder. 
+    :param int file_level: Logging level of the file handler.
+    :param int term_level: Logging level of the terminal handler.
+    '''
     now = datetime.datetime.now()
     datetime_str = now.strftime("%Y-%m-%d_at_%H-%M")
 
@@ -369,6 +406,8 @@ def change_logfile(logger, path):
 
 
 def term_level(logger, level):
+    '''Set the StreamHandler level.
+    '''
     for hdl in logger.handlers[:]:
         if not isinstance(hdl, logging.StreamHandler):
             continue
@@ -382,6 +421,8 @@ def term_level(logger, level):
 
 
 def file_level(logger, level):
+    '''Set the FileHandler level.
+    '''
     for hdl in logger.handlers[:]:
         if not isinstance(hdl, logging.FileHandler):
             continue
