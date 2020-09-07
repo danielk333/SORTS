@@ -622,7 +622,6 @@ class Simulation:
         if (self.root / name).is_dir():
             if self.logger is not None:
                 self.logger.info(f'Branch "{name}" already exists')
-                return
         else:
             if empty:
                 mpi_mkdir(self.root / name)
