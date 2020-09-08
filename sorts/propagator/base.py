@@ -43,6 +43,9 @@ class Propagator(ABC):
 
 
     def _check_settings(self):
+        if self.logger is not None:
+            self.logger.debug(f'Propagator:_check_settings')
+
         for key_s, val_s in self.settings.items():
             if key_s not in self.DEFAULT_SETTINGS:
                 raise KeyError('Setting "{}" does not exist'.format(key_s))
@@ -67,6 +70,11 @@ class Propagator(ABC):
     def convert_time(self, t, epoch):
         '''Convert input time and epoch variables to :code:`astropy.TimeDelta` and :code:`astropy.Time` variables of the correct format and scale.
         '''
+        if self.profiler is not None:
+            self.profiler.start('Propagator:convert_time')
+        if self.logger is not None:
+            self.logger.debug(f'Propagator:convert_time')
+
         if isinstance(epoch, Time):
             if epoch.format != self.settings['epoch_format']:
                 epoch.format = self.settings['epoch_format']
@@ -88,11 +96,12 @@ class Propagator(ABC):
         else:
             t = TimeDelta(t, format=self.settings['time_format'], scale=self.settings['time_scale'])
 
+        if self.profiler is not None:
+            self.profiler.stop('Propagator:convert_time')
+        if self.logger is not None:
+            self.logger.debug(f'Propagator:convert_time:completed')
+
         return t, epoch
-
-
-    def _check_settings(self):
-        pass
 
 
     def settings(self, **kwargs):
