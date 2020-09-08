@@ -22,19 +22,19 @@ def gen_tromso_space_debris_radar(fence=False):
         rx_beam = alib.tsdr.copy()
         tx_beam = alib.tsdr.copy()
 
-        rx_beam.sph_point(azimuth=[90.0, 90.0, 90.0, 270.0], elevation=[30.0, 60.0, 90.0, 60.0])
+        rx_beam.sph_point(azimuth=[0.0, 0.0, 0.0, 180.0], elevation=[30.0, 60.0, 90.0, 60.0])
         rx_beam.width /= 4
         rx_beam.I0 /= 4
 
-        tx_beam.sph_point(azimuth=[90.0, 90.0, 90.0, 270.0], elevation=[30.0, 60.0, 90.0, 60.0])
+        tx_beam.sph_point(azimuth=[0.0, 0.0, 0.0, 180.0], elevation=[30.0, 60.0, 90.0, 60.0])
         tx_beam.width /= 4
         tx_beam.I0 /= 4
     else:
         rx_beam = alib.tsdr.copy()
         tx_beam = alib.tsdr.copy()
 
-        rx_beam.sph_point(azimuth=90.0, elevation=90.0)
-        tx_beam.sph_point(azimuth=90.0, elevation=90.0)
+        rx_beam.sph_point(azimuth=0.0, elevation=90.0)
+        tx_beam.sph_point(azimuth=0.0, elevation=90.0)
 
 
     tsr_tx = TX(

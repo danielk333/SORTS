@@ -6,7 +6,7 @@ from setuptools.command.egg_info import egg_info
 import subprocess
 import pip
 
-__version__ = '3.15.0'
+__version__ = '3.16.0'
 
 
 with open('dependency-links', 'r') as fh:

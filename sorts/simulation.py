@@ -28,6 +28,8 @@ except ImportError:
 from . import profiling
 
 def mpi_wrap_master_thread(func):
+    '''Wrap function to only execute on thread rank=0
+    '''
     def master_th_func(*args, **kwargs):
         if comm is not None:
             if comm.rank == 0:
@@ -43,11 +45,15 @@ def mpi_wrap_master_thread(func):
 
 @mpi_wrap_master_thread
 def mpi_mkdir(path):
+    '''Make directory on thread rank=0
+    '''
     path.mkdir(exist_ok=True)
 
 
 @mpi_wrap_master_thread
 def mpi_rmdir(path):
+    '''Remove directory on thread rank=0 with `shutil.rmtree`
+    '''
     shutil.rmtree(path)
 
 
@@ -60,7 +66,8 @@ def mpi_copy(src, dst):
 
 
 def log_exceptions(func):
-
+    '''If instance has a logger, log exceptions raised by this method.
+    '''
     def wrapped_step(self, *args, **kwargs):
 
         try:
@@ -622,7 +629,6 @@ class Simulation:
         if (self.root / name).is_dir():
             if self.logger is not None:
                 self.logger.info(f'Branch "{name}" already exists')
-                return
         else:
             if empty:
                 mpi_mkdir(self.root / name)

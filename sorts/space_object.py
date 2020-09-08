@@ -61,11 +61,12 @@ Using space object with a different propagator.
 '''
 
 #Python standard import
-
+import copy
 
 #Third party import
 import numpy as np
 import pyorb
+from astropy.time import Time
 
 
 #Local import
@@ -152,7 +153,7 @@ class SpaceObject(object):
             C_D=2.3,
             A=1.0,
             m=1.0,
-            mjd0=57125.7729,
+            epoch=Time(57125.7729, format='mjd'),
             oid=1,
             M_cent = pyorb.M_earth,
             C_R = 1.0,
@@ -183,7 +184,7 @@ class SpaceObject(object):
         self.C_R = C_R
         self.A = A
         self.d = d
-        self.mjd0 = mjd0
+        self.epoch = epoch
         self._propagator_cls = propagator
         self.propagator_options = propagator_options
         self.propagator = propagator(**propagator_options)
@@ -198,13 +199,13 @@ class SpaceObject(object):
             C_D=self.C_D,
             A=self.A,
             m=self.m,
-            mjd0=self.mjd0,
+            epoch=self.epoch,
             oid=self.oid,
             M_cent = self.M_cent,
             C_R = self.C_R,
             propagator = self._propagator_cls,
-            propagator_options = self.propagator_options,
-            propagator_args = self.propagator_args,
+            propagator_options = copy.copy(self.propagator_options),
+            propagator_args = copy.copy(self.propagator_args),
         )
         new_so.orbit.kepler = self.orbit._kep.copy()
 
@@ -229,47 +230,23 @@ class SpaceObject(object):
     def diam(self, val):
         self.d = val
 
-    # todo    
-    # @classmethod
-    #def from_oem(so_class,fname, propagator, propagator_options={}):
-    #    # read oem file
-    #    # figure out epoch, based on first oem point time
-    #    # 
-    #    # do a least-squares fit
-    #    # create space object with fitted parameters
-    #    # o = cls.cartesian
 
-
-    def propagate(self, dt, frame_transformation = None, frame_options = {}):
+    def propagate(self, dt):
         '''Propagate and change the epoch of this space object
-
-        Frame transformations available:
-            * TEME: From ITRF to TEME
-            * ITRF: From TEME to ITRF
-            * None: Do not perform transformation
-            * function pointer: use custom transformation function that takes state as first argument (in SI units) and keyword arguments
-        
         '''
 
-        state = self.get_state(np.array([dt], dtype=np.float64))
-        self.mjd0 = self.mjd0 + dt/(3600.0*24.0)
+        if 'in_frame' in self.propagator.settings and 'out_frame' in self.propagator.settings:
+            out_frame = self.propagator.settings['out_frame']
+            self.propagator.set(out_frame=self.propagator.settings['in_frame'])
 
-        if isinstance(frame_transformation, str):
-            jd_ut1 = dates.mjd_to_jd(self.mjd0)
+            state = self.get_state(np.array([dt], dtype=np.float64))
 
-            frame_options.setdefault('xp', 0.0)
-            frame_options.setdefault('yp', 0.0)
-
-            if frame_transformation == 'ITRF':
-                state_frame = frames.TEME_to_ITRF(state[:,0], jd_ut1, **frame_options)
-            elif frame_transformation == 'TEME':
-                state_frame = frames.ITRF_to_TEME(state[:,0], jd_ut1, **frame_options)
-            else:
-                raise ValueError('Tranformation {} not recognized'.format(frame_transformation))
-        elif isinstance(frame_transformation, None):
-            pass
+            self.propagator.set(out_frame=out_frame)
         else:
-            state_frame = frame_transformation(state, jd_ut1, **frame_options)
+            state = self.get_state(np.array([dt], dtype=np.float64))
+
+
+        self.mjd0 = self.mjd0 + dt/(3600.0*24.0)
 
         x, y, z, vx, vy, vz = state_frame.flatten()
 
@@ -316,7 +293,7 @@ class SpaceObject(object):
 
 
     def __str__(self):
-        p = '\nSpace object {} at epoch {} MJD:\n'.format(self.oid,self.mjd0)
+        p = '\nSpace object {} at epoch {} MJD:\n'.format(self.oid,self.epoch)
         p+= str(self.orbit) + '\n'
         p+= 'PARAMETERS: diameter = {:.3f} m, drag coefficient = {:.3f}, albedo = {:.3f}, area = {:.3f}, mass = {:.3f} kg\n'.format(self.d,self.C_D,self.C_R,self.A,self.m)
         if len(self.propagator_args) > 0:
@@ -371,7 +348,7 @@ class SpaceObject(object):
         ecefs = self.propagator.propagate(
             t = t, 
             state0 = np.squeeze(self.orbit.cartesian), 
-            mjd0=self.mjd0,
+            epoch=self.epoch,
             C_D=self.C_D,
             C_R=self.C_R,
             A=self.A,

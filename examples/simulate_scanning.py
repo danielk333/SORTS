@@ -40,34 +40,21 @@ objs = [
         a = 7200e3, 
         e = 0.1, 
         i = 75, 
-        raan = 79,
+        raan = 86,
         aop = 0,
         mu0 = 60,
         mjd0 = 53005.0,
-        d = 0.3,
+        d = 0.1,
     ),
-    SpaceObject(
-        Prop_cls,
-        propagator_options = Prop_opts,
-        a = 7200e3, 
-        e = 0.1, 
-        i = 69, 
-        raan = 74,
-        aop = 0,
-        mu0 = 0,
-        mjd0 = 53005.0,
-        d = 0.3,
-    )
 ]
 
-objs = objs[:1]
 
 for obj in objs: print(obj)
 
 class ObservedScanning(StaticList, ObservedParameters):
     pass
 
-scan_sched = Scanner(eiscat3d, scan)
+scan_sched = Scanner(eiscat3d, scan, profiler=p, logger=logger)
 scan_sched.t = np.arange(0, end_t, scan.dwell())
 
 p.start('total')
@@ -105,7 +92,7 @@ for ind in range(len(objs)):
     p.stop('find_passes')
 
     p.start('observe_passes')
-    data = scheduler.observe_passes(passes[ind], space_object = objs[ind], snr_limit=True)
+    data = scheduler.observe_passes(passes[ind], space_object = objs[ind], snr_limit=False)
     p.stop('observe_passes')
 
     datas.append(data)
@@ -156,6 +143,7 @@ for ind in range(len(objs)):
             axes[0][1].plot(dat['t']/3600.0, dat['range']*1e-3, '-', label=f'obj{ind}-pass{pi}')
             axes[1][0].plot(dat['t']/3600.0, dat['range_rate']*1e-3, '-')
             axes[1][1].plot(dat['t']/3600.0, 10*np.log10(dat['snr']), '-')
+            axes[1][1].set_ylim([0, None])
 
 
 font_ = 18

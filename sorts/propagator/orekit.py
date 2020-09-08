@@ -24,6 +24,7 @@ Simple propagation showing time difference due to loading of model data.
 #Python standard import
 import os
 import time
+import copy
 
 #Third party import
 import numpy as np
@@ -87,10 +88,8 @@ def _get_frame(name, frame_tidal_effects = False):
         return FramesFactory.getEME2000()
     elif name == 'CIRF':
         return FramesFactory.getCIRF(IERSConventions.IERS_2010, not frame_tidal_effects)
-    elif name == 'ITRF':
+    elif name in ['ITRF', 'TIRF', 'ITRS']:
         return FramesFactory.getITRF(IERSConventions.IERS_2010, not frame_tidal_effects)
-    elif name == 'TIRF':
-        return FramesFactory.getTIRF(IERSConventions.IERS_2010, not frame_tidal_effects)
     elif name == 'ITRFEquinox':
         return FramesFactory.getITRFEquinox(IERSConventions.IERS_2010, not frame_tidal_effects)
     if name == 'TEME':
@@ -203,7 +202,9 @@ class Orekit(Propagator):
             if self.profiler is not None:
                 self.profiler.stop('Orekit:propagate:steps:step-handler')
 
-    DEFAULT_SETTINGS = dict(
+    DEFAULT_SETTINGS = copy.copy(Propagator.DEFAULT_SETTINGS)
+    DEFAULT_SETTINGS.update(
+        dict(
             in_frame='EME',
             out_frame='ITRF',
             frame_tidal_effects=False,
@@ -221,14 +222,7 @@ class Orekit(Propagator):
             constants_source='WGS84',
             solar_activity_strength='WEAK',
         )
-
-
-    def _check_settings(self):
-        for key_s, val_s in self.settings.items():
-            if key_s not in Orekit.DEFAULT_SETTINGS:
-                raise KeyError('Setting "{}" does not exist'.format(key_s))
-            if type(Orekit.DEFAULT_SETTINGS[key_s]) != type(val_s):
-                raise ValueError('Setting "{}" does not support "{}"'.format(key_s, type(val_s)))
+    )
 
 
     def __init__(self,
@@ -237,17 +231,12 @@ class Orekit(Propagator):
                 **kwargs
             ):
 
-        super(Orekit, self).__init__(**kwargs)
+        super(Orekit, self).__init__(settings=settings, **kwargs)
 
         if self.logger is not None:
             self.logger.info(f'sorts.propagator.Orekit:init')
         if self.profiler is not None:
             self.profiler.start('Orekit:init')
-
-        self.settings.update(Orekit.DEFAULT_SETTINGS)
-        if settings is not None:
-            self.settings.update(settings)
-            self._check_settings()
 
         setup_orekit_curdir(filename = orekit_data)
 
@@ -495,7 +484,7 @@ class Orekit(Propagator):
             self.profiler.stop('Orekit:propagate:set_forces')
         
 
-    def propagate(self,t,state0,mjd0, **kwargs):
+    def propagate(self, t, state0, epoch, **kwargs):
         '''
         **Implementation:**
     
@@ -536,7 +525,10 @@ class Orekit(Propagator):
         if 'm' not in kwargs:
             kwargs['m'] = 0.0
 
-        t = self._make_numpy(t)
+        t, epoch = self.convert_time(t, epoch)
+
+        mjd0 = epoch.mjd
+        t = t.value
 
         if self.logger is not None:
             self.logger.info(f'Orekit:propagate:len(t) = {len(t)}')
