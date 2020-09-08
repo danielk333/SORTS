@@ -11,7 +11,7 @@ import inspect
 
 #Third party import
 import numpy as np
-
+from astropy.time import Time, TimeDelta
 
 #Local import
 
@@ -19,13 +19,35 @@ import numpy as np
 
 class Propagator(ABC):
 
-    DEFAULT_SETTINGS = dict()
+    DEFAULT_SETTINGS = dict(
+        epoch_format = 'mjd',
+        epoch_scale = 'utc',
+        time_format = 'sec',
+        time_scale = None,
+    )
 
-    def __init__(self, profiler=None, logger=None):
+    def __init__(self, settings=None, profiler=None, logger=None):
         self.settings = dict()
         self._check_args()
         self.profiler = profiler
         self.logger = logger
+
+        self.settings.update(self.DEFAULT_SETTINGS)
+        if settings is not None:
+            self.settings.update(settings)
+            self._check_settings()
+
+        if self.logger is not None:
+            for key in self.settings:
+                self.logger.debug(f'Propagator:settings:{key} = {self.settings[key]}')
+
+
+    def _check_settings(self):
+        for key_s, val_s in self.settings.items():
+            if key_s not in self.DEFAULT_SETTINGS:
+                raise KeyError('Setting "{}" does not exist'.format(key_s))
+            if type(self.DEFAULT_SETTINGS[key_s]) != type(val_s):
+                raise ValueError('Setting "{}" does not support "{}"'.format(key_s, type(val_s)))
 
 
     def _check_args(self):
@@ -42,18 +64,31 @@ class Propagator(ABC):
             assert var in correct_vars, 'Argument missing in implemented get_orbit, got "{}" instead'.format(var)
 
 
-    def _make_numpy(self, var):
-        '''Small method for converting non-numpy data structures to numpy data arrays. 
-        Should be used at top of functions to minimize type checks and maximize computation speed by avoiding Python objects.
+    def convert_time(self, t, epoch):
+        '''Convert input time and epoch variables to :code:`astropy.TimeDelta` and :code:`astropy.Time` variables of the correct format and scale.
         '''
-        if not isinstance(var, np.ndarray):
-            if isinstance(var, float):
-                var = np.array([var], dtype=np.float)
-            elif isinstance(var, list):
-                var = np.array(var, dtype=np.float)
-            else:
-                raise Exception('Input type {} not supported'.format(type(var)))
-        return var
+        if isinstance(epoch, Time):
+            if epoch.format != self.settings['epoch_format']:
+                epoch.format = self.settings['epoch_format']
+
+            if epoch.scale != self.settings['epoch_scale']:
+                epoch = getattr(epoch,self.settings['epoch_scale'])
+
+        else:
+            epoch = Time(epoch, format=self.settings['epoch_format'], scale=self.settings['epoch_scale'])
+
+
+        if isinstance(t, TimeDelta):
+            if t.format != self.settings['time_format']:
+                t.format = self.settings['time_format']
+
+            if t.scale != self.settings['time_scale']:
+                t = getattr(t,self.settings['time_scale'])
+
+        else:
+            t = TimeDelta(t, format=self.settings['time_format'], scale=self.settings['time_scale'])
+
+        return t, epoch
 
 
     def _check_settings(self):
@@ -66,7 +101,7 @@ class Propagator(ABC):
 
 
     @abstractmethod
-    def propagate(self, t, state0, mjd0, **kwargs):
+    def propagate(self, t, state0, epoch, **kwargs):
         '''Propagate a state
 
         This function uses key-word argument to supply additional information to the propagator, such as area or mass.
@@ -75,8 +110,8 @@ class Propagator(ABC):
 
         SI units are assumed unless implementation states otherwise.
 
-        :param float/list/numpy.ndarray t: Time in seconds to propagate relative the initial state epoch.
-        :param float mjd0: The epoch of the initial state in fractional Julian Days.
+        :param float/list/numpy.ndarray/astropy.TimeDelta t: Time to propagate relative the initial state epoch.
+        :param float/astropy.Time epoch: The epoch of the initial state.
         :param numpy.ndarray state0: 6-D Cartesian state vector in SI-units.
         :return: 6-D Cartesian state vectors in SI-units.
         '''

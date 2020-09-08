@@ -9,6 +9,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import pyorb
+from astropy.utils import iers
+iers.conf.auto_download = False
 
 from sorts.propagator import SGP4
 
@@ -26,7 +28,7 @@ print(orb)
 t = np.linspace(0,3600*24.0*15,num=5000)
 mjd0 = 53005
 
-states = prop.propagate(t, orb.cartesian[:,0], mjd0, A=1.0, C_R = 1.0, C_D = 1.0)
+states = prop.propagate(t, orb.cartesian[:,0], epoch=mjd0, A=1.0, C_R = 1.0, C_D = 1.0)
 
 fig = plt.figure(figsize=(15,15))
 ax = fig.add_subplot(111, projection='3d')
