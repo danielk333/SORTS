@@ -338,14 +338,14 @@ class SGP4(Propagator):
             if it > 0:
                 if dr_old < dr or dv_old < dv:
                     #Assumptions of osculation within slope not working, go to general minimization algorithms
-                    mean_elements = self.TEME_to_TLE_OPTIM(state_cart, epoch0=epoch0, B=B, kepler=False, tol=tol, tol_v=tol_v)
+                    mean_elements = self.TEME_to_TLE_OPTIM(state_cart, epoch=epoch, B=B, kepler=False, tol=tol, tol_v=tol_v)
                     break
 
             if dr < tol and dv < tol_v:   # Iterate until position changes by less than eps
                 break
             if it == iter_max - 1:
                 #Iterative method not working, go to general minimization algorithms
-                mean_elements = self.TEME_to_TLE_OPTIM(state_cart, epoch0=epoch0, B=B, kepler=False, tol=tol, tol_v=tol_v)
+                mean_elements = self.TEME_to_TLE_OPTIM(state_cart, epoch=epoch, B=B, kepler=False, tol=tol, tol_v=tol_v)
 
         if self.profiler is not None:
             self.profiler.stop('SGP4:TEME_to_TLE')

@@ -177,7 +177,7 @@ class Profiler:
             if timedelta:
                 mu = str(datetime.timedelta(seconds=means[key]))
             else:
-                mu = f'{means[key]:.5e}'
+                mu = f'{means[key]:.5e} s'
 
             if normalize is not None:
                 su = f'{totals[key]/totals[normalize]*100.0:.2f} %'
@@ -185,7 +185,7 @@ class Profiler:
                 if timedelta:
                     su = str(datetime.timedelta(seconds=totals[key]))
                 else:
-                    su = f'{totals[key]:.5e}'
+                    su = f'{totals[key]:.5e} s'
             
             data.append([key, num, mu, su])
         

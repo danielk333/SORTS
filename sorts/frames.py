@@ -13,8 +13,10 @@ import scipy.optimize
 import pyorb
 import pyant
 import astropy.coordinates as coord
-from astropy.coordinates import TEME, ITRS
 import astropy.units as units
+
+from astropy.coordinates import TEME, ITRS, EarthLocation, AltAz, SkyCoord
+from astropy.time import Time
 
 from pyant.coordinates import cart_to_sph, sph_to_cart, vector_angle
 from pyant.coordinates import rot_mat_x, rot_mat_y, rot_mat_z
@@ -39,13 +41,13 @@ def convert(t, states, in_frame, out_frame, logger=None, profiler=None, **kwargs
 
     if in_frame == 'TEME':
         astropy_states = _convert_to_astropy(states, TEME, obstime=t)
-    elif in_frame == 'ITRS':
+    elif in_frame in ['ITRS', 'ITRF']:
         astropy_states = _convert_to_astropy(states, ITRS, obstime=t)
     else:
         raise ValueError(f'In frame "{in_frame}" not implemented, please perform manual transformation')
 
 
-    if out_frame == 'ITRS':
+    if out_frame in ['ITRS', 'ITRF']:
         out_states = astropy_states.transform_to(ITRS(obstime=t))
     elif out_frame == 'TEME':
         out_states = astropy_states.transform_to(TEME(obstime=t))
@@ -63,6 +65,73 @@ def convert(t, states, in_frame, out_frame, logger=None, profiler=None, **kwargs
         profiler.stop(f'frames:convert:{in_frame}->{out_frame}')
 
     return rets
+
+
+def geodetic_to_ITRS(lat, lon, alt, radians=False, ellipsoid=None):
+    '''Use `astropy.coordinates.EarthLocation` to transform from geodetic to ITRS.
+    '''
+
+    if not radians:
+        lat, lon = np.radians(lat), np.radians(lon)
+
+    cord = EarthLocation.from_geodetic(
+        lon=lon*units.rad, 
+        lat=lat*units.rad, 
+        height=alt*units.m,
+        ellipsoid=ellipsoid,
+    )
+    pos = cord.get_itrs().cartesian.xyz.to(units.m).value
+    if len(pos.shape) > 1:
+        if pos.shape[1] == 1:
+            pos.shape = (3,)
+    return pos
+
+
+def azel_to_ITRS(lat, lon, alt, az, el, radians=False, ellipsoid=None):
+    '''Radar pointing (az,el) to unit vector in ITRS.
+
+    TODO: Docstring
+    '''
+    if not radians:
+        lat, lon = np.radians(lat), np.radians(lon)
+        az, el = np.radians(az), np.radians(el)
+
+    cord = EarthLocation.from_geodetic(
+        lon=lon*units.rad, 
+        lat=lat*units.rad, 
+        height=alt*units.m,
+        ellipsoid=ellipsoid,
+    )
+    altaz_cord = AltAz(location=cord, obstime=Time('J2000'))
+    point = SkyCoord(az=az*units.degree, alt=el*units.degree, frame=altaz_cord)
+    pos = point.itrs.cartesian.xyz.value
+
+    if len(pos.shape) > 1:
+        if pos.shape[1] == 1:
+            pos.shape = (3,)
+
+    return pos
+
+
+def enu_to_ITRS(lat, lon, alt, enu, radians=False, geocentric=False, ellipsoid=None):
+    '''ENU (east/north/up) to ITRS coordinate system conversion. 
+
+    TODO: Docstring
+    '''
+    raise NotImplementedError()
+
+
+def ned_to_ITRS(lat, lon, alt, ned, radians=False, geocentric=False, ellipsoid=None):
+    '''NED (north/east/down) to ITRS coordinate system conversion, not including translation.
+
+    TODO: Docstring
+    '''
+    enu = np.empty(ned.size, dtype=ned.dtype)
+    enu[0,...] = ned[1,...]
+    enu[1,...] = ned[0,...]
+    enu[2,...] = -ned[2,...]
+    return enu_to_ITRS(lat, lon, alt, enu, radians=radians)
+
 
 
 def _convert_to_astropy(states, frame, **kw):
@@ -121,15 +190,20 @@ def azel_to_ecef(lat, lon, alt, az, el, radians=False):
     TODO: Docstring
     '''
     shape = (3,)
-    if isinstance(az,np.ndarray):    
-        if len(az) > 1:
+
+    if isinstance(az,np.ndarray):
+        if len(az.shape) == 0:
+            az = float(az)
+        elif len(az) > 1:
             shape = (3,len(az))
             az = az.flatten()
         else:
             az = az[0]
     
     if isinstance(el,np.ndarray):
-        if len(el) > 1:
+        if len(el.shape) == 0:
+            el = float(el)
+        elif len(el) > 1:
             shape = (3,len(el))
             el = el.flatten()
         else:

@@ -88,10 +88,8 @@ def _get_frame(name, frame_tidal_effects = False):
         return FramesFactory.getEME2000()
     elif name == 'CIRF':
         return FramesFactory.getCIRF(IERSConventions.IERS_2010, not frame_tidal_effects)
-    elif name == 'ITRF':
+    elif name in ['ITRF', 'TIRF', 'ITRS']:
         return FramesFactory.getITRF(IERSConventions.IERS_2010, not frame_tidal_effects)
-    elif name == 'TIRF':
-        return FramesFactory.getTIRF(IERSConventions.IERS_2010, not frame_tidal_effects)
     elif name == 'ITRFEquinox':
         return FramesFactory.getITRFEquinox(IERSConventions.IERS_2010, not frame_tidal_effects)
     if name == 'TEME':

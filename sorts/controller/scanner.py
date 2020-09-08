@@ -35,6 +35,9 @@ class Scanner(RadarController):
     def point_radar(self, t):
         '''Assumes t is not array
         '''
+        if self.profiler is not None:
+                self.profiler.start('Scanner:generator:point_radar')
+
         if self.return_copy:
             radar = self.radar.copy()
         else:
@@ -56,7 +59,11 @@ class Scanner(RadarController):
                 point_tx.append(point + tx.ecef)
                 point_rx_to_tx.append(point[:,None]*self.r[None,:] + tx.ecef[:,None])
             
+            if self.profiler is not None:
+                self.profiler.start('Scanner:generator:point_radar:_point_station[tx]')
             RadarController._point_station(tx, point_tx[-1])
+            if self.profiler is not None:
+                self.profiler.stop('Scanner:generator:point_radar:_point_station[tx]')
 
         for rx in radar.rx:
             rx_point = []
@@ -71,7 +78,15 @@ class Scanner(RadarController):
                     rx_point.append(point_rx_to_tx[txi])
             rx_point = np.concatenate(rx_point, axis=1)
 
+
+            if self.profiler is not None:
+                self.profiler.start('Scanner:generator:point_radar:_point_station[rx]')
             RadarController._point_station(rx, rx_point)
+            if self.profiler is not None:
+                self.profiler.stop('Scanner:generator:point_radar:_point_station[rx]')
+
+        if self.profiler is not None:
+                self.profiler.stop('Scanner:generator:point_radar')
 
         return radar, meta
 

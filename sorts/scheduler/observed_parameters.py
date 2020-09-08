@@ -68,6 +68,8 @@ class ObservedParameters(Scheduler):
         if self.profiler is not None:
             self.profiler.stop('Obs.Param.:calculate_observation:enus,range,range_rate')
 
+        if self.profiler is not None:
+            self.profiler.start('Obs.Param.:calculate_observation:generator')
         for ti, mrad in enumerate(generator):
             radar, meta = mrad
             if self.profiler is not None:
@@ -128,6 +130,8 @@ class ObservedParameters(Scheduler):
             
             if self.profiler is not None:
                 self.profiler.stop('Obs.Param.:calculate_observation:snr-step')
+        if self.profiler is not None:
+            self.profiler.stop('Obs.Param.:calculate_observation:generator')
 
         data = dict(
             t = t,
