@@ -13,6 +13,7 @@ import scipy.optimize
 import pyorb
 import pyant
 import astropy.coordinates as coord
+from astropy.coordinates import TEME, ITRS
 import astropy.units as units
 
 from pyant.coordinates import cart_to_sph, sph_to_cart, vector_angle
@@ -23,13 +24,52 @@ from . import dates
 from . import constants
 
 
-def _convert_to_astropy(state, frame, **kw):
-    state_p = coord.CartesianRepresentation(state[:3,...]*units.m)
-    state_v = coord.CartesianDifferential(state[3:,...]*units.m/units.s)
-    astropy_state = frame(state_p.with_differentials(state_v), **kw)
-    return astropy_state
+def convert(t, states, in_frame, out_frame, logger=None, profiler=None, **kwargs):
+
+    if logger is not None:
+        logger.info(f'frames:convert: in_frame={in_frame}, out_frame={out_frame}')
+    if profiler is not None:
+        profiler.start(f'frames:convert:{in_frame}->{out_frame}')
+
+    in_frame = in_frame.upper()
+    out_frame = out_frame.upper()
+
+    if in_frame == out_frame:
+        return states
+
+    if in_frame == 'TEME':
+        astropy_states = _convert_to_astropy(states, TEME, obstime=t)
+    elif in_frame == 'ITRS':
+        astropy_states = _convert_to_astropy(states, ITRS, obstime=t)
+    else:
+        raise ValueError(f'In frame "{in_frame}" not implemented, please perform manual transformation')
 
 
+    if out_frame == 'ITRS':
+        out_states = astropy_states.transform_to(ITRS(obstime=t))
+    elif out_frame == 'TEME':
+        out_states = astropy_states.transform_to(TEME(obstime=t))
+    else:
+        raise ValueError(f'Out frame "{out_frame}" not implemented, please perform manual transformation')
+
+    rets = states.copy()
+    rets[:3,...] = out_states.cartesian.xyz.to(units.m).value
+    rets[3:,...] = out_states.velocity.d_xyz.to(units.m / units.s).value
+    
+
+    if logger is not None:
+        logger.info('frames:convert:completed')
+    if profiler is not None:
+        profiler.stop(f'frames:convert:{in_frame}->{out_frame}')
+
+    return rets
+
+
+def _convert_to_astropy(states, frame, **kw):
+    state_p = coord.CartesianRepresentation(states[:3,...]*units.m)
+    state_v = coord.CartesianDifferential(states[3:,...]*units.m/units.s)
+    astropy_states = frame(state_p.with_differentials(state_v), **kw)
+    return astropy_states
 
 
 def enu_to_ecef(lat, lon, alt, enu, radians=False):

@@ -42,7 +42,7 @@ class SGP4(Propagator):
     DEFAULT_SETTINGS = copy(Propagator.DEFAULT_SETTINGS)
     DEFAULT_SETTINGS.update(
         dict(
-            out_frame = 'ITRF',
+            out_frame = 'TEME',
             in_frame = 'TEME',
             gravity_model = 'WGS84',
             TEME_to_TLE_max_iter = 300,
@@ -133,12 +133,30 @@ class SGP4(Propagator):
         if self.logger is not None:
             self.logger.debug(f'SGP4:propagate:B = {B}')
 
+        state0 = frames.convert(
+            times, 
+            state0, 
+            in_frame=self.settings['in_frame'], 
+            out_frame='TEME',
+            profiler = self.profiler,
+            logger = self.logger,
+        )
+
         mean_elements = self.TEME_to_TLE(state0, epoch=epoch, B=B, kepler=False)
 
         if np.any(np.isnan(mean_elements)):
             raise Exception('Could not compute SGP4 initial state: {}'.format(mean_elements))
 
         states = self.propagate_mean_elements(times.jd1, times.jd2, mean_elements, epoch0.jd, B, **kwargs)
+
+        states = frames.convert(
+            times, 
+            states, 
+            in_frame='TEME',
+            out_frame=self.settings['out_frame'],
+            profiler = self.profiler,
+            logger = self.logger,
+        )
 
         if self.profiler is not None:
             self.profiler.stop('SGP4:propagate')

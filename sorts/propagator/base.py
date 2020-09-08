@@ -104,7 +104,7 @@ class Propagator(ABC):
         return t, epoch
 
 
-    def settings(self, **kwargs):
+    def set(self, **kwargs):
         self.settings.update(kwargs)
         self._check_settings()
 
