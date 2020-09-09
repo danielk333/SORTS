@@ -11,6 +11,7 @@ import copy
 import h5py
 import numpy as np
 import pyorb
+from astropy.time import Time
 
 #Local import
 from .. import space_object as so
@@ -309,6 +310,10 @@ class Population:
         for head, use in zip(self.header, self.space_object_uses):
             if use:
                 kw[head] = self.objs[head][n]
+
+        if 'mjd0' in kw:
+            kw['epoch'] = Time(kw['mjd0'], format='mjd', scale='utc')
+            del kw['mjd0']
 
         o=so.SpaceObject(
             propagator = self.propagator,

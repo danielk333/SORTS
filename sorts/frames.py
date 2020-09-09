@@ -27,6 +27,8 @@ from . import constants
 
 
 def convert(t, states, in_frame, out_frame, logger=None, profiler=None, **kwargs):
+    '''Perform predefined coordinate transformations. Always returns a copy of the array.
+    '''
 
     if logger is not None:
         logger.info(f'frames:convert: in_frame={in_frame}, out_frame={out_frame}')
@@ -37,7 +39,7 @@ def convert(t, states, in_frame, out_frame, logger=None, profiler=None, **kwargs
     out_frame = out_frame.upper()
 
     if in_frame == out_frame:
-        return states
+        return states.copy()
 
     if in_frame == 'TEME':
         astropy_states = _convert_to_astropy(states, TEME, obstime=t)

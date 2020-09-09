@@ -508,7 +508,7 @@ def orbits(o, **options):
         elif options['unit'] == 'm':
             o[:,0] = o[:,0]/6353.0e3
     else:
-        o[:,0] = o[:,0]/6353.0
+        o[:,0] = o[:,0]/6353.0e3 #Assume SI
 
     #turn on TeX interperter
     plt.rc('text', usetex=True)
