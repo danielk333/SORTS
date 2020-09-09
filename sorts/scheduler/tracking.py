@@ -171,6 +171,8 @@ class PriorityTracking(Tracking):
                 
                 #uniform distribution
                 dt = int(len(all_inds)/measurements[ind])
+                if dt == 0:
+                    dt = 1
                 all_inds = all_inds[::dt]
                 self.measurements[ind] = all_inds
             else:

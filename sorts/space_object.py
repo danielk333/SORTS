@@ -69,10 +69,6 @@ import pyorb
 from astropy.time import Time
 
 
-#Local import
-from .constants import R_earth
-
-
 class SpaceObject(object):
     '''Encapsulates a object in space who's dynamics is governed in time by a propagator.
 
@@ -184,6 +180,11 @@ class SpaceObject(object):
         self.C_R = C_R
         self.A = A
         self.d = d
+        
+        #assume MJD if not "Time" object
+        if not isinstance(epoch, Time):
+            epoch = Time(epoch, format='mjd', scale='utc')
+
         self.epoch = epoch
         self._propagator_cls = propagator
         self.propagator_options = propagator_options
@@ -293,7 +294,7 @@ class SpaceObject(object):
 
 
     def __str__(self):
-        p = '\nSpace object {} at epoch {} MJD:\n'.format(self.oid,self.epoch)
+        p = '\nSpace object {} at epoch {}:\n'.format(self.oid,repr(self.epoch))
         p+= str(self.orbit) + '\n'
         p+= 'PARAMETERS: diameter = {:.3f} m, drag coefficient = {:.3f}, albedo = {:.3f}, area = {:.3f}, mass = {:.3f} kg\n'.format(self.d,self.C_D,self.C_R,self.A,self.m)
         if len(self.propagator_args) > 0:

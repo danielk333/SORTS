@@ -52,8 +52,6 @@ states_teme_itrs = frames.convert(
     out_frame='ITRS',
 )
 
-print(states_itrs_teme)
-print(states_teme)
 
 fig = plt.figure(figsize=(15,15))
 ax = fig.add_subplot(221, projection='3d')

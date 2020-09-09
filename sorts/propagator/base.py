@@ -75,18 +75,21 @@ class Propagator(ABC):
         if self.logger is not None:
             self.logger.debug(f'Propagator:convert_time')
 
-        if isinstance(epoch, Time):
+        if epoch is None:
+            pass
+        elif isinstance(epoch, Time):
             if epoch.format != self.settings['epoch_format']:
                 epoch.format = self.settings['epoch_format']
 
             if epoch.scale != self.settings['epoch_scale']:
                 epoch = getattr(epoch,self.settings['epoch_scale'])
-
         else:
             epoch = Time(epoch, format=self.settings['epoch_format'], scale=self.settings['epoch_scale'])
 
 
-        if isinstance(t, TimeDelta):
+        if t is None:
+            pass
+        elif isinstance(t, TimeDelta):
             if t.format != self.settings['time_format']:
                 t.format = self.settings['time_format']
 
