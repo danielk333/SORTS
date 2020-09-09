@@ -11,6 +11,7 @@ import copy
 import h5py
 import numpy as np
 import pyorb
+from tabulate import tabulate
 from astropy.time import Time
 
 #Local import
@@ -68,47 +69,61 @@ class Population:
     Notice that in the above example the value to be assigned always has the correct size corresponding to the index and slices, a statement like :code:`x[:,3:7] = 3` is not possible, instead one would write :code:`x[:,3:7] = np.full((len(pop), 4), 3.0, dtype='f')`.
 
 
+    #TODO: THESE HAVE CHANGED, UPDATE THEM!!!!
+
     :ivar numpy.ndarray objs: Array containing population data. Rows correspond to objects and columns to variables.
     :ivar str name: Name of population.
-    :ivar list header: List of strings containing column descriptions.
+    :ivar list fields: List of strings containing column descriptions.
     :ivar list space_object_uses: List of booleans describing what columns should be included when initializing a space object. This allows for extra data to be stored in the population without passing it to the space object.
     :ivar PropagatorBase propagator: Propagator class pointer used for :class:`space_object.SpaceObject`.
     :ivar dict propagator_options: Propagator initialization keyword arguments.
     
     :param str name: Name of population.
-    :param list extra_columns: List of strings containing column descriptions for addition data besides the default columns.
+    :param list fields: List of strings containing column descriptions for addition data besides the default columns.
     :param list dtypes: List of strings containing numpy data type description. Defaults to 'f'.
-    :param list space_object_uses: List of booleans describing what columns should be included when initializing a space object. This allows for extra data to be stored in the population without passing it to the space object.
+    :param list space_object_fields: List of booleans describing what columns should be included when initializing a space object. This allows for extra data to be stored in the population without passing it to the space object.
     :param PropagatorBase propagator: Propagator class pointer used for :class:`space_object.SpaceObject`.
     :param dict propagator_options: Propagator initialization keyword arguments.
     
     '''
 
     _default_dtype = 'float64'
+    _default_fields = ['oid','a','e','i','raan','aop','mu0','mjd0']
+    _default_state_fields = ['a','e','i','raan','aop','mu0']
+    _default_epoch = {'field': 'mjd0', 'format': 'mjd', 'scale': 'utc'}
 
     def __init__(self,
-                extra_columns = [],
-                dtypes = [],
-                space_object_uses = [],
+                fields = None,
+                dtypes = None,
+                space_object_fields = None,
+                state_fields = None,
+                epoch_field = None,
                 propagator = None,
                 propagator_args = {},
                 propagator_options = {},
             ):
         
-        self.header = ['oid','a','e','i','raan','aop','mu0','mjd0']
-        self.space_object_uses = [True]*len(self.header)
-        self.dtypes = [self._default_dtype]*len(self.header)
+        if fields is None:
+            fields = copy.copy(Population._default_fields)
+        self.fields = fields
 
-        self.header += extra_columns
-        self.space_object_uses += space_object_uses
-
-        if len(dtypes) == 0:
-            self.dtypes += [self._default_dtype]*len(extra_columns)
-        elif len(dtypes) != len(extra_columns):
-            raise Exception('Not enough dtypes given for extra columns')
+        self.space_object_fields = space_object_fields
+        if dtypes is None:
+            self.dtypes = [Population._default_dtype]*len(self.fields)
         else:
-            self.dtypes += dtypes
-        
+            self.dtypes = dtypes
+
+        if state_fields is None:
+            state_fields = []
+            for key in Population._default_state_fields:
+                if key in self.fields:
+                    state_fields.append(key)
+        self.state_fields = state_fields
+
+        if epoch_field is None:
+            epoch_field = Population._default_epoch['field']
+        self.epoch_field = epoch_field
+
         self.allocate(0)
         
         self.propagator = propagator
@@ -116,24 +131,23 @@ class Population:
         self.propagator_args = propagator_args
 
     def __len__(self):
-        return(self.objs.shape[0])
+        return(self.data.shape[0])
 
     def copy(self):
         '''Return a copy of the current Population instance.
         '''
         pop = Population(
+                fields = copy.deepcopy(self.fields),
+                dtypes = copy.deepcopy(self.dtypes),
+                space_object_fields = copy.deepcopy(self.space_object_fields),
+                state_fields = copy.deepcopy(self.state_fields),
+                epoch_field = copy.deepcopy(self.epoch_field),
                 propagator = self.propagator,
-                extra_columns = [],
-                dtypes = [],
-                space_object_uses = [],
-                propagator_args = self.propagator_args,
+                propagator_args = copy.deepcopy(self.propagator_args),
                 propagator_options = copy.deepcopy(self.propagator_options),
             )
 
-        pop.header = copy.deepcopy(self.header)
-        pop.space_object_uses = copy.deepcopy(self.space_object_uses)
-        pop.dtypes = copy.deepcopy(self.dtypes)
-        pop.objs = self.objs.copy()
+        pop.data = self.data.copy()
         return pop
 
     def delete(self, inds):
@@ -142,15 +156,15 @@ class Population:
         if isinstance(inds, int):
             inds = [inds]
         elif isinstance(inds, slice):
-            _inds = range(self.objs.shape[0])
+            _inds = range(self.data.shape[0])
             inds = _inds[inds]
         elif not (isinstance(inds, list) or isinstance(inds, np.ndarray)):
             raise Exception('Cannot delete indecies given with type {}'.format(type(inds)))
 
-        mask = np.full( (self.objs.shape[0],), True, dtype=np.bool)
+        mask = np.full( (self.data.shape[0],), True, dtype=np.bool)
         for ind in inds:
             mask[ind] = False
-        self.objs=self.objs[ mask ]
+        self.data=self.data[ mask ]
 
 
     def filter(self,col,fun):
@@ -174,54 +188,23 @@ class Population:
             )
 
         '''
-        if col in self.header:
-            ind = self.header.index(col)
-            mask = np.full( (self.objs.shape[0],), True, dtype=np.bool)
-            for row in range(self.objs.shape[0]):
-                mask[row] = fun(self.objs[col][row])
-            self.objs=self.objs[ mask ]
+        if col in self.fields:
+            ind = self.fields.index(col)
+            mask = np.full( (self.data.shape[0],), True, dtype=np.bool)
+            for row in range(self.data.shape[0]):
+                mask[row] = fun(self.data[col][row])
+            self.data=self.data[ mask ]
         else:
             raise Exception('No such column: {}'.format(col))
 
-    def _str_header(self):
-        ret_str = ''
-        _sep = '  |  '
-        header = ['{:<12}']*len(self.header)
-        header = [header[ind].format(nm) for ind, nm in enumerate(self.header)]
-        header = _sep.join(header)
-
-        ret_str += header + '\n'
-        ret_str += '-'*len(header)
-        return ret_str
-
-    def _str_row(self,n):
-        ret_str = ''
-        row = self.objs[n]
-        _sep = '  |  '
-        _row = [None]*len(self.header)
-        for ind, field in enumerate(self.header):
-            if np.issubdtype(self.objs.dtype[field], np.inexact):
-                _row[ind] = '{:<12.4f}'.format(row[field])
-            else:
-                _row[ind] = '{!r:<12}'.format(row[field])
-
-        return _sep.join(_row)
 
     @property
     def shape(self):
         '''This is the shape of the internal data matrix
         '''
-        shape = (self.objs.shape[0],len(self.header))
+        shape = (self.data.shape[0],len(self.fields))
         return shape
 
-
-    def print_row(self,n):
-        '''Print a specific row with Header information.
-        '''
-        head = self._str_header()
-        row = self._str_row(n)
-        print(head)
-        print(row)
 
     def allocate(self, length):
         '''Allocate the internal data array for assignment of objects.
@@ -248,108 +231,117 @@ class Population:
             my_pop.allocate(2)
             print(len(my_pop)) #will output 2
 
-            my_pop.objs[0] = load_data('obj1')
-            my_pop.objs[1] = load_data('obj2')
+            my_pop.data[0] = load_data('obj1')
+            my_pop.data[1] = load_data('obj2')
 
         '''
         _dtype = []
-        for name, dt, ind in zip(self.header, self.dtypes, range(len(self.header))):
+        for name, dt, ind in zip(self.fields, self.dtypes, range(len(self.fields))):
             _dtype.append( (name, dt))
 
-        self.objs = np.empty((length,), dtype=_dtype)
+        self.data = np.empty((length,), dtype=_dtype)
 
-    def get_states(self, M_cent = constants.WGS72.M_earth):
-        '''Use the orbital parameters and get the state.'''
-        orbs = self.get_all_orbits(order_angs = True).T
-        orbs[:,5] = pyorb.mean_to_true(orbs[:,5], orbs[:,1], radians=False)
-        if 'm' in self.header:
-            mv = self.objs['m']
-        else:
-            mv = np.zeros(len(self), dtype=self._default_dtype)
-        states = pyorb.kep_to_cart(orbs, m=mv, M_cent=M_cent, radians=False).T
+
+    def get_states(self, n=None, named=True, dtype=None):
+        '''Use the defined state parameters to get a copy of the states
+        '''
+        return self.get_fields(fields = self.state_fields, n=n, named=named, dtype=dtype)
+
+
+    def get_fields(self, fields, n=None, named=True, dtype=None):
+        '''Get the orbital elements for one row from internal data array.
+
+        :param int/slice/list n: Row number(s).
+        :param list fields: List of fields to get data for
+        :param bool named: return a named numpy array or a unnamed one. If True, all dtypes are cast as the first fields.
+        '''
+        if n is None:
+            n = slice(None,None,None) #all
+
+        states = self.data[n][fields]
+        if not named:
+            if dtype is None:
+                dtype = states.dtype[0]
+            states_ = np.empty((len(states), len(fields)), dtype=dtype)
+            for ind, key in enumerate(states.dtype.names):
+                states_[:,ind] = states[key].astype(dtype)
+            states = states_
+            del states_
+
         return states
 
 
-
-    def get_orbit(self,n, order_angs=False):
-        '''Get the orbital elements for one row from internal data array.
-
-        :param int n: Row number.
-        :param bool order_angs: Order the orbital element angles according to aop before raan or not.
-        '''
-        if order_angs:
-            dat = ['a','e','i','aop','raan','mu0']
-        else:
-            dat = ['a','e','i','raan','aop','mu0']
-
-        row = np.empty((1, 6), dtype=np.dtype(self._default_dtype))
-        for coln, col in enumerate(dat):
-            row[coln] = self.objs[col][n]
-        return row
-
-    def get_all_orbits(self, order_angs=False):
-        '''Get the orbital elements for all rows from internal data array.
-
-        :param bool order_angs: Order the orbital element angles according to aop before raan or not.
-        '''
-        if order_angs:
-            dat = ['a','e','i','aop','raan','mu0']
-        else:
-            dat = ['a','e','i','raan','aop','mu0']
-
-        ret = np.empty((self.objs.shape[0], 6), dtype=np.dtype(self._default_dtype))
-        for ind in range(self.objs.shape[0]):
-            for coln, col in enumerate(dat):
-                ret[ind,coln] = self.objs[col][ind]
-        return ret
-
-    def get_object(self,n):
+    def get_object(self, n):
         '''Get the one row from the population as a :class:`space_object.SpaceObject` instance.
         '''
-        kw = {}
-        for head, use in zip(self.header, self.space_object_uses):
-            if use:
-                kw[head] = self.objs[head][n]
+        parameters = {}
+        for key in self.space_object_fields:
+            parameters[key] = self.data[key][n]
 
-        if 'mjd0' in kw:
-            kw['epoch'] = Time(kw['mjd0'], format='mjd', scale='utc')
-            del kw['mjd0']
+        cart_state = True
+        kep_state = True
+        for key in pyorb.Orbit.CARTESIAN:
+            if key not in self.state_fields:
+                cart_state = False
+        for key in ['a', 'e', 'i']:
+            if key not in self.state_fields:
+                kep_state = False
+        if 'omega' not in self.state_fields and 'aop' not in self.state_fields:
+            kep_state = False
+        if 'Omega' not in self.state_fields and 'raan' not in self.state_fields:
+            kep_state = False
+        if 'anom' not in self.state_fields and 'mu0' not in self.state_fields:
+            kep_state = False
 
-        o=so.SpaceObject(
+        kwargs = {}
+        if kep_state or cart_state:
+            for key in self.state_fields:
+                kwargs[key] = self.data[n][key]
+        else:
+            kwargs['state'] = self.data[n][self.state_fields]
+
+
+        obj=so.SpaceObject(
             propagator = self.propagator,
             propagator_options = self.propagator_options,
             propagator_args = self.propagator_args,
-            **kw
+            parameters = parameters,
+            epoch=Time(
+                self.data[self.epoch_field['field']][n], 
+                format=self.epoch_field['format'], 
+                scale=self.epoch_field['scale'],
+            ),
+            **kwargs
         )
-        return o
+        return obj
 
-    def object_generator(self):
-        '''Return a generator that iterates trough the entire population returning space objects.
+
+    def add_field(self, name, dtype=None):
+        '''Add a field to the population data.
         '''
-        for ind in range(self.objs.shape[0]):
-            yield self.get_object(ind)
-
-
-    def add_column(self, name, dtype=_default_dtype, space_object_uses=False):
-        '''Add a column to the population data.
-        '''
-        data_tmp = self.objs.copy()
-        self.header.append(name)
+        data_tmp = self.data.copy()
+        self.fields.append(name)
+        if dtype is None:
+            dtype = Population._default_dtype
         self.dtypes.append(dtype)
-        self.space_object_uses.append(space_object_uses)
+
         self.allocate(len(data_tmp))
-        for ind in range(self.objs.shape[0]):
-            for head in self.header:
-                if name != head:
-                    self.objs[ind][head] = data_tmp[ind][head]
+        for key in self.fields:
+            if key != name:
+                self.data[key] = data_tmp[key]
+
+
+    def print(self, n=None, fields=None):
+        if n is None:
+            n = slice(None, None, None)
+        if fields is None:
+            fields = self.fields
+        return tabulate(self.data[n][fields], headers=fields)
 
 
     def __str__(self):
-        ret_str = self._str_header() + '\n'
-        for ind in range(len(self)):
-            ret_str += self._str_row(ind)
-            ret_str += '\n'
-        return ret_str
+        return self.print()
+
 
     def __getitem__(self, key):
 
@@ -362,9 +354,9 @@ class Population:
                         is_slice = True
 
                 if is_slice:
-                    tmp_data = np.empty((self.objs.shape[0], len(self.header)), dtype=np.dtype(self._default_dtype))
-                    for ind, col in enumerate(self.header):
-                        col_data = self.objs[col]
+                    tmp_data = np.empty((self.data.shape[0], len(self.fields)), dtype=np.dtype(self._default_dtype))
+                    for ind, col in enumerate(self.fields):
+                        col_data = self.data[col]
                         try:
                             tmp_data[0,ind] = col_data[0]
                             convertable = True
@@ -377,19 +369,19 @@ class Population:
                             tmp_data[:,ind] = np.nan
                     return tmp_data[key[0],key[1]]
                 else:
-                    return self.objs[self.header[key[1]]][key[0]]
+                    return self.data[self.fields[key[1]]][key[0]]
             else:
                 raise Exception('Too many incidences given, only supports 2')
         elif isinstance(key, str):
-            if key in self.header:
-                return self.objs[key]
+            if key in self.fields:
+                return self.data[key]
             else:
                 raise Exception('No such column: {}'.format(key))
         elif isinstance(key, int):
-            if key < self.objs.shape[0]:
-                return self.objs[key]
+            if key < self.data.shape[0]:
+                return self.data[key]
             else:
-                raise Exception('Row number {} outside range of population {}'.format(key, self.objs.shape[0]))
+                raise Exception('Row number {} outside range of population {}'.format(key, self.data.shape[0]))
         else:
             raise Exception('Key type "{}" not supported'.format(type(key)))
 
@@ -399,7 +391,7 @@ class Population:
         if isinstance(key, tuple):
             if len(key) == 2:
                 row_iter = list(range(len(self)))[key[0]]
-                head_iter = self.header[key[1]]
+                head_iter = self.fields[key[1]]
 
                 if not isinstance(row_iter,list):
                     row_point = True
@@ -413,29 +405,29 @@ class Population:
                     col_point = False
 
                 if row_point and col_point:
-                    self.objs[head_iter[0]][row_iter[0]] = data
+                    self.data[head_iter[0]][row_iter[0]] = data
                 else:
                     for coli, head in enumerate(head_iter):
                         for rowi, row_num in enumerate(row_iter):
                             if col_point:
-                                self.objs[head][row_num] = data[rowi]
+                                self.data[head][row_num] = data[rowi]
                             elif row_point:
-                                self.objs[head][row_num] = data[coli]
+                                self.data[head][row_num] = data[coli]
                             else:
-                                self.objs[head][row_num] = data[rowi][coli]
+                                self.data[head][row_num] = data[rowi][coli]
             else:
                 raise Exception('Too many incidences given, only supports 2')
         elif isinstance(key, str):
-            if key in self.header:
-                self.objs[key] = data
+            if key in self.fields:
+                self.data[key] = data
             else:
                 raise Exception('No such column: {}'.format(key))
         elif isinstance(key, int):
-            if key < self.objs.shape[0]:
-                for coli, head in enumerate(self.header):
-                    self.objs[head][key] = data[coli]
+            if key < self.data.shape[0]:
+                for coli, head in enumerate(self.fields):
+                    self.data[head][key] = data[coli]
             else:
-                raise Exception('Row number {} outside range of population {}'.format(key, self.objs.shape[0]))
+                raise Exception('Row number {} outside range of population {}'.format(key, self.data.shape[0]))
         else:
             raise Exception('Key type "{}" not supported'.format(type(key)))
 
@@ -445,102 +437,52 @@ class Population:
 
 
     def __next__(self):
-        if self.__num < self.objs.shape[0]:
-            ret = self.objs[self.__num]
+        if self.__num < self.data.shape[0]:
+            ret = self.get_object(self.__num)
             self.__num += 1
             return ret
         else:
             raise StopIteration
 
+
     def save(self, fname):
         with h5py.File(fname,"w") as hf:
-            hf.create_dataset('objs', data=self.objs)
-            hf.create_dataset('header',
-                data=np.array(self.header),
+            hf.create_dataset('data', data=self.data)
+            hf.create_dataset('fields',
+                data=np.array(self.fields),
             )
-            hf.create_dataset('space_object_uses',
-                data=np.array(self.space_object_uses),
+            hf.create_dataset('space_object_fields',
+                data=np.array(self.space_object_fields),
             )
             hf.create_dataset('dtypes',
                 data=np.array(self.dtypes),
             )
+            hf.create_dataset('epoch_field',
+                data=np.array(self.epoch_field),
+            )
+            hf.create_dataset('state_fields',
+                data=np.array(self.state_fields),
+            )
+
 
     @classmethod
     def load(cls, fname, propagator, propagator_options = {}, propagator_args = {}):
-        pop = cls(
-            propagator = propagator,
-            name='Unnamed population',
-            extra_columns = [],
-            dtypes = [],
-            space_object_uses = [],
-            propagator_args = propagator_args,
-            propagator_options = propagator_options,
-        )
         with h5py.File(fname,"r") as hf:
-            pop.objs = hf['objs'].value
-
-            pop.header = hf['header'].value.tolist()
-            pop.space_object_uses = hf['space_object_uses'].value.tolist()
-            pop.dtypes = hf['dtypes'].value.tolist()
+            pop = cls(
+                fields = hf['fields'].value[()],
+                dtypes = hf['dtypes'].value[()],
+                space_object_fields = hf['space_object_fields'].value[()],
+                state_fields = hf['state_fields'].value[()],
+                epoch_field = hf['epoch_field'].value[()],
+                propagator = propagator,
+                propagator_args = propagator_options,
+                propagator_options = propagator_args,
+            )
+        
+            pop.data = hf['data'].value[()]
 
         return pop
 
-
-
-    def plot_distribution(self, dist, label = None, logx = False, logy = False, log_freq = False):
-        '''Plot the distribution of parameter(s) or all orbits of this population.
-
-        :param str/list dist: Name of parameter as given by :code:`population.header` or :code:`'orbits'` to plot all orbits. If a list, length of list must be exactly 2 and will produce a 2d distribution instead.
-        :param str/list label: Used if parameter(s) distribution is plotted to label the axis.
-        :param bool logx: Determines if x-axis is logarithmic or not.
-        :param bool logy: Determines if y-axis is logarithmic or not.
-        :param bool log_freq: Determines if frequency is logarithmic or not.
-        '''
-        if isinstance(dist, str):        
-            if dist=='orbits':
-                fig, ax = plotting.orbits(
-                    self.get_all_orbits(order_angs=True), 
-                    title = "Orbit distribution",
-                    show = False,
-                )
-            elif dist in self.header:
-                if label is None:
-                    x_label = dist
-                else:
-                    x_label = label
-                fig, ax = plotting.hist(
-                    self.objs[dist],
-                    title = "{} distribution".format(dist),
-                    show = False,
-                    xlabel = x_label,
-                    logx = logx,
-                    logy = log_freq,
-                )
-        elif isinstance(dist, list):
-            assert len(dist) == 2, 'Can only plot up to 2 parameters'
-            for col in dist:
-                assert col in self.header
-            if label is None:
-                x_label = dist[0]
-                y_label = dist[1]
-            else:
-                x_label = label[0]
-                y_label = label[1]                
-            fig, ax = plotting.hist2d(
-                self.objs[dist[0]],
-                self.objs[dist[1]],
-                title = "{} vs {} distribution".format(dist[0], dist[1]),
-                show = False,
-                xlabel = x_label,
-                ylabel = y_label,
-                logx = logx,
-                logy = logy,
-                log_freq = log_freq,
-            )
-        else:
-            raise Exception('Cannot perform plot of "{}".'.format(dist))
-
-        return fig, ax
 
 
 #python 2.7 compliance

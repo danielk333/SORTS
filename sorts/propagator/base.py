@@ -124,8 +124,8 @@ class Propagator(ABC):
 
         :param float/list/numpy.ndarray/astropy.TimeDelta t: Time to propagate relative the initial state epoch.
         :param float/astropy.Time epoch: The epoch of the initial state.
-        :param numpy.ndarray state0: 6-D Cartesian state vector in SI-units.
-        :return: 6-D Cartesian state vectors in SI-units.
+        :param any state0: State vector in SI-units.
+        :return: State vectors in SI-units.
         '''
         return None
 

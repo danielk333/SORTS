@@ -27,8 +27,6 @@ from .. import frames
 
 
 
-
-
 class SGP4(Propagator):
     '''Propagator class implementing the SGP4 propagator.
 
@@ -59,9 +57,20 @@ class SGP4(Propagator):
             self.logger.info(f'sorts.propagator.SGP4:init')
 
         self.sgp4_mjd0 = Time('1949-12-31 00:00:00', format='iso', scale='ut1').mjd
+        self.rho0 = 2.461e-8
 
         self.grav_ind = getattr(sgp4.api, self.settings['gravity_model'].upper())
         self.grav_model = getattr(sgp4.earth_gravity, self.settings['gravity_model'].lower())
+
+
+    @staticmethod
+    def get_TLE_parameters(line1, line2, gravity_model = 'WGS84'):
+        grav_ind = getattr(sgp4.api, gravity_model.upper())
+        satellite = Satrec.twoline2rv(line1, line2, grav_ind)
+        ret = {}
+        for key in ['bstar', 'satnum', 'jdsatepochF', 'jdsatepoch']:
+            ret[key] = getattr(satellite, key)
+        return ret
 
 
     def propagate_tle(self, t, line1, line2, **kwargs):
@@ -140,6 +149,14 @@ class SGP4(Propagator):
             states = self.propagate_tle(t, line1, line2, **kwargs)
 
         else:
+            if isinstance(state0, pyorb.Orbit):
+                state0_cart = np.squeeze(state0.cartesian)
+            else:
+                state0_cart = state0
+
+            if epoch is None:
+                raise ValueError('Need epoch when propagating state and not TLE')
+
             t, epoch = self.convert_time(t, epoch)
 
             epoch0 = epoch.mjd - self.sgp4_mjd0
@@ -154,16 +171,16 @@ class SGP4(Propagator):
             if self.logger is not None:
                 self.logger.debug(f'SGP4:propagate:B = {B}')
 
-            state0 = frames.convert(
+            state0_cart = frames.convert(
                 epoch, 
-                state0, 
+                state0_cart, 
                 in_frame=self.settings['in_frame'], 
                 out_frame='TEME',
                 profiler = self.profiler,
                 logger = self.logger,
             )
 
-            mean_elements = self.TEME_to_TLE(state0, epoch=epoch, B=B, kepler=False)
+            mean_elements = self.TEME_to_TLE(state0_cart, epoch=epoch, B=B, kepler=False)
 
             if np.any(np.isnan(mean_elements)):
                 raise Exception('Could not compute SGP4 initial state: {}'.format(mean_elements))
@@ -192,7 +209,7 @@ class SGP4(Propagator):
         '''
 
         # Compute ballistic coefficient
-        bstar = 0.5*B*2.461e-8 # B* in [1/m] using Density at q0[kg/m^3]
+        bstar = 0.5*B*self.rho0 # B* in [1/m] using Density at q0[kg/m^3]
         n0 = np.sqrt(self.grav_model.mu) / ((mean_elements[0])**1.5)
         
         # Scaling
@@ -204,7 +221,7 @@ class SGP4(Propagator):
         satellite.sgp4init(
             self.grav_ind, # gravity model
             'i', # 'a' = old AFSPC mode, 'i' = improved mode
-            kwargs.get('oid',42), # satnum: Satellite number
+            int(kwargs.get('oid',42)), # satnum: Satellite number
             epoch0, # epoch: days since 1949 December 31 00:00 UT
             bstar, # bstar: drag coefficient (/earth radii)
             0.0, #[IGNORED BY SGP4] ndot: ballistic coefficient (revs/day) 
