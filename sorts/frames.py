@@ -15,7 +15,8 @@ import pyant
 import astropy.coordinates as coord
 import astropy.units as units
 
-from astropy.coordinates import TEME, ITRS, EarthLocation, AltAz, SkyCoord
+from astropy.coordinates import TEME, ITRS, ICRS, GCRS
+from astropy.coordinates import EarthLocation, AltAz, SkyCoord
 from astropy.time import Time
 
 from pyant.coordinates import cart_to_sph, sph_to_cart, vector_angle
@@ -45,6 +46,10 @@ def convert(t, states, in_frame, out_frame, logger=None, profiler=None, **kwargs
         astropy_states = _convert_to_astropy(states, TEME, obstime=t)
     elif in_frame in ['ITRS', 'ITRF']:
         astropy_states = _convert_to_astropy(states, ITRS, obstime=t)
+    elif in_frame == 'ICRS':
+        astropy_states = _convert_to_astropy(states, ICRS)
+    elif in_frame == 'GCRS':
+        astropy_states = _convert_to_astropy(states, GCRS)
     else:
         raise ValueError(f'In frame "{in_frame}" not implemented, please perform manual transformation')
 
@@ -53,6 +58,10 @@ def convert(t, states, in_frame, out_frame, logger=None, profiler=None, **kwargs
         out_states = astropy_states.transform_to(ITRS(obstime=t))
     elif out_frame == 'TEME':
         out_states = astropy_states.transform_to(TEME(obstime=t))
+    elif out_frame == 'ICRS':
+        out_states = astropy_states.transform_to(ICRS())
+    elif out_frame == 'GCRS':
+        out_states = astropy_states.transform_to(GCRS(obstime=t))
     else:
         raise ValueError(f'Out frame "{out_frame}" not implemented, please perform manual transformation')
 
@@ -105,7 +114,7 @@ def azel_to_ITRS(lat, lon, alt, az, el, radians=False, ellipsoid=None):
         ellipsoid=ellipsoid,
     )
     altaz_cord = AltAz(location=cord, obstime=Time('J2000'))
-    point = SkyCoord(az=az*units.degree, alt=el*units.degree, frame=altaz_cord)
+    point = SkyCoord(az=az*units.rad, alt=el*units.rad, frame=altaz_cord)
     pos = point.itrs.cartesian.xyz.value
 
     if len(pos.shape) > 1:
