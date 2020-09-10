@@ -243,8 +243,6 @@ class Orekit(Propagator):
 
         if self.logger is not None:
             self.logger.debug(f'Orekit:init:orekit-data = {orekit_data}')
-            for key in self.settings:
-                self.logger.debug(f'Orekit:settings:{key} = {self.settings[key]}')
 
         self.utc = TimeScalesFactory.getUTC()
 

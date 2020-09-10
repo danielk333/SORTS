@@ -43,8 +43,10 @@ objs = [
         raan = 86,
         aop = 0,
         mu0 = 60,
-        mjd0 = 53005.0,
-        d = 0.1,
+        epoch = 53005.0,
+        parameters = dict(
+            d = 0.1,
+        ),
     ),
 ]
 
@@ -73,7 +75,7 @@ states = []
 for ind in range(len(objs)):
     p.start('equidistant_sampling')
     t = sorts.equidistant_sampling(
-        orbit = objs[ind].orbit, 
+        orbit = objs[ind].state, 
         start_t = 0, 
         end_t = end_t, 
         max_dpos=1e3,
@@ -140,9 +142,17 @@ for ind in range(len(objs)):
         axes[0][0].plot(states[ind][0,ps.inds], states[ind][1,ps.inds], states[ind][2,ps.inds], '-')
 
         if dat is not None:
+
+            SNRdB = 10*np.log10(dat['snr'])
+            det_inds = SNRdB > 10.0
+
             axes[0][1].plot(dat['t']/3600.0, dat['range']*1e-3, '-', label=f'obj{ind}-pass{pi}')
             axes[1][0].plot(dat['t']/3600.0, dat['range_rate']*1e-3, '-')
-            axes[1][1].plot(dat['t']/3600.0, 10*np.log10(dat['snr']), '-')
+            axes[1][1].plot(dat['t']/3600.0, SNRdB, '-')
+
+            axes[0][1].plot(dat['t'][det_inds]/3600.0, dat['range'][det_inds]*1e-3, '.r')
+            axes[1][0].plot(dat['t'][det_inds]/3600.0, dat['range_rate'][det_inds]*1e-3, '.r')
+            axes[1][1].plot(dat['t'][det_inds]/3600.0, SNRdB[det_inds], '.r')
             axes[1][1].set_ylim([0, None])
 
 

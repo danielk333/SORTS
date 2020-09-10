@@ -196,6 +196,30 @@ class SpaceObject(object):
             self.state.calculate_kepler()
 
 
+    @property
+    def d(self):
+        if 'd' in self.parameters:
+            diam = self.parameters['d']
+        elif 'diam' in self.parameters:
+            diam = self.parameters['diam']
+        elif 'r' in self.parameters:
+            diam = self.parameters['r']*2
+        elif 'A' in self.parameters:
+            diam = np.sqrt(self.parameters['A']/np.pi)*2
+        else:
+            raise ValueError('Space object does not have a diameter parameter: cannot calculate SNR/RCS')
+        return diam
+
+
+    @property
+    def orbit(self):
+        if isinstance(self.state, pyorb.Orbit):
+            return self.state
+        else:
+            raise AttributeError('SpaceObject state is not "pyorb.Orbit"')
+
+
+
     def propagate(self, dt):
         '''Propagate and change the epoch of this space object if the state is a `pyorb.Orbit`.
         '''

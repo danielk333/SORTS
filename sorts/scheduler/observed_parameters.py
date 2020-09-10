@@ -44,9 +44,14 @@ class ObservedParameters(Scheduler):
         if self.profiler is not None:
             self.profiler.start('Obs.Param.:calculate_observation')
 
+
+        diam = space_object.d
+
         if self.profiler is not None:
             self.profiler.start('Obs.Param.:calculate_observation:get_state')
+        
         states = space_object.get_state(t)
+
         if self.profiler is not None:
             self.profiler.stop('Obs.Param.:calculate_observation:get_state')
 
@@ -106,7 +111,7 @@ class ObservedParameters(Scheduler):
                     radar.tx[txi].power,
                     ranges[0][ti],
                     ranges[1][ti],
-                    diameter=space_object.d,
+                    diameter=diam,
                     bandwidth=radar.tx[txi].coh_int_bandwidth,
                     rx_noise_temp=radar.rx[rxi].noise,
                 )
@@ -115,7 +120,7 @@ class ObservedParameters(Scheduler):
 
                 rcs[ti] = hard_target_rcs(
                     wavelength=radar.rx[rxi].wavelength,
-                    diameter=space_object.d,
+                    diameter=diam,
                 )
                 if snr_limit:
                     snr_db = np.log10(snr[ti])*10.0
