@@ -55,6 +55,7 @@ pop['C_D'] = 2.7
 plotting.orbits(
     pop.get_states(named=False),
     title = "Orbit distribution of Population",
+    axis_labels='earth-orbit',
 )
 
 

@@ -160,18 +160,18 @@ class SpaceObject(object):
                 **kwargs
             )
 
-        self.propagator = propagator
+        self.__propagator = propagator
         self.propagator_options = propagator_options
         self.propagator_args = propagator_args
 
-        self.prop = propagator(**propagator_options)
+        self.propagator = propagator(**propagator_options)
 
 
     def copy(self):
         '''Returns a copy of the SpaceObject instance.
         '''
         return SpaceObject(
-            propagator = self.propagator,
+            propagator = self.__propagator,
             propagator_options = copy.deepcopy(self.propagator_options),
             propagator_args = copy.deepcopy(self.propagator_args),
             epoch=self.oid,
@@ -200,13 +200,13 @@ class SpaceObject(object):
         '''Propagate and change the epoch of this space object if the state is a `pyorb.Orbit`.
         '''
 
-        if 'in_frame' in self.prop.settings and 'out_frame' in self.prop.settings:
-            out_frame = self.prop.settings['out_frame']
-            self.prop.set(out_frame=self.prop.settings['in_frame'])
+        if 'in_frame' in self.propagator.settings and 'out_frame' in self.propagator.settings:
+            out_frame = self.propagator.settings['out_frame']
+            self.propagator.set(out_frame=self.propagator.settings['in_frame'])
 
             state = self.get_state(np.array([dt], dtype=np.float64))
 
-            self.prop.set(out_frame=out_frame)
+            self.propagator.set(out_frame=out_frame)
         else:
             state = self.get_state(np.array([dt], dtype=np.float64))
 
@@ -304,7 +304,7 @@ class SpaceObject(object):
         kw.update(self.propagator_args)
         kw.update(self.parameters)
 
-        ecefs = self.prop.propagate(
+        ecefs = self.propagator.propagate(
             t = t,
             state0 = self.state,
             epoch = self.epoch,

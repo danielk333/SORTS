@@ -271,6 +271,44 @@ class Population:
         return states
 
 
+    def get_orbit(self, n, fields=None, M_cent=pyorb.M_earth, degrees=True, anomaly='mean'):
+        '''Get the one row from the population as a :class:`pyorb.Orbit` instance.
+        '''
+
+        if fields is None:
+            fields = self.state_fields
+
+        kwargs = {}
+
+        for key in fields:
+            kwargs[key] = self.data[n][key]
+
+        #TODO: generalize this better
+        if 'aop' in kwargs:
+            kwargs['omega'] = kwargs.pop('aop')
+        if 'raan' in kwargs:
+            kwargs['Omega'] = kwargs.pop('raan')
+        if 'mu0' in kwargs:
+            kwargs['anom'] = kwargs.pop('mu0')
+
+
+        for key in ['X', 'Y', 'Z', 'VX', 'VY', 'VZ']:
+            if key in kwargs:
+                kwargs[key.lower()] = kwargs.pop(key)
+
+        obj=pyorb.Orbit(
+            M0 = M_cent, 
+            degrees = degrees,
+            type=anomaly,
+            auto_update = True, 
+            direct_update = True,
+            num = 1,
+            **kwargs
+        )
+        return obj
+
+
+
     def get_object(self, n):
         '''Get the one row from the population as a :class:`space_object.SpaceObject` instance.
         '''
