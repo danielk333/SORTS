@@ -54,7 +54,7 @@ class SGP4(Propagator):
     def __init__(self, settings=None, **kwargs):
         super(SGP4, self).__init__(settings=settings, **kwargs)
         if self.logger is not None:
-            self.logger.info(f'sorts.propagator.SGP4:init')
+            self.logger.debug(f'sorts.propagator.SGP4:init')
 
         self.sgp4_mjd0 = Time('1949-12-31 00:00:00', format='iso', scale='ut1').mjd
         self.rho0 = 2.461e-8
@@ -142,7 +142,7 @@ class SGP4(Propagator):
         if self.profiler is not None:
             self.profiler.start('SGP4:propagate')
         if self.logger is not None:
-            self.logger.info(f'SGP4:propagate:len(t) = {len(t)}')
+            self.logger.debug(f'SGP4:propagate:len(t) = {len(t)}')
 
         if self.settings['tle_input']:
             line1, line2 = state0
@@ -199,7 +199,7 @@ class SGP4(Propagator):
         if self.profiler is not None:
             self.profiler.stop('SGP4:propagate')
         if self.logger is not None:
-            self.logger.info(f'SGP4:propagate:completed')
+            self.logger.debug(f'SGP4:propagate:completed')
 
         return states
 

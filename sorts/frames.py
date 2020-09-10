@@ -98,53 +98,6 @@ def geodetic_to_ITRS(lat, lon, alt, radians=False, ellipsoid=None):
     return pos
 
 
-def azel_to_ITRS(lat, lon, alt, az, el, radians=False, ellipsoid=None):
-    '''Radar pointing (az,el) to unit vector in ITRS.
-
-    TODO: Docstring
-    '''
-    if not radians:
-        lat, lon = np.radians(lat), np.radians(lon)
-        az, el = np.radians(az), np.radians(el)
-
-    cord = EarthLocation.from_geodetic(
-        lon=lon*units.rad, 
-        lat=lat*units.rad, 
-        height=alt*units.m,
-        ellipsoid=ellipsoid,
-    )
-    altaz_cord = AltAz(location=cord, obstime=Time('J2000'))
-    point = SkyCoord(az=az*units.rad, alt=el*units.rad, frame=altaz_cord)
-    pos = point.itrs.cartesian.xyz.value
-
-    if len(pos.shape) > 1:
-        if pos.shape[1] == 1:
-            pos.shape = (3,)
-
-    return pos
-
-
-def enu_to_ITRS(lat, lon, alt, enu, radians=False, geocentric=False, ellipsoid=None):
-    '''ENU (east/north/up) to ITRS coordinate system conversion. 
-
-    TODO: Docstring
-    '''
-    raise NotImplementedError()
-
-
-def ned_to_ITRS(lat, lon, alt, ned, radians=False, geocentric=False, ellipsoid=None):
-    '''NED (north/east/down) to ITRS coordinate system conversion, not including translation.
-
-    TODO: Docstring
-    '''
-    enu = np.empty(ned.size, dtype=ned.dtype)
-    enu[0,...] = ned[1,...]
-    enu[1,...] = ned[0,...]
-    enu[2,...] = -ned[2,...]
-    return enu_to_ITRS(lat, lon, alt, enu, radians=radians)
-
-
-
 def _convert_to_astropy(states, frame, **kw):
     state_p = coord.CartesianRepresentation(states[:3,...]*units.m)
     state_v = coord.CartesianDifferential(states[3:,...]*units.m/units.s)

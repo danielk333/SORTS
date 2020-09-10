@@ -93,8 +93,9 @@ class Propagator(ABC):
             if t.format != self.settings['time_format']:
                 t.format = self.settings['time_format']
 
-            if t.scale != self.settings['time_scale']:
-                t = getattr(t,self.settings['time_scale'])
+            if self.settings['time_scale'] is not None:
+                if t.scale != self.settings['time_scale']:
+                    t = getattr(t,self.settings['time_scale'])
 
         else:
             t = TimeDelta(t, format=self.settings['time_format'], scale=self.settings['time_scale'])

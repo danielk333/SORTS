@@ -40,9 +40,9 @@ def tle_catalog(
         if len(tle_raw) % 2 != 0:
             raise Exception('Not even number of lines [not TLE compatible]')
 
-        tle_size = len(tle_raw)//2
+        tles = list(zip(tle_raw[0::2], tle_raw[1::2]))
 
-        tles = zip(tle_raw[0::2], tle_raw[1::2])
+    tle_size = len(tles)
 
     prop = SGP4(
         settings = dict(
