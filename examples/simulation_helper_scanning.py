@@ -40,8 +40,10 @@ objs = [
         raan = 79,
         aop = 0,
         mu0 = 60,
-        mjd0 = 53005.0,
-        d = 0.3,
+        epoch = 53005.0,
+        parameters = dict(
+            d = 0.3,
+        ),
     ) for a in np.linspace(7200e3, 8400e3, 4)
 ]
 
@@ -71,9 +73,9 @@ class Scanning(Simulation):
     @MPI_action(action='gather', iterable=True, root=0)
     @iterable_step(iterable='objs', MPI=True)
     @cached_step(caches='h5')
-    def get_states(self, index, item):
+    def get_states(self, index, item, **kw):
         t = sorts.equidistant_sampling(
-            orbit = item.orbit, 
+            orbit = item.state, 
             start_t = self.scheduler.controllers[0].t.min(), 
             end_t = self.scheduler.controllers[0].t.max(), 
             max_dpos=1e3,
@@ -86,7 +88,7 @@ class Scanning(Simulation):
     @MPI_action(action='gather', iterable=True, root=0)
     @iterable_step(iterable=['states', 't'], MPI=True)
     @cached_step(caches='passes')
-    def find_passes(self, index, item):
+    def find_passes(self, index, item, **kw):
         state, t = item
         passes = scheduler.radar.find_passes(t, state, cache_data = False)
         return passes
@@ -96,7 +98,7 @@ class Scanning(Simulation):
     @MPI_action(action='gather-clear', iterable=True, root=0)
     @iterable_step(iterable='passes', MPI=True)
     @cached_step(caches='pickle')
-    def observe_passes(self, index, item):
+    def observe_passes(self, index, item, **kw):
         data = scheduler.observe_passes(item, space_object = self.objs[index], snr_limit=True)
         return data
 

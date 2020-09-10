@@ -14,6 +14,8 @@ import matplotlib as mpl
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
 
+import pyorb
+
 #Local import
 from .. import constants
 
@@ -465,6 +467,8 @@ def orbits(o, **options):
     :param numpy.ndarray o: Rows are distinct orbits and columns are orbital elements in the order a, e, i, omega, Omega
     :param options:  dictionary containing all the optional settings
 
+    #TODO: this needs updating
+
     Currently the options fields are:
         :marker [char]: the marker type
         :size [int]: the size of the marker
@@ -499,36 +503,58 @@ def orbits(o, **options):
 
 
     """
-    if type(o) != np.ndarray:
+    if not isinstance(o, np.ndarray):
         o = np.array(o)
 
-    if 'unit' in options:
-        if options['unit'] == 'km':
-            o[:,0] = o[:,0]/6353.0
-        elif options['unit'] == 'm':
-            o[:,0] = o[:,0]/6353.0e3
+    data_axis = options.get('axis', 0)
+    if data_axis == 1:
+        dim_axis = 0
     else:
-        o[:,0] = o[:,0]/6353.0e3 #Assume SI
+        dim_axis = 1
+
+    scale = options.get('scale', np.ones((o.shape[dim_axis],), dtype=o.dtype))
+
 
     #turn on TeX interperter
     plt.rc('text', usetex=True)
 
-    lis = list(range(o.shape[1]))
+    lis = list(range(o.shape[dim_axis]))
     axis_plot = list(combinations(lis, 2))
 
-    axis_label = options.setdefault('axis_labels', \
-        [ "$a$ [$R_E$]","$e$ [1]","$i$ [deg]","$\omega$ [deg]","$\Omega$ [deg]","$M_0$ [deg]" ])
+    axis_labels = options.setdefault('axis_labels', None)
+
+    limits = options.get('limits', None)
+
+    if isinstance(axis_labels, str):
+        if axis_labels == 'earth-orbit':
+            axis_labels = ["$a$ [$R_E$]","$e$ [1]","$i$ [deg]","$\omega$ [deg]","$\Omega$ [deg]","$M_0$ [deg]" ]
+            scale = [1/constants.R_earth] + [1]*5
+        elif axis_labels == 'earth-state':
+            axis_labels = ["$x$ [$R_E$]","$y$ [$R_E$]","$z$ [$R_E$]","$v_x$ [km/s]","$v_y$ [km/s]","$v_z$ [km/s]" ]
+            scale = [1/constants.R_earth]*3 + [1e-3]*3
+        elif axis_labels == 'sol-orbit':
+            axis_labels = ["$a$ [AU]","$e$ [1]","$i$ [deg]","$\omega$ [deg]","$\Omega$ [deg]","$M_0$ [deg]" ]
+            scale = [1/pyorb.AU]*3 + [1e-3]*3
+        elif axis_labels == 'sol-state':
+            axis_labels = ["$x$ [AU]","$y$ [AU]","$z$ [AU]","$v_x$ [km/s]","$v_y$ [km/s]","$v_z$ [km/s]" ]
+            scale = [1/pyorb.AU]*3 + [1e-3]*3
+        else:
+            axis_labels = ['']*6
+    elif axis_labels is None:
+        axis_labels = ['']*6
+
+
     
-    if o.shape[1] == 2:
+    if o.shape[dim_axis] == 2:
         subplot_cnt = (1,2)
         subplot_perms = 2
-    elif o.shape[1] == 3:
+    elif o.shape[dim_axis] == 3:
         subplot_cnt = (1,3)
         subplot_perms = 3
-    elif o.shape[1] == 4:
+    elif o.shape[dim_axis] == 4:
         subplot_cnt = (2,3)
         subplot_perms = 6
-    elif o.shape[1] == 5:
+    elif o.shape[dim_axis] == 5:
         subplot_cnt = (2,5)
         subplot_perms = 10
     else:
@@ -544,42 +570,56 @@ def orbits(o, **options):
 
     fig = plt.figure(figsize=size_in,dpi=80)
 
-    fig.suptitle(options.setdefault('title','Orbital elements distribution'),\
-        fontsize=options.setdefault('title_font_size',24))
+    fig.suptitle(
+        options.get('title','Orbital elements distribution'),
+        fontsize=options.get('title_font_size',24),
+    )
     axes = []
     for I in range( subplot_perms ):
         ax = fig.add_subplot(subplot_cnt[0],subplot_cnt[1],subplot_cnt_ind)
         axes.append(ax)
-        x = o[:,axis_plot[I][0]]
-        y = o[:,axis_plot[I][1]]
-        sc = ax.scatter( \
-            x.flatten(), \
-            y.flatten(), \
-            marker=options.setdefault('marker','.'),\
-            c=options.setdefault('color','b'),\
-            s=options.setdefault('size',2))
+
+        if dim_axis == 1:
+            x = o[:,axis_plot[I][0]]*scale[axis_plot[I][0]]
+            y = o[:,axis_plot[I][1]]*scale[axis_plot[I][1]]
+        else:
+            x = o[axis_plot[I][0],:]*scale[axis_plot[I][0]]
+            y = o[axis_plot[I][1],:]*scale[axis_plot[I][1]]
+
+        sc = ax.scatter( 
+            x.flatten(), 
+            y.flatten(), 
+            marker=options.get('marker','.'),
+            c=options.setdefault('color','b'),
+            s=options.get('size',2),
+        )
+
         if isinstance(options['color'],np.ndarray):
             plt.colorbar(sc)
-        x_ticks = np.linspace(np.min(o[:,axis_plot[I][0]]),np.max(o[:,axis_plot[I][0]]), num=4)
-        plt.xticks( [round(x,1) for x in x_ticks] )
-        ax.set_xlabel(axis_label[axis_plot[I][0]], \
-            fontsize=options.setdefault('ax_font_size',22))
-        ax.set_ylabel(axis_label[axis_plot[I][1]], \
-            fontsize=options['ax_font_size'])
+
+        # x_ticks = np.linspace(np.min(o[:,axis_plot[I][0]]),np.max(o[:,axis_plot[I][0]]), num=4)
+        # plt.xticks( [round(x,1) for x in x_ticks] )
+        ax.set_xlabel(
+            axis_labels[axis_plot[I][0]],
+            fontsize=options.setdefault('ax_font_size',22),
+        )
+        ax.set_ylabel(
+            axis_labels[axis_plot[I][1]],
+            fontsize=options['ax_font_size'],
+        )
         plt.xticks(fontsize=options.setdefault('tick_font_size',17))
         plt.yticks(fontsize=options['tick_font_size'])
+
+        if limits is not None:
+            if len(limits) > axis_plot[I][0]:
+                ax.set_xlim(*limits[axis_plot[I][0]])
+            if len(limits) > axis_plot[I][1]:
+                ax.set_ylim(*limits[axis_plot[I][1]])
+
         subplot_cnt_ind += 1
     
     plt.tight_layout(rect=options.setdefault('tight_rect',[0, 0.03, 1, 0.95]))
 
-
-    if 'unit' in options:
-        if options['unit'] == 'km':
-            o[:,0] = o[:,0]*6353.0
-        elif options['unit'] == 'm':
-            o[:,0] = o[:,0]*6353.0e3
-    else:
-        o[:,0] = o[:,0]*6353.0
 
     if 'save' in options:
         fig.savefig(options['save'],bbox_inches='tight')

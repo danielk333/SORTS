@@ -111,7 +111,7 @@ class Tracking(Scheduler):
 
     def get_controllers(self):
         if self.logger is not None:
-            self.logger.info(f'Tracking:get_controllers')
+            self.logger.debug(f'Tracking:get_controllers')
 
         ctrls = []
         for ind in range(len(self.space_objects)):

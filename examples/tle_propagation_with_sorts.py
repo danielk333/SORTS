@@ -44,7 +44,7 @@ epoch = 2459099.79381767
 
 t = np.linspace(0,3600*24.0,num=5000)
 
-states_tle = prop.propagate(t, [l1, l2], A=1.0, C_R = 1.0, C_D = 1.0)
+states_tle = prop.propagate(t, [l1, l2])
 
 prop.set(
     tle_input=False, 

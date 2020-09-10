@@ -31,6 +31,7 @@ import numpy as np
 import scipy
 import scipy.constants
 import orekit
+import pyorb
 
 #Local import
 from .base import Propagator
@@ -234,7 +235,7 @@ class Orekit(Propagator):
         super(Orekit, self).__init__(settings=settings, **kwargs)
 
         if self.logger is not None:
-            self.logger.info(f'sorts.propagator.Orekit:init')
+            self.logger.debug(f'sorts.propagator.Orekit:init')
         if self.profiler is not None:
             self.profiler.start('Orekit:init')
 
@@ -242,8 +243,6 @@ class Orekit(Propagator):
 
         if self.logger is not None:
             self.logger.debug(f'Orekit:init:orekit-data = {orekit_data}')
-            for key in self.settings:
-                self.logger.debug(f'Orekit:settings:{key} = {self.settings[key]}')
 
         self.utc = TimeScalesFactory.getUTC()
 
@@ -263,16 +262,6 @@ class Orekit(Propagator):
         self.M_earth = self.mu/scipy.constants.G
 
         self.__params = None
-
-        self.inputFrame = self._get_frame(self.settings['in_frame'])
-        self.outputFrame = self._get_frame(self.settings['out_frame'])
-
-        if self.inputFrame.isPseudoInertial():
-            self.inertialFrame = self.inputFrame
-        else:
-            self.inertialFrame = FramesFactory.getEME2000()
-
-        self.body = OneAxisEllipsoid(self.R_earth, self.f_earth, self.outputFrame)
 
         self._forces = {}
 
@@ -510,6 +499,22 @@ class Orekit(Propagator):
         if self.profiler is not None:
             self.profiler.start('Orekit:propagate')
 
+        self.inputFrame = self._get_frame(self.settings['in_frame'])
+        self.outputFrame = self._get_frame(self.settings['out_frame'])
+
+        if self.inputFrame.isPseudoInertial():
+            self.inertialFrame = self.inputFrame
+        else:
+            self.inertialFrame = FramesFactory.getEME2000()
+
+        self.body = OneAxisEllipsoid(self.R_earth, self.f_earth, self.outputFrame)
+
+
+        if isinstance(state0, pyorb.Orbit):
+            state0_cart = np.squeeze(state0.cartesian)
+        else:
+            state0_cart = state0
+
         if self.settings['radiation_pressure']:
             if 'C_R' not in kwargs:
                 raise Exception('Radiation pressure force enabled but no coefficient "C_R" given')
@@ -529,14 +534,16 @@ class Orekit(Propagator):
 
         mjd0 = epoch.mjd
         t = t.value
+        if not isinstance(t, np.ndarray):
+            t = np.array([t])
 
         if self.logger is not None:
-            self.logger.info(f'Orekit:propagate:len(t) = {len(t)}')
+            self.logger.debug(f'Orekit:propagate:len(t) = {len(t)}')
 
         initialDate = mjd2absdate(mjd0, self.utc)
 
-        pos = org.hipparchus.geometry.euclidean.threed.Vector3D(float(state0[0]), float(state0[1]), float(state0[2]))
-        vel = org.hipparchus.geometry.euclidean.threed.Vector3D(float(state0[3]), float(state0[4]), float(state0[5]))
+        pos = org.hipparchus.geometry.euclidean.threed.Vector3D(float(state0_cart[0]), float(state0_cart[1]), float(state0_cart[2]))
+        vel = org.hipparchus.geometry.euclidean.threed.Vector3D(float(state0_cart[3]), float(state0_cart[4]), float(state0_cart[5]))
         PV_state = PVCoordinates(pos, vel)
 
         if not self.inputFrame.isPseudoInertial():
@@ -610,6 +617,6 @@ class Orekit(Propagator):
             self.profiler.stop('Orekit:propagate')
 
         if self.logger is not None:
-            self.logger.info(f'Orekit:propagate:completed')
+            self.logger.debug(f'Orekit:propagate:completed')
 
         return state

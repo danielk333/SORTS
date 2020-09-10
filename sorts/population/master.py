@@ -47,10 +47,14 @@ def master_catalog(
     '''
     master_raw = np.genfromtxt(input_file);
     i = [0,5,6,7,8,9,10]
+    var = ['oid', 'a', 'e', 'i', 'raan', 'aop', 'mu0']
 
     master = Population(
-        extra_columns = ['A', 'm', 'd', 'C_D', 'C_R', 'Factor', 'MASTER-ID'],
-        space_object_uses = [True, True, True, True, True, False, False],
+        fields = ['oid', 'a', 'e', 'i', 'aop', 'raan', 'mu0', 'mjd0', 'A', 'm', 'd', 'C_D', 'C_R', 'Factor', 'MASTER-ID'],
+        dtypes = ['int'] + ['float64']*13 + ['int'],
+        space_object_fields = ['A', 'm', 'd', 'C_D', 'C_R'],
+        state_fields = ['a', 'e', 'i', 'aop', 'raan', 'mu0'],
+        epoch_field = {'field': 'mjd0', 'format': 'mjd', 'scale': 'utc'},
         propagator = propagator,
         propagator_options = propagator_options,
         propagator_args = propagator_args,
@@ -58,16 +62,18 @@ def master_catalog(
 
     master.allocate(master_raw.shape[0])
 
-    master[:,:7] = master_raw[:, i]
-    master.objs['a'] *= 1e3 #km to m
-    master.objs['mjd0'] = mjd0
-    master.objs['A'] = np.divide(master_raw[:, 2], master_raw[:, 4])
-    master.objs['m'] = master_raw[:, 2]
-    master.objs['d'] = master_raw[:, 3]
-    master.objs['C_D'] = 2.3
-    master.objs['C_R'] = 1.0
-    master.objs['Factor'] = master_raw[:, 1]
-    master.objs['MASTER-ID'] = master_raw[:, 0]
+    for ind, key in zip(i, var):
+        master.data[key] = master_raw[:, ind]
+
+    master.data['a'] *= 1e3 #km to m
+    master.data['mjd0'] = mjd0
+    master.data['A'] = np.divide(master_raw[:, 2], master_raw[:, 4])
+    master.data['m'] = master_raw[:, 2]
+    master.data['d'] = master_raw[:, 3]
+    master.data['C_D'] = 2.3
+    master.data['C_R'] = 1.0
+    master.data['Factor'] = master_raw[:, 1]
+    master.data['MASTER-ID'] = master_raw[:, 0]
 
     diams = master_raw[:, 3]
 
@@ -76,7 +82,7 @@ def master_catalog(
     else:
         idxs = np.arange(len(diams))
 
-    master.objs = master.objs[idxs]
+    master.data = master.data[idxs]
     
     return master
 
@@ -121,11 +127,11 @@ def master_catalog_factor(
     oid_mag = 10**(int(np.log10(max_oid)))
 
     i=0
-    for row in master.objs:
+    for row in master.data:
         f_int = int(np.round(row[13]))
         if f_int >= 1:
             ip = i+f_int
-            for coli, head in enumerate(master.header):
+            for coli, head in enumerate(master.fields):
                 full_objs[i:ip,coli] = row[head]
 
             full_objs[i:ip,0] = np.array(range(i,ip), dtype=np.float)

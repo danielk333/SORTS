@@ -14,10 +14,10 @@ import sorts.errors as errors
 import sorts
 eiscat3d = sorts.radars.eiscat3d
 
-# pth = pathlib.Path(__file__).parent / 'data'
-# print(f'Caching error calculation data to: {pth}')
-# err = errors.LinearizedCoded(eiscat3d.tx[0], seed=123, cache_folder=pth)
-err = errors.LinearizedCoded(eiscat3d.tx[0], seed=123)
+pth = pathlib.Path(__file__).parent / 'data'
+print(f'Caching error calculation data to: {pth}')
+err = errors.LinearizedCoded(eiscat3d.tx[0], seed=123, cache_folder=pth)
+# err = errors.LinearizedCoded(eiscat3d.tx[0], seed=123)
 
 num = 1000
 

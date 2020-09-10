@@ -15,9 +15,10 @@ from sorts import plotting
 t = np.linspace(0,3600*10,num=2000)
 
 pop = Population(
-    extra_columns = ['m', 'A', 'C_R', 'C_D'],
-    dtypes = ['f']*4,
-    space_object_uses = [True]*4,
+    fields = ['oid','a','e','i','raan','aop','mu0','mjd0', 'm', 'A', 'C_R', 'C_D'],
+    space_object_fields = ['oid', 'm', 'A', 'C_R', 'C_D'],
+    state_fields = ['a','e','i','raan','aop','mu0'],
+    epoch_field = {'field': 'mjd0', 'format': 'mjd', 'scale': 'utc'},
     propagator = SGP4,
     propagator_options = dict(
         settings = dict(
@@ -52,15 +53,16 @@ pop['C_R'] = 0.1
 pop['C_D'] = 2.7
 
 plotting.orbits(
-    pop.get_all_orbits(order_angs=True),
+    pop.get_states(named=False),
     title = "Orbit distribution of Population",
+    axis_labels='earth-orbit',
 )
 
 
 fig = plt.figure(figsize=(15,15))
 ax = fig.add_subplot(111, projection='3d')
 
-for obj in pop.object_generator():
+for obj in pop:
     states = obj.get_state(t)
     ax.plot(states[0,:], states[1,:], states[2,:],"-b", alpha=0.5)
 
