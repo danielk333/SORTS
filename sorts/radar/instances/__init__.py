@@ -3,7 +3,7 @@
 '''
 '''
 
-from .eiscat_3d import gen_eiscat3d
+from .eiscat_3d import gen_eiscat3d, gen_eiscat3d_demonstrator
 from .tsdr import gen_tromso_space_debris_radar
 
 radar_instances = ['eiscat3d', 'eiscat3d_interp']
@@ -28,6 +28,10 @@ class RadarSystemsGetter:
             return gen_eiscat3d(beam='array')
         elif name == 'eiscat3d_interp':
             return gen_eiscat3d(beam='interp')
+        elif name == 'eiscat3d_demonstrator':
+            return gen_eiscat3d_demonstrator(beam='array')
+        elif name == 'eiscat3d_demonstrator_interp':
+            return gen_eiscat3d_demonstrator(beam='interp')
         elif name == 'tsdr':
             return gen_tromso_space_debris_radar(fence=False)
         elif name == 'tsdr_fence':
