@@ -20,8 +20,8 @@ orekit_data = '/home/danielk/IRF/IRF_GITLAB/orekit_build/orekit-data-master.zip'
 orekit_options = dict(
     orekit_data = orekit_data, 
     settings=dict(
-        in_frame='EME',
-        out_frame='EME',
+        in_frame='GCRS',
+        out_frame='GCRS',
         drag_force = False,
         radiation_pressure = False,
     ),

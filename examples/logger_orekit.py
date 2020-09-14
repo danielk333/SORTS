@@ -17,8 +17,8 @@ def run_prop():
     prop = sorts.propagator.Orekit(
         orekit_data = orekit_data, 
         settings=dict(
-            in_frame='ITRF',
-            out_frame='EME',
+            in_frame='Orekit-ITRF',
+            out_frame='Orekit-EME',
             drag_force = False,
             radiation_pressure = False,
         ),
