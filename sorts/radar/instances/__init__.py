@@ -33,7 +33,11 @@ class RadarSystemsGetter:
         elif name == 'eiscat3d_demonstrator_interp':
             return gen_eiscat3d_demonstrator(beam='interp')
         elif name == 'tsdr':
-            return gen_tromso_space_debris_radar(fence=False)
+            return gen_tromso_space_debris_radar(fence=False, phased=False)
         elif name == 'tsdr_fence':
-            return gen_tromso_space_debris_radar(fence=True)
+            return gen_tromso_space_debris_radar(fence=True, phased=False)
+        elif name == 'tsdr_phased':
+            return gen_tromso_space_debris_radar(fence=False, phased=True)
+        elif name == 'tsdr_phased_fence':
+            return gen_tromso_space_debris_radar(fence=True, phased=True)
         raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
