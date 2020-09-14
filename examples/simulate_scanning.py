@@ -38,7 +38,7 @@ objs = [
         Prop_cls,
         propagator_options = Prop_opts,
         a = 7200e3, 
-        e = 0.1, 
+        e = 0.02, 
         i = 75, 
         raan = 86,
         aop = 0,
@@ -56,13 +56,13 @@ for obj in objs: print(obj)
 class ObservedScanning(StaticList, ObservedParameters):
     pass
 
-scan_sched = Scanner(eiscat3d, scan, profiler=p, logger=logger)
-scan_sched.t = np.arange(0, end_t, scan.dwell())
+scanner_ctrl = Scanner(eiscat3d, scan, profiler=p, logger=logger)
+scanner_ctrl.t = np.arange(0, end_t, scan.dwell())
 
 p.start('total')
 scheduler = ObservedScanning(
     radar = eiscat3d, 
-    controllers = [scan_sched], 
+    controllers = [scanner_ctrl], 
     logger = logger,
     profiler = p,
 )
@@ -120,16 +120,16 @@ for tx in eiscat3d.tx:
 for rx in eiscat3d.rx:
     axes[0][0].plot([rx.ecef[0]],[rx.ecef[1]],[rx.ecef[2]],'og')
 
-for radar, meta in scan_sched(np.arange(0,scan.cycle(),scan.dwell())):
+for radar, meta in scanner_ctrl(np.arange(0,scan.cycle(),scan.dwell())):
     for tx in radar.tx:
-        point_tx = tx.pointing_ecef/np.linalg.norm(tx.pointing_ecef, axis=0)*scan_sched.r.max() + tx.ecef
+        point_tx = tx.pointing_ecef/np.linalg.norm(tx.pointing_ecef, axis=0)*scanner_ctrl.r.max() + tx.ecef
         axes[0][0].plot([tx.ecef[0], point_tx[0]], [tx.ecef[1], point_tx[1]], [tx.ecef[2], point_tx[2]], 'r-', alpha=0.15)
 
         for rx in radar.rx:
             pecef = rx.pointing_ecef/np.linalg.norm(rx.pointing_ecef, axis=0)
 
             for ri in range(pecef.shape[1]):
-                point_tx = tx.pointing_ecef/np.linalg.norm(tx.pointing_ecef, axis=0)*scan_sched.r[ri] + tx.ecef
+                point_tx = tx.pointing_ecef/np.linalg.norm(tx.pointing_ecef, axis=0)*scanner_ctrl.r[ri] + tx.ecef
                 point = pecef[:,ri]*np.linalg.norm(rx.ecef - point_tx) + rx.ecef
 
                 axes[0][0].plot([rx.ecef[0], point[0]], [rx.ecef[1], point[1]], [rx.ecef[2], point[2]], 'g-', alpha=0.05)
