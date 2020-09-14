@@ -44,26 +44,26 @@ def convert(t, states, in_frame, out_frame, logger=None, profiler=None, **kwargs
 
     if in_frame == 'TEME':
         astropy_states = _convert_to_astropy(states, TEME, obstime=t)
-    elif in_frame in ['ITRS', 'ITRF']:
+    elif in_frame in ['ITRS', 'ITRF']: #Reference System VS Reference Frame
         astropy_states = _convert_to_astropy(states, ITRS, obstime=t)
-    elif in_frame == 'ICRS':
+    elif in_frame in ['ICRS', 'ICRF']:
         astropy_states = _convert_to_astropy(states, ICRS)
-    elif in_frame == 'GCRS':
-        astropy_states = _convert_to_astropy(states, GCRS)
+    elif in_frame in ['GCRS', 'GCRF']:
+        astropy_states = _convert_to_astropy(states, GCRS, obstime=t)
     else:
-        raise ValueError(f'In frame "{in_frame}" not implemented, please perform manual transformation')
+        raise ValueError(f'In frame "{in_frame}" not recognized, please perform manual transformation')
 
 
     if out_frame in ['ITRS', 'ITRF']:
         out_states = astropy_states.transform_to(ITRS(obstime=t))
     elif out_frame == 'TEME':
         out_states = astropy_states.transform_to(TEME(obstime=t))
-    elif out_frame == 'ICRS':
+    elif out_frame in ['ICRS', 'ICRF']:
         out_states = astropy_states.transform_to(ICRS())
-    elif out_frame == 'GCRS':
+    elif out_frame in ['GCRS', 'GCRF']:
         out_states = astropy_states.transform_to(GCRS(obstime=t))
     else:
-        raise ValueError(f'Out frame "{out_frame}" not implemented, please perform manual transformation')
+        raise ValueError(f'Out frame "{out_frame}" not recognized, please perform manual transformation')
 
     rets = states.copy()
     rets[:3,...] = out_states.cartesian.xyz.to(units.m).value
