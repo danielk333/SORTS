@@ -39,7 +39,7 @@ class ObservedParameters(Scheduler):
         txi, rxi = txrx_pass.station_id
 
         if self.logger is not None:
-            self.logger.info(f'Obs.Param.:calculate_observation:(tx={txi}, rx={rxi}), len(t) = {len(t)}')
+            self.logger.debug(f'Obs.Param.:calculate_observation:(tx={txi}, rx={rxi}), len(t) = {len(t)}')
 
         if self.profiler is not None:
             self.profiler.start('Obs.Param.:calculate_observation')
@@ -161,5 +161,5 @@ class ObservedParameters(Scheduler):
             self.profiler.stop('Obs.Param.:calculate_observation')
 
         if self.logger is not None:
-            self.logger.info(f'Obs.Param.:calculate_observation:complete')
+            self.logger.debug(f'Obs.Param.:calculate_observation:complete')
         return data
