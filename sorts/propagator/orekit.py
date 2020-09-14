@@ -541,7 +541,7 @@ class Orekit(Propagator):
                 epoch, 
                 state0_cart, 
                 in_frame=self.settings['in_frame'], 
-                out_frame='GCRF',
+                out_frame='GCRS',
                 profiler = self.profiler,
                 logger = self.logger,
             )
@@ -623,7 +623,7 @@ class Orekit(Propagator):
             state = frames.convert(
                 times, 
                 state, 
-                in_frame='GCRF', 
+                in_frame='GCRS', 
                 out_frame=self.settings['out_frame'],
                 profiler = self.profiler,
                 logger = self.logger,
