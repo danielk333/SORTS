@@ -36,6 +36,7 @@ import pyorb
 #Local import
 from .base import Propagator
 from .. import dates as dates
+from .. import frames
 
 
 orekit.initVM()
@@ -77,26 +78,6 @@ def mjd2absdate(mjd, utc):
     '''
 
     return npdt2absdate(dates.mjd_to_npdt(mjd), utc)
-
-
-
-def _get_frame(name, frame_tidal_effects = False):
-    '''Uses a string to identify which coordinate frame to initialize from Orekit package.
-
-    See `Orekit FramesFactory <https://www.orekit.org/static/apidocs/org/orekit/frames/FramesFactory.html>`_
-    '''
-    if name == 'EME':
-        return FramesFactory.getEME2000()
-    elif name == 'CIRF':
-        return FramesFactory.getCIRF(IERSConventions.IERS_2010, not frame_tidal_effects)
-    elif name in ['ITRF', 'TIRF', 'ITRS']:
-        return FramesFactory.getITRF(IERSConventions.IERS_2010, not frame_tidal_effects)
-    elif name == 'ITRFEquinox':
-        return FramesFactory.getITRFEquinox(IERSConventions.IERS_2010, not frame_tidal_effects)
-    if name == 'TEME':
-        return FramesFactory.getTEME()
-    else:
-        raise Exception('Frame "{}" not recognized'.format(name))
 
 
 
@@ -206,8 +187,8 @@ class Orekit(Propagator):
     DEFAULT_SETTINGS = copy.copy(Propagator.DEFAULT_SETTINGS)
     DEFAULT_SETTINGS.update(
         dict(
-            in_frame='EME',
-            out_frame='ITRF',
+            in_frame='Orekit-EME',
+            out_frame='Orekit-ITRF',
             frame_tidal_effects=False,
             integrator='DormandPrince853',
             min_step=0.001,
@@ -347,6 +328,8 @@ class Orekit(Propagator):
             frame = FramesFactory.getEME2000()
         elif name == 'EME2000':
             frame = FramesFactory.getEME2000()
+        elif name == 'GCRF':
+            frame = FramesFactory.getGCRF()
         elif name == 'CIRF':
             frame = FramesFactory.getCIRF(IERSConventions.IERS_2010, not self.settings['frame_tidal_effects'])
         elif name == 'ITRF':
@@ -499,8 +482,20 @@ class Orekit(Propagator):
         if self.profiler is not None:
             self.profiler.start('Orekit:propagate')
 
-        self.inputFrame = self._get_frame(self.settings['in_frame'])
-        self.outputFrame = self._get_frame(self.settings['out_frame'])
+        if self.settings['in_frame'].startswith('Orekit-'):
+            self.inputFrame = self._get_frame(self.settings['in_frame'].replace('Orekit-', ''))
+            orekit_in_frame = True
+        else:
+            self.inputFrame = self._get_frame('GCRF')
+            orekit_in_frame = False
+
+        if self.settings['out_frame'].startswith('Orekit-'):
+            self.outputFrame = self._get_frame(self.settings['out_frame'].replace('Orekit-', ''))
+            orekit_out_frame = True
+        else:
+            self.outputFrame = self._get_frame('GCRF')
+            orekit_out_frame = False
+
 
         if self.inputFrame.isPseudoInertial():
             self.inertialFrame = self.inputFrame
@@ -531,6 +526,7 @@ class Orekit(Propagator):
             kwargs['m'] = 0.0
 
         t, epoch = self.convert_time(t, epoch)
+        times = epoch + t
 
         mjd0 = epoch.mjd
         t = t.value
@@ -539,6 +535,17 @@ class Orekit(Propagator):
 
         if self.logger is not None:
             self.logger.debug(f'Orekit:propagate:len(t) = {len(t)}')
+
+        if not orekit_in_frame:
+            state0_cart = frames.convert(
+                epoch, 
+                state0_cart, 
+                in_frame=self.settings['in_frame'], 
+                out_frame='GCRF',
+                profiler = self.profiler,
+                logger = self.logger,
+            )
+
 
         initialDate = mjd2absdate(mjd0, self.utc)
 
@@ -611,6 +618,16 @@ class Orekit(Propagator):
             
             #now _state is full and in the order of _t
             state[:, tf_indst] = _state[:, _t_res]
+
+        if not orekit_out_frame:
+            state = frames.convert(
+                times, 
+                state, 
+                in_frame='GCRF', 
+                out_frame=self.settings['out_frame'],
+                profiler = self.profiler,
+                logger = self.logger,
+            )
 
         if self.profiler is not None:
             self.profiler.stop('Orekit:propagate:steps')
