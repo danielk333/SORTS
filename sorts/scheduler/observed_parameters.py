@@ -35,7 +35,7 @@ class ObservedParameters(Scheduler):
         )
 
 
-    def calculate_observation(self, txrx_pass, t, generator, space_object, snr_limit=True):
+    def calculate_observation(self, txrx_pass, t, generator, space_object, interpolator=None, snr_limit=True):
         txi, rxi = txrx_pass.station_id
 
         if self.logger is not None:
@@ -50,7 +50,10 @@ class ObservedParameters(Scheduler):
         if self.profiler is not None:
             self.profiler.start('Obs.Param.:calculate_observation:get_state')
         
-        states = space_object.get_state(t)
+        if interpolator is not None:
+            states = interpolator.get_state(t)
+        else:
+            states = space_object.get_state(t)
 
         if self.profiler is not None:
             self.profiler.stop('Obs.Param.:calculate_observation:get_state')

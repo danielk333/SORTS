@@ -31,7 +31,8 @@ class Legendre8(Interpolator):
         super().__init__(states, t)
 
     def get_state(self, t):
-        return legendre8(self.states.T, self.t.min(), self.t.max(), t, ti=None).T
+        intep_states = legendre8(self.states.T, self.t.min(), self.t.max(), t, ti=None)
+        return intep_states.T
 
 
 
