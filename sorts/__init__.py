@@ -38,6 +38,7 @@ from . import scheduler
 from . import passes
 from . import errors
 from . import io
+from . import interpolation
 from .radar import instances as radars
 
 
