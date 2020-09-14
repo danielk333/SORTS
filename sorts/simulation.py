@@ -13,6 +13,7 @@ import copy
 import pickle
 import datetime
 from glob import glob
+import os
 
 #Third party import
 import h5py
@@ -349,7 +350,7 @@ def iterable_cache(steps, caches, MPI=False, log=False, reduce=None):
                 dir_ = self.get_path(step)
                 if not dir_.is_dir():
                     raise ValueError(f'Input step {step} has no cache {cache}')
-                files = [pathlib.Path(x) for x in glob(str(dir_ / f'*.{cache}'))]
+                files = [pathlib.Path(x) for x in glob(str(dir_ / f'*'))]
                 indecies = [int(file.stem.split('_')[0]) for file in files]
                 
                 files = [x for _, x in sorted(zip(indecies,files), key=lambda pair: pair[0])]
@@ -643,13 +644,17 @@ class Simulation:
             else:
                 if linkfiles is None:
                     mpi_copy(self.root / self.branch_name, self.root / name, linkfiles=False)
-                else:
+                elif isinstance(linkfiles, list):
                     listing = pathlib.Path(self.root / self.branch_name).glob('./*')
                     for pth in listing:
                         if pth.name in linkfiles:
                             mpi_copy(pth, self.root / name / pth.name, linkfiles=True)
                         else:
                             mpi_copy(pth, self.root / name / pth.name, linkfiles=False)
+                elif linkfiles:
+                    mpi_copy(self.root / self.branch_name, self.root / name, linkfiles=True)
+                else:
+                    raise TypeError(f'linkfiles type "{type(linkfiles)}" not supported')
 
         # Make sure log directory exists
         mpi_mkdir(self.root / name / 'logs')
