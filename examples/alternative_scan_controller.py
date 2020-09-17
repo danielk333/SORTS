@@ -47,8 +47,6 @@ for i in range(4):
     )
     axes[i].set_title(f'Panel {i}: {int(radar.tx[0].beam.phase_steering)} deg steering')
 
-pyant.plotting.show()
-
 radar.tx[0].beam.phase_steering = 0.0
 
 
