@@ -12,7 +12,11 @@ import sorts
 from sorts import plotting
 from sorts.population import tle_catalog
 
-pth = pathlib.Path(__file__).parent / 'data' / 'space_track_tle.txt'
+try:
+    pth = pathlib.Path(__file__).parent / 'data' / 'space_track_tle.txt'
+except NameError:
+    import os
+    pth = 'data' + os.path.sep + 'space_track_tle.txt'
 
 pop = tle_catalog(pth, kepler=True)
 
