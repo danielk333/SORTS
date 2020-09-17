@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Finding passes over sites &#8212; SORTS 3.13.0 documentation</title>
+    <title>Finding passes over sites &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../_static/gallery.css" />
@@ -21,7 +21,7 @@
     <script src="../_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="TEME transformations" href="teme_coordinates.html" />
+    <link rel="next" title="Static radar controller and time sampling" href="static_radar_controller_speedup.html" />
     <link rel="prev" title="Custom radar controller" href="custom_radar_controller.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--[if lt IE 9]>
@@ -38,12 +38,12 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="teme_coordinates.html" title="TEME transformations"
+          <a href="static_radar_controller_speedup.html" title="Static radar controller and time sampling"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="custom_radar_controller.html" title="Custom radar controller"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Examples</a> &#187;</li> 
       </ul>
     </div>
@@ -53,8 +53,8 @@
   <p class="topless"><a href="custom_radar_controller.html"
                         title="previous chapter">Custom radar controller</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="teme_coordinates.html"
-                        title="next chapter">TEME transformations</a></p>
+  <p class="topless"><a href="static_radar_controller_speedup.html"
+                        title="next chapter">Static radar controller and time sampling</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -110,16 +110,16 @@ Using the predefined paired passes function
   check_st = zenith_st_ang &lt; 90.0-station.min_elevation
 tx-0 and rx-1 passes: 1
 Full tx-0 to rx-1 pass: 148
------------------------ Performance analysis ----------------------
- Name                     |   Executions |   Mean time | Total time
---------------------------+--------------+-------------+--------------
- equidistant_sampling     |            1 | 0.000326633 | 0.01 %
- propagate                |            1 | 3.76209     | 99.36 %
- find_passes              |            2 | 0.00523663  | 0.28 %
- sim_passes               |            1 | 0.000134706 | 0.00 %
- find_simultaneous_passes |            1 | 0.0124998   | 0.33 %
- total                    |            1 | 3.7865      | 100.00 %
--------------------------------------------------------------------
+------------------------ Performance analysis -----------------------
+ Name                     |   Executions | Mean time     | Total time
+--------------------------+--------------+---------------+--------------
+ equidistant_sampling     |            1 | 2.86579e-04 s | 0.05 %
+ propagate                |            1 | 5.52374e-01 s | 95.42 %
+ find_passes              |            2 | 6.07598e-03 s | 2.10 %
+ sim_passes               |            1 | 1.01805e-04 s | 0.02 %
+ find_simultaneous_passes |            1 | 1.31099e-02 s | 2.26 %
+ total                    |            1 | 5.78878e-01 s | 100.00 %
+---------------------------------------------------------------------
 </pre></div>
 </div>
 <div class="line-block">
@@ -209,7 +209,7 @@ Full tx-0 to rx-1 pass: 148
 <span class="nb">print</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">fmt</span><span class="p">(</span><span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;total&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  3.840 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.633 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-gallery-finding-passes-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/4b6178c6f98c2b8f84bd8c46ce7138c7/finding_passes.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">finding_passes.py</span></code></a></p>
@@ -237,12 +237,12 @@ Full tx-0 to rx-1 pass: 148
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="teme_coordinates.html" title="TEME transformations"
+          <a href="static_radar_controller_speedup.html" title="Static radar controller and time sampling"
              >next</a> |</li>
         <li class="right" >
           <a href="custom_radar_controller.html" title="Custom radar controller"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" >Examples</a> &#187;</li> 
       </ul>
     </div>

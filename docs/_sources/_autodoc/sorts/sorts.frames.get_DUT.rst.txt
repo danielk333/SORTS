@@ -1,8 +1,0 @@
-get\_DUT
-========
-
-.. currentmodule:: sorts.frames
-
-.. rubric:: get_DUT
-
-.. autofunction:: get_DUT

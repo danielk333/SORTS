@@ -26,25 +26,23 @@ Observing a set of passes
  .. code-block:: none
 
 
-    Space object 1 at epoch 53005.0 MJD:
+    Space object 1: <Time object: scale='utc' format='mjd' value=53005.0>:
     a    : 7.2000e+06   x : -1.2858e+06
     e    : 1.0000e-01   y : 2.3487e+06
     i    : 7.5000e+01   z : 6.3831e+06
     omega: 0.0000e+00   vx: -2.1177e+03
     Omega: 7.9000e+01   vy: -6.8611e+03
     anom : 6.2000e+01   vz: 2.8722e+03
-    PARAMETERS: diameter = 1.000 m, drag coefficient = 2.300, albedo = 1.000, area = 1.000, mass = 1.000 kg
+    Parameters: d=1.000, C_D=2.300, A=1.000, m=1.000, C_R=1.000
 
-
-    Space object 1 at epoch 53005.0 MJD:
+    Space object 1: <Time object: scale='utc' format='mjd' value=53005.0>:
     a    : 7.2000e+06   x : -1.2822e+06
     e    : 1.0000e-01   y : 2.3603e+06
     i    : 7.5000e+01   z : 6.3782e+06
     omega: 0.0000e+00   vx: -2.1203e+03
     Omega: 7.9000e+01   vy: -6.8563e+03
     anom : 6.1900e+01   vz: 2.8852e+03
-    PARAMETERS: diameter = 1.000 m, drag coefficient = 2.300, albedo = 1.000, area = 1.000, mass = 1.000 kg
-
+    Parameters: d=1.000, C_D=2.300, A=1.000, m=1.000, C_R=1.000
     Temporal points: 177678
     /home/danielk/IRF/IRF_GITLAB/pyant/pyant/coordinates.py:89: RuntimeWarning: invalid value encountered in greater
       proj[proj > 1.0] = 1.0
@@ -52,30 +50,31 @@ Observing a set of passes
       proj[proj < -1.0] = -1.0
     /home/danielk/IRF/IRF_GITLAB/SORTS/sorts/passes.py:269: RuntimeWarning: invalid value encountered in less
       check_st = zenith_st_ang < 90.0-station.min_elevation
-         t [s]    rx0 az    rx0 el     rx1 az    rx1 el    rx2 az    rx2 el  Controller    Target
-    ----------  --------  --------  ---------  --------  --------  --------  ------------  -------------
-      0.121569  197.474    65.9274  234.03      68.8498  207.847    79.3235  Tracker       Cool object 1
-     17.3843    176.763    75.5348  246.327     80.3558   93.1826   86.6998  Tracker       Cool object 1
-     34.6471    121.589    79.5101   -3.10424   85.1945   52.1564   75.8544  Tracker       Cool object 1
-     51.9099     78.9954   73.1544   31.5689    74.8089   47.5907   65.3995  Tracker       Cool object 1
-     69.1727     64.3514   64.2536   37.3004    64.7143   45.927    56.4595  Tracker       Cool object 1
-     86.4354     57.9795   56.0013   39.6117    56.0379   45.0899   49.02    Tracker       Cool object 1
-    103.698      54.5217   48.9137   40.8789    48.7854   44.6014   42.871   Tracker       Cool object 1
-    120.961      52.3794   42.9529   41.6929    42.7641   44.2923   37.7659  Tracker       Cool object 1
-    138.224      50.9354   37.9491   42.2699    37.7442   44.0879   33.4844  Tracker       Cool object 1
-    155.487      49.9048   33.7204   42.7075    33.5188   43.9497   29.8482  Tracker       Cool object 1
-    172.749      49.1385   30.1096   43.0564    29.9189   43.8562   26.7188  Tracker       Cool object 1
-    -------------------------------------- Performance analysis -------------------------------------
-     Name                                                   |   Executions |   Mean time | Total time
-    --------------------------------------------------------+--------------+-------------+--------------
-     Obs.Param.:calculate_observation:get_state             |            3 | 0.00478069  | 7.17 %
-     Obs.Param.:calculate_observation:enus,range,range_rate |            3 | 0.000438293 | 0.66 %
-     Obs.Param.:calculate_observation:snr-step:gain         |           30 | 0.00549881  | 82.51 %
-     Obs.Param.:calculate_observation:snr-step:snr          |           30 | 2.79506e-05 | 0.42 %
-     Obs.Param.:calculate_observation:snr-step              |           30 | 0.00554674  | 83.23 %
-     Obs.Param.:calculate_observation                       |            3 | 0.066549    | 99.86 %
-     total                                                  |            1 | 0.199928    | 100.00 %
-    -------------------------------------------------------------------------------------------------
+         t [s]    rx0 az    rx0 el    rx1 az    rx1 el    rx2 az    rx2 el  Controller    Target
+    ----------  --------  --------  --------  --------  --------  --------  ------------  -------------
+      0.121569  197.459    65.9292  234.018    68.8548  207.813    79.3268  Tracker       Cool object 1
+     17.3843    176.736    75.5346  246.31     80.3619   93.1725   86.6929  Tracker       Cool object 1
+     34.6471    121.568    79.5048   -3.0253   85.1947   52.1712   75.8492  Tracker       Cool object 1
+     51.9099     78.9973   73.1485   31.588    74.8055   47.599    65.3952  Tracker       Cool object 1
+     69.1727     64.3553   64.2488   37.3099   64.7108   45.9324   56.4559  Tracker       Cool object 1
+     86.4354     57.9827   55.9974   39.6176   56.0348   45.0938   49.0171  Tracker       Cool object 1
+    103.698      54.5242   48.9105   40.8829   48.7827   44.6042   42.8685  Tracker       Cool object 1
+    120.961      52.3813   42.9503   41.6958   42.7618   44.2945   37.7639  Tracker       Cool object 1
+    138.224      50.9369   37.9469   42.2721   37.7423   44.0895   33.4827  Tracker       Cool object 1
+    155.487      49.9059   33.7186   42.7092   33.5171   43.951    29.8467  Tracker       Cool object 1
+    172.749      49.1393   30.1081   43.0576   29.9175   43.8572   26.7175  Tracker       Cool object 1
+    --------------------------------------- Performance analysis --------------------------------------
+     Name                                                   |   Executions | Mean time     | Total time
+    --------------------------------------------------------+--------------+---------------+--------------
+     Obs.Param.:calculate_observation:get_state             |            3 | 1.91642e-02 s | 26.32 %
+     Obs.Param.:calculate_observation:enus,range,range_rate |            3 | 4.25498e-04 s | 0.58 %
+     Obs.Param.:calculate_observation:snr-step:gain         |           30 | 4.74799e-03 s | 65.20 %
+     Obs.Param.:calculate_observation:snr-step:snr          |           30 | 2.64406e-05 s | 0.36 %
+     Obs.Param.:calculate_observation:snr-step              |           30 | 4.79226e-03 s | 65.80 %
+     Obs.Param.:calculate_observation:generator             |            3 | 5.31078e-02 s | 72.92 %
+     Obs.Param.:calculate_observation                       |            3 | 7.27328e-02 s | 99.87 %
+     total                                                  |            1 | 2.18477e-01 s | 100.00 %
+    ---------------------------------------------------------------------------------------------------
 
 
 
@@ -120,8 +119,10 @@ Observing a set of passes
             raan = 79,
             aop = 0,
             mu0 = mu0,
-            mjd0 = 53005.0,
-            d = 1.0,
+            epoch = 53005.0,
+            parameters = dict(
+                d = 1.0,
+            ),
         )
         for mu0 in [62.0, 61.9]
     ]
@@ -129,7 +130,7 @@ Observing a set of passes
     for obj in objs: print(obj)
 
     t = sorts.equidistant_sampling(
-        orbit = objs[0].orbit, 
+        orbit = objs[0].state, 
         start_t = 0, 
         end_t = 3600*6, 
         max_dpos=1e3,
@@ -254,7 +255,7 @@ Observing a set of passes
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  19.758 seconds)
+   **Total running time of the script:** ( 0 minutes  4.112 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_observing_passes.py:

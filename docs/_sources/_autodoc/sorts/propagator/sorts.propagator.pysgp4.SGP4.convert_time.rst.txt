@@ -1,0 +1,8 @@
+SGP4.convert\_time
+==================
+
+.. currentmodule:: sorts.propagator.pysgp4
+
+.. rubric:: SGP4.convert_time
+
+.. automethod:: SGP4.convert_time

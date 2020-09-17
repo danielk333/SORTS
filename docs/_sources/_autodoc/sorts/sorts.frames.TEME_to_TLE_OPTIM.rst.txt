@@ -1,8 +1,0 @@
-TEME\_to\_TLE\_OPTIM
-====================
-
-.. currentmodule:: sorts.frames
-
-.. rubric:: TEME_to_TLE_OPTIM
-
-.. autofunction:: TEME_to_TLE_OPTIM

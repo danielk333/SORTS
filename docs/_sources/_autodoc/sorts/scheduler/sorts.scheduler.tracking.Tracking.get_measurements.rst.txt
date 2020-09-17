@@ -1,8 +1,0 @@
-Tracking.get\_measurements
-==========================
-
-.. currentmodule:: sorts.scheduler.tracking
-
-.. rubric:: Tracking.get_measurements
-
-.. automethod:: Tracking.get_measurements

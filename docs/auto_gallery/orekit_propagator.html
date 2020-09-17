@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Orekit propagator usage &#8212; SORTS 3.13.0 documentation</title>
+    <title>Orekit propagator usage &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../_static/gallery.css" />
@@ -21,8 +21,8 @@
     <script src="../_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Predefined EISCAT 3D Radar" href="predefined_eiscat3d.html" />
-    <link rel="prev" title="Profiling components" href="logger_orekit.html" />
+    <link rel="next" title="Interpolation" href="interpolating_states.html" />
+    <link rel="prev" title="Adding random errors" href="adding_random_errors.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--[if lt IE 9]>
     <script src="_static/css3-mediaqueries.js"></script>
@@ -38,23 +38,23 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="predefined_eiscat3d.html" title="Predefined EISCAT 3D Radar"
+          <a href="interpolating_states.html" title="Interpolation"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="logger_orekit.html" title="Profiling components"
+          <a href="adding_random_errors.html" title="Adding random errors"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Examples</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="logger_orekit.html"
-                        title="previous chapter">Profiling components</a></p>
+  <p class="topless"><a href="adding_random_errors.html"
+                        title="previous chapter">Adding random errors</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="predefined_eiscat3d.html"
-                        title="next chapter">Predefined EISCAT 3D Radar</a></p>
+  <p class="topless"><a href="interpolating_states.html"
+                        title="next chapter">Interpolation</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -88,15 +88,15 @@
 <span id="sphx-glr-auto-gallery-orekit-propagator-py"></span><h1>Orekit propagator usage<a class="headerlink" href="#orekit-propagator-usage" title="Permalink to this headline">¶</a></h1>
 <img alt="orekit propagator" class="sphx-glr-single-img" src="../_images/sphx_glr_orekit_propagator_001.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Orekit instance @ -9223363300601876434:
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Orekit instance @ 8738799299995:
 -------------------------
 Integrator          : DormandPrince853
 Minimum step        : 0.001 s
 Maximum step        : 120.0 s
 Position Tolerance  : 10.0 m
 
-Input frame         : ITRF
-Output frame        : EME
+Input frame         : Orekit-ITRF
+Output frame        : Orekit-EME
 Gravity model       : HolmesFeatherstone
                      - Harmonic expansion order (10, 10)
 Atmosphere model    : DTM2000
@@ -125,8 +125,8 @@ Third body perturbations:
 <span class="n">prop</span> <span class="o">=</span> <span class="n">Orekit</span><span class="p">(</span>
     <span class="n">orekit_data</span> <span class="o">=</span> <span class="n">orekit_data</span><span class="p">,</span>
     <span class="n">settings</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
-        <span class="n">in_frame</span><span class="o">=</span><span class="s1">&#39;ITRF&#39;</span><span class="p">,</span>
-        <span class="n">out_frame</span><span class="o">=</span><span class="s1">&#39;EME&#39;</span><span class="p">,</span>
+        <span class="n">in_frame</span><span class="o">=</span><span class="s1">&#39;Orekit-ITRF&#39;</span><span class="p">,</span>
+        <span class="n">out_frame</span><span class="o">=</span><span class="s1">&#39;Orekit-EME&#39;</span><span class="p">,</span>
         <span class="n">drag_force</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">radiation_pressure</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span>
@@ -153,7 +153,7 @@ Third body perturbations:
 <a href="https://matplotlib.org/api/_as_gen/matplotlib.pyplot.show.html#matplotlib.pyplot.show" title="matplotlib.pyplot.show" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">()</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  1.016 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.972 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-gallery-orekit-propagator-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/b6daa12c947462d98cfda4a1b118061f/orekit_propagator.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">orekit_propagator.py</span></code></a></p>
@@ -181,12 +181,12 @@ Third body perturbations:
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="predefined_eiscat3d.html" title="Predefined EISCAT 3D Radar"
+          <a href="interpolating_states.html" title="Interpolation"
              >next</a> |</li>
         <li class="right" >
-          <a href="logger_orekit.html" title="Profiling components"
+          <a href="adding_random_errors.html" title="Adding random errors"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" >Examples</a> &#187;</li> 
       </ul>
     </div>

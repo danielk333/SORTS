@@ -1,8 +1,0 @@
-ITRF\_to\_TEME
-==============
-
-.. currentmodule:: sorts.frames
-
-.. rubric:: ITRF_to_TEME
-
-.. autofunction:: ITRF_to_TEME

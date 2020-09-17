@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>profiling &#8212; SORTS 3.13.0 documentation</title>
+    <title>profiling &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.dates.unix_to_npdt.html" title="unix_to_npdt"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" accesskey="U">API Reference</a> &#187;</li> 
       </ul>
     </div>
@@ -103,7 +103,7 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.profiling.Profiler.html#sorts.profiling.Profiler" title="sorts.profiling.Profiler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Profiler</span></code></a>([distribution])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.profiling.Profiler.html#sorts.profiling.Profiler" title="sorts.profiling.Profiler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Profiler</span></code></a>([distribution, track_memory, …])</p></td>
 <td><p>Performance profiler class.</p></td>
 </tr>
 </tbody>
@@ -116,16 +116,22 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.profiling.add_logging_level.html#sorts.profiling.add_logging_level" title="sorts.profiling.add_logging_level"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_logging_level</span></code></a>(num, name)</p></td>
-<td><p></p></td>
+<td><p>Adds a custom logging level to all loggers.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.profiling.file_level.html#sorts.profiling.file_level" title="sorts.profiling.file_level"><code class="xref py py-obj docutils literal notranslate"><span class="pre">file_level</span></code></a>(logger, level)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.profiling.change_logfile.html#sorts.profiling.change_logfile" title="sorts.profiling.change_logfile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">change_logfile</span></code></a>(logger, path)</p></td>
+<td><p>Deletes any previous <cite>FileHandler</cite> handlers and creates a new <cite>FileHandler</cite> to the new path with the same level as the previous one.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.profiling.get_logger.html#sorts.profiling.get_logger" title="sorts.profiling.get_logger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_logger</span></code></a>([name, path, file_level, term_level])</p></td>
-<td><p>Returns a logger object</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.profiling.file_level.html#sorts.profiling.file_level" title="sorts.profiling.file_level"><code class="xref py py-obj docutils literal notranslate"><span class="pre">file_level</span></code></a>(logger, level)</p></td>
+<td><p>Set the FileHandler level.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.profiling.get_logger.html#sorts.profiling.get_logger" title="sorts.profiling.get_logger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_logger</span></code></a>([name, path, file_level, term_level])</p></td>
+<td><p>Creates a pre-configured logger.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.profiling.get_logger_formats.html#sorts.profiling.get_logger_formats" title="sorts.profiling.get_logger_formats"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_logger_formats</span></code></a>()</p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.profiling.term_level.html#sorts.profiling.term_level" title="sorts.profiling.term_level"><code class="xref py py-obj docutils literal notranslate"><span class="pre">term_level</span></code></a>(logger, level)</p></td>
-<td><p></p></td>
+<td><p>Set the StreamHandler level.</p></td>
 </tr>
 </tbody>
 </table>
@@ -135,7 +141,7 @@
 <p class="rubric">Profiler</p>
 <dl class="py class">
 <dt>
-<em class="property">class </em><code class="sig-prename descclassname">sorts.profiling.</code><code class="sig-name descname">Profiler</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">distribution</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/profiling.html#Profiler"><span class="viewcode-link">[source]</span></a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">sorts.profiling.</code><code class="sig-name descname">Profiler</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">distribution</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">track_memory</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">snapshot_total</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/profiling.html#Profiler"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Performance profiler class.</p>
 <p>The named performance control is especially useful for timing contents of loops.</p>
@@ -158,8 +164,63 @@
 </div></blockquote>
 <dl class="py method">
 <dt>
+<code class="sig-name descname">fmt</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">normalize</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">timedelta</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/profiling.html#Profiler.fmt"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Format summary of the profiler into a string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>normalize</strong> (<em>str</em>) – Name of the profiling location to normalize execution time towards.</p></li>
+<li><p><strong>timedelta</strong> (<em>bool</em>) – Print execution times as time-deltas.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">memory_diff</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">save</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/profiling.html#Profiler.memory_diff"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Calculate a memory difference between the latest snapshot and now.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Name of the profiling location.</p></li>
+<li><p><strong>save</strong> (<em>str</em>) – Save memory difference to this name, default is same as <code class="code docutils literal notranslate"><span class="pre">name</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">snapshot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/profiling.html#Profiler.snapshot"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Take a tracemalloc snapshot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – Name of the profiling location.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt>
 <code class="sig-name descname">start</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/profiling.html#Profiler.start"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Records a start time for named call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – Name of the profiling location.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">stop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/profiling.html#Profiler.stop"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Records a time elapsed since the latest start time for named call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – Name of the profiling location.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -168,24 +229,66 @@
 <dl class="py function">
 <dt>
 <code class="sig-prename descclassname">sorts.profiling.</code><code class="sig-name descname">add_logging_level</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">num</span></em>, <em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/profiling.html#add_logging_level"><span class="viewcode-link">[source]</span></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt>
-<code class="sig-prename descclassname">sorts.profiling.</code><code class="sig-name descname">file_level</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">logger</span></em>, <em class="sig-param"><span class="n">level</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/profiling.html#file_level"><span class="viewcode-link">[source]</span></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt>
-<code class="sig-prename descclassname">sorts.profiling.</code><code class="sig-name descname">get_logger</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">'sorts'</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">file_level</span><span class="o">=</span><span class="default_value">20</span></em>, <em class="sig-param"><span class="n">term_level</span><span class="o">=</span><span class="default_value">20</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/profiling.html#get_logger"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Returns a logger object</p>
-<p>Formats to output both to terminal and a log file</p>
+<dd><p>Adds a custom logging level to all loggers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num</strong> (<em>int</em>) – Integer level for logging level.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – Name of logging level.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt>
-<code class="sig-prename descclassname">sorts.profiling.</code><code class="sig-name descname">term_level</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">logger</span></em>, <em class="sig-param"><span class="n">level</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/profiling.html#term_level"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-prename descclassname">sorts.profiling.</code><code class="sig-name descname">change_logfile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">logger</span></em>, <em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/profiling.html#change_logfile"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Deletes any previous <cite>FileHandler</cite> handlers and creates a new <cite>FileHandler</cite> to the new path with the same level as the previous one.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>logger</strong> (<em>logging.Logger</em>) – Logger object.</p></li>
+<li><p><strong>path</strong> (<em>str/pathlib.Path</em>) – Path to the logfile output. Can be a file or folder.</p></li>
+<li><p><strong>file_level</strong> (<em>int</em>) – Logging level of the file handler.</p></li>
+<li><p><strong>term_level</strong> (<em>int</em>) – Logging level of the terminal handler.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt>
+<code class="sig-prename descclassname">sorts.profiling.</code><code class="sig-name descname">file_level</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">logger</span></em>, <em class="sig-param"><span class="n">level</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/profiling.html#file_level"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set the FileHandler level.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt>
+<code class="sig-prename descclassname">sorts.profiling.</code><code class="sig-name descname">get_logger</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">'sorts'</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">file_level</span><span class="o">=</span><span class="default_value">20</span></em>, <em class="sig-param"><span class="n">term_level</span><span class="o">=</span><span class="default_value">20</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/profiling.html#get_logger"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Creates a pre-configured logger. Formats to output both to terminal and a log file.</p>
+<p><strong>Note:</strong> Can only use folders as paths for MPI usage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Name of the logger.</p></li>
+<li><p><strong>path</strong> (<em>str/pathlib.Path</em>) – Path to the logfile output. Can be a file, a folder or <cite>None</cite>.</p></li>
+<li><p><strong>file_level</strong> (<em>int</em>) – Logging level of the file handler.</p></li>
+<li><p><strong>term_level</strong> (<em>int</em>) – Logging level of the terminal handler.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt>
+<code class="sig-prename descclassname">sorts.profiling.</code><code class="sig-name descname">get_logger_formats</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/profiling.html#get_logger_formats"><span class="viewcode-link">[source]</span></a></dt>
 <dd></dd></dl>
+
+<dl class="py function">
+<dt>
+<code class="sig-prename descclassname">sorts.profiling.</code><code class="sig-name descname">term_level</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">logger</span></em>, <em class="sig-param"><span class="n">level</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/profiling.html#term_level"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set the StreamHandler level.</p>
+</dd></dl>
 
 </div>
 </div>
@@ -211,7 +314,7 @@
         <li class="right" >
           <a href="sorts.dates.unix_to_npdt.html" title="unix_to_npdt"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li> 
       </ul>
     </div>

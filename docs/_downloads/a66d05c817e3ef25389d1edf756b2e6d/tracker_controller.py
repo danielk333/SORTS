@@ -50,7 +50,7 @@ for rx in e3d.radar.rx:
 for radm, ti in zip(e3d(t),range(len(t))):
     radar, meta = radm
 
-    p.start('Tracker:generator:step:plot')
+    p.start('Tracker-plot')
     for tx in radar.tx:
         r = np.linalg.norm(states[:3,ti] - tx.ecef)*1.1
         point = tx.pointing_ecef*r + tx.ecef
@@ -60,7 +60,7 @@ for radm, ti in zip(e3d(t),range(len(t))):
         r = np.linalg.norm(states[:3,ti] - rx.ecef)
         point = rx.pointing_ecef*r + rx.ecef
         ax.plot([rx.ecef[0], point[0]], [rx.ecef[1], point[1]], [rx.ecef[2], point[2]], 'g-')
-    p.stop('Tracker:generator:step:plot')
+    p.stop('Tracker-plot')
 
 sorts.plotting.grid_earth(ax)
 dx = 600e3

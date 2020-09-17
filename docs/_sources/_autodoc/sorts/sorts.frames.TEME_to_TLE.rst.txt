@@ -1,8 +1,0 @@
-TEME\_to\_TLE
-=============
-
-.. currentmodule:: sorts.frames
-
-.. rubric:: TEME_to_TLE
-
-.. autofunction:: TEME_to_TLE

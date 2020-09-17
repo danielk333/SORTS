@@ -1,0 +1,333 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Static radar controller and time sampling &#8212; SORTS 3.18.0 documentation</title>
+    <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Custom Scans" href="custom_scans.html" />
+    <link rel="prev" title="Finding passes over sites" href="finding_passes.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="custom_scans.html" title="Custom Scans"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="finding_passes.html" title="Finding passes over sites"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Examples</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="finding_passes.html"
+                        title="previous chapter">Finding passes over sites</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="custom_scans.html"
+                        title="next chapter">Custom Scans</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/auto_gallery/static_radar_controller_speedup.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-auto-gallery-static-radar-controller-speedup-py"><span class="std std-ref">here</span></a>     to download the full example code</p>
+</div>
+<div class="sphx-glr-example-title section" id="static-radar-controller-and-time-sampling">
+<span id="sphx-glr-auto-gallery-static-radar-controller-speedup-py"></span><h1>Static radar controller and time sampling<a class="headerlink" href="#static-radar-controller-and-time-sampling" title="Permalink to this headline">¶</a></h1>
+<p>You can speed up execution by switching radar controller that is optimized for the use case.
+Also reducing time sampling of the radar controller can speed up calculations.</p>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Space object 1: &lt;Time object: scale=&#39;utc&#39; format=&#39;mjd&#39; value=53005.0&gt;:
+a    : 7.2000e+06   x : -1.3922e+06
+e    : 2.0000e-02   y : 3.4519e+06
+i    : 7.5000e+01   z : 6.0816e+06
+omega: 0.0000e+00   vx: -1.3986e+03
+Omega: 8.6000e+01   vy: -6.4897e+03
+anom : 6.0000e+01   vz: 3.5175e+03
+Parameters: d=0.100, C_D=2.300, A=1.000, m=1.000, C_R=1.000
+2020-09-17 12:27:17.336 INFO    ; Static:init
+2020-09-17 12:27:17.340 INFO    ; Static:init
+2020-09-17 12:27:17.343 INFO    ; Scanner:init
+Temporal points obj: 4555
+Max SNR=-7.52150639802996 dB
+Max SNR=-7.426719944704181 dB
+Max SNR=-6.157419687282379 dB
+
+ &lt;class &#39;sorts.controller.scanner.Scanner&#39;&gt;: len(t) = 6000
+
+--------------------------------------- Performance analysis --------------------------------------
+ Name                                                   |   Executions | Mean time     | Total time
+--------------------------------------------------------+--------------+---------------+--------------
+ equidistant_sampling                                   |            1 | 6.86646e-05 s | 0.00 %
+ get_state                                              |            1 | 5.52654e-02 s | 0.41 %
+ find_passes                                            |            1 | 5.68318e-03 s | 0.04 %
+ Obs.Param.:calculate_observation:get_state             |            3 | 6.00181e-02 s | 1.33 %
+ Obs.Param.:calculate_observation:enus,range,range_rate |            3 | 7.23600e-04 s | 0.02 %
+ Scanner:generator:point_radar:_point_station[tx]       |         8361 | 1.14356e-04 s | 7.05 %
+ Scanner:generator:point_radar:_point_station[rx]       |        25083 | 2.12747e-04 s | 39.34 %
+ Scanner:generator:point_radar                          |         8361 | 9.04070e-04 s | 55.73 %
+ Obs.Param.:calculate_observation:snr-step:gain         |         8361 | 6.41506e-04 s | 39.54 %
+ Obs.Param.:calculate_observation:snr-step:snr          |         8361 | 2.43943e-05 s | 1.50 %
+ Obs.Param.:calculate_observation:snr-step              |         8361 | 6.82654e-04 s | 42.08 %
+ Obs.Param.:calculate_observation:generator             |            3 | 4.43992e+00 s | 98.19 %
+ Obs.Param.:calculate_observation                       |            3 | 4.50076e+00 s | 99.54 %
+ observe_passes                                         |            1 | 1.35033e+01 s | 99.55 %
+ total                                                  |            1 | 1.35646e+01 s | 100.00 %
+---------------------------------------------------------------------------------------------------
+
+Temporal points obj: 4555
+Max SNR=-7.52150639802996 dB
+Max SNR=-7.426719944704181 dB
+Max SNR=-6.157419687282379 dB
+
+ &lt;class &#39;sorts.controller.static.Static&#39;&gt;: len(t) = 6000
+
+--------------------------------------- Performance analysis --------------------------------------
+ Name                                                   |   Executions | Mean time     | Total time
+--------------------------------------------------------+--------------+---------------+--------------
+ equidistant_sampling                                   |            1 | 7.89165e-05 s | 0.00 %
+ get_state                                              |            1 | 6.07996e-02 s | 1.12 %
+ find_passes                                            |            1 | 2.65529e-02 s | 0.49 %
+ Obs.Param.:calculate_observation:get_state             |            3 | 5.92041e-02 s | 3.29 %
+ Obs.Param.:calculate_observation:enus,range,range_rate |            3 | 8.03471e-04 s | 0.04 %
+ Obs.Param.:calculate_observation:snr-step:gain         |         8361 | 5.75736e-04 s | 89.05 %
+ Obs.Param.:calculate_observation:snr-step:snr          |         8361 | 2.07818e-05 s | 3.21 %
+ Obs.Param.:calculate_observation:snr-step              |         8361 | 6.11969e-04 s | 94.65 %
+ Obs.Param.:calculate_observation:generator             |            3 | 1.71228e+00 s | 95.03 %
+ Obs.Param.:calculate_observation                       |            3 | 1.77237e+00 s | 98.36 %
+ observe_passes                                         |            1 | 5.31806e+00 s | 98.38 %
+ total                                                  |            1 | 5.40572e+00 s | 100.00 %
+---------------------------------------------------------------------------------------------------
+
+Temporal points obj: 4555
+Max SNR=-7.825843305311009 dB
+Max SNR=-7.629714510540971 dB
+Max SNR=-6.239996253442425 dB
+
+ &lt;class &#39;sorts.controller.static.Static&#39;&gt;: len(t) = 600
+
+--------------------------------------- Performance analysis --------------------------------------
+ Name                                                   |   Executions | Mean time     | Total time
+--------------------------------------------------------+--------------+---------------+--------------
+ equidistant_sampling                                   |            1 | 6.34193e-05 s | 0.01 %
+ get_state                                              |            1 | 5.61700e-02 s | 8.28 %
+ find_passes                                            |            1 | 1.24094e-02 s | 1.83 %
+ Obs.Param.:calculate_observation:get_state             |            3 | 2.41255e-02 s | 10.67 %
+ Obs.Param.:calculate_observation:enus,range,range_rate |            3 | 5.30799e-04 s | 0.23 %
+ Obs.Param.:calculate_observation:snr-step:gain         |          835 | 5.95767e-04 s | 73.34 %
+ Obs.Param.:calculate_observation:snr-step:snr          |          835 | 2.41008e-05 s | 2.97 %
+ Obs.Param.:calculate_observation:snr-step              |          835 | 6.37608e-04 s | 78.49 %
+ Obs.Param.:calculate_observation:generator             |            3 | 1.78155e-01 s | 78.79 %
+ Obs.Param.:calculate_observation                       |            3 | 2.02873e-01 s | 89.73 %
+ observe_passes                                         |            1 | 6.09462e-01 s | 89.85 %
+ total                                                  |            1 | 6.78300e-01 s | 100.00 %
+---------------------------------------------------------------------------------------------------
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+
+<span class="kn">import</span> <span class="nn">sorts</span>
+<span class="n">eiscat3d</span> <span class="o">=</span> <span class="n">sorts</span><span class="o">.</span><span class="n">radars</span><span class="o">.</span><span class="n">eiscat3d_interp</span>
+
+<span class="kn">from</span> <span class="nn">sorts.scheduler</span> <span class="kn">import</span> <span class="n">StaticList</span><span class="p">,</span> <span class="n">ObservedParameters</span>
+<span class="kn">from</span> <span class="nn">sorts.controller</span> <span class="kn">import</span> <span class="n">Static</span><span class="p">,</span> <span class="n">Scanner</span>
+<span class="kn">from</span> <span class="nn">sorts</span> <span class="kn">import</span> <span class="n">SpaceObject</span>
+<span class="kn">from</span> <span class="nn">sorts.profiling</span> <span class="kn">import</span> <span class="n">Profiler</span>
+<span class="kn">from</span> <span class="nn">sorts.radar.scans</span> <span class="kn">import</span> <span class="n">Beampark</span>
+
+<span class="kn">from</span> <span class="nn">sorts.propagator</span> <span class="kn">import</span> <span class="n">SGP4</span>
+<span class="n">Prop_cls</span> <span class="o">=</span> <span class="n">SGP4</span>
+<span class="n">Prop_opts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">out_frame</span><span class="o">=</span><span class="s1">&#39;ITRF&#39;</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">end_t</span> <span class="o">=</span> <span class="mf">600.0</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">sorts</span><span class="o">.</span><span class="n">profiling</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span><span class="s1">&#39;scanning&#39;</span><span class="p">)</span>
+
+<span class="n">obj</span> <span class="o">=</span> <span class="n">SpaceObject</span><span class="p">(</span>
+    <span class="n">Prop_cls</span><span class="p">,</span>
+    <span class="n">propagator_options</span> <span class="o">=</span> <span class="n">Prop_opts</span><span class="p">,</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="mf">7200e3</span><span class="p">,</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="mf">0.02</span><span class="p">,</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">75</span><span class="p">,</span>
+    <span class="n">raan</span> <span class="o">=</span> <span class="mi">86</span><span class="p">,</span>
+    <span class="n">aop</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">mu0</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span>
+    <span class="n">epoch</span> <span class="o">=</span> <span class="mf">53005.0</span><span class="p">,</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+
+
+<span class="nb">print</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">ObservedScanning</span><span class="p">(</span><span class="n">StaticList</span><span class="p">,</span> <span class="n">ObservedParameters</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="n">static_ctrl</span> <span class="o">=</span> <span class="n">Static</span><span class="p">(</span><span class="n">eiscat3d</span><span class="p">,</span> <span class="n">azimuth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">elevation</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span> <span class="n">meta</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;dwell&#39;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">})</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">static_ctrl</span><span class="o">.</span><span class="n">t</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">end_t</span><span class="p">,</span> <span class="n">static_ctrl</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;dwell&#39;</span><span class="p">])</span>
+
+<span class="n">static_ctrl_undersamp</span> <span class="o">=</span> <span class="n">Static</span><span class="p">(</span><span class="n">eiscat3d</span><span class="p">,</span> <span class="n">azimuth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">elevation</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span> <span class="n">meta</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;dwell&#39;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">})</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">static_ctrl_undersamp</span><span class="o">.</span><span class="n">t</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">end_t</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+<span class="n">scan</span> <span class="o">=</span> <span class="n">Beampark</span><span class="p">(</span><span class="n">azimuth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">elevation</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">dwell</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="n">scanner_ctrl</span> <span class="o">=</span> <span class="n">Scanner</span><span class="p">(</span><span class="n">eiscat3d</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">scan</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">scanner_ctrl</span><span class="o">.</span><span class="n">t</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">end_t</span><span class="p">,</span> <span class="n">scan</span><span class="o">.</span><span class="n">dwell</span><span class="p">())</span>
+
+<span class="k">def</span> <span class="nf">run_scanning_simulation</span><span class="p">(</span><span class="n">radar_ctrl</span><span class="p">):</span>
+
+    <span class="n">p</span> <span class="o">=</span> <span class="n">Profiler</span><span class="p">()</span>
+    <span class="n">radar_ctrl</span><span class="o">.</span><span class="n">profiler</span> <span class="o">=</span> <span class="n">p</span>
+
+    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;total&#39;</span><span class="p">)</span>
+    <span class="n">scheduler</span> <span class="o">=</span> <span class="n">ObservedScanning</span><span class="p">(</span>
+        <span class="n">radar</span> <span class="o">=</span> <span class="n">eiscat3d</span><span class="p">,</span>
+        <span class="n">controllers</span> <span class="o">=</span> <span class="p">[</span><span class="n">radar_ctrl</span><span class="p">],</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span><span class="p">,</span>
+        <span class="n">profiler</span> <span class="o">=</span> <span class="n">p</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+
+    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;equidistant_sampling&#39;</span><span class="p">)</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">sorts</span><span class="o">.</span><span class="n">equidistant_sampling</span><span class="p">(</span>
+        <span class="n">orbit</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">state</span><span class="p">,</span>
+        <span class="n">start_t</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">end_t</span> <span class="o">=</span> <span class="n">end_t</span><span class="p">,</span>
+        <span class="n">max_dpos</span><span class="o">=</span><span class="mf">1e3</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;equidistant_sampling&#39;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Temporal points obj: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;get_state&#39;</span><span class="p">)</span>
+    <span class="n">states</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;get_state&#39;</span><span class="p">)</span>
+
+    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;find_passes&#39;</span><span class="p">)</span>
+    <span class="c1">#rename cache_data to something more descriptive</span>
+    <span class="n">passes</span> <span class="o">=</span> <span class="n">eiscat3d</span><span class="o">.</span><span class="n">find_passes</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">states</span><span class="p">,</span> <span class="n">cache_data</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;find_passes&#39;</span><span class="p">)</span>
+
+    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;observe_passes&#39;</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">observe_passes</span><span class="p">(</span><span class="n">passes</span><span class="p">,</span> <span class="n">space_object</span> <span class="o">=</span> <span class="n">obj</span><span class="p">,</span> <span class="n">snr_limit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;observe_passes&#39;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">psi</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">txps</span> <span class="ow">in</span> <span class="n">psi</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">rxtxps</span> <span class="ow">in</span> <span class="n">txps</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Max SNR=</span><span class="si">{</span><span class="mi">10</span><span class="o">*</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.log10.html#numpy.log10" title="numpy.log10" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-data"><span class="n">np</span><span class="o">.</span><span class="n">log10</span></a><span class="p">(</span><span class="n">rxtxps</span><span class="p">[</span><span class="s2">&quot;snr&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span><span class="si">}</span><span class="s1"> dB&#39;</span><span class="p">)</span>
+
+    <span class="n">p</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;total&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"> </span><span class="si">{</span><span class="n">radar_ctrl</span><span class="o">.</span><span class="vm">__class__</span><span class="si">}</span><span class="s1">: len(t) = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">radar_ctrl</span><span class="o">.</span><span class="n">t</span><span class="p">)</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">fmt</span><span class="p">(</span><span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;total&#39;</span><span class="p">))</span>
+
+<span class="n">run_scanning_simulation</span><span class="p">(</span><span class="n">scanner_ctrl</span><span class="p">)</span>
+<span class="n">run_scanning_simulation</span><span class="p">(</span><span class="n">static_ctrl</span><span class="p">)</span>
+<span class="n">run_scanning_simulation</span><span class="p">(</span><span class="n">static_ctrl_undersamp</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  19.677 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-gallery-static-radar-controller-speedup-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/b00324c6ec4d464a144f1875167040fb/static_radar_controller_speedup.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">static_radar_controller_speedup.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/470f021d9eff3ec62e6ae39142d8f1aa/static_radar_controller_speedup.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">static_radar_controller_speedup.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="custom_scans.html" title="Custom Scans"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="finding_passes.html" title="Finding passes over sites"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Examples</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

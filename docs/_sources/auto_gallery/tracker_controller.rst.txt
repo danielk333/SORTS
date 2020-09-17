@@ -25,16 +25,16 @@ A controller for tracing
 
  .. code-block:: none
 
-    ------------------------- Performance analysis -------------------------
-     Name                          |   Executions |   Mean time | Total time
-    -------------------------------+--------------+-------------+--------------
-     propagate                     |            1 | 0.00311899  | 2.09 %
-     Tracker:generator:point_radar |           10 | 0.000578213 | 3.87 %
-     Tracker:generator:step        |           10 | 0.000623512 | 4.18 %
-     Tracker:generator:step:plot   |           10 | 0.00435917  | 29.21 %
-     Tracker:generator             |            1 | 0.0499275   | 33.45 %
-     total                         |            1 | 0.149256    | 100.00 %
-    ------------------------------------------------------------------------
+    -------------------------- Performance analysis --------------------------
+     Name                          |   Executions | Mean time     | Total time
+    -------------------------------+--------------+---------------+--------------
+     propagate                     |            1 | 1.21498e-02 s | 9.88 %
+     Tracker:generator:point_radar |           10 | 4.32634e-04 s | 3.52 %
+     Tracker:generator:step        |           10 | 4.67253e-04 s | 3.80 %
+     Tracker-plot                  |           10 | 3.27408e-03 s | 26.62 %
+     Tracker:generator             |            1 | 3.74935e-02 s | 30.49 %
+     total                         |            1 | 1.22976e-01 s | 100.00 %
+    --------------------------------------------------------------------------
 
 
 
@@ -92,7 +92,7 @@ A controller for tracing
     for radm, ti in zip(e3d(t),range(len(t))):
         radar, meta = radm
 
-        p.start('Tracker:generator:step:plot')
+        p.start('Tracker-plot')
         for tx in radar.tx:
             r = np.linalg.norm(states[:3,ti] - tx.ecef)*1.1
             point = tx.pointing_ecef*r + tx.ecef
@@ -102,7 +102,7 @@ A controller for tracing
             r = np.linalg.norm(states[:3,ti] - rx.ecef)
             point = rx.pointing_ecef*r + rx.ecef
             ax.plot([rx.ecef[0], point[0]], [rx.ecef[1], point[1]], [rx.ecef[2], point[2]], 'g-')
-        p.stop('Tracker:generator:step:plot')
+        p.stop('Tracker-plot')
 
     sorts.plotting.grid_earth(ax)
     dx = 600e3
@@ -117,7 +117,7 @@ A controller for tracing
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.539 seconds)
+   **Total running time of the script:** ( 0 minutes  0.478 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_tracker_controller.py:

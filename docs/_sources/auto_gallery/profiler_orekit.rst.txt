@@ -21,15 +21,15 @@ Profiling Orekit
 
  .. code-block:: none
 
-    Orekit instance @ -9223363300610199934:
+    Orekit instance @ -9223363298055409099:
     -------------------------
     Integrator          : DormandPrince853
     Minimum step        : 0.001 s
     Maximum step        : 120.0 s
     Position Tolerance  : 10.0 m
 
-    Input frame         : ITRF
-    Output frame        : EME
+    Input frame         : ITRS
+    Output frame        : GCRS
     Gravity model       : HolmesFeatherstone
                          - Harmonic expansion order (10, 10)
     Atmosphere model    : DTM2000
@@ -44,63 +44,71 @@ Profiling Orekit
      - Sun
 
     ---------------------------------- Performance analysis ---------------------------------
-     Name                                         |   Executions |   Mean time |   Total time
-    ----------------------------------------------+--------------+-------------+--------------
-     Orekit:get_frame                             |            2 | 1.19209e-05 |  2.38419e-05
-     Orekit:init                                  |            1 | 0.155833    |  0.155833
-     Orekit:propagate:construct_propagator        |            1 | 7.70092e-05 |  7.70092e-05
-     Orekit:propagate:set_forces                  |            1 | 1.07288e-05 |  1.07288e-05
-     Orekit:propagate:steps:step-handler:getState |         5000 | 1.54157e-05 |  0.0770783
-     Orekit:propagate:steps:step-handler          |         1443 | 9.29867e-05 |  0.13418
-     Orekit:propagate:steps                       |            1 | 0.457373    |  0.457373
-     Orekit:propagate                             |            1 | 0.457782    |  0.457782
-     total                                        |            1 | 0.614431    |  0.614431
+     Name                                         |   Executions | Mean time     | Total time
+    ----------------------------------------------+--------------+---------------+---------------
+     Orekit:init                                  |            1 | 1.53689e-01 s | 1.53689e-01 s
+     Orekit:get_frame                             |            2 | 5.84126e-06 s | 1.16825e-05 s
+     Propagator:convert_time                      |            1 | 4.79937e-04 s | 4.79937e-04 s
+     frames:convert:ITRS->GCRS                    |            1 | 2.12235e-02 s | 2.12235e-02 s
+     Orekit:propagate:construct_propagator        |            1 | 9.27448e-05 s | 9.27448e-05 s
+     Orekit:propagate:set_forces                  |            1 | 1.19209e-05 s | 1.19209e-05 s
+     Orekit:propagate:steps:step-handler:getState |         5000 | 1.71622e-05 s | 8.58109e-02 s
+     Orekit:propagate:steps:step-handler          |         1443 | 1.03941e-04 s | 1.49987e-01 s
+     Orekit:propagate:steps                       |            1 | 4.83256e-01 s | 4.83256e-01 s
+     Orekit:propagate                             |            1 | 5.08683e-01 s | 5.08683e-01 s
+     total                                        |            1 | 6.63086e-01 s | 6.63086e-01 s
     -----------------------------------------------------------------------------------------
 
     ---------------------------------- Performance analysis ----------------------------------
      Name                                         |   Executions | Mean time      | Total time
     ----------------------------------------------+--------------+----------------+----------------
-     Orekit:get_frame                             |            2 | 0:00:00.000012 | 0:00:00.000024
-     Orekit:init                                  |            1 | 0:00:00.155833 | 0:00:00.155833
-     Orekit:propagate:construct_propagator        |            1 | 0:00:00.000077 | 0:00:00.000077
-     Orekit:propagate:set_forces                  |            1 | 0:00:00.000011 | 0:00:00.000011
-     Orekit:propagate:steps:step-handler:getState |         5000 | 0:00:00.000015 | 0:00:00.077078
-     Orekit:propagate:steps:step-handler          |         1443 | 0:00:00.000093 | 0:00:00.134180
-     Orekit:propagate:steps                       |            1 | 0:00:00.457373 | 0:00:00.457373
-     Orekit:propagate                             |            1 | 0:00:00.457782 | 0:00:00.457782
-     total                                        |            1 | 0:00:00.614431 | 0:00:00.614431
+     Orekit:init                                  |            1 | 0:00:00.153689 | 0:00:00.153689
+     Orekit:get_frame                             |            2 | 0:00:00.000006 | 0:00:00.000012
+     Propagator:convert_time                      |            1 | 0:00:00.000480 | 0:00:00.000480
+     frames:convert:ITRS->GCRS                    |            1 | 0:00:00.021224 | 0:00:00.021224
+     Orekit:propagate:construct_propagator        |            1 | 0:00:00.000093 | 0:00:00.000093
+     Orekit:propagate:set_forces                  |            1 | 0:00:00.000012 | 0:00:00.000012
+     Orekit:propagate:steps:step-handler:getState |         5000 | 0:00:00.000017 | 0:00:00.085811
+     Orekit:propagate:steps:step-handler          |         1443 | 0:00:00.000104 | 0:00:00.149987
+     Orekit:propagate:steps                       |            1 | 0:00:00.483256 | 0:00:00.483256
+     Orekit:propagate                             |            1 | 0:00:00.508683 | 0:00:00.508683
+     total                                        |            1 | 0:00:00.663086 | 0:00:00.663086
     ------------------------------------------------------------------------------------------
 
-    --------------------------------- Performance analysis --------------------------------
-     Name                                         |   Executions |   Mean time | Total time
-    ----------------------------------------------+--------------+-------------+--------------
-     Orekit:get_frame                             |            2 | 1.19209e-05 | 0.00 %
-     Orekit:init                                  |            1 | 0.155833    | 25.36 %
-     Orekit:propagate:construct_propagator        |            1 | 7.70092e-05 | 0.01 %
-     Orekit:propagate:set_forces                  |            1 | 1.07288e-05 | 0.00 %
-     Orekit:propagate:steps:step-handler:getState |         5000 | 1.54157e-05 | 12.54 %
-     Orekit:propagate:steps:step-handler          |         1443 | 9.29867e-05 | 21.84 %
-     Orekit:propagate:steps                       |            1 | 0.457373    | 74.44 %
-     Orekit:propagate                             |            1 | 0.457782    | 74.50 %
-     total                                        |            1 | 0.614431    | 100.00 %
-    ---------------------------------------------------------------------------------------
+    ---------------------------------- Performance analysis ---------------------------------
+     Name                                         |   Executions | Mean time     | Total time
+    ----------------------------------------------+--------------+---------------+--------------
+     Orekit:init                                  |            1 | 1.53689e-01 s | 23.18 %
+     Orekit:get_frame                             |            2 | 5.84126e-06 s | 0.00 %
+     Propagator:convert_time                      |            1 | 4.79937e-04 s | 0.07 %
+     frames:convert:ITRS->GCRS                    |            1 | 2.12235e-02 s | 3.20 %
+     Orekit:propagate:construct_propagator        |            1 | 9.27448e-05 s | 0.01 %
+     Orekit:propagate:set_forces                  |            1 | 1.19209e-05 s | 0.00 %
+     Orekit:propagate:steps:step-handler:getState |         5000 | 1.71622e-05 s | 12.94 %
+     Orekit:propagate:steps:step-handler          |         1443 | 1.03941e-04 s | 22.62 %
+     Orekit:propagate:steps                       |            1 | 4.83256e-01 s | 72.88 %
+     Orekit:propagate                             |            1 | 5.08683e-01 s | 76.71 %
+     total                                        |            1 | 6.63086e-01 s | 100.00 %
+    -----------------------------------------------------------------------------------------
 
 
      Enable Drag Force 
 
-    --------------------------------- Performance analysis --------------------------------
-     Name                                         |   Executions |   Mean time | Total time
-    ----------------------------------------------+--------------+-------------+--------------
-     Orekit:get_frame                             |            2 | 8.22544e-06 | 0.00 %
-     Orekit:init                                  |            1 | 0.149706    | 7.87 %
-     Orekit:propagate:construct_propagator        |            1 | 8.22544e-05 | 0.00 %
-     Orekit:propagate:set_forces                  |            1 | 0.982052    | 51.64 %
-     Orekit:propagate:steps:step-handler:getState |         5000 | 1.69882e-05 | 4.47 %
-     Orekit:propagate:steps:step-handler          |         1443 | 0.000103429 | 7.85 %
-     Orekit:propagate:steps                       |            1 | 0.769279    | 40.45 %
-     Orekit:propagate                             |            1 | 1.75172     | 92.12 %
-     total                                        |            1 | 1.90157     | 100.00 %
-    ---------------------------------------------------------------------------------------
+    ---------------------------------- Performance analysis ---------------------------------
+     Name                                         |   Executions | Mean time     | Total time
+    ----------------------------------------------+--------------+---------------+--------------
+     Orekit:init                                  |            1 | 1.54665e-01 s | 7.99 %
+     Orekit:get_frame                             |            2 | 3.45707e-06 s | 0.00 %
+     Propagator:convert_time                      |            1 | 5.17607e-04 s | 0.03 %
+     frames:convert:ITRS->GCRS                    |            1 | 2.34056e-02 s | 1.21 %
+     Orekit:propagate:construct_propagator        |            1 | 2.40326e-04 s | 0.01 %
+     Orekit:propagate:set_forces                  |            1 | 9.17248e-01 s | 47.39 %
+     Orekit:propagate:steps:step-handler:getState |         5000 | 1.83501e-05 s | 4.74 %
+     Orekit:propagate:steps:step-handler          |         1443 | 1.14023e-04 s | 8.50 %
+     Orekit:propagate:steps                       |            1 | 8.35532e-01 s | 43.17 %
+     Orekit:propagate                             |            1 | 1.78078e+00 s | 92.00 %
+     total                                        |            1 | 1.93566e+00 s | 100.00 %
+    -----------------------------------------------------------------------------------------
 
 
 
@@ -126,8 +134,8 @@ Profiling Orekit
     prop = Orekit(
         orekit_data = orekit_data, 
         settings=dict(
-            in_frame='ITRF',
-            out_frame='EME',
+            in_frame='ITRS',
+            out_frame='GCRS',
             drag_force = False,
             radiation_pressure = False,
         ),
@@ -157,8 +165,8 @@ Profiling Orekit
     prop = Orekit(
         orekit_data = orekit_data, 
         settings=dict(
-            in_frame='ITRF',
-            out_frame='EME',
+            in_frame='ITRS',
+            out_frame='GCRS',
             drag_force = True,
             radiation_pressure = False,
         ),
@@ -172,7 +180,7 @@ Profiling Orekit
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.523 seconds)
+   **Total running time of the script:** ( 0 minutes  2.609 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_profiler_orekit.py:

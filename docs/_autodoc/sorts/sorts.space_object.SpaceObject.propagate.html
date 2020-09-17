@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>SpaceObject.propagate &#8212; SORTS 3.13.0 documentation</title>
+    <title>SpaceObject.propagate &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.space_object.SpaceObject.get_velocity.html" title="SpaceObject.get_velocity"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.space_object.html" >space_object</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="sorts.space_object.SpaceObject.html" accesskey="U">SpaceObject</a> &#187;</li> 
@@ -87,17 +87,8 @@
 <p class="rubric">SpaceObject.propagate</p>
 <dl class="py method">
 <dt id="sorts.space_object.SpaceObject.propagate">
-<code class="sig-prename descclassname">SpaceObject.</code><code class="sig-name descname">propagate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dt</span></em>, <em class="sig-param"><span class="n">frame_transformation</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">frame_options</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/space_object.html#SpaceObject.propagate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.space_object.SpaceObject.propagate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Propagate and change the epoch of this space object</p>
-<dl class="simple">
-<dt>Frame transformations available:</dt><dd><ul class="simple">
-<li><p>TEME: From ITRF to TEME</p></li>
-<li><p>ITRF: From TEME to ITRF</p></li>
-<li><p>None: Do not perform transformation</p></li>
-<li><p>function pointer: use custom transformation function that takes state as first argument (in SI units) and keyword arguments</p></li>
-</ul>
-</dd>
-</dl>
+<code class="sig-prename descclassname">SpaceObject.</code><code class="sig-name descname">propagate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dt</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/space_object.html#SpaceObject.propagate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.space_object.SpaceObject.propagate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Propagate and change the epoch of this space object if the state is a <cite>pyorb.Orbit</cite>.</p>
 </dd></dl>
 
 </div>
@@ -123,7 +114,7 @@
         <li class="right" >
           <a href="sorts.space_object.SpaceObject.get_velocity.html" title="SpaceObject.get_velocity"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.space_object.html" >space_object</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="sorts.space_object.SpaceObject.html" >SpaceObject</a> &#187;</li> 

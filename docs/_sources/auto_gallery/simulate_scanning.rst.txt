@@ -26,43 +26,38 @@ Simulate scanning for objects
  .. code-block:: none
 
 
-    Space object 1 at epoch 53005.0 MJD:
-    a    : 7.2000e+06   x : -1.2134e+06
-    e    : 1.0000e-01   y : 2.5788e+06
-    i    : 7.5000e+01   z : 6.2817e+06
-    omega: 0.0000e+00   vx: -2.1687e+03
-    Omega: 7.9000e+01   vy: -6.7605e+03
-    anom : 6.0000e+01   vz: 3.1307e+03
-    PARAMETERS: diameter = 0.300 m, drag coefficient = 2.300, albedo = 1.000, area = 1.000, mass = 1.000 kg
+    Space object 1: <Time object: scale='utc' format='mjd' value=53005.0>:
+    a    : 7.2000e+06   x : -1.3922e+06
+    e    : 2.0000e-02   y : 3.4519e+06
+    i    : 7.5000e+01   z : 6.0816e+06
+    omega: 0.0000e+00   vx: -1.3986e+03
+    Omega: 8.6000e+01   vy: -6.4897e+03
+    anom : 6.0000e+01   vz: 3.5175e+03
+    Parameters: d=0.100, C_D=2.300, A=1.000, m=1.000, C_R=1.000
+    2020-09-17 12:27:44.536 INFO    ; Scanner:init
+    Temporal points obj 0: 4555
+    --------------------------------------- Performance analysis --------------------------------------
+     Name                                                   |   Executions | Mean time     | Total time
+    --------------------------------------------------------+--------------+---------------+--------------
+     equidistant_sampling                                   |            1 | 7.84397e-05 s | 0.00 %
+     get_state                                              |            1 | 5.82559e-02 s | 0.45 %
+     find_passes                                            |            1 | 1.02768e-02 s | 0.08 %
+     Obs.Param.:calculate_observation:get_state             |            3 | 5.41079e-02 s | 1.26 %
+     Obs.Param.:calculate_observation:enus,range,range_rate |            3 | 7.01269e-04 s | 0.02 %
+     Scanner:generator:point_radar:_point_station[tx]       |         8361 | 1.14940e-04 s | 7.46 %
+     Scanner:generator:point_radar:_point_station[rx]       |        25083 | 2.06396e-04 s | 40.19 %
+     Scanner:generator:point_radar                          |         8361 | 8.89602e-04 s | 57.74 %
+     Obs.Param.:calculate_observation:snr-step:gain         |         8149 | 5.93849e-04 s | 37.57 %
+     Obs.Param.:calculate_observation:snr-step:snr          |         8149 | 2.31376e-05 s | 1.46 %
+     Obs.Param.:calculate_observation:snr-step              |         8361 | 6.17065e-04 s | 40.05 %
+     Obs.Param.:calculate_observation:generator             |            3 | 4.21560e+00 s | 98.18 %
+     Obs.Param.:calculate_observation                       |            3 | 4.27048e+00 s | 99.46 %
+     observe_passes                                         |            1 | 1.28123e+01 s | 99.47 %
+     total                                                  |            1 | 1.28810e+01 s | 100.00 %
+    ---------------------------------------------------------------------------------------------------
 
-    Temporal points obj 0: 4936
-    2020-07-10 16:50:08.039 INFO    ; Scheduler:__call__:2082 events found between 0.1 and 208.4
-    2020-07-10 16:50:08.039 INFO    ; Obs.Param.:calculate_observation:(tx=0, rx=0), len(t) = 2082
-    /home/danielk/IRF/IRF_GITLAB/SORTS/sorts/scheduler/observed_parameters.py:108: RuntimeWarning: divide by zero encountered in log10
-      snr_db = np.log10(snr[ti])*10.0
-    2020-07-10 16:50:10.680 INFO    ; Obs.Param.:calculate_observation:complete
-    2020-07-10 16:50:10.680 INFO    ; Scheduler:__call__:2072 events found between 0.1 and 207.4
-    2020-07-10 16:50:10.680 INFO    ; Obs.Param.:calculate_observation:(tx=1, rx=1), len(t) = 2072
-    2020-07-10 16:50:14.734 INFO    ; Obs.Param.:calculate_observation:complete
-    2020-07-10 16:50:14.734 INFO    ; Scheduler:__call__:1896 events found between 0.1 and 189.8
-    2020-07-10 16:50:14.734 INFO    ; Obs.Param.:calculate_observation:(tx=2, rx=2), len(t) = 1896
-    2020-07-10 16:50:18.986 INFO    ; Obs.Param.:calculate_observation:complete
-    -------------------------------------- Performance analysis --------------------------------------
-     Name                                                   |   Executions |    Mean time | Total time
-    --------------------------------------------------------+--------------+--------------+--------------
-     equidistant_sampling                                   |            1 |  7.20024e-05 | 0.00 %
-     get_state                                              |            1 |  0.361191    | 3.19 %
-     find_passes                                            |            1 |  0.00671434  | 0.06 %
-     Obs.Param.:calculate_observation:get_state             |            3 |  0.190155    | 5.04 %
-     Obs.Param.:calculate_observation:enus,range,range_rate |            3 |  0.000506481 | 0.01 %
-     Obs.Param.:calculate_observation:snr-step:gain         |         5896 |  0.000686825 | 35.79 %
-     Obs.Param.:calculate_observation:snr-step:snr          |         5896 |  2.57083e-05 | 1.34 %
-     Obs.Param.:calculate_observation:snr-step              |         6050 |  0.000720883 | 38.54 %
-     Obs.Param.:calculate_observation                       |            3 |  3.64868     | 96.73 %
-     observe_passes                                         |            1 | 10.9478      | 96.75 %
-     total                                                  |            1 | 11.3159      | 100.00 %
-    --------------------------------------------------------------------------------------------------
-
+    /home/danielk/IRF/IRF_GITLAB/SORTS/examples/simulate_scanning.py:146: RuntimeWarning: divide by zero encountered in log10
+      SNRdB = 10*np.log10(dat['snr'])
 
 
 
@@ -108,42 +103,31 @@ Simulate scanning for objects
             Prop_cls,
             propagator_options = Prop_opts,
             a = 7200e3, 
-            e = 0.1, 
+            e = 0.02, 
             i = 75, 
-            raan = 79,
+            raan = 86,
             aop = 0,
             mu0 = 60,
-            mjd0 = 53005.0,
-            d = 0.3,
+            epoch = 53005.0,
+            parameters = dict(
+                d = 0.1,
+            ),
         ),
-        SpaceObject(
-            Prop_cls,
-            propagator_options = Prop_opts,
-            a = 7200e3, 
-            e = 0.1, 
-            i = 69, 
-            raan = 74,
-            aop = 0,
-            mu0 = 0,
-            mjd0 = 53005.0,
-            d = 0.3,
-        )
     ]
 
-    objs = objs[:1]
 
     for obj in objs: print(obj)
 
     class ObservedScanning(StaticList, ObservedParameters):
         pass
 
-    scan_sched = Scanner(eiscat3d, scan)
-    scan_sched.t = np.arange(0, end_t, scan.dwell())
+    scanner_ctrl = Scanner(eiscat3d, scan, profiler=p, logger=logger)
+    scanner_ctrl.t = np.arange(0, end_t, scan.dwell())
 
     p.start('total')
     scheduler = ObservedScanning(
         radar = eiscat3d, 
-        controllers = [scan_sched], 
+        controllers = [scanner_ctrl], 
         logger = logger,
         profiler = p,
     )
@@ -156,7 +140,7 @@ Simulate scanning for objects
     for ind in range(len(objs)):
         p.start('equidistant_sampling')
         t = sorts.equidistant_sampling(
-            orbit = objs[ind].orbit, 
+            orbit = objs[ind].state, 
             start_t = 0, 
             end_t = end_t, 
             max_dpos=1e3,
@@ -170,11 +154,12 @@ Simulate scanning for objects
         p.stop('get_state')
 
         p.start('find_passes')
-        passes += [eiscat3d.find_passes(t, states[ind], cache_data = True)]
+        #rename cache_data to something more descriptive
+        passes += [eiscat3d.find_passes(t, states[ind], cache_data = True)] 
         p.stop('find_passes')
 
         p.start('observe_passes')
-        data = scheduler.observe_passes(passes[ind], space_object = objs[ind], snr_limit=True)
+        data = scheduler.observe_passes(passes[ind], space_object = objs[ind], snr_limit=False)
         p.stop('observe_passes')
 
         datas.append(data)
@@ -200,16 +185,16 @@ Simulate scanning for objects
     for rx in eiscat3d.rx:
         axes[0][0].plot([rx.ecef[0]],[rx.ecef[1]],[rx.ecef[2]],'og')
 
-    for radar, meta in scan_sched(np.arange(0,scan.cycle(),scan.dwell())):
+    for radar, meta in scanner_ctrl(np.arange(0,scan.cycle(),scan.dwell())):
         for tx in radar.tx:
-            point_tx = tx.pointing_ecef/np.linalg.norm(tx.pointing_ecef, axis=0)*scan_sched.r.max() + tx.ecef
+            point_tx = tx.pointing_ecef/np.linalg.norm(tx.pointing_ecef, axis=0)*scanner_ctrl.r.max() + tx.ecef
             axes[0][0].plot([tx.ecef[0], point_tx[0]], [tx.ecef[1], point_tx[1]], [tx.ecef[2], point_tx[2]], 'r-', alpha=0.15)
 
             for rx in radar.rx:
                 pecef = rx.pointing_ecef/np.linalg.norm(rx.pointing_ecef, axis=0)
 
                 for ri in range(pecef.shape[1]):
-                    point_tx = tx.pointing_ecef/np.linalg.norm(tx.pointing_ecef, axis=0)*scan_sched.r[ri] + tx.ecef
+                    point_tx = tx.pointing_ecef/np.linalg.norm(tx.pointing_ecef, axis=0)*scanner_ctrl.r[ri] + tx.ecef
                     point = pecef[:,ri]*np.linalg.norm(rx.ecef - point_tx) + rx.ecef
 
                     axes[0][0].plot([rx.ecef[0], point[0]], [rx.ecef[1], point[1]], [rx.ecef[2], point[2]], 'g-', alpha=0.05)
@@ -222,9 +207,18 @@ Simulate scanning for objects
             axes[0][0].plot(states[ind][0,ps.inds], states[ind][1,ps.inds], states[ind][2,ps.inds], '-')
 
             if dat is not None:
+
+                SNRdB = 10*np.log10(dat['snr'])
+                det_inds = SNRdB > 10.0
+
                 axes[0][1].plot(dat['t']/3600.0, dat['range']*1e-3, '-', label=f'obj{ind}-pass{pi}')
                 axes[1][0].plot(dat['t']/3600.0, dat['range_rate']*1e-3, '-')
-                axes[1][1].plot(dat['t']/3600.0, 10*np.log10(dat['snr']), '-')
+                axes[1][1].plot(dat['t']/3600.0, SNRdB, '-')
+
+                axes[0][1].plot(dat['t'][det_inds]/3600.0, dat['range'][det_inds]*1e-3, '.r')
+                axes[1][0].plot(dat['t'][det_inds]/3600.0, dat['range_rate'][det_inds]*1e-3, '.r')
+                axes[1][1].plot(dat['t'][det_inds]/3600.0, SNRdB[det_inds], '.r')
+                axes[1][1].set_ylim([0, None])
 
 
     font_ = 18
@@ -247,7 +241,7 @@ Simulate scanning for objects
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  13.231 seconds)
+   **Total running time of the script:** ( 0 minutes  14.489 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_simulate_scanning.py:

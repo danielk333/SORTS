@@ -21,39 +21,43 @@ Profiling components
 
  .. code-block:: none
 
-    2020-07-10 16:47:55.796 INFO    ; sorts.propagator.Orekit:init
-    2020-07-10 16:47:59.910 INFO    ; Orekit:propagate:len(t) = 5000
-    2020-07-10 16:48:02.241 INFO    ; Orekit:propagate:completed
 
      SETTING DEBUG MODE 
 
-    2020-07-10 16:48:02.242 INFO    ; sorts.propagator.Orekit:init
-    2020-07-10 16:48:02.242 DEBUG   ; Orekit:init:orekit-data = /home/danielk/IRF/IRF_GITLAB/orekit_build/orekit-data-master.zip
-    2020-07-10 16:48:02.242 DEBUG   ; Orekit:settings:in_frame = ITRF
-    2020-07-10 16:48:02.242 DEBUG   ; Orekit:settings:out_frame = EME
-    2020-07-10 16:48:02.242 DEBUG   ; Orekit:settings:frame_tidal_effects = False
-    2020-07-10 16:48:02.242 DEBUG   ; Orekit:settings:integrator = DormandPrince853
-    2020-07-10 16:48:02.242 DEBUG   ; Orekit:settings:min_step = 0.001
-    2020-07-10 16:48:02.242 DEBUG   ; Orekit:settings:max_step = 120.0
-    2020-07-10 16:48:02.242 DEBUG   ; Orekit:settings:position_tolerance = 10.0
-    2020-07-10 16:48:02.242 DEBUG   ; Orekit:settings:earth_gravity = HolmesFeatherstone
-    2020-07-10 16:48:02.242 DEBUG   ; Orekit:settings:gravity_order = (10, 10)
-    2020-07-10 16:48:02.242 DEBUG   ; Orekit:settings:solarsystem_perturbers = ['Moon', 'Sun']
-    2020-07-10 16:48:02.243 DEBUG   ; Orekit:settings:drag_force = False
-    2020-07-10 16:48:02.243 DEBUG   ; Orekit:settings:atmosphere = DTM2000
-    2020-07-10 16:48:02.243 DEBUG   ; Orekit:settings:radiation_pressure = False
-    2020-07-10 16:48:02.243 DEBUG   ; Orekit:settings:solar_activity = Marshall
-    2020-07-10 16:48:02.243 DEBUG   ; Orekit:settings:constants_source = WGS84
-    2020-07-10 16:48:02.243 DEBUG   ; Orekit:settings:solar_activity_strength = WEAK
-    2020-07-10 16:48:02.427 DEBUG   ; Orekit:init:_forces:earth_gravity = <class 'org.orekit.forces.gravity.HolmesFeatherstoneAttractionModel'>
-    2020-07-10 16:48:02.427 DEBUG   ; Orekit:init:_forces:perturbation_Moon = <class 'org.orekit.forces.gravity.ThirdBodyAttraction'>
-    2020-07-10 16:48:02.427 DEBUG   ; Orekit:init:_forces:perturbation_Sun = <class 'org.orekit.forces.gravity.ThirdBodyAttraction'>
-    2020-07-10 16:48:02.427 INFO    ; Orekit:propagate:len(t) = 5000
-    2020-07-10 16:48:02.427 DEBUG   ; Orekit:set_forces:A = 1.0
-    2020-07-10 16:48:02.427 DEBUG   ; Orekit:set_forces:cd = 1.0
-    2020-07-10 16:48:02.427 DEBUG   ; Orekit:set_forces:cr = 1.0
-    2020-07-10 16:48:02.427 DEBUG   ; Orekit:set_forces:re_calc = True
-    2020-07-10 16:48:03.043 INFO    ; Orekit:propagate:completed
+    2020-09-17 12:25:48.823 DEBUG   ; Propagator:_check_settings
+    2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:epoch_format = mjd
+    2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:epoch_scale = utc
+    2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:time_format = sec
+    2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:time_scale = None
+    2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:in_frame = Orekit-ITRF
+    2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:out_frame = Orekit-EME
+    2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:frame_tidal_effects = False
+    2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:integrator = DormandPrince853
+    2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:min_step = 0.001
+    2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:max_step = 120.0
+    2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:position_tolerance = 10.0
+    2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:earth_gravity = HolmesFeatherstone
+    2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:gravity_order = (10, 10)
+    2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:solarsystem_perturbers = ['Moon', 'Sun']
+    2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:drag_force = False
+    2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:atmosphere = DTM2000
+    2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:radiation_pressure = False
+    2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:solar_activity = Marshall
+    2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:constants_source = WGS84
+    2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:solar_activity_strength = WEAK
+    2020-09-17 12:25:48.823 DEBUG   ; sorts.propagator.Orekit:init
+    2020-09-17 12:25:48.824 DEBUG   ; Orekit:init:orekit-data = /home/danielk/IRF/IRF_GITLAB/orekit_build/orekit-data-master.zip
+    2020-09-17 12:25:48.981 DEBUG   ; Orekit:init:_forces:earth_gravity = <class 'org.orekit.forces.gravity.HolmesFeatherstoneAttractionModel'>
+    2020-09-17 12:25:48.981 DEBUG   ; Orekit:init:_forces:perturbation_Moon = <class 'org.orekit.forces.gravity.ThirdBodyAttraction'>
+    2020-09-17 12:25:48.981 DEBUG   ; Orekit:init:_forces:perturbation_Sun = <class 'org.orekit.forces.gravity.ThirdBodyAttraction'>
+    2020-09-17 12:25:48.981 DEBUG   ; Propagator:convert_time
+    2020-09-17 12:25:48.982 DEBUG   ; Propagator:convert_time:completed
+    2020-09-17 12:25:48.986 DEBUG   ; Orekit:propagate:len(t) = 5000
+    2020-09-17 12:25:48.986 DEBUG   ; Orekit:set_forces:A = 1.0
+    2020-09-17 12:25:48.986 DEBUG   ; Orekit:set_forces:cd = 1.0
+    2020-09-17 12:25:48.986 DEBUG   ; Orekit:set_forces:cr = 1.0
+    2020-09-17 12:25:48.986 DEBUG   ; Orekit:set_forces:re_calc = True
+    2020-09-17 12:25:49.566 DEBUG   ; Orekit:propagate:completed
 
 
 
@@ -77,8 +81,8 @@ Profiling components
         prop = sorts.propagator.Orekit(
             orekit_data = orekit_data, 
             settings=dict(
-                in_frame='ITRF',
-                out_frame='EME',
+                in_frame='Orekit-ITRF',
+                out_frame='Orekit-EME',
                 drag_force = False,
                 radiation_pressure = False,
             ),
@@ -102,7 +106,7 @@ Profiling components
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  7.248 seconds)
+   **Total running time of the script:** ( 0 minutes  1.511 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_logger_orekit.py:

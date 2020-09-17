@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>sorts.dates &#8212; SORTS 3.13.0 documentation</title>
+    <title>sorts.dates &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -75,8 +75,6 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="c1">#Local import</span>
-
-
 
 <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;TZ&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;GMT&#39;</span>
 <span class="n">time</span><span class="o">.</span><span class="n">tzset</span><span class="p">()</span>
@@ -189,66 +187,6 @@
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">dt</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span><span class="s1">&#39;1970-01-01&#39;</span><span class="p">))</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;s&#39;</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="gstime"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.dates.gstime.html#sorts.dates.gstime">[docs]</a><span class="k">def</span> <span class="nf">gstime</span><span class="p">(</span><span class="n">jdut1</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;This function finds the greenwich sidereal time (iau-82).</span>
-
-<span class="sd">    *References:* Vallado 2007, 193, Eq 3-43</span>
-
-<span class="sd">    Author: David Vallado 719-573-2600 7 jun 2002</span>
-<span class="sd">    Adapted to Python, Daniel Kastinen 2018</span>
-
-<span class="sd">    :param float jdut1: Julian date of ut1 in days from 4713 bc</span>
-
-<span class="sd">    :return: Greenwich sidereal time in radians, 0 to :math:`2\pi`</span>
-<span class="sd">    :rtype: float</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">twopi</span>      <span class="o">=</span> <span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">;</span>
-    <span class="n">deg2rad</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">180.0</span><span class="p">;</span>
-
-    <span class="c1"># ------------------------  implementation   ------------------</span>
-    <span class="n">tut1</span><span class="o">=</span> <span class="p">(</span> <span class="n">jdut1</span> <span class="o">-</span> <span class="mf">2451545.0</span> <span class="p">)</span> <span class="o">/</span> <span class="mf">36525.0</span>
-
-    <span class="n">temp</span> <span class="o">=</span> <span class="o">-</span> <span class="mf">6.2e-6</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">tut1</span><span class="p">,</span><span class="n">tut1</span><span class="p">),</span><span class="n">tut1</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.093104</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">tut1</span><span class="p">,</span><span class="n">tut1</span><span class="p">)</span> \
-           <span class="o">+</span> <span class="p">(</span><span class="mf">876600.0</span> <span class="o">*</span> <span class="mf">3600.0</span> <span class="o">+</span> <span class="mf">8640184.812866</span><span class="p">)</span> <span class="o">*</span> <span class="n">tut1</span> <span class="o">+</span> <span class="mf">67310.54841</span>
-
-    <span class="c1"># 360/86400 = 1/240, to deg, to rad</span>
-    <span class="n">temp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fmod</span><span class="p">(</span> <span class="n">temp</span><span class="o">*</span><span class="n">deg2rad</span><span class="o">/</span><span class="mf">240.0</span><span class="p">,</span><span class="n">twopi</span> <span class="p">)</span>
-
-    <span class="c1"># ------------------------ check quadrants --------------------</span>
-    <span class="n">temp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">temp</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">temp</span><span class="o">+</span><span class="n">twopi</span><span class="p">,</span> <span class="n">temp</span><span class="p">)</span>
-
-
-    <span class="n">gst</span> <span class="o">=</span> <span class="n">temp</span>
-    <span class="k">return</span> <span class="n">gst</span></div>
-
-
-<div class="viewcode-block" id="GMST1982"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.dates.GMST1982.html#sorts.dates.GMST1982">[docs]</a><span class="k">def</span> <span class="nf">GMST1982</span><span class="p">(</span><span class="n">jd_ut1</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Return the angle of Greenwich Mean Standard Time 1982 given the JD.</span>
-<span class="sd">    This angle defines the difference between the idiosyncratic True</span>
-<span class="sd">    Equator Mean Equinox (TEME) frame of reference used by SGP4 and the</span>
-<span class="sd">    more standard Pseudo Earth Fixed (PEF) frame of reference.</span>
-
-
-<span class="sd">    *Reference:* AIAA 2006-6753 Appendix C.</span>
-
-<span class="sd">    Original work Copyright (c) 2013-2018 Brandon Rhodes under the MIT license</span>
-<span class="sd">    Modified work Copyright (c) 2019 Daniel Kastinen</span>
-
-<span class="sd">    :param float jd_ut1: UT1 Julian date.</span>
-<span class="sd">    :returns: tuple of (Earth rotation [rad], Earth angular velocity [rad/day])</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">_second</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">24.0</span> <span class="o">*</span> <span class="mf">60.0</span> <span class="o">*</span> <span class="mf">60.0</span><span class="p">)</span>
-
-    <span class="n">T0</span> <span class="o">=</span> <span class="mf">2451545.0</span>
-
-    <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">jd_ut1</span> <span class="o">-</span> <span class="n">T0</span><span class="p">)</span> <span class="o">/</span> <span class="mf">36525.0</span>
-    <span class="n">g</span> <span class="o">=</span> <span class="mf">67310.54841</span> <span class="o">+</span> <span class="p">(</span><span class="mf">8640184.812866</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.093104</span> <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="mf">6.2e-6</span><span class="p">)</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span> <span class="o">*</span> <span class="n">t</span>
-    <span class="n">dg</span> <span class="o">=</span> <span class="mf">8640184.812866</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.093104</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="mf">6.2e-6</span> <span class="o">*</span> <span class="mf">3.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span> <span class="o">*</span> <span class="n">t</span>
-    <span class="n">theta</span> <span class="o">=</span> <span class="p">(</span><span class="n">jd_ut1</span> <span class="o">%</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="n">g</span> <span class="o">*</span> <span class="n">_second</span> <span class="o">%</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
-    <span class="n">theta_dot</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">dg</span> <span class="o">*</span> <span class="n">_second</span> <span class="o">/</span> <span class="mf">36525.0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
-    <span class="k">return</span> <span class="n">theta</span><span class="p">,</span> <span class="n">theta_dot</span></div>
 </pre></div>
 
           </div>
@@ -265,7 +203,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

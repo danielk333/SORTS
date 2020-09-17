@@ -1,0 +1,302 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Simulate tracking with simulation helper &#8212; SORTS 3.18.0 documentation</title>
+    <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Simulate scanning for objects" href="simulate_scanning.html" />
+    <link rel="prev" title="Custom Scheduler" href="custom_scheduler.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="simulate_scanning.html" title="Simulate scanning for objects"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="custom_scheduler.html" title="Custom Scheduler"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Examples</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="custom_scheduler.html"
+                        title="previous chapter">Custom Scheduler</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="simulate_scanning.html"
+                        title="next chapter">Simulate scanning for objects</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/auto_gallery/simulation_helper_tracking.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-auto-gallery-simulation-helper-tracking-py"><span class="std std-ref">here</span></a>     to download the full example code</p>
+</div>
+<div class="sphx-glr-example-title section" id="simulate-tracking-with-simulation-helper">
+<span id="sphx-glr-auto-gallery-simulation-helper-tracking-py"></span><h1>Simulate tracking with simulation helper<a class="headerlink" href="#simulate-tracking-with-simulation-helper" title="Permalink to this headline">¶</a></h1>
+<img alt="simulation helper tracking" class="sphx-glr-single-img" src="../_images/sphx_glr_simulation_helper_tracking_001.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2020-09-17 12:27:43.791 INFO    ; Simulation:run:find_passes
+2020-09-17 12:27:43.919 INFO    ; Simulation:run:find_passes [completed]
+2020-09-17 12:27:43.919 INFO    ; Simulation:run:calculate_measurements
+2020-09-17 12:27:43.919 INFO    ; Simulation:run:calculate_measurements [completed]
+2020-09-17 12:27:43.919 INFO    ; Simulation:run:observe_passes
+2020-09-17 12:27:43.921 INFO    ; Simulation:run:observe_passes [completed]
+2020-09-17 12:27:43.922 ALWAYS  ;
+------------------------------ Performance analysis ------------------------------
+ Name                                  |   Executions | Mean time     | Total time
+---------------------------------------+--------------+---------------+--------------
+ Simulation:run:find_passes            |            1 | 1.27673e-01 s | 98.06 %
+ Simulation:run:calculate_measurements |            1 | 4.80175e-04 s | 0.37 %
+ Simulation:run:observe_passes         |            1 | 1.44100e-03 s | 1.11 %
+ total                                 |            1 | 1.30197e-01 s | 100.00 %
+----------------------------------------------------------------------------------
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+
+<span class="kn">import</span> <span class="nn">sorts</span>
+<span class="n">eiscat3d</span> <span class="o">=</span> <span class="n">sorts</span><span class="o">.</span><span class="n">radars</span><span class="o">.</span><span class="n">eiscat3d_interp</span>
+
+<span class="kn">from</span> <span class="nn">sorts.scheduler</span> <span class="kn">import</span> <span class="n">PriorityTracking</span><span class="p">,</span> <span class="n">ObservedParameters</span>
+<span class="kn">from</span> <span class="nn">sorts.controller</span> <span class="kn">import</span> <span class="n">Scanner</span>
+<span class="kn">from</span> <span class="nn">sorts</span> <span class="kn">import</span> <span class="n">SpaceObject</span><span class="p">,</span> <span class="n">Simulation</span>
+<span class="kn">from</span> <span class="nn">sorts</span> <span class="kn">import</span> <span class="n">MPI_single_process</span><span class="p">,</span> <span class="n">MPI_action</span><span class="p">,</span> <span class="n">iterable_step</span><span class="p">,</span> <span class="n">store_step</span><span class="p">,</span> <span class="n">cached_step</span>
+<span class="kn">from</span> <span class="nn">sorts.radar.scans</span> <span class="kn">import</span> <span class="n">Fence</span>
+
+<span class="kn">from</span> <span class="nn">sorts.propagator</span> <span class="kn">import</span> <span class="n">SGP4</span>
+<span class="n">Prop_cls</span> <span class="o">=</span> <span class="n">SGP4</span>
+<span class="n">Prop_opts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">out_frame</span><span class="o">=</span><span class="s1">&#39;ITRF&#39;</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">objs</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">SpaceObject</span><span class="p">(</span>
+        <span class="n">Prop_cls</span><span class="p">,</span>
+        <span class="n">propagator_options</span> <span class="o">=</span> <span class="n">Prop_opts</span><span class="p">,</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="mf">7200e3</span><span class="p">,</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">inc</span><span class="p">,</span>
+        <span class="n">raan</span> <span class="o">=</span> <span class="mi">79</span><span class="p">,</span>
+        <span class="n">aop</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">mu0</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span>
+        <span class="n">epoch</span> <span class="o">=</span> <span class="mf">53005.0</span><span class="p">,</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">oid</span> <span class="o">=</span> <span class="n">ind</span><span class="p">,</span>
+    <span class="p">)</span> <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">inc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.linspace.html#numpy.linspace" title="numpy.linspace" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="mi">69</span><span class="p">,</span><span class="mi">75</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
+<span class="p">]</span>
+
+<span class="k">class</span> <span class="nc">ObservedTracking</span><span class="p">(</span><span class="n">PriorityTracking</span><span class="p">,</span> <span class="n">ObservedParameters</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<span class="n">scheduler</span> <span class="o">=</span> <span class="n">ObservedTracking</span><span class="p">(</span>
+    <span class="n">radar</span> <span class="o">=</span> <span class="n">eiscat3d</span><span class="p">,</span>
+    <span class="n">space_objects</span> <span class="o">=</span> <span class="n">objs</span><span class="p">,</span>
+    <span class="n">timeslice</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">allocation</span> <span class="o">=</span> <span class="mf">0.1</span><span class="o">*</span><span class="mi">600</span><span class="p">,</span>
+    <span class="n">end_time</span> <span class="o">=</span> <span class="mi">3600</span><span class="o">*</span><span class="mf">6.0</span><span class="p">,</span>
+    <span class="n">priority</span> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ones.html#numpy.ones" title="numpy.ones" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">ones</span></a><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">objs</span><span class="p">)),</span>
+    <span class="n">use_pass_states</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">Tracking</span><span class="p">(</span><span class="n">Simulation</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="s1">&#39;find_passes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_passes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="s1">&#39;calculate_measurements&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_measurements</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="s1">&#39;observe_passes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observe_passes</span>
+
+
+
+    <span class="nd">@store_step</span><span class="p">(</span><span class="n">store</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;scheduler.</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;passes&#39;</span><span class="p">,</span> <span class="s1">&#39;states&#39;</span><span class="p">,</span> <span class="s1">&#39;states_t&#39;</span><span class="p">]],</span> <span class="n">iterable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nd">@MPI_action</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;bcast&#39;</span><span class="p">,</span> <span class="n">iterable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nd">@iterable_step</span><span class="p">(</span><span class="n">iterable</span><span class="o">=</span><span class="s1">&#39;scheduler.space_objects&#39;</span><span class="p">,</span> <span class="n">MPI</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nd">@cached_step</span><span class="p">(</span><span class="n">caches</span><span class="o">=</span><span class="s1">&#39;pickle&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">find_passes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="n">passes</span><span class="p">,</span> <span class="n">states</span><span class="p">,</span> <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">get_passes</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">passes</span><span class="p">,</span> <span class="n">states</span><span class="p">,</span> <span class="n">t</span>
+
+
+    <span class="nd">@store_step</span><span class="p">(</span><span class="n">store</span><span class="o">=</span><span class="s1">&#39;scheduler.measurements&#39;</span><span class="p">)</span>
+    <span class="nd">@MPI_action</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;bcast&#39;</span><span class="p">)</span>
+    <span class="nd">@MPI_single_process</span><span class="p">(</span><span class="n">process_id</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="nd">@cached_step</span><span class="p">(</span><span class="n">caches</span><span class="o">=</span><span class="s1">&#39;pickle&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">calculate_measurements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">calculate_measurements</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">measurements</span>
+
+
+
+    <span class="nd">@store_step</span><span class="p">(</span><span class="n">store</span><span class="o">=</span><span class="s1">&#39;obs_data&#39;</span><span class="p">,</span> <span class="n">iterable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nd">@MPI_action</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;gather-clear&#39;</span><span class="p">,</span> <span class="n">iterable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nd">@iterable_step</span><span class="p">(</span><span class="n">iterable</span><span class="o">=</span><span class="s1">&#39;scheduler.passes&#39;</span><span class="p">,</span> <span class="n">MPI</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nd">@cached_step</span><span class="p">(</span><span class="n">caches</span><span class="o">=</span><span class="s1">&#39;pickle&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">observe_passes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">observe_passes</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">space_object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">space_objects</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">snr_limit</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+
+    <span class="nd">@MPI_single_process</span><span class="p">(</span><span class="n">process_id</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oid</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">tx</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rx</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+
+        <span class="n">fig</span> <span class="o">=</span> <a href="https://matplotlib.org/api/_as_gen/matplotlib.pyplot.figure.html#matplotlib.pyplot.figure" title="matplotlib.pyplot.figure" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="mi">15</span><span class="p">))</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">221</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">),</span>
+                <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">222</span><span class="p">),</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">223</span><span class="p">),</span>
+                <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">224</span><span class="p">),</span>
+            <span class="p">],</span>
+        <span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_data</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">oid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">oid</span> <span class="o">!=</span> <span class="n">ind</span><span class="p">:</span>
+                    <span class="k">continue</span>
+            <span class="k">for</span> <span class="n">pi</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">passes</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="n">tx</span><span class="p">][</span><span class="n">rx</span><span class="p">])):</span>
+
+                <span class="n">ps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">passes</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="n">tx</span><span class="p">][</span><span class="n">rx</span><span class="p">][</span><span class="n">pi</span><span class="p">]</span>
+                <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ps</span><span class="o">.</span><span class="n">enu</span><span class="p">[</span><span class="n">tx</span><span class="p">][</span><span class="mi">0</span><span class="p">,:],</span> <span class="n">ps</span><span class="o">.</span><span class="n">enu</span><span class="p">[</span><span class="n">tx</span><span class="p">][</span><span class="mi">1</span><span class="p">,:],</span> <span class="n">ps</span><span class="o">.</span><span class="n">enu</span><span class="p">[</span><span class="n">tx</span><span class="p">][</span><span class="mi">2</span><span class="p">,:],</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+
+                <span class="n">dat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_data</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="n">tx</span><span class="p">][</span><span class="n">rx</span><span class="p">][</span><span class="n">pi</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">dat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dat</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">/</span><span class="mf">3600.0</span><span class="p">,</span> <span class="n">dat</span><span class="p">[</span><span class="s1">&#39;range&#39;</span><span class="p">],</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;obj</span><span class="si">{</span><span class="n">ind</span><span class="si">}</span><span class="s1">-pass</span><span class="si">{</span><span class="n">pi</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dat</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">/</span><span class="mf">3600.0</span><span class="p">,</span> <span class="n">dat</span><span class="p">[</span><span class="s1">&#39;range_rate&#39;</span><span class="p">],</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dat</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">/</span><span class="mf">3600.0</span><span class="p">,</span> <span class="mi">10</span><span class="o">*</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.log10.html#numpy.log10" title="numpy.log10" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-data"><span class="n">np</span><span class="o">.</span><span class="n">log10</span></a><span class="p">(</span><span class="n">dat</span><span class="p">[</span><span class="s1">&#39;snr&#39;</span><span class="p">]),</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+
+
+        <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+
+
+
+<span class="n">sim</span> <span class="o">=</span> <span class="n">Tracking</span><span class="p">(</span>
+    <span class="n">scheduler</span> <span class="o">=</span> <span class="n">scheduler</span><span class="p">,</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="s1">&#39;/home/danielk/IRF/E3D_PA/sorts_v4_tests/sim2&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="c1"># sim.delete(&#39;test&#39;)</span>
+<span class="c1"># sim.branch(&#39;test&#39;, empty=True)</span>
+<span class="c1"># sim.branch(&#39;mpi&#39;, empty=True)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">checkout</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
+<span class="c1"># sim.branch(&#39;test-no-mpi&#39;, empty=True)</span>
+
+<span class="n">sim</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;total&#39;</span><span class="p">)</span>
+
+<span class="n">sim</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+<span class="n">sim</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;total&#39;</span><span class="p">)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">always</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="n">sim</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">fmt</span><span class="p">(</span><span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;total&#39;</span><span class="p">))</span>
+
+<span class="n">sim</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">oid</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<a href="https://matplotlib.org/api/_as_gen/matplotlib.pyplot.show.html#matplotlib.pyplot.show" title="matplotlib.pyplot.show" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.601 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-gallery-simulation-helper-tracking-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/1552cc3e8aa375535cce594c9ab1cd64/simulation_helper_tracking.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">simulation_helper_tracking.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/47efbd15e9dd12584adb8a01e79f61e0/simulation_helper_tracking.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">simulation_helper_tracking.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="simulate_scanning.html" title="Simulate scanning for objects"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="custom_scheduler.html" title="Custom Scheduler"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Examples</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

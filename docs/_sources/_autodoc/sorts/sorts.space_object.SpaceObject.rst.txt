@@ -31,7 +31,9 @@ SpaceObject
    .. autosummary::
       :toctree: .
    
-      ~SpaceObject.diam
+      ~SpaceObject.d
+      ~SpaceObject.default_parameters
       ~SpaceObject.m
+      ~SpaceObject.orbit
    
    

@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>base &#8212; SORTS 3.13.0 documentation</title>
+    <title>base &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="../sorts.signals.hard_target_snr.html" title="hard_target_snr"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" accesskey="U">API Reference</a> &#187;</li> 
       </ul>
     </div>
@@ -101,7 +101,7 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.base.Propagator.html#sorts.propagator.base.Propagator" title="sorts.propagator.base.Propagator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Propagator</span></code></a>([profiler, logger])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.base.Propagator.html#sorts.propagator.base.Propagator" title="sorts.propagator.base.Propagator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Propagator</span></code></a>([settings, profiler, logger])</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -112,11 +112,17 @@
 <p class="rubric">Propagator</p>
 <dl class="py class">
 <dt>
-<em class="property">class </em><code class="sig-prename descclassname">sorts.propagator.base.</code><code class="sig-name descname">Propagator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">profiler</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">logger</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/propagator/base.html#Propagator"><span class="viewcode-link">[source]</span></a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">sorts.propagator.base.</code><code class="sig-name descname">Propagator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">settings</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">profiler</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">logger</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/propagator/base.html#Propagator"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
 <dl class="py method">
 <dt>
-<em class="property">abstract </em><code class="sig-name descname">propagate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">state0</span></em>, <em class="sig-param"><span class="n">mjd0</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/propagator/base.html#Propagator.propagate"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname">convert_time</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">epoch</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/propagator/base.html#Propagator.convert_time"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Convert input time and epoch variables to <code class="code docutils literal notranslate"><span class="pre">astropy.TimeDelta</span></code> and <code class="code docutils literal notranslate"><span class="pre">astropy.Time</span></code> variables of the correct format and scale.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">abstract </em><code class="sig-name descname">propagate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">state0</span></em>, <em class="sig-param"><span class="n">epoch</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/propagator/base.html#Propagator.propagate"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Propagate a state</p>
 <p>This function uses key-word argument to supply additional information to the propagator, such as area or mass.</p>
 <p>The coordinate frames used should be documented in the child class docstring.</p>
@@ -124,13 +130,13 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>t</strong> (<em>float/list/numpy.ndarray</em>) – Time in seconds to propagate relative the initial state epoch.</p></li>
-<li><p><strong>mjd0</strong> (<em>float</em>) – The epoch of the initial state in fractional Julian Days.</p></li>
-<li><p><strong>state0</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – 6-D Cartesian state vector in SI-units.</p></li>
+<li><p><strong>t</strong> (<em>float/list/numpy.ndarray/astropy.TimeDelta</em>) – Time to propagate relative the initial state epoch.</p></li>
+<li><p><strong>epoch</strong> (<em>float/astropy.Time</em>) – The epoch of the initial state.</p></li>
+<li><p><strong>state0</strong> (<em>any</em>) – State vector in SI-units.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>6-D Cartesian state vectors in SI-units.</p>
+<dd class="field-even"><p>State vectors in SI-units.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -161,7 +167,7 @@
         <li class="right" >
           <a href="../sorts.signals.hard_target_snr.html" title="hard_target_snr"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li> 
       </ul>
     </div>

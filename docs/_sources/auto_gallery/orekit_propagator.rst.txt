@@ -25,15 +25,15 @@ Orekit propagator usage
 
  .. code-block:: none
 
-    Orekit instance @ -9223363300601876434:
+    Orekit instance @ 8738799299995:
     -------------------------
     Integrator          : DormandPrince853
     Minimum step        : 0.001 s
     Maximum step        : 120.0 s
     Position Tolerance  : 10.0 m
 
-    Input frame         : ITRF
-    Output frame        : EME
+    Input frame         : Orekit-ITRF
+    Output frame        : Orekit-EME
     Gravity model       : HolmesFeatherstone
                          - Harmonic expansion order (10, 10)
     Atmosphere model    : DTM2000
@@ -70,8 +70,8 @@ Orekit propagator usage
     prop = Orekit(
         orekit_data = orekit_data, 
         settings=dict(
-            in_frame='ITRF',
-            out_frame='EME',
+            in_frame='Orekit-ITRF',
+            out_frame='Orekit-EME',
             drag_force = False,
             radiation_pressure = False,
         )
@@ -99,7 +99,7 @@ Orekit propagator usage
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.016 seconds)
+   **Total running time of the script:** ( 0 minutes  0.972 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_orekit_propagator.py:

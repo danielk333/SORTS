@@ -14,9 +14,15 @@ SGP4
    .. autosummary::
       :toctree: .
    
+      ~SGP4.TEME_to_TLE
+      ~SGP4.TEME_to_TLE_OPTIM
       ~SGP4.__init__
+      ~SGP4.convert_time
+      ~SGP4.get_TLE_parameters
       ~SGP4.propagate
-      ~SGP4.settings
+      ~SGP4.propagate_mean_elements
+      ~SGP4.propagate_tle
+      ~SGP4.set
    
    
 

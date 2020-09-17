@@ -1,8 +1,0 @@
-Population.object\_generator
-============================
-
-.. currentmodule:: sorts.population.population
-
-.. rubric:: Population.object_generator
-
-.. automethod:: Population.object_generator

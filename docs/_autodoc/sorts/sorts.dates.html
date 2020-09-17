@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>dates &#8212; SORTS 3.13.0 documentation</title>
+    <title>dates &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -21,8 +21,8 @@
     <script src="../../_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="GMST1982" href="sorts.dates.GMST1982.html" />
-    <link rel="prev" title="polar_motion_matrix" href="sorts.frames.polar_motion_matrix.html" />
+    <link rel="next" title="date_to_unix" href="sorts.dates.date_to_unix.html" />
+    <link rel="prev" title="ned_to_ecef" href="sorts.frames.ned_to_ecef.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--[if lt IE 9]>
     <script src="_static/css3-mediaqueries.js"></script>
@@ -38,12 +38,12 @@
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="sorts.dates.GMST1982.html" title="GMST1982"
+          <a href="sorts.dates.date_to_unix.html" title="date_to_unix"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="sorts.frames.polar_motion_matrix.html" title="polar_motion_matrix"
+          <a href="sorts.frames.ned_to_ecef.html" title="ned_to_ecef"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" accesskey="U">API Reference</a> &#187;</li> 
       </ul>
     </div>
@@ -59,11 +59,11 @@
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="sorts.frames.polar_motion_matrix.html"
-                        title="previous chapter">polar_motion_matrix</a></p>
+  <p class="topless"><a href="sorts.frames.ned_to_ecef.html"
+                        title="previous chapter">ned_to_ecef</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="sorts.dates.GMST1982.html"
-                        title="next chapter">GMST1982</a></p>
+  <p class="topless"><a href="sorts.dates.date_to_unix.html"
+                        title="next chapter">date_to_unix</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -100,14 +100,8 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.dates.GMST1982.html#sorts.dates.GMST1982" title="sorts.dates.GMST1982"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GMST1982</span></code></a>(jd_ut1)</p></td>
-<td><p>Return the angle of Greenwich Mean Standard Time 1982 given the JD.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.dates.date_to_unix.html#sorts.dates.date_to_unix" title="sorts.dates.date_to_unix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">date_to_unix</span></code></a>(year, month, day, hour, minute, …)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.dates.date_to_unix.html#sorts.dates.date_to_unix" title="sorts.dates.date_to_unix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">date_to_unix</span></code></a>(year, month, day, hour, minute, …)</p></td>
 <td><p>Convert date to unix time in seconds</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.dates.gstime.html#sorts.dates.gstime" title="sorts.dates.gstime"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gstime</span></code></a>(jdut1)</p></td>
-<td><p>This function finds the greenwich sidereal time (iau-82).</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.dates.jd_to_mjd.html#sorts.dates.jd_to_mjd" title="sorts.dates.jd_to_mjd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jd_to_mjd</span></code></a>(jd)</p></td>
 <td><p>Convert Julian Date (relative 12h Jan 1, 4713 BC) to Modified Julian Date (relative 0h Nov 17, 1858)</p></td>
@@ -147,26 +141,6 @@
 <p class="rubric">Functions</p>
 <dl class="py function">
 <dt>
-<code class="sig-prename descclassname">sorts.dates.</code><code class="sig-name descname">GMST1982</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">jd_ut1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/dates.html#GMST1982"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Return the angle of Greenwich Mean Standard Time 1982 given the JD.
-This angle defines the difference between the idiosyncratic True
-Equator Mean Equinox (TEME) frame of reference used by SGP4 and the
-more standard Pseudo Earth Fixed (PEF) frame of reference.</p>
-<p><em>Reference:</em> AIAA 2006-6753 Appendix C.</p>
-<p>Original work Copyright (c) 2013-2018 Brandon Rhodes under the MIT license
-Modified work Copyright (c) 2019 Daniel Kastinen</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>jd_ut1</strong> (<em>float</em>) – UT1 Julian date.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>tuple of (Earth rotation [rad], Earth angular velocity [rad/day])</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt>
 <code class="sig-prename descclassname">sorts.dates.</code><code class="sig-name descname">date_to_unix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">year</span></em>, <em class="sig-param"><span class="n">month</span></em>, <em class="sig-param"><span class="n">day</span></em>, <em class="sig-param"><span class="n">hour</span></em>, <em class="sig-param"><span class="n">minute</span></em>, <em class="sig-param"><span class="n">second</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/dates.html#date_to_unix"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Convert date to unix time in seconds</p>
 <dl class="field-list simple">
@@ -182,26 +156,6 @@ Modified work Copyright (c) 2019 Daniel Kastinen</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Unix time in seconds</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt>
-<code class="sig-prename descclassname">sorts.dates.</code><code class="sig-name descname">gstime</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">jdut1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/dates.html#gstime"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>This function finds the greenwich sidereal time (iau-82).</p>
-<p><em>References:</em> Vallado 2007, 193, Eq 3-43</p>
-<p>Author: David Vallado 719-573-2600 7 jun 2002
-Adapted to Python, Daniel Kastinen 2018</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>jdut1</strong> (<em>float</em>) – Julian date of ut1 in days from 4713 bc</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Greenwich sidereal time in radians, 0 to <span class="math notranslate nohighlight">\(2\pi\)</span></p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>float</p>
@@ -331,12 +285,12 @@ all except usec are integer</p>
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="sorts.dates.GMST1982.html" title="GMST1982"
+          <a href="sorts.dates.date_to_unix.html" title="date_to_unix"
              >next</a> |</li>
         <li class="right" >
-          <a href="sorts.frames.polar_motion_matrix.html" title="polar_motion_matrix"
+          <a href="sorts.frames.ned_to_ecef.html" title="ned_to_ecef"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li> 
       </ul>
     </div>

@@ -15,20 +15,18 @@ Population
       :toctree: .
    
       ~Population.__init__
-      ~Population.add_column
+      ~Population.add_field
       ~Population.allocate
       ~Population.copy
       ~Population.delete
       ~Population.filter
-      ~Population.get_all_orbits
+      ~Population.get_fields
       ~Population.get_object
       ~Population.get_orbit
       ~Population.get_states
       ~Population.load
       ~Population.next
-      ~Population.object_generator
-      ~Population.plot_distribution
-      ~Population.print_row
+      ~Population.print
       ~Population.save
    
    

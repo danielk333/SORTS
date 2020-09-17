@@ -1,8 +1,0 @@
-gstime
-======
-
-.. currentmodule:: sorts.dates
-
-.. rubric:: gstime
-
-.. autofunction:: gstime

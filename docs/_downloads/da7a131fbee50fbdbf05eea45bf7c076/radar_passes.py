@@ -17,12 +17,12 @@ from sorts.propagator import SGP4
 Prop_cls = SGP4
 Prop_opts = dict(
     settings = dict(
-        out_frame='ITRF',
+        out_frame='ITRS',
     ),
 )
 prop = Prop_cls(**Prop_opts)
 
-orb = pyorb.Orbit(M0 = pyorb.M_earth, direct_update=True, auto_update=True, degrees=True, a=7200e3, e=0.1, i=75, omega=0, Omega=79, anom=72, epoch=53005.0)
+orb = pyorb.Orbit(M0 = pyorb.M_earth, direct_update=True, auto_update=True, degrees=True, a=7200e3, e=0.05, i=75, omega=0, Omega=79, anom=72, epoch=53005.0)
 print(orb)
 
 t = sorts.equidistant_sampling(
@@ -36,6 +36,10 @@ print(f'Temporal points: {len(t)}')
 states = prop.propagate(t, orb.cartesian[:,0], orb.epoch, A=1.0, C_R = 1.0, C_D = 1.0)
 
 passes = eiscat3d.find_passes(t, states)
+
+fig = plt.figure(figsize=(15,15))
+ax = fig.add_subplot(111, projection='3d')
+ax.plot(states[0,:], states[1,:], states[2,:])
 
 fig = plt.figure(figsize=(15,15))
 axes = [

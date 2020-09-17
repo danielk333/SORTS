@@ -1,0 +1,8 @@
+Profiler.memory\_diff
+=====================
+
+.. currentmodule:: sorts.profiling
+
+.. rubric:: Profiler.memory_diff
+
+.. automethod:: Profiler.memory_diff

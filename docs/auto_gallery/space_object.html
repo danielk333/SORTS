@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>The SpaceObject class &#8212; SORTS 3.13.0 documentation</title>
+    <title>The SpaceObject class &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../_static/gallery.css" />
@@ -21,8 +21,8 @@
     <script src="../_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Profiling Orekit" href="profiler_orekit.html" />
-    <link rel="prev" title="Predefined EISCAT 3D Radar" href="predefined_eiscat3d.html" />
+    <link rel="next" title="TEME transformations" href="teme_coordinates.html" />
+    <link rel="prev" title="Profiling memory leaks" href="memory_profiler.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--[if lt IE 9]>
     <script src="_static/css3-mediaqueries.js"></script>
@@ -38,23 +38,23 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="profiler_orekit.html" title="Profiling Orekit"
+          <a href="teme_coordinates.html" title="TEME transformations"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="predefined_eiscat3d.html" title="Predefined EISCAT 3D Radar"
+          <a href="memory_profiler.html" title="Profiling memory leaks"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Examples</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="predefined_eiscat3d.html"
-                        title="previous chapter">Predefined EISCAT 3D Radar</a></p>
+  <p class="topless"><a href="memory_profiler.html"
+                        title="previous chapter">Profiling memory leaks</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="profiler_orekit.html"
-                        title="next chapter">Profiling Orekit</a></p>
+  <p class="topless"><a href="teme_coordinates.html"
+                        title="next chapter">TEME transformations</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -88,14 +88,14 @@
 <span id="sphx-glr-auto-gallery-space-object-py"></span><h1>The SpaceObject class<a class="headerlink" href="#the-spaceobject-class" title="Permalink to this headline">¶</a></h1>
 <img alt="space object" class="sphx-glr-single-img" src="../_images/sphx_glr_space_object_001.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Space object 1 at epoch 57125.7729 MJD:
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Space object 1: &lt;Time object: scale=&#39;utc&#39; format=&#39;mjd&#39; value=57125.7729&gt;:
 a    : 7.0000e+06   x : 7.0000e+06
 e    : 0.0000e+00   y : 0.0000e+00
 i    : 6.9000e+01   z : 0.0000e+00
 omega: 0.0000e+00   vx: -0.0000e+00
 Omega: 0.0000e+00   vy: 2.7043e+03
 anom : 0.0000e+00   vz: 7.0448e+03
-PARAMETERS: diameter = 0.010 m, drag coefficient = 2.300, albedo = 1.000, area = 1.000, mass = 1.000 kg
+Parameters: d=0.200, C_D=2.300, A=1.000, m=1.000, C_R=1.000
 </pre></div>
 </div>
 <div class="line-block">
@@ -104,6 +104,7 @@ PARAMETERS: diameter = 0.010 m, drag coefficient = 2.300, albedo = 1.000, area =
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d</span> <span class="kn">import</span> <span class="n">Axes3D</span>
+<span class="kn">from</span> <span class="nn">astropy.time</span> <span class="kn">import</span> <span class="n">Time</span>
 
 <span class="kn">from</span> <span class="nn">sorts.propagator</span> <span class="kn">import</span> <span class="n">Orekit</span>
 <span class="kn">from</span> <span class="nn">sorts</span> <span class="kn">import</span> <span class="n">SpaceObject</span>
@@ -113,8 +114,8 @@ PARAMETERS: diameter = 0.010 m, drag coefficient = 2.300, albedo = 1.000, area =
 <span class="n">orekit_options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
     <span class="n">orekit_data</span> <span class="o">=</span> <span class="n">orekit_data</span><span class="p">,</span>
     <span class="n">settings</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
-        <span class="n">in_frame</span><span class="o">=</span><span class="s1">&#39;EME&#39;</span><span class="p">,</span>
-        <span class="n">out_frame</span><span class="o">=</span><span class="s1">&#39;EME&#39;</span><span class="p">,</span>
+        <span class="n">in_frame</span><span class="o">=</span><span class="s1">&#39;GCRS&#39;</span><span class="p">,</span>
+        <span class="n">out_frame</span><span class="o">=</span><span class="s1">&#39;GCRS&#39;</span><span class="p">,</span>
         <span class="n">drag_force</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">radiation_pressure</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">),</span>
@@ -122,7 +123,7 @@ PARAMETERS: diameter = 0.010 m, drag coefficient = 2.300, albedo = 1.000, area =
 
 <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">t</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.linspace.html#numpy.linspace" title="numpy.linspace" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3600</span><span class="o">*</span><span class="mf">24.0</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
 
-<span class="n">SO</span> <span class="o">=</span> <span class="n">SpaceObject</span><span class="p">(</span>
+<span class="n">obj</span> <span class="o">=</span> <span class="n">SpaceObject</span><span class="p">(</span>
     <span class="n">Orekit</span><span class="p">,</span>
     <span class="n">propagator_options</span> <span class="o">=</span> <span class="n">orekit_options</span><span class="p">,</span>
     <span class="n">a</span> <span class="o">=</span> <span class="mf">7000e3</span><span class="p">,</span>
@@ -131,12 +132,15 @@ PARAMETERS: diameter = 0.010 m, drag coefficient = 2.300, albedo = 1.000, area =
     <span class="n">raan</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">aop</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">mu0</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="n">mjd0</span> <span class="o">=</span> <span class="mf">57125.7729</span>
+    <span class="n">epoch</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="mf">57125.7729</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;mjd&#39;</span><span class="p">),</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
+    <span class="p">)</span>
 <span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="n">SO</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 
-<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">states</span></a> <span class="o">=</span> <span class="n">SO</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">t</span></a><span class="p">)</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">states</span></a> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">t</span></a><span class="p">)</span>
 
 
 
@@ -152,7 +156,7 @@ PARAMETERS: diameter = 0.010 m, drag coefficient = 2.300, albedo = 1.000, area =
 <a href="https://matplotlib.org/api/_as_gen/matplotlib.pyplot.show.html#matplotlib.pyplot.show" title="matplotlib.pyplot.show" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">()</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  3.026 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  2.971 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-gallery-space-object-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/dcf4dadd58ca494bd4536dd682e320d6/space_object.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">space_object.py</span></code></a></p>
@@ -180,12 +184,12 @@ PARAMETERS: diameter = 0.010 m, drag coefficient = 2.300, albedo = 1.000, area =
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="profiler_orekit.html" title="Profiling Orekit"
+          <a href="teme_coordinates.html" title="TEME transformations"
              >next</a> |</li>
         <li class="right" >
-          <a href="predefined_eiscat3d.html" title="Predefined EISCAT 3D Radar"
+          <a href="memory_profiler.html" title="Profiling memory leaks"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" >Examples</a> &#187;</li> 
       </ul>
     </div>

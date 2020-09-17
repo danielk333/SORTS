@@ -1,0 +1,8 @@
+SpaceObject.orbit
+=================
+
+.. currentmodule:: sorts.space_object
+
+.. rubric:: SpaceObject.orbit
+
+.. autoproperty:: sorts.space_object.SpaceObject.orbit

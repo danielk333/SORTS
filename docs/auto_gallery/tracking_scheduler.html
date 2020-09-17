@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>An example scheduler for tracking &#8212; SORTS 3.13.0 documentation</title>
+    <title>An example scheduler for tracking &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="custom_scans.html" title="Custom Scans"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Examples</a> &#187;</li> 
       </ul>
     </div>
@@ -88,90 +88,77 @@
 <span id="sphx-glr-auto-gallery-tracking-scheduler-py"></span><h1>An example scheduler for tracking<a class="headerlink" href="#an-example-scheduler-for-tracking" title="Permalink to this headline">¶</a></h1>
 <img alt="tracking scheduler" class="sphx-glr-single-img" src="../_images/sphx_glr_tracking_scheduler_001.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Space object 1 at epoch 53005.0 MJD:
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Space object 1: &lt;Time object: scale=&#39;utc&#39; format=&#39;mjd&#39; value=57125.7729&gt;:
 a    : 7.2000e+06   x : -1.2134e+06
 e    : 1.0000e-01   y : 2.5788e+06
 i    : 7.5000e+01   z : 6.2817e+06
 omega: 0.0000e+00   vx: -2.1687e+03
 Omega: 7.9000e+01   vy: -6.7605e+03
 anom : 6.0000e+01   vz: 3.1307e+03
-PARAMETERS: diameter = 1.000 m, drag coefficient = 2.300, albedo = 1.000, area = 1.000, mass = 1.000 kg
+Parameters: d=0.010, C_D=2.300, A=1.000, m=1.000, C_R=1.000
 
-
-Space object 2 at epoch 53005.0 MJD:
+Space object 2: &lt;Time object: scale=&#39;utc&#39; format=&#39;mjd&#39; value=57125.7729&gt;:
 a    : 7.2000e+06   x : 1.7861e+06
 e    : 1.0000e-01   y : 6.2290e+06
 i    : 6.9000e+01   z : 0.0000e+00
 omega: 0.0000e+00   vx: -2.8337e+03
 Omega: 7.4000e+01   vy: 8.1254e+02
 anom : 0.0000e+00   vz: 7.6794e+03
-PARAMETERS: diameter = 1.000 m, drag coefficient = 2.300, albedo = 1.000, area = 1.000, mass = 1.000 kg
-
-2020-07-10 16:49:47.506 INFO    ; Tracking:get_passes(ind=0):propagating 177678 steps
-2020-07-10 16:49:56.715 INFO    ; Tracking:get_passes(ind=0):propagating complete
+Parameters: d=0.010, C_D=2.300, A=1.000, m=1.000, C_R=1.000
+2020-09-17 12:27:37.818 INFO    ; Tracking:get_passes(ind=0):propagating 177678 steps
+2020-09-17 12:27:39.483 INFO    ; Tracking:get_passes(ind=0):propagating complete
 /home/danielk/IRF/IRF_GITLAB/pyant/pyant/coordinates.py:89: RuntimeWarning: invalid value encountered in greater
   proj[proj &gt; 1.0] = 1.0
 /home/danielk/IRF/IRF_GITLAB/pyant/pyant/coordinates.py:90: RuntimeWarning: invalid value encountered in less
   proj[proj &lt; -1.0] = -1.0
 /home/danielk/IRF/IRF_GITLAB/SORTS/sorts/passes.py:269: RuntimeWarning: invalid value encountered in less
   check_st = zenith_st_ang &lt; 90.0-station.min_elevation
-2020-07-10 16:49:56.802 INFO    ; Tracking:get_passes(ind=0):tx0-rx0 1 passes
-2020-07-10 16:49:56.803 INFO    ; Tracking:get_passes(ind=0):tx0-rx1 1 passes
-2020-07-10 16:49:56.803 INFO    ; Tracking:get_passes(ind=0):tx0-rx2 1 passes
-2020-07-10 16:49:56.804 INFO    ; Tracking:get_passes(ind=1):propagating 177678 steps
-2020-07-10 16:50:05.799 INFO    ; Tracking:get_passes(ind=1):propagating complete
-2020-07-10 16:50:05.883 INFO    ; Tracking:get_passes(ind=1):tx0-rx0 0 passes
-2020-07-10 16:50:05.883 INFO    ; Tracking:get_passes(ind=1):tx0-rx1 0 passes
-2020-07-10 16:50:05.884 INFO    ; Tracking:get_passes(ind=1):tx0-rx2 0 passes
-2020-07-10 16:50:05.884 INFO    ; Tracking:get_controllers
-     t [s]    rx0 az    rx0 el     rx1 az    rx1 el    rx2 az    rx2 el  Controller    Target
-----------  --------  --------  ---------  --------  --------  --------  ------------  --------
-  0.121569  210.805    46.4172  229.355     47.7409  218.643    55.5207  Tracker       Object 1
-  6.32158   209.685    49.366   229.887     50.8385  218.212    59.1725  Tracker       Object 1
- 12.5216    208.325    52.4891  230.533     54.1331  217.636    63.0241  Tracker       Object 1
- 18.7216    206.643    55.7807  231.34      57.6242  216.83     67.0595  Tracker       Object 1
- 24.9216    204.513    59.2264  232.376     61.305   215.632    71.253   Tracker       Object 1
- 31.1216    201.744    62.7989  233.759     65.1603  213.681    75.5669  Tracker       Object 1
- 37.3216    198.022    66.4519  235.703     69.1642  209.983    79.9439  Tracker       Object 1
- 43.5216    192.814    70.1086  238.635     73.2751  200.575    84.2641  Tracker       Object 1
- 49.7217    185.188    73.6369  243.544     77.4226  153.885    87.7447  Tracker       Object 1
- 55.9217    173.545    76.7974  253.231     81.4581   72.0081   85.8281  Tracker       Object 1
- 62.1217    155.783    79.1507  -82.3587    84.888    56.5953   81.759   Tracker       Object 1
- 68.3217    132.013    80.056   -27.2615    85.7288   51.5964   77.6196  Tracker       Object 1
- 74.5217    108.493    79.1712    9.27865   83.0537   49.1742   73.5949  Tracker       Object 1
- 80.7217     91.1565   76.9291   22.8106    79.3384   47.7557   69.7377  Tracker       Object 1
- 86.9217     79.8231   73.9856   29.0822    75.4786   46.8292   66.0728  Tracker       Object 1
- 93.1217     72.3848   70.7621   32.6244    71.6841   46.18     62.6121  Tracker       Object 1
- 99.3217     67.2911   67.4769   34.8894    68.0288   45.7022   59.3588  Tracker       Object 1
-105.522      63.6407   64.242    36.4616    64.5456   45.3378   56.3103  Tracker       Object 1
-111.722      60.9191   61.1165   37.6178    61.2497   45.0522   53.4601  Tracker       Object 1
-117.922      58.8225   58.1312   38.5053    58.1458   44.8237   50.7988  Tracker       Object 1
-124.122      57.1634   55.3006   39.2093    55.2324   44.6378   48.3154  Tracker       Object 1
-130.322      55.8211   52.6295   39.7826    52.5037   44.4845   45.998   Tracker       Object 1
-136.522      54.7151   50.1167   40.2595    49.9511   44.3568   43.8347  Tracker       Object 1
-142.722      53.7895   47.757    40.6634    47.5647   44.2495   41.8134  Tracker       Object 1
-148.922      53.0046   45.5433   41.0106    45.3337   44.1588   39.9229  Tracker       Object 1
-155.122      52.3317   43.4669   41.313     43.2469   44.0817   38.1524  Tracker       Object 1
-161.322      51.749    41.5191   41.5792    41.2936   44.0159   36.4917  Tracker       Object 1
-167.522      51.2402   39.6905   41.8159    39.4632   43.9597   34.9317  Tracker       Object 1
-173.722      50.7926   37.9723   42.0283    37.7458   43.9115   33.4637  Tracker       Object 1
-179.922      50.3963   36.3561   42.2202    36.1322   43.8703   32.08    Tracker       Object 1
-186.122      50.0434   34.8338   42.3949    34.6138   43.835    30.7735  Tracker       Object 1
-192.322      49.7274   33.3979   42.5549    33.1827   43.8049   29.5376  Tracker       Object 1
-198.522      49.4433   32.0414   42.7023    31.8317   43.7794   28.3667  Tracker       Object 1
-204.722      49.1867   30.7581   42.8387    30.5542   43.7579   27.2553  Tracker       Object 1
-2020-07-10 16:50:05.981 INFO    ; Tracking:get_controllers
-2020-07-10 16:50:05.982 INFO    ; Scheduler:__call__:34 events found between 0.1 and 208.4
-2020-07-10 16:50:05.982 INFO    ; Obs.Param.:calculate_observation:(tx=0, rx=0), len(t) = 34
-2020-07-10 16:50:06.166 INFO    ; Obs.Param.:calculate_observation:complete
-2020-07-10 16:50:06.166 INFO    ; Tracking:get_controllers
-2020-07-10 16:50:06.167 INFO    ; Scheduler:__call__:34 events found between 0.1 and 207.4
-2020-07-10 16:50:06.167 INFO    ; Obs.Param.:calculate_observation:(tx=1, rx=1), len(t) = 34
-2020-07-10 16:50:06.351 INFO    ; Obs.Param.:calculate_observation:complete
-2020-07-10 16:50:06.352 INFO    ; Tracking:get_controllers
-2020-07-10 16:50:06.352 INFO    ; Scheduler:__call__:31 events found between 0.1 and 189.8
-2020-07-10 16:50:06.352 INFO    ; Obs.Param.:calculate_observation:(tx=2, rx=2), len(t) = 31
-2020-07-10 16:50:06.522 INFO    ; Obs.Param.:calculate_observation:complete
+2020-09-17 12:27:39.582 INFO    ; Tracking:get_passes(ind=0):tx0-rx0 2 passes
+2020-09-17 12:27:39.582 INFO    ; Tracking:get_passes(ind=0):tx0-rx1 2 passes
+2020-09-17 12:27:39.583 INFO    ; Tracking:get_passes(ind=0):tx0-rx2 2 passes
+2020-09-17 12:27:39.584 INFO    ; Tracking:get_passes(ind=1):propagating 177678 steps
+2020-09-17 12:27:41.342 INFO    ; Tracking:get_passes(ind=1):propagating complete
+2020-09-17 12:27:41.429 INFO    ; Tracking:get_passes(ind=1):tx0-rx0 1 passes
+2020-09-17 12:27:41.429 INFO    ; Tracking:get_passes(ind=1):tx0-rx1 1 passes
+2020-09-17 12:27:41.430 INFO    ; Tracking:get_passes(ind=1):tx0-rx2 1 passes
+    t [s]      rx0 az    rx0 el      rx1 az    rx1 el     rx2 az    rx2 el  Controller    Target
+---------  ----------  --------  ----------  --------  ---------  --------  ------------  --------
+  105.4    -72.5595     44.2446  -64.8155     38.1225  -59.5643    42.3254  Tracker       Object 1
+  111.357  -69.4505     45.9338  -62.0589     39.4048  -56.1129    43.5081  Tracker       Object 1
+  117.314  -66.0239     47.5823  -59.1038     40.6492  -52.4403    44.5979  Tracker       Object 1
+  123.271  -62.2558     49.1627  -55.9445     41.8399  -48.5564    45.5742  Tracker       Object 1
+  129.228  -58.1288     50.6441  -52.5795     42.9594  -44.4799    46.4169  Tracker       Object 1
+  135.185  -53.6367     51.9923  -49.0125     43.9896  -40.2391    47.1076  Tracker       Object 1
+  141.141  -48.7897     53.1717  -45.2538     44.9118  -35.8715    47.6313  Tracker       Object 1
+  147.098  -43.6195     54.1476  -41.3215     45.7083  -31.4226    47.9771  Tracker       Object 1
+  153.055  -38.1827     54.8892  -37.2413     46.3629  -26.9435    48.1394  Tracker       Object 1
+  159.012  -32.5603     55.3728  -33.0472     46.8623  -22.4872    48.1183  Tracker       Object 1
+  164.969  -26.8525     55.5846  -28.7794     47.197   -18.1054    47.9196  Tracker       Object 1
+  170.926  -21.1693     55.5231  -24.4832     47.3618  -13.8445    47.554   Tracker       Object 1
+  176.883  -15.6177     55.1984  -20.2052     47.3566   -9.74323   47.0365  Tracker       Object 1
+  182.84   -10.2905     54.6315  -15.9912     47.1861   -5.83115   46.3847  Tracker       Object 1
+  188.796   -5.25808    53.8512  -11.8829     46.8596   -2.12828   45.6178  Tracker       Object 1
+  194.753   -0.565792   52.8908   -7.91549    46.3898    1.35424   44.7553  Tracker       Object 1
+  200.71     3.76472    51.7849   -4.11684    45.7921    4.61294   43.8163  Tracker       Object 1
+  206.667    7.7312     50.567    -0.506551   45.0833    7.65043   42.8184  Tracker       Object 1
+  212.624   11.3454     49.2676    2.90345    44.2811   10.4738    41.7777  Tracker       Object 1
+  218.581   14.6282     47.9136    6.10805    43.4026   13.0934    40.7081  Tracker       Object 1
+  224.538   17.6052     46.5277    9.10779    42.4639   15.5211    39.6216  Tracker       Object 1
+  230.495   20.3042     45.1284   11.9075     41.4801   17.7702    38.5283  Tracker       Object 1
+  236.451   22.7527     43.7307   14.5151     40.4643   19.854     37.4366  Tracker       Object 1
+  242.408   24.9768     42.3461   16.9406     39.4279   21.7856    36.3531  Tracker       Object 1
+  248.365   27.0009     40.9836   19.1951     38.381    23.5776    35.2831  Tracker       Object 1
+  254.322   28.8468     39.6495   21.2904     37.3316   25.2419    34.2307  Tracker       Object 1
+  260.279   30.5343     38.3486   23.2382     36.2864   26.7895    33.1989  Tracker       Object 1
+  266.236   32.0808     37.084    25.05       35.251    28.2307    32.19    Tracker       Object 1
+  272.193   33.5017     35.8575   26.7366     34.2295   29.5746    31.2055  Tracker       Object 1
+  278.149   34.8106     34.6701   28.3083     33.2253   30.83      30.2463  Tracker       Object 1
+  284.106   36.0193     33.5221   29.7748     32.2407   32.0043    29.3129  Tracker       Object 1
+  290.063   37.1383     32.4132   31.1448     31.2777   33.1046    28.4055  Tracker       Object 1
+  296.02    38.1767     31.3428   32.4265     30.3374   34.1373    27.5239  Tracker       Object 1
+  301.977   39.1428     30.3097   33.6272     29.4206   35.1079    26.6678  Tracker       Object 1
+14614.5    -29.7736     41.9537  -27.9956     40.8112  -29.6036    41.0138  Tracker       Object 2
+14614.6    -25.5715     30.2395  -23.7614     29.1205  -25.6811    29.2495  Tracker       Object 2
 </pre></div>
 </div>
 <div class="line-block">
@@ -257,6 +244,9 @@ PARAMETERS: diameter = 1.000 m, drag coefficient = 2.300, albedo = 1.000, area =
     <span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span><span class="p">,</span>
 <span class="p">)</span>
 
+<span class="n">scheduler</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+<span class="n">scheduler</span><span class="o">.</span><span class="n">calculate_measurements</span><span class="p">()</span>
+
 
 <span class="n">sched_data</span> <span class="o">=</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">schedule</span><span class="p">()</span>
 <span class="n">rx_head</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;rx</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">co</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">scheduler</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">rx</span><span class="p">))</span> <span class="k">for</span> <span class="n">co</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;az&#39;</span><span class="p">,</span> <span class="s1">&#39;el&#39;</span><span class="p">]]</span>
@@ -301,7 +291,7 @@ PARAMETERS: diameter = 1.000 m, drag coefficient = 2.300, albedo = 1.000, area =
 <a href="https://matplotlib.org/api/_as_gen/matplotlib.pyplot.show.html#matplotlib.pyplot.show" title="matplotlib.pyplot.show" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">()</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  19.497 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  5.222 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-gallery-tracking-scheduler-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/d1eba92623a632960ddb0be7966fb465/tracking_scheduler.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">tracking_scheduler.py</span></code></a></p>
@@ -334,7 +324,7 @@ PARAMETERS: diameter = 1.000 m, drag coefficient = 2.300, albedo = 1.000, area =
         <li class="right" >
           <a href="custom_scans.html" title="Custom Scans"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" >Examples</a> &#187;</li> 
       </ul>
     </div>

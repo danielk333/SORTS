@@ -1,8 +1,0 @@
-sgp4\_propagation
-=================
-
-.. currentmodule:: sorts.propagator.pysgp4
-
-.. rubric:: sgp4_propagation
-
-.. autofunction:: sgp4_propagation

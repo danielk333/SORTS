@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>sorts.space_object &#8212; SORTS 3.13.0 documentation</title>
+    <title>sorts.space_object &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -74,16 +74,7 @@
 <span class="sd">    import numpy as n</span>
 <span class="sd">    import matplotlib.pyplot as plt</span>
 
-<span class="sd">    ecefs=o.get_state(t)</span>
-
-<span class="sd">    fig = plt.figure(figsize=(15,15))</span>
-<span class="sd">    ax = fig.add_subplot(111, projection=&#39;3d&#39;)</span>
-<span class="sd">    ax.view_init(15, 5)</span>
-<span class="sd">    .draw_earth_grid(ax)</span>
-
-<span class="sd">    ax.plot(ecefs[0,:],ecefs[1,:],ecefs[2,:],&#39;-&#39;,alpha=0.5,color=&quot;black&quot;)</span>
-<span class="sd">    plt.title(&quot;Orbital propagation test&quot;)</span>
-<span class="sd">    plt.show()</span>
+<span class="sd">    </span>
 
 
 <span class="sd">Using space object with a different propagator.</span>
@@ -94,44 +85,17 @@
 <span class="sd">    import matplotlib.pyplot as plt</span>
 
 
-<span class="sd">    o = so.SpaceObject(</span>
-<span class="sd">        a=7000, e=0.0, i=69,</span>
-<span class="sd">        raan=0, aop=0, mu0=0,</span>
-<span class="sd">        C_D=2.3, A=1.0, m=1.0,</span>
-<span class="sd">        C_R=1.0, oid=42,</span>
-<span class="sd">        mjd0=57125.7729,</span>
-<span class="sd">        propagator = PropagatorOrekit,</span>
-<span class="sd">        propagator_options = {</span>
-<span class="sd">            &#39;in_frame&#39;: &#39;TEME&#39;,</span>
-<span class="sd">            &#39;out_frame&#39;: &#39;ITRF&#39;,</span>
-<span class="sd">        },</span>
-<span class="sd">    )</span>
-
-<span class="sd">    t=np.linspace(0,24*3600,num=1000, dtype=np.float)</span>
-<span class="sd">    ecefs=o.get_state(t)</span>
-
-<span class="sd">    fig = plt.figure(figsize=(15,15))</span>
-<span class="sd">    ax = fig.add_subplot(111, projection=&#39;3d&#39;)</span>
-<span class="sd">    ax.view_init(15, 5)</span>
-<span class="sd">    plothelp.draw_earth_grid(ax)</span>
-
-<span class="sd">    ax.plot(ecefs[0,:],ecefs[1,:],ecefs[2,:],&#39;-&#39;,alpha=0.5,color=&quot;black&quot;)</span>
-<span class="sd">    plt.title(&quot;Orbital propagation test&quot;)</span>
-<span class="sd">    plt.show()</span>
 
 
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="c1">#Python standard import</span>
-
+<span class="kn">import</span> <span class="nn">copy</span>
 
 <span class="c1">#Third party import</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pyorb</span>
-
-
-<span class="c1">#Local import</span>
-<span class="kn">from</span> <span class="nn">.constants</span> <span class="kn">import</span> <span class="n">R_earth</span>
+<span class="kn">from</span> <span class="nn">astropy.time</span> <span class="kn">import</span> <span class="n">Time</span>
 
 
 <div class="viewcode-block" id="SpaceObject"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.space_object.SpaceObject.html#sorts.space_object.SpaceObject">[docs]</a><span class="k">class</span> <span class="nc">SpaceObject</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -140,6 +104,8 @@
 <span class="sd">    The relation between the Cartesian and Kepler states are a direct transformation according to the below orientation rules.</span>
 <span class="sd">    If the Kepler elements are given in a Inertial system, to reference the Cartesian to a Earth-fixed system a earth rotation transformation</span>
 <span class="sd">    must be applied externally of the method.</span>
+
+<span class="sd">    #TODO: THIS DOC MUST BE UPDATED TOO</span>
 
 
 <span class="sd">    **Orientation of the ellipse in the coordinate system:**</span>
@@ -205,133 +171,133 @@
 <span class="sd">        * *vy* (``float``) -- Y-velocity</span>
 <span class="sd">        * *vz* (``float``) -- Z-velocity</span>
 
-
-
 <span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">default_parameters</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+        <span class="n">C_D</span> <span class="o">=</span> <span class="mf">2.3</span><span class="p">,</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">C_R</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">)</span>
+
 <div class="viewcode-block" id="SpaceObject.__init__"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.space_object.SpaceObject.__init__.html#sorts.space_object.SpaceObject.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
             <span class="n">propagator</span><span class="p">,</span>
-            <span class="n">d</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
-            <span class="n">C_D</span><span class="o">=</span><span class="mf">2.3</span><span class="p">,</span>
-            <span class="n">A</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-            <span class="n">m</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-            <span class="n">mjd0</span><span class="o">=</span><span class="mf">57125.7729</span><span class="p">,</span>
-            <span class="n">oid</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">M_cent</span> <span class="o">=</span> <span class="n">pyorb</span><span class="o">.</span><span class="n">M_earth</span><span class="p">,</span>
-            <span class="n">C_R</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
             <span class="n">propagator_options</span> <span class="o">=</span> <span class="p">{},</span>
             <span class="n">propagator_args</span> <span class="o">=</span> <span class="p">{},</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="p">{},</span>
+            <span class="n">epoch</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span><span class="mf">57125.7729</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;mjd&#39;</span><span class="p">),</span>
+            <span class="n">oid</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">):</span>
-        <span class="k">if</span> <span class="s1">&#39;aop&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;omega&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;aop&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="s1">&#39;raan&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;Omega&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;raan&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="s1">&#39;mu0&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;anom&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;mu0&#39;</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">orbit</span> <span class="o">=</span> <span class="n">pyorb</span><span class="o">.</span><span class="n">Orbit</span><span class="p">(</span>
-            <span class="n">M0</span> <span class="o">=</span> <span class="n">M_cent</span><span class="p">,</span> 
-            <span class="n">degrees</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span>
-            <span class="n">auto_update</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> 
-            <span class="n">direct_update</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="n">num</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-            <span class="n">m</span> <span class="o">=</span> <span class="n">m</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span>
-        <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">oid</span> <span class="o">=</span> <span class="n">oid</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">C_D</span> <span class="o">=</span> <span class="n">C_D</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">C_R</span> <span class="o">=</span> <span class="n">C_R</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="n">A</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">=</span> <span class="n">d</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mjd0</span> <span class="o">=</span> <span class="n">mjd0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_propagator_cls</span> <span class="o">=</span> <span class="n">propagator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">SpaceObject</span><span class="o">.</span><span class="n">default_parameters</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+        
+        <span class="c1">#assume MJD if not &quot;Time&quot; object</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">Time</span><span class="p">):</span>
+            <span class="n">epoch</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;mjd&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;utc&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">epoch</span> <span class="o">=</span> <span class="n">epoch</span>
+
+        <span class="k">if</span> <span class="s1">&#39;state&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;aop&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;omega&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;aop&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;raan&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;Omega&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;raan&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;mu0&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;anom&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;mu0&#39;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">pyorb</span><span class="o">.</span><span class="n">Orbit</span><span class="p">(</span>
+                <span class="n">M0</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;M_cent&#39;</span><span class="p">,</span> <span class="n">pyorb</span><span class="o">.</span><span class="n">M_earth</span><span class="p">),</span> 
+                <span class="n">degrees</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span>
+                <span class="n">auto_update</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> 
+                <span class="n">direct_update</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="n">num</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+                <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__propagator</span> <span class="o">=</span> <span class="n">propagator</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">propagator_options</span> <span class="o">=</span> <span class="n">propagator_options</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">propagator</span> <span class="o">=</span> <span class="n">propagator</span><span class="p">(</span><span class="o">**</span><span class="n">propagator_options</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">propagator_args</span> <span class="o">=</span> <span class="n">propagator_args</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">propagator_args</span> <span class="o">=</span> <span class="n">propagator_args</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">propagator</span> <span class="o">=</span> <span class="n">propagator</span><span class="p">(</span><span class="o">**</span><span class="n">propagator_options</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SpaceObject.copy"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.space_object.SpaceObject.copy.html#sorts.space_object.SpaceObject.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Returns a copy of the SpaceObject instance.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">new_so</span> <span class="o">=</span> <span class="n">SpaceObject</span><span class="p">(</span>
-            <span class="n">d</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">,</span>
-            <span class="n">C_D</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">C_D</span><span class="p">,</span>
-            <span class="n">A</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">,</span>
-            <span class="n">m</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">,</span>
-            <span class="n">mjd0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mjd0</span><span class="p">,</span>
+        <span class="k">return</span> <span class="n">SpaceObject</span><span class="p">(</span>
+            <span class="n">propagator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__propagator</span><span class="p">,</span>
+            <span class="n">propagator_options</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">propagator_options</span><span class="p">),</span>
+            <span class="n">propagator_args</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">propagator_args</span><span class="p">),</span>
+            <span class="n">epoch</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">oid</span><span class="p">,</span>
             <span class="n">oid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">oid</span><span class="p">,</span>
-            <span class="n">M_cent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">M_cent</span><span class="p">,</span>
-            <span class="n">C_R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">C_R</span><span class="p">,</span>
-            <span class="n">propagator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_propagator_cls</span><span class="p">,</span>
-            <span class="n">propagator_options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagator_options</span><span class="p">,</span>
-            <span class="n">propagator_args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagator_args</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="n">new_so</span><span class="o">.</span><span class="n">orbit</span><span class="o">.</span><span class="n">kepler</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">orbit</span><span class="o">.</span><span class="n">_kep</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
+            <span class="n">state</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">),</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">),</span>
+        <span class="p">)</span></div>
 
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">m</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Object mass, if changed the Kepler elements stays constant</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">orbit</span><span class="o">.</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;m&#39;</span><span class="p">]</span>
     
     <span class="nd">@m</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">m</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">orbit</span><span class="o">.</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">orbit</span><span class="o">.</span><span class="n">calculate_cartesian</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;m&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">pyorb</span><span class="o">.</span><span class="n">Orbit</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>            
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">calculate_cartesian</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">calculate_kepler</span><span class="p">()</span>
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">diam</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span>
-    
-    <span class="nd">@diam</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">diam</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">=</span> <span class="n">val</span>
-
-    <span class="c1"># todo    </span>
-    <span class="c1"># @classmethod</span>
-    <span class="c1">#def from_oem(so_class,fname, propagator, propagator_options={}):</span>
-    <span class="c1">#    # read oem file</span>
-    <span class="c1">#    # figure out epoch, based on first oem point time</span>
-    <span class="c1">#    # </span>
-    <span class="c1">#    # do a least-squares fit</span>
-    <span class="c1">#    # create space object with fitted parameters</span>
-    <span class="c1">#    # o = cls.cartesian</span>
+    <span class="k">def</span> <span class="nf">d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;d&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+            <span class="n">diam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;d&#39;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="s1">&#39;diam&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+            <span class="n">diam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;diam&#39;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="s1">&#39;r&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+            <span class="n">diam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span>
+        <span class="k">elif</span> <span class="s1">&#39;A&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+            <span class="n">diam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">]</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Space object does not have a diameter parameter: cannot calculate SNR/RCS&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">diam</span>
 
 
-<div class="viewcode-block" id="SpaceObject.propagate"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.space_object.SpaceObject.propagate.html#sorts.space_object.SpaceObject.propagate">[docs]</a>    <span class="k">def</span> <span class="nf">propagate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">frame_transformation</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">frame_options</span> <span class="o">=</span> <span class="p">{}):</span>
-        <span class="sd">&#39;&#39;&#39;Propagate and change the epoch of this space object</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">orbit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">pyorb</span><span class="o">.</span><span class="n">Orbit</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;SpaceObject state is not &quot;pyorb.Orbit&quot;&#39;</span><span class="p">)</span>
 
-<span class="sd">        Frame transformations available:</span>
-<span class="sd">            * TEME: From ITRF to TEME</span>
-<span class="sd">            * ITRF: From TEME to ITRF</span>
-<span class="sd">            * None: Do not perform transformation</span>
-<span class="sd">            * function pointer: use custom transformation function that takes state as first argument (in SI units) and keyword arguments</span>
-<span class="sd">        </span>
+
+
+<div class="viewcode-block" id="SpaceObject.propagate"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.space_object.SpaceObject.propagate.html#sorts.space_object.SpaceObject.propagate">[docs]</a>    <span class="k">def</span> <span class="nf">propagate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Propagate and change the epoch of this space object if the state is a `pyorb.Orbit`.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
 
-        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">dt</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mjd0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mjd0</span> <span class="o">+</span> <span class="n">dt</span><span class="o">/</span><span class="p">(</span><span class="mf">3600.0</span><span class="o">*</span><span class="mf">24.0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;in_frame&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagator</span><span class="o">.</span><span class="n">settings</span> <span class="ow">and</span> <span class="s1">&#39;out_frame&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagator</span><span class="o">.</span><span class="n">settings</span><span class="p">:</span>
+            <span class="n">out_frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagator</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;out_frame&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">propagator</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">out_frame</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">propagator</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;in_frame&#39;</span><span class="p">])</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame_transformation</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">jd_ut1</span> <span class="o">=</span> <span class="n">dates</span><span class="o">.</span><span class="n">mjd_to_jd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mjd0</span><span class="p">)</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">dt</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
 
-            <span class="n">frame_options</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;xp&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-            <span class="n">frame_options</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;yp&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">frame_transformation</span> <span class="o">==</span> <span class="s1">&#39;ITRF&#39;</span><span class="p">:</span>
-                <span class="n">state_frame</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">TEME_to_ITRF</span><span class="p">(</span><span class="n">state</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">jd_ut1</span><span class="p">,</span> <span class="o">**</span><span class="n">frame_options</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">frame_transformation</span> <span class="o">==</span> <span class="s1">&#39;TEME&#39;</span><span class="p">:</span>
-                <span class="n">state_frame</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">ITRF_to_TEME</span><span class="p">(</span><span class="n">state</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">jd_ut1</span><span class="p">,</span> <span class="o">**</span><span class="n">frame_options</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Tranformation </span><span class="si">{}</span><span class="s1"> not recognized&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">frame_transformation</span><span class="p">))</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame_transformation</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
-            <span class="k">pass</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">propagator</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">out_frame</span><span class="o">=</span><span class="n">out_frame</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">state_frame</span> <span class="o">=</span> <span class="n">frame_transformation</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">jd_ut1</span><span class="p">,</span> <span class="o">**</span><span class="n">frame_options</span><span class="p">)</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">dt</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">))</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mjd0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mjd0</span> <span class="o">+</span> <span class="n">dt</span><span class="o">/</span><span class="p">(</span><span class="mf">3600.0</span><span class="o">*</span><span class="mf">24.0</span><span class="p">)</span>
 
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">vx</span><span class="p">,</span> <span class="n">vy</span><span class="p">,</span> <span class="n">vz</span> <span class="o">=</span> <span class="n">state_frame</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
 
@@ -345,9 +311,8 @@
         <span class="p">)</span></div>
 
 
-
 <div class="viewcode-block" id="SpaceObject.update"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.space_object.SpaceObject.update.html#sorts.space_object.SpaceObject.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Updates the orbital elements and Cartesian state vector of the space object.</span>
+        <span class="sd">&#39;&#39;&#39;If a `pyorb.Orbit` is present, updates the orbital elements and Cartesian state vector of the space object.</span>
 
 <span class="sd">        Can update any of the related state parameters, all others will automatically update.</span>
 
@@ -356,9 +321,9 @@
 <span class="sd">        :param float a: Semi-major axis in km</span>
 <span class="sd">        :param float e: Eccentricity</span>
 <span class="sd">        :param float i: Inclination in degrees</span>
-<span class="sd">        :param float aop: Argument of perigee in degrees</span>
-<span class="sd">        :param float raan: Right ascension of the ascending node in degrees</span>
-<span class="sd">        :param float mu0: Mean anomaly in degrees</span>
+<span class="sd">        :param float aop/omega: Argument of perigee in degrees</span>
+<span class="sd">        :param float raan/Omega: Right ascension of the ascending node in degrees</span>
+<span class="sd">        :param float mu0/anom: Mean anomaly in degrees</span>
 <span class="sd">        :param float x: X position in km</span>
 <span class="sd">        :param float y: Y position in km</span>
 <span class="sd">        :param float z: Z position in km</span>
@@ -378,16 +343,11 @@
 
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">p</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Space object </span><span class="si">{}</span><span class="s1"> at epoch </span><span class="si">{}</span><span class="s1"> MJD:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">oid</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">mjd0</span><span class="p">)</span>
-        <span class="n">p</span><span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orbit</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
-        <span class="n">p</span><span class="o">+=</span> <span class="s1">&#39;PARAMETERS: diameter = </span><span class="si">{:.3f}</span><span class="s1"> m, drag coefficient = </span><span class="si">{:.3f}</span><span class="s1">, albedo = </span><span class="si">{:.3f}</span><span class="s1">, area = </span><span class="si">{:.3f}</span><span class="s1">, mass = </span><span class="si">{:.3f}</span><span class="s1"> kg</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">C_D</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">C_R</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">propagator_args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">p</span><span class="o">+=</span> <span class="s1">&#39;ADDITIONAL KEYWORDS: &#39;</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> = </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagator_args</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="p">])</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Space object </span><span class="si">{}</span><span class="s1">: </span><span class="si">{}</span><span class="s1">:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">oid</span><span class="p">,</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epoch</span><span class="p">))</span>
+        <span class="n">p</span><span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">p</span><span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;Parameters: &#39;</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">val</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
         <span class="k">return</span> <span class="n">p</span>
 
-
-    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span>
 
 <div class="viewcode-block" id="SpaceObject.get_position"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.space_object.SpaceObject.get_position.html#sorts.space_object.SpaceObject.get_position">[docs]</a>    <span class="k">def</span> <span class="nf">get_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">t</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Gets position at specified times using propagator instance.</span>
@@ -398,7 +358,7 @@
 <span class="sd">        :rtype: numpy.ndarray of size (3,len(t))</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">ecefs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
-        <span class="k">return</span><span class="p">(</span><span class="n">ecefs</span><span class="p">[:</span><span class="mi">3</span><span class="p">,:])</span></div>
+        <span class="k">return</span> <span class="n">ecefs</span><span class="p">[:</span><span class="mi">3</span><span class="p">,:]</span></div>
 
 
 <div class="viewcode-block" id="SpaceObject.get_velocity"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.space_object.SpaceObject.get_velocity.html#sorts.space_object.SpaceObject.get_velocity">[docs]</a>    <span class="k">def</span> <span class="nf">get_velocity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">t</span><span class="p">):</span>
@@ -410,14 +370,10 @@
 <span class="sd">        :rtype: numpy.ndarray of size (3,len(t))</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">ecefs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
-        <span class="k">return</span><span class="p">(</span><span class="n">ecefs</span><span class="p">[</span><span class="mi">3</span><span class="p">:,:])</span></div>
-
-    
-    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
-        <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">ecefs</span><span class="p">[</span><span class="mi">3</span><span class="p">:,:]</span></div>
 
 
-<div class="viewcode-block" id="SpaceObject.get_state"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.space_object.SpaceObject.get_state.html#sorts.space_object.SpaceObject.get_state">[docs]</a>    <span class="k">def</span> <span class="nf">get_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">t</span><span class="p">):</span>
+<div class="viewcode-block" id="SpaceObject.get_state"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.space_object.SpaceObject.get_state.html#sorts.space_object.SpaceObject.get_state">[docs]</a>    <span class="k">def</span> <span class="nf">get_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Gets ECEF state at specified times using propagator instance.</span>
 
 <span class="sd">        :param float/list/numpy.ndarray t: Time relative epoch in seconds.</span>
@@ -425,20 +381,22 @@
 <span class="sd">        :return: Array of state (position and velocity) as a function of time.</span>
 <span class="sd">        :rtype: numpy.ndarray of size (6,len(t))</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">Time</span><span class="p">):</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">t</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">epoch</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="nb">list</span><span class="p">):</span>
                 <span class="n">t</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="p">]</span>
-            <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
         
+        <span class="n">kw</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">kw</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">propagator_args</span><span class="p">)</span>
+        <span class="n">kw</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+
         <span class="n">ecefs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagator</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span>
-            <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="p">,</span> 
-            <span class="n">state0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orbit</span><span class="o">.</span><span class="n">cartesian</span><span class="p">),</span> 
-            <span class="n">mjd0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mjd0</span><span class="p">,</span>
-            <span class="n">C_D</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">C_D</span><span class="p">,</span>
-            <span class="n">C_R</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">C_R</span><span class="p">,</span>
-            <span class="n">A</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">,</span>
-            <span class="n">m</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">,</span>
-            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">propagator_args</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="p">,</span>
+            <span class="n">state0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">,</span>
+            <span class="n">epoch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">epoch</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kw</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">ecefs</span></div></div>
 
@@ -458,7 +416,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

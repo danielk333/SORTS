@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Custom Scheduler &#8212; SORTS 3.13.0 documentation</title>
+    <title>Custom Scheduler &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../_static/gallery.css" />
@@ -21,7 +21,7 @@
     <script src="../_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Simulate scanning for objects" href="simulate_scanning.html" />
+    <link rel="next" title="Simulate tracking with simulation helper" href="simulation_helper_tracking.html" />
     <link rel="prev" title="An example scheduler for tracking" href="tracking_scheduler.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--[if lt IE 9]>
@@ -38,12 +38,12 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="simulate_scanning.html" title="Simulate scanning for objects"
+          <a href="simulation_helper_tracking.html" title="Simulate tracking with simulation helper"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="tracking_scheduler.html" title="An example scheduler for tracking"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Examples</a> &#187;</li> 
       </ul>
     </div>
@@ -53,8 +53,8 @@
   <p class="topless"><a href="tracking_scheduler.html"
                         title="previous chapter">An example scheduler for tracking</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="simulate_scanning.html"
-                        title="next chapter">Simulate scanning for objects</a></p>
+  <p class="topless"><a href="simulation_helper_tracking.html"
+                        title="next chapter">Simulate tracking with simulation helper</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -91,21 +91,21 @@
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>3 Orbits
   t [s]    rx0 az    rx0 el    rx1 az    rx1 el    rx2 az    rx2 el  Controller    Target
 -------  --------  --------  --------  --------  --------  --------  ------------  --------
-    0    203.955    46.5231  231.719    49.0993  214.601    61.7555  Tracker       Orbit 0
-    2.5  202.798    48.2655  232.232    51.0625  213.751    64.3226  Tracker       Orbit 0
-    5    201.492    50.0799  232.82     53.1235  212.678    66.9872  Tracker       Orbit 0
-    7.5  200.009    51.9645  233.502    55.2844  211.28     69.7409  Tracker       Orbit 0
-   10    198.311    53.9154  234.301    57.5461  209.389    72.5708  Tracker       Orbit 0
-   20    166.913    61.8378  216.621    75.0152  118.72     77.6884  Tracker       Orbit 1
-   22.5  161.731    63.245   214.906    78.0249  105.349    76.709   Tracker       Orbit 1
-   25    155.93     64.4648  211.977    81.0787   94.3689   75.1562  Tracker       Orbit 1
-   27.5  149.534    65.4464  205.921    84.1314   85.7859   73.2159  Tracker       Orbit 1
-   30    142.628    66.1417  187.428    87.0102   79.1702   71.0396  Tracker       Orbit 1
-   40    105.762    57.7586   70.7574   70.4941   69.7183   54.1644  Tracker       Orbit 2
-   42.5  101.271    56.7261   66.9308   67.98     67.6022   52.3054  Tracker       Orbit 2
-   45     97.1333   55.5659   63.957    65.4775   65.7434   50.4928  Tracker       Orbit 2
-   47.5   93.3483   54.3062   61.592    63.0177   64.1011   48.7342  Tracker       Orbit 2
-   50     89.9017   52.9731   59.6727   60.6207   62.6421   47.0343  Tracker       Orbit 2
+    0    203.943    46.5256  231.709    49.1046  214.582    61.7606  Tracker       Orbit 0
+    2.5  202.786    48.268   232.222    51.0681  213.731    64.3278  Tracker       Orbit 0
+    5    201.479    50.0824  232.81     53.1294  212.654    66.9925  Tracker       Orbit 0
+    7.5  199.994    51.9669  233.491    55.2907  211.252    69.7462  Tracker       Orbit 0
+   10    198.296    53.9177  234.289    57.5528  209.356    72.5759  Tracker       Orbit 0
+   20    166.892    61.836   216.587    75.0216  118.693    77.679   Tracker       Orbit 1
+   22.5  161.709    63.2424  214.862    78.0311  105.335    76.6988  Tracker       Orbit 1
+   25    155.908    64.4613  211.916    81.0846   94.3637   75.1457  Tracker       Orbit 1
+   27.5  149.512    65.442   205.823    84.1363   85.7867   73.2056  Tracker       Orbit 1
+   30    142.608    66.1363  187.217    87.0117   79.1745   71.0296  Tracker       Orbit 1
+   40    105.756    57.7511   70.7657   70.4847   69.722    54.1572  Tracker       Orbit 2
+   42.5  101.266    56.7187   66.9397   67.9711   67.6062   52.2986  Tracker       Orbit 2
+   45     97.1296   55.5586   63.9658   65.4691   65.7474   50.4864  Tracker       Orbit 2
+   47.5   93.3457   54.299    61.6005   63.0098   64.1051   48.7281  Tracker       Orbit 2
+   50     89.9      52.9661   59.6809   60.6132   62.6461   47.0286  Tracker       Orbit 2
 </pre></div>
 </div>
 <div class="line-block">
@@ -230,7 +230,7 @@
 <span class="c1"># plt.show()</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.412 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.459 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-gallery-custom-scheduler-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/42d4337812ebbde3306a45140425efc2/custom_scheduler.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">custom_scheduler.py</span></code></a></p>
@@ -258,12 +258,12 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="simulate_scanning.html" title="Simulate scanning for objects"
+          <a href="simulation_helper_tracking.html" title="Simulate tracking with simulation helper"
              >next</a> |</li>
         <li class="right" >
           <a href="tracking_scheduler.html" title="An example scheduler for tracking"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" >Examples</a> &#187;</li> 
       </ul>
     </div>

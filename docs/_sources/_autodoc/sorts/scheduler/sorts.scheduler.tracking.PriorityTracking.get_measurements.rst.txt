@@ -1,8 +1,0 @@
-PriorityTracking.get\_measurements
-==================================
-
-.. currentmodule:: sorts.scheduler.tracking
-
-.. rubric:: PriorityTracking.get_measurements
-
-.. automethod:: PriorityTracking.get_measurements

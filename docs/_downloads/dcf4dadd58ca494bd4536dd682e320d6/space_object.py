@@ -10,6 +10,7 @@ The SpaceObject class
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from astropy.time import Time
 
 from sorts.propagator import Orekit
 from sorts import SpaceObject
@@ -19,8 +20,8 @@ orekit_data = '/home/danielk/IRF/IRF_GITLAB/orekit_build/orekit-data-master.zip'
 orekit_options = dict(
     orekit_data = orekit_data, 
     settings=dict(
-        in_frame='EME',
-        out_frame='EME',
+        in_frame='GCRS',
+        out_frame='GCRS',
         drag_force = False,
         radiation_pressure = False,
     ),
@@ -28,7 +29,7 @@ orekit_options = dict(
 
 t = np.linspace(0,3600*24.0*2,num=5000)
 
-SO = SpaceObject(
+obj = SpaceObject(
     Orekit,
     propagator_options = orekit_options,
     a = 7000e3, 
@@ -37,12 +38,15 @@ SO = SpaceObject(
     raan = 0, 
     aop = 0, 
     mu0 = 0, 
-    mjd0 = 57125.7729
+    epoch = Time(57125.7729, format='mjd'),
+    parameters = dict(
+        d = 0.2,
+    )
 )
 
-print(SO)
+print(obj)
 
-states = SO.get_state(t)
+states = obj.get_state(t)
 
 
 

@@ -1,0 +1,8 @@
+PriorityTracking.calculate\_measurements
+========================================
+
+.. currentmodule:: sorts.scheduler.tracking
+
+.. rubric:: PriorityTracking.calculate_measurements
+
+.. automethod:: PriorityTracking.calculate_measurements

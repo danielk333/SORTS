@@ -1,0 +1,6 @@
+sorts.space\_object.SpaceObject.default\_parameters
+===================================================
+
+.. currentmodule:: sorts.space_object
+
+.. autoattribute:: SpaceObject.default_parameters

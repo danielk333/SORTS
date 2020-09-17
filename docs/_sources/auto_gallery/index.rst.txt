@@ -76,14 +76,14 @@ This is all the examples and tutorials
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="SGP4 propagator usage">
+    <div class="sphx-glr-thumbcontainer" tooltip="SGP4 standalone example">
 
 .. only:: html
 
- .. figure:: /auto_gallery/images/thumb/sphx_glr_sgp4_propagator_thumb.png
-     :alt: SGP4 propagator usage
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_sgp4_package_example_thumb.png
+     :alt: SGP4 standalone example
 
-     :ref:`sphx_glr_auto_gallery_sgp4_propagator.py`
+     :ref:`sphx_glr_auto_gallery_sgp4_package_example.py`
 
 .. raw:: html
 
@@ -93,18 +93,18 @@ This is all the examples and tutorials
 .. toctree::
    :hidden:
 
-   /auto_gallery/sgp4_propagator
+   /auto_gallery/sgp4_package_example
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Adding random errors">
+    <div class="sphx-glr-thumbcontainer" tooltip="Predefined EISCAT 3D Demonstrator">
 
 .. only:: html
 
- .. figure:: /auto_gallery/images/thumb/sphx_glr_adding_random_errors_thumb.png
-     :alt: Adding random errors
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_eiscat3d_demonstrator_array_thumb.png
+     :alt: Predefined EISCAT 3D Demonstrator
 
-     :ref:`sphx_glr_auto_gallery_adding_random_errors.py`
+     :ref:`sphx_glr_auto_gallery_eiscat3d_demonstrator_array.py`
 
 .. raw:: html
 
@@ -114,7 +114,28 @@ This is all the examples and tutorials
 .. toctree::
    :hidden:
 
-   /auto_gallery/adding_random_errors
+   /auto_gallery/eiscat3d_demonstrator_array
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Orekit propagator small time step">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_orekit_small_step_thumb.png
+     :alt: Orekit propagator small time step
+
+     :ref:`sphx_glr_auto_gallery_orekit_small_step.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/orekit_small_step
 
 .. raw:: html
 
@@ -139,6 +160,27 @@ This is all the examples and tutorials
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="Adding random errors">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_adding_random_errors_thumb.png
+     :alt: Adding random errors
+
+     :ref:`sphx_glr_auto_gallery_adding_random_errors.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/adding_random_errors
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="Orekit propagator usage">
 
 .. only:: html
@@ -157,6 +199,27 @@ This is all the examples and tutorials
    :hidden:
 
    /auto_gallery/orekit_propagator
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Interpolation">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_interpolating_states_thumb.png
+     :alt: Interpolation
+
+     :ref:`sphx_glr_auto_gallery_interpolating_states.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/interpolating_states
 
 .. raw:: html
 
@@ -181,6 +244,27 @@ This is all the examples and tutorials
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="Profiling memory leaks">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_memory_profiler_thumb.png
+     :alt: Profiling memory leaks
+
+     :ref:`sphx_glr_auto_gallery_memory_profiler.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/memory_profiler
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="The SpaceObject class">
 
 .. only:: html
@@ -199,6 +283,48 @@ This is all the examples and tutorials
    :hidden:
 
    /auto_gallery/space_object
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="TEME transformations">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_teme_coordinates_thumb.png
+     :alt: TEME transformations
+
+     :ref:`sphx_glr_auto_gallery_teme_coordinates.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/teme_coordinates
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Using Frames">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_using_frames_thumb.png
+     :alt: Using Frames
+
+     :ref:`sphx_glr_auto_gallery_using_frames.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/using_frames
 
 .. raw:: html
 
@@ -265,6 +391,27 @@ This is all the examples and tutorials
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="Loading a TLE catalog (e.g. spacetrack)">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_spacetrack_catalog_thumb.png
+     :alt: Loading a TLE catalog (e.g. spacetrack)
+
+     :ref:`sphx_glr_auto_gallery_spacetrack_catalog.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/spacetrack_catalog
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="Finding passes over radar system">
 
 .. only:: html
@@ -283,6 +430,27 @@ This is all the examples and tutorials
    :hidden:
 
    /auto_gallery/radar_passes
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This shows that TLEs really should be propagated as TLEs, not as states. ">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_tle_propagation_with_sorts_thumb.png
+     :alt: TLE propagation with SGP4
+
+     :ref:`sphx_glr_auto_gallery_tle_propagation_with_sorts.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/tle_propagation_with_sorts
 
 .. raw:: html
 
@@ -370,6 +538,27 @@ This is all the examples and tutorials
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="SGP4 propagator usage">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_sgp4_propagator_thumb.png
+     :alt: SGP4 propagator usage
+
+     :ref:`sphx_glr_auto_gallery_sgp4_propagator.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/sgp4_propagator
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="Custom radar controller">
 
 .. only:: html
@@ -412,14 +601,14 @@ This is all the examples and tutorials
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="TEME transformations">
+    <div class="sphx-glr-thumbcontainer" tooltip="You can speed up execution by switching radar controller that is optimized for the use case. Al...">
 
 .. only:: html
 
- .. figure:: /auto_gallery/images/thumb/sphx_glr_teme_coordinates_thumb.png
-     :alt: TEME transformations
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_static_radar_controller_speedup_thumb.png
+     :alt: Static radar controller and time sampling
 
-     :ref:`sphx_glr_auto_gallery_teme_coordinates.py`
+     :ref:`sphx_glr_auto_gallery_static_radar_controller_speedup.py`
 
 .. raw:: html
 
@@ -429,7 +618,7 @@ This is all the examples and tutorials
 .. toctree::
    :hidden:
 
-   /auto_gallery/teme_coordinates
+   /auto_gallery/static_radar_controller_speedup
 
 .. raw:: html
 
@@ -496,6 +685,27 @@ This is all the examples and tutorials
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="Simulate tracking with simulation helper">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_simulation_helper_tracking_thumb.png
+     :alt: Simulate tracking with simulation helper
+
+     :ref:`sphx_glr_auto_gallery_simulation_helper_tracking.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/simulation_helper_tracking
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="Simulate scanning for objects">
 
 .. only:: html
@@ -535,6 +745,69 @@ This is all the examples and tutorials
    :hidden:
 
    /auto_gallery/observing_passes
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Optimizing with interpolation">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_scheduler_interpolation_optimizing_thumb.png
+     :alt: Optimizing with interpolation
+
+     :ref:`sphx_glr_auto_gallery_scheduler_interpolation_optimizing.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/scheduler_interpolation_optimizing
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Using scans on alternative parameters">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_alternative_scan_controller_thumb.png
+     :alt: Using scans on alternative parameters
+
+     :ref:`sphx_glr_auto_gallery_alternative_scan_controller.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/alternative_scan_controller
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Simulate scanning for objects with simulation class">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_simulation_helper_scanning_thumb.png
+     :alt: Simulate scanning for objects with simulation class
+
+     :ref:`sphx_glr_auto_gallery_simulation_helper_scanning.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/simulation_helper_scanning
 .. raw:: html
 
     <div class="sphx-glr-clear"></div>

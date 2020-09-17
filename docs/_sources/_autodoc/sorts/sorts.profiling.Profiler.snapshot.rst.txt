@@ -1,0 +1,8 @@
+Profiler.snapshot
+=================
+
+.. currentmodule:: sorts.profiling
+
+.. rubric:: Profiler.snapshot
+
+.. automethod:: Profiler.snapshot

@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Propagator.propagate &#8212; SORTS 3.13.0 documentation</title>
+    <title>Propagator.propagate &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -21,8 +21,8 @@
     <script src="../../../_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="Propagator.settings" href="sorts.propagator.base.Propagator.settings.html" />
-    <link rel="prev" title="Propagator.__init__" href="sorts.propagator.base.Propagator.__init__.html" />
+    <link rel="next" title="Propagator.set" href="sorts.propagator.base.Propagator.set.html" />
+    <link rel="prev" title="Propagator.convert_time" href="sorts.propagator.base.Propagator.convert_time.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--[if lt IE 9]>
     <script src="_static/css3-mediaqueries.js"></script>
@@ -38,12 +38,12 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="sorts.propagator.base.Propagator.settings.html" title="Propagator.settings"
+          <a href="sorts.propagator.base.Propagator.set.html" title="Propagator.set"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="sorts.propagator.base.Propagator.__init__.html" title="Propagator.__init__"
+          <a href="sorts.propagator.base.Propagator.convert_time.html" title="Propagator.convert_time"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.propagator.base.html" >base</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="sorts.propagator.base.Propagator.html" accesskey="U">Propagator</a> &#187;</li> 
@@ -52,11 +52,11 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="sorts.propagator.base.Propagator.__init__.html"
-                        title="previous chapter">Propagator.__init__</a></p>
+  <p class="topless"><a href="sorts.propagator.base.Propagator.convert_time.html"
+                        title="previous chapter">Propagator.convert_time</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="sorts.propagator.base.Propagator.settings.html"
-                        title="next chapter">Propagator.settings</a></p>
+  <p class="topless"><a href="sorts.propagator.base.Propagator.set.html"
+                        title="next chapter">Propagator.set</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -87,7 +87,7 @@
 <p class="rubric">Propagator.propagate</p>
 <dl class="py method">
 <dt id="sorts.propagator.base.Propagator.propagate">
-<em class="property">abstract </em><code class="sig-prename descclassname">Propagator.</code><code class="sig-name descname">propagate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">state0</span></em>, <em class="sig-param"><span class="n">mjd0</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/propagator/base.html#Propagator.propagate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.propagator.base.Propagator.propagate" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-prename descclassname">Propagator.</code><code class="sig-name descname">propagate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">state0</span></em>, <em class="sig-param"><span class="n">epoch</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/propagator/base.html#Propagator.propagate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.propagator.base.Propagator.propagate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Propagate a state</p>
 <p>This function uses key-word argument to supply additional information to the propagator, such as area or mass.</p>
 <p>The coordinate frames used should be documented in the child class docstring.</p>
@@ -95,13 +95,13 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>t</strong> (<em>float/list/numpy.ndarray</em>) – Time in seconds to propagate relative the initial state epoch.</p></li>
-<li><p><strong>mjd0</strong> (<em>float</em>) – The epoch of the initial state in fractional Julian Days.</p></li>
-<li><p><strong>state0</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – 6-D Cartesian state vector in SI-units.</p></li>
+<li><p><strong>t</strong> (<em>float/list/numpy.ndarray/astropy.TimeDelta</em>) – Time to propagate relative the initial state epoch.</p></li>
+<li><p><strong>epoch</strong> (<em>float/astropy.Time</em>) – The epoch of the initial state.</p></li>
+<li><p><strong>state0</strong> (<em>any</em>) – State vector in SI-units.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>6-D Cartesian state vectors in SI-units.</p>
+<dd class="field-even"><p>State vectors in SI-units.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -124,12 +124,12 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="sorts.propagator.base.Propagator.settings.html" title="Propagator.settings"
+          <a href="sorts.propagator.base.Propagator.set.html" title="Propagator.set"
              >next</a> |</li>
         <li class="right" >
-          <a href="sorts.propagator.base.Propagator.__init__.html" title="Propagator.__init__"
+          <a href="sorts.propagator.base.Propagator.convert_time.html" title="Propagator.convert_time"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.propagator.base.html" >base</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="sorts.propagator.base.Propagator.html" >Propagator</a> &#187;</li> 

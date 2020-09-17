@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>SORTS &#8212; SORTS 3.13.0 documentation</title>
+    <title>SORTS &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/gallery.css" />
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="introduction/introduction.html" title="Introduction"
              accesskey="N">next</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">SORTS 3.13.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="#">SORTS 3.18.0 documentation</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -47,8 +47,13 @@
   <h3><a href="#">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">SORTS</a><ul>
-<li><a class="reference internal" href="#features">Features</a></li>
-<li><a class="reference internal" href="#getting-started">Getting started</a></li>
+<li><a class="reference internal" href="#feature-list">Feature list</a></li>
+<li><a class="reference internal" href="#install-sorts">Install SORTS</a></li>
+<li><a class="reference internal" href="#install-mpi">Install MPI</a></li>
+<li><a class="reference internal" href="#install-orekit">Install Orekit</a></li>
+<li><a class="reference internal" href="#example">Example</a></li>
+<li><a class="reference internal" href="#for-developers">For developers</a></li>
+<li><a class="reference internal" href="#when-used-for-publications">When used for publications</a></li>
 <li><a class="reference internal" href="#examples">Examples</a></li>
 </ul>
 </li>
@@ -88,10 +93,10 @@
 <h1>SORTS<a class="headerlink" href="#sorts" title="Permalink to this headline">¶</a></h1>
 <dl class="field-list simple">
 <dt class="field-odd">Release</dt>
-<dd class="field-odd"><p>3.13.0</p>
+<dd class="field-odd"><p>3.18.0</p>
 </dd>
 <dt class="field-even">Date</dt>
-<dd class="field-even"><p>Jul 10, 2020</p>
+<dd class="field-even"><p>Sep 17, 2020</p>
 </dd>
 </dl>
 <div class="toctree-wrapper compound">
@@ -115,28 +120,140 @@
 </li>
 </ul>
 </div>
-<div class="section" id="features">
-<h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="feature-list">
+<h2>Feature list<a class="headerlink" href="#feature-list" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><p>Things</p></li>
-<li><p>More Things</p></li>
+<li><p>stuff</p></li>
+<li><p>more stuff</p></li>
 </ul>
 </div>
-<div class="section" id="getting-started">
-<h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
-<p>To install (Not yet available)</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install pyant
+<div class="section" id="install-sorts">
+<h2>Install SORTS<a class="headerlink" href="#install-sorts" title="Permalink to this headline">¶</a></h2>
+<p><strong>Make sure you have Python &gt;= 3.6</strong></p>
+<p>It is recommended to use virtual environments</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 -m venv /path/to/new/sorts/environment
+<span class="nb">source</span> /path/to/new/sorts/environment/bin/activate
 </pre></div>
 </div>
-<p>or</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install git+https://github.com/danielk333/pyant
-pip install git+https://github.com/danielk333/pyorb
-
-git clone https://github.com/danielk333/SORTS
+<p>Now you should be inside the new virtual environment. Check this by</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip --version
+</pre></div>
+</div>
+<p>And you should see the path to “/path/to/new/sorts/environment”. If the “pip” command fails, you need to make sure you have a functioning Python version with pip.</p>
+<p>Now you should make sure you have an up to date pip:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install --upgrade pip
+</pre></div>
+</div>
+<p><strong>To install SORTS</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/danielk333/SORTS
 <span class="nb">cd</span> sorts
 pip install .
 </pre></div>
 </div>
+<p>In case “pyant” or “pyorb” requrements fail auto-install run the following commands:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install git+https://github.com/danielk333/pyant
+pip install git+https://github.com/danielk333/pyorb
+</pre></div>
+</div>
+</div>
+<div class="section" id="install-mpi">
+<h2>Install MPI<a class="headerlink" href="#install-mpi" title="Permalink to this headline">¶</a></h2>
+<p>Open MPI on Ubuntu</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt-get update
+sudo apt-get install openmpi-bin libopenmpi-dev
+pip install mpi4py
+</pre></div>
+</div>
+<p>MPICH on Ubuntu</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt-get update
+sudo apt install mpich
+pip install mpi4py
+</pre></div>
+</div>
+</div>
+<div class="section" id="install-orekit">
+<h2>Install Orekit<a class="headerlink" href="#install-orekit" title="Permalink to this headline">¶</a></h2>
+<p>Using install script while a virtual environment is active on Ubuntu (from inside the SORTS repository)</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt-get update
+sudo apt-get install openjdk-8-jdk
+./install_orekit.sh
+</pre></div>
+</div>
+</div>
+<div class="section" id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
+<p>Finding passes over radar system</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pyorb</span>
+
+<span class="kn">import</span> <span class="nn">sorts</span>
+<span class="kn">from</span> <span class="nn">sorts.propagator</span> <span class="kn">import</span> <span class="n">SGP4</span>
+
+<span class="n">eiscat3d</span> <span class="o">=</span> <span class="n">sorts</span><span class="o">.</span><span class="n">radars</span><span class="o">.</span><span class="n">eiscat3d</span>
+
+<span class="n">prop</span> <span class="o">=</span> <span class="n">SGP4</span><span class="p">(</span>
+      <span class="n">settings</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+          <span class="n">out_frame</span><span class="o">=</span><span class="s1">&#39;ITRS&#39;</span><span class="p">,</span>
+      <span class="p">),</span>
+  <span class="p">)</span>
+
+<span class="n">orb</span> <span class="o">=</span> <span class="n">pyorb</span><span class="o">.</span><span class="n">Orbit</span><span class="p">(</span>
+    <span class="n">M0</span> <span class="o">=</span> <span class="n">pyorb</span><span class="o">.</span><span class="n">M_earth</span><span class="p">,</span>
+    <span class="n">direct_update</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">auto_update</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">degrees</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">a</span><span class="o">=</span><span class="mf">7200e3</span><span class="p">,</span>
+    <span class="n">e</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">i</span><span class="o">=</span><span class="mi">75</span><span class="p">,</span>
+    <span class="n">omega</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">Omega</span><span class="o">=</span><span class="mi">79</span><span class="p">,</span>
+    <span class="n">anom</span><span class="o">=</span><span class="mi">72</span><span class="p">,</span>
+    <span class="n">epoch</span><span class="o">=</span><span class="mf">53005.0</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">orb</span><span class="p">)</span>
+
+<span class="n">t</span> <span class="o">=</span> <span class="n">sorts</span><span class="o">.</span><span class="n">equidistant_sampling</span><span class="p">(</span>
+    <span class="n">orbit</span> <span class="o">=</span> <span class="n">orb</span><span class="p">,</span>
+    <span class="n">start_t</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">end_t</span> <span class="o">=</span> <span class="mi">3600</span><span class="o">*</span><span class="mi">24</span><span class="o">*</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">max_dpos</span><span class="o">=</span><span class="mf">1e3</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">states</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">orb</span><span class="o">.</span><span class="n">cartesian</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">orb</span><span class="o">.</span><span class="n">epoch</span><span class="p">)</span>
+
+<span class="n">passes</span> <span class="o">=</span> <span class="n">eiscat3d</span><span class="o">.</span><span class="n">find_passes</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">states</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">passes</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="for-developers">
+<h2>For developers<a class="headerlink" href="#for-developers" title="Permalink to this headline">¶</a></h2>
+<p>To install developer dependencies</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1">#NOT YET AVALIBLE</span>
+</pre></div>
+</div>
+<p>To test</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest
+</pre></div>
+</div>
+<p>To make doc</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git checkout gh-pages
+git <span class="nb">cd</span> docsrc
+make github
+</pre></div>
+</div>
+</div>
+<div class="section" id="when-used-for-publications">
+<h2>When used for publications<a class="headerlink" href="#when-used-for-publications" title="Permalink to this headline">¶</a></h2>
+<dl class="simple">
+<dt>&#64;article{</dt><dd><p>autor=””,
+title=””</p>
+</dd>
+</dl>
+<p>}</p>
 </div>
 <div class="section" id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
@@ -214,7 +331,7 @@ pip install .
         <li class="right" >
           <a href="introduction/introduction.html" title="Introduction"
              >next</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">SORTS 3.13.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="#">SORTS 3.18.0 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

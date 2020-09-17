@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>sorts.signals &#8212; SORTS 3.13.0 documentation</title>
+    <title>sorts.signals &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -70,6 +70,13 @@
 
 
 <div class="viewcode-block" id="hard_target_rcs"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.signals.hard_target_rcs.html#sorts.signals.hard_target_rcs">[docs]</a><span class="k">def</span> <span class="nf">hard_target_rcs</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">diameter</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Determine the radar cross section for a hard target.</span>
+<span class="sd">    Assume a smooth transition between Rayleigh and optical scattering. </span>
+<span class="sd">    Ignore Mie regime and use either optical or Rayleigh scatter.</span>
+
+<span class="sd">    :param float wavelength: radar wavelength (meters)</span>
+<span class="sd">    :param float/numpy.ndarray diameter: diameter in meters of the objects.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">is_rayleigh</span> <span class="o">=</span> <span class="n">diameter</span> <span class="o">&lt;</span> <span class="n">wavelength</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">3.0</span><span class="p">))</span>
     <span class="n">is_optical</span> <span class="o">=</span> <span class="n">diameter</span> <span class="o">&gt;=</span> <span class="n">wavelength</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">3.0</span><span class="p">))</span>
     <span class="n">optical_rcs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">diameter</span><span class="o">**</span><span class="mf">2.0</span><span class="o">/</span><span class="mf">4.0</span>
@@ -129,7 +136,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

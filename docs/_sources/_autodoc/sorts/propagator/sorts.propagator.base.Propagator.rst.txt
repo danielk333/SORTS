@@ -15,8 +15,9 @@ Propagator
       :toctree: .
    
       ~Propagator.__init__
+      ~Propagator.convert_time
       ~Propagator.propagate
-      ~Propagator.settings
+      ~Propagator.set
    
    
 

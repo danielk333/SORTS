@@ -1,0 +1,8 @@
+Population.add\_field
+=====================
+
+.. currentmodule:: sorts.population.population
+
+.. rubric:: Population.add_field
+
+.. automethod:: Population.add_field

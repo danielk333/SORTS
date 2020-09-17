@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>sorts.propagator.pysgp4 &#8212; SORTS 3.13.0 documentation</title>
+    <title>sorts.propagator.pysgp4 &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -67,16 +67,17 @@
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="c1">#Python standard import</span>
-
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
 
 <span class="c1">#Third party import</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">astropy.time</span> <span class="kn">import</span> <span class="n">Time</span>
+<span class="kn">import</span> <span class="nn">scipy.optimize</span>
+<span class="kn">import</span> <span class="nn">pyorb</span>
 
 <span class="kn">import</span> <span class="nn">sgp4</span>
+<span class="kn">from</span> <span class="nn">sgp4.api</span> <span class="kn">import</span> <span class="n">Satrec</span><span class="p">,</span> <span class="n">SGP4_ERRORS</span>
 <span class="kn">import</span> <span class="nn">sgp4.earth_gravity</span>
-<span class="kn">import</span> <span class="nn">sgp4.io</span>
-<span class="kn">import</span> <span class="nn">sgp4.propagation</span>
-<span class="kn">import</span> <span class="nn">sgp4.model</span>
 
 <span class="c1">#Local import</span>
 <span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">Propagator</span>
@@ -84,202 +85,101 @@
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">frames</span>
 
 
-<div class="viewcode-block" id="SGP4_module_wrapper"><a class="viewcode-back" href="../../../_autodoc/sorts/propagator/sorts.propagator.pysgp4.SGP4_module_wrapper.html#sorts.propagator.pysgp4.SGP4_module_wrapper">[docs]</a><span class="k">class</span> <span class="nc">SGP4_module_wrapper</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The SGP4 class acts as a wrapper around the sgp4 module</span>
-<span class="sd">    uploaded by Brandon Rhodes (http://pypi.python.org/pypi/sgp4/).</span>
-
-<span class="sd">        </span>
-<span class="sd">    It converts orbital elements into the TLE-like &#39;satellite&#39;-structure which</span>
-<span class="sd">    is used by the module for the propagation.</span>
-
-<span class="sd">    Notes:</span>
-<span class="sd">        The class can be directly used for propagation. Alternatively,</span>
-<span class="sd">        a simple propagator function is provided below.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
 
-    <span class="c1"># Geophysical constants (WGS 72 values) for notational convinience</span>
-    <span class="n">WGS</span>     <span class="o">=</span> <span class="n">sgp4</span><span class="o">.</span><span class="n">earth_gravity</span><span class="o">.</span><span class="n">wgs72</span>     <span class="c1"># Model used within SGP4</span>
-    <span class="n">R_EARTH</span> <span class="o">=</span> <span class="n">WGS</span><span class="o">.</span><span class="n">radiusearthkm</span>            <span class="c1"># Earth&#39;s radius [km]</span>
-    <span class="n">GM</span>      <span class="o">=</span> <span class="n">WGS</span><span class="o">.</span><span class="n">mu</span>                       <span class="c1"># Grav.coeff.[km^3/s^2]</span>
-    <span class="n">RHO0</span>    <span class="o">=</span> <span class="mf">2.461e-8</span>                     <span class="c1"># Density at q0[kg/m^3]</span>
-    <span class="n">Q0</span>      <span class="o">=</span> <span class="mf">120.0</span>                        <span class="c1"># Reference height [km]</span>
-    <span class="n">S0</span>      <span class="o">=</span> <span class="mf">78.0</span>                         <span class="c1"># Reference height [km]</span>
-
-    <span class="c1"># Time constants</span>
-
-    <span class="n">MJD_0</span> <span class="o">=</span> <span class="mf">2400000.5</span>
-
-<div class="viewcode-block" id="SGP4_module_wrapper.__init__"><a class="viewcode-back" href="../../../_autodoc/sorts/propagator/sorts.propagator.pysgp4.SGP4_module_wrapper.__init__.html#sorts.propagator.pysgp4.SGP4_module_wrapper.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mjd_epoch</span><span class="p">,</span> <span class="n">mean_elements</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize SGP4 object from mean orbital elements and</span>
-<span class="sd">        ballistic coefficient</span>
-
-<span class="sd">        Creates a sgp4.model.Satellite object for mean element propagation</span>
-<span class="sd">        First all units are converted to the ones used for TLEs, then</span>
-<span class="sd">        they are modified to the sgp4 module standard.</span>
-<span class="sd">        </span>
-<span class="sd">        Input</span>
-<span class="sd">        -----</span>
-<span class="sd">        mjd_epoch     : epoch as Modified Julian Date (MJD)</span>
-<span class="sd">        mean_elements : [a0,e0,i0,raan0,aop0,M0]</span>
-<span class="sd">        B             : Ballistic coefficient ( 0.5*C_D*A/m )</span>
-<span class="sd">        </span>
-<span class="sd">        Remarks</span>
-<span class="sd">        -------</span>
-<span class="sd">        </span>
-<span class="sd">        This object is not usable for TLE generation, but only for propagation</span>
-<span class="sd">        as internal variables are modified by sgp4init.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">a0</span>     <span class="o">=</span> <span class="n">mean_elements</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>         <span class="c1"># Semi-major (a&#39;) at epoch [km]</span>
-        <span class="n">e0</span>     <span class="o">=</span> <span class="n">mean_elements</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>         <span class="c1"># Eccentricity at epoch</span>
-        <span class="n">i0</span>     <span class="o">=</span> <span class="n">mean_elements</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>         <span class="c1"># Inclination at epoch</span>
-        <span class="n">raan0</span>  <span class="o">=</span> <span class="n">mean_elements</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>         <span class="c1"># RA of the ascending node at epoch</span>
-        <span class="n">aop0</span>   <span class="o">=</span> <span class="n">mean_elements</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>         <span class="c1"># Argument of perigee at epoch</span>
-        <span class="n">M0</span>     <span class="o">=</span> <span class="n">mean_elements</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>         <span class="c1"># Mean anomaly at epoch</span>
-    
-        <span class="c1"># Compute ballistic coefficient</span>
-        <span class="n">bstar</span>  <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">B</span><span class="o">*</span><span class="n">SGP4_module_wrapper</span><span class="o">.</span><span class="n">RHO0</span> <span class="c1"># B* in [1/m]</span>
-        <span class="n">n0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">SGP4_module_wrapper</span><span class="o">.</span><span class="n">GM</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">a0</span><span class="o">**</span><span class="mf">1.5</span><span class="p">)</span>
-        
-        <span class="c1"># Scaling</span>
-        <span class="n">n0</span>    <span class="o">=</span> <span class="n">n0</span><span class="o">*</span><span class="p">(</span><span class="mf">86400.0</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span>          <span class="c1"># Convert to [rev/d]</span>
-        <span class="n">bstar</span> <span class="o">=</span> <span class="n">bstar</span><span class="o">*</span><span class="p">(</span><span class="n">SGP4_module_wrapper</span><span class="o">.</span><span class="n">R_EARTH</span><span class="o">*</span><span class="mf">1000.0</span><span class="p">)</span>     <span class="c1"># Convert from [1/m] to [1/R_EARTH]</span>
-    
-        <span class="c1"># Compute year and day of year</span>
-        <span class="n">d</span>   <span class="o">=</span> <span class="n">mjd_epoch</span> <span class="o">-</span> <span class="mf">16480.0</span>               <span class="c1"># Days since 1904 Jan 1.0</span>
-        <span class="n">y</span>   <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">/</span> <span class="mf">365.25</span><span class="p">)</span>                <span class="c1"># Number of years since 1904</span>
-        <span class="n">doy</span> <span class="o">=</span> <span class="n">d</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="mf">365.25</span><span class="o">*</span><span class="n">y</span><span class="p">)</span>                 <span class="c1"># Day of year</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">y</span><span class="o">%</span><span class="mi">4</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>
-            <span class="n">doy</span><span class="o">+=</span><span class="mf">1.0</span>
-                    
-        <span class="c1"># Create Satellite object and fill member variables</span>
-        <span class="n">sat</span> <span class="o">=</span> <span class="n">sgp4</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">Satellite</span><span class="p">()</span>
-        <span class="c1">#Unique satellite number given in the TLE file.</span>
-        <span class="n">sat</span><span class="o">.</span><span class="n">satnum</span> <span class="o">=</span> <span class="mi">12345</span>
-        <span class="c1">#Full four-digit year of this element set&#39;s epoch moment.</span>
-        <span class="n">sat</span><span class="o">.</span><span class="n">epochyr</span> <span class="o">=</span> <span class="mi">1904</span><span class="o">+</span><span class="n">y</span>
-        <span class="c1">#Fractional days into the year of the epoch moment.</span>
-        <span class="n">sat</span><span class="o">.</span><span class="n">epochdays</span> <span class="o">=</span> <span class="n">doy</span>
-        <span class="c1">#Julian date of the epoch (computed from epochyr and epochdays).</span>
-        <span class="n">sat</span><span class="o">.</span><span class="n">jdsatepoch</span> <span class="o">=</span> <span class="n">mjd_epoch</span> <span class="o">+</span> <span class="n">SGP4_module_wrapper</span><span class="o">.</span><span class="n">MJD_0</span>
-        
-        <span class="c1">#First time derivative of the mean motion (ignored by SGP4).</span>
-        <span class="c1">#sat.ndot</span>
-        <span class="c1">#Second time derivative of the mean motion (ignored by SGP4).</span>
-        <span class="c1">#sat.nddot</span>
-        <span class="c1">#Ballistic drag coefficient B* in inverse earth radii.</span>
-        <span class="n">sat</span><span class="o">.</span><span class="n">bstar</span> <span class="o">=</span> <span class="n">bstar</span>
-        <span class="c1">#Inclination in radians.</span>
-        <span class="n">sat</span><span class="o">.</span><span class="n">inclo</span> <span class="o">=</span> <span class="n">i0</span>
-        <span class="c1">#Right ascension of ascending node in radians.</span>
-        <span class="n">sat</span><span class="o">.</span><span class="n">nodeo</span> <span class="o">=</span> <span class="n">raan0</span>
-        <span class="c1">#Eccentricity.</span>
-        <span class="n">sat</span><span class="o">.</span><span class="n">ecco</span> <span class="o">=</span> <span class="n">e0</span>
-        <span class="c1">#Argument of perigee in radians.</span>
-        <span class="n">sat</span><span class="o">.</span><span class="n">argpo</span> <span class="o">=</span> <span class="n">aop0</span>
-        <span class="c1">#Mean anomaly in radians.</span>
-        <span class="n">sat</span><span class="o">.</span><span class="n">mo</span> <span class="o">=</span> <span class="n">M0</span>
-        <span class="c1">#Mean motion in radians per minute.</span>
-        <span class="n">sat</span><span class="o">.</span><span class="n">no</span> <span class="o">=</span> <span class="n">n0</span> <span class="o">/</span> <span class="p">(</span> <span class="mf">1440.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="p">)</span>
-        <span class="c1">#</span>
-        <span class="n">sat</span><span class="o">.</span><span class="n">whichconst</span> <span class="o">=</span> <span class="n">SGP4_module_wrapper</span><span class="o">.</span><span class="n">WGS</span>
-        
-        <span class="n">sat</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="nb">pow</span><span class="p">(</span> <span class="n">sat</span><span class="o">.</span><span class="n">no</span><span class="o">*</span><span class="n">SGP4_module_wrapper</span><span class="o">.</span><span class="n">WGS</span><span class="o">.</span><span class="n">tumin</span> <span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mf">2.0</span><span class="o">/</span><span class="mf">3.0</span><span class="p">)</span> <span class="p">)</span>
-        <span class="n">sat</span><span class="o">.</span><span class="n">alta</span> <span class="o">=</span> <span class="n">sat</span><span class="o">.</span><span class="n">a</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">sat</span><span class="o">.</span><span class="n">ecco</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1.0</span>
-        <span class="n">sat</span><span class="o">.</span><span class="n">altp</span> <span class="o">=</span> <span class="n">sat</span><span class="o">.</span><span class="n">a</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">sat</span><span class="o">.</span><span class="n">ecco</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1.0</span>
-    
-        <span class="n">sgp4</span><span class="o">.</span><span class="n">propagation</span><span class="o">.</span><span class="n">sgp4init</span><span class="p">(</span><span class="n">SGP4_module_wrapper</span><span class="o">.</span><span class="n">WGS</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">,</span> \
-            <span class="n">sat</span><span class="o">.</span><span class="n">satnum</span><span class="p">,</span> <span class="n">sat</span><span class="o">.</span><span class="n">jdsatepoch</span><span class="o">-</span><span class="mf">2433281.5</span><span class="p">,</span> <span class="n">sat</span><span class="o">.</span><span class="n">bstar</span><span class="p">,</span>\
-            <span class="n">sat</span><span class="o">.</span><span class="n">ecco</span><span class="p">,</span> <span class="n">sat</span><span class="o">.</span><span class="n">argpo</span><span class="p">,</span> <span class="n">sat</span><span class="o">.</span><span class="n">inclo</span><span class="p">,</span> <span class="n">sat</span><span class="o">.</span><span class="n">mo</span><span class="p">,</span> <span class="n">sat</span><span class="o">.</span><span class="n">no</span><span class="p">,</span>\
-            <span class="n">sat</span><span class="o">.</span><span class="n">nodeo</span><span class="p">,</span> <span class="n">sat</span><span class="p">)</span>
-
-        <span class="c1"># Store satellite object and epoch</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sat</span>       <span class="o">=</span> <span class="n">sat</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mjd_epoch</span> <span class="o">=</span> <span class="n">mjd_epoch</span></div>
-        
-<div class="viewcode-block" id="SGP4_module_wrapper.state"><a class="viewcode-back" href="../../../_autodoc/sorts/propagator/sorts.propagator.pysgp4.SGP4_module_wrapper.state.html#sorts.propagator.pysgp4.SGP4_module_wrapper.state">[docs]</a>    <span class="k">def</span> <span class="nf">state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mjd</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Inertial position and velocity ([m], [m/s]) at epoch mjd</span>
-<span class="sd">        </span>
-
-<span class="sd">        :param float mjd: epoch where satellite should be propagated to</span>
-<span class="sd">        </span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># minutes since reference epoch</span>
-        <span class="n">m</span> <span class="o">=</span> <span class="p">(</span><span class="n">mjd</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mjd_epoch</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1440.0</span>
-        <span class="n">r</span><span class="p">,</span><span class="n">v</span> <span class="o">=</span> <span class="n">sgp4</span><span class="o">.</span><span class="n">propagation</span><span class="o">.</span><span class="n">sgp4</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sat</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
-        <span class="c1"># print(r,v)</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">r</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">v</span><span class="p">)))</span><span class="o">*</span><span class="mf">1e3</span></div></div>
-
-
-
-<div class="viewcode-block" id="sgp4_propagation"><a class="viewcode-back" href="../../../_autodoc/sorts/propagator/sorts.propagator.pysgp4.sgp4_propagation.html#sorts.propagator.pysgp4.sgp4_propagation">[docs]</a><span class="k">def</span> <span class="nf">sgp4_propagation</span><span class="p">(</span> <span class="n">mjd_epoch</span><span class="p">,</span> <span class="n">mean_elements</span><span class="p">,</span> <span class="n">B</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Lazy SGP4 propagation using SGP4 class</span>
-<span class="sd">    </span>
-<span class="sd">    Create a satellite object from mean elements and propagate it</span>
-
-<span class="sd">    :param list/numpy.ndarray mean_elements : [a0,e0,i0,raan0,aop0,M0]</span>
-<span class="sd">    :param float B: Ballistic coefficient ( 0.5*C_D*A/m )</span>
-<span class="sd">    :param float dt: Time difference w.r.t. element epoch in seconds</span>
-<span class="sd">    :param float mjd_epoch: Epoch of elements as Modified Julian Date (MJD) Can be ignored if the exact epoch is unimportant.</span>
-<span class="sd">    :param str method: Forces use of SGP4 or SDP4 depending on string &#39;n&#39; or &#39;d&#39;</span>
-<span class="sd">    </span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">mjd_</span> <span class="o">=</span> <span class="n">mjd_epoch</span> <span class="o">+</span> <span class="n">dt</span> <span class="o">/</span> <span class="mf">86400.0</span>
-    <span class="n">obj</span> <span class="o">=</span> <span class="n">SGP4_module_wrapper</span><span class="p">(</span><span class="n">mjd_epoch</span><span class="p">,</span> <span class="n">mean_elements</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">method</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">]:</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">sat</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">method</span>
-    <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">mjd_</span><span class="p">)</span></div>
-    
 
 
 <div class="viewcode-block" id="SGP4"><a class="viewcode-back" href="../../../_autodoc/sorts/propagator/sorts.propagator.pysgp4.SGP4.html#sorts.propagator.pysgp4.SGP4">[docs]</a><span class="k">class</span> <span class="nc">SGP4</span><span class="p">(</span><span class="n">Propagator</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Propagator class implementing the SGP4 propagator.</span>
 
-<span class="sd">    :ivar bool polar_motion: Determines if polar motion should be used in calculating ITRF frame.</span>
-<span class="sd">    :ivar str out_frame: String identifying the output frame. Options are &#39;ITRF&#39; or &#39;TEME&#39;.</span>
+<span class="sd">    Frame options are found in the `sorts.frames.convert` function.</span>
 
-<span class="sd">    :param bool polar_motion: Determines if polar motion should be used in calculating ITRF frame.</span>
-<span class="sd">    :param str out_frame: String identifying the output frame. Options are &#39;ITRF&#39; or &#39;TEME&#39;.</span>
+<span class="sd">    :ivar str in_frame: String identifying the input frame. </span>
+<span class="sd">    :ivar str out_frame: String identifying the output frame. </span>
+
+<span class="sd">    :param str in_frame: String identifying the input frame.</span>
+<span class="sd">    :param str out_frame: String identifying the output frame. </span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
-    <span class="n">DEFAULT_SETTINGS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-        <span class="n">out_frame</span> <span class="o">=</span> <span class="s1">&#39;ITRF&#39;</span><span class="p">,</span>
-        <span class="n">polar_motion</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">polar_motion_model</span> <span class="o">=</span> <span class="s1">&#39;80&#39;</span><span class="p">,</span>
+    <span class="n">DEFAULT_SETTINGS</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">Propagator</span><span class="o">.</span><span class="n">DEFAULT_SETTINGS</span><span class="p">)</span>
+    <span class="n">DEFAULT_SETTINGS</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">out_frame</span> <span class="o">=</span> <span class="s1">&#39;TEME&#39;</span><span class="p">,</span>
+            <span class="n">in_frame</span> <span class="o">=</span> <span class="s1">&#39;TEME&#39;</span><span class="p">,</span>
+            <span class="n">gravity_model</span> <span class="o">=</span> <span class="s1">&#39;WGS84&#39;</span><span class="p">,</span>
+            <span class="n">TEME_to_TLE_max_iter</span> <span class="o">=</span> <span class="mi">300</span><span class="p">,</span>
+            <span class="n">tle_input</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
     <span class="p">)</span>
-
-
-    <span class="k">def</span> <span class="nf">_check_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">key_s</span><span class="p">,</span> <span class="n">val_s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">key_s</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">SGP4</span><span class="o">.</span><span class="n">DEFAULT_SETTINGS</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;Setting &quot;</span><span class="si">{}</span><span class="s1">&quot; does not exist&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key_s</span><span class="p">))</span>
-            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">SGP4</span><span class="o">.</span><span class="n">DEFAULT_SETTINGS</span><span class="p">[</span><span class="n">key_s</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">type</span><span class="p">(</span><span class="n">val_s</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Setting &quot;</span><span class="si">{}</span><span class="s1">&quot; does not support &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key_s</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">val_s</span><span class="p">)))</span>
-
+    
 
 <div class="viewcode-block" id="SGP4.__init__"><a class="viewcode-back" href="../../../_autodoc/sorts/propagator/sorts.propagator.pysgp4.SGP4.__init__.html#sorts.propagator.pysgp4.SGP4.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">SGP4</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
+        <span class="nb">super</span><span class="p">(</span><span class="n">SGP4</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;sorts.propagator.SGP4:init&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;sorts.propagator.SGP4:init&#39;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">SGP4</span><span class="o">.</span><span class="n">DEFAULT_SETTINGS</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">settings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_check_settings</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sgp4_mjd0</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="s1">&#39;1949-12-31 00:00:00&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;iso&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;ut1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">mjd</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rho0</span> <span class="o">=</span> <span class="mf">2.461e-8</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">grav_ind</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sgp4</span><span class="o">.</span><span class="n">api</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;gravity_model&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grav_model</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sgp4</span><span class="o">.</span><span class="n">earth_gravity</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;gravity_model&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="SGP4.get_TLE_parameters"><a class="viewcode-back" href="../../../_autodoc/sorts/propagator/sorts.propagator.pysgp4.SGP4.get_TLE_parameters.html#sorts.propagator.pysgp4.SGP4.get_TLE_parameters">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_TLE_parameters</span><span class="p">(</span><span class="n">line1</span><span class="p">,</span> <span class="n">line2</span><span class="p">,</span> <span class="n">gravity_model</span> <span class="o">=</span> <span class="s1">&#39;WGS84&#39;</span><span class="p">):</span>
+        <span class="n">grav_ind</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sgp4</span><span class="o">.</span><span class="n">api</span><span class="p">,</span> <span class="n">gravity_model</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+        <span class="n">satellite</span> <span class="o">=</span> <span class="n">Satrec</span><span class="o">.</span><span class="n">twoline2rv</span><span class="p">(</span><span class="n">line1</span><span class="p">,</span> <span class="n">line2</span><span class="p">,</span> <span class="n">grav_ind</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;bstar&#39;</span><span class="p">,</span> <span class="s1">&#39;satnum&#39;</span><span class="p">,</span> <span class="s1">&#39;jdsatepochF&#39;</span><span class="p">,</span> <span class="s1">&#39;jdsatepoch&#39;</span><span class="p">]:</span>
+            <span class="n">ret</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">satellite</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+
+<div class="viewcode-block" id="SGP4.propagate_tle"><a class="viewcode-back" href="../../../_autodoc/sorts/propagator/sorts.propagator.pysgp4.SGP4.propagate_tle.html#sorts.propagator.pysgp4.SGP4.propagate_tle">[docs]</a>    <span class="k">def</span> <span class="nf">propagate_tle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">line1</span><span class="p">,</span> <span class="n">line2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Propagate a TLE pair</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">satellite</span> <span class="o">=</span> <span class="n">Satrec</span><span class="o">.</span><span class="n">twoline2rv</span><span class="p">(</span><span class="n">line1</span><span class="p">,</span> <span class="n">line2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grav_ind</span><span class="p">)</span>
+
+        <span class="n">epoch</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="n">satellite</span><span class="o">.</span><span class="n">jdsatepoch</span> <span class="o">+</span> <span class="n">satellite</span><span class="o">.</span><span class="n">jdsatepochF</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;jd&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;utc&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SGP4:settings:</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SGP4:propagate_tle:epoch=</span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">t</span><span class="p">,</span> <span class="n">epoch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_time</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">epoch</span><span class="p">)</span>
+        <span class="n">times</span> <span class="o">=</span> <span class="n">epoch</span> <span class="o">+</span> <span class="n">t</span>
+        
+        <span class="n">states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span><span class="n">t</span><span class="o">.</span><span class="n">size</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;SGP4:propagate_tle:steps&#39;</span><span class="p">)</span>
+
+        <span class="n">errors</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">satellite</span><span class="o">.</span><span class="n">sgp4_array</span><span class="p">(</span><span class="n">times</span><span class="o">.</span><span class="n">jd1</span><span class="p">,</span> <span class="n">times</span><span class="o">.</span><span class="n">jd2</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">err</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">errors</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SGP4:propagate_tle:step-</span><span class="si">{</span><span class="n">ind</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">SGP4_ERRORS</span><span class="p">[</span><span class="n">err</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">states</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span><span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">T</span><span class="o">*</span><span class="mf">1e3</span> <span class="c1">#km to m</span>
+        <span class="n">states</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span><span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">T</span><span class="o">*</span><span class="mf">1e3</span> <span class="c1">#km/s to m</span>
+
+        <span class="n">states</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span>
+            <span class="n">times</span><span class="p">,</span> 
+            <span class="n">states</span><span class="p">,</span> 
+            <span class="n">in_frame</span><span class="o">=</span><span class="s1">&#39;TEME&#39;</span><span class="p">,</span>
+            <span class="n">out_frame</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;out_frame&#39;</span><span class="p">],</span>
+            <span class="n">profiler</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="p">,</span>
+            <span class="n">logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;SGP4:propagate_tle:steps&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">states</span></div>
 
 
-<div class="viewcode-block" id="SGP4.propagate"><a class="viewcode-back" href="../../../_autodoc/sorts/propagator/sorts.propagator.pysgp4.SGP4.propagate.html#sorts.propagator.pysgp4.SGP4.propagate">[docs]</a>    <span class="k">def</span> <span class="nf">propagate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">state0</span><span class="p">,</span> <span class="n">mjd0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="SGP4.propagate"><a class="viewcode-back" href="../../../_autodoc/sorts/propagator/sorts.propagator.pysgp4.SGP4.propagate.html#sorts.propagator.pysgp4.SGP4.propagate">[docs]</a>    <span class="k">def</span> <span class="nf">propagate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">state0</span><span class="p">,</span> <span class="n">epoch</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Propagate a state</span>
+
+<span class="sd">        #TODO: UPDATE THIS DOCSTRING</span>
 
 <span class="sd">        All state-vector are given in SI units.</span>
 
@@ -290,8 +190,8 @@
 
 <span class="sd">        The input frame is ECI (TEME) for orbital elements and Cartesian. The output frame is as standard ECEF (ITRF). But can be set to TEME.</span>
 
-<span class="sd">        :param float/list/numpy.ndarray t: Time in seconds to propagate relative the initial state epoch.</span>
-<span class="sd">        :param float mjd0: The epoch of the initial state in fractional Julian Days.</span>
+<span class="sd">        :param float/list/numpy.ndarray/astropy.time.TimeDelta t: Time to propagate relative the initial state epoch.</span>
+<span class="sd">        :param float/astropy.time.Time epoch: The epoch of the initial state.</span>
 <span class="sd">        :param numpy.ndarray state0: 6-D Cartesian state vector in SI-units.</span>
 <span class="sd">        :param float B: Ballistic coefficient</span>
 <span class="sd">        :param float C_D: Drag coefficient</span>
@@ -303,70 +203,287 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;SGP4:propagate&#39;</span><span class="p">)</span>
-
-        <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_numpy</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
-
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SGP4:propagate:len(t) = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SGP4:propagate:len(t) = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="s1">&#39;B&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="n">B</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;tle_input&#39;</span><span class="p">]:</span>
+            <span class="n">line1</span><span class="p">,</span> <span class="n">line2</span> <span class="o">=</span> <span class="n">state0</span>
+            <span class="n">states</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagate_tle</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">line1</span><span class="p">,</span> <span class="n">line2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">B</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;C_D&#39;</span><span class="p">,</span><span class="mf">2.3</span><span class="p">)</span><span class="o">*</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span><span class="o">/</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SGP4:propagate:B = </span><span class="si">{</span><span class="n">B</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
-        <span class="n">mean_elements</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">TEME_to_TLE</span><span class="p">(</span><span class="n">state0</span><span class="p">,</span> <span class="n">mjd0</span><span class="o">=</span><span class="n">mjd0</span><span class="p">,</span> <span class="n">kepler</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">mean_elements</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Could not compute SGP4 initial state: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mean_elements</span><span class="p">))</span>
-
-        <span class="c1"># Create own SGP4 object</span>
-        <span class="n">obj</span> <span class="o">=</span> <span class="n">SGP4_module_wrapper</span><span class="p">(</span><span class="n">mjd0</span><span class="p">,</span> <span class="n">mean_elements</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
-
-        <span class="n">mjdates</span> <span class="o">=</span> <span class="n">mjd0</span> <span class="o">+</span> <span class="n">t</span><span class="o">/</span><span class="mf">86400.0</span>
-        <span class="n">pos</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span><span class="n">t</span><span class="o">.</span><span class="n">size</span><span class="p">])</span>
-        <span class="n">vel</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span><span class="n">t</span><span class="o">.</span><span class="n">size</span><span class="p">])</span>
-
-        <span class="k">for</span> <span class="n">mi</span><span class="p">,</span><span class="n">mjd</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mjdates</span><span class="p">):</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;SGP4:propagate:step&#39;</span><span class="p">)</span>
-
-            <span class="n">y</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">mjd</span><span class="p">)</span>
-            <span class="n">pos</span><span class="p">[:,</span><span class="n">mi</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
-            <span class="n">vel</span><span class="p">[:,</span><span class="n">mi</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
-
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;SGP4:propagate:step&#39;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;out_frame&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;TEME&#39;</span><span class="p">:</span>
-            <span class="n">states</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span><span class="n">t</span><span class="o">.</span><span class="n">size</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-            <span class="n">states</span><span class="p">[:</span><span class="mi">3</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">pos</span>
-            <span class="n">states</span><span class="p">[</span><span class="mi">3</span><span class="p">:,:]</span> <span class="o">=</span> <span class="n">vel</span>
-            
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;out_frame&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;ITRF&#39;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;polar_motion&#39;</span><span class="p">]:</span>
-                <span class="n">PM_data</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">get_polar_motion</span><span class="p">(</span><span class="n">dates</span><span class="o">.</span><span class="n">mjd_to_jd</span><span class="p">(</span><span class="n">mjdates</span><span class="p">))</span>
-                <span class="n">xp</span> <span class="o">=</span> <span class="n">PM_data</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">xp</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">xp</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
-                <span class="n">yp</span> <span class="o">=</span> <span class="n">PM_data</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
-                <span class="n">yp</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">yp</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
-
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">state0</span><span class="p">,</span> <span class="n">pyorb</span><span class="o">.</span><span class="n">Orbit</span><span class="p">):</span>
+                <span class="n">state0_cart</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">state0</span><span class="o">.</span><span class="n">cartesian</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">xp</span> <span class="o">=</span> <span class="mf">0.0</span>
-                <span class="n">yp</span> <span class="o">=</span> <span class="mf">0.0</span>
+                <span class="n">state0_cart</span> <span class="o">=</span> <span class="n">state0</span>
 
-            <span class="n">states</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">TEME_to_ECEF</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">vel</span><span class="p">,</span> <span class="n">mjd0</span><span class="o">=</span><span class="n">mjd0</span><span class="p">,</span> <span class="n">xp</span><span class="o">=</span><span class="n">xp</span><span class="p">,</span> <span class="n">yp</span><span class="o">=</span><span class="n">yp</span> <span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;polar_motion_model&#39;</span><span class="p">])</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Output frame </span><span class="si">{}</span><span class="s1"> not found&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_frame</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">epoch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Need epoch when propagating state and not TLE&#39;</span><span class="p">)</span>
+
+            <span class="n">t</span><span class="p">,</span> <span class="n">epoch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_time</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">epoch</span><span class="p">)</span>
+
+            <span class="n">epoch0</span> <span class="o">=</span> <span class="n">epoch</span><span class="o">.</span><span class="n">mjd</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">sgp4_mjd0</span>
+            <span class="n">times</span> <span class="o">=</span> <span class="n">epoch</span> <span class="o">+</span> <span class="n">t</span>
+
+
+            <span class="k">if</span> <span class="s1">&#39;B&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">B</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">B</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;C_D&#39;</span><span class="p">,</span><span class="mf">2.3</span><span class="p">)</span><span class="o">*</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span><span class="o">/</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SGP4:propagate:B = </span><span class="si">{</span><span class="n">B</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="n">state0_cart</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span>
+                <span class="n">epoch</span><span class="p">,</span> 
+                <span class="n">state0_cart</span><span class="p">,</span> 
+                <span class="n">in_frame</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;in_frame&#39;</span><span class="p">],</span> 
+                <span class="n">out_frame</span><span class="o">=</span><span class="s1">&#39;TEME&#39;</span><span class="p">,</span>
+                <span class="n">profiler</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="p">,</span>
+                <span class="n">logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">mean_elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">TEME_to_TLE</span><span class="p">(</span><span class="n">state0_cart</span><span class="p">,</span> <span class="n">epoch</span><span class="o">=</span><span class="n">epoch</span><span class="p">,</span> <span class="n">B</span><span class="o">=</span><span class="n">B</span><span class="p">,</span> <span class="n">kepler</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">mean_elements</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Could not compute SGP4 initial state: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mean_elements</span><span class="p">))</span>
+
+            <span class="n">states</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagate_mean_elements</span><span class="p">(</span><span class="n">times</span><span class="o">.</span><span class="n">jd1</span><span class="p">,</span> <span class="n">times</span><span class="o">.</span><span class="n">jd2</span><span class="p">,</span> <span class="n">mean_elements</span><span class="p">,</span> <span class="n">epoch0</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+            <span class="n">states</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span>
+                <span class="n">times</span><span class="p">,</span> 
+                <span class="n">states</span><span class="p">,</span> 
+                <span class="n">in_frame</span><span class="o">=</span><span class="s1">&#39;TEME&#39;</span><span class="p">,</span>
+                <span class="n">out_frame</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;out_frame&#39;</span><span class="p">],</span>
+                <span class="n">profiler</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="p">,</span>
+                <span class="n">logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;SGP4:propagate&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SGP4:propagate:completed&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SGP4:propagate:completed&#39;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">states</span></div></div>
+        <span class="k">return</span> <span class="n">states</span></div>
+
+
+<div class="viewcode-block" id="SGP4.propagate_mean_elements"><a class="viewcode-back" href="../../../_autodoc/sorts/propagator/sorts.propagator.pysgp4.SGP4.propagate_mean_elements.html#sorts.propagator.pysgp4.SGP4.propagate_mean_elements">[docs]</a>    <span class="k">def</span> <span class="nf">propagate_mean_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jd0</span><span class="p">,</span> <span class="n">jd_f</span><span class="p">,</span> <span class="n">mean_elements</span><span class="p">,</span> <span class="n">epoch0</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Propagate sgp4 mean elements.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Compute ballistic coefficient</span>
+        <span class="n">bstar</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">B</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">rho0</span> <span class="c1"># B* in [1/m] using Density at q0[kg/m^3]</span>
+        <span class="n">n0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grav_model</span><span class="o">.</span><span class="n">mu</span><span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="n">mean_elements</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mf">1.5</span><span class="p">)</span>
+        
+        <span class="c1"># Scaling</span>
+        <span class="n">n0</span> <span class="o">=</span> <span class="n">n0</span><span class="o">*</span><span class="p">(</span><span class="mf">86400.0</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span> <span class="c1"># Convert to [rev/d]</span>
+        <span class="n">bstar</span> <span class="o">=</span> <span class="n">bstar</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grav_model</span><span class="o">.</span><span class="n">radiusearthkm</span><span class="o">*</span><span class="mf">1e3</span><span class="p">)</span>     <span class="c1"># Convert from [1/m] to [1/R_EARTH]</span>
+    
+
+        <span class="n">satellite</span> <span class="o">=</span> <span class="n">Satrec</span><span class="p">()</span>
+        <span class="n">satellite</span><span class="o">.</span><span class="n">sgp4init</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grav_ind</span><span class="p">,</span> <span class="c1"># gravity model</span>
+            <span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="c1"># &#39;a&#39; = old AFSPC mode, &#39;i&#39; = improved mode</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;oid&#39;</span><span class="p">,</span><span class="mi">42</span><span class="p">)),</span> <span class="c1"># satnum: Satellite number</span>
+            <span class="n">epoch0</span><span class="p">,</span> <span class="c1"># epoch: days since 1949 December 31 00:00 UT</span>
+            <span class="n">bstar</span><span class="p">,</span> <span class="c1"># bstar: drag coefficient (/earth radii)</span>
+            <span class="mf">0.0</span><span class="p">,</span> <span class="c1">#[IGNORED BY SGP4] ndot: ballistic coefficient (revs/day) </span>
+            <span class="mf">0.0</span><span class="p">,</span> <span class="c1">#[IGNORED BY SGP4] nddot: second derivative of mean motion (revs/day^3)</span>
+            <span class="n">mean_elements</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="c1"># ecco: eccentricity</span>
+            <span class="n">mean_elements</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="c1"># argpo: argument of perigee (radians)</span>
+            <span class="n">mean_elements</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="c1"># inclo: inclination (radians)</span>
+            <span class="n">mean_elements</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="c1"># mo: mean anomaly (radians)</span>
+            <span class="n">n0</span><span class="o">/</span><span class="p">(</span><span class="mf">1440.0</span><span class="o">/</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)),</span> <span class="c1"># no_kozai: mean motion (radians/minute)</span>
+            <span class="n">mean_elements</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="c1"># nodeo: right ascension of ascending node (radians)</span>
+        <span class="p">)</span>
+
+        <span class="n">logger_profiler_on</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;logger_profiler_on&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">logger_profiler_on</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;SGP4:propagate:steps&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">jd_f</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">jd_f</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">6</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+            <span class="n">error</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">satellite</span><span class="o">.</span><span class="n">sgp4</span><span class="p">(</span><span class="n">jd0</span><span class="p">,</span> <span class="n">jd_f</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">logger_profiler_on</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">error</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SGP4:propagate:step-</span><span class="si">{</span><span class="n">ind</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">SGP4_ERRORS</span><span class="p">[</span><span class="n">error</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="n">states</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span>
+            <span class="n">states</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span> <span class="o">=</span> <span class="n">v</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span><span class="n">jd_f</span><span class="o">.</span><span class="n">size</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+            <span class="n">errors</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">satellite</span><span class="o">.</span><span class="n">sgp4_array</span><span class="p">(</span><span class="n">jd0</span><span class="p">,</span> <span class="n">jd_f</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">logger_profiler_on</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">err</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">errors</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SGP4:propagate:step-</span><span class="si">{</span><span class="n">ind</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">SGP4_ERRORS</span><span class="p">[</span><span class="n">err</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="n">states</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span><span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">states</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span><span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">T</span>
+
+
+        <span class="n">states</span> <span class="o">*=</span> <span class="mf">1e3</span> <span class="c1">#km to m and km/s to m/s</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">logger_profiler_on</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;SGP4:propagate:steps&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">states</span></div>
+
+
+
+<div class="viewcode-block" id="SGP4.TEME_to_TLE_OPTIM"><a class="viewcode-back" href="../../../_autodoc/sorts/propagator/sorts.propagator.pysgp4.SGP4.TEME_to_TLE_OPTIM.html#sorts.propagator.pysgp4.SGP4.TEME_to_TLE_OPTIM">[docs]</a>    <span class="k">def</span> <span class="nf">TEME_to_TLE_OPTIM</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">B</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">kepler</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span> <span class="n">tol_v</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Convert osculating orbital elements in TEME</span>
+<span class="sd">        to mean elements used in two line element sets (TLE&#39;s).</span>
+
+<span class="sd">        :param numpy.ndarray kep: Osculating State (position and velocity) vector in m and m/s, TEME frame. If :code:`kepler = True` then state is osculating orbital elements, in m and radians. Orbital elements are semi major axis (m), orbital eccentricity, orbital inclination (radians), right ascension of ascending node (radians), argument of perigee (radians), mean anomaly (radians)</span>
+<span class="sd">        :param bool kepler: Indicates if input state is kepler elements or cartesian.</span>
+<span class="sd">        :param float epoch0: Epoch in days since 1949 December 31 00:00 UT</span>
+<span class="sd">        :param float tol: Wanted precision in position of mean element conversion in m.</span>
+<span class="sd">        :param float tol_v: Wanted precision in velocity mean element conversion in m/s.</span>
+<span class="sd">        :return: mean elements of: semi major axis (km), orbital eccentricity, orbital inclination (radians), right ascension of ascending node (radians), argument of perigee (radians), mean anomaly (radians)</span>
+<span class="sd">        :rtype: numpy.ndarray</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;SGP4:TEME_to_TLE_OPTIM&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SGP4:TEME_to_TLE_OPTIM&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">kepler</span><span class="p">:</span>
+            <span class="n">state_cart</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sgp4_elems2cart</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+            <span class="n">init_elements</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">state_cart</span> <span class="o">=</span> <span class="n">state</span>
+            <span class="n">init_elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cart2sgp4_elems</span><span class="p">(</span><span class="n">state_cart</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">find_mean_elems</span><span class="p">(</span><span class="n">mean_elements</span><span class="p">):</span>
+            <span class="c1"># Mean elements and osculating state</span>
+            <span class="n">state_osc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagate_mean_elements</span><span class="p">(</span><span class="n">epoch</span><span class="o">.</span><span class="n">jd1</span><span class="p">,</span> <span class="n">epoch</span><span class="o">.</span><span class="n">jd2</span><span class="p">,</span> <span class="n">mean_elements</span><span class="p">,</span> <span class="n">epoch</span><span class="o">.</span><span class="n">mjd</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">sgp4_mjd0</span><span class="p">,</span> <span class="n">B</span><span class="o">=</span><span class="n">B</span><span class="p">,</span> <span class="n">logger_profiler_on</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="c1"># Correction of mean state vector</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">state_cart</span> <span class="o">-</span> <span class="n">state_osc</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+
+        <span class="c1"># bounds = [(None, None), (0.0, 0.999), (None, None)] + [(None, None)]*3</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="p">[(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)]</span> <span class="o">+</span> <span class="p">[(</span><span class="mf">0.</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)]</span><span class="o">*</span><span class="mi">3</span>
+
+        <span class="n">opt_res</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">find_mean_elems</span><span class="p">,</span> <span class="n">init_elements</span><span class="p">,</span>
+            <span class="c1">#method=&#39;powell&#39;,</span>
+            <span class="n">method</span><span class="o">=</span><span class="s1">&#39;Nelder-Mead&#39;</span><span class="p">,</span>
+            <span class="c1"># method=&#39;L-BFGS-B&#39;,</span>
+            <span class="c1"># bounds=bounds,</span>
+            <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;ftol&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">tol</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">tol_v</span><span class="o">**</span><span class="mi">2</span><span class="p">)}</span>
+        <span class="p">)</span>
+        <span class="n">mean_elements</span> <span class="o">=</span> <span class="n">opt_res</span><span class="o">.</span><span class="n">x</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;SGP4:TEME_to_TLE_OPTIM&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SGP4:TEME_to_TLE_OPTIM:completed&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">mean_elements</span></div>
+
+
+<div class="viewcode-block" id="SGP4.TEME_to_TLE"><a class="viewcode-back" href="../../../_autodoc/sorts/propagator/sorts.propagator.pysgp4.SGP4.TEME_to_TLE.html#sorts.propagator.pysgp4.SGP4.TEME_to_TLE">[docs]</a>    <span class="k">def</span> <span class="nf">TEME_to_TLE</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">B</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">kepler</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span> <span class="n">tol_v</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Convert osculating orbital elements in TEME</span>
+<span class="sd">        to mean elements used in two line element sets (TLE&#39;s).</span>
+
+<span class="sd">        :param numpy.ndarray kep: Osculating State (position and velocity) vector in m and m/s, TEME frame. If :code:`kepler = True` then state is osculating orbital elements, in m and radians. Orbital elements are semi major axis (m), orbital eccentricity, orbital inclination (radians), right ascension of ascending node (radians), argument of perigee (radians), mean anomaly (radians)</span>
+<span class="sd">        :param bool kepler: Indicates if input state is kepler elements or cartesian.</span>
+<span class="sd">        :param astropy.time.Time epoch: Epoch of the orbit</span>
+<span class="sd">        :param float tol: Wanted precision in position of mean element conversion in m.</span>
+<span class="sd">        :param float tol_v: Wanted precision in velocity mean element conversion in m/s.</span>
+<span class="sd">        :return: mean elements of: semi major axis (km), orbital eccentricity, orbital inclination (radians), right ascension of ascending node (radians), argument of perigee (radians), mean anomaly (radians)</span>
+<span class="sd">        :rtype: numpy.ndarray</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;SGP4:TEME_to_TLE&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SGP4:TEME_to_TLE&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">kepler</span><span class="p">:</span>
+            <span class="n">state_mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sgp4_elems2cart</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+            <span class="n">state_kep</span> <span class="o">=</span> <span class="n">state</span>
+            <span class="n">state_cart</span> <span class="o">=</span> <span class="n">state_mean</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">state_mean</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">state_cart</span> <span class="o">=</span> <span class="n">state</span>
+            <span class="n">state_kep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cart2sgp4_elems</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+        <span class="n">iter_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;TEME_to_TLE_max_iter&#39;</span><span class="p">]</span>  <span class="c1"># Maximum number of iterations</span>
+
+        <span class="c1"># Iterative determination of mean elements</span>
+        <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iter_max</span><span class="p">):</span>
+            <span class="c1"># Mean elements and osculating state</span>
+            <span class="n">mean_elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cart2sgp4_elems</span><span class="p">(</span><span class="n">state_mean</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">it</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">mean_elements</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c1">#Assumptions of osculation within slope not working, go to general minimization algorithms</span>
+                <span class="n">mean_elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">TEME_to_TLE_OPTIM</span><span class="p">(</span><span class="n">state_cart</span><span class="p">,</span> <span class="n">epoch</span><span class="o">=</span><span class="n">epoch</span><span class="p">,</span> <span class="n">B</span><span class="o">=</span><span class="n">B</span><span class="p">,</span> <span class="n">kepler</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">,</span> <span class="n">tol_v</span><span class="o">=</span><span class="n">tol_v</span><span class="p">)</span>
+                <span class="k">break</span>
+
+            <span class="n">state_osc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagate_mean_elements</span><span class="p">(</span><span class="n">epoch</span><span class="o">.</span><span class="n">jd1</span><span class="p">,</span> <span class="n">epoch</span><span class="o">.</span><span class="n">jd2</span><span class="p">,</span> <span class="n">mean_elements</span><span class="p">,</span> <span class="n">epoch</span><span class="o">.</span><span class="n">mjd</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">sgp4_mjd0</span><span class="p">,</span> <span class="n">B</span><span class="o">=</span><span class="n">B</span><span class="p">,</span> <span class="n">logger_profiler_on</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="c1"># Correction of mean state vector</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">state_cart</span> <span class="o">-</span> <span class="n">state_osc</span>
+            <span class="n">state_mean</span> <span class="o">+=</span> <span class="n">d</span>
+            <span class="k">if</span> <span class="n">it</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">dr_old</span> <span class="o">=</span> <span class="n">dr</span>
+                <span class="n">dv_old</span> <span class="o">=</span> <span class="n">dv</span>
+
+            <span class="n">dr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">d</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span>  <span class="c1"># Position change</span>
+            <span class="n">dv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">3</span><span class="p">:])</span>  <span class="c1"># Velocity change</span>
+
+            <span class="k">if</span> <span class="n">it</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">dr_old</span> <span class="o">&lt;</span> <span class="n">dr</span> <span class="ow">or</span> <span class="n">dv_old</span> <span class="o">&lt;</span> <span class="n">dv</span><span class="p">:</span>
+                    <span class="c1">#Assumptions of osculation within slope not working, go to general minimization algorithms</span>
+                    <span class="n">mean_elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">TEME_to_TLE_OPTIM</span><span class="p">(</span><span class="n">state_cart</span><span class="p">,</span> <span class="n">epoch</span><span class="o">=</span><span class="n">epoch</span><span class="p">,</span> <span class="n">B</span><span class="o">=</span><span class="n">B</span><span class="p">,</span> <span class="n">kepler</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">,</span> <span class="n">tol_v</span><span class="o">=</span><span class="n">tol_v</span><span class="p">)</span>
+                    <span class="k">break</span>
+
+            <span class="k">if</span> <span class="n">dr</span> <span class="o">&lt;</span> <span class="n">tol</span> <span class="ow">and</span> <span class="n">dv</span> <span class="o">&lt;</span> <span class="n">tol_v</span><span class="p">:</span>   <span class="c1"># Iterate until position changes by less than eps</span>
+                <span class="k">break</span>
+            <span class="k">if</span> <span class="n">it</span> <span class="o">==</span> <span class="n">iter_max</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c1">#Iterative method not working, go to general minimization algorithms</span>
+                <span class="n">mean_elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">TEME_to_TLE_OPTIM</span><span class="p">(</span><span class="n">state_cart</span><span class="p">,</span> <span class="n">epoch</span><span class="o">=</span><span class="n">epoch</span><span class="p">,</span> <span class="n">B</span><span class="o">=</span><span class="n">B</span><span class="p">,</span> <span class="n">kepler</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">,</span> <span class="n">tol_v</span><span class="o">=</span><span class="n">tol_v</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;SGP4:TEME_to_TLE&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SGP4:TEME_to_TLE:completed&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">mean_elements</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_sgp4_elems2cart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kep</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Orbital elements to cartesian coordinates. Wrap pyorb-function to use mean anomaly, km and reversed order on aoe and raan. Output in SI.</span>
+<span class="sd">        </span>
+<span class="sd">        Neglecting mass is sufficient for this calculation (the standard gravitational parameter is 24 orders larger then the change).</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_kep</span> <span class="o">=</span> <span class="n">kep</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">_kep</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*=</span> <span class="mf">1e3</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">_kep</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+        <span class="n">_kep</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">_kep</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">_kep</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp</span>
+        <span class="n">_kep</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">pyorb</span><span class="o">.</span><span class="n">mean_to_true</span><span class="p">(</span><span class="n">_kep</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">_kep</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">degrees</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">cart</span> <span class="o">=</span> <span class="n">pyorb</span><span class="o">.</span><span class="n">kep_to_cart</span><span class="p">(</span><span class="n">kep</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grav_model</span><span class="o">.</span><span class="n">mu</span><span class="o">*</span><span class="mf">1e9</span><span class="p">,</span> <span class="n">degrees</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cart</span>
+
+    <span class="k">def</span> <span class="nf">_cart2sgp4_elems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cart</span><span class="p">,</span> <span class="n">degrees</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Cartesian coordinates to orbital elements. Wrap pyorb-function to use mean anomaly, km and reversed order on aoe and raan.</span>
+<span class="sd">        </span>
+<span class="sd">        Neglecting mass is sufficient for this calculation (the standard gravitational parameter is 24 orders larger then the change).</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">kep</span> <span class="o">=</span> <span class="n">pyorb</span><span class="o">.</span><span class="n">cart_to_kep</span><span class="p">(</span><span class="n">cart</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grav_model</span><span class="o">.</span><span class="n">mu</span><span class="o">*</span><span class="mf">1e9</span><span class="p">,</span> <span class="n">degrees</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">kep</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*=</span> <span class="mf">1e-3</span>
+        <span class="n">tmp</span> <span class="o">=</span> <span class="n">kep</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+        <span class="n">kep</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">kep</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">kep</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp</span>
+        <span class="n">kep</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">pyorb</span><span class="o">.</span><span class="n">true_to_mean</span><span class="p">(</span><span class="n">kep</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">kep</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">degrees</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">kep</span></div>
 </pre></div>
 
           </div>
@@ -383,7 +500,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

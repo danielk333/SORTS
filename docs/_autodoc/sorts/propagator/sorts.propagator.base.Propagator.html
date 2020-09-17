@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Propagator &#8212; SORTS 3.13.0 documentation</title>
+    <title>Propagator &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.propagator.base.html" title="base"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.propagator.base.html" accesskey="U">base</a> &#187;</li> 
       </ul>
@@ -85,7 +85,7 @@
 <h1>Propagator<a class="headerlink" href="#propagator" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt id="sorts.propagator.base.Propagator">
-<em class="property">class </em><code class="sig-prename descclassname">sorts.propagator.base.</code><code class="sig-name descname">Propagator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">profiler</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">logger</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/propagator/base.html#Propagator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.propagator.base.Propagator" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">sorts.propagator.base.</code><code class="sig-name descname">Propagator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">settings</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">profiler</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">logger</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/propagator/base.html#Propagator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.propagator.base.Propagator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
 <p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
@@ -94,13 +94,16 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.base.Propagator.__init__.html#sorts.propagator.base.Propagator.__init__" title="sorts.propagator.base.Propagator.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([profiler, logger])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.base.Propagator.__init__.html#sorts.propagator.base.Propagator.__init__" title="sorts.propagator.base.Propagator.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([settings, profiler, logger])</p></td>
 <td><p>Initialize self.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.propagator.base.Propagator.propagate.html#sorts.propagator.base.Propagator.propagate" title="sorts.propagator.base.Propagator.propagate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">propagate</span></code></a>(t, state0, mjd0, **kwargs)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.propagator.base.Propagator.convert_time.html#sorts.propagator.base.Propagator.convert_time" title="sorts.propagator.base.Propagator.convert_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_time</span></code></a>(t, epoch)</p></td>
+<td><p>Convert input time and epoch variables to <code class="code docutils literal notranslate"><span class="pre">astropy.TimeDelta</span></code> and <code class="code docutils literal notranslate"><span class="pre">astropy.Time</span></code> variables of the correct format and scale.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.base.Propagator.propagate.html#sorts.propagator.base.Propagator.propagate" title="sorts.propagator.base.Propagator.propagate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">propagate</span></code></a>(t, state0, epoch, **kwargs)</p></td>
 <td><p>Propagate a state</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.base.Propagator.settings.html#sorts.propagator.base.Propagator.settings" title="sorts.propagator.base.Propagator.settings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">settings</span></code></a>(**kwargs)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.propagator.base.Propagator.set.html#sorts.propagator.base.Propagator.set" title="sorts.propagator.base.Propagator.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code></a>(**kwargs)</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -142,7 +145,7 @@
         <li class="right" >
           <a href="sorts.propagator.base.html" title="base"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.propagator.base.html" >base</a> &#187;</li> 
       </ul>

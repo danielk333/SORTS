@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>SGP4.propagate &#8212; SORTS 3.13.0 documentation</title>
+    <title>SGP4.propagate &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -21,8 +21,8 @@
     <script src="../../../_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="SGP4.settings" href="sorts.propagator.pysgp4.SGP4.settings.html" />
-    <link rel="prev" title="SGP4.__init__" href="sorts.propagator.pysgp4.SGP4.__init__.html" />
+    <link rel="next" title="SGP4.propagate_mean_elements" href="sorts.propagator.pysgp4.SGP4.propagate_mean_elements.html" />
+    <link rel="prev" title="SGP4.get_TLE_parameters" href="sorts.propagator.pysgp4.SGP4.get_TLE_parameters.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--[if lt IE 9]>
     <script src="_static/css3-mediaqueries.js"></script>
@@ -38,12 +38,12 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="sorts.propagator.pysgp4.SGP4.settings.html" title="SGP4.settings"
+          <a href="sorts.propagator.pysgp4.SGP4.propagate_mean_elements.html" title="SGP4.propagate_mean_elements"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="sorts.propagator.pysgp4.SGP4.__init__.html" title="SGP4.__init__"
+          <a href="sorts.propagator.pysgp4.SGP4.get_TLE_parameters.html" title="SGP4.get_TLE_parameters"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.propagator.pysgp4.html" >pysgp4</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="sorts.propagator.pysgp4.SGP4.html" accesskey="U">SGP4</a> &#187;</li> 
@@ -52,11 +52,11 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="sorts.propagator.pysgp4.SGP4.__init__.html"
-                        title="previous chapter">SGP4.__init__</a></p>
+  <p class="topless"><a href="sorts.propagator.pysgp4.SGP4.get_TLE_parameters.html"
+                        title="previous chapter">SGP4.get_TLE_parameters</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="sorts.propagator.pysgp4.SGP4.settings.html"
-                        title="next chapter">SGP4.settings</a></p>
+  <p class="topless"><a href="sorts.propagator.pysgp4.SGP4.propagate_mean_elements.html"
+                        title="next chapter">SGP4.propagate_mean_elements</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -87,8 +87,9 @@
 <p class="rubric">SGP4.propagate</p>
 <dl class="py method">
 <dt id="sorts.propagator.pysgp4.SGP4.propagate">
-<code class="sig-prename descclassname">SGP4.</code><code class="sig-name descname">propagate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">state0</span></em>, <em class="sig-param"><span class="n">mjd0</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/propagator/pysgp4.html#SGP4.propagate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.propagator.pysgp4.SGP4.propagate" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">SGP4.</code><code class="sig-name descname">propagate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">state0</span></em>, <em class="sig-param"><span class="n">epoch</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/propagator/pysgp4.html#SGP4.propagate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.propagator.pysgp4.SGP4.propagate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Propagate a state</p>
+<p>#TODO: UPDATE THIS DOCSTRING</p>
 <p>All state-vector are given in SI units.</p>
 <p>Keyword arguments contain only information needed for ballistic coefficient <code class="code docutils literal notranslate"><span class="pre">B</span></code> used by SGP4. Either <code class="code docutils literal notranslate"><span class="pre">B</span></code> or <code class="code docutils literal notranslate"><span class="pre">C_D</span></code>, <code class="code docutils literal notranslate"><span class="pre">A</span></code> and <code class="code docutils literal notranslate"><span class="pre">m</span></code> must be supplied.
 They also contain a option to give angles in radians or degrees. By default input is assumed to be degrees.</p>
@@ -97,8 +98,8 @@ They also contain a option to give angles in radians or degrees. By default inpu
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>t</strong> (<em>float/list/numpy.ndarray</em>) – Time in seconds to propagate relative the initial state epoch.</p></li>
-<li><p><strong>mjd0</strong> (<em>float</em>) – The epoch of the initial state in fractional Julian Days.</p></li>
+<li><p><strong>t</strong> (<em>float/list/numpy.ndarray/astropy.time.TimeDelta</em>) – Time to propagate relative the initial state epoch.</p></li>
+<li><p><strong>epoch</strong> (<em>float/astropy.time.Time</em>) – The epoch of the initial state.</p></li>
 <li><p><strong>state0</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – 6-D Cartesian state vector in SI-units.</p></li>
 <li><p><strong>B</strong> (<em>float</em>) – Ballistic coefficient</p></li>
 <li><p><strong>C_D</strong> (<em>float</em>) – Drag coefficient</p></li>
@@ -131,12 +132,12 @@ They also contain a option to give angles in radians or degrees. By default inpu
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="sorts.propagator.pysgp4.SGP4.settings.html" title="SGP4.settings"
+          <a href="sorts.propagator.pysgp4.SGP4.propagate_mean_elements.html" title="SGP4.propagate_mean_elements"
              >next</a> |</li>
         <li class="right" >
-          <a href="sorts.propagator.pysgp4.SGP4.__init__.html" title="SGP4.__init__"
+          <a href="sorts.propagator.pysgp4.SGP4.get_TLE_parameters.html" title="SGP4.get_TLE_parameters"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.propagator.pysgp4.html" >pysgp4</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="sorts.propagator.pysgp4.SGP4.html" >SGP4</a> &#187;</li> 

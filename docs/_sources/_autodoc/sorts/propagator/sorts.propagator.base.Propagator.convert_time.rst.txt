@@ -1,0 +1,8 @@
+Propagator.convert\_time
+========================
+
+.. currentmodule:: sorts.propagator.base
+
+.. rubric:: Propagator.convert_time
+
+.. automethod:: Propagator.convert_time

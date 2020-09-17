@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>orekit &#8212; SORTS 3.13.0 documentation</title>
+    <title>orekit &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.propagator.base.Propagator.DEFAULT_SETTINGS.html" title="sorts.propagator.base.Propagator.DEFAULT_SETTINGS"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" accesskey="U">API Reference</a> &#187;</li> 
       </ul>
     </div>
@@ -223,7 +223,13 @@
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname">propagate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">state0</span></em>, <em class="sig-param"><span class="n">mjd0</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/propagator/orekit.html#Orekit.propagate"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname">convert_time</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">epoch</span></em><span class="sig-paren">)</span></dt>
+<dd><p>Convert input time and epoch variables to <code class="code docutils literal notranslate"><span class="pre">astropy.TimeDelta</span></code> and <code class="code docutils literal notranslate"><span class="pre">astropy.Time</span></code> variables of the correct format and scale.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">propagate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">state0</span></em>, <em class="sig-param"><span class="n">epoch</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/propagator/orekit.html#Orekit.propagate"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p><strong>Implementation:</strong></p>
 <p>Units are in meters and degrees.</p>
 <p>Keyword arguments are:</p>
@@ -285,7 +291,7 @@
         <li class="right" >
           <a href="sorts.propagator.base.Propagator.DEFAULT_SETTINGS.html" title="sorts.propagator.base.Propagator.DEFAULT_SETTINGS"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li> 
       </ul>
     </div>

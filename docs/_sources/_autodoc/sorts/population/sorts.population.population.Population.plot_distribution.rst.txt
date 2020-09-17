@@ -1,8 +1,0 @@
-Population.plot\_distribution
-=============================
-
-.. currentmodule:: sorts.population.population
-
-.. rubric:: Population.plot_distribution
-
-.. automethod:: Population.plot_distribution

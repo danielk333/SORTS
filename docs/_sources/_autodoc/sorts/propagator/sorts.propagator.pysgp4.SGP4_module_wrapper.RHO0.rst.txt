@@ -1,6 +1,0 @@
-sorts.propagator.pysgp4.SGP4\_module\_wrapper.RHO0
-==================================================
-
-.. currentmodule:: sorts.propagator.pysgp4
-
-.. autoattribute:: SGP4_module_wrapper.RHO0

@@ -1,8 +1,0 @@
-TEME\_to\_ECEF
-==============
-
-.. currentmodule:: sorts.frames
-
-.. rubric:: TEME_to_ECEF
-
-.. autofunction:: TEME_to_ECEF

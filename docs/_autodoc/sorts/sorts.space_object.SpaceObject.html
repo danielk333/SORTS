@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>SpaceObject &#8212; SORTS 3.13.0 documentation</title>
+    <title>SpaceObject &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.space_object.html" title="space_object"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.space_object.html" accesskey="U">space_object</a> &#187;</li> 
       </ul>
@@ -85,12 +85,13 @@
 <h1>SpaceObject<a class="headerlink" href="#spaceobject" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt id="sorts.space_object.SpaceObject">
-<em class="property">class </em><code class="sig-prename descclassname">sorts.space_object.</code><code class="sig-name descname">SpaceObject</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">propagator</span></em>, <em class="sig-param"><span class="n">d</span><span class="o">=</span><span class="default_value">0.01</span></em>, <em class="sig-param"><span class="n">C_D</span><span class="o">=</span><span class="default_value">2.3</span></em>, <em class="sig-param"><span class="n">A</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">m</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">mjd0</span><span class="o">=</span><span class="default_value">57125.7729</span></em>, <em class="sig-param"><span class="n">oid</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">M_cent</span><span class="o">=</span><span class="default_value">5.972169366075844e+24</span></em>, <em class="sig-param"><span class="n">C_R</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">propagator_options</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">propagator_args</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/space_object.html#SpaceObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.space_object.SpaceObject" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">sorts.space_object.</code><code class="sig-name descname">SpaceObject</code><span class="sig-paren">(</span><em class="sig-param">propagator</em>, <em class="sig-param">propagator_options={}</em>, <em class="sig-param">propagator_args={}</em>, <em class="sig-param">parameters={}</em>, <em class="sig-param">epoch=&lt;Time object: scale='utc' format='mjd' value=57125.7729&gt;</em>, <em class="sig-param">oid=1</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/space_object.html#SpaceObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.space_object.SpaceObject" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Encapsulates a object in space who’s dynamics is governed in time by a propagator.</p>
 <p>The relation between the Cartesian and Kepler states are a direct transformation according to the below orientation rules.
 If the Kepler elements are given in a Inertial system, to reference the Cartesian to a Earth-fixed system a earth rotation transformation
 must be applied externally of the method.</p>
+<p>#TODO: THIS DOC MUST BE UPDATED TOO</p>
 <dl>
 <dt><strong>Orientation of the ellipse in the coordinate system:</strong></dt><dd><ul class="simple">
 <li><p>For zero inclination <span class="math notranslate nohighlight">\(i\)</span>: the ellipse is located in the x-y plane.</p></li>
@@ -118,13 +119,13 @@ must be applied externally of the method.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>orbit</strong> (<em>pyorb.Orbit</em>) – Orbit instance</p></li>
+<li><p><a class="reference internal" href="sorts.space_object.SpaceObject.orbit.html#sorts.space_object.SpaceObject.orbit" title="sorts.space_object.SpaceObject.orbit"><strong>orbit</strong></a> (<em>pyorb.Orbit</em>) – Orbit instance</p></li>
 <li><p><strong>oid</strong> (<em>int</em>) – Identifying object ID</p></li>
 <li><p><strong>C_D</strong> (<em>float</em>) – Drag coefficient</p></li>
 <li><p><strong>C_R</strong> (<em>float</em>) – Radiation pressure coefficient</p></li>
 <li><p><strong>A</strong> (<em>float</em>) – Area [<span class="math notranslate nohighlight">\(m^2\)</span>]</p></li>
 <li><p><a class="reference internal" href="sorts.space_object.SpaceObject.m.html#sorts.space_object.SpaceObject.m" title="sorts.space_object.SpaceObject.m"><strong>m</strong></a> (<em>float</em>) – Mass [kg]</p></li>
-<li><p><strong>d</strong> (<em>float</em>) – Diameter [m]</p></li>
+<li><p><a class="reference internal" href="sorts.space_object.SpaceObject.d.html#sorts.space_object.SpaceObject.d" title="sorts.space_object.SpaceObject.d"><strong>d</strong></a> (<em>float</em>) – Diameter [m]</p></li>
 <li><p><strong>mjd0</strong> (<em>float</em>) – Epoch for state [BC-relative JD]</p></li>
 <li><p><strong>prop</strong> (<em>float</em>) – Propagator instance, child of <code class="xref py py-class docutils literal notranslate"><span class="pre">PropagatorBase</span></code></p></li>
 <li><p><strong>propagator_options</strong> (<em>dict</em>) – Propagator initialization keyword arguments</p></li>
@@ -173,7 +174,7 @@ must be applied externally of the method.</p>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.space_object.SpaceObject.__init__.html#sorts.space_object.SpaceObject.__init__" title="sorts.space_object.SpaceObject.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(propagator[, d, C_D, A, m, mjd0, …])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.space_object.SpaceObject.__init__.html#sorts.space_object.SpaceObject.__init__" title="sorts.space_object.SpaceObject.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(propagator[, propagator_options, …])</p></td>
 <td><p>Initialize self.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.space_object.SpaceObject.copy.html#sorts.space_object.SpaceObject.copy" title="sorts.space_object.SpaceObject.copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code></a>()</p></td>
@@ -188,11 +189,11 @@ must be applied externally of the method.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.space_object.SpaceObject.get_velocity.html#sorts.space_object.SpaceObject.get_velocity" title="sorts.space_object.SpaceObject.get_velocity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_velocity</span></code></a>(t)</p></td>
 <td><p>Gets velocity at specified times using propagator instance.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.space_object.SpaceObject.propagate.html#sorts.space_object.SpaceObject.propagate" title="sorts.space_object.SpaceObject.propagate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">propagate</span></code></a>(dt[, frame_transformation, …])</p></td>
-<td><p>Propagate and change the epoch of this space object</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.space_object.SpaceObject.propagate.html#sorts.space_object.SpaceObject.propagate" title="sorts.space_object.SpaceObject.propagate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">propagate</span></code></a>(dt)</p></td>
+<td><p>Propagate and change the epoch of this space object if the state is a <cite>pyorb.Orbit</cite>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.space_object.SpaceObject.update.html#sorts.space_object.SpaceObject.update" title="sorts.space_object.SpaceObject.update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update</span></code></a>(**kwargs)</p></td>
-<td><p>Updates the orbital elements and Cartesian state vector of the space object.</p></td>
+<td><p>If a <cite>pyorb.Orbit</cite> is present, updates the orbital elements and Cartesian state vector of the space object.</p></td>
 </tr>
 </tbody>
 </table>
@@ -203,11 +204,17 @@ must be applied externally of the method.</p>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.space_object.SpaceObject.diam.html#sorts.space_object.SpaceObject.diam" title="sorts.space_object.SpaceObject.diam"><code class="xref py py-obj docutils literal notranslate"><span class="pre">diam</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.space_object.SpaceObject.d.html#sorts.space_object.SpaceObject.d" title="sorts.space_object.SpaceObject.d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">d</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.space_object.SpaceObject.m.html#sorts.space_object.SpaceObject.m" title="sorts.space_object.SpaceObject.m"><code class="xref py py-obj docutils literal notranslate"><span class="pre">m</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.space_object.SpaceObject.default_parameters.html#sorts.space_object.SpaceObject.default_parameters" title="sorts.space_object.SpaceObject.default_parameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_parameters</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.space_object.SpaceObject.m.html#sorts.space_object.SpaceObject.m" title="sorts.space_object.SpaceObject.m"><code class="xref py py-obj docutils literal notranslate"><span class="pre">m</span></code></a></p></td>
 <td><p>Object mass, if changed the Kepler elements stays constant</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.space_object.SpaceObject.orbit.html#sorts.space_object.SpaceObject.orbit" title="sorts.space_object.SpaceObject.orbit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">orbit</span></code></a></p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
@@ -236,7 +243,7 @@ must be applied externally of the method.</p>
         <li class="right" >
           <a href="sorts.space_object.html" title="space_object"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.space_object.html" >space_object</a> &#187;</li> 
       </ul>

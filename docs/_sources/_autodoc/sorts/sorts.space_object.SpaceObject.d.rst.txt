@@ -1,0 +1,8 @@
+SpaceObject.d
+=============
+
+.. currentmodule:: sorts.space_object
+
+.. rubric:: SpaceObject.d
+
+.. autoproperty:: sorts.space_object.SpaceObject.d

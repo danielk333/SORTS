@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>frames &#8212; SORTS 3.13.0 documentation</title>
+    <title>frames &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -21,7 +21,7 @@
     <script src="../../_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="ECEF_to_TEME" href="sorts.frames.ECEF_to_TEME.html" />
+    <link rel="next" title="azel_to_ecef" href="sorts.frames.azel_to_ecef.html" />
     <link rel="prev" title="sorts.constants.WGS84.f" href="sorts.constants.WGS84.f.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--[if lt IE 9]>
@@ -38,12 +38,12 @@
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="sorts.frames.ECEF_to_TEME.html" title="ECEF_to_TEME"
+          <a href="sorts.frames.azel_to_ecef.html" title="azel_to_ecef"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="sorts.constants.WGS84.f.html" title="sorts.constants.WGS84.f"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" accesskey="U">API Reference</a> &#187;</li> 
       </ul>
     </div>
@@ -62,8 +62,8 @@
   <p class="topless"><a href="sorts.constants.WGS84.f.html"
                         title="previous chapter">sorts.constants.WGS84.f</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="sorts.frames.ECEF_to_TEME.html"
-                        title="next chapter">ECEF_to_TEME</a></p>
+  <p class="topless"><a href="sorts.frames.azel_to_ecef.html"
+                        title="next chapter">azel_to_ecef</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -101,53 +101,23 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.frames.ECEF_to_TEME.html#sorts.frames.ECEF_to_TEME" title="sorts.frames.ECEF_to_TEME"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ECEF_to_TEME</span></code></a>(t, p, v[, mjd0, xp, yp, model, lod])</p></td>
-<td><p>This function transforms a vector from ECEF to true equator mean equniox frame</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.frames.azel_to_ecef.html#sorts.frames.azel_to_ecef" title="sorts.frames.azel_to_ecef"><code class="xref py py-obj docutils literal notranslate"><span class="pre">azel_to_ecef</span></code></a>(lat, lon, alt, az, el[, radians])</p></td>
+<td><p>Radar pointing (az,el) to unit vector in ECEF, not including translation.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.frames.ITRF_to_TEME.html#sorts.frames.ITRF_to_TEME" title="sorts.frames.ITRF_to_TEME"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ITRF_to_TEME</span></code></a>(ITRF, jd_ut1, xp, yp)</p></td>
-<td><p>Convert ITRF position and velocity into the idiosyncratic True Equator Mean Equinox (TEME) frame of reference used by the SGP4 theory.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.frames.TEME_to_ECEF.html#sorts.frames.TEME_to_ECEF" title="sorts.frames.TEME_to_ECEF"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TEME_to_ECEF</span></code></a>(t, p, v[, mjd0, xp, yp, model, lod])</p></td>
-<td><p>This function trsnforms a vector from the true equator mean equniox frame (teme), to an earth fixed (ITRF) frame.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.frames.TEME_to_ITRF.html#sorts.frames.TEME_to_ITRF" title="sorts.frames.TEME_to_ITRF"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TEME_to_ITRF</span></code></a>(TEME, jd_ut1, xp, yp)</p></td>
-<td><p>Convert TEME position and velocity into standard ITRS coordinates.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.frames.TEME_to_TLE.html#sorts.frames.TEME_to_TLE" title="sorts.frames.TEME_to_TLE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TEME_to_TLE</span></code></a>(state, mjd0[, kepler, tol, tol_v])</p></td>
-<td><p>Convert osculating orbital elements in TEME to mean elements used in two line element sets (TLE’s).</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.frames.TEME_to_TLE_OPTIM.html#sorts.frames.TEME_to_TLE_OPTIM" title="sorts.frames.TEME_to_TLE_OPTIM"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TEME_to_TLE_OPTIM</span></code></a>(state, mjd0[, kepler, …])</p></td>
-<td><p>Convert osculating orbital elements in TEME to mean elements used in two line element sets (TLE’s).</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.frames.TLE_to_TEME.html#sorts.frames.TLE_to_TEME" title="sorts.frames.TLE_to_TEME"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TLE_to_TEME</span></code></a>(state, mjd0[, kepler])</p></td>
-<td><p>Convert mean elements used in two line element sets (TLE’s) to osculating orbital elements in TEME.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.frames.azel_to_ecef.html#sorts.frames.azel_to_ecef" title="sorts.frames.azel_to_ecef"><code class="xref py py-obj docutils literal notranslate"><span class="pre">azel_to_ecef</span></code></a>(lat, lon, alt, az, el[, radians])</p></td>
-<td><p>Radar pointing (az,el) to unit vector in ECEF.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.frames.convert.html#sorts.frames.convert" title="sorts.frames.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(t, states, in_frame, out_frame[, …])</p></td>
+<td><p>Perform predefined coordinate transformations.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.frames.ecef_to_enu.html#sorts.frames.ecef_to_enu" title="sorts.frames.ecef_to_enu"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ecef_to_enu</span></code></a>(lat, lon, alt, ecef[, radians])</p></td>
-<td><p>ECEF coordinate system to local ENU (east,north,up).</p></td>
+<td><p>ECEF coordinate system to local ENU (east,north,up), not including translation.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.frames.enu_to_ecef.html#sorts.frames.enu_to_ecef" title="sorts.frames.enu_to_ecef"><code class="xref py py-obj docutils literal notranslate"><span class="pre">enu_to_ecef</span></code></a>(lat, lon, alt, enu[, radians])</p></td>
-<td><p>ENU (east/north/up) to ECEF coordinate system conversion.</p></td>
+<td><p>ENU (east/north/up) to ECEF coordinate system conversion, not including translation.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.frames.geodetic_to_ecef.html#sorts.frames.geodetic_to_ecef" title="sorts.frames.geodetic_to_ecef"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geodetic_to_ecef</span></code></a>(lat, lon, alt[, radians])</p></td>
-<td><p>Convert geodetic coordinates to ECEF using WGS84.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.frames.geodetic_to_ITRS.html#sorts.frames.geodetic_to_ITRS" title="sorts.frames.geodetic_to_ITRS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geodetic_to_ITRS</span></code></a>(lat, lon, alt[, radians, …])</p></td>
+<td><p>Use <cite>astropy.coordinates.EarthLocation</cite> to transform from geodetic to ITRS.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.frames.get_DUT.html#sorts.frames.get_DUT" title="sorts.frames.get_DUT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_DUT</span></code></a>(jd_ut1)</p></td>
-<td><p>Get the Difference UT between UT1 and UTC, <span class="math notranslate nohighlight">\(DUT1 = UT1 - UTC\)</span>.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.frames.get_IERS_EOP.html#sorts.frames.get_IERS_EOP" title="sorts.frames.get_IERS_EOP"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_IERS_EOP</span></code></a>([fname])</p></td>
-<td><p>Loads the IERS EOP data into memory.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.frames.get_polar_motion.html#sorts.frames.get_polar_motion" title="sorts.frames.get_polar_motion"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_polar_motion</span></code></a>(jd_ut1)</p></td>
-<td><p>Get the polar motion coefficients <span class="math notranslate nohighlight">\(x_p\)</span> and <span class="math notranslate nohighlight">\(y_p\)</span> used in EOP.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.frames.ned_to_ecef.html#sorts.frames.ned_to_ecef" title="sorts.frames.ned_to_ecef"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ned_to_ecef</span></code></a>(lat, lon, alt, ned[, radians])</p></td>
-<td><p>NED (north/east/down) to ECEF coordinate system conversion.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.frames.polar_motion_matrix.html#sorts.frames.polar_motion_matrix" title="sorts.frames.polar_motion_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">polar_motion_matrix</span></code></a>(xp, yp, ttt, opt)</p></td>
-<td><p>This function calculates the transformation matrix that accounts for polar motion.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.frames.ned_to_ecef.html#sorts.frames.ned_to_ecef" title="sorts.frames.ned_to_ecef"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ned_to_ecef</span></code></a>(lat, lon, alt, ned[, radians])</p></td>
+<td><p>NED (north/east/down) to ECEF coordinate system conversion, not including translation.</p></td>
 </tr>
 </tbody>
 </table>
@@ -157,301 +127,42 @@
 <p class="rubric">Functions</p>
 <dl class="py function">
 <dt>
-<code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">ECEF_to_TEME</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">p</span></em>, <em class="sig-param"><span class="n">v</span></em>, <em class="sig-param"><span class="n">mjd0</span><span class="o">=</span><span class="default_value">57084</span></em>, <em class="sig-param"><span class="n">xp</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">yp</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">model</span><span class="o">=</span><span class="default_value">'80'</span></em>, <em class="sig-param"><span class="n">lod</span><span class="o">=</span><span class="default_value">0.0015563</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#ECEF_to_TEME"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>This function transforms a vector from ECEF to true equator mean equniox frame</p>
-<p>The results take into account the effects of sidereal time, and polar motion.</p>
-<p><em>References:</em> Vallado  2007, 219-228.</p>
-<p>Author: David Vallado 719-573-2600, 10 dec 2007.
-Adapted to Python, Daniel Kastinen 2018
-Reverse operation, developed by Daniel Kastinen 2019</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>t</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – numpy vector row of seconds relative to <code class="code docutils literal notranslate"><span class="pre">mjd0</span></code></p></li>
-<li><p><strong>p</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – numpy matrix of TEME positions, Cartesian coordinates in km. Columns correspond to times in t, and rows to x, y and z coordinates respectively.</p></li>
-<li><p><strong>v</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – numpy matrix of TEME velocities, Cartesian coordinates in km/s. Columns correspond to times in t, and rows to x, y and z coordinates respectively.</p></li>
-<li><p><strong>mjd0</strong> (<em>float</em>) – Modified julian date epoch that t vector is relative to</p></li>
-<li><p><strong>xp</strong> (<em>float</em>) – x-axis polar motion coefficient in radians</p></li>
-<li><p><strong>yp</strong> (<em>float</em>) – y-axis polar motion coefficient in radians</p></li>
-<li><p><strong>model</strong> (<em>str</em>) – The polar motion model used in transformation, options are ‘80’ or ‘00’, see David Vallado documentation for more info.</p></li>
-<li><p><strong>lod</strong> (<em>float</em>) – Excess length of day in seconds</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>State vector of position and velocity in km and km/s.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a> (6-D vector)</p>
-</dd>
-</dl>
-<p><strong>Uses:</strong></p>
-<blockquote>
-<div><ul class="simple">
-<li><p><a class="reference internal" href="sorts.dates.gstime.html#sorts.dates.gstime" title="sorts.dates.gstime"><code class="xref py py-func docutils literal notranslate"><span class="pre">sorts.dates.gstime()</span></code></a></p></li>
-<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">sorts.frames.polarm()</span></code></p></li>
-</ul>
-</div></blockquote>
-</dd></dl>
-
-<dl class="py function">
-<dt>
-<code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">ITRF_to_TEME</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ITRF</span></em>, <em class="sig-param"><span class="n">jd_ut1</span></em>, <em class="sig-param"><span class="n">xp</span></em>, <em class="sig-param"><span class="n">yp</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#ITRF_to_TEME"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Convert ITRF position and velocity into the idiosyncratic
-True Equator Mean Equinox (TEME) frame of reference used by the SGP4
-theory.</p>
-<p>Original work Copyright (c) 2013-2018 Brandon Rhodes under the MIT license
-Modified work Copyright (c) 2019 Daniel Kastinen</p>
-<p># TODO: There is some ambiguity about if this is ITRS00 or something else? I dont know.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>ITRF</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – 6-D state vector in ITRF frame given in SI-units.</p></li>
-<li><p><strong>jd_ut1</strong> (<em>float</em>) – UT1 Julian date.</p></li>
-<li><p><strong>xp</strong> (<em>float</em>) – Polar motion constant for rotation around x axis</p></li>
-<li><p><strong>yp</strong> (<em>float</em>) – Polar motion constant for rotation around y axis</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>ITRF 6-D state vector given in SI-units.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt>
-<code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">TEME_to_ECEF</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">p</span></em>, <em class="sig-param"><span class="n">v</span></em>, <em class="sig-param"><span class="n">mjd0</span><span class="o">=</span><span class="default_value">57084</span></em>, <em class="sig-param"><span class="n">xp</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">yp</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">model</span><span class="o">=</span><span class="default_value">'80'</span></em>, <em class="sig-param"><span class="n">lod</span><span class="o">=</span><span class="default_value">0.0015563</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#TEME_to_ECEF"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>This function trsnforms a vector from the true equator mean equniox frame
-(teme), to an earth fixed (ITRF) frame.  the results take into account
-the effects of sidereal time, and polar motion.</p>
-<p><em>References:</em> Vallado  2007, 219-228.</p>
-<p>Author: David Vallado 719-573-2600, 10 dec 2007.
-Adapted to Python, Daniel Kastinen 2018</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>t</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – numpy vector row of seconds relative to <code class="code docutils literal notranslate"><span class="pre">mjd0</span></code></p></li>
-<li><p><strong>p</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – numpy matrix of TEME positions, Cartesian coordinates in km. Columns correspond to times in t, and rows to x, y and z coordinates respectively.</p></li>
-<li><p><strong>v</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – numpy matrix of TEME velocities, Cartesian coordinates in km/s. Columns correspond to times in t, and rows to x, y and z coordinates respectively.</p></li>
-<li><p><strong>mjd0</strong> (<em>float</em>) – Modified julian date epoch that t vector is relative to</p></li>
-<li><p><strong>xp</strong> (<em>float</em>) – x-axis polar motion coefficient in radians</p></li>
-<li><p><strong>yp</strong> (<em>float</em>) – y-axis polar motion coefficient in radians</p></li>
-<li><p><strong>model</strong> (<em>str</em>) – The polar motion model used in transformation, options are ‘80’ or ‘00’, see David Vallado documentation for more info.</p></li>
-<li><p><strong>lod</strong> (<em>float</em>) – Excess length of day in seconds</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>State vector of position and velocity in km and km/s.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a> (6-D vector)</p>
-</dd>
-</dl>
-<p><strong>Uses:</strong></p>
-<blockquote>
-<div><ul class="simple">
-<li><p><a class="reference internal" href="sorts.dates.gstime.html#sorts.dates.gstime" title="sorts.dates.gstime"><code class="xref py py-func docutils literal notranslate"><span class="pre">sorts.dates.gstime()</span></code></a></p></li>
-<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">sorts.frames.polarm()</span></code></p></li>
-</ul>
-</div></blockquote>
-</dd></dl>
-
-<dl class="py function">
-<dt>
-<code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">TEME_to_ITRF</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">TEME</span></em>, <em class="sig-param"><span class="n">jd_ut1</span></em>, <em class="sig-param"><span class="n">xp</span></em>, <em class="sig-param"><span class="n">yp</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#TEME_to_ITRF"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Convert TEME position and velocity into standard ITRS coordinates.
-This converts a position and velocity vector in the idiosyncratic
-True Equator Mean Equinox (TEME) frame of reference used by the SGP4
-theory into vectors into the more standard ITRS frame of reference.</p>
-<p><em>Reference:</em> AIAA 2006-6753 Appendix C.</p>
-<p>Original work Copyright (c) 2013-2018 Brandon Rhodes under the MIT license
-Modified work Copyright (c) 2019 Daniel Kastinen</p>
-<p>Since TEME uses the instantaneous North pole and mean direction
-of the Vernal equinox, a simple GMST and polar motion transformation will move to ITRS.</p>
-<p># TODO: There is some ambiguity about if this is ITRS00 or something else? I dont know.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>TEME</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – 6-D state vector in TEME frame given in SI-units.</p></li>
-<li><p><strong>jd_ut1</strong> (<em>float</em>) – UT1 Julian date.</p></li>
-<li><p><strong>xp</strong> (<em>float</em>) – Polar motion constant for rotation around x axis</p></li>
-<li><p><strong>yp</strong> (<em>float</em>) – Polar motion constant for rotation around y axis</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>ITRF 6-D state vector given in SI-units.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt>
-<code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">TEME_to_TLE</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">state</span></em>, <em class="sig-param"><span class="n">mjd0</span></em>, <em class="sig-param"><span class="n">kepler</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">tol</span><span class="o">=</span><span class="default_value">0.001</span></em>, <em class="sig-param"><span class="n">tol_v</span><span class="o">=</span><span class="default_value">0.0001</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#TEME_to_TLE"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Convert osculating orbital elements in TEME
-to mean elements used in two line element sets (TLE’s).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>kep</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Osculating State (position and velocity) vector in m and m/s, TEME frame. If <code class="code docutils literal notranslate"><span class="pre">kepler</span> <span class="pre">=</span> <span class="pre">True</span></code> then state is osculating orbital elements, in m and radians. Orbital elements are semi major axis (m), orbital eccentricity, orbital inclination (radians), right ascension of ascending node (radians), argument of perigee (radians), mean anomaly (radians)</p></li>
-<li><p><strong>kepler</strong> (<em>bool</em>) – Indicates if input state is kepler elements or cartesian.</p></li>
-<li><p><strong>mjd0</strong> (<em>float</em>) – Modified Julian date for state, important for SDP4 iteration.</p></li>
-<li><p><strong>tol</strong> (<em>float</em>) – Wanted precision in position of mean element conversion in m.</p></li>
-<li><p><strong>tol_v</strong> (<em>float</em>) – Wanted precision in velocity mean element conversion in m/s.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>mean elements of: semi major axis (km), orbital eccentricity, orbital inclination (radians), right ascension of ascending node (radians), argument of perigee (radians), mean anomaly (radians)</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt>
-<code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">TEME_to_TLE_OPTIM</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">state</span></em>, <em class="sig-param"><span class="n">mjd0</span></em>, <em class="sig-param"><span class="n">kepler</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">tol</span><span class="o">=</span><span class="default_value">1e-06</span></em>, <em class="sig-param"><span class="n">tol_v</span><span class="o">=</span><span class="default_value">1e-07</span></em>, <em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#TEME_to_TLE_OPTIM"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Convert osculating orbital elements in TEME
-to mean elements used in two line element sets (TLE’s).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>kep</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Osculating State (position and velocity) vector in m and m/s, TEME frame. If <code class="code docutils literal notranslate"><span class="pre">kepler</span> <span class="pre">=</span> <span class="pre">True</span></code> then state is osculating orbital elements, in m and radians. Orbital elements are semi major axis (m), orbital eccentricity, orbital inclination (radians), right ascension of ascending node (radians), argument of perigee (radians), mean anomaly (radians)</p></li>
-<li><p><strong>kepler</strong> (<em>bool</em>) – Indicates if input state is kepler elements or cartesian.</p></li>
-<li><p><strong>mjd0</strong> (<em>float</em>) – Modified Julian date for state, important for SDP4 iteration.</p></li>
-<li><p><strong>tol</strong> (<em>float</em>) – Wanted precision in position of mean element conversion in m.</p></li>
-<li><p><strong>tol_v</strong> (<em>float</em>) – Wanted precision in velocity mean element conversion in m/s.</p></li>
-<li><p><strong>method</strong> (<em>str</em>) – Forces use of SGP4 or SDP4 depending on string ‘n’ or ‘d’, if None method is automatically chosen based on orbital period.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>mean elements of: semi major axis (km), orbital eccentricity, orbital inclination (radians), right ascension of ascending node (radians), argument of perigee (radians), mean anomaly (radians)</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt>
-<code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">TLE_to_TEME</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">state</span></em>, <em class="sig-param"><span class="n">mjd0</span></em>, <em class="sig-param"><span class="n">kepler</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#TLE_to_TEME"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Convert mean elements used in two line element sets (TLE’s) to osculating orbital elements in TEME.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt>
 <code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">azel_to_ecef</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lat</span></em>, <em class="sig-param"><span class="n">lon</span></em>, <em class="sig-param"><span class="n">alt</span></em>, <em class="sig-param"><span class="n">az</span></em>, <em class="sig-param"><span class="n">el</span></em>, <em class="sig-param"><span class="n">radians</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#azel_to_ecef"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Radar pointing (az,el) to unit vector in ECEF.</p>
+<dd><p>Radar pointing (az,el) to unit vector in ECEF, not including translation.</p>
 <p>TODO: Docstring</p>
 </dd></dl>
 
 <dl class="py function">
 <dt>
+<code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">convert</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">states</span></em>, <em class="sig-param"><span class="n">in_frame</span></em>, <em class="sig-param"><span class="n">out_frame</span></em>, <em class="sig-param"><span class="n">logger</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">profiler</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#convert"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Perform predefined coordinate transformations. Always returns a copy of the array.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt>
 <code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">ecef_to_enu</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lat</span></em>, <em class="sig-param"><span class="n">lon</span></em>, <em class="sig-param"><span class="n">alt</span></em>, <em class="sig-param"><span class="n">ecef</span></em>, <em class="sig-param"><span class="n">radians</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#ecef_to_enu"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>ECEF coordinate system to local ENU (east,north,up).</p>
+<dd><p>ECEF coordinate system to local ENU (east,north,up), not including translation.</p>
 <p>TODO: Docstring</p>
 </dd></dl>
 
 <dl class="py function">
 <dt>
 <code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">enu_to_ecef</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lat</span></em>, <em class="sig-param"><span class="n">lon</span></em>, <em class="sig-param"><span class="n">alt</span></em>, <em class="sig-param"><span class="n">enu</span></em>, <em class="sig-param"><span class="n">radians</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#enu_to_ecef"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>ENU (east/north/up) to ECEF coordinate system conversion.</p>
+<dd><p>ENU (east/north/up) to ECEF coordinate system conversion, not including translation.</p>
 <p>TODO: Docstring</p>
 </dd></dl>
 
 <dl class="py function">
 <dt>
-<code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">geodetic_to_ecef</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lat</span></em>, <em class="sig-param"><span class="n">lon</span></em>, <em class="sig-param"><span class="n">alt</span></em>, <em class="sig-param"><span class="n">radians</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#geodetic_to_ecef"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Convert geodetic coordinates to ECEF using WGS84.</p>
-<p>TODO: Docstring</p>
-</dd></dl>
-
-<dl class="py function">
-<dt>
-<code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">get_DUT</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">jd_ut1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#get_DUT"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Get the Difference UT between UT1 and UTC, <span class="math notranslate nohighlight">\(DUT1 = UT1 - UTC\)</span>. This function interpolates between data given by IERS.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>jd_ut1</strong> (<em>float/numpy.ndarray</em>) – Input Julian date in UT1.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>DUT</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt>
-<code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">get_IERS_EOP</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fname</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#get_IERS_EOP"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Loads the IERS EOP data into memory.</p>
-<p>This is automatically loaded, to load different dataset, call this function again with a different filename.</p>
-<p>Note: Column descriptions are hard-coded in the function and my change if standard IERS format is changed.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>fname</strong> (<em>str</em>) – path to input IERS data file.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>tuple of (numpy.ndarray, list of column descriptions)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt>
-<code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">get_polar_motion</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">jd_ut1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#get_polar_motion"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Get the polar motion coefficients <span class="math notranslate nohighlight">\(x_p\)</span> and <span class="math notranslate nohighlight">\(y_p\)</span> used in EOP. This function interpolates between data given by IERS.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>jd_ut1</strong> (<em>float/numpy.ndarray</em>) – Input Julian date in UT1.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><span class="math notranslate nohighlight">\(x_p\)</span> as column 0 and <span class="math notranslate nohighlight">\(y_p\)</span> as column 1</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></p>
-</dd>
-</dl>
+<code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">geodetic_to_ITRS</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lat</span></em>, <em class="sig-param"><span class="n">lon</span></em>, <em class="sig-param"><span class="n">alt</span></em>, <em class="sig-param"><span class="n">radians</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">ellipsoid</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#geodetic_to_ITRS"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Use <cite>astropy.coordinates.EarthLocation</cite> to transform from geodetic to ITRS.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt>
 <code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">ned_to_ecef</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lat</span></em>, <em class="sig-param"><span class="n">lon</span></em>, <em class="sig-param"><span class="n">alt</span></em>, <em class="sig-param"><span class="n">ned</span></em>, <em class="sig-param"><span class="n">radians</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#ned_to_ecef"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>NED (north/east/down) to ECEF coordinate system conversion.</p>
+<dd><p>NED (north/east/down) to ECEF coordinate system conversion, not including translation.</p>
 <p>TODO: Docstring</p>
-</dd></dl>
-
-<dl class="py function">
-<dt>
-<code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">polar_motion_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xp</span></em>, <em class="sig-param"><span class="n">yp</span></em>, <em class="sig-param"><span class="n">ttt</span></em>, <em class="sig-param"><span class="n">opt</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#polar_motion_matrix"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>This function calculates the transformation matrix that accounts for polar motion. both the 1980 and 2000 theories are handled. note that the rotation order is different between 1980 and 2000.</p>
-<p><em>References:</em> Vallado 2004, 207-209, 211, 223-224.</p>
-<p>Author: David Vallado 719-573-2600   25 jun 2002.
-Adapted to Python, Daniel Kastinen 2018 (2020)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>xp</strong> (<em>float</em>) – x-axis polar motion coefficient in radians</p></li>
-<li><p><strong>yp</strong> (<em>float</em>) – y-axis polar motion coefficient in radians</p></li>
-<li><p><strong>ttt</strong> (<em>float</em>) – Julian centuries of tt (00 theory only)</p></li>
-<li><p><strong>opt</strong> (<em>str</em>) – Model for polar motion to use, options are ‘01’, ‘02’, ‘80’.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Transformation matrix for ECEF to PEF</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a> (3x3 matrix)</p>
-</dd>
-</dl>
 </dd></dl>
 
 </div>
@@ -473,12 +184,12 @@ Adapted to Python, Daniel Kastinen 2018 (2020)</p>
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="sorts.frames.ECEF_to_TEME.html" title="ECEF_to_TEME"
+          <a href="sorts.frames.azel_to_ecef.html" title="azel_to_ecef"
              >next</a> |</li>
         <li class="right" >
           <a href="sorts.constants.WGS84.f.html" title="sorts.constants.WGS84.f"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li> 
       </ul>
     </div>

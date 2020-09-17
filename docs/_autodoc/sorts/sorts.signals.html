@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>signals &#8212; SORTS 3.13.0 documentation</title>
+    <title>signals &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.profiling.term_level.html" title="term_level"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" accesskey="U">API Reference</a> &#187;</li> 
       </ul>
     </div>
@@ -102,7 +102,7 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.signals.hard_target_rcs.html#sorts.signals.hard_target_rcs" title="sorts.signals.hard_target_rcs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hard_target_rcs</span></code></a>(wavelength, diameter)</p></td>
-<td><p></p></td>
+<td><p>Determine the radar cross section for a hard target.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.signals.hard_target_snr.html#sorts.signals.hard_target_snr" title="sorts.signals.hard_target_snr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hard_target_snr</span></code></a>(gain_tx, gain_rx, …[, …])</p></td>
 <td><p>Determine the signal-to-noise ratio (energy-to-noise) ratio for a hard target.</p></td>
@@ -116,7 +116,18 @@
 <dl class="py function">
 <dt>
 <code class="sig-prename descclassname">sorts.signals.</code><code class="sig-name descname">hard_target_rcs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">wavelength</span></em>, <em class="sig-param"><span class="n">diameter</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/signals.html#hard_target_rcs"><span class="viewcode-link">[source]</span></a></dt>
-<dd></dd></dl>
+<dd><p>Determine the radar cross section for a hard target.
+Assume a smooth transition between Rayleigh and optical scattering. 
+Ignore Mie regime and use either optical or Rayleigh scatter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wavelength</strong> (<em>float</em>) – radar wavelength (meters)</p></li>
+<li><p><strong>diameter</strong> (<em>float/numpy.ndarray</em>) – diameter in meters of the objects.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt>
@@ -172,7 +183,7 @@ Ignore Mie regime and use either optical or Rayleigh scatter.</p>
         <li class="right" >
           <a href="sorts.profiling.term_level.html" title="term_level"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li> 
       </ul>
     </div>

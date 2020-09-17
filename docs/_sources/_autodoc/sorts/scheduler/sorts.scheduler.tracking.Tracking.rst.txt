@@ -19,7 +19,6 @@ Tracking
       ~Tracking.chain_generators
       ~Tracking.generate_schedule
       ~Tracking.get_controllers
-      ~Tracking.get_measurements
       ~Tracking.get_passes
       ~Tracking.observe_passes
       ~Tracking.schedule

@@ -1,8 +1,0 @@
-Orekit.settings
-===============
-
-.. currentmodule:: sorts.propagator.orekit
-
-.. rubric:: Orekit.settings
-
-.. automethod:: Orekit.settings

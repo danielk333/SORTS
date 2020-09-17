@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>TEME transformations &#8212; SORTS 3.13.0 documentation</title>
+    <title>TEME transformations &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../_static/gallery.css" />
@@ -21,8 +21,8 @@
     <script src="../_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Custom Scans" href="custom_scans.html" />
-    <link rel="prev" title="Finding passes over sites" href="finding_passes.html" />
+    <link rel="next" title="Using Frames" href="using_frames.html" />
+    <link rel="prev" title="The SpaceObject class" href="space_object.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--[if lt IE 9]>
     <script src="_static/css3-mediaqueries.js"></script>
@@ -38,23 +38,23 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="custom_scans.html" title="Custom Scans"
+          <a href="using_frames.html" title="Using Frames"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="finding_passes.html" title="Finding passes over sites"
+          <a href="space_object.html" title="The SpaceObject class"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Examples</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="finding_passes.html"
-                        title="previous chapter">Finding passes over sites</a></p>
+  <p class="topless"><a href="space_object.html"
+                        title="previous chapter">The SpaceObject class</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="custom_scans.html"
-                        title="next chapter">Custom Scans</a></p>
+  <p class="topless"><a href="using_frames.html"
+                        title="next chapter">Using Frames</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -87,16 +87,13 @@
 <div class="sphx-glr-example-title section" id="teme-transformations">
 <span id="sphx-glr-auto-gallery-teme-coordinates-py"></span><h1>TEME transformations<a class="headerlink" href="#teme-transformations" title="Permalink to this headline">¶</a></h1>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Polar motion for Julian date: 2453005.620000 days
-
-xp = 1.442e-07, yp = 7.461e-07
-Transform:
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Transform:
 x = -7.1003e+03 km  | vx = 8.6771e-02 km/s
 y = -3.8977e+03 km  | vy = -3.4072e+00 km/s
 z = 1.8568e+04 km  | vz = 2.9616e+00 km/s
 -&gt;
-x = -7.6123e+03 km  | vx = -6.3642e-01 km/s
-y = -2.7676e+03 km  | vy = -2.8254e+00 km/s
+x = 3.3654e+03 km  | vx = -1.5679e+00 km/s
+y = 7.3675e+03 km  | vy = 2.4351e+00 km/s
 z = 1.8568e+04 km  | vz = 2.9616e+00 km/s
 
 Initial TEME
@@ -108,95 +105,36 @@ x = -7.1003e+03 km  | vx = 8.6771e-02 km/s
 y = -3.8977e+03 km  | vy = -3.4072e+00 km/s
 z = 1.8568e+04 km  | vz = 2.9616e+00 km/s
 Error
-x = 0.0000e+00 km  | vx = 1.4211e-17 km/s
-y = 0.0000e+00 km  | vy = 9.0949e-16 km/s
-z = 3.7253e-12 km  | vz = 4.5475e-16 km/s
+x = 0.0000e+00 km  | vx = 1.2144e-12 km/s
+y = -9.3132e-13 km  | vy = 1.4552e-13 km/s
+z = -3.7253e-12 km  | vz = 1.4006e-12 km/s
 
-Initial ITRF
-x = -7.6123e+03 km  | vx = -6.3642e-01 km/s
-y = -2.7676e+03 km  | vy = -2.8254e+00 km/s
+Initial ITRS
+x = 3.3654e+03 km  | vx = -1.5679e+00 km/s
+y = 7.3675e+03 km  | vy = 2.4351e+00 km/s
 z = 1.8568e+04 km  | vz = 2.9616e+00 km/s
-Recovered ITRF
-x = -7.6123e+03 km  | vx = -6.3642e-01 km/s
-y = -2.7676e+03 km  | vy = -2.8254e+00 km/s
+Recovered ITRS
+x = 3.3654e+03 km  | vx = -1.5679e+00 km/s
+y = 7.3675e+03 km  | vy = 2.4351e+00 km/s
 z = 1.8568e+04 km  | vz = 2.9616e+00 km/s
 Error
-x = 0.0000e+00 km  | vx = 1.1369e-16 km/s
-y = 0.0000e+00 km  | vy = 4.5475e-16 km/s
-z = 3.7253e-12 km  | vz = 4.5475e-16 km/s
-
-Transform:
-x = -7.1003e+03 km  | vx = 8.6771e-02 km/s
-y = -3.8977e+03 km  | vy = -3.4072e+00 km/s
-z = 1.8568e+04 km  | vz = 2.9616e+00 km/s
--&gt;
-x = 3.3656e+03 km  | vx = -1.5678e+00 km/s
-y = 7.3674e+03 km  | vy = 2.4352e+00 km/s
-z = 1.8568e+04 km  | vz = 2.9616e+00 km/s
-
-Initial ECEF
-x = 3.3656e+03 km  | vx = -1.5678e+00 km/s
-y = 7.3674e+03 km  | vy = 2.4352e+00 km/s
-z = 1.8568e+04 km  | vz = 2.9616e+00 km/s
-Recovered ECEF
-x = 3.3656e+03 km  | vx = -1.5678e+00 km/s
-y = 7.3674e+03 km  | vy = 2.4352e+00 km/s
-z = 1.8568e+04 km  | vz = 2.9616e+00 km/s
-Error
-x = 0.0000e+00 km  | vx = 0.0000e+00 km/s
-y = 0.0000e+00 km  | vy = 0.0000e+00 km/s
-z = -3.7253e-12 km  | vz = 0.0000e+00 km/s
-
-Initial TEME
-x = -7.1003e+03 km  | vx = 8.6771e-02 km/s
-y = -3.8977e+03 km  | vy = -3.4072e+00 km/s
-z = 1.8568e+04 km  | vz = 2.9616e+00 km/s
-Recovered TEME
-x = -7.1003e+03 km  | vx = 8.6771e-02 km/s
-y = -3.8977e+03 km  | vy = -3.4072e+00 km/s
-z = 1.8568e+04 km  | vz = 2.9616e+00 km/s
-Error
-x = 0.0000e+00 km  | vx = 2.7001e-16 km/s
-y = 0.0000e+00 km  | vy = 0.0000e+00 km/s
-z = -3.7253e-12 km  | vz = 0.0000e+00 km/s
-
-Implementation difference:
-x = 1.0978e+04 km  | vx = -9.3137e-01 km/s
-y = 1.0135e+04 km  | vy = 5.2606e+00 km/s
-z = -4.9948e-03 km  | vz = -2.0078e-06 km/s
-
-TEME to SGP4 coordinates (TLE elements):
-Transform:
-x = -7.1003e+03 km  | vx = 8.6771e-02 km/s
-y = -3.8977e+03 km  | vy = -3.4072e+00 km/s
-z = 1.8568e+04 km  | vz = 2.9616e+00 km/s
--&gt;
-[2.10216197e+04 7.40282889e-01 1.16054200e+00 1.98377500e+00
- 5.51853223e+00 7.82497043e-01]
-Initial TEME
-x = -7.1003e+03 km  | vx = 8.6771e-02 km/s
-y = -3.8977e+03 km  | vy = -3.4072e+00 km/s
-z = 1.8568e+04 km  | vz = 2.9616e+00 km/s
-Recovered TEME
-x = -7.1003e+03 km  | vx = 8.6771e-02 km/s
-y = -3.8977e+03 km  | vy = -3.4072e+00 km/s
-z = 1.8568e+04 km  | vz = 2.9616e+00 km/s
-Error
-x = 1.3862e-08 km  | vx = 8.1810e-12 km/s
-y = -1.5995e-08 km  | vy = -5.1159e-12 km/s
-z = -4.3526e-08 km  | vz = 2.3196e-11 km/s
+x = -4.6566e-13 km  | vx = 0.0000e+00 km/s
+y = 1.8626e-12 km  | vy = -1.8626e-12 km/s
+z = -3.7253e-12 km  | vz = 7.4510e-12 km/s
 </pre></div>
 </div>
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">astropy.time</span> <span class="kn">import</span> <span class="n">Time</span>
 
 <span class="kn">import</span> <span class="nn">sorts</span>
 <span class="kn">import</span> <span class="nn">sorts.frames</span> <span class="k">as</span> <span class="nn">frames</span>
 
-<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">state0</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><span class="o">-</span><span class="mf">7100297.113</span><span class="p">,</span><span class="o">-</span><span class="mf">3897715.442</span><span class="p">,</span><span class="mf">18568433.707</span><span class="p">,</span><span class="mf">86.771</span><span class="p">,</span><span class="o">-</span><span class="mf">3407.231</span><span class="p">,</span><span class="mf">2961.571</span><span class="p">])</span>
-<span class="n">mjd0</span> <span class="o">=</span> <span class="mf">53005.12</span>
+
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME0</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><span class="o">-</span><span class="mf">7100297.113</span><span class="p">,</span><span class="o">-</span><span class="mf">3897715.442</span><span class="p">,</span><span class="mf">18568433.707</span><span class="p">,</span><span class="mf">86.771</span><span class="p">,</span><span class="o">-</span><span class="mf">3407.231</span><span class="p">,</span><span class="mf">2961.571</span><span class="p">])</span>
+<span class="n">mjd0</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="mf">53005.12</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;mjd&#39;</span><span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">print_state</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="n">state_</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -207,21 +145,16 @@ z = -4.3526e-08 km  | vz = 2.3196e-11 km/s
     <span class="k">if</span> <span class="n">newline</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
 
-<span class="n">jd</span> <span class="o">=</span> <span class="n">sorts</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">mjd_to_jd</span><span class="p">(</span><span class="n">mjd0</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Polar motion for Julian date: </span><span class="si">{</span><span class="n">jd</span><span class="si">:</span><span class="s1">1f</span><span class="si">}</span><span class="s1"> days</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-<span class="n">xp</span><span class="p">,</span> <span class="n">yp</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">get_polar_motion</span><span class="p">(</span><span class="n">jd</span><span class="p">)[</span><span class="mi">0</span><span class="p">,:]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;xp = </span><span class="si">{</span><span class="n">xp</span><span class="si">:</span><span class="s1">.3e</span><span class="si">}</span><span class="s1">, yp = </span><span class="si">{</span><span class="n">yp</span><span class="si">:</span><span class="s1">.3e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME0</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">state0</span></a><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
-<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ITRF0</span></a> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">TEME_to_ITRF</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME0</span></a><span class="p">,</span> <span class="n">jd</span><span class="p">,</span> <span class="n">xp</span><span class="p">,</span> <span class="n">yp</span><span class="p">)</span>
-<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME</span></a> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">ITRF_to_TEME</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ITRF0</span></a><span class="p">,</span> <span class="n">jd</span><span class="p">,</span> <span class="n">xp</span><span class="p">,</span> <span class="n">yp</span><span class="p">)</span>
-<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ITRF</span></a> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">TEME_to_ITRF</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME</span></a><span class="p">,</span> <span class="n">jd</span><span class="p">,</span> <span class="n">xp</span><span class="p">,</span> <span class="n">yp</span><span class="p">)</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ITRS0</span></a> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">mjd0</span><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME0</span></a><span class="p">,</span> <span class="n">in_frame</span><span class="o">=</span><span class="s1">&#39;TEME&#39;</span><span class="p">,</span> <span class="n">out_frame</span><span class="o">=</span><span class="s1">&#39;ITRS&#39;</span><span class="p">)</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME</span></a> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">mjd0</span><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ITRS0</span></a><span class="p">,</span> <span class="n">in_frame</span><span class="o">=</span><span class="s1">&#39;ITRS&#39;</span><span class="p">,</span> <span class="n">out_frame</span><span class="o">=</span><span class="s1">&#39;TEME&#39;</span><span class="p">)</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ITRS</span></a> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">mjd0</span><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME</span></a><span class="p">,</span> <span class="n">in_frame</span><span class="o">=</span><span class="s1">&#39;TEME&#39;</span><span class="p">,</span> <span class="n">out_frame</span><span class="o">=</span><span class="s1">&#39;ITRS&#39;</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Transform:&#39;</span><span class="p">)</span>
 <span class="n">print_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME0</span></a><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-&gt;&#39;</span><span class="p">)</span>
-<span class="n">print_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ITRF0</span></a><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">print_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ITRS0</span></a><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Initial TEME&#39;</span><span class="p">)</span>
 <span class="n">print_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME0</span></a><span class="p">)</span>
@@ -230,66 +163,15 @@ z = -4.3526e-08 km  | vz = 2.3196e-11 km/s
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Error&#39;</span><span class="p">)</span>
 <span class="n">print_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME0</span></a><span class="o">-</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME</span></a><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Initial ITRF&#39;</span><span class="p">)</span>
-<span class="n">print_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ITRF0</span></a><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Recovered ITRF&#39;</span><span class="p">)</span>
-<span class="n">print_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ITRF</span></a><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Initial ITRS&#39;</span><span class="p">)</span>
+<span class="n">print_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ITRS0</span></a><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Recovered ITRS&#39;</span><span class="p">)</span>
+<span class="n">print_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ITRS</span></a><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Error&#39;</span><span class="p">)</span>
-<span class="n">print_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ITRF0</span></a><span class="o">-</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ITRF</span></a><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-
-<span class="c1">#A different implementation of the coordinate transformation</span>
-
-<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME0_v2</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">state0</span></a><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME0_v2</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME0_v2</span></a><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-
-<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ECEF0</span></a> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">TEME_to_ECEF</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME0_v2</span></a><span class="p">[:</span><span class="mi">3</span><span class="p">,:],</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME0_v2</span></a><span class="p">[</span><span class="mi">3</span><span class="p">:,:],</span> <span class="n">mjd0</span><span class="o">=</span><span class="n">mjd0</span><span class="p">,</span> <span class="n">xp</span><span class="o">=</span><span class="n">xp</span><span class="p">,</span> <span class="n">yp</span><span class="o">=</span><span class="n">yp</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s1">&#39;80&#39;</span><span class="p">)</span>
-<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME_v2</span></a> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">ECEF_to_TEME</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ECEF0</span></a><span class="p">[:</span><span class="mi">3</span><span class="p">,:],</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ECEF0</span></a><span class="p">[</span><span class="mi">3</span><span class="p">:,:],</span> <span class="n">mjd0</span><span class="o">=</span><span class="n">mjd0</span><span class="p">,</span> <span class="n">xp</span><span class="o">=</span><span class="n">xp</span><span class="p">,</span> <span class="n">yp</span><span class="o">=</span><span class="n">yp</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s1">&#39;80&#39;</span><span class="p">)</span>
-<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ECEF</span></a> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">TEME_to_ECEF</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME_v2</span></a><span class="p">[:</span><span class="mi">3</span><span class="p">,:],</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME_v2</span></a><span class="p">[</span><span class="mi">3</span><span class="p">:,:],</span> <span class="n">mjd0</span><span class="o">=</span><span class="n">mjd0</span><span class="p">,</span> <span class="n">xp</span><span class="o">=</span><span class="n">xp</span><span class="p">,</span> <span class="n">yp</span><span class="o">=</span><span class="n">yp</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s1">&#39;80&#39;</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Transform:&#39;</span><span class="p">)</span>
-<span class="n">print_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME0_v2</span></a><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-&gt;&#39;</span><span class="p">)</span>
-<span class="n">print_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ECEF0</span></a><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Initial ECEF&#39;</span><span class="p">)</span>
-<span class="n">print_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ECEF0</span></a><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Recovered ECEF&#39;</span><span class="p">)</span>
-<span class="n">print_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ECEF</span></a><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Error&#39;</span><span class="p">)</span>
-<span class="n">print_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ECEF0</span></a><span class="o">-</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ECEF</span></a><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Initial TEME&#39;</span><span class="p">)</span>
-<span class="n">print_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME0_v2</span></a><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Recovered TEME&#39;</span><span class="p">)</span>
-<span class="n">print_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME_v2</span></a><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Error&#39;</span><span class="p">)</span>
-<span class="n">print_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME0_v2</span></a><span class="o">-</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME_v2</span></a><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Implementation difference:&#39;</span><span class="p">)</span>
-<span class="n">print_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ECEF0</span></a><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ITRF0</span></a><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="k">if</span> <span class="n">sorts</span><span class="o">.</span><span class="n">propagator</span><span class="o">.</span><span class="n">SGP4</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-
-    <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME0_sgp4</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">state0</span></a><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TLE</span></a> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">TEME_to_TLE</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME0_sgp4</span></a><span class="p">,</span> <span class="n">mjd0</span><span class="p">,</span> <span class="n">kepler</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">tol_v</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
-    <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME_sgp4</span></a> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">TLE_to_TEME</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TLE</span></a><span class="p">,</span> <span class="n">mjd0</span><span class="p">,</span> <span class="n">kepler</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;TEME to SGP4 coordinates (TLE elements):&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Transform:&#39;</span><span class="p">)</span>
-    <span class="n">print_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME0_sgp4</span></a><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-&gt;&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TLE</span></a><span class="p">)</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Initial TEME&#39;</span><span class="p">)</span>
-    <span class="n">print_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME0_sgp4</span></a><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Recovered TEME&#39;</span><span class="p">)</span>
-    <span class="n">print_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME_sgp4</span></a><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Error&#39;</span><span class="p">)</span>
-    <span class="n">print_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME0_sgp4</span></a><span class="o">-</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">TEME_sgp4</span></a><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">print_state</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ITRS0</span></a><span class="o">-</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ITRS</span></a><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.011 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.678 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-gallery-teme-coordinates-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/90959e271e4a454b2bebe70fd0fc13f3/teme_coordinates.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">teme_coordinates.py</span></code></a></p>
@@ -317,12 +199,12 @@ z = -4.3526e-08 km  | vz = 2.3196e-11 km/s
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="custom_scans.html" title="Custom Scans"
+          <a href="using_frames.html" title="Using Frames"
              >next</a> |</li>
         <li class="right" >
-          <a href="finding_passes.html" title="Finding passes over sites"
+          <a href="space_object.html" title="The SpaceObject class"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" >Examples</a> &#187;</li> 
       </ul>
     </div>

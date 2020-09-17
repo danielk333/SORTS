@@ -1,0 +1,8 @@
+Orekit.convert\_time
+====================
+
+.. currentmodule:: sorts.propagator.orekit
+
+.. rubric:: Orekit.convert_time
+
+.. automethod:: Orekit.convert_time

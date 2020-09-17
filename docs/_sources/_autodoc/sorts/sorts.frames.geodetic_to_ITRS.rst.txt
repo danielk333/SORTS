@@ -1,0 +1,8 @@
+geodetic\_to\_ITRS
+==================
+
+.. currentmodule:: sorts.frames
+
+.. rubric:: geodetic_to_ITRS
+
+.. autofunction:: geodetic_to_ITRS

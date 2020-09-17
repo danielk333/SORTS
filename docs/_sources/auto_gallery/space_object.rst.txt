@@ -26,15 +26,14 @@ The SpaceObject class
  .. code-block:: none
 
 
-    Space object 1 at epoch 57125.7729 MJD:
+    Space object 1: <Time object: scale='utc' format='mjd' value=57125.7729>:
     a    : 7.0000e+06   x : 7.0000e+06
     e    : 0.0000e+00   y : 0.0000e+00
     i    : 6.9000e+01   z : 0.0000e+00
     omega: 0.0000e+00   vx: -0.0000e+00
     Omega: 0.0000e+00   vy: 2.7043e+03
     anom : 0.0000e+00   vz: 7.0448e+03
-    PARAMETERS: diameter = 0.010 m, drag coefficient = 2.300, albedo = 1.000, area = 1.000, mass = 1.000 kg
-
+    Parameters: d=0.200, C_D=2.300, A=1.000, m=1.000, C_R=1.000
 
 
 
@@ -50,6 +49,7 @@ The SpaceObject class
     import numpy as np
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
+    from astropy.time import Time
 
     from sorts.propagator import Orekit
     from sorts import SpaceObject
@@ -59,8 +59,8 @@ The SpaceObject class
     orekit_options = dict(
         orekit_data = orekit_data, 
         settings=dict(
-            in_frame='EME',
-            out_frame='EME',
+            in_frame='GCRS',
+            out_frame='GCRS',
             drag_force = False,
             radiation_pressure = False,
         ),
@@ -68,7 +68,7 @@ The SpaceObject class
 
     t = np.linspace(0,3600*24.0*2,num=5000)
 
-    SO = SpaceObject(
+    obj = SpaceObject(
         Orekit,
         propagator_options = orekit_options,
         a = 7000e3, 
@@ -77,12 +77,15 @@ The SpaceObject class
         raan = 0, 
         aop = 0, 
         mu0 = 0, 
-        mjd0 = 57125.7729
+        epoch = Time(57125.7729, format='mjd'),
+        parameters = dict(
+            d = 0.2,
+        )
     )
 
-    print(SO)
+    print(obj)
 
-    states = SO.get_state(t)
+    states = obj.get_state(t)
 
 
 
@@ -101,7 +104,7 @@ The SpaceObject class
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.026 seconds)
+   **Total running time of the script:** ( 0 minutes  2.971 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_space_object.py:

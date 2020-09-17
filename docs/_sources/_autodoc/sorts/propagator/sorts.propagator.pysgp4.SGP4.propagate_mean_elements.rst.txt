@@ -1,0 +1,8 @@
+SGP4.propagate\_mean\_elements
+==============================
+
+.. currentmodule:: sorts.propagator.pysgp4
+
+.. rubric:: SGP4.propagate_mean_elements
+
+.. automethod:: SGP4.propagate_mean_elements

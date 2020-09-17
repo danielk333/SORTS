@@ -37,8 +37,10 @@ objs = [
         raan = 79,
         aop = 0,
         mu0 = mu0,
-        mjd0 = 53005.0,
-        d = 1.0,
+        epoch = 53005.0,
+        parameters = dict(
+            d = 1.0,
+        ),
     )
     for mu0 in [62.0, 61.9]
 ]
@@ -46,7 +48,7 @@ objs = [
 for obj in objs: print(obj)
 
 t = sorts.equidistant_sampling(
-    orbit = objs[0].orbit, 
+    orbit = objs[0].state, 
     start_t = 0, 
     end_t = 3600*6, 
     max_dpos=1e3,

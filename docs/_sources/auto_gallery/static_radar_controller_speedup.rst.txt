@@ -1,0 +1,264 @@
+.. only:: html
+
+    .. note::
+        :class: sphx-glr-download-link-note
+
+        Click :ref:`here <sphx_glr_download_auto_gallery_static_radar_controller_speedup.py>`     to download the full example code
+    .. rst-class:: sphx-glr-example-title
+
+    .. _sphx_glr_auto_gallery_static_radar_controller_speedup.py:
+
+
+Static radar controller and time sampling
+==========================================
+
+You can speed up execution by switching radar controller that is optimized for the use case.
+Also reducing time sampling of the radar controller can speed up calculations.
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    Space object 1: <Time object: scale='utc' format='mjd' value=53005.0>:
+    a    : 7.2000e+06   x : -1.3922e+06
+    e    : 2.0000e-02   y : 3.4519e+06
+    i    : 7.5000e+01   z : 6.0816e+06
+    omega: 0.0000e+00   vx: -1.3986e+03
+    Omega: 8.6000e+01   vy: -6.4897e+03
+    anom : 6.0000e+01   vz: 3.5175e+03
+    Parameters: d=0.100, C_D=2.300, A=1.000, m=1.000, C_R=1.000
+    2020-09-17 12:27:17.336 INFO    ; Static:init
+    2020-09-17 12:27:17.340 INFO    ; Static:init
+    2020-09-17 12:27:17.343 INFO    ; Scanner:init
+    Temporal points obj: 4555
+    Max SNR=-7.52150639802996 dB
+    Max SNR=-7.426719944704181 dB
+    Max SNR=-6.157419687282379 dB
+
+     <class 'sorts.controller.scanner.Scanner'>: len(t) = 6000 
+
+    --------------------------------------- Performance analysis --------------------------------------
+     Name                                                   |   Executions | Mean time     | Total time
+    --------------------------------------------------------+--------------+---------------+--------------
+     equidistant_sampling                                   |            1 | 6.86646e-05 s | 0.00 %
+     get_state                                              |            1 | 5.52654e-02 s | 0.41 %
+     find_passes                                            |            1 | 5.68318e-03 s | 0.04 %
+     Obs.Param.:calculate_observation:get_state             |            3 | 6.00181e-02 s | 1.33 %
+     Obs.Param.:calculate_observation:enus,range,range_rate |            3 | 7.23600e-04 s | 0.02 %
+     Scanner:generator:point_radar:_point_station[tx]       |         8361 | 1.14356e-04 s | 7.05 %
+     Scanner:generator:point_radar:_point_station[rx]       |        25083 | 2.12747e-04 s | 39.34 %
+     Scanner:generator:point_radar                          |         8361 | 9.04070e-04 s | 55.73 %
+     Obs.Param.:calculate_observation:snr-step:gain         |         8361 | 6.41506e-04 s | 39.54 %
+     Obs.Param.:calculate_observation:snr-step:snr          |         8361 | 2.43943e-05 s | 1.50 %
+     Obs.Param.:calculate_observation:snr-step              |         8361 | 6.82654e-04 s | 42.08 %
+     Obs.Param.:calculate_observation:generator             |            3 | 4.43992e+00 s | 98.19 %
+     Obs.Param.:calculate_observation                       |            3 | 4.50076e+00 s | 99.54 %
+     observe_passes                                         |            1 | 1.35033e+01 s | 99.55 %
+     total                                                  |            1 | 1.35646e+01 s | 100.00 %
+    ---------------------------------------------------------------------------------------------------
+
+    Temporal points obj: 4555
+    Max SNR=-7.52150639802996 dB
+    Max SNR=-7.426719944704181 dB
+    Max SNR=-6.157419687282379 dB
+
+     <class 'sorts.controller.static.Static'>: len(t) = 6000 
+
+    --------------------------------------- Performance analysis --------------------------------------
+     Name                                                   |   Executions | Mean time     | Total time
+    --------------------------------------------------------+--------------+---------------+--------------
+     equidistant_sampling                                   |            1 | 7.89165e-05 s | 0.00 %
+     get_state                                              |            1 | 6.07996e-02 s | 1.12 %
+     find_passes                                            |            1 | 2.65529e-02 s | 0.49 %
+     Obs.Param.:calculate_observation:get_state             |            3 | 5.92041e-02 s | 3.29 %
+     Obs.Param.:calculate_observation:enus,range,range_rate |            3 | 8.03471e-04 s | 0.04 %
+     Obs.Param.:calculate_observation:snr-step:gain         |         8361 | 5.75736e-04 s | 89.05 %
+     Obs.Param.:calculate_observation:snr-step:snr          |         8361 | 2.07818e-05 s | 3.21 %
+     Obs.Param.:calculate_observation:snr-step              |         8361 | 6.11969e-04 s | 94.65 %
+     Obs.Param.:calculate_observation:generator             |            3 | 1.71228e+00 s | 95.03 %
+     Obs.Param.:calculate_observation                       |            3 | 1.77237e+00 s | 98.36 %
+     observe_passes                                         |            1 | 5.31806e+00 s | 98.38 %
+     total                                                  |            1 | 5.40572e+00 s | 100.00 %
+    ---------------------------------------------------------------------------------------------------
+
+    Temporal points obj: 4555
+    Max SNR=-7.825843305311009 dB
+    Max SNR=-7.629714510540971 dB
+    Max SNR=-6.239996253442425 dB
+
+     <class 'sorts.controller.static.Static'>: len(t) = 600 
+
+    --------------------------------------- Performance analysis --------------------------------------
+     Name                                                   |   Executions | Mean time     | Total time
+    --------------------------------------------------------+--------------+---------------+--------------
+     equidistant_sampling                                   |            1 | 6.34193e-05 s | 0.01 %
+     get_state                                              |            1 | 5.61700e-02 s | 8.28 %
+     find_passes                                            |            1 | 1.24094e-02 s | 1.83 %
+     Obs.Param.:calculate_observation:get_state             |            3 | 2.41255e-02 s | 10.67 %
+     Obs.Param.:calculate_observation:enus,range,range_rate |            3 | 5.30799e-04 s | 0.23 %
+     Obs.Param.:calculate_observation:snr-step:gain         |          835 | 5.95767e-04 s | 73.34 %
+     Obs.Param.:calculate_observation:snr-step:snr          |          835 | 2.41008e-05 s | 2.97 %
+     Obs.Param.:calculate_observation:snr-step              |          835 | 6.37608e-04 s | 78.49 %
+     Obs.Param.:calculate_observation:generator             |            3 | 1.78155e-01 s | 78.79 %
+     Obs.Param.:calculate_observation                       |            3 | 2.02873e-01 s | 89.73 %
+     observe_passes                                         |            1 | 6.09462e-01 s | 89.85 %
+     total                                                  |            1 | 6.78300e-01 s | 100.00 %
+    ---------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+|
+
+
+.. code-block:: default
+
+
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+
+    import sorts
+    eiscat3d = sorts.radars.eiscat3d_interp
+
+    from sorts.scheduler import StaticList, ObservedParameters
+    from sorts.controller import Static, Scanner
+    from sorts import SpaceObject
+    from sorts.profiling import Profiler
+    from sorts.radar.scans import Beampark
+
+    from sorts.propagator import SGP4
+    Prop_cls = SGP4
+    Prop_opts = dict(
+        settings = dict(
+            out_frame='ITRF',
+        ),
+    )
+
+    end_t = 600.0
+
+    logger = sorts.profiling.get_logger('scanning')
+
+    obj = SpaceObject(
+        Prop_cls,
+        propagator_options = Prop_opts,
+        a = 7200e3, 
+        e = 0.02, 
+        i = 75, 
+        raan = 86,
+        aop = 0,
+        mu0 = 60,
+        epoch = 53005.0,
+        parameters = dict(
+            d = 0.1,
+        ),
+    )
+
+
+    print(obj)
+
+    class ObservedScanning(StaticList, ObservedParameters):
+        pass
+
+    static_ctrl = Static(eiscat3d, azimuth=0, elevation=90, logger=logger, meta={'dwell': 0.1})
+    static_ctrl.t = np.arange(0, end_t, static_ctrl.meta['dwell'])
+
+    static_ctrl_undersamp = Static(eiscat3d, azimuth=0, elevation=90, logger=logger, meta={'dwell': 0.1})
+    static_ctrl_undersamp.t = np.arange(0, end_t, 1.0)
+
+    scan = Beampark(azimuth=0, elevation=90, dwell=0.1)
+    scanner_ctrl = Scanner(eiscat3d.copy(), scan, logger=logger)
+    scanner_ctrl.t = np.arange(0, end_t, scan.dwell())
+
+    def run_scanning_simulation(radar_ctrl):
+
+        p = Profiler()
+        radar_ctrl.profiler = p
+
+        p.start('total')
+        scheduler = ObservedScanning(
+            radar = eiscat3d, 
+            controllers = [radar_ctrl], 
+            logger = logger,
+            profiler = p,
+        )
+
+
+
+        p.start('equidistant_sampling')
+        t = sorts.equidistant_sampling(
+            orbit = obj.state, 
+            start_t = 0, 
+            end_t = end_t, 
+            max_dpos=1e3,
+        )
+        p.stop('equidistant_sampling')
+
+        print(f'Temporal points obj: {len(t)}')
+    
+        p.start('get_state')
+        states = obj.get_state(t)
+        p.stop('get_state')
+
+        p.start('find_passes')
+        #rename cache_data to something more descriptive
+        passes = eiscat3d.find_passes(t, states, cache_data = True)
+        p.stop('find_passes')
+
+        p.start('observe_passes')
+        data = scheduler.observe_passes(passes, space_object = obj, snr_limit=False)
+        p.stop('observe_passes')
+
+        for psi in data:
+            for txps in psi:
+                for rxtxps in txps:
+                    print(f'Max SNR={10*np.log10(rxtxps["snr"].max())} dB')
+
+        p.stop('total')
+        print(f'\n {radar_ctrl.__class__}: len(t) = {len(radar_ctrl.t)} \n')
+        print(p.fmt(normalize='total'))
+
+    run_scanning_simulation(scanner_ctrl)
+    run_scanning_simulation(static_ctrl)
+    run_scanning_simulation(static_ctrl_undersamp)
+
+.. rst-class:: sphx-glr-timing
+
+   **Total running time of the script:** ( 0 minutes  19.677 seconds)
+
+
+.. _sphx_glr_download_auto_gallery_static_radar_controller_speedup.py:
+
+
+.. only :: html
+
+ .. container:: sphx-glr-footer
+    :class: sphx-glr-footer-example
+
+
+
+  .. container:: sphx-glr-download sphx-glr-download-python
+
+     :download:`Download Python source code: static_radar_controller_speedup.py <static_radar_controller_speedup.py>`
+
+
+
+  .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+     :download:`Download Jupyter notebook: static_radar_controller_speedup.ipynb <static_radar_controller_speedup.ipynb>`
+
+
+.. only:: html
+
+ .. rst-class:: sphx-glr-signature
+
+    `Gallery generated by Sphinx-Gallery <https://sphinx-gallery.github.io>`_

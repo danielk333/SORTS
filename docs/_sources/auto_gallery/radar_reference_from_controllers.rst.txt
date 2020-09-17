@@ -27,8 +27,8 @@ Radar controller returning reference
 
 
     setting "return_copy" to false makes the returned radar from the controller as just a reference
-    tcontroller.radar.tx.pointing: [ 0.32786049 -0.172709    0.9288052 ]
-    radar.tx.pointing            : [ 0.32786049 -0.172709    0.9288052 ]
+    tcontroller.radar.tx.pointing: [ 0.3280197  -0.17268885  0.92875273]
+    radar.tx.pointing            : [ 0.3280197  -0.17268885  0.92875273]
 
      edit tcontroller.radar
 
@@ -96,7 +96,7 @@ Radar controller returning reference
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.054 seconds)
+   **Total running time of the script:** ( 0 minutes  0.066 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_radar_reference_from_controllers.py:

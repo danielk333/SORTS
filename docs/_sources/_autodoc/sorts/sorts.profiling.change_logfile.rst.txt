@@ -1,0 +1,8 @@
+change\_logfile
+===============
+
+.. currentmodule:: sorts.profiling
+
+.. rubric:: change_logfile
+
+.. autofunction:: change_logfile

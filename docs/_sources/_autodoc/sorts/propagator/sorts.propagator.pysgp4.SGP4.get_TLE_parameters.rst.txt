@@ -1,0 +1,8 @@
+SGP4.get\_TLE\_parameters
+=========================
+
+.. currentmodule:: sorts.propagator.pysgp4
+
+.. rubric:: SGP4.get_TLE_parameters
+
+.. automethod:: SGP4.get_TLE_parameters

@@ -1,8 +1,0 @@
-GMST1982
-========
-
-.. currentmodule:: sorts.dates
-
-.. rubric:: GMST1982
-
-.. autofunction:: GMST1982

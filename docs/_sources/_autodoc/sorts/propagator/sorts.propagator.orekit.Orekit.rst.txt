@@ -15,8 +15,9 @@ Orekit
       :toctree: .
    
       ~Orekit.__init__
+      ~Orekit.convert_time
       ~Orekit.propagate
-      ~Orekit.settings
+      ~Orekit.set
    
    
 

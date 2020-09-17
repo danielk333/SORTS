@@ -19,11 +19,7 @@ Module summary
 .. autosummary::
     :toctree: .
     
-    GMST1982
-    
     date_to_unix
-    
-    gstime
     
     jd_to_mjd
     
@@ -60,17 +56,7 @@ Contents
 .. rubric:: Functions
 
 
-.. autofunction:: GMST1982
-   :noindex:
-
-
-
 .. autofunction:: date_to_unix
-   :noindex:
-
-
-
-.. autofunction:: gstime
    :noindex:
 
 

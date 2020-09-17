@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Population &#8212; SORTS 3.13.0 documentation</title>
+    <title>Population &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.population.population.html" title="population"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.population.population.html" accesskey="U">population</a> &#187;</li> 
       </ul>
@@ -85,7 +85,7 @@
 <h1>Population<a class="headerlink" href="#population" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt id="sorts.population.population.Population">
-<em class="property">class </em><code class="sig-prename descclassname">sorts.population.population.</code><code class="sig-name descname">Population</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">extra_columns</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">dtypes</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">space_object_uses</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">propagator</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">propagator_args</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">propagator_options</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/population/population.html#Population"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.population.population.Population" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">sorts.population.population.</code><code class="sig-name descname">Population</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fields</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dtypes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">space_object_fields</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">state_fields</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">epoch_field</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">propagator</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">propagator_args</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">propagator_options</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/population/population.html#Population"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.population.population.Population" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Encapsulates a population of space objects as an array and functions for returning instances of space objects.</p>
 <p><strong>Default columns:</strong></p>
@@ -127,12 +127,13 @@
 </pre></div>
 </div>
 <p>Notice that in the above example the value to be assigned always has the correct size corresponding to the index and slices, a statement like <code class="code docutils literal notranslate"><span class="pre">x[:,3:7]</span> <span class="pre">=</span> <span class="pre">3</span></code> is not possible, instead one would write <code class="code docutils literal notranslate"><span class="pre">x[:,3:7]</span> <span class="pre">=</span> <span class="pre">np.full((len(pop),</span> <span class="pre">4),</span> <span class="pre">3.0,</span> <span class="pre">dtype='f')</span></code>.</p>
+<p>#TODO: THESE HAVE CHANGED, UPDATE THEM!!!!</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>objs</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Array containing population data. Rows correspond to objects and columns to variables.</p></li>
 <li><p><strong>name</strong> (<em>str</em>) – Name of population.</p></li>
-<li><p><strong>header</strong> (<em>list</em>) – List of strings containing column descriptions.</p></li>
+<li><p><strong>fields</strong> (<em>list</em>) – List of strings containing column descriptions.</p></li>
 <li><p><strong>space_object_uses</strong> (<em>list</em>) – List of booleans describing what columns should be included when initializing a space object. This allows for extra data to be stored in the population without passing it to the space object.</p></li>
 <li><p><strong>propagator</strong> (<em>PropagatorBase</em>) – Propagator class pointer used for <code class="xref py py-class docutils literal notranslate"><span class="pre">space_object.SpaceObject</span></code>.</p></li>
 <li><p><strong>propagator_options</strong> (<em>dict</em>) – Propagator initialization keyword arguments.</p></li>
@@ -141,9 +142,9 @@
 <dt class="field-even">Parameters</dt>
 <dd class="field-even"><ul class="simple">
 <li><p><strong>name</strong> (<em>str</em>) – Name of population.</p></li>
-<li><p><strong>extra_columns</strong> (<em>list</em>) – List of strings containing column descriptions for addition data besides the default columns.</p></li>
+<li><p><strong>fields</strong> (<em>list</em>) – List of strings containing column descriptions for addition data besides the default columns.</p></li>
 <li><p><strong>dtypes</strong> (<em>list</em>) – List of strings containing numpy data type description. Defaults to ‘f’.</p></li>
-<li><p><strong>space_object_uses</strong> (<em>list</em>) – List of booleans describing what columns should be included when initializing a space object. This allows for extra data to be stored in the population without passing it to the space object.</p></li>
+<li><p><strong>space_object_fields</strong> (<em>list</em>) – List of booleans describing what columns should be included when initializing a space object. This allows for extra data to be stored in the population without passing it to the space object.</p></li>
 <li><p><strong>propagator</strong> (<em>PropagatorBase</em>) – Propagator class pointer used for <code class="xref py py-class docutils literal notranslate"><span class="pre">space_object.SpaceObject</span></code>.</p></li>
 <li><p><strong>propagator_options</strong> (<em>dict</em>) – Propagator initialization keyword arguments.</p></li>
 </ul>
@@ -156,11 +157,11 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.population.population.Population.__init__.html#sorts.population.population.Population.__init__" title="sorts.population.population.Population.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([extra_columns, dtypes, …])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.population.population.Population.__init__.html#sorts.population.population.Population.__init__" title="sorts.population.population.Population.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([fields, dtypes, …])</p></td>
 <td><p>Initialize self.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.population.population.Population.add_column.html#sorts.population.population.Population.add_column" title="sorts.population.population.Population.add_column"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_column</span></code></a>(name[, dtype, space_object_uses])</p></td>
-<td><p>Add a column to the population data.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.population.population.Population.add_field.html#sorts.population.population.Population.add_field" title="sorts.population.population.Population.add_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_field</span></code></a>(name[, dtype])</p></td>
+<td><p>Add a field to the population data.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.population.population.Population.allocate.html#sorts.population.population.Population.allocate" title="sorts.population.population.Population.allocate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">allocate</span></code></a>(length)</p></td>
 <td><p>Allocate the internal data array for assignment of objects.</p></td>
@@ -174,17 +175,17 @@
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.population.population.Population.filter.html#sorts.population.population.Population.filter" title="sorts.population.population.Population.filter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter</span></code></a>(col, fun)</p></td>
 <td><p>Filters the population using a boolean function, keeping true values.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.population.population.Population.get_all_orbits.html#sorts.population.population.Population.get_all_orbits" title="sorts.population.population.Population.get_all_orbits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_all_orbits</span></code></a>([order_angs])</p></td>
-<td><p>Get the orbital elements for all rows from internal data array.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.population.population.Population.get_fields.html#sorts.population.population.Population.get_fields" title="sorts.population.population.Population.get_fields"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_fields</span></code></a>(fields[, n, named, dtype])</p></td>
+<td><p>Get the orbital elements for one row from internal data array.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.population.population.Population.get_object.html#sorts.population.population.Population.get_object" title="sorts.population.population.Population.get_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_object</span></code></a>(n)</p></td>
 <td><p>Get the one row from the population as a <code class="xref py py-class docutils literal notranslate"><span class="pre">space_object.SpaceObject</span></code> instance.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.population.population.Population.get_orbit.html#sorts.population.population.Population.get_orbit" title="sorts.population.population.Population.get_orbit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_orbit</span></code></a>(n[, order_angs])</p></td>
-<td><p>Get the orbital elements for one row from internal data array.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.population.population.Population.get_orbit.html#sorts.population.population.Population.get_orbit" title="sorts.population.population.Population.get_orbit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_orbit</span></code></a>(n[, fields, M_cent, degrees, anomaly])</p></td>
+<td><p>Get the one row from the population as a <code class="xref py py-class docutils literal notranslate"><span class="pre">pyorb.Orbit</span></code> instance.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.population.population.Population.get_states.html#sorts.population.population.Population.get_states" title="sorts.population.population.Population.get_states"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_states</span></code></a>([M_cent])</p></td>
-<td><p>Use the orbital parameters and get the state.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.population.population.Population.get_states.html#sorts.population.population.Population.get_states" title="sorts.population.population.Population.get_states"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_states</span></code></a>([n, named, dtype])</p></td>
+<td><p>Use the defined state parameters to get a copy of the states</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.population.population.Population.load.html#sorts.population.population.Population.load" title="sorts.population.population.Population.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>(fname, propagator[, …])</p></td>
 <td><p></p></td>
@@ -192,14 +193,8 @@
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.population.population.Population.next.html#sorts.population.population.Population.next" title="sorts.population.population.Population.next"><code class="xref py py-obj docutils literal notranslate"><span class="pre">next</span></code></a>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.population.population.Population.object_generator.html#sorts.population.population.Population.object_generator" title="sorts.population.population.Population.object_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">object_generator</span></code></a>()</p></td>
-<td><p>Return a generator that iterates trough the entire population returning space objects.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.population.population.Population.plot_distribution.html#sorts.population.population.Population.plot_distribution" title="sorts.population.population.Population.plot_distribution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_distribution</span></code></a>(dist[, label, logx, logy, …])</p></td>
-<td><p>Plot the distribution of parameter(s) or all orbits of this population.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.population.population.Population.print_row.html#sorts.population.population.Population.print_row" title="sorts.population.population.Population.print_row"><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_row</span></code></a>(n)</p></td>
-<td><p>Print a specific row with Header information.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.population.population.Population.print.html#sorts.population.population.Population.print" title="sorts.population.population.Population.print"><code class="xref py py-obj docutils literal notranslate"><span class="pre">print</span></code></a>([n, fields])</p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.population.population.Population.save.html#sorts.population.population.Population.save" title="sorts.population.population.Population.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(fname)</p></td>
 <td><p></p></td>
@@ -243,7 +238,7 @@
         <li class="right" >
           <a href="sorts.population.population.html" title="population"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.population.population.html" >population</a> &#187;</li> 
       </ul>

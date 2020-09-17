@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>get_logger &#8212; SORTS 3.13.0 documentation</title>
+    <title>get_logger &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -21,7 +21,7 @@
     <script src="../../_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="term_level" href="sorts.profiling.term_level.html" />
+    <link rel="next" title="get_logger_formats" href="sorts.profiling.get_logger_formats.html" />
     <link rel="prev" title="file_level" href="sorts.profiling.file_level.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--[if lt IE 9]>
@@ -38,12 +38,12 @@
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="sorts.profiling.term_level.html" title="term_level"
+          <a href="sorts.profiling.get_logger_formats.html" title="get_logger_formats"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="sorts.profiling.file_level.html" title="file_level"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.profiling.html" accesskey="U">profiling</a> &#187;</li> 
       </ul>
@@ -54,8 +54,8 @@
   <p class="topless"><a href="sorts.profiling.file_level.html"
                         title="previous chapter">file_level</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="sorts.profiling.term_level.html"
-                        title="next chapter">term_level</a></p>
+  <p class="topless"><a href="sorts.profiling.get_logger_formats.html"
+                        title="next chapter">get_logger_formats</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -87,8 +87,18 @@
 <dl class="py function">
 <dt id="sorts.profiling.get_logger">
 <code class="sig-prename descclassname">sorts.profiling.</code><code class="sig-name descname">get_logger</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">'sorts'</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">file_level</span><span class="o">=</span><span class="default_value">20</span></em>, <em class="sig-param"><span class="n">term_level</span><span class="o">=</span><span class="default_value">20</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/profiling.html#get_logger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.profiling.get_logger" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a logger object</p>
-<p>Formats to output both to terminal and a log file</p>
+<dd><p>Creates a pre-configured logger. Formats to output both to terminal and a log file.</p>
+<p><strong>Note:</strong> Can only use folders as paths for MPI usage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Name of the logger.</p></li>
+<li><p><strong>path</strong> (<em>str/pathlib.Path</em>) – Path to the logfile output. Can be a file, a folder or <cite>None</cite>.</p></li>
+<li><p><strong>file_level</strong> (<em>int</em>) – Logging level of the file handler.</p></li>
+<li><p><strong>term_level</strong> (<em>int</em>) – Logging level of the terminal handler.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -109,12 +119,12 @@
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="sorts.profiling.term_level.html" title="term_level"
+          <a href="sorts.profiling.get_logger_formats.html" title="get_logger_formats"
              >next</a> |</li>
         <li class="right" >
           <a href="sorts.profiling.file_level.html" title="file_level"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.profiling.html" >profiling</a> &#187;</li> 
       </ul>

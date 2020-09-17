@@ -1,0 +1,8 @@
+SGP4.TEME\_to\_TLE\_OPTIM
+=========================
+
+.. currentmodule:: sorts.propagator.pysgp4
+
+.. rubric:: SGP4.TEME_to_TLE_OPTIM
+
+.. automethod:: SGP4.TEME_to_TLE_OPTIM

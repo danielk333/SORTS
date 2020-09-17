@@ -28,13 +28,13 @@ Radar controller return copy
 
     using "return_copy" ensures that the returned radar from the controller is always its own object
     tcontroller.radar.tx.pointing: [0.000000e+00 6.123234e-17 1.000000e+00]
-    radar.tx.pointing            : [ 0.32786049 -0.172709    0.9288052 ]
+    radar.tx.pointing            : [ 0.3280197  -0.17268885  0.92875273]
 
      edit tcontroller.radar
 
     eiscat3d.tx.pointing         : [ 0.62296654 -0.3596699   0.69465837]
     tcontroller.radar.tx.pointing: [ 0.62296654 -0.3596699   0.69465837]
-    radar.tx.pointing            : [ 0.32786049 -0.172709    0.9288052 ]
+    radar.tx.pointing            : [ 0.3280197  -0.17268885  0.92875273]
 
 
 
@@ -96,7 +96,7 @@ Radar controller return copy
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.056 seconds)
+   **Total running time of the script:** ( 0 minutes  0.072 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_radar_copy_from_controllers.py:

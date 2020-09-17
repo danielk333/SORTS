@@ -1,0 +1,8 @@
+Population.get\_fields
+======================
+
+.. currentmodule:: sorts.population.population
+
+.. rubric:: Population.get_fields
+
+.. automethod:: Population.get_fields

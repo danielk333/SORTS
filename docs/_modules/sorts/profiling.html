@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>sorts.profiling &#8212; SORTS 3.13.0 documentation</title>
+    <title>sorts.profiling &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -68,7 +68,9 @@
 <span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">pathlib</span>
 <span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">tracemalloc</span>
 
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">tabulate</span> <span class="kn">import</span> <span class="n">tabulate</span>
 
 <div class="viewcode-block" id="Profiler"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.profiling.Profiler.html#sorts.profiling.Profiler">[docs]</a><span class="k">class</span> <span class="nc">Profiler</span><span class="p">:</span>
@@ -94,17 +96,84 @@
 <span class="sd">            print(p)</span>
 
 <span class="sd">    &#39;&#39;&#39;</span>
-<div class="viewcode-block" id="Profiler.__init__"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.profiling.Profiler.__init__.html#sorts.profiling.Profiler.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distribution</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Profiler.__init__"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.profiling.Profiler.__init__.html#sorts.profiling.Profiler.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distribution</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">track_memory</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">snapshot_total</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span> <span class="o">=</span> <span class="n">distribution</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_total</span> <span class="o">=</span> <span class="n">snapshot_total</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">track_memory</span> <span class="o">=</span> <span class="n">track_memory</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">track_memory</span><span class="p">:</span>
+            <span class="n">tracemalloc</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">exec_times</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">start_times</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_times</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">memory_stats</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapshots</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">track_memory</span><span class="p">:</span>
+            <span class="n">tracemalloc</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="Profiler.snapshot"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.profiling.Profiler.snapshot.html#sorts.profiling.Profiler.snapshot">[docs]</a>    <span class="k">def</span> <span class="nf">snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Take a tracemalloc snapshot.</span>
+
+<span class="sd">        :param str name: Name of the profiling location.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">track_memory</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_total</span><span class="p">:</span>
+            <span class="n">snap_</span> <span class="o">=</span> <span class="n">tracemalloc</span><span class="o">.</span><span class="n">take_snapshot</span><span class="p">()</span>
+            <span class="n">alloc</span> <span class="o">=</span> <span class="n">snap_</span><span class="o">.</span><span class="n">statistics</span><span class="p">(</span><span class="s1">&#39;lineno&#39;</span><span class="p">)</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">size</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">alloc</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">snapshots</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">size</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">snapshots</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">tracemalloc</span><span class="o">.</span><span class="n">take_snapshot</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Profiler.memory_diff"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.profiling.Profiler.memory_diff.html#sorts.profiling.Profiler.memory_diff">[docs]</a>    <span class="k">def</span> <span class="nf">memory_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Calculate a memory difference between the latest snapshot and now.</span>
+
+<span class="sd">        :param str name: Name of the profiling location.</span>
+<span class="sd">        :param str save: Save memory difference to this name, default is same as :code:`name`.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">track_memory</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">save</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">save</span> <span class="o">=</span> <span class="n">name</span>
+
+        <span class="n">new_snapshot</span> <span class="o">=</span> <span class="n">tracemalloc</span><span class="o">.</span><span class="n">take_snapshot</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_total</span><span class="p">:</span>
+            <span class="n">new_alloc</span> <span class="o">=</span> <span class="n">new_snapshot</span><span class="o">.</span><span class="n">statistics</span><span class="p">(</span><span class="s1">&#39;lineno&#39;</span><span class="p">)</span>
+            <span class="n">new_size</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">size</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">new_alloc</span><span class="p">])</span>
+
+            <span class="n">data</span> <span class="o">=</span> <span class="n">new_size</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshots</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">new_snapshot</span><span class="o">.</span><span class="n">compare_to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshots</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="s1">&#39;lineno&#39;</span><span class="p">)</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">size_diff</span><span class="p">,</span> <span class="n">reverse</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">save</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">memory_stats</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">memory_stats</span><span class="p">[</span><span class="n">save</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">memory_stats</span><span class="p">[</span><span class="n">save</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">]</span></div>
+    
 
 <div class="viewcode-block" id="Profiler.start"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.profiling.Profiler.start.html#sorts.profiling.Profiler.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Records a start time for named call.</span>
+
+<span class="sd">        :param str name: Name of the profiling location.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">start_times</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Profiler.stop"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.profiling.Profiler.stop.html#sorts.profiling.Profiler.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Records a time elapsed since the latest start time for named call.</span>
+
+<span class="sd">        :param str name: Name of the profiling location.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">dt</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_times</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">start_times</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -151,6 +220,11 @@
             <span class="k">return</span> <span class="n">ret</span></div>
 
 <div class="viewcode-block" id="Profiler.fmt"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.profiling.Profiler.fmt.html#sorts.profiling.Profiler.fmt">[docs]</a>    <span class="k">def</span> <span class="nf">fmt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timedelta</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Format summary of the profiler into a string.</span>
+
+<span class="sd">        :param str normalize: Name of the profiling location to normalize execution time towards.</span>
+<span class="sd">        :param bool timedelta: Print execution times as time-deltas.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">means</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
         <span class="n">totals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total</span><span class="p">()</span>
 
@@ -165,7 +239,7 @@
             <span class="k">if</span> <span class="n">timedelta</span><span class="p">:</span>
                 <span class="n">mu</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">means</span><span class="p">[</span><span class="n">key</span><span class="p">]))</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">mu</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">means</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="si">:</span><span class="s1">.5e</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">mu</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">means</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="si">:</span><span class="s1">.5e</span><span class="si">}</span><span class="s1"> s&#39;</span>
 
             <span class="k">if</span> <span class="n">normalize</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">su</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">totals</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">/</span><span class="n">totals</span><span class="p">[</span><span class="n">normalize</span><span class="p">]</span><span class="o">*</span><span class="mf">100.0</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1"> %&#39;</span>
@@ -173,7 +247,7 @@
                 <span class="k">if</span> <span class="n">timedelta</span><span class="p">:</span>
                     <span class="n">su</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">totals</span><span class="p">[</span><span class="n">key</span><span class="p">]))</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">su</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">totals</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="si">:</span><span class="s1">.5e</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="n">su</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">totals</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="si">:</span><span class="s1">.5e</span><span class="si">}</span><span class="s1"> s&#39;</span>
             
             <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">key</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">su</span><span class="p">])</span>
         
@@ -186,6 +260,32 @@
         <span class="n">str_</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="s2">&quot; Performance analysis &quot;</span><span class="o">.</span><span class="n">center</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="n">str_</span> <span class="o">+=</span> <span class="n">tab</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="n">str_</span> <span class="o">+=</span> <span class="s1">&#39;-&#39;</span><span class="o">*</span><span class="n">width</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">track_memory</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_total</span><span class="p">:</span>
+
+            <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">memory_stats</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">memory_stats</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">sum_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">memory_stats</span><span class="p">[</span><span class="n">key</span><span class="p">])</span><span class="o">/</span><span class="mf">1024.0</span>
+                    <span class="n">mean_</span> <span class="o">=</span> <span class="n">sum_</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">memory_stats</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+                    <span class="n">su</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">sum_</span><span class="si">:</span><span class="s1">.5e</span><span class="si">}</span><span class="s1"> kB&#39;</span>
+                    <span class="n">mu</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">mean_</span><span class="si">:</span><span class="s1">.5e</span><span class="si">}</span><span class="s1"> kB&#39;</span>
+
+                <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">key</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">memory_stats</span><span class="p">[</span><span class="n">key</span><span class="p">]),</span> <span class="n">mu</span><span class="p">,</span> <span class="n">su</span><span class="p">])</span>
+
+
+            <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Name&#39;</span><span class="p">,</span> <span class="s1">&#39;Executions&#39;</span><span class="p">,</span> <span class="s1">&#39;Mean size change&#39;</span><span class="p">,</span> <span class="s1">&#39;Total size change&#39;</span><span class="p">]</span>
+            <span class="n">tab</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">tablefmt</span><span class="o">=</span><span class="s2">&quot;presto&quot;</span><span class="p">))</span>
+
+            <span class="n">width</span> <span class="o">=</span> <span class="n">tab</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+            <span class="n">str_</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">*</span><span class="mi">2</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="s2">&quot; Memory analysis &quot;</span><span class="o">.</span><span class="n">center</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">str_</span> <span class="o">+=</span> <span class="n">tab</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">str_</span> <span class="o">+=</span> <span class="s1">&#39;-&#39;</span><span class="o">*</span><span class="n">width</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
 
         <span class="k">return</span> <span class="n">str_</span></div>
 
@@ -216,6 +316,11 @@
 
 
 <div class="viewcode-block" id="add_logging_level"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.profiling.add_logging_level.html#sorts.profiling.add_logging_level">[docs]</a><span class="k">def</span> <span class="nf">add_logging_level</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Adds a custom logging level to all loggers.</span>
+
+<span class="sd">    :param int num: Integer level for logging level.</span>
+<span class="sd">    :param str name: Name of logging level.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">def</span> <span class="nf">fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isEnabledFor</span><span class="p">(</span><span class="n">num</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -226,22 +331,7 @@
 
 <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="o">.</span><span class="n">always</span> <span class="o">=</span> <span class="n">add_logging_level</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="s1">&#39;ALWAYS&#39;</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="get_logger"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.profiling.get_logger.html#sorts.profiling.get_logger">[docs]</a><span class="k">def</span> <span class="nf">get_logger</span><span class="p">(</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;sorts&#39;</span><span class="p">,</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">file_level</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
-        <span class="n">term_level</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
-    <span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Returns a logger object</span>
-<span class="sd">    </span>
-<span class="sd">    Formats to output both to terminal and a log file</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
-    <span class="n">datetime_str</span> <span class="o">=</span> <span class="n">now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">_at_%H-%M&quot;</span><span class="p">)</span>
-    <span class="n">datefmt</span> <span class="o">=</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span>
-    <span class="n">msecfmt</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%03d</span><span class="s1">&#39;</span>
-
+<span class="k">def</span> <span class="nf">_get_parallel</span><span class="p">():</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
         <span class="n">comm</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
@@ -251,7 +341,47 @@
             <span class="n">parallel</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
         <span class="n">parallel</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">parallel</span>
 
+
+<div class="viewcode-block" id="get_logger_formats"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.profiling.get_logger_formats.html#sorts.profiling.get_logger_formats">[docs]</a><span class="k">def</span> <span class="nf">get_logger_formats</span><span class="p">():</span>
+    <span class="n">datefmt</span> <span class="o">=</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span>
+    <span class="n">msecfmt</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%03d</span><span class="s1">&#39;</span>
+
+    <span class="n">parallel</span> <span class="o">=</span> <span class="n">_get_parallel</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">parallel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">format_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;%(asctime)s PID</span><span class="si">{</span><span class="n">parallel</span><span class="si">}</span><span class="s1"> %(levelname)-8s; %(message)s&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">format_str</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> </span><span class="si">%(levelname)-8s</span><span class="s1">; </span><span class="si">%(message)s</span><span class="s1">&#39;</span>
+
+    <span class="k">return</span> <span class="n">datefmt</span><span class="p">,</span> <span class="n">msecfmt</span><span class="p">,</span> <span class="n">format_str</span></div>
+
+
+
+<div class="viewcode-block" id="get_logger"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.profiling.get_logger.html#sorts.profiling.get_logger">[docs]</a><span class="k">def</span> <span class="nf">get_logger</span><span class="p">(</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;sorts&#39;</span><span class="p">,</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">file_level</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+        <span class="n">term_level</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+    <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Creates a pre-configured logger. Formats to output both to terminal and a log file.</span>
+
+<span class="sd">    **Note:** Can only use folders as paths for MPI usage.</span>
+
+<span class="sd">    :param str name: Name of the logger. </span>
+<span class="sd">    :param str/pathlib.Path path: Path to the logfile output. Can be a file, a folder or `None`. </span>
+<span class="sd">    :param int file_level: Logging level of the file handler.</span>
+<span class="sd">    :param int term_level: Logging level of the terminal handler.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="n">datetime_str</span> <span class="o">=</span> <span class="n">now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">_at_%H-%M&quot;</span><span class="p">)</span>
+
+    <span class="n">datefmt</span><span class="p">,</span> <span class="n">msecfmt</span><span class="p">,</span> <span class="n">format_str</span> <span class="o">=</span> <span class="n">get_logger_formats</span><span class="p">()</span>
+    <span class="n">parallel</span> <span class="o">=</span> <span class="n">_get_parallel</span><span class="p">()</span>
+
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">):</span>
@@ -259,9 +389,9 @@
 
         <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">parallel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">log_fname</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">datetime_str</span><span class="si">}</span><span class="s1">.log&#39;</span>
+                <span class="n">log_fname</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">datetime_str</span><span class="si">}</span><span class="s1">.log&#39;</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">log_fname</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">datetime_str</span><span class="si">}</span><span class="s1">_process</span><span class="si">{</span><span class="n">parallel</span><span class="si">}</span><span class="s1">.log&#39;</span>
+                <span class="n">log_fname</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">datetime_str</span><span class="si">}</span><span class="s1">_process</span><span class="si">{</span><span class="n">parallel</span><span class="si">}</span><span class="s1">.log&#39;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">parallel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">log_fname</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
@@ -269,23 +399,13 @@
                 <span class="n">new_name</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">suffix</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;_process</span><span class="si">{</span><span class="n">parallel</span><span class="si">}</span><span class="s1">&#39;</span>
                 <span class="n">log_fname</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">new_name</span><span class="si">}{</span><span class="n">path</span><span class="o">.</span><span class="n">suffix</span><span class="si">}</span><span class="s1">&#39;</span>
 
-
-    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">parallel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">format_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;%(asctime)s PID</span><span class="si">{</span><span class="n">parallel</span><span class="si">}</span><span class="s1"> %(levelname)-8s; %(message)s&#39;</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">format_str</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> </span><span class="si">%(levelname)-8s</span><span class="s1">; </span><span class="si">%(message)s</span><span class="s1">&#39;</span>
-
-    <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">fh</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="n">log_fname</span><span class="p">)</span>
         <span class="n">fh</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">file_level</span><span class="p">)</span> <span class="c1">#debug and worse</span>
         <span class="n">form_fh</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="n">format_str</span><span class="p">)</span>
         <span class="n">form_fh</span><span class="o">.</span><span class="n">default_time_format</span> <span class="o">=</span> <span class="n">datefmt</span>
         <span class="n">form_fh</span><span class="o">.</span><span class="n">default_msec_format</span> <span class="o">=</span> <span class="n">msecfmt</span>
         <span class="n">fh</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">form_fh</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span> <span class="c1">#id 0</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
 
     <span class="n">ch</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
     <span class="n">ch</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">term_level</span><span class="p">)</span>
@@ -294,35 +414,85 @@
     <span class="n">form_ch</span><span class="o">.</span><span class="n">default_msec_format</span> <span class="o">=</span> <span class="n">msecfmt</span>
 
     <span class="n">ch</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">form_ch</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span> <span class="c1">#id 1</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">logger</span></div>
 
 
-<div class="viewcode-block" id="term_level"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.profiling.term_level.html#sorts.profiling.term_level">[docs]</a><span class="k">def</span> <span class="nf">term_level</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">term_id</span> <span class="o">=</span> <span class="mi">0</span>
+<div class="viewcode-block" id="change_logfile"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.profiling.change_logfile.html#sorts.profiling.change_logfile">[docs]</a><span class="k">def</span> <span class="nf">change_logfile</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Deletes any previous `FileHandler` handlers and creates a new `FileHandler` to the new path with the same level as the previous one.</span>
+
+<span class="sd">    :param logging.Logger logger: Logger object.</span>
+<span class="sd">    :param str/pathlib.Path path: Path to the logfile output. Can be a file or folder. </span>
+<span class="sd">    :param int file_level: Logging level of the file handler.</span>
+<span class="sd">    :param int term_level: Logging level of the terminal handler.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="n">datetime_str</span> <span class="o">=</span> <span class="n">now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">_at_%H-%M&quot;</span><span class="p">)</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="n">datefmt</span><span class="p">,</span> <span class="n">msecfmt</span><span class="p">,</span> <span class="n">format_str</span> <span class="o">=</span> <span class="n">get_logger_formats</span><span class="p">()</span>
+    <span class="n">parallel</span> <span class="o">=</span> <span class="n">_get_parallel</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">parallel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">log_fname</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">datetime_str</span><span class="si">}</span><span class="s1">.log&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">log_fname</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">datetime_str</span><span class="si">}</span><span class="s1">_process</span><span class="si">{</span><span class="n">parallel</span><span class="si">}</span><span class="s1">.log&#39;</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">term_id</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">parallel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">log_fname</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_name</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">suffix</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;_process</span><span class="si">{</span><span class="n">parallel</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="n">log_fname</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">new_name</span><span class="si">}{</span><span class="n">path</span><span class="o">.</span><span class="n">suffix</span><span class="si">}</span><span class="s1">&#39;</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">level</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">logging</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
+    <span class="n">fh</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="n">log_fname</span><span class="p">)</span>
+    <span class="n">form_fh</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="n">format_str</span><span class="p">)</span>
+    <span class="n">form_fh</span><span class="o">.</span><span class="n">default_time_format</span> <span class="o">=</span> <span class="n">datefmt</span>
+    <span class="n">form_fh</span><span class="o">.</span><span class="n">default_msec_format</span> <span class="o">=</span> <span class="n">msecfmt</span>
+    <span class="n">fh</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">form_fh</span><span class="p">)</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">[</span><span class="n">term_id</span><span class="p">]</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">hdl</span> <span class="ow">in</span> <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">[:]:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hdl</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">):</span>
+            <span class="n">fh</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">hdl</span><span class="o">.</span><span class="n">level</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">removeHandler</span><span class="p">(</span><span class="n">hdl</span><span class="p">)</span>
+            
+    <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">logger</span></div>
+
+
+
+<div class="viewcode-block" id="term_level"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.profiling.term_level.html#sorts.profiling.term_level">[docs]</a><span class="k">def</span> <span class="nf">term_level</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Set the StreamHandler level.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">hdl</span> <span class="ow">in</span> <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">[:]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hdl</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">):</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">level</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">logging</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
+
+        <span class="n">hdl</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">logger</span></div>
 
 
 <div class="viewcode-block" id="file_level"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.profiling.file_level.html#sorts.profiling.file_level">[docs]</a><span class="k">def</span> <span class="nf">file_level</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">logger</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">file_id</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="sd">&#39;&#39;&#39;Set the FileHandler level.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">hdl</span> <span class="ow">in</span> <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">[:]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hdl</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">):</span>
+            <span class="k">continue</span>
+        
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">level</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">logging</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">level</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">logging</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
-
-    <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">[</span><span class="n">file_id</span><span class="p">]</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+        <span class="n">hdl</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">logger</span></div>
 </pre></div>
@@ -341,7 +511,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

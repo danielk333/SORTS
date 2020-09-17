@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Profiling components &#8212; SORTS 3.13.0 documentation</title>
+    <title>Profiling components &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../_static/gallery.css" />
@@ -21,8 +21,8 @@
     <script src="../_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Orekit propagator usage" href="orekit_propagator.html" />
-    <link rel="prev" title="Adding random errors" href="adding_random_errors.html" />
+    <link rel="next" title="Adding random errors" href="adding_random_errors.html" />
+    <link rel="prev" title="Orekit propagator small time step" href="orekit_small_step.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--[if lt IE 9]>
     <script src="_static/css3-mediaqueries.js"></script>
@@ -38,23 +38,23 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="orekit_propagator.html" title="Orekit propagator usage"
+          <a href="adding_random_errors.html" title="Adding random errors"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="adding_random_errors.html" title="Adding random errors"
+          <a href="orekit_small_step.html" title="Orekit propagator small time step"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Examples</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="adding_random_errors.html"
-                        title="previous chapter">Adding random errors</a></p>
+  <p class="topless"><a href="orekit_small_step.html"
+                        title="previous chapter">Orekit propagator small time step</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="orekit_propagator.html"
-                        title="next chapter">Orekit propagator usage</a></p>
+  <p class="topless"><a href="adding_random_errors.html"
+                        title="next chapter">Adding random errors</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -87,39 +87,42 @@
 <div class="sphx-glr-example-title section" id="profiling-components">
 <span id="sphx-glr-auto-gallery-logger-orekit-py"></span><h1>Profiling components<a class="headerlink" href="#profiling-components" title="Permalink to this headline">¶</a></h1>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2020-07-10 16:47:55.796 INFO    ; sorts.propagator.Orekit:init
-2020-07-10 16:47:59.910 INFO    ; Orekit:propagate:len(t) = 5000
-2020-07-10 16:48:02.241 INFO    ; Orekit:propagate:completed
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span> SETTING DEBUG MODE
 
- SETTING DEBUG MODE
-
-2020-07-10 16:48:02.242 INFO    ; sorts.propagator.Orekit:init
-2020-07-10 16:48:02.242 DEBUG   ; Orekit:init:orekit-data = /home/danielk/IRF/IRF_GITLAB/orekit_build/orekit-data-master.zip
-2020-07-10 16:48:02.242 DEBUG   ; Orekit:settings:in_frame = ITRF
-2020-07-10 16:48:02.242 DEBUG   ; Orekit:settings:out_frame = EME
-2020-07-10 16:48:02.242 DEBUG   ; Orekit:settings:frame_tidal_effects = False
-2020-07-10 16:48:02.242 DEBUG   ; Orekit:settings:integrator = DormandPrince853
-2020-07-10 16:48:02.242 DEBUG   ; Orekit:settings:min_step = 0.001
-2020-07-10 16:48:02.242 DEBUG   ; Orekit:settings:max_step = 120.0
-2020-07-10 16:48:02.242 DEBUG   ; Orekit:settings:position_tolerance = 10.0
-2020-07-10 16:48:02.242 DEBUG   ; Orekit:settings:earth_gravity = HolmesFeatherstone
-2020-07-10 16:48:02.242 DEBUG   ; Orekit:settings:gravity_order = (10, 10)
-2020-07-10 16:48:02.242 DEBUG   ; Orekit:settings:solarsystem_perturbers = [&#39;Moon&#39;, &#39;Sun&#39;]
-2020-07-10 16:48:02.243 DEBUG   ; Orekit:settings:drag_force = False
-2020-07-10 16:48:02.243 DEBUG   ; Orekit:settings:atmosphere = DTM2000
-2020-07-10 16:48:02.243 DEBUG   ; Orekit:settings:radiation_pressure = False
-2020-07-10 16:48:02.243 DEBUG   ; Orekit:settings:solar_activity = Marshall
-2020-07-10 16:48:02.243 DEBUG   ; Orekit:settings:constants_source = WGS84
-2020-07-10 16:48:02.243 DEBUG   ; Orekit:settings:solar_activity_strength = WEAK
-2020-07-10 16:48:02.427 DEBUG   ; Orekit:init:_forces:earth_gravity = &lt;class &#39;org.orekit.forces.gravity.HolmesFeatherstoneAttractionModel&#39;&gt;
-2020-07-10 16:48:02.427 DEBUG   ; Orekit:init:_forces:perturbation_Moon = &lt;class &#39;org.orekit.forces.gravity.ThirdBodyAttraction&#39;&gt;
-2020-07-10 16:48:02.427 DEBUG   ; Orekit:init:_forces:perturbation_Sun = &lt;class &#39;org.orekit.forces.gravity.ThirdBodyAttraction&#39;&gt;
-2020-07-10 16:48:02.427 INFO    ; Orekit:propagate:len(t) = 5000
-2020-07-10 16:48:02.427 DEBUG   ; Orekit:set_forces:A = 1.0
-2020-07-10 16:48:02.427 DEBUG   ; Orekit:set_forces:cd = 1.0
-2020-07-10 16:48:02.427 DEBUG   ; Orekit:set_forces:cr = 1.0
-2020-07-10 16:48:02.427 DEBUG   ; Orekit:set_forces:re_calc = True
-2020-07-10 16:48:03.043 INFO    ; Orekit:propagate:completed
+2020-09-17 12:25:48.823 DEBUG   ; Propagator:_check_settings
+2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:epoch_format = mjd
+2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:epoch_scale = utc
+2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:time_format = sec
+2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:time_scale = None
+2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:in_frame = Orekit-ITRF
+2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:out_frame = Orekit-EME
+2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:frame_tidal_effects = False
+2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:integrator = DormandPrince853
+2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:min_step = 0.001
+2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:max_step = 120.0
+2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:position_tolerance = 10.0
+2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:earth_gravity = HolmesFeatherstone
+2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:gravity_order = (10, 10)
+2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:solarsystem_perturbers = [&#39;Moon&#39;, &#39;Sun&#39;]
+2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:drag_force = False
+2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:atmosphere = DTM2000
+2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:radiation_pressure = False
+2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:solar_activity = Marshall
+2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:constants_source = WGS84
+2020-09-17 12:25:48.823 DEBUG   ; Propagator:settings:solar_activity_strength = WEAK
+2020-09-17 12:25:48.823 DEBUG   ; sorts.propagator.Orekit:init
+2020-09-17 12:25:48.824 DEBUG   ; Orekit:init:orekit-data = /home/danielk/IRF/IRF_GITLAB/orekit_build/orekit-data-master.zip
+2020-09-17 12:25:48.981 DEBUG   ; Orekit:init:_forces:earth_gravity = &lt;class &#39;org.orekit.forces.gravity.HolmesFeatherstoneAttractionModel&#39;&gt;
+2020-09-17 12:25:48.981 DEBUG   ; Orekit:init:_forces:perturbation_Moon = &lt;class &#39;org.orekit.forces.gravity.ThirdBodyAttraction&#39;&gt;
+2020-09-17 12:25:48.981 DEBUG   ; Orekit:init:_forces:perturbation_Sun = &lt;class &#39;org.orekit.forces.gravity.ThirdBodyAttraction&#39;&gt;
+2020-09-17 12:25:48.981 DEBUG   ; Propagator:convert_time
+2020-09-17 12:25:48.982 DEBUG   ; Propagator:convert_time:completed
+2020-09-17 12:25:48.986 DEBUG   ; Orekit:propagate:len(t) = 5000
+2020-09-17 12:25:48.986 DEBUG   ; Orekit:set_forces:A = 1.0
+2020-09-17 12:25:48.986 DEBUG   ; Orekit:set_forces:cd = 1.0
+2020-09-17 12:25:48.986 DEBUG   ; Orekit:set_forces:cr = 1.0
+2020-09-17 12:25:48.986 DEBUG   ; Orekit:set_forces:re_calc = True
+2020-09-17 12:25:49.566 DEBUG   ; Orekit:propagate:completed
 </pre></div>
 </div>
 <div class="line-block">
@@ -137,8 +140,8 @@
     <span class="n">prop</span> <span class="o">=</span> <span class="n">sorts</span><span class="o">.</span><span class="n">propagator</span><span class="o">.</span><span class="n">Orekit</span><span class="p">(</span>
         <span class="n">orekit_data</span> <span class="o">=</span> <span class="n">orekit_data</span><span class="p">,</span>
         <span class="n">settings</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
-            <span class="n">in_frame</span><span class="o">=</span><span class="s1">&#39;ITRF&#39;</span><span class="p">,</span>
-            <span class="n">out_frame</span><span class="o">=</span><span class="s1">&#39;EME&#39;</span><span class="p">,</span>
+            <span class="n">in_frame</span><span class="o">=</span><span class="s1">&#39;Orekit-ITRF&#39;</span><span class="p">,</span>
+            <span class="n">out_frame</span><span class="o">=</span><span class="s1">&#39;Orekit-EME&#39;</span><span class="p">,</span>
             <span class="n">drag_force</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
             <span class="n">radiation_pressure</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="p">),</span>
@@ -160,7 +163,7 @@
 <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">states</span></a> <span class="o">=</span> <span class="n">run_prop</span><span class="p">()</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  7.248 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  1.511 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-gallery-logger-orekit-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/c94c20cba749176d66d55aa4fe6886ae/logger_orekit.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">logger_orekit.py</span></code></a></p>
@@ -188,12 +191,12 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="orekit_propagator.html" title="Orekit propagator usage"
+          <a href="adding_random_errors.html" title="Adding random errors"
              >next</a> |</li>
         <li class="right" >
-          <a href="adding_random_errors.html" title="Adding random errors"
+          <a href="orekit_small_step.html" title="Orekit propagator small time step"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" >Examples</a> &#187;</li> 
       </ul>
     </div>

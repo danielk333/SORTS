@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>sorts.scheduler.observed_parameters &#8212; SORTS 3.13.0 documentation</title>
+    <title>sorts.scheduler.observed_parameters &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -76,6 +76,17 @@
 
 <div class="viewcode-block" id="ObservedParameters"><a class="viewcode-back" href="../../../_autodoc/sorts/scheduler/sorts.scheduler.observed_parameters.ObservedParameters.html#sorts.scheduler.observed_parameters.ObservedParameters">[docs]</a><span class="k">class</span> <span class="nc">ObservedParameters</span><span class="p">(</span><span class="n">Scheduler</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Bi-static radar observation parameters of hard targets.</span>
+
+<span class="sd">    **Parameters calculated**</span>
+
+<span class="sd">        * time</span>
+<span class="sd">        * signal to noise ratio</span>
+<span class="sd">        * range</span>
+<span class="sd">        * range rate</span>
+<span class="sd">        * transmitter local pointing to target k</span>
+<span class="sd">        * receiver pointing to target k</span>
+<span class="sd">        * radar cross section</span>
+
 <span class="sd">    &#39;&#39;&#39;</span> 
 
 <div class="viewcode-block" id="ObservedParameters.__init__"><a class="viewcode-back" href="../../../_autodoc/sorts/scheduler/sorts.scheduler.observed_parameters.ObservedParameters.__init__.html#sorts.scheduler.observed_parameters.ObservedParameters.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radar</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">profiler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -86,18 +97,26 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="ObservedParameters.calculate_observation"><a class="viewcode-back" href="../../../_autodoc/sorts/scheduler/sorts.scheduler.observed_parameters.ObservedParameters.calculate_observation.html#sorts.scheduler.observed_parameters.ObservedParameters.calculate_observation">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_observation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">txrx_pass</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">generator</span><span class="p">,</span> <span class="n">space_object</span><span class="p">,</span> <span class="n">snr_limit</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="ObservedParameters.calculate_observation"><a class="viewcode-back" href="../../../_autodoc/sorts/scheduler/sorts.scheduler.observed_parameters.ObservedParameters.calculate_observation.html#sorts.scheduler.observed_parameters.ObservedParameters.calculate_observation">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_observation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">txrx_pass</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">generator</span><span class="p">,</span> <span class="n">space_object</span><span class="p">,</span> <span class="n">interpolator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">snr_limit</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="n">txi</span><span class="p">,</span> <span class="n">rxi</span> <span class="o">=</span> <span class="n">txrx_pass</span><span class="o">.</span><span class="n">station_id</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Obs.Param.:calculate_observation:(tx=</span><span class="si">{</span><span class="n">rxi</span><span class="si">}</span><span class="s1">, rx=</span><span class="si">{</span><span class="n">rxi</span><span class="si">}</span><span class="s1">), len(t) = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Obs.Param.:calculate_observation:(tx=</span><span class="si">{</span><span class="n">txi</span><span class="si">}</span><span class="s1">, rx=</span><span class="si">{</span><span class="n">rxi</span><span class="si">}</span><span class="s1">), len(t) = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;Obs.Param.:calculate_observation&#39;</span><span class="p">)</span>
 
+
+        <span class="n">diam</span> <span class="o">=</span> <span class="n">space_object</span><span class="o">.</span><span class="n">d</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;Obs.Param.:calculate_observation:get_state&#39;</span><span class="p">)</span>
-        <span class="n">states</span> <span class="o">=</span> <span class="n">space_object</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">interpolator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">states</span> <span class="o">=</span> <span class="n">interpolator</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">states</span> <span class="o">=</span> <span class="n">space_object</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;Obs.Param.:calculate_observation:get_state&#39;</span><span class="p">)</span>
 
@@ -119,6 +138,8 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;Obs.Param.:calculate_observation:enus,range,range_rate&#39;</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;Obs.Param.:calculate_observation:generator&#39;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">ti</span><span class="p">,</span> <span class="n">mrad</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">generator</span><span class="p">):</span>
             <span class="n">radar</span><span class="p">,</span> <span class="n">meta</span> <span class="o">=</span> <span class="n">mrad</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -155,7 +176,7 @@
                     <span class="n">radar</span><span class="o">.</span><span class="n">tx</span><span class="p">[</span><span class="n">txi</span><span class="p">]</span><span class="o">.</span><span class="n">power</span><span class="p">,</span>
                     <span class="n">ranges</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">ti</span><span class="p">],</span>
                     <span class="n">ranges</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">ti</span><span class="p">],</span>
-                    <span class="n">diameter</span><span class="o">=</span><span class="n">space_object</span><span class="o">.</span><span class="n">d</span><span class="p">,</span>
+                    <span class="n">diameter</span><span class="o">=</span><span class="n">diam</span><span class="p">,</span>
                     <span class="n">bandwidth</span><span class="o">=</span><span class="n">radar</span><span class="o">.</span><span class="n">tx</span><span class="p">[</span><span class="n">txi</span><span class="p">]</span><span class="o">.</span><span class="n">coh_int_bandwidth</span><span class="p">,</span>
                     <span class="n">rx_noise_temp</span><span class="o">=</span><span class="n">radar</span><span class="o">.</span><span class="n">rx</span><span class="p">[</span><span class="n">rxi</span><span class="p">]</span><span class="o">.</span><span class="n">noise</span><span class="p">,</span>
                 <span class="p">)</span>
@@ -164,7 +185,7 @@
 
                 <span class="n">rcs</span><span class="p">[</span><span class="n">ti</span><span class="p">]</span> <span class="o">=</span> <span class="n">hard_target_rcs</span><span class="p">(</span>
                     <span class="n">wavelength</span><span class="o">=</span><span class="n">radar</span><span class="o">.</span><span class="n">rx</span><span class="p">[</span><span class="n">rxi</span><span class="p">]</span><span class="o">.</span><span class="n">wavelength</span><span class="p">,</span>
-                    <span class="n">diameter</span><span class="o">=</span><span class="n">space_object</span><span class="o">.</span><span class="n">d</span><span class="p">,</span>
+                    <span class="n">diameter</span><span class="o">=</span><span class="n">diam</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="k">if</span> <span class="n">snr_limit</span><span class="p">:</span>
                     <span class="n">snr_db</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">snr</span><span class="p">[</span><span class="n">ti</span><span class="p">])</span><span class="o">*</span><span class="mf">10.0</span>
@@ -179,6 +200,8 @@
             
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;Obs.Param.:calculate_observation:snr-step&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;Obs.Param.:calculate_observation:generator&#39;</span><span class="p">)</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
             <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="p">,</span>
@@ -200,7 +223,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;Obs.Param.:calculate_observation&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Obs.Param.:calculate_observation:complete&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Obs.Param.:calculate_observation:complete&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div></div>
 </pre></div>
 
@@ -218,7 +241,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

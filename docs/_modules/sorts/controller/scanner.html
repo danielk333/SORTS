@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>sorts.controller.scanner &#8212; SORTS 3.13.0 documentation</title>
+    <title>sorts.controller.scanner &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -72,7 +72,7 @@
 
 
 <div class="viewcode-block" id="Scanner"><a class="viewcode-back" href="../../../_autodoc/sorts/controller/sorts.controller.scanner.Scanner.html#sorts.controller.scanner.Scanner">[docs]</a><span class="k">class</span> <span class="nc">Scanner</span><span class="p">(</span><span class="n">RadarController</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Takes in ECEF points and a time vector and creates a tracking control.</span>
+    <span class="sd">&#39;&#39;&#39;Takes in a scan and create a scanning radar controller.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="n">META_FIELDS</span> <span class="o">=</span> <span class="n">RadarController</span><span class="o">.</span><span class="n">META_FIELDS</span> <span class="o">+</span> <span class="p">[</span>
@@ -95,6 +95,11 @@
         <span class="k">return</span> <span class="n">dic</span></div>
 
 <div class="viewcode-block" id="Scanner.point_radar"><a class="viewcode-back" href="../../../_autodoc/sorts/controller/sorts.controller.scanner.Scanner.point_radar.html#sorts.controller.scanner.Scanner.point_radar">[docs]</a>    <span class="k">def</span> <span class="nf">point_radar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Assumes t is not array</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;Scanner:generator:point_radar&#39;</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_copy</span><span class="p">:</span>
             <span class="n">radar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
@@ -108,28 +113,50 @@
         <span class="k">for</span> <span class="n">tx</span> <span class="ow">in</span> <span class="n">radar</span><span class="o">.</span><span class="n">tx</span><span class="p">:</span>
             <span class="n">point</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">ecef_pointing</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">tx</span><span class="p">)</span>
 
-            <span class="n">point_tx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point</span> <span class="o">+</span> <span class="n">tx</span><span class="o">.</span><span class="n">ecef</span><span class="p">)</span>
-            <span class="n">point_rx_to_tx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point</span><span class="p">[:,</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">r</span><span class="p">[</span><span class="kc">None</span><span class="p">,:]</span> <span class="o">+</span> <span class="n">tx</span><span class="o">.</span><span class="n">ecef</span><span class="p">[:,</span><span class="kc">None</span><span class="p">])</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">point</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">point_tx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point</span> <span class="o">+</span> <span class="n">tx</span><span class="o">.</span><span class="n">ecef</span><span class="p">[:,</span><span class="kc">None</span><span class="p">])</span>
+                <span class="n">__ptx</span> <span class="o">=</span> <span class="n">point</span><span class="p">[:,:,</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">r</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">,:]</span> <span class="o">+</span> <span class="n">tx</span><span class="o">.</span><span class="n">ecef</span><span class="p">[:,</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">]</span>
+                <span class="n">point_rx_to_tx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">__ptx</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">__ptx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">__ptx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">point_tx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point</span> <span class="o">+</span> <span class="n">tx</span><span class="o">.</span><span class="n">ecef</span><span class="p">)</span>
+                <span class="n">point_rx_to_tx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point</span><span class="p">[:,</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">r</span><span class="p">[</span><span class="kc">None</span><span class="p">,:]</span> <span class="o">+</span> <span class="n">tx</span><span class="o">.</span><span class="n">ecef</span><span class="p">[:,</span><span class="kc">None</span><span class="p">])</span>
             
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;Scanner:generator:point_radar:_point_station[tx]&#39;</span><span class="p">)</span>
             <span class="n">RadarController</span><span class="o">.</span><span class="n">_point_station</span><span class="p">(</span><span class="n">tx</span><span class="p">,</span> <span class="n">point_tx</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;Scanner:generator:point_radar:_point_station[tx]&#39;</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">rx</span> <span class="ow">in</span> <span class="n">radar</span><span class="o">.</span><span class="n">rx</span><span class="p">:</span>
             <span class="n">rx_point</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">txi</span><span class="p">,</span> <span class="n">tx</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">radar</span><span class="o">.</span><span class="n">tx</span><span class="p">):</span>
                 <span class="c1">#&lt; 200 meters apart = same location for pointing</span>
                 <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">tx</span><span class="o">.</span><span class="n">ecef</span> <span class="o">-</span> <span class="n">rx</span><span class="o">.</span><span class="n">ecef</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">200.0</span><span class="p">:</span>
-                    <span class="n">rx_point</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point_tx</span><span class="p">[</span><span class="n">txi</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+                    <span class="n">__ptx</span> <span class="o">=</span> <span class="n">point_tx</span><span class="p">[</span><span class="n">txi</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">__ptx</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">__ptx</span> <span class="o">=</span> <span class="n">__ptx</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">rx_point</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">__ptx</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">rx_point</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point_rx_to_tx</span><span class="p">[</span><span class="n">txi</span><span class="p">])</span>
             <span class="n">rx_point</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">rx_point</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;Scanner:generator:point_radar:_point_station[rx]&#39;</span><span class="p">)</span>
             <span class="n">RadarController</span><span class="o">.</span><span class="n">_point_station</span><span class="p">(</span><span class="n">rx</span><span class="p">,</span> <span class="n">rx_point</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;Scanner:generator:point_radar:_point_station[rx]&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;Scanner:generator:point_radar&#39;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">radar</span><span class="p">,</span> <span class="n">meta</span></div>
 
 <div class="viewcode-block" id="Scanner.generator"><a class="viewcode-back" href="../../../_autodoc/sorts/controller/sorts.controller.scanner.Scanner.generator.html#sorts.controller.scanner.Scanner.generator">[docs]</a>    <span class="k">def</span> <span class="nf">generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">ti</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)):</span>
             <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">point_radar</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">ti</span><span class="p">])</span></div></div>
+
+
 </pre></div>
 
           </div>
@@ -146,7 +173,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

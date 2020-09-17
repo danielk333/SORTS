@@ -1,0 +1,8 @@
+Propagator.set
+==============
+
+.. currentmodule:: sorts.propagator.base
+
+.. rubric:: Propagator.set
+
+.. automethod:: Propagator.set

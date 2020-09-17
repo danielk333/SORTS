@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>population &#8212; SORTS 3.13.0 documentation</title>
+    <title>population &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -22,7 +22,7 @@
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="Population" href="sorts.population.population.Population.html" />
-    <link rel="prev" title="sgp4_propagation" href="../propagator/sorts.propagator.pysgp4.sgp4_propagation.html" />
+    <link rel="prev" title="sorts.propagator.pysgp4.SGP4.DEFAULT_SETTINGS" href="../propagator/sorts.propagator.pysgp4.SGP4.DEFAULT_SETTINGS.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--[if lt IE 9]>
     <script src="_static/css3-mediaqueries.js"></script>
@@ -41,9 +41,9 @@
           <a href="sorts.population.population.Population.html" title="Population"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="../propagator/sorts.propagator.pysgp4.sgp4_propagation.html" title="sgp4_propagation"
+          <a href="../propagator/sorts.propagator.pysgp4.SGP4.DEFAULT_SETTINGS.html" title="sorts.propagator.pysgp4.SGP4.DEFAULT_SETTINGS"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" accesskey="U">API Reference</a> &#187;</li> 
       </ul>
     </div>
@@ -59,8 +59,8 @@
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="../propagator/sorts.propagator.pysgp4.sgp4_propagation.html"
-                        title="previous chapter">sgp4_propagation</a></p>
+  <p class="topless"><a href="../propagator/sorts.propagator.pysgp4.SGP4.DEFAULT_SETTINGS.html"
+                        title="previous chapter">sorts.propagator.pysgp4.SGP4.DEFAULT_SETTINGS</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="sorts.population.population.Population.html"
                         title="next chapter">Population</a></p>
@@ -101,7 +101,7 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.population.population.Population.html#sorts.population.population.Population" title="sorts.population.population.Population"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Population</span></code></a>([extra_columns, dtypes, …])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.population.population.Population.html#sorts.population.population.Population" title="sorts.population.population.Population"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Population</span></code></a>([fields, dtypes, …])</p></td>
 <td><p>Encapsulates a population of space objects as an array and functions for returning instances of space objects.</p></td>
 </tr>
 </tbody>
@@ -112,7 +112,7 @@
 <p class="rubric">Population</p>
 <dl class="py class">
 <dt>
-<em class="property">class </em><code class="sig-prename descclassname">sorts.population.population.</code><code class="sig-name descname">Population</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">extra_columns</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">dtypes</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">space_object_uses</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">propagator</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">propagator_args</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">propagator_options</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/population/population.html#Population"><span class="viewcode-link">[source]</span></a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">sorts.population.population.</code><code class="sig-name descname">Population</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fields</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dtypes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">space_object_fields</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">state_fields</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">epoch_field</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">propagator</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">propagator_args</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">propagator_options</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/population/population.html#Population"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Encapsulates a population of space objects as an array and functions for returning instances of space objects.</p>
 <p><strong>Default columns:</strong></p>
@@ -154,12 +154,13 @@
 </pre></div>
 </div>
 <p>Notice that in the above example the value to be assigned always has the correct size corresponding to the index and slices, a statement like <code class="code docutils literal notranslate"><span class="pre">x[:,3:7]</span> <span class="pre">=</span> <span class="pre">3</span></code> is not possible, instead one would write <code class="code docutils literal notranslate"><span class="pre">x[:,3:7]</span> <span class="pre">=</span> <span class="pre">np.full((len(pop),</span> <span class="pre">4),</span> <span class="pre">3.0,</span> <span class="pre">dtype='f')</span></code>.</p>
+<p>#TODO: THESE HAVE CHANGED, UPDATE THEM!!!!</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>objs</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Array containing population data. Rows correspond to objects and columns to variables.</p></li>
 <li><p><strong>name</strong> (<em>str</em>) – Name of population.</p></li>
-<li><p><strong>header</strong> (<em>list</em>) – List of strings containing column descriptions.</p></li>
+<li><p><strong>fields</strong> (<em>list</em>) – List of strings containing column descriptions.</p></li>
 <li><p><strong>space_object_uses</strong> (<em>list</em>) – List of booleans describing what columns should be included when initializing a space object. This allows for extra data to be stored in the population without passing it to the space object.</p></li>
 <li><p><strong>propagator</strong> (<em>PropagatorBase</em>) – Propagator class pointer used for <code class="xref py py-class docutils literal notranslate"><span class="pre">space_object.SpaceObject</span></code>.</p></li>
 <li><p><strong>propagator_options</strong> (<em>dict</em>) – Propagator initialization keyword arguments.</p></li>
@@ -168,9 +169,9 @@
 <dt class="field-even">Parameters</dt>
 <dd class="field-even"><ul class="simple">
 <li><p><strong>name</strong> (<em>str</em>) – Name of population.</p></li>
-<li><p><strong>extra_columns</strong> (<em>list</em>) – List of strings containing column descriptions for addition data besides the default columns.</p></li>
+<li><p><strong>fields</strong> (<em>list</em>) – List of strings containing column descriptions for addition data besides the default columns.</p></li>
 <li><p><strong>dtypes</strong> (<em>list</em>) – List of strings containing numpy data type description. Defaults to ‘f’.</p></li>
-<li><p><strong>space_object_uses</strong> (<em>list</em>) – List of booleans describing what columns should be included when initializing a space object. This allows for extra data to be stored in the population without passing it to the space object.</p></li>
+<li><p><strong>space_object_fields</strong> (<em>list</em>) – List of booleans describing what columns should be included when initializing a space object. This allows for extra data to be stored in the population without passing it to the space object.</p></li>
 <li><p><strong>propagator</strong> (<em>PropagatorBase</em>) – Propagator class pointer used for <code class="xref py py-class docutils literal notranslate"><span class="pre">space_object.SpaceObject</span></code>.</p></li>
 <li><p><strong>propagator_options</strong> (<em>dict</em>) – Propagator initialization keyword arguments.</p></li>
 </ul>
@@ -178,8 +179,8 @@
 </dl>
 <dl class="py method">
 <dt>
-<code class="sig-name descname">add_column</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">dtype</span><span class="o">=</span><span class="default_value">'float64'</span></em>, <em class="sig-param"><span class="n">space_object_uses</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/population/population.html#Population.add_column"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Add a column to the population data.</p>
+<code class="sig-name descname">add_field</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">dtype</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/population/population.html#Population.add_field"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Add a field to the population data.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -203,8 +204,8 @@
 <span class="n">my_pop</span><span class="o">.</span><span class="n">allocate</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">my_pop</span><span class="p">))</span> <span class="c1">#will output 2</span>
 
-<span class="n">my_pop</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span><span class="s1">&#39;obj1&#39;</span><span class="p">)</span>
-<span class="n">my_pop</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span><span class="s1">&#39;obj2&#39;</span><span class="p">)</span>
+<span class="n">my_pop</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span><span class="s1">&#39;obj1&#39;</span><span class="p">)</span>
+<span class="n">my_pop</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span><span class="s1">&#39;obj2&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -248,11 +249,15 @@
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname">get_all_orbits</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">order_angs</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/population/population.html#Population.get_all_orbits"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Get the orbital elements for all rows from internal data array.</p>
+<code class="sig-name descname">get_fields</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fields</span></em>, <em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">named</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">dtype</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/population/population.html#Population.get_fields"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Get the orbital elements for one row from internal data array.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>order_angs</strong> (<em>bool</em>) – Order the orbital element angles according to aop before raan or not.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>int/slice/list</em>) – Row number(s).</p></li>
+<li><p><strong>fields</strong> (<em>list</em>) – List of fields to get data for</p></li>
+<li><p><strong>named</strong> (<em>bool</em>) – return a named numpy array or a unnamed one. If True, all dtypes are cast as the first fields.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -265,51 +270,14 @@
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname">get_orbit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span></em>, <em class="sig-param"><span class="n">order_angs</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/population/population.html#Population.get_orbit"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Get the orbital elements for one row from internal data array.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>n</strong> (<em>int</em>) – Row number.</p></li>
-<li><p><strong>order_angs</strong> (<em>bool</em>) – Order the orbital element angles according to aop before raan or not.</p></li>
-</ul>
-</dd>
-</dl>
+<code class="sig-name descname">get_orbit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span></em>, <em class="sig-param"><span class="n">fields</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">M_cent</span><span class="o">=</span><span class="default_value">5.972169366075844e+24</span></em>, <em class="sig-param"><span class="n">degrees</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">anomaly</span><span class="o">=</span><span class="default_value">'mean'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/population/population.html#Population.get_orbit"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Get the one row from the population as a <code class="xref py py-class docutils literal notranslate"><span class="pre">pyorb.Orbit</span></code> instance.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname">get_states</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">M_cent</span><span class="o">=</span><span class="default_value">5.972173860929236e+24</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/population/population.html#Population.get_states"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Use the orbital parameters and get the state.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt>
-<code class="sig-name descname">object_generator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/population/population.html#Population.object_generator"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Return a generator that iterates trough the entire population returning space objects.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt>
-<code class="sig-name descname">plot_distribution</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dist</span></em>, <em class="sig-param"><span class="n">label</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">logx</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">logy</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">log_freq</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/population/population.html#Population.plot_distribution"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Plot the distribution of parameter(s) or all orbits of this population.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>dist</strong> (<em>str/list</em>) – Name of parameter as given by <code class="code docutils literal notranslate"><span class="pre">population.header</span></code> or <code class="code docutils literal notranslate"><span class="pre">'orbits'</span></code> to plot all orbits. If a list, length of list must be exactly 2 and will produce a 2d distribution instead.</p></li>
-<li><p><strong>label</strong> (<em>str/list</em>) – Used if parameter(s) distribution is plotted to label the axis.</p></li>
-<li><p><strong>logx</strong> (<em>bool</em>) – Determines if x-axis is logarithmic or not.</p></li>
-<li><p><strong>logy</strong> (<em>bool</em>) – Determines if y-axis is logarithmic or not.</p></li>
-<li><p><strong>log_freq</strong> (<em>bool</em>) – Determines if frequency is logarithmic or not.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt>
-<code class="sig-name descname">print_row</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/population/population.html#Population.print_row"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Print a specific row with Header information.</p>
+<code class="sig-name descname">get_states</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">named</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">dtype</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/population/population.html#Population.get_states"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Use the defined state parameters to get a copy of the states</p>
 </dd></dl>
 
 <dl class="py method">
@@ -342,9 +310,9 @@
           <a href="sorts.population.population.Population.html" title="Population"
              >next</a> |</li>
         <li class="right" >
-          <a href="../propagator/sorts.propagator.pysgp4.sgp4_propagation.html" title="sgp4_propagation"
+          <a href="../propagator/sorts.propagator.pysgp4.SGP4.DEFAULT_SETTINGS.html" title="sorts.propagator.pysgp4.SGP4.DEFAULT_SETTINGS"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li> 
       </ul>
     </div>

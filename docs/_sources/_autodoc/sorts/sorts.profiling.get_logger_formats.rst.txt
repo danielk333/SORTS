@@ -1,0 +1,8 @@
+get\_logger\_formats
+====================
+
+.. currentmodule:: sorts.profiling
+
+.. rubric:: get_logger_formats
+
+.. autofunction:: get_logger_formats

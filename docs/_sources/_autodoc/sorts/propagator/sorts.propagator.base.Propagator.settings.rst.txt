@@ -1,8 +1,0 @@
-Propagator.settings
-===================
-
-.. currentmodule:: sorts.propagator.base
-
-.. rubric:: Propagator.settings
-
-.. automethod:: Propagator.settings

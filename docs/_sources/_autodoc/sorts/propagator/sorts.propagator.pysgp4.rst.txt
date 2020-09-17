@@ -19,19 +19,8 @@ Module summary
     
     SGP4
     
-    SGP4_module_wrapper
-    
 
 
-
-
-.. rubric:: Functions
-
-.. autosummary::
-    :toctree: .
-    
-    sgp4_propagation
-    
 
 
 
@@ -53,23 +42,5 @@ Contents
    :inherited-members:
 
 
-
-.. rubric:: SGP4_module_wrapper
-
-.. autoclass:: SGP4_module_wrapper
-   :show-inheritance:
-   :noindex:
-   :members:
-   :inherited-members:
-
-
-
-
-
-.. rubric:: Functions
-
-
-.. autofunction:: sgp4_propagation
-   :noindex:
 
 

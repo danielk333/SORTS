@@ -1,0 +1,8 @@
+convert
+=======
+
+.. currentmodule:: sorts.frames
+
+.. rubric:: convert
+
+.. autofunction:: convert

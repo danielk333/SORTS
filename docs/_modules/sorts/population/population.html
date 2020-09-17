@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>sorts.population.population &#8212; SORTS 3.13.0 documentation</title>
+    <title>sorts.population.population &#8212; SORTS 3.18.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -73,6 +73,8 @@
 <span class="kn">import</span> <span class="nn">h5py</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pyorb</span>
+<span class="kn">from</span> <span class="nn">tabulate</span> <span class="kn">import</span> <span class="n">tabulate</span>
+<span class="kn">from</span> <span class="nn">astropy.time</span> <span class="kn">import</span> <span class="n">Time</span>
 
 <span class="c1">#Local import</span>
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">space_object</span> <span class="k">as</span> <span class="n">so</span>
@@ -129,47 +131,61 @@
 <span class="sd">    Notice that in the above example the value to be assigned always has the correct size corresponding to the index and slices, a statement like :code:`x[:,3:7] = 3` is not possible, instead one would write :code:`x[:,3:7] = np.full((len(pop), 4), 3.0, dtype=&#39;f&#39;)`.</span>
 
 
+<span class="sd">    #TODO: THESE HAVE CHANGED, UPDATE THEM!!!!</span>
+
 <span class="sd">    :ivar numpy.ndarray objs: Array containing population data. Rows correspond to objects and columns to variables.</span>
 <span class="sd">    :ivar str name: Name of population.</span>
-<span class="sd">    :ivar list header: List of strings containing column descriptions.</span>
+<span class="sd">    :ivar list fields: List of strings containing column descriptions.</span>
 <span class="sd">    :ivar list space_object_uses: List of booleans describing what columns should be included when initializing a space object. This allows for extra data to be stored in the population without passing it to the space object.</span>
 <span class="sd">    :ivar PropagatorBase propagator: Propagator class pointer used for :class:`space_object.SpaceObject`.</span>
 <span class="sd">    :ivar dict propagator_options: Propagator initialization keyword arguments.</span>
 <span class="sd">    </span>
 <span class="sd">    :param str name: Name of population.</span>
-<span class="sd">    :param list extra_columns: List of strings containing column descriptions for addition data besides the default columns.</span>
+<span class="sd">    :param list fields: List of strings containing column descriptions for addition data besides the default columns.</span>
 <span class="sd">    :param list dtypes: List of strings containing numpy data type description. Defaults to &#39;f&#39;.</span>
-<span class="sd">    :param list space_object_uses: List of booleans describing what columns should be included when initializing a space object. This allows for extra data to be stored in the population without passing it to the space object.</span>
+<span class="sd">    :param list space_object_fields: List of booleans describing what columns should be included when initializing a space object. This allows for extra data to be stored in the population without passing it to the space object.</span>
 <span class="sd">    :param PropagatorBase propagator: Propagator class pointer used for :class:`space_object.SpaceObject`.</span>
 <span class="sd">    :param dict propagator_options: Propagator initialization keyword arguments.</span>
 <span class="sd">    </span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="n">_default_dtype</span> <span class="o">=</span> <span class="s1">&#39;float64&#39;</span>
+    <span class="n">_default_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;oid&#39;</span><span class="p">,</span><span class="s1">&#39;a&#39;</span><span class="p">,</span><span class="s1">&#39;e&#39;</span><span class="p">,</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="s1">&#39;raan&#39;</span><span class="p">,</span><span class="s1">&#39;aop&#39;</span><span class="p">,</span><span class="s1">&#39;mu0&#39;</span><span class="p">,</span><span class="s1">&#39;mjd0&#39;</span><span class="p">]</span>
+    <span class="n">_default_state_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span><span class="s1">&#39;e&#39;</span><span class="p">,</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="s1">&#39;raan&#39;</span><span class="p">,</span><span class="s1">&#39;aop&#39;</span><span class="p">,</span><span class="s1">&#39;mu0&#39;</span><span class="p">]</span>
+    <span class="n">_default_epoch</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;field&#39;</span><span class="p">:</span> <span class="s1">&#39;mjd0&#39;</span><span class="p">,</span> <span class="s1">&#39;format&#39;</span><span class="p">:</span> <span class="s1">&#39;mjd&#39;</span><span class="p">,</span> <span class="s1">&#39;scale&#39;</span><span class="p">:</span> <span class="s1">&#39;utc&#39;</span><span class="p">}</span>
 
 <div class="viewcode-block" id="Population.__init__"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.population.Population.__init__.html#sorts.population.population.Population.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                <span class="n">extra_columns</span> <span class="o">=</span> <span class="p">[],</span>
-                <span class="n">dtypes</span> <span class="o">=</span> <span class="p">[],</span>
-                <span class="n">space_object_uses</span> <span class="o">=</span> <span class="p">[],</span>
+                <span class="n">fields</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">dtypes</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">space_object_fields</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">state_fields</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">epoch_field</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="n">propagator</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="n">propagator_args</span> <span class="o">=</span> <span class="p">{},</span>
                 <span class="n">propagator_options</span> <span class="o">=</span> <span class="p">{},</span>
             <span class="p">):</span>
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;oid&#39;</span><span class="p">,</span><span class="s1">&#39;a&#39;</span><span class="p">,</span><span class="s1">&#39;e&#39;</span><span class="p">,</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="s1">&#39;raan&#39;</span><span class="p">,</span><span class="s1">&#39;aop&#39;</span><span class="p">,</span><span class="s1">&#39;mu0&#39;</span><span class="p">,</span><span class="s1">&#39;mjd0&#39;</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">space_object_uses</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dtypes</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_default_dtype</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fields</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fields</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">Population</span><span class="o">.</span><span class="n">_default_fields</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fields</span> <span class="o">=</span> <span class="n">fields</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">header</span> <span class="o">+=</span> <span class="n">extra_columns</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">space_object_uses</span> <span class="o">+=</span> <span class="n">space_object_uses</span>
-
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dtypes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dtypes</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_default_dtype</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">extra_columns</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">dtypes</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">extra_columns</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Not enough dtypes given for extra columns&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">space_object_fields</span> <span class="o">=</span> <span class="n">space_object_fields</span>
+        <span class="k">if</span> <span class="n">dtypes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">Population</span><span class="o">.</span><span class="n">_default_dtype</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dtypes</span> <span class="o">+=</span> <span class="n">dtypes</span>
-        
+            <span class="bp">self</span><span class="o">.</span><span class="n">dtypes</span> <span class="o">=</span> <span class="n">dtypes</span>
+
+        <span class="k">if</span> <span class="n">state_fields</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">state_fields</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">Population</span><span class="o">.</span><span class="n">_default_state_fields</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+                    <span class="n">state_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_fields</span> <span class="o">=</span> <span class="n">state_fields</span>
+
+        <span class="k">if</span> <span class="n">epoch_field</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">epoch_field</span> <span class="o">=</span> <span class="n">Population</span><span class="o">.</span><span class="n">_default_epoch</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epoch_field</span> <span class="o">=</span> <span class="n">epoch_field</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">allocate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">propagator</span> <span class="o">=</span> <span class="n">propagator</span>
@@ -177,24 +193,23 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">propagator_args</span> <span class="o">=</span> <span class="n">propagator_args</span></div>
 
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
 <div class="viewcode-block" id="Population.copy"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.population.Population.copy.html#sorts.population.population.Population.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Return a copy of the current Population instance.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">pop</span> <span class="o">=</span> <span class="n">Population</span><span class="p">(</span>
+                <span class="n">fields</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">),</span>
+                <span class="n">dtypes</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtypes</span><span class="p">),</span>
+                <span class="n">space_object_fields</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">space_object_fields</span><span class="p">),</span>
+                <span class="n">state_fields</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state_fields</span><span class="p">),</span>
+                <span class="n">epoch_field</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epoch_field</span><span class="p">),</span>
                 <span class="n">propagator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagator</span><span class="p">,</span>
-                <span class="n">extra_columns</span> <span class="o">=</span> <span class="p">[],</span>
-                <span class="n">dtypes</span> <span class="o">=</span> <span class="p">[],</span>
-                <span class="n">space_object_uses</span> <span class="o">=</span> <span class="p">[],</span>
-                <span class="n">propagator_args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagator_args</span><span class="p">,</span>
+                <span class="n">propagator_args</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">propagator_args</span><span class="p">),</span>
                 <span class="n">propagator_options</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">propagator_options</span><span class="p">),</span>
             <span class="p">)</span>
 
-        <span class="n">pop</span><span class="o">.</span><span class="n">header</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
-        <span class="n">pop</span><span class="o">.</span><span class="n">space_object_uses</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">space_object_uses</span><span class="p">)</span>
-        <span class="n">pop</span><span class="o">.</span><span class="n">dtypes</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtypes</span><span class="p">)</span>
-        <span class="n">pop</span><span class="o">.</span><span class="n">objs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">pop</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">pop</span></div>
 
 <div class="viewcode-block" id="Population.delete"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.population.Population.delete.html#sorts.population.population.Population.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inds</span><span class="p">):</span>
@@ -203,15 +218,15 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inds</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="n">inds</span> <span class="o">=</span> <span class="p">[</span><span class="n">inds</span><span class="p">]</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inds</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
-            <span class="n">_inds</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">_inds</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="n">inds</span> <span class="o">=</span> <span class="n">_inds</span><span class="p">[</span><span class="n">inds</span><span class="p">]</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">inds</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inds</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Cannot delete indecies given with type </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">inds</span><span class="p">)))</span>
 
-        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],),</span> <span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],),</span> <span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">inds</span><span class="p">:</span>
             <span class="n">mask</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span> <span class="n">mask</span> <span class="p">]</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span> <span class="n">mask</span> <span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="Population.filter"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.population.Population.filter.html#sorts.population.population.Population.filter">[docs]</a>    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">col</span><span class="p">,</span><span class="n">fun</span><span class="p">):</span>
@@ -235,54 +250,23 @@
 <span class="sd">            )</span>
 
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">:</span>
-            <span class="n">ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
-            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],),</span> <span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-                <span class="n">mask</span><span class="p">[</span><span class="n">row</span><span class="p">]</span> <span class="o">=</span> <span class="n">fun</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="n">col</span><span class="p">][</span><span class="n">row</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span> <span class="n">mask</span> <span class="p">]</span>
+        <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],),</span> <span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="n">mask</span><span class="p">[</span><span class="n">row</span><span class="p">]</span> <span class="o">=</span> <span class="n">fun</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">][</span><span class="n">row</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span> <span class="n">mask</span> <span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;No such column: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">col</span><span class="p">))</span></div>
 
-    <span class="k">def</span> <span class="nf">_str_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">ret_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-        <span class="n">_sep</span> <span class="o">=</span> <span class="s1">&#39;  |  &#39;</span>
-        <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">{:&lt;12}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
-        <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="n">header</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nm</span><span class="p">)</span> <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">nm</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">)]</span>
-        <span class="n">header</span> <span class="o">=</span> <span class="n">_sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
-
-        <span class="n">ret_str</span> <span class="o">+=</span> <span class="n">header</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
-        <span class="n">ret_str</span> <span class="o">+=</span> <span class="s1">&#39;-&#39;</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">ret_str</span>
-
-    <span class="k">def</span> <span class="nf">_str_row</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">n</span><span class="p">):</span>
-        <span class="n">ret_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-        <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
-        <span class="n">_sep</span> <span class="o">=</span> <span class="s1">&#39;  |  &#39;</span>
-        <span class="n">_row</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">field</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="o">.</span><span class="n">dtype</span><span class="p">[</span><span class="n">field</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">inexact</span><span class="p">):</span>
-                <span class="n">_row</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{:&lt;12.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">field</span><span class="p">])</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">_row</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{!r:&lt;12}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">field</span><span class="p">])</span>
-
-        <span class="k">return</span> <span class="n">_sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_row</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;This is the shape of the internal data matrix</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">))</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">shape</span>
 
-
-<div class="viewcode-block" id="Population.print_row"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.population.Population.print_row.html#sorts.population.population.Population.print_row">[docs]</a>    <span class="k">def</span> <span class="nf">print_row</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">n</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Print a specific row with Header information.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">head</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_str_header</span><span class="p">()</span>
-        <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_str_row</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">head</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">row</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Population.allocate"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.population.Population.allocate.html#sorts.population.population.Population.allocate">[docs]</a>    <span class="k">def</span> <span class="nf">allocate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Allocate the internal data array for assignment of objects.</span>
@@ -309,104 +293,155 @@
 <span class="sd">            my_pop.allocate(2)</span>
 <span class="sd">            print(len(my_pop)) #will output 2</span>
 
-<span class="sd">            my_pop.objs[0] = load_data(&#39;obj1&#39;)</span>
-<span class="sd">            my_pop.objs[1] = load_data(&#39;obj2&#39;)</span>
+<span class="sd">            my_pop.data[0] = load_data(&#39;obj1&#39;)</span>
+<span class="sd">            my_pop.data[1] = load_data(&#39;obj2&#39;)</span>
 
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">_dtype</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtypes</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">))):</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtypes</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">))):</span>
             <span class="n">_dtype</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">dt</span><span class="p">))</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">objs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">length</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">_dtype</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">length</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">_dtype</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Population.get_states"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.population.Population.get_states.html#sorts.population.population.Population.get_states">[docs]</a>    <span class="k">def</span> <span class="nf">get_states</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">M_cent</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">WGS72</span><span class="o">.</span><span class="n">M_earth</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Use the orbital parameters and get the state.&#39;&#39;&#39;</span>
-        <span class="n">orbs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_all_orbits</span><span class="p">(</span><span class="n">order_angs</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-        <span class="n">orbs</span><span class="p">[:,</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">pyorb</span><span class="o">.</span><span class="n">mean_to_true</span><span class="p">(</span><span class="n">orbs</span><span class="p">[:,</span><span class="mi">5</span><span class="p">],</span> <span class="n">orbs</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">radians</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="k">if</span> <span class="s1">&#39;m&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">:</span>
-            <span class="n">mv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="s1">&#39;m&#39;</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">mv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_default_dtype</span><span class="p">)</span>
-        <span class="n">states</span> <span class="o">=</span> <span class="n">pyorb</span><span class="o">.</span><span class="n">kep_to_cart</span><span class="p">(</span><span class="n">orbs</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="n">mv</span><span class="p">,</span> <span class="n">M_cent</span><span class="o">=</span><span class="n">M_cent</span><span class="p">,</span> <span class="n">radians</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+<div class="viewcode-block" id="Population.get_states"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.population.Population.get_states.html#sorts.population.population.Population.get_states">[docs]</a>    <span class="k">def</span> <span class="nf">get_states</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">named</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Use the defined state parameters to get a copy of the states</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_fields</span><span class="p">(</span><span class="n">fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_fields</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">named</span><span class="o">=</span><span class="n">named</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Population.get_fields"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.population.Population.get_fields.html#sorts.population.population.Population.get_fields">[docs]</a>    <span class="k">def</span> <span class="nf">get_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">named</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Get the orbital elements for one row from internal data array.</span>
+
+<span class="sd">        :param int/slice/list n: Row number(s).</span>
+<span class="sd">        :param list fields: List of fields to get data for</span>
+<span class="sd">        :param bool named: return a named numpy array or a unnamed one. If True, all dtypes are cast as the first fields.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span> <span class="c1">#all</span>
+
+        <span class="n">states</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="n">fields</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">named</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dtype</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">dtype</span> <span class="o">=</span> <span class="n">states</span><span class="o">.</span><span class="n">dtype</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">states_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">states</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">states</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span><span class="p">):</span>
+                <span class="n">states_</span><span class="p">[:,</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">states</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="n">states</span> <span class="o">=</span> <span class="n">states_</span>
+            <span class="k">del</span> <span class="n">states_</span>
+
         <span class="k">return</span> <span class="n">states</span></div>
 
 
-
-<div class="viewcode-block" id="Population.get_orbit"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.population.Population.get_orbit.html#sorts.population.population.Population.get_orbit">[docs]</a>    <span class="k">def</span> <span class="nf">get_orbit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">n</span><span class="p">,</span> <span class="n">order_angs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Get the orbital elements for one row from internal data array.</span>
-
-<span class="sd">        :param int n: Row number.</span>
-<span class="sd">        :param bool order_angs: Order the orbital element angles according to aop before raan or not.</span>
+<div class="viewcode-block" id="Population.get_orbit"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.population.Population.get_orbit.html#sorts.population.population.Population.get_orbit">[docs]</a>    <span class="k">def</span> <span class="nf">get_orbit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">M_cent</span><span class="o">=</span><span class="n">pyorb</span><span class="o">.</span><span class="n">M_earth</span><span class="p">,</span> <span class="n">degrees</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">anomaly</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Get the one row from the population as a :class:`pyorb.Orbit` instance.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">if</span> <span class="n">order_angs</span><span class="p">:</span>
-            <span class="n">dat</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span><span class="s1">&#39;e&#39;</span><span class="p">,</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="s1">&#39;aop&#39;</span><span class="p">,</span><span class="s1">&#39;raan&#39;</span><span class="p">,</span><span class="s1">&#39;mu0&#39;</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">dat</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span><span class="s1">&#39;e&#39;</span><span class="p">,</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="s1">&#39;raan&#39;</span><span class="p">,</span><span class="s1">&#39;aop&#39;</span><span class="p">,</span><span class="s1">&#39;mu0&#39;</span><span class="p">]</span>
 
-        <span class="n">row</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_default_dtype</span><span class="p">))</span>
-        <span class="k">for</span> <span class="n">coln</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dat</span><span class="p">):</span>
-            <span class="n">row</span><span class="p">[</span><span class="n">coln</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="n">col</span><span class="p">][</span><span class="n">n</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">row</span></div>
+        <span class="k">if</span> <span class="n">fields</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_fields</span>
 
-<div class="viewcode-block" id="Population.get_all_orbits"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.population.Population.get_all_orbits.html#sorts.population.population.Population.get_all_orbits">[docs]</a>    <span class="k">def</span> <span class="nf">get_all_orbits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order_angs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Get the orbital elements for all rows from internal data array.</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
 
-<span class="sd">        :param bool order_angs: Order the orbital element angles according to aop before raan or not.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">if</span> <span class="n">order_angs</span><span class="p">:</span>
-            <span class="n">dat</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span><span class="s1">&#39;e&#39;</span><span class="p">,</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="s1">&#39;aop&#39;</span><span class="p">,</span><span class="s1">&#39;raan&#39;</span><span class="p">,</span><span class="s1">&#39;mu0&#39;</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">dat</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span><span class="s1">&#39;e&#39;</span><span class="p">,</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="s1">&#39;raan&#39;</span><span class="p">,</span><span class="s1">&#39;aop&#39;</span><span class="p">,</span><span class="s1">&#39;mu0&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
 
-        <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">6</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_default_dtype</span><span class="p">))</span>
-        <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-            <span class="k">for</span> <span class="n">coln</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dat</span><span class="p">):</span>
-                <span class="n">ret</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span><span class="n">coln</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="n">col</span><span class="p">][</span><span class="n">ind</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">ret</span></div>
+        <span class="c1">#TODO: generalize this better</span>
+        <span class="k">if</span> <span class="s1">&#39;aop&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;omega&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;aop&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;raan&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;Omega&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;raan&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;mu0&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;anom&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;mu0&#39;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Population.get_object"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.population.Population.get_object.html#sorts.population.population.Population.get_object">[docs]</a>    <span class="k">def</span> <span class="nf">get_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">n</span><span class="p">):</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="s1">&#39;VX&#39;</span><span class="p">,</span> <span class="s1">&#39;VY&#39;</span><span class="p">,</span> <span class="s1">&#39;VZ&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+        <span class="n">obj</span><span class="o">=</span><span class="n">pyorb</span><span class="o">.</span><span class="n">Orbit</span><span class="p">(</span>
+            <span class="n">M0</span> <span class="o">=</span> <span class="n">M_cent</span><span class="p">,</span> 
+            <span class="n">degrees</span> <span class="o">=</span> <span class="n">degrees</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">anomaly</span><span class="p">,</span>
+            <span class="n">auto_update</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> 
+            <span class="n">direct_update</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">num</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+
+
+
+<div class="viewcode-block" id="Population.get_object"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.population.Population.get_object.html#sorts.population.population.Population.get_object">[docs]</a>    <span class="k">def</span> <span class="nf">get_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Get the one row from the population as a :class:`space_object.SpaceObject` instance.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">kw</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">head</span><span class="p">,</span> <span class="n">use</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">space_object_uses</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">use</span><span class="p">:</span>
-                <span class="n">kw</span><span class="p">[</span><span class="n">head</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="n">head</span><span class="p">][</span><span class="n">n</span><span class="p">]</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">space_object_fields</span><span class="p">:</span>
+            <span class="n">parameters</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">n</span><span class="p">]</span>
 
-        <span class="n">o</span><span class="o">=</span><span class="n">so</span><span class="o">.</span><span class="n">SpaceObject</span><span class="p">(</span>
+        <span class="n">cart_state</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">kep_state</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">pyorb</span><span class="o">.</span><span class="n">Orbit</span><span class="o">.</span><span class="n">CARTESIAN</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_fields</span><span class="p">:</span>
+                <span class="n">cart_state</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_fields</span><span class="p">:</span>
+                <span class="n">kep_state</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="s1">&#39;omega&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_fields</span> <span class="ow">and</span> <span class="s1">&#39;aop&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_fields</span><span class="p">:</span>
+            <span class="n">kep_state</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="s1">&#39;Omega&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_fields</span> <span class="ow">and</span> <span class="s1">&#39;raan&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_fields</span><span class="p">:</span>
+            <span class="n">kep_state</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="s1">&#39;anom&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_fields</span> <span class="ow">and</span> <span class="s1">&#39;mu0&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_fields</span><span class="p">:</span>
+            <span class="n">kep_state</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">kep_state</span> <span class="ow">or</span> <span class="n">cart_state</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_fields</span><span class="p">:</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">state_fields</span><span class="p">]</span>
+
+
+        <span class="n">obj</span><span class="o">=</span><span class="n">so</span><span class="o">.</span><span class="n">SpaceObject</span><span class="p">(</span>
             <span class="n">propagator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagator</span><span class="p">,</span>
             <span class="n">propagator_options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagator_options</span><span class="p">,</span>
             <span class="n">propagator_args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagator_args</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kw</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">,</span>
+            <span class="n">epoch</span><span class="o">=</span><span class="n">Time</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">epoch_field</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]][</span><span class="n">n</span><span class="p">],</span> 
+                <span class="nb">format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">epoch_field</span><span class="p">[</span><span class="s1">&#39;format&#39;</span><span class="p">],</span> 
+                <span class="n">scale</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">epoch_field</span><span class="p">[</span><span class="s1">&#39;scale&#39;</span><span class="p">],</span>
+            <span class="p">),</span>
+            <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">o</span></div>
+        <span class="k">return</span> <span class="n">obj</span></div>
 
-<div class="viewcode-block" id="Population.object_generator"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.population.Population.object_generator.html#sorts.population.population.Population.object_generator">[docs]</a>    <span class="k">def</span> <span class="nf">object_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Return a generator that iterates trough the entire population returning space objects.</span>
+
+<div class="viewcode-block" id="Population.add_field"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.population.Population.add_field.html#sorts.population.population.Population.add_field">[docs]</a>    <span class="k">def</span> <span class="nf">add_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Add a field to the population data.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="Population.add_column"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.population.Population.add_column.html#sorts.population.population.Population.add_column">[docs]</a>    <span class="k">def</span> <span class="nf">add_column</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">_default_dtype</span><span class="p">,</span> <span class="n">space_object_uses</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Add a column to the population data.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">data_tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">data_tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dtype</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="n">Population</span><span class="o">.</span><span class="n">_default_dtype</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">space_object_uses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">space_object_uses</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">allocate</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_tmp</span><span class="p">))</span>
-        <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-            <span class="k">for</span> <span class="n">head</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="n">head</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="n">head</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_tmp</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="n">head</span><span class="p">]</span></div>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="n">name</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_tmp</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="Population.print"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.population.Population.print.html#sorts.population.population.Population.print">[docs]</a>    <span class="k">def</span> <span class="nf">print</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fields</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span>
+        <span class="k">return</span> <span class="n">tabulate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="n">fields</span><span class="p">],</span> <span class="n">headers</span><span class="o">=</span><span class="n">fields</span><span class="p">)</span></div>
 
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">ret_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_str_header</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
-        <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
-            <span class="n">ret_str</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_str_row</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
-            <span class="n">ret_str</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
-        <span class="k">return</span> <span class="n">ret_str</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">()</span>
+
 
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
 
@@ -419,9 +454,9 @@
                         <span class="n">is_slice</span> <span class="o">=</span> <span class="kc">True</span>
 
                 <span class="k">if</span> <span class="n">is_slice</span><span class="p">:</span>
-                    <span class="n">tmp_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_default_dtype</span><span class="p">))</span>
-                    <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">):</span>
-                        <span class="n">col_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+                    <span class="n">tmp_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_default_dtype</span><span class="p">))</span>
+                    <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">):</span>
+                        <span class="n">col_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
                         <span class="k">try</span><span class="p">:</span>
                             <span class="n">tmp_data</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">col_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                             <span class="n">convertable</span> <span class="o">=</span> <span class="kc">True</span>
@@ -434,19 +469,19 @@
                             <span class="n">tmp_data</span><span class="p">[:,</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
                     <span class="k">return</span> <span class="n">tmp_data</span><span class="p">[</span><span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]]][</span><span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]]][</span><span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Too many incidences given, only supports 2&#39;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;No such column: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Row number </span><span class="si">{}</span><span class="s1"> outside range of population </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Row number </span><span class="si">{}</span><span class="s1"> outside range of population </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Key type &quot;</span><span class="si">{}</span><span class="s1">&quot; not supported&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)))</span>
 
@@ -456,7 +491,7 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="n">row_iter</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)))[</span><span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
-                <span class="n">head_iter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                <span class="n">head_iter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
 
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">row_iter</span><span class="p">,</span><span class="nb">list</span><span class="p">):</span>
                     <span class="n">row_point</span> <span class="o">=</span> <span class="kc">True</span>
@@ -470,29 +505,29 @@
                     <span class="n">col_point</span> <span class="o">=</span> <span class="kc">False</span>
 
                 <span class="k">if</span> <span class="n">row_point</span> <span class="ow">and</span> <span class="n">col_point</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="n">head_iter</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="n">row_iter</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">head_iter</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="n">row_iter</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">coli</span><span class="p">,</span> <span class="n">head</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">head_iter</span><span class="p">):</span>
                         <span class="k">for</span> <span class="n">rowi</span><span class="p">,</span> <span class="n">row_num</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">row_iter</span><span class="p">):</span>
                             <span class="k">if</span> <span class="n">col_point</span><span class="p">:</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="n">head</span><span class="p">][</span><span class="n">row_num</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">rowi</span><span class="p">]</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">head</span><span class="p">][</span><span class="n">row_num</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">rowi</span><span class="p">]</span>
                             <span class="k">elif</span> <span class="n">row_point</span><span class="p">:</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="n">head</span><span class="p">][</span><span class="n">row_num</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">coli</span><span class="p">]</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">head</span><span class="p">][</span><span class="n">row_num</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">coli</span><span class="p">]</span>
                             <span class="k">else</span><span class="p">:</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="n">head</span><span class="p">][</span><span class="n">row_num</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">rowi</span><span class="p">][</span><span class="n">coli</span><span class="p">]</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">head</span><span class="p">][</span><span class="n">row_num</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">rowi</span><span class="p">][</span><span class="n">coli</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Too many incidences given, only supports 2&#39;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;No such column: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                <span class="k">for</span> <span class="n">coli</span><span class="p">,</span> <span class="n">head</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">):</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="n">head</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">coli</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="k">for</span> <span class="n">coli</span><span class="p">,</span> <span class="n">head</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">head</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">coli</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Row number </span><span class="si">{}</span><span class="s1"> outside range of population </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Row number </span><span class="si">{}</span><span class="s1"> outside range of population </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Key type &quot;</span><span class="si">{}</span><span class="s1">&quot; not supported&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)))</span>
 
@@ -502,102 +537,52 @@
 
 
     <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__num</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-            <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__num</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__num</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__num</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__num</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">return</span> <span class="n">ret</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">StopIteration</span>
 
+
 <div class="viewcode-block" id="Population.save"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.population.Population.save.html#sorts.population.population.Population.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
         <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
-            <span class="n">hf</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;objs&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="p">)</span>
-            <span class="n">hf</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;header&#39;</span><span class="p">,</span>
-                <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">),</span>
+            <span class="n">hf</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">hf</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;fields&#39;</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">),</span>
             <span class="p">)</span>
-            <span class="n">hf</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;space_object_uses&#39;</span><span class="p">,</span>
-                <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">space_object_uses</span><span class="p">),</span>
+            <span class="n">hf</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;space_object_fields&#39;</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">space_object_fields</span><span class="p">),</span>
             <span class="p">)</span>
             <span class="n">hf</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;dtypes&#39;</span><span class="p">,</span>
                 <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtypes</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">hf</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;epoch_field&#39;</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epoch_field</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">hf</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;state_fields&#39;</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state_fields</span><span class="p">),</span>
             <span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="Population.load"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.population.Population.load.html#sorts.population.population.Population.load">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">propagator</span><span class="p">,</span> <span class="n">propagator_options</span> <span class="o">=</span> <span class="p">{},</span> <span class="n">propagator_args</span> <span class="o">=</span> <span class="p">{}):</span>
-        <span class="n">pop</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span>
-            <span class="n">propagator</span> <span class="o">=</span> <span class="n">propagator</span><span class="p">,</span>
-            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Unnamed population&#39;</span><span class="p">,</span>
-            <span class="n">extra_columns</span> <span class="o">=</span> <span class="p">[],</span>
-            <span class="n">dtypes</span> <span class="o">=</span> <span class="p">[],</span>
-            <span class="n">space_object_uses</span> <span class="o">=</span> <span class="p">[],</span>
-            <span class="n">propagator_args</span> <span class="o">=</span> <span class="n">propagator_args</span><span class="p">,</span>
-            <span class="n">propagator_options</span> <span class="o">=</span> <span class="n">propagator_options</span><span class="p">,</span>
-        <span class="p">)</span>
         <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
-            <span class="n">pop</span><span class="o">.</span><span class="n">objs</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;objs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-
-            <span class="n">pop</span><span class="o">.</span><span class="n">header</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;header&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-            <span class="n">pop</span><span class="o">.</span><span class="n">space_object_uses</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;space_object_uses&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-            <span class="n">pop</span><span class="o">.</span><span class="n">dtypes</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;dtypes&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-
-        <span class="k">return</span> <span class="n">pop</span></div>
-
-
-
-<div class="viewcode-block" id="Population.plot_distribution"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.population.Population.plot_distribution.html#sorts.population.population.Population.plot_distribution">[docs]</a>    <span class="k">def</span> <span class="nf">plot_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">logx</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">logy</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">log_freq</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Plot the distribution of parameter(s) or all orbits of this population.</span>
-
-<span class="sd">        :param str/list dist: Name of parameter as given by :code:`population.header` or :code:`&#39;orbits&#39;` to plot all orbits. If a list, length of list must be exactly 2 and will produce a 2d distribution instead.</span>
-<span class="sd">        :param str/list label: Used if parameter(s) distribution is plotted to label the axis.</span>
-<span class="sd">        :param bool logx: Determines if x-axis is logarithmic or not.</span>
-<span class="sd">        :param bool logy: Determines if y-axis is logarithmic or not.</span>
-<span class="sd">        :param bool log_freq: Determines if frequency is logarithmic or not.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>        
-            <span class="k">if</span> <span class="n">dist</span><span class="o">==</span><span class="s1">&#39;orbits&#39;</span><span class="p">:</span>
-                <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plotting</span><span class="o">.</span><span class="n">orbits</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">get_all_orbits</span><span class="p">(</span><span class="n">order_angs</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> 
-                    <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Orbit distribution&quot;</span><span class="p">,</span>
-                    <span class="n">show</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="p">)</span>
-            <span class="k">elif</span> <span class="n">dist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">label</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">x_label</span> <span class="o">=</span> <span class="n">dist</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">x_label</span> <span class="o">=</span> <span class="n">label</span>
-                <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plotting</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="n">dist</span><span class="p">],</span>
-                    <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> distribution&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dist</span><span class="p">),</span>
-                    <span class="n">show</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                    <span class="n">xlabel</span> <span class="o">=</span> <span class="n">x_label</span><span class="p">,</span>
-                    <span class="n">logx</span> <span class="o">=</span> <span class="n">logx</span><span class="p">,</span>
-                    <span class="n">logy</span> <span class="o">=</span> <span class="n">log_freq</span><span class="p">,</span>
-                <span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;Can only plot up to 2 parameters&#39;</span>
-            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">dist</span><span class="p">:</span>
-                <span class="k">assert</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span>
-            <span class="k">if</span> <span class="n">label</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">x_label</span> <span class="o">=</span> <span class="n">dist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">y_label</span> <span class="o">=</span> <span class="n">dist</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">x_label</span> <span class="o">=</span> <span class="n">label</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">y_label</span> <span class="o">=</span> <span class="n">label</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>                
-            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plotting</span><span class="o">.</span><span class="n">hist2d</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="n">dist</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">objs</span><span class="p">[</span><span class="n">dist</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
-                <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> vs </span><span class="si">{}</span><span class="s2"> distribution&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dist</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dist</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
-                <span class="n">show</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="n">xlabel</span> <span class="o">=</span> <span class="n">x_label</span><span class="p">,</span>
-                <span class="n">ylabel</span> <span class="o">=</span> <span class="n">y_label</span><span class="p">,</span>
-                <span class="n">logx</span> <span class="o">=</span> <span class="n">logx</span><span class="p">,</span>
-                <span class="n">logy</span> <span class="o">=</span> <span class="n">logy</span><span class="p">,</span>
-                <span class="n">log_freq</span> <span class="o">=</span> <span class="n">log_freq</span><span class="p">,</span>
+            <span class="n">pop</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span>
+                <span class="n">fields</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;fields&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">[()],</span>
+                <span class="n">dtypes</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;dtypes&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">[()],</span>
+                <span class="n">space_object_fields</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;space_object_fields&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">[()],</span>
+                <span class="n">state_fields</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;state_fields&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">[()],</span>
+                <span class="n">epoch_field</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;epoch_field&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">[()],</span>
+                <span class="n">propagator</span> <span class="o">=</span> <span class="n">propagator</span><span class="p">,</span>
+                <span class="n">propagator_args</span> <span class="o">=</span> <span class="n">propagator_options</span><span class="p">,</span>
+                <span class="n">propagator_options</span> <span class="o">=</span> <span class="n">propagator_args</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Cannot perform plot of &quot;</span><span class="si">{}</span><span class="s1">&quot;.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dist</span><span class="p">))</span>
+        
+            <span class="n">pop</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">[()]</span>
 
-        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div></div>
+        <span class="k">return</span> <span class="n">pop</span></div></div>
+
 
 
 <span class="c1">#python 2.7 compliance</span>
@@ -619,7 +604,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.13.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

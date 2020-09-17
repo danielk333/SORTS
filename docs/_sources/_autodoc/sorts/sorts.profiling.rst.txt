@@ -30,9 +30,13 @@ Module summary
     
     add_logging_level
     
+    change_logfile
+    
     file_level
     
     get_logger
+    
+    get_logger_formats
     
     term_level
     
@@ -68,12 +72,22 @@ Contents
 
 
 
+.. autofunction:: change_logfile
+   :noindex:
+
+
+
 .. autofunction:: file_level
    :noindex:
 
 
 
 .. autofunction:: get_logger
+   :noindex:
+
+
+
+.. autofunction:: get_logger_formats
    :noindex:
 
 

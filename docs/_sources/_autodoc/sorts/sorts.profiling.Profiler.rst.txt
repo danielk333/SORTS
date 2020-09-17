@@ -18,6 +18,8 @@ Profiler
       ~Profiler.fmt
       ~Profiler.from_txt
       ~Profiler.mean
+      ~Profiler.memory_diff
+      ~Profiler.snapshot
       ~Profiler.start
       ~Profiler.stop
       ~Profiler.to_txt
