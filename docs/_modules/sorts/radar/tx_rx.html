@@ -1,0 +1,296 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>sorts.radar.tx_rx &#8212; SORTS 3.18.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for sorts.radar.tx_rx</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="sd">&#39;&#39;&#39;Defines an antenna&#39;s or entire radar system&#39;s radiation pattern, also defines physical antennas for RX and TX.</span>
+
+<span class="sd">(c) 2016-2019 Juha Vierinen, Daniel Kastinen</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="c1">#Python standard import</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+
+
+<span class="c1">#Third party import</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<span class="c1">#Local import</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">frames</span>
+
+
+<div class="viewcode-block" id="Station"><a class="viewcode-back" href="../../../_autodoc/sorts/radar/sorts.radar.tx_rx.Station.html#sorts.radar.tx_rx.Station">[docs]</a><span class="k">class</span> <span class="nc">Station</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;A radar station.</span>
+
+<span class="sd">        :param float lat: Geographical latitude of radar station in decimal degrees  (North+).</span>
+<span class="sd">        :param float lon: Geographical longitude of radar station in decimal degrees (East+).</span>
+<span class="sd">        :param float alt: Geographical altitude above geoid surface of radar station in meter.</span>
+<span class="sd">        :param float min_elevation: Elevation threshold for the radar station in degrees, i.e. it cannot detect or point below this elevation.</span>
+<span class="sd">        :param pyant.Beam beam: Radiation pattern for radar station.</span>
+
+
+<span class="sd">        :ivar float lat: Geographical latitude of radar station in decimal degrees  (North+).</span>
+<span class="sd">        :ivar float lon: Geographical longitude of radar station in decimal degrees (East+).</span>
+<span class="sd">        :ivar float alt: Geographical altitude above geoid surface of radar station in meter.</span>
+<span class="sd">        :ivar float min_elevation: Elevation threshold for the radar station in degrees, i.e. it cannot detect or point below this elevation.</span>
+<span class="sd">        :ivar numpy.array ecef: The ECEF coordinates of the radar station calculated using :func:`frames.geodetic_to_ITRS`.</span>
+<span class="sd">        :ivar pyant.Beam beam: Radiation pattern for radar station.</span>
+<span class="sd">        :ivar bool enabled: Indicates if this station is turned on or off.</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+<div class="viewcode-block" id="Station.__init__"><a class="viewcode-back" href="../../../_autodoc/sorts/radar/sorts.radar.tx_rx.Station.__init__.html#sorts.radar.tx_rx.Station.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">min_elevation</span><span class="p">,</span> <span class="n">beam</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lat</span> <span class="o">=</span> <span class="n">lat</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lon</span> <span class="o">=</span> <span class="n">lon</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alt</span> <span class="o">=</span> <span class="n">alt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_elevation</span> <span class="o">=</span> <span class="n">min_elevation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ecef</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">geodetic_to_ITRS</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">radians</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beam</span> <span class="o">=</span> <span class="n">beam</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="Station.copy"><a class="viewcode-back" href="../../../_autodoc/sorts/radar/sorts.radar.tx_rx.Station.copy.html#sorts.radar.tx_rx.Station.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">Station</span><span class="p">(</span>
+            <span class="n">lat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span>
+            <span class="n">lon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span>
+            <span class="n">alt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">,</span>
+            <span class="n">min_elevation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_elevation</span><span class="p">,</span>
+            <span class="n">beam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span>
+        <span class="k">return</span> <span class="n">st</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">frequency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">frequency</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">wavelength</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">wavelength</span>
+
+
+<div class="viewcode-block" id="Station.enu"><a class="viewcode-back" href="../../../_autodoc/sorts/radar/sorts.radar.tx_rx.Station.enu.html#sorts.radar.tx_rx.Station.enu">[docs]</a>    <span class="k">def</span> <span class="nf">enu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ecefs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Converts a set of ECEF states to local ENU coordinates.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">rel_</span> <span class="o">=</span> <span class="n">ecefs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">rel_</span><span class="p">[:</span><span class="mi">3</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">rel_</span><span class="p">[:</span><span class="mi">3</span><span class="p">,:]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ecef</span><span class="p">[:,</span><span class="kc">None</span><span class="p">]</span>
+        <span class="n">rel_</span><span class="p">[:</span><span class="mi">3</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">ecef_to_enu</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">,</span>
+            <span class="n">rel_</span><span class="p">[:</span><span class="mi">3</span><span class="p">,:],</span>
+            <span class="n">radians</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">ecefs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">rel_</span><span class="p">[</span><span class="mi">3</span><span class="p">:,:]</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">ecef_to_enu</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">,</span>
+                <span class="n">rel_</span><span class="p">[</span><span class="mi">3</span><span class="p">:,:],</span>
+                <span class="n">radians</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">rel_</span></div>
+
+
+<div class="viewcode-block" id="Station.point"><a class="viewcode-back" href="../../../_autodoc/sorts/radar/sorts.radar.tx_rx.Station.point.html#sorts.radar.tx_rx.Station.point">[docs]</a>    <span class="k">def</span> <span class="nf">point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Point Station beam in local ENU coordinates.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">point</span><span class="p">(</span><span class="n">k</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Station.point_ecef"><a class="viewcode-back" href="../../../_autodoc/sorts/radar/sorts.radar.tx_rx.Station.point_ecef.html#sorts.radar.tx_rx.Station.point_ecef">[docs]</a>    <span class="k">def</span> <span class="nf">point_ecef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Point Station beam in location of ECEF coordinate. Returns local pointing direction.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">ecef_to_enu</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">,</span>
+            <span class="n">point</span><span class="p">,</span>
+            <span class="n">radians</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">point</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">k</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pointing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Station beam pointing in local ENU coordinates.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">pointing</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pointing_ecef</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Station beam pointing in local ENU coordinates.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">frames</span><span class="o">.</span><span class="n">enu_to_ecef</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">,</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">pointing</span><span class="p">,</span> 
+            <span class="n">radians</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="RX"><a class="viewcode-back" href="../../../_autodoc/sorts/radar/sorts.radar.tx_rx.RX.html#sorts.radar.tx_rx.RX">[docs]</a><span class="k">class</span> <span class="nc">RX</span><span class="p">(</span><span class="n">Station</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;A radar receiving system.</span>
+
+<span class="sd">        :param float noise: Receiver noise in Kelvin, i.e. system temperature.</span>
+
+<span class="sd">        :ivar float noise: Receiver noise in Kelvin, i.e. system temperature.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+<div class="viewcode-block" id="RX.__init__"><a class="viewcode-back" href="../../../_autodoc/sorts/radar/sorts.radar.tx_rx.RX.__init__.html#sorts.radar.tx_rx.RX.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">min_elevation</span><span class="p">,</span> <span class="n">beam</span><span class="p">,</span> <span class="n">noise</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">min_elevation</span><span class="p">,</span> <span class="n">beam</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noise</span> <span class="o">=</span> <span class="n">noise</span></div>
+
+<div class="viewcode-block" id="RX.copy"><a class="viewcode-back" href="../../../_autodoc/sorts/radar/sorts.radar.tx_rx.RX.copy.html#sorts.radar.tx_rx.RX.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">RX</span><span class="p">(</span>
+            <span class="n">lat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span>
+            <span class="n">lon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span>
+            <span class="n">alt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">,</span>
+            <span class="n">min_elevation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_elevation</span><span class="p">,</span>
+            <span class="n">beam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+            <span class="n">noise</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span>
+        <span class="k">return</span> <span class="n">st</span></div></div>
+
+
+
+<div class="viewcode-block" id="TX"><a class="viewcode-back" href="../../../_autodoc/sorts/radar/sorts.radar.tx_rx.TX.html#sorts.radar.tx_rx.TX">[docs]</a><span class="k">class</span> <span class="nc">TX</span><span class="p">(</span><span class="n">Station</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;A transmitting radar station</span>
+<span class="sd">        </span>
+<span class="sd">        :param float bandwidth: Transmissions bandwidth.</span>
+<span class="sd">        :param float duty_cycle: Maximum duty cycle, i.e. fraction of time transmission can occur at maximum power.</span>
+<span class="sd">        :param float power: Transmissions power in watts.</span>
+<span class="sd">        :param float pulse_length: Length of transmission pulse.</span>
+<span class="sd">        :param float ipp: Time between consecutive pulses.</span>
+<span class="sd">        :param int n_ipp: Number of pulses to coherently integrate.</span>
+
+<span class="sd">        :ivar float bandwidth: Transmissions bandwidth.</span>
+<span class="sd">        :ivar float duty_cycle: Maximum duty cycle, i.e. fraction of time transmission can occur at maximum power.</span>
+<span class="sd">        :ivar float power: Transmissions power in watts.</span>
+<span class="sd">        :ivar float pulse_length: Length of transmission pulse.</span>
+<span class="sd">        :ivar float ipp: Time between consecutive pulses.</span>
+<span class="sd">        :ivar int n_ipp: Number of pulses to coherently integrate.</span>
+<span class="sd">        :ivar float coh_int_bandwidth: Effective bandwidth of receiver noise after coherent integration.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+<div class="viewcode-block" id="TX.__init__"><a class="viewcode-back" href="../../../_autodoc/sorts/radar/sorts.radar.tx_rx.TX.__init__.html#sorts.radar.tx_rx.TX.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">min_elevation</span><span class="p">,</span> <span class="n">beam</span><span class="p">,</span> <span class="n">power</span><span class="p">,</span> <span class="n">bandwidth</span><span class="p">,</span> <span class="n">duty_cycle</span><span class="p">,</span> <span class="n">pulse_length</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">ipp</span><span class="o">=</span><span class="mf">10e-3</span><span class="p">,</span> <span class="n">n_ipp</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">min_elevation</span><span class="p">,</span> <span class="n">beam</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">bandwidth</span> <span class="o">=</span> <span class="n">bandwidth</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">duty_cycle</span> <span class="o">=</span> <span class="n">duty_cycle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">power</span> <span class="o">=</span> <span class="n">power</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pulse_length</span> <span class="o">=</span> <span class="n">pulse_length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ipp</span> <span class="o">=</span> <span class="n">ipp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_ipp</span> <span class="o">=</span> <span class="n">n_ipp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coh_int_bandwidth</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="n">pulse_length</span><span class="o">*</span><span class="n">n_ipp</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TX.copy"><a class="viewcode-back" href="../../../_autodoc/sorts/radar/sorts.radar.tx_rx.TX.copy.html#sorts.radar.tx_rx.TX.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">TX</span><span class="p">(</span>
+            <span class="n">lat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span>
+            <span class="n">lon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span>
+            <span class="n">alt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">,</span>
+            <span class="n">min_elevation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_elevation</span><span class="p">,</span>
+            <span class="n">beam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+            <span class="n">power</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">power</span><span class="p">,</span>
+            <span class="n">bandwidth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandwidth</span><span class="p">,</span>
+            <span class="n">duty_cycle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">duty_cycle</span><span class="p">,</span>
+            <span class="n">pulse_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulse_length</span><span class="p">,</span>
+            <span class="n">ipp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ipp</span><span class="p">,</span>
+            <span class="n">n_ipp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_ipp</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span>
+        <span class="k">return</span> <span class="n">st</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

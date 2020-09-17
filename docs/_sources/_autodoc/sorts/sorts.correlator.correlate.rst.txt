@@ -1,0 +1,8 @@
+correlate
+=========
+
+.. currentmodule:: sorts.correlator
+
+.. rubric:: correlate
+
+.. autofunction:: correlate

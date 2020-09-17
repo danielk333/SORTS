@@ -1,0 +1,8 @@
+Simulation.run
+==============
+
+.. currentmodule:: sorts.simulation
+
+.. rubric:: Simulation.run
+
+.. automethod:: Simulation.run

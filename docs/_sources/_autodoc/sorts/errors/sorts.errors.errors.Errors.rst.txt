@@ -1,0 +1,32 @@
+Errors
+======
+
+.. currentmodule:: sorts.errors.errors
+
+.. autoclass:: Errors
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Errors.__init__
+      ~Errors.get
+      ~Errors.set_numpy_seed
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Errors.VARIABLES
+   
+   

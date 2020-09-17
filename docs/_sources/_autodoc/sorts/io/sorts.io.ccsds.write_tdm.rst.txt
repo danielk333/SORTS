@@ -1,0 +1,8 @@
+write\_tdm
+==========
+
+.. currentmodule:: sorts.io.ccsds
+
+.. rubric:: write_tdm
+
+.. autofunction:: write_tdm

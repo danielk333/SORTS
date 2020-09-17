@@ -1,0 +1,8 @@
+Interpolator.get\_state
+=======================
+
+.. currentmodule:: sorts.interpolation
+
+.. rubric:: Interpolator.get_state
+
+.. automethod:: Interpolator.get_state

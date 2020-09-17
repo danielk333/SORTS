@@ -1,0 +1,8 @@
+precalculate\_dr
+================
+
+.. currentmodule:: sorts.errors.linearized_coded
+
+.. rubric:: precalculate_dr
+
+.. autofunction:: precalculate_dr

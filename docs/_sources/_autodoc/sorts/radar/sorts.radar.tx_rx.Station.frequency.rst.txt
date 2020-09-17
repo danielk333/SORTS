@@ -1,0 +1,8 @@
+Station.frequency
+=================
+
+.. currentmodule:: sorts.radar.tx_rx
+
+.. rubric:: Station.frequency
+
+.. autoproperty:: sorts.radar.tx_rx.Station.frequency

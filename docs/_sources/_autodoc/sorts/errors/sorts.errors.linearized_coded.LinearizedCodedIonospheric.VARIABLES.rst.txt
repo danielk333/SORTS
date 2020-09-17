@@ -1,0 +1,6 @@
+sorts.errors.linearized\_coded.LinearizedCodedIonospheric.VARIABLES
+===================================================================
+
+.. currentmodule:: sorts.errors.linearized_coded
+
+.. autoattribute:: LinearizedCodedIonospheric.VARIABLES

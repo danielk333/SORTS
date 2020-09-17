@@ -1,0 +1,46 @@
+radar
+=====
+
+.. automodule:: sorts.radar.radar
+
+.. currentmodule:: sorts.radar.radar
+
+Module summary
+--------------
+
+
+
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    Radar
+    
+
+
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: Radar
+
+.. autoclass:: Radar
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
+
+
+
+

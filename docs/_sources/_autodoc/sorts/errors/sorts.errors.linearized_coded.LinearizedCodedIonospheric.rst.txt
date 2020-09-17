@@ -1,0 +1,35 @@
+LinearizedCodedIonospheric
+==========================
+
+.. currentmodule:: sorts.errors.linearized_coded
+
+.. autoclass:: LinearizedCodedIonospheric
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~LinearizedCodedIonospheric.__init__
+      ~LinearizedCodedIonospheric.doppler
+      ~LinearizedCodedIonospheric.get
+      ~LinearizedCodedIonospheric.range
+      ~LinearizedCodedIonospheric.range_rate
+      ~LinearizedCodedIonospheric.set_numpy_seed
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~LinearizedCodedIonospheric.VARIABLES
+   
+   

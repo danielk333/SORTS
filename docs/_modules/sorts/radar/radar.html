@@ -1,0 +1,178 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>sorts.radar.radar &#8212; SORTS 3.18.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for sorts.radar.radar</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="sd">&#39;&#39;&#39;This module is used to define the radar network configuration.</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">passes</span>
+
+<div class="viewcode-block" id="Radar"><a class="viewcode-back" href="../../../_autodoc/sorts/radar/sorts.radar.radar.Radar.html#sorts.radar.radar.Radar">[docs]</a><span class="k">class</span> <span class="nc">Radar</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;A network of transmitting and receiving radar stations.</span>
+<span class="sd">        </span>
+<span class="sd">        :ivar list tx: List of transmitting sites, i.e. instances of :class:`sorts.radar.TX`</span>
+<span class="sd">        :ivar list rx: List of receiving sites, i.e. instances of :class:`sorts.radar.RX`</span>
+<span class="sd">        :ivar float max_off_axis: Maximum angle between pointing direction and a received signal.</span>
+<span class="sd">        :ivar float min_SNRdb: Minimum SNR detectable by radar system in dB (after coherent integration).</span>
+
+<span class="sd">        :param list tx: List of transmitting sites, i.e. instances of :class:`sorts.radar.TX`</span>
+<span class="sd">        :param list rx: List of receiving sites, i.e. instances of :class:`sorts.radar.RX`</span>
+<span class="sd">        :param float max_off_axis: Maximum angle between pointing direction and a received signal.</span>
+<span class="sd">        :param float min_SNRdb: Minimum SNR detectable by radar system in dB (after coherent integration).</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+<div class="viewcode-block" id="Radar.__init__"><a class="viewcode-back" href="../../../_autodoc/sorts/radar/sorts.radar.radar.Radar.__init__.html#sorts.radar.radar.Radar.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tx</span><span class="p">,</span> <span class="n">rx</span><span class="p">,</span> <span class="n">max_off_axis</span><span class="o">=</span><span class="mf">90.0</span><span class="p">,</span> <span class="n">min_SNRdb</span><span class="o">=</span><span class="mf">10.0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tx</span> <span class="o">=</span> <span class="n">tx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rx</span> <span class="o">=</span> <span class="n">rx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_off_axis</span> <span class="o">=</span> <span class="n">max_off_axis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_SNRdb</span> <span class="o">=</span> <span class="n">min_SNRdb</span></div>
+
+
+<div class="viewcode-block" id="Radar.copy"><a class="viewcode-back" href="../../../_autodoc/sorts/radar/sorts.radar.radar.Radar.copy.html#sorts.radar.radar.Radar.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Create a deep copy of the radar system.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">Radar</span><span class="p">(</span>
+            <span class="n">tx</span> <span class="o">=</span> <span class="p">[],</span>
+            <span class="n">rx</span> <span class="o">=</span> <span class="p">[],</span>
+            <span class="n">max_off_axis</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_off_axis</span><span class="p">),</span>
+            <span class="n">min_SNRdb</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_SNRdb</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">tx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tx</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">tx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tx</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">rx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rx</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">rx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rx</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+
+<div class="viewcode-block" id="Radar.set_beam"><a class="viewcode-back" href="../../../_autodoc/sorts/radar/sorts.radar.radar.Radar.set_beam.html#sorts.radar.radar.Radar.set_beam">[docs]</a>    <span class="k">def</span> <span class="nf">set_beam</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beam</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Sets the radiation pattern for transmitters and receivers.</span>
+<span class="sd">        </span>
+<span class="sd">        :param pyant.Beam beam: The radiation pattern to set for radar system.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_tx_beam</span><span class="p">(</span><span class="n">beam</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_rx_beam</span><span class="p">(</span><span class="n">beam</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Radar.set_tx_beam"><a class="viewcode-back" href="../../../_autodoc/sorts/radar/sorts.radar.radar.Radar.set_tx_beam.html#sorts.radar.radar.Radar.set_tx_beam">[docs]</a>    <span class="k">def</span> <span class="nf">set_tx_beam</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beam</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Sets the radiation pattern for transmitters.</span>
+<span class="sd">        </span>
+<span class="sd">        :param pyant.Beam beam: The radiation pattern to set for radar system.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">tx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tx</span><span class="p">:</span>
+            <span class="n">tx</span><span class="o">.</span><span class="n">beam</span> <span class="o">=</span> <span class="n">beam</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Radar.set_rx_beam"><a class="viewcode-back" href="../../../_autodoc/sorts/radar/sorts.radar.radar.Radar.set_rx_beam.html#sorts.radar.radar.Radar.set_rx_beam">[docs]</a>    <span class="k">def</span> <span class="nf">set_rx_beam</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beam</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Sets the radiation pattern for receivers.</span>
+<span class="sd">        </span>
+<span class="sd">        :param pyant.Beam beam: The radiation pattern to set for radar system.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">rx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rx</span><span class="p">:</span>
+            <span class="n">rx</span><span class="o">.</span><span class="n">beam</span> <span class="o">=</span> <span class="n">beam</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Radar.find_passes"><a class="viewcode-back" href="../../../_autodoc/sorts/radar/sorts.radar.radar.Radar.find_passes.html#sorts.radar.radar.Radar.find_passes">[docs]</a>    <span class="k">def</span> <span class="nf">find_passes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">states</span><span class="p">,</span> <span class="n">cache_data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Finds all passes that are simultaneously inside a transmitter station FOV and a receiver station FOV. </span>
+
+<span class="sd">            :param numpy.ndarray t: Vector of times in seconds to use as a base to find passes.</span>
+<span class="sd">            :param numpy.ndarray states: ECEF states of the object to find passes for.</span>
+<span class="sd">            :return: list of passes indexed by first tx-station and then rx-station.</span>
+<span class="sd">            :rtype: list of list of sorts.Pass</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">rd_ps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">txi</span><span class="p">,</span><span class="n">tx</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tx</span><span class="p">):</span>
+            <span class="n">rd_ps</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+            <span class="k">for</span> <span class="n">rxi</span><span class="p">,</span><span class="n">rx</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rx</span><span class="p">):</span>
+                <span class="n">txrx</span> <span class="o">=</span> <span class="n">passes</span><span class="o">.</span><span class="n">find_simultaneous_passes</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">states</span><span class="p">,</span> <span class="p">[</span><span class="n">tx</span><span class="p">,</span> <span class="n">rx</span><span class="p">],</span> <span class="n">cache_data</span><span class="o">=</span><span class="n">cache_data</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">ps</span> <span class="ow">in</span> <span class="n">txrx</span><span class="p">:</span>
+                    <span class="n">ps</span><span class="o">.</span><span class="n">station_id</span> <span class="o">=</span> <span class="p">[</span><span class="n">txi</span><span class="p">,</span> <span class="n">rxi</span><span class="p">]</span>
+                <span class="n">rd_ps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">txrx</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rd_ps</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

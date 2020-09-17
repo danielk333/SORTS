@@ -1,0 +1,8 @@
+mpi\_wrap\_master\_thread
+=========================
+
+.. currentmodule:: sorts.simulation
+
+.. rubric:: mpi_wrap_master_thread
+
+.. autofunction:: mpi_wrap_master_thread

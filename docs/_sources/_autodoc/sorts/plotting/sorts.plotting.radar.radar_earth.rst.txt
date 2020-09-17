@@ -1,0 +1,8 @@
+radar\_earth
+============
+
+.. currentmodule:: sorts.plotting.radar
+
+.. rubric:: radar_earth
+
+.. autofunction:: radar_earth

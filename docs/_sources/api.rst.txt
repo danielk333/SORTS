@@ -9,14 +9,17 @@ Modules
    :template: autosummary/module.rst
    :toctree: _autodoc/sorts
 
-    sorts.space_object
-    sorts.passes
-    sorts.functions
     sorts.constants
-    sorts.frames
+    sorts.correlator
     sorts.dates
+    sorts.frames
+    sorts.functions
+    sorts.interpolation
+    sorts.passes
     sorts.profiling
     sorts.signals
+    sorts.simulation
+    sorts.space_object
 
 
 Sub-packages
@@ -45,6 +48,7 @@ population
 
     sorts.population.population
     sorts.population.master
+    sorts.population.tles
 
 
 controller
@@ -58,6 +62,7 @@ controller
     sorts.controller.radar_controller
     sorts.controller.scanner
     sorts.controller.tracker
+    sorts.controller.static
 
 
 
@@ -79,18 +84,52 @@ scheduler
 errors
 -------------
 
+.. autosummary::
+   :template: autosummary/module.rst
+   :toctree: _autodoc/sorts/errors
+
+
+    sorts.errors.errors
+    sorts.errors.ionospheric_ray_trace
+    sorts.errors.linearized_coded
+
 
 io
 -------------
+
+.. autosummary::
+   :template: autosummary/module.rst
+   :toctree: _autodoc/sorts/io
+
+
+    sorts.io.ccsds
 
 
 plotting
 -------------
 
+.. autosummary::
+   :template: autosummary/module.rst
+   :toctree: _autodoc/sorts/plotting
+
+
+    sorts.plotting.general
+    sorts.plotting.radar
+    sorts.plotting.scan
+    sorts.plotting.tracking
+
+
 
 radar
 -------------
 
+.. autosummary::
+   :template: autosummary/module.rst
+   :toctree: _autodoc/sorts/radar
+
+
+    sorts.radar.radar
+    sorts.radar.tx_rx
 
 
 scans
@@ -106,6 +145,8 @@ scans
     sorts.radar.scans.random_uniform
     sorts.radar.scans.fence
     sorts.radar.scans.plane
+    sorts.radar.scans.bp
+
 
 
 Instances

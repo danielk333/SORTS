@@ -1,0 +1,8 @@
+Static.turn\_on
+===============
+
+.. currentmodule:: sorts.controller.static
+
+.. rubric:: Static.turn_on
+
+.. automethod:: Static.turn_on

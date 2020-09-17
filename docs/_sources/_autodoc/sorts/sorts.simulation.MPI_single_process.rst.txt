@@ -1,0 +1,8 @@
+MPI\_single\_process
+====================
+
+.. currentmodule:: sorts.simulation
+
+.. rubric:: MPI_single_process
+
+.. autofunction:: MPI_single_process

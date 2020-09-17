@@ -1,0 +1,8 @@
+LinearizedCodedIonospheric.range
+================================
+
+.. currentmodule:: sorts.errors.linearized_coded
+
+.. rubric:: LinearizedCodedIonospheric.range
+
+.. automethod:: LinearizedCodedIonospheric.range

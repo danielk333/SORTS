@@ -1,0 +1,209 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Installation &#8212; SORTS 3.18.0 documentation</title>
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Examples" href="auto_gallery/index.html" />
+    <link rel="prev" title="Introduction" href="intro.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="auto_gallery/index.html" title="Examples"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="intro.html" title="Introduction"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SORTS 3.18.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Installation</a><ul>
+<li><a class="reference internal" href="#sorts">SORTS</a><ul>
+<li><a class="reference internal" href="#system-requirements">System requirements</a></li>
+<li><a class="reference internal" href="#id1">Installation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mpi">MPI</a></li>
+<li><a class="reference internal" href="#orekit">Orekit</a></li>
+<li><a class="reference internal" href="#for-developers">For developers</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="intro.html"
+                        title="previous chapter">Introduction</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="auto_gallery/index.html"
+                        title="next chapter">Examples</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/install.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="sorts">
+<h2>SORTS<a class="headerlink" href="#sorts" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="system-requirements">
+<h3>System requirements<a class="headerlink" href="#system-requirements" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Unix (tested on Ubuntu-16.04 LTS, Ubuntu-server-16.04 LTS)</p></li>
+<li><p>Python &gt; 3.6</p></li>
+</ul>
+<p>It is recommended to use virtual environments</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 -m venv /path/to/new/sorts/environment
+<span class="nb">source</span> /path/to/new/sorts/environment/bin/activate
+</pre></div>
+</div>
+<p>Now you should be inside the new virtual environment. Check this by</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip --version
+</pre></div>
+</div>
+<p>And you should see the path to “/path/to/new/sorts/environment”. If the “pip” command fails, you need to make sure you have a functioning Python version with pip.</p>
+<p>Now you should make sure you have an up to date pip:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install --upgrade pip
+</pre></div>
+</div>
+</div>
+<div class="section" id="id1">
+<h3>Installation<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p><strong>To install SORTS</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/danielk333/SORTS
+<span class="nb">cd</span> sorts
+pip install .
+</pre></div>
+</div>
+<p>In case “pyant” or “pyorb” requrements fail auto-install run the following commands:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install git+https://github.com/danielk333/pyant
+pip install git+https://github.com/danielk333/pyorb
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="mpi">
+<h2>MPI<a class="headerlink" href="#mpi" title="Permalink to this headline">¶</a></h2>
+<p>Open MPI on Ubuntu</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt-get update
+sudo apt-get install openmpi-bin libopenmpi-dev
+pip install mpi4py
+</pre></div>
+</div>
+<p>MPICH on Ubuntu</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt-get update
+sudo apt install mpich
+pip install mpi4py
+</pre></div>
+</div>
+</div>
+<div class="section" id="orekit">
+<h2>Orekit<a class="headerlink" href="#orekit" title="Permalink to this headline">¶</a></h2>
+<p>Using install script while a virtual environment is active on Ubuntu (from inside the SORTS repository)</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt-get update
+sudo apt-get install openjdk-8-jdk
+./install_orekit.sh
+</pre></div>
+</div>
+</div>
+<div class="section" id="for-developers">
+<h2>For developers<a class="headerlink" href="#for-developers" title="Permalink to this headline">¶</a></h2>
+<p>To install developer dependencies</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1">#NOT YET AVALIBLE</span>
+</pre></div>
+</div>
+<p>To test</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest
+</pre></div>
+</div>
+<p>To make doc</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git checkout gh-pages
+git <span class="nb">cd</span> docsrc
+make github
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="auto_gallery/index.html" title="Examples"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="intro.html" title="Introduction"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SORTS 3.18.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

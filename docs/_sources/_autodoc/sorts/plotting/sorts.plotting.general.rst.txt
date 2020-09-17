@@ -1,0 +1,49 @@
+general
+=======
+
+.. automodule:: sorts.plotting.general
+
+.. currentmodule:: sorts.plotting.general
+
+Module summary
+--------------
+
+
+
+
+
+
+
+.. rubric:: Functions
+
+.. autosummary::
+    :toctree: .
+    
+    grid_earth
+    
+    orbits
+    
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: Functions
+
+
+.. autofunction:: grid_earth
+   :noindex:
+
+
+
+.. autofunction:: orbits
+   :noindex:
+
+

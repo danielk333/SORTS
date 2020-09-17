@@ -1,0 +1,8 @@
+Simulation.get\_path
+====================
+
+.. currentmodule:: sorts.simulation
+
+.. rubric:: Simulation.get_path
+
+.. automethod:: Simulation.get_path

@@ -1,0 +1,223 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>interpolation &#8212; SORTS 3.18.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Interpolator" href="sorts.interpolation.Interpolator.html" />
+    <link rel="prev" title="signal_delay" href="sorts.functions.signal_delay.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.interpolation.Interpolator.html" title="Interpolator"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sorts.functions.signal_delay.html" title="signal_delay"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../api.html" accesskey="U">API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">interpolation</a><ul>
+<li><a class="reference internal" href="#module-summary">Module summary</a><ul>
+</ul>
+</li>
+<li><a class="reference internal" href="#contents">Contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sorts.functions.signal_delay.html"
+                        title="previous chapter">signal_delay</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sorts.interpolation.Interpolator.html"
+                        title="next chapter">Interpolator</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/_autodoc/sorts/sorts.interpolation.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-sorts.interpolation">
+<span id="interpolation"></span><h1>interpolation<a class="headerlink" href="#module-sorts.interpolation" title="Permalink to this headline">¶</a></h1>
+<p>Interpolation functions.</p>
+<div class="section" id="module-summary">
+<h2>Module summary<a class="headerlink" href="#module-summary" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Classes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.interpolation.Interpolator.html#sorts.interpolation.Interpolator" title="sorts.interpolation.Interpolator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Interpolator</span></code></a>(states, t)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.interpolation.Legendre8.html#sorts.interpolation.Legendre8" title="sorts.interpolation.Legendre8"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Legendre8</span></code></a>(states, t)</p></td>
+<td><p>Order-8 Legendre polynomial interpolation of uniformly distributed states.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Functions</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.interpolation.legendre8.html#sorts.interpolation.legendre8" title="sorts.interpolation.legendre8"><code class="xref py py-obj docutils literal notranslate"><span class="pre">legendre8</span></code></a>(table, t1, tN, t[, ti])</p></td>
+<td><p>Order-8 Legendre polynomial interpolation</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.interpolation.legendre8_loop.html#sorts.interpolation.legendre8_loop" title="sorts.interpolation.legendre8_loop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">legendre8_loop</span></code></a>(table, t1, tN, t)</p></td>
+<td><p>Order-8 Legendre polynomial interpolation</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Interpolator</p>
+<dl class="py class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">sorts.interpolation.</code><code class="sig-name descname">Interpolator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">states</span></em>, <em class="sig-param"><span class="n">t</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/interpolation.html#Interpolator"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+</dd></dl>
+
+<p class="rubric">Legendre8</p>
+<dl class="py class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">sorts.interpolation.</code><code class="sig-name descname">Legendre8</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">states</span></em>, <em class="sig-param"><span class="n">t</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/interpolation.html#Legendre8"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="sorts.interpolation.Interpolator.html#sorts.interpolation.Interpolator" title="sorts.interpolation.Interpolator"><code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.interpolation.Interpolator</span></code></a></p>
+<p>Order-8 Legendre polynomial interpolation of uniformly distributed states.</p>
+</dd></dl>
+
+<p class="rubric">Functions</p>
+<dl class="py function">
+<dt>
+<code class="sig-prename descclassname">sorts.interpolation.</code><code class="sig-name descname">legendre8</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">table</span></em>, <em class="sig-param"><span class="n">t1</span></em>, <em class="sig-param"><span class="n">tN</span></em>, <em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">ti</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/interpolation.html#legendre8"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Order-8 Legendre polynomial interpolation</p>
+<p>Code adapted from the <cite>gdar</cite> system developed by NORCE Norwegian Research Centre AS, used with permission.</p>
+<dl>
+<dt>Parameters:</dt><dd><dl class="simple">
+<dt>table: M vectors (M &gt;= 9) to interpolate between, each containing N</dt><dd><p>values, e.g. for a position vector N=3 (x, y, z) table.shape = (M, N)</p>
+</dd>
+</dl>
+<p>t1: time corresponding to M=0
+tN: time corresponding to M=N-1
+t: times at which to provide N-dimensional answer.
+ti: indices which sort t in monotonic order</p>
+<p>This version requires t to be sorted, which enables optimization
+by interpolating all t in an interval between two nodes as a single
+expression. For the typical case where there are many fewer intervals
+to consider than distinct values to interpolate, this gives much
+improved performance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt>
+<code class="sig-prename descclassname">sorts.interpolation.</code><code class="sig-name descname">legendre8_loop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">table</span></em>, <em class="sig-param"><span class="n">t1</span></em>, <em class="sig-param"><span class="n">tN</span></em>, <em class="sig-param"><span class="n">t</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/interpolation.html#legendre8_loop"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Order-8 Legendre polynomial interpolation</p>
+<p>Code adapted from the <cite>gdar</cite> system developed by NORCE Norwegian Research Centre AS, used with permission.</p>
+<dl>
+<dt>Parameters:</dt><dd><dl class="simple">
+<dt>table: M vectors (M &gt;= 9) to interpolate between, each containing N</dt><dd><p>values, e.g. for a position vector N=3 (x, y, z) table.shape = (M, N)</p>
+</dd>
+</dl>
+<p>t1: time corresponding to M=0
+tN: time corresponding to M=N-1
+t: times at which to provide N-dimensional answer.</p>
+<p>This version loops over all interpolation instants t.
+Direct port of IDL, which was directly ported from Fortran.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.interpolation.Interpolator.html" title="Interpolator"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sorts.functions.signal_delay.html" title="signal_delay"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

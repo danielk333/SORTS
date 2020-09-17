@@ -1,0 +1,321 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>tx_rx &#8212; SORTS 3.18.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="RX" href="sorts.radar.tx_rx.RX.html" />
+    <link rel="prev" title="Radar.set_tx_beam" href="sorts.radar.radar.Radar.set_tx_beam.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.radar.tx_rx.RX.html" title="RX"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sorts.radar.radar.Radar.set_tx_beam.html" title="Radar.set_tx_beam"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" accesskey="U">API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">tx_rx</a><ul>
+<li><a class="reference internal" href="#module-summary">Module summary</a></li>
+<li><a class="reference internal" href="#contents">Contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sorts.radar.radar.Radar.set_tx_beam.html"
+                        title="previous chapter">Radar.set_tx_beam</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sorts.radar.tx_rx.RX.html"
+                        title="next chapter">RX</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/_autodoc/sorts/radar/sorts.radar.tx_rx.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-sorts.radar.tx_rx">
+<span id="tx-rx"></span><h1>tx_rx<a class="headerlink" href="#module-sorts.radar.tx_rx" title="Permalink to this headline">¶</a></h1>
+<p>Defines an antenna’s or entire radar system’s radiation pattern, also defines physical antennas for RX and TX.</p>
+<ol class="loweralpha simple" start="3">
+<li><p>2016-2019 Juha Vierinen, Daniel Kastinen</p></li>
+</ol>
+<div class="section" id="module-summary">
+<h2>Module summary<a class="headerlink" href="#module-summary" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Classes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.radar.tx_rx.RX.html#sorts.radar.tx_rx.RX" title="sorts.radar.tx_rx.RX"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RX</span></code></a>(lat, lon, alt, min_elevation, beam, noise)</p></td>
+<td><p>A radar receiving system.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.radar.tx_rx.Station.html#sorts.radar.tx_rx.Station" title="sorts.radar.tx_rx.Station"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Station</span></code></a>(lat, lon, alt, min_elevation, beam)</p></td>
+<td><p>A radar station.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.radar.tx_rx.TX.html#sorts.radar.tx_rx.TX" title="sorts.radar.tx_rx.TX"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TX</span></code></a>(lat, lon, alt, min_elevation, beam, …)</p></td>
+<td><p>A transmitting radar station</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">RX</p>
+<dl class="py class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">sorts.radar.tx_rx.</code><code class="sig-name descname">RX</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lat</span></em>, <em class="sig-param"><span class="n">lon</span></em>, <em class="sig-param"><span class="n">alt</span></em>, <em class="sig-param"><span class="n">min_elevation</span></em>, <em class="sig-param"><span class="n">beam</span></em>, <em class="sig-param"><span class="n">noise</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/radar/tx_rx.html#RX"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="sorts.radar.tx_rx.Station.html#sorts.radar.tx_rx.Station" title="sorts.radar.tx_rx.Station"><code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.radar.tx_rx.Station</span></code></a></p>
+<p>A radar receiving system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>noise</strong> (<em>float</em>) – Receiver noise in Kelvin, i.e. system temperature.</p>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><p><strong>noise</strong> (<em>float</em>) – Receiver noise in Kelvin, i.e. system temperature.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt>
+<code class="sig-name descname">enu</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ecefs</span></em><span class="sig-paren">)</span></dt>
+<dd><p>Converts a set of ECEF states to local ENU coordinates.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">point</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">k</span></em><span class="sig-paren">)</span></dt>
+<dd><p>Point Station beam in local ENU coordinates.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">point_ecef</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">point</span></em><span class="sig-paren">)</span></dt>
+<dd><p>Point Station beam in location of ECEF coordinate. Returns local pointing direction.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">pointing</code></dt>
+<dd><p>Station beam pointing in local ENU coordinates.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">pointing_ecef</code></dt>
+<dd><p>Station beam pointing in local ENU coordinates.</p>
+</dd></dl>
+
+</dd></dl>
+
+<p class="rubric">Station</p>
+<dl class="py class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">sorts.radar.tx_rx.</code><code class="sig-name descname">Station</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lat</span></em>, <em class="sig-param"><span class="n">lon</span></em>, <em class="sig-param"><span class="n">alt</span></em>, <em class="sig-param"><span class="n">min_elevation</span></em>, <em class="sig-param"><span class="n">beam</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/radar/tx_rx.html#Station"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A radar station.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat</strong> (<em>float</em>) – Geographical latitude of radar station in decimal degrees  (North+).</p></li>
+<li><p><strong>lon</strong> (<em>float</em>) – Geographical longitude of radar station in decimal degrees (East+).</p></li>
+<li><p><strong>alt</strong> (<em>float</em>) – Geographical altitude above geoid surface of radar station in meter.</p></li>
+<li><p><strong>min_elevation</strong> (<em>float</em>) – Elevation threshold for the radar station in degrees, i.e. it cannot detect or point below this elevation.</p></li>
+<li><p><strong>beam</strong> (<em>pyant.Beam</em>) – Radiation pattern for radar station.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>lat</strong> (<em>float</em>) – Geographical latitude of radar station in decimal degrees  (North+).</p></li>
+<li><p><strong>lon</strong> (<em>float</em>) – Geographical longitude of radar station in decimal degrees (East+).</p></li>
+<li><p><strong>alt</strong> (<em>float</em>) – Geographical altitude above geoid surface of radar station in meter.</p></li>
+<li><p><strong>min_elevation</strong> (<em>float</em>) – Elevation threshold for the radar station in degrees, i.e. it cannot detect or point below this elevation.</p></li>
+<li><p><strong>ecef</strong> (<em>numpy.array</em>) – The ECEF coordinates of the radar station calculated using <code class="xref py py-func docutils literal notranslate"><span class="pre">frames.geodetic_to_ITRS()</span></code>.</p></li>
+<li><p><strong>beam</strong> (<em>pyant.Beam</em>) – Radiation pattern for radar station.</p></li>
+<li><p><strong>enabled</strong> (<em>bool</em>) – Indicates if this station is turned on or off.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt>
+<code class="sig-name descname">enu</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ecefs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/radar/tx_rx.html#Station.enu"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Converts a set of ECEF states to local ENU coordinates.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">point</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">k</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/radar/tx_rx.html#Station.point"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Point Station beam in local ENU coordinates.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">point_ecef</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">point</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/radar/tx_rx.html#Station.point_ecef"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Point Station beam in location of ECEF coordinate. Returns local pointing direction.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">pointing</code></dt>
+<dd><p>Station beam pointing in local ENU coordinates.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">pointing_ecef</code></dt>
+<dd><p>Station beam pointing in local ENU coordinates.</p>
+</dd></dl>
+
+</dd></dl>
+
+<p class="rubric">TX</p>
+<dl class="py class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">sorts.radar.tx_rx.</code><code class="sig-name descname">TX</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lat</span></em>, <em class="sig-param"><span class="n">lon</span></em>, <em class="sig-param"><span class="n">alt</span></em>, <em class="sig-param"><span class="n">min_elevation</span></em>, <em class="sig-param"><span class="n">beam</span></em>, <em class="sig-param"><span class="n">power</span></em>, <em class="sig-param"><span class="n">bandwidth</span></em>, <em class="sig-param"><span class="n">duty_cycle</span></em>, <em class="sig-param"><span class="n">pulse_length</span><span class="o">=</span><span class="default_value">0.001</span></em>, <em class="sig-param"><span class="n">ipp</span><span class="o">=</span><span class="default_value">0.01</span></em>, <em class="sig-param"><span class="n">n_ipp</span><span class="o">=</span><span class="default_value">20</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/radar/tx_rx.html#TX"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="sorts.radar.tx_rx.Station.html#sorts.radar.tx_rx.Station" title="sorts.radar.tx_rx.Station"><code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.radar.tx_rx.Station</span></code></a></p>
+<p>A transmitting radar station</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bandwidth</strong> (<em>float</em>) – Transmissions bandwidth.</p></li>
+<li><p><strong>duty_cycle</strong> (<em>float</em>) – Maximum duty cycle, i.e. fraction of time transmission can occur at maximum power.</p></li>
+<li><p><strong>power</strong> (<em>float</em>) – Transmissions power in watts.</p></li>
+<li><p><strong>pulse_length</strong> (<em>float</em>) – Length of transmission pulse.</p></li>
+<li><p><strong>ipp</strong> (<em>float</em>) – Time between consecutive pulses.</p></li>
+<li><p><strong>n_ipp</strong> (<em>int</em>) – Number of pulses to coherently integrate.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>bandwidth</strong> (<em>float</em>) – Transmissions bandwidth.</p></li>
+<li><p><strong>duty_cycle</strong> (<em>float</em>) – Maximum duty cycle, i.e. fraction of time transmission can occur at maximum power.</p></li>
+<li><p><strong>power</strong> (<em>float</em>) – Transmissions power in watts.</p></li>
+<li><p><strong>pulse_length</strong> (<em>float</em>) – Length of transmission pulse.</p></li>
+<li><p><strong>ipp</strong> (<em>float</em>) – Time between consecutive pulses.</p></li>
+<li><p><strong>n_ipp</strong> (<em>int</em>) – Number of pulses to coherently integrate.</p></li>
+<li><p><strong>coh_int_bandwidth</strong> (<em>float</em>) – Effective bandwidth of receiver noise after coherent integration.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt>
+<code class="sig-name descname">enu</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ecefs</span></em><span class="sig-paren">)</span></dt>
+<dd><p>Converts a set of ECEF states to local ENU coordinates.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">point</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">k</span></em><span class="sig-paren">)</span></dt>
+<dd><p>Point Station beam in local ENU coordinates.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">point_ecef</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">point</span></em><span class="sig-paren">)</span></dt>
+<dd><p>Point Station beam in location of ECEF coordinate. Returns local pointing direction.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">pointing</code></dt>
+<dd><p>Station beam pointing in local ENU coordinates.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">pointing_ecef</code></dt>
+<dd><p>Station beam pointing in local ENU coordinates.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.radar.tx_rx.RX.html" title="RX"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sorts.radar.radar.Radar.set_tx_beam.html" title="Radar.set_tx_beam"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

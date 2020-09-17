@@ -1,0 +1,8 @@
+store\_step
+===========
+
+.. currentmodule:: sorts.simulation
+
+.. rubric:: store_step
+
+.. autofunction:: store_step

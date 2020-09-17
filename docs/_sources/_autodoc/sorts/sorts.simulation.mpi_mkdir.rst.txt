@@ -1,0 +1,8 @@
+mpi\_mkdir
+==========
+
+.. currentmodule:: sorts.simulation
+
+.. rubric:: mpi_mkdir
+
+.. autofunction:: mpi_mkdir

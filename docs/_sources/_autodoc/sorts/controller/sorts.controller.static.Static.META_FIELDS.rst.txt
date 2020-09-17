@@ -1,0 +1,6 @@
+sorts.controller.static.Static.META\_FIELDS
+===========================================
+
+.. currentmodule:: sorts.controller.static
+
+.. autoattribute:: Static.META_FIELDS

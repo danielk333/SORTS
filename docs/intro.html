@@ -1,0 +1,184 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Introduction &#8212; SORTS 3.18.0 documentation</title>
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="install.html" />
+    <link rel="prev" title="SORTS" href="index.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="install.html" title="Installation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="SORTS"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SORTS 3.18.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Introduction</a><ul>
+<li><a class="reference internal" href="#what-is-sorts">What is SORTS</a></li>
+<li><a class="reference internal" href="#feature-list">Feature list</a></li>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">SORTS</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="install.html"
+                        title="next chapter">Installation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/intro.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="what-is-sorts">
+<h2>What is SORTS<a class="headerlink" href="#what-is-sorts" title="Permalink to this headline">¶</a></h2>
+<p>SORTS stands for Space Object Radar Tracking Simulator (SORTS). It is a collection of modules designed for research purposes concerning the tracking and detection of objects in space. Its ultimate goal is to simulate the tracking and discovery of objects in space using radar systems in a very general fashion. Therefor it can not only be used for simulating the performance of radar systems but be used to plan observations and schedule campagins.</p>
+</div>
+<div class="section" id="feature-list">
+<h2>Feature list<a class="headerlink" href="#feature-list" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>TO BE ADDED</p></li>
+</ul>
+</div>
+<div class="section" id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
+<p>Finding all passes of a space object over a radar system</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pyorb</span>
+
+<span class="kn">import</span> <span class="nn">sorts</span>
+<span class="kn">from</span> <span class="nn">sorts.propagator</span> <span class="kn">import</span> <span class="n">SGP4</span>
+
+<span class="n">eiscat3d</span> <span class="o">=</span> <span class="n">sorts</span><span class="o">.</span><span class="n">radars</span><span class="o">.</span><span class="n">eiscat3d</span>
+
+<span class="n">prop</span> <span class="o">=</span> <span class="n">SGP4</span><span class="p">(</span>
+      <span class="n">settings</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+          <span class="n">out_frame</span><span class="o">=</span><span class="s1">&#39;ITRS&#39;</span><span class="p">,</span>
+      <span class="p">),</span>
+  <span class="p">)</span>
+
+<span class="n">orb</span> <span class="o">=</span> <span class="n">pyorb</span><span class="o">.</span><span class="n">Orbit</span><span class="p">(</span>
+    <span class="n">M0</span> <span class="o">=</span> <span class="n">pyorb</span><span class="o">.</span><span class="n">M_earth</span><span class="p">,</span>
+    <span class="n">direct_update</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">auto_update</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">degrees</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">a</span><span class="o">=</span><span class="mf">7200e3</span><span class="p">,</span>
+    <span class="n">e</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">i</span><span class="o">=</span><span class="mi">75</span><span class="p">,</span>
+    <span class="n">omega</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">Omega</span><span class="o">=</span><span class="mi">79</span><span class="p">,</span>
+    <span class="n">anom</span><span class="o">=</span><span class="mi">72</span><span class="p">,</span>
+    <span class="n">epoch</span><span class="o">=</span><span class="mf">53005.0</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">orb</span><span class="p">)</span>
+
+<span class="n">t</span> <span class="o">=</span> <span class="n">sorts</span><span class="o">.</span><span class="n">equidistant_sampling</span><span class="p">(</span>
+    <span class="n">orbit</span> <span class="o">=</span> <span class="n">orb</span><span class="p">,</span>
+    <span class="n">start_t</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">end_t</span> <span class="o">=</span> <span class="mi">3600</span><span class="o">*</span><span class="mi">24</span><span class="o">*</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">max_dpos</span><span class="o">=</span><span class="mf">1e3</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">states</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">orb</span><span class="o">.</span><span class="n">cartesian</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">orb</span><span class="o">.</span><span class="n">epoch</span><span class="p">)</span>
+
+<span class="n">passes</span> <span class="o">=</span> <span class="n">eiscat3d</span><span class="o">.</span><span class="n">find_passes</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">states</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">passes</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="install.html" title="Installation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="SORTS"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SORTS 3.18.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

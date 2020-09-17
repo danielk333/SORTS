@@ -1,0 +1,214 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>correlator &#8212; SORTS 3.18.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="correlate" href="sorts.correlator.correlate.html" />
+    <link rel="prev" title="sorts.constants.WGS84.f" href="sorts.constants.WGS84.f.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.correlator.correlate.html" title="correlate"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sorts.constants.WGS84.f.html" title="sorts.constants.WGS84.f"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../api.html" accesskey="U">API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">correlator</a><ul>
+<li><a class="reference internal" href="#module-summary">Module summary</a></li>
+<li><a class="reference internal" href="#contents">Contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sorts.constants.WGS84.f.html"
+                        title="previous chapter">sorts.constants.WGS84.f</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sorts.correlator.correlate.html"
+                        title="next chapter">correlate</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/_autodoc/sorts/sorts.correlator.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-sorts.correlator">
+<span id="correlator"></span><h1>correlator<a class="headerlink" href="#module-sorts.correlator" title="Permalink to this headline">¶</a></h1>
+<p>Correlate measurement time series with a population of objects to find the best match.</p>
+<p>Currently only works for Mono-static measurements.</p>
+<p># TODO: Assume a uniform prior distribution over population index, posterior distribution is the probability of what object generated the data. Probability comes from measurement covariance.</p>
+<div class="section" id="module-summary">
+<h2>Module summary<a class="headerlink" href="#module-summary" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Functions</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.correlator.correlate.html#sorts.correlator.correlate" title="sorts.correlator.correlate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">correlate</span></code></a>(data, station, population, metric)</p></td>
+<td><p>Given a mono-static measurement of ranges and rage-rates, a radar model and a population: correlate measurements with population.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.correlator.plot_correlation.html#sorts.correlator.plot_correlation" title="sorts.correlator.plot_correlation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_correlation</span></code></a>(dat, cdat)</p></td>
+<td><p>Plot the correlation between the measurement and simulated population object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.correlator.residual_distribution_metric.html#sorts.correlator.residual_distribution_metric" title="sorts.correlator.residual_distribution_metric"><code class="xref py py-obj docutils literal notranslate"><span class="pre">residual_distribution_metric</span></code></a>(t, r, v, r_ref, …)</p></td>
+<td><p>Using the simulated and the measured ranges and rage-rates calculate a de-correlation metric.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Functions</p>
+<dl class="py function">
+<dt>
+<code class="sig-prename descclassname">sorts.correlator.</code><code class="sig-name descname">correlate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">station</span></em>, <em class="sig-param"><span class="n">population</span></em>, <em class="sig-param"><span class="n">metric</span></em>, <em class="sig-param"><span class="n">n_closest</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">out_file</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">MPI_on</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/correlator.html#correlate"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Given a mono-static measurement of ranges and rage-rates, a radar model and a population: correlate measurements with population.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>dict</em>) – Dictionary that contains measurement data. Contents are described below.</p></li>
+<li><p><strong>station</strong> (<em>AntennaRX</em>) – Model of receiver station that performed the measurement.</p></li>
+<li><p><strong>population</strong> (<a class="reference internal" href="population/sorts.population.population.Population.html#sorts.population.population.Population" title="sorts.population.population.Population"><em>Population</em></a>) – Population to correlate against.</p></li>
+<li><p><strong>metric</strong> (<em>function</em>) – Metric used to correlate measurement and simulation of population.</p></li>
+<li><p><strong>n_closest</strong> (<em>int</em>) – Number of closest matches to output.</p></li>
+<li><p><strong>out_file</strong> (<em>str</em>) – If not <code class="code docutils literal notranslate"><span class="pre">None</span></code>, save the output data to this path.</p></li>
+<li><p><strong>MPI_on</strong> (<em>bool</em>) – If True use internal parallelization with MPI to calculate correlation. Turn to False to externally parallelize with MPI.</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Measurement data:</strong></p>
+<blockquote>
+<div><dl class="simple">
+<dt>The file must be a dictionary that contains three data-sets:</dt><dd><ul class="simple">
+<li><p>‘t’: Times in unix-seconds</p></li>
+<li><p>‘r’: Ranges in meters</p></li>
+<li><p>‘v’: Range-rates in meters per second</p></li>
+</ul>
+</dd>
+</dl>
+<p>They should all be numpy vectors of equal length.</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt>
+<code class="sig-prename descclassname">sorts.correlator.</code><code class="sig-name descname">plot_correlation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dat</span></em>, <em class="sig-param"><span class="n">cdat</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/correlator.html#plot_correlation"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Plot the correlation between the measurement and simulated population object.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt>
+<code class="sig-prename descclassname">sorts.correlator.</code><code class="sig-name descname">residual_distribution_metric</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">r</span></em>, <em class="sig-param"><span class="n">v</span></em>, <em class="sig-param"><span class="n">r_ref</span></em>, <em class="sig-param"><span class="n">v_ref</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/correlator.html#residual_distribution_metric"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Using the simulated and the measured ranges and rage-rates calculate a de-correlation metric.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Times in seconds corresponding to measurement and simulation data.</p></li>
+<li><p><strong>r</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Measured ranges in meters</p></li>
+<li><p><strong>v</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Measured rage-rates in meters per second</p></li>
+<li><p><strong>r_ref</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Simulated ranges in meters</p></li>
+<li><p><strong>v_ref</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Simulated rage-rates in meters per second</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Metric value, smaller values indicate better match.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.correlator.correlate.html" title="correlate"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sorts.constants.WGS84.f.html" title="sorts.constants.WGS84.f"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,8 @@
+radar\_scan
+===========
+
+.. currentmodule:: sorts.plotting.scan
+
+.. rubric:: radar_scan
+
+.. autofunction:: radar_scan

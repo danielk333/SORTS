@@ -1,0 +1,194 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>TX &#8212; SORTS 3.18.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="TX.__init__" href="sorts.radar.tx_rx.TX.__init__.html" />
+    <link rel="prev" title="Station.wavelength" href="sorts.radar.tx_rx.Station.wavelength.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.radar.tx_rx.TX.__init__.html" title="TX.__init__"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sorts.radar.tx_rx.Station.wavelength.html" title="Station.wavelength"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.radar.tx_rx.html" accesskey="U">tx_rx</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sorts.radar.tx_rx.Station.wavelength.html"
+                        title="previous chapter">Station.wavelength</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sorts.radar.tx_rx.TX.__init__.html"
+                        title="next chapter">TX.__init__</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/_autodoc/sorts/radar/sorts.radar.tx_rx.TX.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="tx">
+<h1>TX<a class="headerlink" href="#tx" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="sorts.radar.tx_rx.TX">
+<em class="property">class </em><code class="sig-prename descclassname">sorts.radar.tx_rx.</code><code class="sig-name descname">TX</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lat</span></em>, <em class="sig-param"><span class="n">lon</span></em>, <em class="sig-param"><span class="n">alt</span></em>, <em class="sig-param"><span class="n">min_elevation</span></em>, <em class="sig-param"><span class="n">beam</span></em>, <em class="sig-param"><span class="n">power</span></em>, <em class="sig-param"><span class="n">bandwidth</span></em>, <em class="sig-param"><span class="n">duty_cycle</span></em>, <em class="sig-param"><span class="n">pulse_length</span><span class="o">=</span><span class="default_value">0.001</span></em>, <em class="sig-param"><span class="n">ipp</span><span class="o">=</span><span class="default_value">0.01</span></em>, <em class="sig-param"><span class="n">n_ipp</span><span class="o">=</span><span class="default_value">20</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/radar/tx_rx.html#TX"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.radar.tx_rx.TX" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="sorts.radar.tx_rx.Station.html#sorts.radar.tx_rx.Station" title="sorts.radar.tx_rx.Station"><code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.radar.tx_rx.Station</span></code></a></p>
+<p>A transmitting radar station</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bandwidth</strong> (<em>float</em>) – Transmissions bandwidth.</p></li>
+<li><p><strong>duty_cycle</strong> (<em>float</em>) – Maximum duty cycle, i.e. fraction of time transmission can occur at maximum power.</p></li>
+<li><p><strong>power</strong> (<em>float</em>) – Transmissions power in watts.</p></li>
+<li><p><strong>pulse_length</strong> (<em>float</em>) – Length of transmission pulse.</p></li>
+<li><p><strong>ipp</strong> (<em>float</em>) – Time between consecutive pulses.</p></li>
+<li><p><strong>n_ipp</strong> (<em>int</em>) – Number of pulses to coherently integrate.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>bandwidth</strong> (<em>float</em>) – Transmissions bandwidth.</p></li>
+<li><p><strong>duty_cycle</strong> (<em>float</em>) – Maximum duty cycle, i.e. fraction of time transmission can occur at maximum power.</p></li>
+<li><p><strong>power</strong> (<em>float</em>) – Transmissions power in watts.</p></li>
+<li><p><strong>pulse_length</strong> (<em>float</em>) – Length of transmission pulse.</p></li>
+<li><p><strong>ipp</strong> (<em>float</em>) – Time between consecutive pulses.</p></li>
+<li><p><strong>n_ipp</strong> (<em>int</em>) – Number of pulses to coherently integrate.</p></li>
+<li><p><strong>coh_int_bandwidth</strong> (<em>float</em>) – Effective bandwidth of receiver noise after coherent integration.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.radar.tx_rx.TX.__init__.html#sorts.radar.tx_rx.TX.__init__" title="sorts.radar.tx_rx.TX.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(lat, lon, alt, min_elevation, beam, …)</p></td>
+<td><p>Initialize self.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.radar.tx_rx.TX.copy.html#sorts.radar.tx_rx.TX.copy" title="sorts.radar.tx_rx.TX.copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.radar.tx_rx.TX.enu.html#sorts.radar.tx_rx.TX.enu" title="sorts.radar.tx_rx.TX.enu"><code class="xref py py-obj docutils literal notranslate"><span class="pre">enu</span></code></a>(ecefs)</p></td>
+<td><p>Converts a set of ECEF states to local ENU coordinates.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.radar.tx_rx.TX.point.html#sorts.radar.tx_rx.TX.point" title="sorts.radar.tx_rx.TX.point"><code class="xref py py-obj docutils literal notranslate"><span class="pre">point</span></code></a>(k)</p></td>
+<td><p>Point Station beam in local ENU coordinates.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.radar.tx_rx.TX.point_ecef.html#sorts.radar.tx_rx.TX.point_ecef" title="sorts.radar.tx_rx.TX.point_ecef"><code class="xref py py-obj docutils literal notranslate"><span class="pre">point_ecef</span></code></a>(point)</p></td>
+<td><p>Point Station beam in location of ECEF coordinate.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.radar.tx_rx.TX.frequency.html#sorts.radar.tx_rx.TX.frequency" title="sorts.radar.tx_rx.TX.frequency"><code class="xref py py-obj docutils literal notranslate"><span class="pre">frequency</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.radar.tx_rx.TX.pointing.html#sorts.radar.tx_rx.TX.pointing" title="sorts.radar.tx_rx.TX.pointing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pointing</span></code></a></p></td>
+<td><p>Station beam pointing in local ENU coordinates.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.radar.tx_rx.TX.pointing_ecef.html#sorts.radar.tx_rx.TX.pointing_ecef" title="sorts.radar.tx_rx.TX.pointing_ecef"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pointing_ecef</span></code></a></p></td>
+<td><p>Station beam pointing in local ENU coordinates.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.radar.tx_rx.TX.wavelength.html#sorts.radar.tx_rx.TX.wavelength" title="sorts.radar.tx_rx.TX.wavelength"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wavelength</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.radar.tx_rx.TX.__init__.html" title="TX.__init__"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sorts.radar.tx_rx.Station.wavelength.html" title="Station.wavelength"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.radar.tx_rx.html" >tx_rx</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

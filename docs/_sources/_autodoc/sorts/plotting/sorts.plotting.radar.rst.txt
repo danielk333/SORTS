@@ -1,0 +1,49 @@
+radar
+=====
+
+.. automodule:: sorts.plotting.radar
+
+.. currentmodule:: sorts.plotting.radar
+
+Module summary
+--------------
+
+
+
+
+
+
+
+.. rubric:: Functions
+
+.. autosummary::
+    :toctree: .
+    
+    radar_earth
+    
+    radar_map
+    
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: Functions
+
+
+.. autofunction:: radar_earth
+   :noindex:
+
+
+
+.. autofunction:: radar_map
+   :noindex:
+
+

@@ -1,0 +1,787 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>sorts.simulation &#8212; SORTS 3.18.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for sorts.simulation</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="sd">&#39;&#39;&#39;Main simulation handler in the form of a class using the capabilities of the entire toolbox.</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="c1">#Python standard import</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">from</span> <span class="nn">glob</span> <span class="kn">import</span> <span class="n">glob</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1">#Third party import</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+    <span class="n">comm</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">comm</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="c1">#Local import</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">profiling</span>
+
+<div class="viewcode-block" id="mpi_wrap_master_thread"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.simulation.mpi_wrap_master_thread.html#sorts.simulation.mpi_wrap_master_thread">[docs]</a><span class="k">def</span> <span class="nf">mpi_wrap_master_thread</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Wrap function to only execute on thread rank=0</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">master_th_func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">comm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">comm</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ret</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ret</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">comm</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
+    <span class="k">return</span> <span class="n">master_th_func</span></div>
+
+
+<div class="viewcode-block" id="mpi_mkdir"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.simulation.mpi_mkdir.html#sorts.simulation.mpi_mkdir">[docs]</a><span class="nd">@mpi_wrap_master_thread</span>
+<span class="k">def</span> <span class="nf">mpi_mkdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Make directory on thread rank=0</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="mpi_rmdir"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.simulation.mpi_rmdir.html#sorts.simulation.mpi_rmdir">[docs]</a><span class="nd">@mpi_wrap_master_thread</span>
+<span class="k">def</span> <span class="nf">mpi_rmdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Remove directory on thread rank=0 with `shutil.rmtree`</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="mpi_copy"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.simulation.mpi_copy.html#sorts.simulation.mpi_copy">[docs]</a><span class="nd">@mpi_wrap_master_thread</span>
+<span class="k">def</span> <span class="nf">mpi_copy</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">linkfiles</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">src</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">linkfiles</span><span class="p">:</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">copy_function</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">link</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">linkfiles</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="log_exceptions"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.simulation.log_exceptions.html#sorts.simulation.log_exceptions">[docs]</a><span class="k">def</span> <span class="nf">log_exceptions</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;If instance has a logger, log exceptions raised by this method.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">wrapped_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">rets</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;logger&#39;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">args: </span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="se">\n</span><span class="s1"> kwargs: </span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">err</span>
+            
+        <span class="k">return</span> <span class="n">rets</span>
+
+    <span class="k">return</span> <span class="n">wrapped_step</span></div>
+
+
+
+
+<div class="viewcode-block" id="MPI_single_process"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.simulation.MPI_single_process.html#sorts.simulation.MPI_single_process">[docs]</a><span class="k">def</span> <span class="nf">MPI_single_process</span><span class="p">(</span><span class="n">process_id</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Simulation step single process method restriction decorator</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">step_wrapping</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">wrapped_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">comm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">comm</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="n">process_id</span><span class="p">:</span>
+                    <span class="n">rets</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">rets</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rets</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">rets</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s1">&#39;_simulation_step&#39;</span><span class="p">):</span>
+            <span class="n">wrapped_step</span><span class="o">.</span><span class="n">_simulation_step</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">_simulation_step</span>
+        <span class="k">return</span> <span class="n">wrapped_step</span>
+
+    <span class="k">return</span> <span class="n">step_wrapping</span></div>
+
+
+<div class="viewcode-block" id="MPI_action"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.simulation.MPI_action.html#sorts.simulation.MPI_action">[docs]</a><span class="k">def</span> <span class="nf">MPI_action</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">iterable</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">root</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Simulation step MPI post step action decorator</span>
+
+<span class="sd">    :param str action: Mode of operations on node-data communication, available options are &quot;gather&quot;, &quot;gather-clear&quot;, &quot;bcast&quot; and &quot;barrier&quot;.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">step_wrapping</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">wrapped_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">rets</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">comm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">rets</span>
+
+            <span class="k">if</span> <span class="n">iterable</span><span class="p">:</span>
+                <span class="n">mpi_inds</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">thrid</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">comm</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+                    <span class="n">mpi_inds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">thrid</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">rets</span><span class="p">),</span> <span class="n">comm</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+
+
+            <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;barrier&#39;</span><span class="p">:</span>
+                <span class="n">comm</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">action</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;gather&#39;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">iterable</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">comm</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="n">root</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">thr_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">comm</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="n">thr_id</span> <span class="o">!=</span> <span class="n">root</span><span class="p">:</span>
+                                <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">mpi_inds</span><span class="p">[</span><span class="n">thr_id</span><span class="p">]:</span>
+                                    <span class="n">rets</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">thr_id</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">ind</span><span class="p">)</span>
+
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">mpi_inds</span><span class="p">[</span><span class="n">comm</span><span class="o">.</span><span class="n">rank</span><span class="p">]:</span>
+                            <span class="n">comm</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">rets</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">dest</span><span class="o">=</span><span class="n">root</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">ind</span><span class="p">)</span>
+                    
+                    <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;gather-clear&#39;</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">comm</span><span class="o">.</span><span class="n">rank</span> <span class="o">!=</span> <span class="n">root</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">mpi_inds</span><span class="p">[</span><span class="n">comm</span><span class="o">.</span><span class="n">rank</span><span class="p">]:</span>
+                                <span class="n">rets</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">all_rets</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">comm</span><span class="o">.</span><span class="n">size</span>
+                    <span class="n">all_rets</span><span class="p">[</span><span class="n">comm</span><span class="o">.</span><span class="n">rank</span><span class="p">]</span> <span class="o">=</span> <span class="n">rets</span>
+
+                    <span class="k">if</span> <span class="n">comm</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="n">root</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">thr_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">comm</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="n">thr_id</span> <span class="o">!=</span> <span class="n">root</span><span class="p">:</span>
+                                <span class="n">all_rets</span><span class="p">[</span><span class="n">thr_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">thr_id</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">thr_id</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">comm</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">all_rets</span><span class="p">[</span><span class="n">comm</span><span class="o">.</span><span class="n">rank</span><span class="p">],</span> <span class="n">dest</span><span class="o">=</span><span class="n">root</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">comm</span><span class="o">.</span><span class="n">rank</span><span class="p">)</span>
+                    
+                    <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;gather-clear&#39;</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">comm</span><span class="o">.</span><span class="n">rank</span> <span class="o">!=</span> <span class="n">root</span><span class="p">:</span>
+                            <span class="n">all_rets</span><span class="p">[</span><span class="n">comm</span><span class="o">.</span><span class="n">rank</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">rets</span> <span class="o">=</span> <span class="n">all_rets</span>
+
+            <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;bcast&#39;</span><span class="p">:</span>
+
+                <span class="k">if</span> <span class="n">iterable</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">thr_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">comm</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+                        <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">mpi_inds</span><span class="p">[</span><span class="n">thr_id</span><span class="p">]:</span>
+                            <span class="n">rets</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">rets</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">root</span><span class="o">=</span><span class="n">thr_id</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>     
+                    <span class="n">rets</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">rets</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">rets</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s1">&#39;_simulation_step&#39;</span><span class="p">):</span>
+            <span class="n">wrapped_step</span><span class="o">.</span><span class="n">_simulation_step</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">_simulation_step</span>
+        <span class="k">return</span> <span class="n">wrapped_step</span>
+
+    <span class="k">return</span> <span class="n">step_wrapping</span></div>
+
+
+<div class="viewcode-block" id="iterable_step"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.simulation.iterable_step.html#sorts.simulation.iterable_step">[docs]</a><span class="k">def</span> <span class="nf">iterable_step</span><span class="p">(</span><span class="n">iterable</span><span class="p">,</span> <span class="n">MPI</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">reduce</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Simulation step iteration decorator</span>
+
+<span class="sd"> </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">reduce_</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">iterable</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">iterable</span> <span class="o">=</span> <span class="p">[</span><span class="n">iterable</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">step_wrapping</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">wrapped_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+            <span class="n">all_attrs</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">iterable</span><span class="p">:</span>
+                <span class="n">subvars</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">vari</span><span class="p">,</span> <span class="n">subvar</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">subvars</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">vari</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subvar</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">subvar</span><span class="p">)</span>
+                <span class="n">all_attrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_attrs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">attr</span> <span class="o">=</span> <span class="n">all_attrs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">attr</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">all_attrs</span><span class="p">))</span>
+
+
+            <span class="k">if</span> <span class="n">MPI</span> <span class="ow">and</span> <span class="n">comm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">_iter</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">comm</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">attr</span><span class="p">),</span> <span class="n">comm</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">_iter</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">attr</span><span class="p">)))</span>
+
+            <span class="k">if</span> <span class="n">reduce_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">rets</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rets</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+            <span class="n">step_name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;_step_name&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="n">profiler_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Simulation:iterable_step_</span><span class="si">{</span><span class="n">step_name</span><span class="si">}</span><span class="s1">&#39;</span>
+
+            <span class="n">_iters</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">_total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">_iter</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">_iter</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">log</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">profiler_name</span><span class="p">)</span>
+                <span class="n">item</span> <span class="o">=</span> <span class="n">attr</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s1">&#39;_simulation_step&#39;</span><span class="p">):</span>
+                    <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;_iterable_index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">index</span>
+
+                <span class="n">ret</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">reduce_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">rets</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">rets</span> <span class="o">=</span> <span class="n">reduce_</span><span class="p">(</span><span class="n">rets</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
+                    <span class="k">del</span> <span class="n">ret</span>
+
+                <span class="k">if</span> <span class="n">log</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">profiler_name</span><span class="p">)</span>
+                <span class="n">_iters</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">log</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">_spent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">total</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">profiler_name</span><span class="p">)</span>
+                        <span class="n">_est_left</span> <span class="o">=</span> <span class="p">(</span><span class="n">_total</span> <span class="o">-</span> <span class="n">_iters</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">profiler_name</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">always</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Simulation:</span><span class="si">{</span><span class="n">step_name</span><span class="si">}</span><span class="s1">:iterable_step: </span><span class="si">{</span><span class="n">_iters</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">_total</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+                            <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;[Elapsed  ] </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">_spent</span><span class="p">))</span><span class="si">}</span><span class="s1"> | &#39;</span>
+                            <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;[Time left] </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">_est_left</span><span class="p">))</span><span class="si">}</span><span class="s1">&#39;</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">always</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Simulation:</span><span class="si">{</span><span class="n">step_name</span><span class="si">}</span><span class="s1">:iterable_step: </span><span class="si">{</span><span class="n">_iters</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">_total</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">log</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">step_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">exec_times</span><span class="p">[</span><span class="n">profiler_name</span><span class="p">]</span>
+
+            <span class="k">return</span> <span class="n">rets</span>
+
+        <span class="n">wrapped_step</span><span class="o">.</span><span class="n">_simulation_step</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">wrapped_step</span>
+
+    <span class="k">return</span> <span class="n">step_wrapping</span></div>
+
+
+
+<div class="viewcode-block" id="store_step"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.simulation.store_step.html#sorts.simulation.store_step">[docs]</a><span class="k">def</span> <span class="nf">store_step</span><span class="p">(</span><span class="n">store</span><span class="p">,</span> <span class="n">iterable</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Simulation step storing decorator</span>
+
+<span class="sd"> </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">store</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">store</span> <span class="o">=</span> <span class="p">[</span><span class="n">store</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">step_wrapping</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">wrapped_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+            <span class="n">rets</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">si</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">store</span><span class="p">):</span>
+                <span class="n">subvars</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subvars</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="n">subvars</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">vari</span><span class="p">,</span> <span class="n">subvar</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">subvars</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+                        <span class="k">if</span> <span class="n">vari</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subvar</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">subvar</span><span class="p">)</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="n">subvars</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                
+                <span class="k">if</span> <span class="n">iterable</span><span class="p">:</span>
+                    <span class="n">iter_obj</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">rets</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rets</span><span class="p">)):</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">store</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">rets</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">iter_obj</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">rets</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">iter_obj</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">rets</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="n">si</span><span class="p">]</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">iter_obj</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">store</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">rets</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">rets</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">rets</span><span class="p">[</span><span class="n">si</span><span class="p">])</span>
+
+            <span class="k">return</span> <span class="n">rets</span>
+
+        <span class="n">wrapped_step</span><span class="o">.</span><span class="n">_simulation_step</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">wrapped_step</span>
+
+    <span class="k">return</span> <span class="n">step_wrapping</span></div>
+
+
+
+<div class="viewcode-block" id="iterable_cache"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.simulation.iterable_cache.html#sorts.simulation.iterable_cache">[docs]</a><span class="k">def</span> <span class="nf">iterable_cache</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="n">caches</span><span class="p">,</span> <span class="n">MPI</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">reduce</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Simulation step iteration decorator</span>
+
+<span class="sd"> </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">reduce_</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">steps</span> <span class="o">=</span> <span class="p">[</span><span class="n">steps</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">caches</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">caches</span> <span class="o">=</span> <span class="p">[</span><span class="n">caches</span><span class="p">]</span>
+
+
+    <span class="k">def</span> <span class="nf">step_wrapping</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">wrapped_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+            <span class="n">all_files</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">all_indecies</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="n">cache</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="n">caches</span><span class="p">):</span>
+                <span class="n">dir_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">dir_</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Input step </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s1"> has no cache </span><span class="si">{</span><span class="n">cache</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">glob</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dir_</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;*&#39;</span><span class="p">))]</span>
+                <span class="n">indecies</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>
+                
+                <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">indecies</span><span class="p">,</span><span class="n">files</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pair</span><span class="p">:</span> <span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+                <span class="n">indecies</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">indecies</span><span class="p">)</span>
+
+                <span class="n">all_files</span> <span class="o">+=</span> <span class="p">[</span><span class="n">files</span><span class="p">]</span>
+                <span class="n">all_indecies</span> <span class="o">+=</span> <span class="p">[</span><span class="n">indecies</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">steps</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">files_lst</span> <span class="o">=</span> <span class="p">[[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">all_files</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1">#check all inds exist</span>
+                <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">inds</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">all_indecies</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">inds</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Missing index </span><span class="si">{</span><span class="n">inds</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">files_lst</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">all_files</span><span class="p">))</span>
+            <span class="n">indecies</span> <span class="o">=</span> <span class="n">all_indecies</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">MPI</span> <span class="ow">and</span> <span class="n">comm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">_iter</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">comm</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">indecies</span><span class="p">),</span> <span class="n">comm</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">_iter</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">indecies</span><span class="p">)))</span>
+
+            <span class="k">if</span> <span class="n">reduce_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">rets</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">indecies</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rets</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="n">step_name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;_step_name&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="n">profiler_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Simulation:iterable_cache:</span><span class="si">{</span><span class="n">step_name</span><span class="si">}</span><span class="s1">&#39;</span>
+
+            <span class="n">_iters</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">_total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">_iter</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">index__</span> <span class="ow">in</span> <span class="n">_iter</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="n">indecies</span><span class="p">[</span><span class="n">index__</span><span class="p">]</span>
+                <span class="n">files</span> <span class="o">=</span> <span class="n">files_lst</span><span class="p">[</span><span class="n">index__</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">log</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">profiler_name</span><span class="p">)</span>
+                
+                <span class="n">item</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">cache</span><span class="p">,</span> <span class="n">fname</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">caches</span><span class="p">,</span> <span class="n">files</span><span class="p">):</span>
+                    <span class="n">lfunc</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;load_</span><span class="si">{</span><span class="n">cache</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">item</span> <span class="o">+=</span> <span class="p">[</span><span class="n">lfunc</span><span class="p">(</span><span class="n">fname</span><span class="p">)]</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">caches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">item</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s1">&#39;_simulation_step&#39;</span><span class="p">):</span>
+                    <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;_iterable_index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">index</span>
+
+                <span class="n">ret</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">reduce_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">rets</span><span class="p">[</span><span class="n">index__</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">rets</span> <span class="o">=</span> <span class="n">reduce_</span><span class="p">(</span><span class="n">rets</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
+                    <span class="k">del</span> <span class="n">ret</span>
+
+                <span class="k">if</span> <span class="n">log</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">profiler_name</span><span class="p">)</span>
+                <span class="n">_iters</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">log</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">_spent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">total</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">profiler_name</span><span class="p">)</span>
+                        <span class="n">_est_left</span> <span class="o">=</span> <span class="p">(</span><span class="n">_total</span> <span class="o">-</span> <span class="n">_iters</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">profiler_name</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">always</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Simulation:</span><span class="si">{</span><span class="n">step_name</span><span class="si">}</span><span class="s1">:iterable_cache: </span><span class="si">{</span><span class="n">_iters</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">_total</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+                            <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;[Elapsed  ] </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">_spent</span><span class="p">))</span><span class="si">}</span><span class="s1"> | &#39;</span>
+                            <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;[Time left] </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">_est_left</span><span class="p">))</span><span class="si">}</span><span class="s1">&#39;</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">always</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Simulation:</span><span class="si">{</span><span class="n">step_name</span><span class="si">}</span><span class="s1">:iterable_cache: </span><span class="si">{</span><span class="n">_iters</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">_total</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">log</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">step_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">exec_times</span><span class="p">[</span><span class="n">profiler_name</span><span class="p">]</span>
+
+            <span class="k">return</span> <span class="n">rets</span>
+
+
+        <span class="n">wrapped_step</span><span class="o">.</span><span class="n">_simulation_step</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">wrapped_step</span>
+
+    <span class="k">return</span> <span class="n">step_wrapping</span></div>
+
+
+
+
+<div class="viewcode-block" id="cached_step"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.simulation.cached_step.html#sorts.simulation.cached_step">[docs]</a><span class="k">def</span> <span class="nf">cached_step</span><span class="p">(</span><span class="n">caches</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Simulation step caching decorator</span>
+
+<span class="sd"> </span>
+<span class="sd">    :param str caches: Is a list of strings for the caches to be used, available by default is &quot;h5&quot; and &quot;pickle&quot;. Custom caches are implemented by implementing methods with the string name but prefixed with load_ and save_.</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">caches</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">caches</span> <span class="o">=</span> <span class="p">[</span><span class="n">caches</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">step_wrapping</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">wrapped_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+            <span class="n">step</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;_step_name&#39;</span><span class="p">,</span> <span class="s1">&#39;cached_data&#39;</span><span class="p">)</span>
+            <span class="n">fname_parts</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;_fname_parts&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">])</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;_iterable_index&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">index_lst</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">index_lst</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">index</span><span class="p">)]</span>
+
+            <span class="n">dir_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">dir_</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+                <span class="n">mpi_mkdir</span><span class="p">(</span><span class="n">dir_</span><span class="p">)</span>
+
+            <span class="n">loaded_</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="c1">#load</span>
+            <span class="k">for</span> <span class="n">cache</span> <span class="ow">in</span> <span class="n">caches</span><span class="p">:</span>
+                <span class="n">fname</span> <span class="o">=</span> <span class="n">dir_</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">index_lst</span> <span class="o">+</span> <span class="n">fname_parts</span><span class="p">)</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">cache</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="k">if</span> <span class="n">fname</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+                    <span class="n">lfunc</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;load_</span><span class="si">{</span><span class="n">cache</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">ret</span> <span class="o">=</span> <span class="n">lfunc</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+                        <span class="n">loaded_</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">EOFError</span><span class="p">,</span> <span class="ne">UnicodeError</span><span class="p">,</span> <span class="p">):</span>
+                        <span class="n">fname</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+
+                <span class="k">if</span> <span class="n">loaded_</span><span class="p">:</span>
+                    <span class="k">break</span>
+                    
+
+            <span class="c1">#if there are no caches</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">loaded_</span><span class="p">:</span>
+                <span class="n">ret</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+                <span class="c1">#save</span>
+                <span class="k">for</span> <span class="n">cache</span> <span class="ow">in</span> <span class="n">caches</span><span class="p">:</span>
+                    <span class="n">fname</span> <span class="o">=</span> <span class="n">dir_</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">index_lst</span> <span class="o">+</span> <span class="n">fname_parts</span><span class="p">)</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">cache</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="n">sfunc</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;save_</span><span class="si">{</span><span class="n">cache</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">sfunc</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">ret</span>
+
+        <span class="n">wrapped_step</span><span class="o">.</span><span class="n">_simulation_step</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">wrapped_step</span>
+
+    <span class="k">return</span> <span class="n">step_wrapping</span></div>
+
+
+
+
+<div class="viewcode-block" id="Simulation"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.simulation.Simulation.html#sorts.simulation.Simulation">[docs]</a><span class="k">class</span> <span class="nc">Simulation</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;Convenience simulation handler, creates a step-by-step simulation sequence and creates file system structure for saving of data to disk.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+<div class="viewcode-block" id="Simulation.__init__"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.simulation.Simulation.__init__.html#sorts.simulation.Simulation.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scheduler</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">profiler</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">steps</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="o">=</span> <span class="n">scheduler</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">):</span>
+            <span class="n">root</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">root</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">branch_name</span> <span class="o">=</span> <span class="s1">&#39;master&#39;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="n">mpi_mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+
+        <span class="n">_master</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">branch_name</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_master</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="n">mpi_mkdir</span><span class="p">(</span><span class="n">_master</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">make_paths</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">logger</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">profiling</span><span class="o">.</span><span class="n">get_logger</span><span class="p">(</span>
+                <span class="s1">&#39;Simulation&#39;</span><span class="p">,</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_path</span><span class="p">,</span>
+                <span class="n">file_level</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;file_level&#39;</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">),</span>
+                <span class="n">term_level</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;term_level&#39;</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">profiler</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="o">=</span> <span class="n">profiling</span><span class="o">.</span><span class="n">Profiler</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">profiler</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="Simulation.save_pickle"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.simulation.Simulation.save_pickle.html#sorts.simulation.Simulation.save_pickle">[docs]</a>    <span class="k">def</span> <span class="nf">save_pickle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">h</span><span class="p">:</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Simulation.load_pickle"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.simulation.Simulation.load_pickle.html#sorts.simulation.Simulation.load_pickle">[docs]</a>    <span class="k">def</span> <span class="nf">load_pickle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">h</span><span class="p">:</span>
+                <span class="n">ret</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">ret</span></div>
+
+<div class="viewcode-block" id="Simulation.save_h5"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.simulation.Simulation.save_h5.html#sorts.simulation.Simulation.save_h5">[docs]</a>    <span class="k">def</span> <span class="nf">save_h5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">h</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                        <span class="n">h</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">h</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)):</span>
+                    <span class="n">h</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;__ret_len&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                        <span class="n">h</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;saved_data__</span><span class="si">{</span><span class="n">ind</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">h</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;saved_data__</span><span class="si">{</span><span class="n">ind</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">h</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;__saved_data&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Simulation.load_h5"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.simulation.Simulation.load_h5.html#sorts.simulation.Simulation.load_h5">[docs]</a>    <span class="k">def</span> <span class="nf">load_h5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">h</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s1">&#39;__saved_data&#39;</span> <span class="ow">in</span> <span class="n">h</span><span class="p">:</span>
+                    <span class="n">ret</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="s1">&#39;__saved_data&#39;</span><span class="p">][()]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+                <span class="k">elif</span> <span class="s1">&#39;__ret_len&#39;</span> <span class="ow">in</span> <span class="n">h</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
+                    <span class="n">ret</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;__ret_len&#39;</span><span class="p">])</span>
+                    <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ret</span><span class="p">)):</span>
+                        <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;saved_data__</span><span class="si">{</span><span class="n">ind</span><span class="si">}</span><span class="s1">&#39;</span>
+                        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">h</span><span class="p">:</span>
+                            <span class="n">ret</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="n">key</span><span class="p">][()]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">ret</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ret</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">h</span><span class="p">:</span>
+                        <span class="n">ret</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="n">key</span><span class="p">][()]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">h</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
+                        <span class="n">ret</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">ret</span></div>
+
+
+
+
+<div class="viewcode-block" id="Simulation.make_paths"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.simulation.Simulation.make_paths.html#sorts.simulation.Simulation.make_paths">[docs]</a>    <span class="k">def</span> <span class="nf">make_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">:</span>
+            <span class="n">mpi_mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="n">path</span><span class="p">))</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">paths</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;logs&#39;</span><span class="p">]</span>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">log_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">branch_name</span> <span class="o">/</span> <span class="s1">&#39;logs&#39;</span>
+
+
+
+<div class="viewcode-block" id="Simulation.get_path"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.simulation.Simulation.get_path.html#sorts.simulation.Simulation.get_path">[docs]</a>    <span class="k">def</span> <span class="nf">get_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">branch_name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">branch_name</span> <span class="o">/</span> <span class="n">name</span></div>
+
+
+<div class="viewcode-block" id="Simulation.delete"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.simulation.Simulation.delete.html#sorts.simulation.Simulation.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">branch</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Delete branch.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="n">branch</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="n">mpi_rmdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="n">branch</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">branch_name</span> <span class="o">==</span> <span class="n">branch</span><span class="p">:</span>
+            <span class="n">mpi_mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">branch_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">make_paths</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Simulation.branch"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.simulation.Simulation.branch.html#sorts.simulation.Simulation.branch">[docs]</a>    <span class="k">def</span> <span class="nf">branch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">empty</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">linkfiles</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Create branch.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Branch &quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot; already exists&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">empty</span><span class="p">:</span>
+                <span class="n">mpi_mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="n">name</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">:</span>
+                    <span class="n">mpi_mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="n">name</span> <span class="o">/</span> <span class="n">path</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">linkfiles</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">mpi_copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">branch_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="n">name</span><span class="p">,</span> <span class="n">linkfiles</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">linkfiles</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                    <span class="n">listing</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">branch_name</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;./*&#39;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">pth</span> <span class="ow">in</span> <span class="n">listing</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">pth</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">linkfiles</span><span class="p">:</span>
+                            <span class="n">mpi_copy</span><span class="p">(</span><span class="n">pth</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="n">name</span> <span class="o">/</span> <span class="n">pth</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">linkfiles</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">mpi_copy</span><span class="p">(</span><span class="n">pth</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="n">name</span> <span class="o">/</span> <span class="n">pth</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">linkfiles</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">linkfiles</span><span class="p">:</span>
+                    <span class="n">mpi_copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">branch_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="n">name</span><span class="p">,</span> <span class="n">linkfiles</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;linkfiles type &quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">linkfiles</span><span class="p">)</span><span class="si">}</span><span class="s1">&quot; not supported&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Make sure log directory exists</span>
+        <span class="n">mpi_mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="n">name</span> <span class="o">/</span> <span class="s1">&#39;logs&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkout</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="Simulation.checkout"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.simulation.Simulation.checkout.html#sorts.simulation.Simulation.checkout">[docs]</a>    <span class="k">def</span> <span class="nf">checkout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">branch</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Change to branch.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">branch_name</span> <span class="o">=</span> <span class="n">branch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">profiling</span><span class="o">.</span><span class="n">change_logfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_path</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Simulation.run"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.simulation.Simulation.run.html#sorts.simulation.Simulation.run">[docs]</a>    <span class="nd">@log_exceptions</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">make_paths</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">step</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Simulation:run:</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Simulation:run:</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s1">&#39;_simulation_step&#39;</span><span class="p">):</span>
+                    <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">_step_name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Simulation:run:</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Simulation:run:</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> [completed]&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="n">step</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Simulation:run:</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Simulation:run:</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s1">&#39;_simulation_step&#39;</span><span class="p">):</span>
+                <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">_step_name</span><span class="o">=</span><span class="n">step</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Simulation:run:</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Simulation:run:</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s1"> [completed]&#39;</span><span class="p">)</span></div></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

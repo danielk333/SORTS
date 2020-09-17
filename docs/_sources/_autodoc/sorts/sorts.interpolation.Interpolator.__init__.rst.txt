@@ -1,0 +1,8 @@
+Interpolator.\_\_init\_\_
+=========================
+
+.. currentmodule:: sorts.interpolation
+
+.. rubric:: Interpolator.__init__
+
+.. automethod:: Interpolator.__init__

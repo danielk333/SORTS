@@ -1,0 +1,8 @@
+Static.generator
+================
+
+.. currentmodule:: sorts.controller.static
+
+.. rubric:: Static.generator
+
+.. automethod:: Static.generator

@@ -1,0 +1,8 @@
+Legendre8.\_\_init\_\_
+======================
+
+.. currentmodule:: sorts.interpolation
+
+.. rubric:: Legendre8.__init__
+
+.. automethod:: Legendre8.__init__

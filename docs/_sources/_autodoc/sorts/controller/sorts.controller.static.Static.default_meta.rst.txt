@@ -1,0 +1,8 @@
+Static.default\_meta
+====================
+
+.. currentmodule:: sorts.controller.static
+
+.. rubric:: Static.default_meta
+
+.. automethod:: Static.default_meta

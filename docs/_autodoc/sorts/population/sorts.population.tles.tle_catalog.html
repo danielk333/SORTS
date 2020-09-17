@@ -1,0 +1,155 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>tle_catalog &#8212; SORTS 3.18.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="radar_controller" href="../controller/sorts.controller.radar_controller.html" />
+    <link rel="prev" title="tles" href="sorts.population.tles.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../controller/sorts.controller.radar_controller.html" title="radar_controller"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sorts.population.tles.html" title="tles"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.population.tles.html" accesskey="U">tles</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sorts.population.tles.html"
+                        title="previous chapter">tles</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../controller/sorts.controller.radar_controller.html"
+                        title="next chapter">radar_controller</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/_autodoc/sorts/population/sorts.population.tles.tle_catalog.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="tle-catalog">
+<h1>tle_catalog<a class="headerlink" href="#tle-catalog" title="Permalink to this headline">¶</a></h1>
+<p class="rubric">tle_catalog</p>
+<dl class="py function">
+<dt id="sorts.population.tles.tle_catalog">
+<code class="sig-prename descclassname">sorts.population.tles.</code><code class="sig-name descname">tle_catalog</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tles</span></em>, <em class="sig-param"><span class="n">sgp4_propagation</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">kepler</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">propagator</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">propagator_options</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">propagator_args</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/population/tles.html#tle_catalog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.population.tles.tle_catalog" title="Permalink to this definition">¶</a></dt>
+<dd><dl>
+<dt>Reads a TLE-snapshot file and converts the TLE’s to orbits in a TEME frame and creates a population file. </dt><dd><p>A snapshot generally contains several TLE’s for the same object thus will this population also contain duplicate objects.
+The BSTAR parameter is saved in field BSTAR <code class="code docutils literal notranslate"><span class="pre">BSTAR</span></code>.</p>
+<p><em>Numerical propagator assumptions:</em>
+To propagate with a numerical propagator one needs to make assumptions.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Density is :math:<a href="#id1"><span class="problematic" id="id2">`</span></a>5cdot 10^3 ;</p></li>
+</ul>
+</div></blockquote>
+</dd>
+<dt>rac{kg}{m^3}`.</dt><dd><blockquote>
+<div><ul class="simple">
+<li><p>Object is a sphere</p></li>
+<li><p>Drag coefficient is 2.3.</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">param str/list tles</dt>
+<dd class="field-odd"><p>Path to the input TLE snapshot file. Or the TLE-set can be given directly as a list of two lines that can be unpacked in a loop, e.g. <code class="code docutils literal notranslate"><span class="pre">[(tle1_l1,</span> <span class="pre">tle1_l2),</span> <span class="pre">(tle2_l1,</span> <span class="pre">tle2_l2)]</span></code>.</p>
+</dd>
+<dt class="field-even">return</dt>
+<dd class="field-even"><p>TLE snapshot as a Population</p>
+</dd>
+<dt class="field-odd">rtype</dt>
+<dd class="field-odd"><p>sorts.Population</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../controller/sorts.controller.radar_controller.html" title="radar_controller"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sorts.population.tles.html" title="tles"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.population.tles.html" >tles</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

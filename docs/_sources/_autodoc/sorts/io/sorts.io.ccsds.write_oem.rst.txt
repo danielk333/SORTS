@@ -1,0 +1,8 @@
+write\_oem
+==========
+
+.. currentmodule:: sorts.io.ccsds
+
+.. rubric:: write_oem
+
+.. autofunction:: write_oem

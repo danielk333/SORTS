@@ -1,0 +1,8 @@
+RX.pointing\_ecef
+=================
+
+.. currentmodule:: sorts.radar.tx_rx
+
+.. rubric:: RX.pointing_ecef
+
+.. autoproperty:: sorts.radar.tx_rx.RX.pointing_ecef

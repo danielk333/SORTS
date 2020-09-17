@@ -1,0 +1,8 @@
+Static.point
+============
+
+.. currentmodule:: sorts.controller.static
+
+.. rubric:: Static.point
+
+.. automethod:: Static.point

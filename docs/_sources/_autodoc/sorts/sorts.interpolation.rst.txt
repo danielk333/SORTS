@@ -1,0 +1,82 @@
+interpolation
+=============
+
+.. automodule:: sorts.interpolation
+
+.. currentmodule:: sorts.interpolation
+
+Module summary
+--------------
+
+
+
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    Interpolator
+    
+    Legendre8
+    
+
+
+
+
+.. rubric:: Functions
+
+.. autosummary::
+    :toctree: .
+    
+    legendre8
+    
+    legendre8_loop
+    
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: Interpolator
+
+.. autoclass:: Interpolator
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
+
+
+
+.. rubric:: Legendre8
+
+.. autoclass:: Legendre8
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
+
+
+
+
+
+.. rubric:: Functions
+
+
+.. autofunction:: legendre8
+   :noindex:
+
+
+
+.. autofunction:: legendre8_loop
+   :noindex:
+
+

@@ -1,0 +1,8 @@
+orbits
+======
+
+.. currentmodule:: sorts.plotting.general
+
+.. rubric:: orbits
+
+.. autofunction:: orbits

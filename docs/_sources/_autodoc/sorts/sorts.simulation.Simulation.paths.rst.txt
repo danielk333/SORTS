@@ -1,0 +1,8 @@
+Simulation.paths
+================
+
+.. currentmodule:: sorts.simulation
+
+.. rubric:: Simulation.paths
+
+.. autoproperty:: sorts.simulation.Simulation.paths

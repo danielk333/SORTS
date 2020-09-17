@@ -1,0 +1,56 @@
+correlator
+==========
+
+.. automodule:: sorts.correlator
+
+.. currentmodule:: sorts.correlator
+
+Module summary
+--------------
+
+
+
+
+
+
+
+.. rubric:: Functions
+
+.. autosummary::
+    :toctree: .
+    
+    correlate
+    
+    plot_correlation
+    
+    residual_distribution_metric
+    
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: Functions
+
+
+.. autofunction:: correlate
+   :noindex:
+
+
+
+.. autofunction:: plot_correlation
+   :noindex:
+
+
+
+.. autofunction:: residual_distribution_metric
+   :noindex:
+
+

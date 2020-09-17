@@ -1,0 +1,8 @@
+residual\_distribution\_metric
+==============================
+
+.. currentmodule:: sorts.correlator
+
+.. rubric:: residual_distribution_metric
+
+.. autofunction:: residual_distribution_metric

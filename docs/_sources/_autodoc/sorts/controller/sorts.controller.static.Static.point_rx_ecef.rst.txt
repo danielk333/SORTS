@@ -1,0 +1,8 @@
+Static.point\_rx\_ecef
+======================
+
+.. currentmodule:: sorts.controller.static
+
+.. rubric:: Static.point_rx_ecef
+
+.. automethod:: Static.point_rx_ecef

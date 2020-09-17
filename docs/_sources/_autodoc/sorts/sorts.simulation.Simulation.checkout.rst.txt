@@ -1,0 +1,8 @@
+Simulation.checkout
+===================
+
+.. currentmodule:: sorts.simulation
+
+.. rubric:: Simulation.checkout
+
+.. automethod:: Simulation.checkout

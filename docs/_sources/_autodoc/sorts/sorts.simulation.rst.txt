@@ -1,0 +1,133 @@
+simulation
+==========
+
+.. automodule:: sorts.simulation
+
+.. currentmodule:: sorts.simulation
+
+Module summary
+--------------
+
+
+
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    Simulation
+    
+
+
+
+
+.. rubric:: Functions
+
+.. autosummary::
+    :toctree: .
+    
+    MPI_action
+    
+    MPI_single_process
+    
+    cached_step
+    
+    iterable_cache
+    
+    iterable_step
+    
+    log_exceptions
+    
+    mpi_copy
+    
+    mpi_mkdir
+    
+    mpi_rmdir
+    
+    mpi_wrap_master_thread
+    
+    store_step
+    
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: Simulation
+
+.. autoclass:: Simulation
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
+
+
+
+
+
+.. rubric:: Functions
+
+
+.. autofunction:: MPI_action
+   :noindex:
+
+
+
+.. autofunction:: MPI_single_process
+   :noindex:
+
+
+
+.. autofunction:: cached_step
+   :noindex:
+
+
+
+.. autofunction:: iterable_cache
+   :noindex:
+
+
+
+.. autofunction:: iterable_step
+   :noindex:
+
+
+
+.. autofunction:: log_exceptions
+   :noindex:
+
+
+
+.. autofunction:: mpi_copy
+   :noindex:
+
+
+
+.. autofunction:: mpi_mkdir
+   :noindex:
+
+
+
+.. autofunction:: mpi_rmdir
+   :noindex:
+
+
+
+.. autofunction:: mpi_wrap_master_thread
+   :noindex:
+
+
+
+.. autofunction:: store_step
+   :noindex:
+
+

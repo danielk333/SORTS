@@ -1,0 +1,8 @@
+plot\_radar\_scan\_movie
+========================
+
+.. currentmodule:: sorts.plotting.scan
+
+.. rubric:: plot_radar_scan_movie
+
+.. autofunction:: plot_radar_scan_movie

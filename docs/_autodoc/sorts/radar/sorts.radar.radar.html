@@ -1,0 +1,230 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>radar &#8212; SORTS 3.18.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Radar" href="sorts.radar.radar.Radar.html" />
+    <link rel="prev" title="plot_snr" href="../plotting/sorts.plotting.tracking.plot_snr.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.radar.radar.Radar.html" title="Radar"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../plotting/sorts.plotting.tracking.plot_snr.html" title="plot_snr"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" accesskey="U">API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">radar</a><ul>
+<li><a class="reference internal" href="#module-summary">Module summary</a></li>
+<li><a class="reference internal" href="#contents">Contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../plotting/sorts.plotting.tracking.plot_snr.html"
+                        title="previous chapter">plot_snr</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sorts.radar.radar.Radar.html"
+                        title="next chapter">Radar</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/_autodoc/sorts/radar/sorts.radar.radar.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-sorts.radar.radar">
+<span id="radar"></span><h1>radar<a class="headerlink" href="#module-sorts.radar.radar" title="Permalink to this headline">¶</a></h1>
+<p>This module is used to define the radar network configuration.</p>
+<div class="section" id="module-summary">
+<h2>Module summary<a class="headerlink" href="#module-summary" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Classes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.radar.radar.Radar.html#sorts.radar.radar.Radar" title="sorts.radar.radar.Radar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Radar</span></code></a>(tx, rx[, max_off_axis, min_SNRdb])</p></td>
+<td><p>A network of transmitting and receiving radar stations.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Radar</p>
+<dl class="py class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">sorts.radar.radar.</code><code class="sig-name descname">Radar</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tx</span></em>, <em class="sig-param"><span class="n">rx</span></em>, <em class="sig-param"><span class="n">max_off_axis</span><span class="o">=</span><span class="default_value">90.0</span></em>, <em class="sig-param"><span class="n">min_SNRdb</span><span class="o">=</span><span class="default_value">10.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/radar/radar.html#Radar"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A network of transmitting and receiving radar stations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tx</strong> (<em>list</em>) – List of transmitting sites, i.e. instances of <code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.radar.TX</span></code></p></li>
+<li><p><strong>rx</strong> (<em>list</em>) – List of receiving sites, i.e. instances of <code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.radar.RX</span></code></p></li>
+<li><p><strong>max_off_axis</strong> (<em>float</em>) – Maximum angle between pointing direction and a received signal.</p></li>
+<li><p><strong>min_SNRdb</strong> (<em>float</em>) – Minimum SNR detectable by radar system in dB (after coherent integration).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>tx</strong> (<em>list</em>) – List of transmitting sites, i.e. instances of <code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.radar.TX</span></code></p></li>
+<li><p><strong>rx</strong> (<em>list</em>) – List of receiving sites, i.e. instances of <code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.radar.RX</span></code></p></li>
+<li><p><strong>max_off_axis</strong> (<em>float</em>) – Maximum angle between pointing direction and a received signal.</p></li>
+<li><p><strong>min_SNRdb</strong> (<em>float</em>) – Minimum SNR detectable by radar system in dB (after coherent integration).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt>
+<code class="sig-name descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/radar/radar.html#Radar.copy"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Create a deep copy of the radar system.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">find_passes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">states</span></em>, <em class="sig-param"><span class="n">cache_data</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/radar/radar.html#Radar.find_passes"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Finds all passes that are simultaneously inside a transmitter station FOV and a receiver station FOV.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Vector of times in seconds to use as a base to find passes.</p></li>
+<li><p><strong>states</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – ECEF states of the object to find passes for.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of passes indexed by first tx-station and then rx-station.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of list of sorts.Pass</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">set_beam</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beam</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/radar/radar.html#Radar.set_beam"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets the radiation pattern for transmitters and receivers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>beam</strong> (<em>pyant.Beam</em>) – The radiation pattern to set for radar system.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">set_rx_beam</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beam</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/radar/radar.html#Radar.set_rx_beam"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets the radiation pattern for receivers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>beam</strong> (<em>pyant.Beam</em>) – The radiation pattern to set for radar system.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">set_tx_beam</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">beam</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/radar/radar.html#Radar.set_tx_beam"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Sets the radiation pattern for transmitters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>beam</strong> (<em>pyant.Beam</em>) – The radiation pattern to set for radar system.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.radar.radar.Radar.html" title="Radar"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../plotting/sorts.plotting.tracking.plot_snr.html" title="plot_snr"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

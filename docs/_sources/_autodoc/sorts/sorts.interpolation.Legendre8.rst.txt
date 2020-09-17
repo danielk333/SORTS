@@ -1,0 +1,24 @@
+Legendre8
+=========
+
+.. currentmodule:: sorts.interpolation
+
+.. autoclass:: Legendre8
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Legendre8.__init__
+      ~Legendre8.get_state
+   
+   
+
+   
+   
+   

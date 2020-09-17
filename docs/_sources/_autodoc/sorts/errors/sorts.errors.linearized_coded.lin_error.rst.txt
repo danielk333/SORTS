@@ -1,0 +1,8 @@
+lin\_error
+==========
+
+.. currentmodule:: sorts.errors.linearized_coded
+
+.. rubric:: lin_error
+
+.. autofunction:: lin_error

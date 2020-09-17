@@ -1,0 +1,40 @@
+Static
+======
+
+.. currentmodule:: sorts.controller.static
+
+.. autoclass:: Static
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Static.__init__
+      ~Static.default_meta
+      ~Static.generator
+      ~Static.point
+      ~Static.point_ecef
+      ~Static.point_radar
+      ~Static.point_rx_ecef
+      ~Static.point_tx_ecef
+      ~Static.run
+      ~Static.turn_off
+      ~Static.turn_on
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Static.META_FIELDS
+   
+   

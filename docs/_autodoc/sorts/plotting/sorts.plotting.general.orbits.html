@@ -1,0 +1,191 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>orbits &#8212; SORTS 3.18.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="radar" href="sorts.plotting.radar.html" />
+    <link rel="prev" title="grid_earth" href="sorts.plotting.general.grid_earth.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.plotting.radar.html" title="radar"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sorts.plotting.general.grid_earth.html" title="grid_earth"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.plotting.general.html" accesskey="U">general</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sorts.plotting.general.grid_earth.html"
+                        title="previous chapter">grid_earth</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sorts.plotting.radar.html"
+                        title="next chapter">radar</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/_autodoc/sorts/plotting/sorts.plotting.general.orbits.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="orbits">
+<h1>orbits<a class="headerlink" href="#orbits" title="Permalink to this headline">¶</a></h1>
+<p class="rubric">orbits</p>
+<dl class="py function">
+<dt id="sorts.plotting.general.orbits">
+<code class="sig-prename descclassname">sorts.plotting.general.</code><code class="sig-name descname">orbits</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">o</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">options</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/plotting/general.html#orbits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.plotting.general.orbits" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates several scatter plots of a set of orbital elements based on the
+different possible axis planar projections, calculates all possible permutations of plane
+intersections based on the number of columns</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>o</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Rows are distinct orbits and columns are orbital elements in the order a, e, i, omega, Omega</p></li>
+<li><p><strong>options</strong> – dictionary containing all the optional settings</p></li>
+</ul>
+</dd>
+</dl>
+<p>#TODO: this needs updating</p>
+<dl class="simple">
+<dt>Currently the options fields are:</dt><dd><dl class="field-list simple">
+<dt class="field-odd">marker [char]</dt>
+<dd class="field-odd"><p>the marker type</p>
+</dd>
+<dt class="field-even">size [int]</dt>
+<dd class="field-even"><p>the size of the marker</p>
+</dd>
+<dt class="field-odd">title [string]</dt>
+<dd class="field-odd"><p>the title of the plot</p>
+</dd>
+<dt class="field-even">title_font_size [int]</dt>
+<dd class="field-even"><p>the title font size</p>
+</dd>
+<dt class="field-odd">axis_labels [list of strings]</dt>
+<dd class="field-odd"><p>labels for each column</p>
+</dd>
+<dt class="field-even">tick_font_size [int]</dt>
+<dd class="field-even"><p>the axis tick font size</p>
+</dd>
+<dt class="field-odd">window [tuple/list]</dt>
+<dd class="field-odd"><p>the size of the plot window in pixels (assuming dpi = 80)</p>
+</dd>
+<dt class="field-even">save [string]</dt>
+<dd class="field-even"><p>will not display figure and will instead save it to this path</p>
+</dd>
+<dt class="field-odd">show [bool]</dt>
+<dd class="field-odd"><p>if False will do draw() instead of show() allowing script to continue</p>
+</dd>
+<dt class="field-even">tight_rect [list of 4 floats]</dt>
+<dd class="field-even"><p>configuration for the tight_layout function</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">dpt_tools</span> <span class="k">as</span> <span class="nn">dpt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">19680221</span><span class="p">)</span>
+
+<span class="n">orbs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">([</span>
+    <span class="mi">11</span>  <span class="o">+</span> <span class="mi">3</span>  <span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1000</span><span class="p">),</span>
+    <span class="mf">0.5</span> <span class="o">+</span> <span class="mf">0.2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1000</span><span class="p">),</span>
+    <span class="mi">60</span>  <span class="o">+</span> <span class="mi">10</span> <span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1000</span><span class="p">),</span>
+    <span class="mi">120</span> <span class="o">+</span> <span class="mi">5</span>  <span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1000</span><span class="p">),</span>
+    <span class="mi">33</span>  <span class="o">+</span> <span class="mi">2</span>  <span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1000</span><span class="p">),</span>
+<span class="p">])</span><span class="o">.</span><span class="n">T</span>
+
+<span class="n">dpt</span><span class="o">.</span><span class="n">orbits</span><span class="p">(</span><span class="n">orbs</span><span class="p">,</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;My orbital element distribution&quot;</span><span class="p">,</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.plotting.radar.html" title="radar"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sorts.plotting.general.grid_earth.html" title="grid_earth"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.plotting.general.html" >general</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

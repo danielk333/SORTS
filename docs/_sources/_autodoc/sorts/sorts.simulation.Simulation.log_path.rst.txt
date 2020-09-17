@@ -1,0 +1,8 @@
+Simulation.log\_path
+====================
+
+.. currentmodule:: sorts.simulation
+
+.. rubric:: Simulation.log_path
+
+.. autoproperty:: sorts.simulation.Simulation.log_path

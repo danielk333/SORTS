@@ -1,0 +1,320 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>sorts.plotting.general &#8212; SORTS 3.18.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for sorts.plotting.general</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="sd">&#39;&#39;&#39;Plotting helper functions</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="c1">#Python standard import</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">combinations</span>
+
+<span class="c1">#Third party import</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
+<span class="kn">import</span> <span class="nn">matplotlib.cm</span> <span class="k">as</span> <span class="nn">cm</span>
+<span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d</span> <span class="kn">import</span> <span class="n">Axes3D</span>
+
+<span class="kn">import</span> <span class="nn">pyorb</span>
+
+<span class="c1">#Local import</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">constants</span>
+
+
+
+<div class="viewcode-block" id="grid_earth"><a class="viewcode-back" href="../../../_autodoc/sorts/plotting/sorts.plotting.general.grid_earth.html#sorts.plotting.general.grid_earth">[docs]</a><span class="k">def</span> <span class="nf">grid_earth</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">num_lat</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">num_lon</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">res</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">hide_ax</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Add a 3d spherical grid to the given axis that represent the Earth.</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">lons</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="n">num_lon</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span> 
+    <span class="n">lons</span> <span class="o">=</span> <span class="n">lons</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">lats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="n">num_lat</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span> 
+
+    <span class="n">lonsl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span> 
+    <span class="n">latsl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span> 
+
+    <span class="n">r_e</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">R_earth</span>
+    <span class="k">for</span> <span class="n">lat</span> <span class="ow">in</span> <span class="n">lats</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">r_e</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lonsl</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">r_e</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lonsl</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">r_e</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">lonsl</span><span class="p">))</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">lon</span> <span class="ow">in</span> <span class="n">lons</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">r_e</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">latsl</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">r_e</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">latsl</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">r_e</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">latsl</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">hide_ax</span><span class="p">:</span>
+        <span class="c1"># Hide grid lines</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># Hide axes ticks</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_zticks</span><span class="p">([])</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">ax</span></div>
+
+
+
+<div class="viewcode-block" id="orbits"><a class="viewcode-back" href="../../../_autodoc/sorts/plotting/sorts.plotting.general.orbits.html#sorts.plotting.general.orbits">[docs]</a><span class="k">def</span> <span class="nf">orbits</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This function creates several scatter plots of a set of orbital elements based on the</span>
+<span class="sd">    different possible axis planar projections, calculates all possible permutations of plane</span>
+<span class="sd">    intersections based on the number of columns</span>
+
+<span class="sd">    :param numpy.ndarray o: Rows are distinct orbits and columns are orbital elements in the order a, e, i, omega, Omega</span>
+<span class="sd">    :param options:  dictionary containing all the optional settings</span>
+
+<span class="sd">    #TODO: this needs updating</span>
+
+<span class="sd">    Currently the options fields are:</span>
+<span class="sd">        :marker [char]: the marker type</span>
+<span class="sd">        :size [int]: the size of the marker</span>
+<span class="sd">        :title [string]: the title of the plot</span>
+<span class="sd">        :title_font_size [int]: the title font size</span>
+<span class="sd">        :axis_labels [list of strings]: labels for each column</span>
+<span class="sd">        :tick_font_size [int]: the axis tick font size</span>
+<span class="sd">        :window [tuple/list]: the size of the plot window in pixels (assuming dpi = 80)</span>
+<span class="sd">        :save [string]: will not display figure and will instead save it to this path</span>
+<span class="sd">        :show [bool]: if False will do draw() instead of show() allowing script to continue</span>
+<span class="sd">        :tight_rect [list of 4 floats]: configuration for the tight_layout function</span>
+
+
+<span class="sd">    Example::</span>
+<span class="sd">        </span>
+<span class="sd">        import dpt_tools as dpt</span>
+<span class="sd">        import numpy as np</span>
+<span class="sd">        np.random.seed(19680221)</span>
+
+<span class="sd">        orbs = np.matrix([</span>
+<span class="sd">            11  + 3  *np.random.randn(1000),</span>
+<span class="sd">            0.5 + 0.2*np.random.randn(1000),</span>
+<span class="sd">            60  + 10 *np.random.randn(1000),</span>
+<span class="sd">            120 + 5  *np.random.randn(1000),</span>
+<span class="sd">            33  + 2  *np.random.randn(1000),</span>
+<span class="sd">        ]).T</span>
+
+<span class="sd">        dpt.orbits(orbs,</span>
+<span class="sd">            title = &quot;My orbital element distribution&quot;,</span>
+<span class="sd">            size = 10,</span>
+<span class="sd">        )</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="n">o</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+
+    <span class="n">data_axis</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;axis&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">data_axis</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">dim_axis</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dim_axis</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">scale</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">o</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">dim_axis</span><span class="p">],),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">o</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
+
+
+    <span class="c1">#turn on TeX interperter</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;text&#39;</span><span class="p">,</span> <span class="n">usetex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">lis</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">o</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">dim_axis</span><span class="p">]))</span>
+    <span class="n">axis_plot</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">combinations</span><span class="p">(</span><span class="n">lis</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">axis_labels</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;axis_labels&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">limits</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;limits&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">axis_labels</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">axis_labels</span> <span class="o">==</span> <span class="s1">&#39;earth-orbit&#39;</span><span class="p">:</span>
+            <span class="n">axis_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;$a$ [$R_E$]&quot;</span><span class="p">,</span><span class="s2">&quot;$e$ [1]&quot;</span><span class="p">,</span><span class="s2">&quot;$i$ [deg]&quot;</span><span class="p">,</span><span class="s2">&quot;$\omega$ [deg]&quot;</span><span class="p">,</span><span class="s2">&quot;$\Omega$ [deg]&quot;</span><span class="p">,</span><span class="s2">&quot;$M_0$ [deg]&quot;</span> <span class="p">]</span>
+            <span class="n">scale</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="n">constants</span><span class="o">.</span><span class="n">R_earth</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">5</span>
+        <span class="k">elif</span> <span class="n">axis_labels</span> <span class="o">==</span> <span class="s1">&#39;earth-state&#39;</span><span class="p">:</span>
+            <span class="n">axis_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;$x$ [$R_E$]&quot;</span><span class="p">,</span><span class="s2">&quot;$y$ [$R_E$]&quot;</span><span class="p">,</span><span class="s2">&quot;$z$ [$R_E$]&quot;</span><span class="p">,</span><span class="s2">&quot;$v_x$ [km/s]&quot;</span><span class="p">,</span><span class="s2">&quot;$v_y$ [km/s]&quot;</span><span class="p">,</span><span class="s2">&quot;$v_z$ [km/s]&quot;</span> <span class="p">]</span>
+            <span class="n">scale</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="n">constants</span><span class="o">.</span><span class="n">R_earth</span><span class="p">]</span><span class="o">*</span><span class="mi">3</span> <span class="o">+</span> <span class="p">[</span><span class="mf">1e-3</span><span class="p">]</span><span class="o">*</span><span class="mi">3</span>
+        <span class="k">elif</span> <span class="n">axis_labels</span> <span class="o">==</span> <span class="s1">&#39;sol-orbit&#39;</span><span class="p">:</span>
+            <span class="n">axis_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;$a$ [AU]&quot;</span><span class="p">,</span><span class="s2">&quot;$e$ [1]&quot;</span><span class="p">,</span><span class="s2">&quot;$i$ [deg]&quot;</span><span class="p">,</span><span class="s2">&quot;$\omega$ [deg]&quot;</span><span class="p">,</span><span class="s2">&quot;$\Omega$ [deg]&quot;</span><span class="p">,</span><span class="s2">&quot;$M_0$ [deg]&quot;</span> <span class="p">]</span>
+            <span class="n">scale</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="n">pyorb</span><span class="o">.</span><span class="n">AU</span><span class="p">]</span><span class="o">*</span><span class="mi">3</span> <span class="o">+</span> <span class="p">[</span><span class="mf">1e-3</span><span class="p">]</span><span class="o">*</span><span class="mi">3</span>
+        <span class="k">elif</span> <span class="n">axis_labels</span> <span class="o">==</span> <span class="s1">&#39;sol-state&#39;</span><span class="p">:</span>
+            <span class="n">axis_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;$x$ [AU]&quot;</span><span class="p">,</span><span class="s2">&quot;$y$ [AU]&quot;</span><span class="p">,</span><span class="s2">&quot;$z$ [AU]&quot;</span><span class="p">,</span><span class="s2">&quot;$v_x$ [km/s]&quot;</span><span class="p">,</span><span class="s2">&quot;$v_y$ [km/s]&quot;</span><span class="p">,</span><span class="s2">&quot;$v_z$ [km/s]&quot;</span> <span class="p">]</span>
+            <span class="n">scale</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="n">pyorb</span><span class="o">.</span><span class="n">AU</span><span class="p">]</span><span class="o">*</span><span class="mi">3</span> <span class="o">+</span> <span class="p">[</span><span class="mf">1e-3</span><span class="p">]</span><span class="o">*</span><span class="mi">3</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">axis_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span><span class="o">*</span><span class="mi">6</span>
+    <span class="k">elif</span> <span class="n">axis_labels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">axis_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span><span class="o">*</span><span class="mi">6</span>
+
+
+    
+    <span class="k">if</span> <span class="n">o</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">dim_axis</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">subplot_cnt</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">subplot_perms</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="k">elif</span> <span class="n">o</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">dim_axis</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">subplot_cnt</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">subplot_perms</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="k">elif</span> <span class="n">o</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">dim_axis</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">subplot_cnt</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">subplot_perms</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="k">elif</span> <span class="n">o</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">dim_axis</span><span class="p">]</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="n">subplot_cnt</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">subplot_perms</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">subplot_cnt</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">subplot_perms</span> <span class="o">=</span> <span class="mi">15</span>
+    <span class="n">subplot_cnt_ind</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="s1">&#39;window&#39;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+        <span class="n">size_in</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;window&#39;</span><span class="p">]</span>
+        <span class="n">size_in</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="o">/</span><span class="mf">80.0</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">size_in</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">size_in</span><span class="o">=</span><span class="p">(</span><span class="mi">19</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">size_in</span><span class="p">,</span><span class="n">dpi</span><span class="o">=</span><span class="mi">80</span><span class="p">)</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">,</span><span class="s1">&#39;Orbital elements distribution&#39;</span><span class="p">),</span>
+        <span class="n">fontsize</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;title_font_size&#39;</span><span class="p">,</span><span class="mi">24</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">axes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span> <span class="n">subplot_perms</span> <span class="p">):</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">subplot_cnt</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">subplot_cnt</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">subplot_cnt_ind</span><span class="p">)</span>
+        <span class="n">axes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dim_axis</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">o</span><span class="p">[:,</span><span class="n">axis_plot</span><span class="p">[</span><span class="n">I</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span><span class="o">*</span><span class="n">scale</span><span class="p">[</span><span class="n">axis_plot</span><span class="p">[</span><span class="n">I</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">o</span><span class="p">[:,</span><span class="n">axis_plot</span><span class="p">[</span><span class="n">I</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span><span class="o">*</span><span class="n">scale</span><span class="p">[</span><span class="n">axis_plot</span><span class="p">[</span><span class="n">I</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">o</span><span class="p">[</span><span class="n">axis_plot</span><span class="p">[</span><span class="n">I</span><span class="p">][</span><span class="mi">0</span><span class="p">],:]</span><span class="o">*</span><span class="n">scale</span><span class="p">[</span><span class="n">axis_plot</span><span class="p">[</span><span class="n">I</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">o</span><span class="p">[</span><span class="n">axis_plot</span><span class="p">[</span><span class="n">I</span><span class="p">][</span><span class="mi">1</span><span class="p">],:]</span><span class="o">*</span><span class="n">scale</span><span class="p">[</span><span class="n">axis_plot</span><span class="p">[</span><span class="n">I</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span>
+
+        <span class="n">sc</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span> 
+            <span class="n">x</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> 
+            <span class="n">y</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> 
+            <span class="n">marker</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;marker&#39;</span><span class="p">,</span><span class="s1">&#39;.&#39;</span><span class="p">),</span>
+            <span class="n">c</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;color&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">),</span>
+            <span class="n">s</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;size&#39;</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">options</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">],</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">sc</span><span class="p">)</span>
+
+        <span class="c1"># x_ticks = np.linspace(np.min(o[:,axis_plot[I][0]]),np.max(o[:,axis_plot[I][0]]), num=4)</span>
+        <span class="c1"># plt.xticks( [round(x,1) for x in x_ticks] )</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span>
+            <span class="n">axis_labels</span><span class="p">[</span><span class="n">axis_plot</span><span class="p">[</span><span class="n">I</span><span class="p">][</span><span class="mi">0</span><span class="p">]],</span>
+            <span class="n">fontsize</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;ax_font_size&#39;</span><span class="p">,</span><span class="mi">22</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span>
+            <span class="n">axis_labels</span><span class="p">[</span><span class="n">axis_plot</span><span class="p">[</span><span class="n">I</span><span class="p">][</span><span class="mi">1</span><span class="p">]],</span>
+            <span class="n">fontsize</span><span class="o">=</span><span class="n">options</span><span class="p">[</span><span class="s1">&#39;ax_font_size&#39;</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;tick_font_size&#39;</span><span class="p">,</span><span class="mi">17</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="n">options</span><span class="p">[</span><span class="s1">&#39;tick_font_size&#39;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">limits</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">limits</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">axis_plot</span><span class="p">[</span><span class="n">I</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">*</span><span class="n">limits</span><span class="p">[</span><span class="n">axis_plot</span><span class="p">[</span><span class="n">I</span><span class="p">][</span><span class="mi">0</span><span class="p">]])</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">limits</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">axis_plot</span><span class="p">[</span><span class="n">I</span><span class="p">][</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">*</span><span class="n">limits</span><span class="p">[</span><span class="n">axis_plot</span><span class="p">[</span><span class="n">I</span><span class="p">][</span><span class="mi">1</span><span class="p">]])</span>
+
+        <span class="n">subplot_cnt_ind</span> <span class="o">+=</span> <span class="mi">1</span>
+    
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">(</span><span class="n">rect</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;tight_rect&#39;</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">]))</span>
+
+
+    <span class="k">if</span> <span class="s1">&#39;save&#39;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">options</span><span class="p">[</span><span class="s1">&#39;save&#39;</span><span class="p">],</span><span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;show&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,8 @@
+Simulation.save\_h5
+===================
+
+.. currentmodule:: sorts.simulation
+
+.. rubric:: Simulation.save_h5
+
+.. automethod:: Simulation.save_h5

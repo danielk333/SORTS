@@ -1,0 +1,8 @@
+log\_exceptions
+===============
+
+.. currentmodule:: sorts.simulation
+
+.. rubric:: log_exceptions
+
+.. autofunction:: log_exceptions

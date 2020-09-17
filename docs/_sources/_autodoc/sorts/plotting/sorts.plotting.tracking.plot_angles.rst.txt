@@ -1,0 +1,8 @@
+plot\_angles
+============
+
+.. currentmodule:: sorts.plotting.tracking
+
+.. rubric:: plot_angles
+
+.. autofunction:: plot_angles

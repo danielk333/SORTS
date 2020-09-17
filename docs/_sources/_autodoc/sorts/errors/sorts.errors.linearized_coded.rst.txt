@@ -1,0 +1,89 @@
+linearized\_coded
+=================
+
+.. automodule:: sorts.errors.linearized_coded
+
+.. currentmodule:: sorts.errors.linearized_coded
+
+Module summary
+--------------
+
+
+
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    LinearizedCoded
+    
+    LinearizedCodedIonospheric
+    
+
+
+
+
+.. rubric:: Functions
+
+.. autosummary::
+    :toctree: .
+    
+    lin_error
+    
+    precalculate_dr
+    
+    simulate_echo
+    
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: LinearizedCoded
+
+.. autoclass:: LinearizedCoded
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
+
+
+
+.. rubric:: LinearizedCodedIonospheric
+
+.. autoclass:: LinearizedCodedIonospheric
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
+
+
+
+
+
+.. rubric:: Functions
+
+
+.. autofunction:: lin_error
+   :noindex:
+
+
+
+.. autofunction:: precalculate_dr
+   :noindex:
+
+
+
+.. autofunction:: simulate_echo
+   :noindex:
+
+

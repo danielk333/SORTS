@@ -1,0 +1,8 @@
+RX.point\_ecef
+==============
+
+.. currentmodule:: sorts.radar.tx_rx
+
+.. rubric:: RX.point_ecef
+
+.. automethod:: RX.point_ecef

@@ -1,0 +1,8 @@
+Static.turn\_off
+================
+
+.. currentmodule:: sorts.controller.static
+
+.. rubric:: Static.turn_off
+
+.. automethod:: Static.turn_off

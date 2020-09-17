@@ -1,0 +1,24 @@
+Interpolator
+============
+
+.. currentmodule:: sorts.interpolation
+
+.. autoclass:: Interpolator
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Interpolator.__init__
+      ~Interpolator.get_state
+   
+   
+
+   
+   
+   

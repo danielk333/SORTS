@@ -1,0 +1,8 @@
+mpi\_copy
+=========
+
+.. currentmodule:: sorts.simulation
+
+.. rubric:: mpi_copy
+
+.. autofunction:: mpi_copy

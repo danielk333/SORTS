@@ -1,0 +1,8 @@
+RX.point
+========
+
+.. currentmodule:: sorts.radar.tx_rx
+
+.. rubric:: RX.point
+
+.. automethod:: RX.point

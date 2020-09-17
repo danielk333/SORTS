@@ -1,0 +1,8 @@
+cached\_step
+============
+
+.. currentmodule:: sorts.simulation
+
+.. rubric:: cached_step
+
+.. autofunction:: cached_step

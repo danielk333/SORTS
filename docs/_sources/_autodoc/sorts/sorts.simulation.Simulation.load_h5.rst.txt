@@ -1,0 +1,8 @@
+Simulation.load\_h5
+===================
+
+.. currentmodule:: sorts.simulation
+
+.. rubric:: Simulation.load_h5
+
+.. automethod:: Simulation.load_h5

@@ -1,0 +1,8 @@
+legendre8
+=========
+
+.. currentmodule:: sorts.interpolation
+
+.. rubric:: legendre8
+
+.. autofunction:: legendre8

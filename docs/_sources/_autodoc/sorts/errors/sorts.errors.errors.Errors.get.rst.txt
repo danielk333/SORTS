@@ -1,0 +1,8 @@
+Errors.get
+==========
+
+.. currentmodule:: sorts.errors.errors
+
+.. rubric:: Errors.get
+
+.. automethod:: Errors.get

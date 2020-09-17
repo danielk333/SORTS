@@ -1,0 +1,8 @@
+Simulation.\_\_init\_\_
+=======================
+
+.. currentmodule:: sorts.simulation
+
+.. rubric:: Simulation.__init__
+
+.. automethod:: Simulation.__init__

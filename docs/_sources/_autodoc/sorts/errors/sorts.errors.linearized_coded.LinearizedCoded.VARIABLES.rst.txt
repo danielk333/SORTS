@@ -1,0 +1,6 @@
+sorts.errors.linearized\_coded.LinearizedCoded.VARIABLES
+========================================================
+
+.. currentmodule:: sorts.errors.linearized_coded
+
+.. autoattribute:: LinearizedCoded.VARIABLES

@@ -77,7 +77,7 @@
 <span class="kn">from</span> <span class="nn">...</span> <span class="kn">import</span> <span class="n">frames</span>
 
 
-<div class="viewcode-block" id="Scan"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.html#sorts.radar.scans.fence.Scan">[docs]</a><span class="k">class</span> <span class="nc">Scan</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="Scan"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.html#sorts.radar.scans.bp.Scan">[docs]</a><span class="k">class</span> <span class="nc">Scan</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Encapsulates the observation schema of a radar system, i.e. its &quot;scan&quot;.</span>
 
 <span class="sd">    :param str coordinates: The coordinate system used, can be :code:`&#39;azelr&#39;`, :code:`&#39;ned&#39;` or :code:`&#39;enu&#39;`. If `azelr` is used, degrees are assumed.</span>
@@ -108,35 +108,35 @@
 
 
 <span class="sd">    &#39;&#39;&#39;</span>
-<div class="viewcode-block" id="Scan.__init__"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.__init__.html#sorts.radar.scans.fence.Scan.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="o">=</span><span class="s1">&#39;enu&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="Scan.__init__"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.__init__.html#sorts.radar.scans.bp.Scan.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="o">=</span><span class="s1">&#39;enu&#39;</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="n">coordinates</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="Scan.dwell"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.dwell.html#sorts.radar.scans.fence.Scan.dwell">[docs]</a>    <span class="k">def</span> <span class="nf">dwell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+<div class="viewcode-block" id="Scan.dwell"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.dwell.html#sorts.radar.scans.bp.Scan.dwell">[docs]</a>    <span class="k">def</span> <span class="nf">dwell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;The current dwell time of the scan. </span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
 
-<div class="viewcode-block" id="Scan.min_dwell"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.min_dwell.html#sorts.radar.scans.fence.Scan.min_dwell">[docs]</a>    <span class="k">def</span> <span class="nf">min_dwell</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Scan.min_dwell"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.min_dwell.html#sorts.radar.scans.bp.Scan.min_dwell">[docs]</a>    <span class="k">def</span> <span class="nf">min_dwell</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;If there are dynamic dwell times, this is the minimum dwell time. Otherwise, returns same as :code:`dwell`.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
 
-<div class="viewcode-block" id="Scan.cycle"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.cycle.html#sorts.radar.scans.fence.Scan.cycle">[docs]</a>    <span class="k">def</span> <span class="nf">cycle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Scan.cycle"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.cycle.html#sorts.radar.scans.bp.Scan.cycle">[docs]</a>    <span class="k">def</span> <span class="nf">cycle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;The cycle time of the scan if applicable.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
 
-<div class="viewcode-block" id="Scan.copy"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.copy.html#sorts.radar.scans.fence.Scan.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Scan.copy"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.copy.html#sorts.radar.scans.bp.Scan.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Return a copy of the current instance.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="Scan.check_dwell_tx"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.check_dwell_tx.html#sorts.radar.scans.fence.Scan.check_dwell_tx">[docs]</a>    <span class="k">def</span> <span class="nf">check_dwell_tx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tx</span><span class="p">):</span>
+<div class="viewcode-block" id="Scan.check_dwell_tx"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.check_dwell_tx.html#sorts.radar.scans.bp.Scan.check_dwell_tx">[docs]</a>    <span class="k">def</span> <span class="nf">check_dwell_tx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tx</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Checks if the transmitting antenna pulse pattern and coherent integration schema is compatible with the observation schema. Raises an Exception if not.</span>
 <span class="sd">        </span>
 <span class="sd">            :param sorts.radar.TX tx: The antenna that should perform this scan.</span>
@@ -148,12 +148,12 @@
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;TX time_slice of </span><span class="si">{</span><span class="n">time_slice</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1"> s incompatible with minimum dwell time of scan </span><span class="si">{</span><span class="n">dwell_time</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1"> s&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Scan.pointing"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.pointing.html#sorts.radar.scans.fence.Scan.pointing">[docs]</a>    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="Scan.pointing"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.pointing.html#sorts.radar.scans.bp.Scan.pointing">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">pointing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
         <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="Scan.enu_pointing"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.enu_pointing.html#sorts.radar.scans.fence.Scan.enu_pointing">[docs]</a>    <span class="k">def</span> <span class="nf">enu_pointing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+<div class="viewcode-block" id="Scan.enu_pointing"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.enu_pointing.html#sorts.radar.scans.bp.Scan.enu_pointing">[docs]</a>    <span class="k">def</span> <span class="nf">enu_pointing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Returns the instantaneous pointing in East, North, Up (ENU) local coordinates.</span>
 <span class="sd">        </span>
 <span class="sd">            :param float/numpy.ndarray t: Seconds past a reference epoch to retrieve the pointing at.</span>
@@ -187,7 +187,7 @@
         <span class="k">return</span> <span class="n">k0</span>
 
 
-<div class="viewcode-block" id="Scan.ecef_pointing"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.ecef_pointing.html#sorts.radar.scans.fence.Scan.ecef_pointing">[docs]</a>    <span class="k">def</span> <span class="nf">ecef_pointing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">ant</span><span class="p">):</span>
+<div class="viewcode-block" id="Scan.ecef_pointing"><a class="viewcode-back" href="../../../../_autodoc/sorts/scheduler/sorts.radar.scans.scan.Scan.ecef_pointing.html#sorts.radar.scans.bp.Scan.ecef_pointing">[docs]</a>    <span class="k">def</span> <span class="nf">ecef_pointing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">ant</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Returns the instantaneous WGS84 ECEF pointing direction and the radar geographical location in WGS84 ECEF coordinates.</span>
 <span class="sd">        </span>
 <span class="sd">            :param float t: Seconds past a reference epoch to retrieve the pointing at.</span>

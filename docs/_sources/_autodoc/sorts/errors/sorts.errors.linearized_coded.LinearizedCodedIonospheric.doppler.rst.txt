@@ -1,0 +1,8 @@
+LinearizedCodedIonospheric.doppler
+==================================
+
+.. currentmodule:: sorts.errors.linearized_coded
+
+.. rubric:: LinearizedCodedIonospheric.doppler
+
+.. automethod:: LinearizedCodedIonospheric.doppler

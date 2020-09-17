@@ -1,0 +1,8 @@
+RX.wavelength
+=============
+
+.. currentmodule:: sorts.radar.tx_rx
+
+.. rubric:: RX.wavelength
+
+.. autoproperty:: sorts.radar.tx_rx.RX.wavelength

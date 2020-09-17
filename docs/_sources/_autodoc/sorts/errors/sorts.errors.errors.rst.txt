@@ -1,0 +1,46 @@
+errors
+======
+
+.. automodule:: sorts.errors.errors
+
+.. currentmodule:: sorts.errors.errors
+
+Module summary
+--------------
+
+
+
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    Errors
+    
+
+
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: Errors
+
+.. autoclass:: Errors
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
+
+
+
+

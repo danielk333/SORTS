@@ -1,0 +1,8 @@
+Simulation.make\_paths
+======================
+
+.. currentmodule:: sorts.simulation
+
+.. rubric:: Simulation.make_paths
+
+.. automethod:: Simulation.make_paths

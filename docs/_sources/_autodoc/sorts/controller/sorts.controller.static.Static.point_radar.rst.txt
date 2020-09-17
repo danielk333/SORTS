@@ -1,0 +1,8 @@
+Static.point\_radar
+===================
+
+.. currentmodule:: sorts.controller.static
+
+.. rubric:: Static.point_radar
+
+.. automethod:: Static.point_radar

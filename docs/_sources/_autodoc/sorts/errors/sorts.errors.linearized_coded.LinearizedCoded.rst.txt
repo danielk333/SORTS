@@ -1,0 +1,35 @@
+LinearizedCoded
+===============
+
+.. currentmodule:: sorts.errors.linearized_coded
+
+.. autoclass:: LinearizedCoded
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~LinearizedCoded.__init__
+      ~LinearizedCoded.doppler
+      ~LinearizedCoded.get
+      ~LinearizedCoded.range
+      ~LinearizedCoded.range_rate
+      ~LinearizedCoded.set_numpy_seed
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~LinearizedCoded.VARIABLES
+   
+   

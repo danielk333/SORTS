@@ -1,0 +1,8 @@
+read\_tdm
+=========
+
+.. currentmodule:: sorts.io.ccsds
+
+.. rubric:: read_tdm
+
+.. autofunction:: read_tdm

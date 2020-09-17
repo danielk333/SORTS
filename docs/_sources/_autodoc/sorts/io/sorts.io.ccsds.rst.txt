@@ -1,0 +1,63 @@
+ccsds
+=====
+
+.. automodule:: sorts.io.ccsds
+
+.. currentmodule:: sorts.io.ccsds
+
+Module summary
+--------------
+
+
+
+
+
+
+
+.. rubric:: Functions
+
+.. autosummary::
+    :toctree: .
+    
+    read_oem
+    
+    read_tdm
+    
+    write_oem
+    
+    write_tdm
+    
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: Functions
+
+
+.. autofunction:: read_oem
+   :noindex:
+
+
+
+.. autofunction:: read_tdm
+   :noindex:
+
+
+
+.. autofunction:: write_oem
+   :noindex:
+
+
+
+.. autofunction:: write_tdm
+   :noindex:
+
+

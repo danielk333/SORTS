@@ -1,0 +1,8 @@
+iterable\_step
+==============
+
+.. currentmodule:: sorts.simulation
+
+.. rubric:: iterable_step
+
+.. autofunction:: iterable_step

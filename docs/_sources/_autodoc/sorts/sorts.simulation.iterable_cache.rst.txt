@@ -1,0 +1,8 @@
+iterable\_cache
+===============
+
+.. currentmodule:: sorts.simulation
+
+.. rubric:: iterable_cache
+
+.. autofunction:: iterable_cache

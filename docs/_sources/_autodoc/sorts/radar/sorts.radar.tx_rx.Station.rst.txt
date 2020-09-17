@@ -1,0 +1,37 @@
+Station
+=======
+
+.. currentmodule:: sorts.radar.tx_rx
+
+.. autoclass:: Station
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Station.__init__
+      ~Station.copy
+      ~Station.enu
+      ~Station.point
+      ~Station.point_ecef
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Station.frequency
+      ~Station.pointing
+      ~Station.pointing_ecef
+      ~Station.wavelength
+   
+   

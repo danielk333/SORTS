@@ -1,0 +1,8 @@
+LinearizedCoded.get
+===================
+
+.. currentmodule:: sorts.errors.linearized_coded
+
+.. rubric:: LinearizedCoded.get
+
+.. automethod:: LinearizedCoded.get

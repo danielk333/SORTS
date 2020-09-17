@@ -1,0 +1,46 @@
+static
+======
+
+.. automodule:: sorts.controller.static
+
+.. currentmodule:: sorts.controller.static
+
+Module summary
+--------------
+
+
+
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    Static
+    
+
+
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: Static
+
+.. autoclass:: Static
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
+
+
+
+

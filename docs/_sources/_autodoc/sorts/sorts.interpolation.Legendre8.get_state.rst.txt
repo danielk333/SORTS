@@ -1,0 +1,8 @@
+Legendre8.get\_state
+====================
+
+.. currentmodule:: sorts.interpolation
+
+.. rubric:: Legendre8.get_state
+
+.. automethod:: Legendre8.get_state

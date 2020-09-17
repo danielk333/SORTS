@@ -1,0 +1,28 @@
+Radar
+=====
+
+.. currentmodule:: sorts.radar.radar
+
+.. autoclass:: Radar
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Radar.__init__
+      ~Radar.copy
+      ~Radar.find_passes
+      ~Radar.set_beam
+      ~Radar.set_rx_beam
+      ~Radar.set_tx_beam
+   
+   
+
+   
+   
+   

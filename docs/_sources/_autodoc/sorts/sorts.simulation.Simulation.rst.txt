@@ -1,0 +1,41 @@
+Simulation
+==========
+
+.. currentmodule:: sorts.simulation
+
+.. autoclass:: Simulation
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Simulation.__init__
+      ~Simulation.branch
+      ~Simulation.checkout
+      ~Simulation.delete
+      ~Simulation.get_path
+      ~Simulation.load_h5
+      ~Simulation.load_pickle
+      ~Simulation.make_paths
+      ~Simulation.run
+      ~Simulation.save_h5
+      ~Simulation.save_pickle
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~Simulation.log_path
+      ~Simulation.paths
+   
+   

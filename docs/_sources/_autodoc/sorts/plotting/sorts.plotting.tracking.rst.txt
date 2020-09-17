@@ -1,0 +1,49 @@
+tracking
+========
+
+.. automodule:: sorts.plotting.tracking
+
+.. currentmodule:: sorts.plotting.tracking
+
+Module summary
+--------------
+
+
+
+
+
+
+
+.. rubric:: Functions
+
+.. autosummary::
+    :toctree: .
+    
+    plot_angles
+    
+    plot_snr
+    
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: Functions
+
+
+.. autofunction:: plot_angles
+   :noindex:
+
+
+
+.. autofunction:: plot_snr
+   :noindex:
+
+

@@ -1,0 +1,8 @@
+MPI\_action
+===========
+
+.. currentmodule:: sorts.simulation
+
+.. rubric:: MPI_action
+
+.. autofunction:: MPI_action

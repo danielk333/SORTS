@@ -1,0 +1,8 @@
+Simulation.delete
+=================
+
+.. currentmodule:: sorts.simulation
+
+.. rubric:: Simulation.delete
+
+.. automethod:: Simulation.delete

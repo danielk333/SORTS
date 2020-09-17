@@ -1,0 +1,8 @@
+radar\_map
+==========
+
+.. currentmodule:: sorts.plotting.radar
+
+.. rubric:: radar_map
+
+.. autofunction:: radar_map

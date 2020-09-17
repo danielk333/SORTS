@@ -1,0 +1,6 @@
+sorts.errors.errors.Errors.VARIABLES
+====================================
+
+.. currentmodule:: sorts.errors.errors
+
+.. autoattribute:: Errors.VARIABLES

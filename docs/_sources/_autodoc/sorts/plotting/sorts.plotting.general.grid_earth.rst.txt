@@ -1,0 +1,8 @@
+grid\_earth
+===========
+
+.. currentmodule:: sorts.plotting.general
+
+.. rubric:: grid_earth
+
+.. autofunction:: grid_earth

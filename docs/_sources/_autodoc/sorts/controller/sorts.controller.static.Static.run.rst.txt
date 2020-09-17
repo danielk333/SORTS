@@ -1,0 +1,8 @@
+Static.run
+==========
+
+.. currentmodule:: sorts.controller.static
+
+.. rubric:: Static.run
+
+.. automethod:: Static.run
