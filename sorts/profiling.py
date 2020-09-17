@@ -6,7 +6,9 @@ import logging
 import datetime
 import pathlib
 import time
+import tracemalloc
 
+import numpy as np
 from tabulate import tabulate
 
 class Profiler:
@@ -32,17 +34,84 @@ class Profiler:
             print(p)
 
     '''
-    def __init__(self, distribution=False):
+    def __init__(self, distribution=False, track_memory=False, snapshot_total=True):
         self.distribution = distribution
+        self.snapshot_total = snapshot_total
+        self.track_memory = track_memory
+
+        if self.track_memory:
+            tracemalloc.start()
+
         self.exec_times = dict()
         self.start_times = dict()
 
+        self.memory_stats = dict()
+        self.snapshots = dict()
+
+
+    def __del__(self):
+        if self.track_memory:
+            tracemalloc.stop()
+
+
+    def snapshot(self, name):
+        '''Take a tracemalloc snapshot.
+
+        :param str name: Name of the profiling location.
+        '''
+        if not self.track_memory:
+            return
+
+        if self.snapshot_total:
+            snap_ = tracemalloc.take_snapshot()
+            alloc = snap_.statistics('lineno')
+            size = sum([x.size for x in alloc])
+            self.snapshots[name] = size
+        else:
+            self.snapshots[name] = tracemalloc.take_snapshot()
+
+
+    def memory_diff(self, name, save=None):
+        '''Calculate a memory difference between the latest snapshot and now.
+
+        :param str name: Name of the profiling location.
+        :param str save: Save memory difference to this name, default is same as :code:`name`.
+        '''
+        if not self.track_memory:
+            return
+
+        if save is None:
+            save = name
+
+        new_snapshot = tracemalloc.take_snapshot()
+
+        if self.snapshot_total:
+            new_alloc = new_snapshot.statistics('lineno')
+            new_size = sum([x.size for x in new_alloc])
+
+            data = new_size - self.snapshots[name]
+        else:
+            data = new_snapshot.compare_to(self.snapshots[name], 'lineno')
+            data.sort(key=lambda x: x.size_diff, reverse = True)
+
+        if save in self.memory_stats:
+            self.memory_stats[save].append(data)
+        else:
+            self.memory_stats[save] = [data]
+    
+
     def start(self, name):
         '''Records a start time for named call.
+
+        :param str name: Name of the profiling location.
         '''
         self.start_times[name] = time.time()
 
     def stop(self, name):
+        '''Records a time elapsed since the latest start time for named call.
+
+        :param str name: Name of the profiling location.
+        '''
         dt = time.time() - self.start_times[name]
         self.start_times[name] = None
 
@@ -89,6 +158,11 @@ class Profiler:
             return ret
 
     def fmt(self, normalize=None, timedelta=False):
+        '''Format summary of the profiler into a string.
+
+        :param str normalize: Name of the profiling location to normalize execution time towards.
+        :param bool timedelta: Print execution times as time-deltas.
+        '''
         means = self.mean()
         totals = self.total()
 
@@ -103,7 +177,7 @@ class Profiler:
             if timedelta:
                 mu = str(datetime.timedelta(seconds=means[key]))
             else:
-                mu = f'{means[key]:.5e}'
+                mu = f'{means[key]:.5e} s'
 
             if normalize is not None:
                 su = f'{totals[key]/totals[normalize]*100.0:.2f} %'
@@ -111,7 +185,7 @@ class Profiler:
                 if timedelta:
                     su = str(datetime.timedelta(seconds=totals[key]))
                 else:
-                    su = f'{totals[key]:.5e}'
+                    su = f'{totals[key]:.5e} s'
             
             data.append([key, num, mu, su])
         
@@ -124,6 +198,32 @@ class Profiler:
         str_ = f'{" Performance analysis ".center(width, "-")}\n'
         str_ += tab + '\n'
         str_ += '-'*width + '\n'
+
+        if self.track_memory and self.snapshot_total:
+
+            data = []
+
+            for key in self.memory_stats:
+                if len(self.memory_stats[key]) == 0:
+                    continue
+                else:
+                    sum_ = np.sum(self.memory_stats[key])/1024.0
+                    mean_ = sum_/len(self.memory_stats[key])
+
+                    su = f'{sum_:.5e} kB'
+                    mu = f'{mean_:.5e} kB'
+
+                data.append([key, len(self.memory_stats[key]), mu, su])
+
+
+            header = ['Name', 'Executions', 'Mean size change', 'Total size change']
+            tab = str(tabulate(data, header, tablefmt="presto"))
+
+            width = tab.find('\n', 0)
+
+            str_ += '\n'*2 + f'{" Memory analysis ".center(width, "-")}\n'
+            str_ += tab + '\n'
+            str_ += '-'*width + '\n'
 
         return str_
 
@@ -154,6 +254,11 @@ class Profiler:
 
 
 def add_logging_level(num, name):
+    '''Adds a custom logging level to all loggers.
+
+    :param int num: Integer level for logging level.
+    :param str name: Name of logging level.
+    '''
     def fn(self, message, *args, **kwargs):
         if self.isEnabledFor(num):
             self._log(num, message, args, **kwargs)
@@ -164,22 +269,7 @@ def add_logging_level(num, name):
 
 logging.Logger.always = add_logging_level(100, 'ALWAYS')
 
-
-def get_logger(
-        name = 'sorts',
-        path = None,
-        file_level = logging.INFO,
-        term_level = logging.INFO,
-    ):
-    '''Returns a logger object
-    
-    Formats to output both to terminal and a log file
-    '''
-    now = datetime.datetime.now()
-    datetime_str = now.strftime("%Y-%m-%d_at_%H-%M")
-    datefmt = '%Y-%m-%d %H:%M:%S'
-    msecfmt = '%s.%03d'
-
+def _get_parallel():
     try:
         from mpi4py import MPI
         comm = MPI.COMM_WORLD
@@ -189,7 +279,47 @@ def get_logger(
             parallel = None
     except ImportError:
         parallel = None
+    return parallel
 
+
+def get_logger_formats():
+    datefmt = '%Y-%m-%d %H:%M:%S'
+    msecfmt = '%s.%03d'
+
+    parallel = _get_parallel()
+
+    if parallel is not None:
+        format_str = f'%(asctime)s PID{parallel} %(levelname)-8s; %(message)s'
+    else:
+        format_str = '%(asctime)s %(levelname)-8s; %(message)s'
+
+    return datefmt, msecfmt, format_str
+
+
+
+def get_logger(
+        name = 'sorts',
+        path = None,
+        file_level = logging.INFO,
+        term_level = logging.INFO,
+    ):
+    '''Creates a pre-configured logger. Formats to output both to terminal and a log file.
+
+    **Note:** Can only use folders as paths for MPI usage.
+
+    :param str name: Name of the logger. 
+    :param str/pathlib.Path path: Path to the logfile output. Can be a file, a folder or `None`. 
+    :param int file_level: Logging level of the file handler.
+    :param int term_level: Logging level of the terminal handler.
+    '''
+    now = datetime.datetime.now()
+    datetime_str = now.strftime("%Y-%m-%d_at_%H-%M")
+
+    datefmt, msecfmt, format_str = get_logger_formats()
+    parallel = _get_parallel()
+
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)
 
     if path is not None:
         if not isinstance(path, pathlib.Path):
@@ -197,9 +327,9 @@ def get_logger(
 
         if path.is_dir():
             if parallel is None:
-                log_fname = f'{name}_{datetime_str}.log'
+                log_fname = path / f'{name}_{datetime_str}.log'
             else:
-                log_fname = f'{name}_{datetime_str}_process{parallel}.log'
+                log_fname = path / f'{name}_{datetime_str}_process{parallel}.log'
         else:
             if parallel is None:
                 log_fname = str(path)
@@ -207,23 +337,13 @@ def get_logger(
                 new_name = path.name.replace(path.suffix, '') + f'_process{parallel}'
                 log_fname = path.parent / f'{new_name}{path.suffix}'
 
-
-    logger = logging.getLogger(name)
-    logger.setLevel(logging.DEBUG)
-
-    if parallel is not None:
-        format_str = f'%(asctime)s PID{parallel} %(levelname)-8s; %(message)s'
-    else:
-        format_str = '%(asctime)s %(levelname)-8s; %(message)s'
-
-    if path is not None:
         fh = logging.FileHandler(log_fname)
         fh.setLevel(file_level) #debug and worse
         form_fh = logging.Formatter(format_str)
         form_fh.default_time_format = datefmt
         form_fh.default_msec_format = msecfmt
         fh.setFormatter(form_fh)
-        logger.addHandler(fh) #id 0
+        logger.addHandler(fh)
 
     ch = logging.StreamHandler()
     ch.setLevel(term_level)
@@ -232,34 +352,84 @@ def get_logger(
     form_ch.default_msec_format = msecfmt
 
     ch.setFormatter(form_ch)
-    logger.addHandler(ch) #id 1
+    logger.addHandler(ch)
 
     return logger
 
 
-def term_level(logger, level):
-    if len(logger.handlers) == 1:
-        term_id = 0
+def change_logfile(logger, path):
+    '''Deletes any previous `FileHandler` handlers and creates a new `FileHandler` to the new path with the same level as the previous one.
+
+    :param logging.Logger logger: Logger object.
+    :param str/pathlib.Path path: Path to the logfile output. Can be a file or folder. 
+    :param int file_level: Logging level of the file handler.
+    :param int term_level: Logging level of the terminal handler.
+    '''
+    now = datetime.datetime.now()
+    datetime_str = now.strftime("%Y-%m-%d_at_%H-%M")
+
+    name = logger.name
+
+    datefmt, msecfmt, format_str = get_logger_formats()
+    parallel = _get_parallel()
+
+    if not isinstance(path, pathlib.Path):
+        path = pathlib.Path(path)
+
+    if path.is_dir():
+        if parallel is None:
+            log_fname = path / f'{name}_{datetime_str}.log'
+        else:
+            log_fname = path / f'{name}_{datetime_str}_process{parallel}.log'
     else:
-        term_id = 1
+        if parallel is None:
+            log_fname = path
+        else:
+            new_name = path.name.replace(path.suffix, '') + f'_process{parallel}'
+            log_fname = path.parent / f'{new_name}{path.suffix}'
 
-    if isinstance(level, str):
-        level = getattr(logging, level)
+    fh = logging.FileHandler(log_fname)
+    form_fh = logging.Formatter(format_str)
+    form_fh.default_time_format = datefmt
+    form_fh.default_msec_format = msecfmt
+    fh.setFormatter(form_fh)
 
-    logger.handlers[term_id].setLevel(level)
+    for hdl in logger.handlers[:]:
+        if isinstance(hdl, logging.FileHandler):
+            fh.setLevel(hdl.level)
+            logger.removeHandler(hdl)
+            
+    logger.addHandler(fh)
+
+    return logger
+
+
+
+def term_level(logger, level):
+    '''Set the StreamHandler level.
+    '''
+    for hdl in logger.handlers[:]:
+        if not isinstance(hdl, logging.StreamHandler):
+            continue
+
+        if isinstance(level, str):
+            level = getattr(logging, level)
+
+        hdl.setLevel(level)
 
     return logger
 
 
 def file_level(logger, level):
-    if len(logger.handlers) == 1:
-        return logger
-    else:
-        file_id = 0
+    '''Set the FileHandler level.
+    '''
+    for hdl in logger.handlers[:]:
+        if not isinstance(hdl, logging.FileHandler):
+            continue
+        
+        if isinstance(level, str):
+            level = getattr(logging, level)
 
-    if isinstance(level, str):
-        level = getattr(logging, level)
-
-    logger.handlers[file_id].setLevel(level)
+        hdl.setLevel(level)
 
     return logger

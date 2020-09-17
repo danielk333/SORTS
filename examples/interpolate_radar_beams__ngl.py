@@ -8,27 +8,29 @@ import numpy as np
 import pyant
 import sorts.radar.instances as rlib
 
+radar = rlib.eiscat3d_demonstrator
+
 res = 500
 
 tx_intp = []
-for txi,tx in enumerate(rlib.eiscat3d.tx):
+for txi,tx in enumerate(radar.tx):
     tx_intp += [pyant.PlaneArrayInterp(
         azimuth=tx.beam.azimuth,
         elevation=tx.beam.elevation, 
         frequency=tx.beam.frequency,
     )]
     tx_intp[-1].generate_interpolation(tx.beam, resolution=res)
-    # tx_intp[-1].save(f'./sorts/data/e3d_tx{txi}_res{res}_interp')
+    # tx_intp[-1].save(f'./sorts/data/e3d_demo_tx{txi}_res{res}_interp')
     # print('saved')
 
 rx_intp = []
-for rxi,rx in enumerate(rlib.eiscat3d.rx):
+for rxi,rx in enumerate(radar.rx):
     rx_intp += [pyant.PlaneArrayInterp(
         azimuth=rx.beam.azimuth,
         elevation=rx.beam.elevation, 
         frequency=rx.beam.frequency,
     )]
     rx_intp[-1].generate_interpolation(rx.beam, resolution=res)
-    # rx_intp[-1].save(f'./sorts/data/e3d_rx{rxi}_res{res}_interp')
+    # rx_intp[-1].save(f'./sorts/data/e3d_demo_rx{rxi}_res{res}_interp')
     # print('saved')
 

@@ -4,4 +4,5 @@
 
 '''
 
-from .general import hist2d, posterior, hist, scatter, orbits, grid_earth
+from .general import orbits, grid_earth
+from .radar import radar_earth, radar_map

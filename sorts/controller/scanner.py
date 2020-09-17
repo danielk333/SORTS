@@ -10,7 +10,7 @@ from .radar_controller import RadarController
 
 
 class Scanner(RadarController):
-    '''Takes in ECEF points and a time vector and creates a tracking control.
+    '''Takes in a scan and create a scanning radar controller.
     '''
 
     META_FIELDS = RadarController.META_FIELDS + [
@@ -33,6 +33,11 @@ class Scanner(RadarController):
         return dic
 
     def point_radar(self, t):
+        '''Assumes t is not array
+        '''
+        if self.profiler is not None:
+                self.profiler.start('Scanner:generator:point_radar')
+
         if self.return_copy:
             radar = self.radar.copy()
         else:
@@ -46,25 +51,47 @@ class Scanner(RadarController):
         for tx in radar.tx:
             point = self.scan.ecef_pointing(t, tx)
 
-            point_tx.append(point + tx.ecef)
-            point_rx_to_tx.append(point[:,None]*self.r[None,:] + tx.ecef[:,None])
+            if len(point.shape) > 1:
+                point_tx.append(point + tx.ecef[:,None])
+                __ptx = point[:,:,None]*self.r[None,None,:] + tx.ecef[:,None,None]
+                point_rx_to_tx.append(__ptx.reshape(3, __ptx.shape[1]*__ptx.shape[2]))
+            else:
+                point_tx.append(point + tx.ecef)
+                point_rx_to_tx.append(point[:,None]*self.r[None,:] + tx.ecef[:,None])
             
+            if self.profiler is not None:
+                self.profiler.start('Scanner:generator:point_radar:_point_station[tx]')
             RadarController._point_station(tx, point_tx[-1])
+            if self.profiler is not None:
+                self.profiler.stop('Scanner:generator:point_radar:_point_station[tx]')
 
         for rx in radar.rx:
             rx_point = []
             for txi, tx in enumerate(radar.tx):
                 #< 200 meters apart = same location for pointing
                 if np.linalg.norm(tx.ecef - rx.ecef) < 200.0:
-                    rx_point.append(point_tx[txi].reshape(3,1))
+                    __ptx = point_tx[txi]
+                    if len(__ptx.shape) == 1:
+                        __ptx = __ptx.reshape(3,1)
+                    rx_point.append(__ptx)
                 else:
                     rx_point.append(point_rx_to_tx[txi])
             rx_point = np.concatenate(rx_point, axis=1)
 
+
+            if self.profiler is not None:
+                self.profiler.start('Scanner:generator:point_radar:_point_station[rx]')
             RadarController._point_station(rx, rx_point)
+            if self.profiler is not None:
+                self.profiler.stop('Scanner:generator:point_radar:_point_station[rx]')
+
+        if self.profiler is not None:
+                self.profiler.stop('Scanner:generator:point_radar')
 
         return radar, meta
 
     def generator(self, t):
         for ti in range(len(t)):
             yield self.point_radar(t[ti])
+
+

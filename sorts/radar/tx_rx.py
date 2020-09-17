@@ -31,7 +31,7 @@ class Station(object):
         :ivar float lon: Geographical longitude of radar station in decimal degrees (East+).
         :ivar float alt: Geographical altitude above geoid surface of radar station in meter.
         :ivar float min_elevation: Elevation threshold for the radar station in degrees, i.e. it cannot detect or point below this elevation.
-        :ivar numpy.array ecef: The ECEF coordinates of the radar station calculated using :func:`frames.geodetic_to_ecef`.
+        :ivar numpy.array ecef: The ECEF coordinates of the radar station calculated using :func:`frames.geodetic_to_ITRS`.
         :ivar pyant.Beam beam: Radiation pattern for radar station.
         :ivar bool enabled: Indicates if this station is turned on or off.
 
@@ -41,7 +41,7 @@ class Station(object):
         self.lon = lon
         self.alt = alt
         self.min_elevation = min_elevation
-        self.ecef = frames.geodetic_to_ecef(lat, lon, alt, radians = False)
+        self.ecef = frames.geodetic_to_ITRS(lat, lon, alt, radians = False)
         self.beam = beam
         self.enabled = True
 

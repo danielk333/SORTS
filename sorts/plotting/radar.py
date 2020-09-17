@@ -1,15 +1,45 @@
+#!/usr/bin/env python
 
-def plot_radar_earth(ax, radar):
-    for tx in radar._tx:
-        ecef = coord.geodetic2ecef(tx.lat, tx.lon, tx.alt)
-        ax.plot([ecef[0]],[ecef[1]],[ecef[2]],"x",color='r',label=tx.name)    
-    for rx in radar._rx:
-        ecef = coord.geodetic2ecef(rx.lat, rx.lon, rx.alt)
-        ax.plot([ecef[0]],[ecef[1]],[ecef[2]],"x",color='b',label=rx.name)
+'''
+
+'''
+
+#Python standard import
+
+#Third party import
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+import matplotlib.cm as cm
+from mpl_toolkits.mplot3d import Axes3D
+
+#Local import
+
+from . import general
+from .. import frames
 
 
+def radar_earth(ax, radar, **kwargs):
 
-def plot_radar_geo(radar):
+    tx_names = kwargs.pop('tx_names', None)
+    rx_names = kwargs.pop('rx_names', None)
+    grid_earth(ax, **kwargs)
+
+    for ind, tx in enumerate(radar.tx):
+        if tx_names is None:
+            ax.plot([tx.ecef[0]],[tx.ecef[1]],[tx.ecef[2]],"x",color='r')
+        else:
+            ax.plot([tx.ecef[0]],[tx.ecef[1]],[tx.ecef[2]],"x",color='r',label=tx_names[ind])
+        
+    for ind, rx in enumerate(radar.rx):
+        if rx_names is None:
+            ax.plot([rx.ecef[0]],[rx.ecef[1]],[rx.ecef[2]],"x",color='r')
+        else:
+            ax.plot([rx.ecef[0]],[rx.ecef[1]],[rx.ecef[2]],"x",color='r',label=rx_names[ind])
+    
+
+
+def radar_map(radar, ax=None):
     '''Plot the geographical location of the radar system using the GeoPandas library.
 
     To get:
@@ -17,10 +47,17 @@ def plot_radar_geo(radar):
     pip install git+git://github.com/geopandas/geopandas.git
     pip install descartes
 
-    include in basic SORTS++ install?
     '''
-    fig = plt.figure(figsize=(15,7))
-    ax = fig.add_subplot(111)
+
+    try:
+        import geopandas
+    except ImportError:
+        geopandas = None
+        raise ImportError('Cannot plot geo-location of radar without "geopandas" package')
+
+    if ax is None:
+        fig = plt.figure(figsize=(15,7))
+        ax = fig.add_subplot(111)
 
     df = geopandas.read_file(geopandas.datasets.get_path('naturalearth_lowres'))
     ax = df.plot(figsize=(10, 10), alpha=0.5, edgecolor='k', linewidth=0.25, color='lightgrey', ax=ax)
@@ -29,10 +66,10 @@ def plot_radar_geo(radar):
     sites = []
     lats = []
     lons = []
-    for r in radar._tx:
+    for ind, r in enumerate(radar.tx):
         lons.append(r.lon)
         lats.append(r.lat)
-        sites.append(r.name)
+        sites.append(f'TX-{ind}')
     df_sites_tx = pd.DataFrame(
         {'Site': sites,
          'Latitude': lats,
@@ -41,10 +78,10 @@ def plot_radar_geo(radar):
     sites_rx = []
     lats_rx = []
     lons_rx = []
-    for r in radar._rx:
+    for ind, r in enumerate(radar.rx):
         lons_rx.append(r.lon)
         lats_rx.append(r.lat)
-        sites_rx.append(r.name)
+        sites_rx.append(f'RX-{ind}')
     df_sites_rx = pd.DataFrame(
         {'Site': sites_rx,
          'Latitude': lats_rx,
@@ -91,42 +128,5 @@ def plot_radar_geo(radar):
 
     ax.set_aspect('equal')
 
-    return fig, ax
-
-
-def plot_radar(radar, save_folder = None):
-    '''Plots aspects of the radar system.
-
-    **Current plots:**
-
-       * Geographical locations.
-       * Antenna patterns.
-       * Scan patterns.
-    '''
-    
-    for tx in radar._tx:
-        fig, ax = rs.plot_radar_scan(tx.scan, earth=True)
-        if save_folder is not None:
-            fig.savefig(save_folder + '/' + tx.name.replace(' ','_') + '_scan.png', bbox_inches='tight')
-            plt.close(fig)
-
-    for tx in radar._tx:
-        fig, ax = antenna.plot_gain_heatmap(tx.beam, res=200, min_el = 75.0, title=tx.name)
-        if save_folder is not None:
-            fig.savefig(save_folder + '/' + tx.name.replace(' ','_') +'_'+ tx.beam.beam_name.replace(' ','_') + '.png', bbox_inches='tight')
-            plt.close(fig)
-
-    for rx in radar._rx:
-        fig, ax = antenna.plot_gain_heatmap(rx.beam, res=200, min_el = 75.0, title=rx.name)
-        if save_folder is not None:
-            fig.savefig(save_folder + '/' + rx.name.replace(' ','_') +'_'+ rx.beam.beam_name.replace(' ','_') + '.png', bbox_inches='tight')
-            plt.close(fig)
-
-    fig, ax = plot_radar_geo(radar)
-    if save_folder is not None:
-        fig.savefig(save_folder + '/' + radar.name.replace(' ','_') + '.png', bbox_inches='tight')
-        plt.close(fig)
-
-    if save_folder is None:
-        plt.show()
+    return ax
 

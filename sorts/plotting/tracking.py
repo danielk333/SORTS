@@ -1,3 +1,22 @@
+#!/usr/bin/env python
+
+'''Plotting helper functions
+
+'''
+
+#Python standard import
+
+
+#Third party import
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+import matplotlib.cm as cm
+from mpl_toolkits.mplot3d import Axes3D
+
+
+#Local import
+
 
 def plot_angles(ts, angs, ax=None):
     '''Plot the angles data returned by the :func:`simulate_tracking.get_angles` function.
@@ -7,6 +26,7 @@ def plot_angles(ts, angs, ax=None):
     :param ax: matplotlib axis to plot the SNR's on. If not given, create new figure and axis.
     :return: The matplotlib axis object
     '''
+
     if ax is None:
         fig, ax = plt.subplots(1, 1, figsize=(14, 10), tight_layout=True)
     txc = 0
@@ -17,9 +37,9 @@ def plot_angles(ts, angs, ax=None):
             ax.plot(tv - tv[0], n.array(psa),label='TX{} - pass {}'.format(txc,psc))
             psc+=1
         txc+=1
-    ax.set( \
-        title='passes Angles', \
-        ylabel='Zenith angle [deg]', \
+    ax.set(
+        title='passes Angles',
+        ylabel='Zenith angle [deg]',
         xlabel='Time since entering FOV [min]')
     plt.legend()
     return ax

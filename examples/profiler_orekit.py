@@ -18,8 +18,8 @@ orekit_data = '/home/danielk/IRF/IRF_GITLAB/orekit_build/orekit-data-master.zip'
 prop = Orekit(
     orekit_data = orekit_data, 
     settings=dict(
-        in_frame='ITRF',
-        out_frame='EME',
+        in_frame='ITRS',
+        out_frame='GCRS',
         drag_force = False,
         radiation_pressure = False,
     ),
@@ -49,8 +49,8 @@ p2.start('total')
 prop = Orekit(
     orekit_data = orekit_data, 
     settings=dict(
-        in_frame='ITRF',
-        out_frame='EME',
+        in_frame='ITRS',
+        out_frame='GCRS',
         drag_force = True,
         radiation_pressure = False,
     ),

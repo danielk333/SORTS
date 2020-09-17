@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''rapper for the SGP4 propagator
+'''Constants used by SORTS from various sources.
 
 '''
 
@@ -9,6 +9,9 @@ import scipy.constants
 
 
 class WGS84:
+    '''World Geodetic System 1984 constants.
+    '''
+
     a = 6378.137*1e3
     '''float: semi-major axis parameter in meters of the World Geodetic System 1984 (WGS84)
     '''
@@ -35,6 +38,8 @@ R_earth = 6371.0088e3
 '''
 
 class WGS72:
+    '''World Geodetic System 1972 constants.
+    '''
 
     MU_earth = 398600.8*1e9
     '''float: Standard gravitational parameter of the Earth using the WGS72 convention.
