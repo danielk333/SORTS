@@ -7,10 +7,11 @@ E3D Demonstrator SST planner
 '''
 import pathlib
 
-from tabulate import tabulate
 import numpy as np
 import matplotlib.pyplot as plt
+from tabulate import tabulate
 from mpl_toolkits.mplot3d import Axes3D
+from astropy.time import Time
 
 import sorts
 
@@ -72,7 +73,8 @@ class ObservedTracking(Tracking, ObservedParameters):
             if self.logger is not None:
                 self.logger.info(f'Propagating {len(t)} measurement states for object {ind}')
 
-            self.states[ind] = so.get_state(t)
+            dt = (self.space_objects[ind].epoch - self.epoch).to_value('sec')
+            self.states[ind] = so.get_state(t - dt)
             self.states_t[ind] = t
 
 
@@ -116,6 +118,7 @@ objects = [ #NORAD ID
     35227,
     35245,
 ]
+epoch = Time('2020-09-08 00:24:51.759', format='iso', scale='utc')
 t_start = 0.0
 t_end = 12.0*3600.0 #end time of tracking scheduling
 t_step = 10.0 #time step for finding passes
@@ -144,6 +147,7 @@ logger.always(f'Found {len(space_objects)} objects to track')
 
 scheduler = ObservedTracking(
     radar = e3d_demo, 
+    epoch = epoch,
     space_objects = space_objects, 
     end_time = t_end, 
     start_time = t_start, 

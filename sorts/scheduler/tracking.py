@@ -20,6 +20,7 @@ class Tracking(Scheduler):
             radar, 
             space_objects, 
             end_time, 
+            epoch,
             start_time = 0.0, 
             controller = Tracker,
             controller_args = dict(return_copy=True),
@@ -31,6 +32,7 @@ class Tracking(Scheduler):
             calculate_max_snr = False,
         ):
         super().__init__(radar, profiler=profiler, logger=logger)
+        self.epoch = epoch
         self.controller = controller
         self.controller_args = controller_args
         self.space_objects = space_objects
@@ -58,6 +60,9 @@ class Tracking(Scheduler):
 
 
     def get_passes(self, ind):
+
+        dt = (self.space_objects[ind].epoch - self.epoch).to_value('sec')
+
         if isinstance(self.space_objects[ind].state, pyorb.Orbit):
             t = equidistant_sampling(
                 orbit = self.space_objects[ind].state, 
@@ -73,7 +78,7 @@ class Tracking(Scheduler):
         if self.profiler is not None:
             self.profiler.start('Tracking:get_passes:propagating')
 
-        states = self.space_objects[ind].get_state(t)
+        states = self.space_objects[ind].get_state(t - dt)
         if self.use_pass_states:
             self.states[ind] = states
             self.states_t[ind] = t

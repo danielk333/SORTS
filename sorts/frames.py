@@ -91,11 +91,39 @@ def geodetic_to_ITRS(lat, lon, alt, radians=False, ellipsoid=None):
         height=alt*units.m,
         ellipsoid=ellipsoid,
     )
-    pos = cord.get_itrs().cartesian.xyz.to(units.m).value
-    if len(pos.shape) > 1:
-        if pos.shape[1] == 1:
-            pos.shape = (3,)
+    x,y,z = cord.to_geocentric()
+
+    pos = np.empty((3,), dtype=np.float64)
+
+    pos[0] = x.to(units.m).value
+    pos[1] = y.to(units.m).value
+    pos[2] = z.to(units.m).value
+
     return pos
+
+
+def ITRS_to_geodetic(x, y, z, radians=False, ellipsoid=None):
+    '''Use `astropy.coordinates.EarthLocation` to transform from geodetic to ITRS.
+    '''
+
+    cord = EarthLocation.from_geocentric(
+        x=x*units.m, 
+        y=y*units.m, 
+        z=z*units.m,
+    )
+    lon, lat, height = cord.to_geodetic(ellipsoid=ellipsoid)
+    
+    llh = np.empty((3,), dtype=np.float64)
+    
+    if radians:
+        u_ = units.rad
+    else:
+        u_ = units.deg
+    llh[0] = lat.to(u_).value
+    llh[1] = lon.to(u_).value
+    llh[2] = height.to(units.m).value
+    
+    return llh
 
 
 def _convert_to_astropy(states, frame, **kw):
