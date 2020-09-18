@@ -145,6 +145,9 @@ class SGP4(Propagator):
             self.logger.debug(f'SGP4:propagate:len(t) = {len(t)}')
 
         if self.settings['tle_input']:
+            if isinstance(state0, np.ndarray):
+                if state0.size == 1:
+                    state0 = state0[0]
             line1, line2 = state0
             states = self.propagate_tle(t, line1, line2, **kwargs)
 

@@ -283,7 +283,10 @@ class SpaceObject(object):
     def __str__(self):
         p = '\nSpace object {}: {}:\n'.format(self.oid,repr(self.epoch))
         p+= str(self.state) + '\n'
-        p+= f'Parameters: ' + ', '.join([f'{key}={val:.3f}' for key,val in self.parameters.items()])
+        p+= f'Parameters: ' + ', '.join([
+            f'{key}={val}'
+            for key,val in self.parameters.items()
+        ])
         return p
 
 

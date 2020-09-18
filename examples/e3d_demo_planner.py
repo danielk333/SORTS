@@ -5,6 +5,8 @@ E3D Demonstrator SST planner
 ================================
 
 '''
+import pathlib
+
 from tabulate import tabulate
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,147 +14,153 @@ from mpl_toolkits.mplot3d import Axes3D
 
 import sorts
 
-from sorts import Scheduler
-from sorts.propagator import SGP4
-from sorts.population import tle_catalog
-from sorts.controller import Tracker
-
-radar = sorts.radars.eiscat3d_demonstrator_interp
+from sorts.scheduler import Tracking, ObservedParameters
 
 
-#############
-# CHOOSE OBJECTS
-#############
-
-objects = [
-    '40838',
-    '35227',
-    '35245',
-]
-t_end = 12.0*3600.0 #end time of tracking scheduling
-t_step = 10.0
-
-try:
-    pth = pathlib.Path(__file__).parent / 'data' / 'space_track_tle.txt'
-except NameError:
-    import os
-    pth = 'data' + os.path.sep + 'space_track_tle.txt'
-
-pop = tle_catalog(pth, kepler=True)
-
-
+# The Tracking scheduler takes in a series of SpaceObjects and finds all the passes of the objects 
+#  over the radar when "update" is called. Then "set_measurements", which is an abstract method,
+#  is used to determine when along those passes measurements should be done
+# 
 # ObservedParameters implements radar observation of space objects based on the radar schedule
 #  and calculates the observed parameters (like range, range rate, RCS, SNR, ..)
+#  and can be used in case we want to predict what data we will measure
 #
 # The generate_schedule is not implemented and needs to be defined to generate a schedule output
 #  as the standard format for outputting a radar schedule in SORTS is to have a list of "radar"
 #  instance with the exact configuration of the radar for each radar action
 #
-
-class ObservedTracking(ObservedParameters):
+class ObservedTracking(Tracking, ObservedParameters):
     
-    def __init__(self, radar, controllers, profiler=None, logger=None, **kwargs):
-        super().__init__(
-            radar=radar, 
-            logger=logger, 
-            profiler=profiler,
-        )
-        self.controllers = controllers
+    def set_measurements(self):
+        dw = self.controller_args['dwell']
 
+        for ind, so in enumerate(self.space_objects):
+            t_vec = []
+            for txi in range(len(self.radar.tx)):
+                for rxi in range(len(self.radar.rx)):
+                    for ps in self.passes[ind][txi][rxi]:
+                        #lets just measure it all!
+                        t_vec += np.arange(ps.start(), ps.end(), dw).tolist()
 
-    def update(self, controllers):
-        if self.logger is not None:
-            self.logger.debug(f'StaticList:update:id(controllers) = {id(controllers)}')
-        self.controllers = controllers
+            #we probably need to make sure we do not have overlapping measurements
+            #this is a very "stupid" scheduler
+            t = np.array(t_vec)
+            t_keep = np.full(t.shape, True, dtype=np.bool)
 
+            for ch_ind in range(ind):
+                t_ch_keep = np.full(self.states_t[ch_ind].shape, True, dtype=np.bool)
+                #this creates a matrix of all possible time differences
+                t_diff = self.states_t[ch_ind][:,None] - t[None,:]
 
-    def get_controllers(self):
-        return self.controllers
+                #find the ones that overlap with previously selected measurements
+                inds = np.argwhere(np.logical_and(t_diff <= 0, t_diff >= -dw ))
 
+                #just do every other
+                first_one = True
+                for bad_samp in inds:
+                    if first_one:
+                        t_keep[bad_samp[1]] = False
+                    else:
+                        t_ch_keep[bad_samp[0]] = False
+
+                    first_one = not first_one
+                t = t[t_keep]
+
+                self.states_t[ch_ind] = self.states_t[ch_ind][t_ch_keep]
+                self.states[ch_ind] = self.states[ch_ind][:,t_ch_keep]
+
+            if self.logger is not None:
+                self.logger.info(f'Propagating {len(t)} measurement states for object {ind}')
+
+            self.states[ind] = so.get_state(t)
+            self.states_t[ind] = t
 
 
     def generate_schedule(self, t, generator):
-        data = np.empty((len(t),len(self.radar.rx)*2+1), dtype=np.float64)
+        data = np.empty((len(t),len(self.radar.tx)*2+len(self.radar.rx)*3+1), dtype=np.float64)
+
         data[:,0] = t
-        names = []
         targets = []
+        experiment = []
         for ind,mrad in enumerate(generator):
             radar, meta = mrad
-            names.append(meta['controller_type'].__name__)
             targets.append(meta['target'])
+            experiment.append('SST')
+
+            for ti, tx in enumerate(radar.tx):
+                data[ind,1+ti*2] = tx.beam.azimuth
+                data[ind,2+ti*2] = tx.beam.elevation
+
             for ri, rx in enumerate(radar.rx):
-                data[ind,1+ri*2] = rx.beam.azimuth
-                data[ind,2+ri*2] = rx.beam.elevation
-        data = data.T.tolist() + [names, targets]
+                data[ind,len(radar.tx)*2+1+ri*3] = rx.beam.azimuth
+                data[ind,len(radar.tx)*2+2+ri*3] = rx.beam.elevation
+                data[ind,len(radar.tx)*2+3+ri*3] = rx.pointing_range*1e-3 #to km
+
+        data = data.T.tolist() + [experiment, targets]
         data = list(map(list, zip(*data)))
         return data
 
 
-controllers = []
-for obj in objects:
-    pop_id = np.argwhere(pop.data['oid'] == obj)
-    space_obj = pop.get_object(pop_id)
 
-    t = np.arange(0, t_end, t_step)
-    states = space_obj.get_state(t)
 
-    passes = radar.find_passes(t, states, cache_data = True)
+if __name__=='__main__':
+    from sorts.population import tle_catalog
 
-    controllers.append(
-        Tracker(
-            radar = radar,
-            t=,
-            ecefs = ,
-            meta = dict(
-                dwell=0.1,
-                target=f'Satnum: {obj}',
-            ),
-        )
+    e3d_demo = sorts.radars.eiscat3d_demonstrator_interp
+    #############
+    # CHOOSE OBJECTS
+    #############
+
+    objects = [ #NORAD ID
+        27386, #Envisat
+        35227,
+        35245,
+    ]
+    t_start = 0.0
+    t_end = 12.0*3600.0 #end time of tracking scheduling
+    t_step = 10.0 #time step for finding passes
+    dwell = 10.0 #the time between re-pointing beam, i.e. "radar actions" or "time slices"
+
+    profiler = sorts.profiling.Profiler()
+    logger = sorts.profiling.get_logger()
+
+    try:
+        pth = pathlib.Path(__file__).parent / 'data' / 'space_track_tle.txt'
+    except NameError:
+        import os
+        pth = 'data' + os.path.sep + 'space_track_tle.txt'
+
+    pop = tle_catalog(pth, kepler=True)
+
+    pop.propagator_options['settings']['out_frame'] = 'ITRS' #output states in ECEF
+
+    space_objects = []
+    for obj in objects:
+        ind = np.argwhere(pop.data['oid'] == obj)
+        if len(ind) > 0:
+            space_objects.append(pop.get_object(ind[0]))
+
+    logger.always(f'Found {len(space_objects)} objects to track')
+
+    scheduler = ObservedTracking(
+        radar = e3d_demo, 
+        space_objects = space_objects, 
+        end_time = t_end, 
+        start_time = t_start, 
+        controller_args = dict(return_copy=True, dwell=dwell),
+        max_dpos = 1e3,
+        profiler = profiler, 
+        logger = logger,
+        use_pass_states = False,
     )
 
+    scheduler.update()
+    scheduler.set_measurements()
 
+    data = scheduler.schedule()
 
-orb = pyorb.Orbit(M0 = pyorb.M_earth, direct_update=True, auto_update=True, degrees=True, num=3, a=6700e3, e=0, i=75, omega=0, Omega=np.linspace(79,82,num=3), anom=72, epoch=53005)
-print(orb)
+    rx_head = [f'TX{i}-{co}' for i in range(len(e3d_demo.tx)) for co in ['az [deg]', 'el [deg]']]
+    rx_head += [f'RX{i}-{co}' for i in range(len(e3d_demo.rx)) for co in ['az [deg]', 'el [deg]', 'r [km]']]
+    sched_tab = tabulate(data, headers=["t [s]"] + rx_head + ['Experiment', 'Target'])
 
-e3d = MyScheduler(radar = eiscat3d, propagator=prop)
-
-e3d.update(orb)
-data = e3d.schedule()
-
-rx_head = [f'rx{i} {co}' for i in range(len(eiscat3d.rx)) for co in ['az', 'el']]
-sched_tab = tabulate(data, headers=["t [s]"] + rx_head + ['Controller', 'Target'])
-
-print(sched_tab)
-
-
-fig = plt.figure(figsize=(15,15))
-ax = fig.add_subplot(121)
-for i in range(3):
-    ax.plot([x[0] for x in data], [x[1+i*2] for x in data], '.', label=f'RX{i}')
-ax.legend()
-ax.set_ylabel('Azimuth')
-
-ax = fig.add_subplot(122)
-for i in range(3):
-    ax.plot([x[0] for x in data], [x[2+i*2] for x in data], '.', label=f'RX{i}')
-ax.legend()
-ax.set_ylabel('Elevation')
-
-
-plt.show()
-
-
-
-# fig, ax =plt.subplots()
-# collabel=("Time [s]",)
-# for i in range(3):
-#     collabel += (f'RX{i} Az [deg]', f'RX{i} El [deg]')
-# collabel += ('Dwell [s]',)
-
-# ax.axis('tight')
-# ax.axis('off')
-# table = ax.table(cellText=data,colLabels=collabel,loc='center')
-# table.set_fontsize(22)
-
-# plt.show()
+    print(sched_tab)

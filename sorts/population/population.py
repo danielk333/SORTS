@@ -338,6 +338,9 @@ class Population:
         else:
             kwargs['state'] = self.data[n][self.state_fields]
 
+        if 'oid' in self.fields:
+            kwargs['oid'] = self.data[n]['oid']
+
 
         obj=so.SpaceObject(
             propagator = self.propagator,
