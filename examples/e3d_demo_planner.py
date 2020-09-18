@@ -78,8 +78,10 @@ class ObservedTracking(Tracking, ObservedParameters):
             self.states_t[ind] = t
 
 
-    def generate_schedule(self, t, generator):
+    def generate_schedule(self, t, generator, group_target=False):
         data = np.empty((len(t),len(self.radar.tx)*2+len(self.radar.rx)*3+1), dtype=np.float64)
+
+        all_targets = dict()
 
         data[:,0] = t
         targets = []
@@ -87,6 +89,12 @@ class ObservedTracking(Tracking, ObservedParameters):
         for ind,mrad in enumerate(generator):
             radar, meta = mrad
             targets.append(meta['target'])
+            
+            if meta['target'] in all_targets:
+                all_targets[meta['target']] += [ind]
+            else:
+                all_targets[meta['target']] = [ind]
+
             experiment.append('SST')
 
             for ti, tx in enumerate(radar.tx):
@@ -100,7 +108,19 @@ class ObservedTracking(Tracking, ObservedParameters):
 
         data = data.T.tolist() + [experiment, targets]
         data = list(map(list, zip(*data)))
-        return data
+
+        if group_target:
+            data_ = dict()
+            for key in all_targets:
+                for ind in all_targets[key]:
+                    if key in data_:
+                        data_[key] += [data[ind]]
+                    else:
+                        data_[key] = [data[ind]]
+        else:
+            data_ = data
+
+        return data_
 
 
 
@@ -160,6 +180,15 @@ scheduler = ObservedTracking(
 
 scheduler.update()
 scheduler.set_measurements()
+
+grouped_data = scheduler.schedule(group_target=True)
+
+for key in grouped_data:
+    ax = sorts.plotting.local_tracking(
+        np.array([x[1] for x in grouped_data[key]]),
+        np.array([x[2] for x in grouped_data[key]]),
+    )
+    ax.set_title(key)
 
 data = scheduler.schedule()
 

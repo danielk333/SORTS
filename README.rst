@@ -5,8 +5,7 @@ SORTS
 Feature list
 -------------
 
-* stuff
-* more stuff
+* TO BE ADDED
 
 
 Install SORTS
@@ -81,6 +80,21 @@ Using install script while a virtual environment is active on Ubuntu (from insid
    sudo apt-get update
    sudo apt-get install openjdk-8-jdk
    ./install_orekit.sh
+
+
+Install Pyglow
+---------------
+
+Taken from "https://github.com/timduly4/pyglow/"
+
+.. code-block:: bash
+
+  git clone git://github.com/timduly4/pyglow.git pyglow
+
+  cd pyglow/
+  pip install -r requirements.txt
+  make -C src/pyglow/models source
+  python setup.py install
 
 
 Example
