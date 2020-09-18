@@ -102,65 +102,79 @@ class ObservedTracking(Tracking, ObservedParameters):
 
 
 
+######## RUNNING ########
 
-if __name__=='__main__':
-    from sorts.population import tle_catalog
+from sorts.population import tle_catalog
 
-    e3d_demo = sorts.radars.eiscat3d_demonstrator_interp
-    #############
-    # CHOOSE OBJECTS
-    #############
+e3d_demo = sorts.radars.eiscat3d_demonstrator_interp
+#############
+# CHOOSE OBJECTS
+#############
 
-    objects = [ #NORAD ID
-        27386, #Envisat
-        35227,
-        35245,
-    ]
-    t_start = 0.0
-    t_end = 12.0*3600.0 #end time of tracking scheduling
-    t_step = 10.0 #time step for finding passes
-    dwell = 10.0 #the time between re-pointing beam, i.e. "radar actions" or "time slices"
+objects = [ #NORAD ID
+    27386, #Envisat
+    35227,
+    35245,
+]
+t_start = 0.0
+t_end = 12.0*3600.0 #end time of tracking scheduling
+t_step = 10.0 #time step for finding passes
+dwell = 10.0 #the time between re-pointing beam, i.e. "radar actions" or "time slices"
 
-    profiler = sorts.profiling.Profiler()
-    logger = sorts.profiling.get_logger()
+profiler = sorts.profiling.Profiler()
+logger = sorts.profiling.get_logger()
 
-    try:
-        pth = pathlib.Path(__file__).parent / 'data' / 'space_track_tle.txt'
-    except NameError:
-        import os
-        pth = 'data' + os.path.sep + 'space_track_tle.txt'
+try:
+    pth = pathlib.Path(__file__).parent / 'data' / 'space_track_tle.txt'
+except NameError:
+    import os
+    pth = 'data' + os.path.sep + 'space_track_tle.txt'
 
-    pop = tle_catalog(pth, kepler=True)
+pop = tle_catalog(pth, kepler=True)
 
-    pop.propagator_options['settings']['out_frame'] = 'ITRS' #output states in ECEF
+pop.propagator_options['settings']['out_frame'] = 'ITRS' #output states in ECEF
 
-    space_objects = []
-    for obj in objects:
-        ind = np.argwhere(pop.data['oid'] == obj)
-        if len(ind) > 0:
-            space_objects.append(pop.get_object(ind[0]))
+space_objects = []
+for obj in objects:
+    ind = np.argwhere(pop.data['oid'] == obj)
+    if len(ind) > 0:
+        space_objects.append(pop.get_object(ind[0]))
 
-    logger.always(f'Found {len(space_objects)} objects to track')
+logger.always(f'Found {len(space_objects)} objects to track')
 
-    scheduler = ObservedTracking(
-        radar = e3d_demo, 
-        space_objects = space_objects, 
-        end_time = t_end, 
-        start_time = t_start, 
-        controller_args = dict(return_copy=True, dwell=dwell),
-        max_dpos = 1e3,
-        profiler = profiler, 
-        logger = logger,
-        use_pass_states = False,
-    )
+scheduler = ObservedTracking(
+    radar = e3d_demo, 
+    space_objects = space_objects, 
+    end_time = t_end, 
+    start_time = t_start, 
+    controller_args = dict(return_copy=True, dwell=dwell),
+    max_dpos = 1e3,
+    profiler = profiler, 
+    logger = logger,
+    use_pass_states = False,
+)
 
-    scheduler.update()
-    scheduler.set_measurements()
+scheduler.update()
+scheduler.set_measurements()
 
-    data = scheduler.schedule()
+data = scheduler.schedule()
 
-    rx_head = [f'TX{i}-{co}' for i in range(len(e3d_demo.tx)) for co in ['az [deg]', 'el [deg]']]
-    rx_head += [f'RX{i}-{co}' for i in range(len(e3d_demo.rx)) for co in ['az [deg]', 'el [deg]', 'r [km]']]
-    sched_tab = tabulate(data, headers=["t [s]"] + rx_head + ['Experiment', 'Target'])
+rx_head = [f'TX{i}-{co}' for i in range(len(e3d_demo.tx)) for co in ['az [deg]', 'el [deg]']]
+rx_head += [f'RX{i}-{co}' for i in range(len(e3d_demo.rx)) for co in ['az [deg]', 'el [deg]', 'r [km]']]
+sched_tab = tabulate(data, headers=["t [s]"] + rx_head + ['Experiment', 'Target'])
 
-    print(sched_tab)
+print(sched_tab)
+
+
+fig = plt.figure(figsize=(15,15))
+ax = fig.add_subplot(211)
+ax.plot([x[0]/3600.0 for x in data], [x[1] for x in data], ".b")
+ax.set_xlabel('Time [h]')
+ax.set_ylabel('TX Azimuth [deg]')
+
+ax = fig.add_subplot(212)
+ax.plot([x[0]/3600.0 for x in data], [x[2] for x in data], ".b")
+ax.set_xlabel('Time [h]')
+ax.set_ylabel('TX Elevation [deg]')
+
+plt.show()
