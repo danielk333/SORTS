@@ -27,6 +27,10 @@ from . import dates
 from . import constants
 
 
+def arctime_to_degrees(minutes, seconds):
+    return (minutes + seconds/60.0)/60.0
+
+
 def convert(t, states, in_frame, out_frame, logger=None, profiler=None, **kwargs):
     '''Perform predefined coordinate transformations. Always returns a copy of the array.
     '''
