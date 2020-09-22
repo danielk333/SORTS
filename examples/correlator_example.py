@@ -31,11 +31,16 @@ except NameError:
 #   * 'epoch': [astropy.Time] epoch for measurements
 #   * 'tx': [sorts.TX] Pointer to the TX station
 #   * 'rx': [sorts.RX] Pointer to the RX station
-print('Loading EISCAT UHF ENVISAT Data')
+print('Loading EISCAT UHF monostatic measurements')
 with h5py.File(str(obs_pth),'r') as h_det:
     r = h_det['r'][()]*1e3 #km -> m, one way
     t = h_det['t'][()] #Unix seconds
     v = -h_det['v'][()] #Inverted definition of range rate, one way
+
+    inds = np.argsort(t)
+    t = t[inds]
+    r = r[inds]
+    v = v[inds]
 
     t = Time(t, format='unix', scale='utc')
     epoch = t[0]
@@ -52,8 +57,25 @@ with h5py.File(str(obs_pth),'r') as h_det:
 
 print('Loading TLE population')
 pop = sorts.population.tle_catalog(tle_pth)
+#THIS NEEDS FIXING
+# pop.save('/tmp/test_pop.h5')
+# exit()
+# from sorts.propagator import SGP4
+# pop = sorts.Population.load(
+#     '/tmp/test_pop.h5',
+#     propagator = SGP4,
+#     propagator_options = dict(
+#         settings = dict(
+#             tle_input=True,
+#         ),
+#     ),
+# )
+
+#correlate requires output in ECEF 
 pop.out_frame = 'ITRS'
 
+#filter out some objects for speed of example
+#IRIDIUM = 43075U
 pop.filter('oid', lambda oid: np.abs(oid - 43075) < 4)
 
 print('population size: {}'.format(len(pop)))
@@ -62,12 +84,13 @@ print('Correlating data and population')
 indecies, metric, cdat = sorts.correlate(
     measurements = [dat],
     population = pop,
-    n_closest = 2,
+    n_closest = 4,
 )
 
 print('Match metric:')
 for ind, dst in zip(indecies, metric):
     print(f'ind = {ind}: metric = {dst}')
+    print(pop.print(n=ind, fields=['oid', 'mjd0']) + '\n')
 
 
 def plot_correlation(dat, cdat):
@@ -114,6 +137,6 @@ def plot_correlation(dat, cdat):
     ax.set_xlabel('Time [s]')
 
 plot_correlation(dat, cdat[0][0])
-plot_correlation(dat, cdat[1][0])
+plot_correlation(dat, cdat[3][0])
 
 plt.show()

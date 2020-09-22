@@ -6,6 +6,7 @@
 
 #Python standard import
 import copy
+import pathlib
 
 #Third party import
 import h5py
@@ -413,7 +414,13 @@ class Population:
             n = slice(None, None, None)
         if fields is None:
             fields = self.fields
-        return tabulate(self.data[n][fields], headers=fields)
+        
+        data = self.data[n][fields]
+
+        if isinstance(data, np.void):
+            data = [[x for x in data]]
+
+        return tabulate(data, headers=fields)
 
 
     def __str__(self):
@@ -523,6 +530,9 @@ class Population:
 
 
     def save(self, fname):
+        if isinstance(fname, str):
+            fname = pathlib.Path(fname)
+
         with h5py.File(fname,"w") as hf:
             hf.create_dataset('data', data=self.data)
             hf.create_dataset('fields',
@@ -544,6 +554,9 @@ class Population:
 
     @classmethod
     def load(cls, fname, propagator, propagator_options = {}, propagator_args = {}):
+        if isinstance(fname, str):
+            fname = pathlib.Path(fname)
+
         with h5py.File(fname,"r") as hf:
             pop = cls(
                 fields = hf['fields'].value[()],

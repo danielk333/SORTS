@@ -120,6 +120,7 @@ def correlate(
             continue
 
         pbar.set_description('Correlating object {} '.format(ind))
+        pbar.update(1)
 
         if logger is not None:
             logger.debug('correlating {}/{}'.format(ind+1, len(population)))
