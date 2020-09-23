@@ -30,8 +30,23 @@ Populations
           :class: sphx-glr-multi-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    /home/danielk/IRF/IRF_GITLAB/SORTS/sorts/propagator/pysgp4.py:271: RuntimeWarning: overflow encountered in multiply
+      states *= 1e3 #km to m and km/s to m/s
+    /home/danielk/IRF/IRF_GITLAB/SORTS/sorts/propagator/pysgp4.py:271: RuntimeWarning: invalid value encountered in multiply
+      states *= 1e3 #km to m and km/s to m/s
 
 
+
+
+
+
+|
 
 
 .. code-block:: default
@@ -106,7 +121,7 @@ Populations
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.770 seconds)
+   **Total running time of the script:** ( 0 minutes  4.184 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_populations.py:

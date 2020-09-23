@@ -21,7 +21,7 @@
     <script src="../../_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="azel_to_ecef" href="sorts.frames.azel_to_ecef.html" />
+    <link rel="next" title="ITRS_to_geodetic" href="sorts.frames.ITRS_to_geodetic.html" />
     <link rel="prev" title="unix_to_npdt" href="sorts.dates.unix_to_npdt.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--[if lt IE 9]>
@@ -38,7 +38,7 @@
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="sorts.frames.azel_to_ecef.html" title="azel_to_ecef"
+          <a href="sorts.frames.ITRS_to_geodetic.html" title="ITRS_to_geodetic"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="sorts.dates.unix_to_npdt.html" title="unix_to_npdt"
@@ -62,8 +62,8 @@
   <p class="topless"><a href="sorts.dates.unix_to_npdt.html"
                         title="previous chapter">unix_to_npdt</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="sorts.frames.azel_to_ecef.html"
-                        title="next chapter">azel_to_ecef</a></p>
+  <p class="topless"><a href="sorts.frames.ITRS_to_geodetic.html"
+                        title="next chapter">ITRS_to_geodetic</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -101,6 +101,12 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.frames.ITRS_to_geodetic.html#sorts.frames.ITRS_to_geodetic" title="sorts.frames.ITRS_to_geodetic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ITRS_to_geodetic</span></code></a>(x, y, z[, radians, ellipsoid])</p></td>
+<td><p>Use <cite>astropy.coordinates.EarthLocation</cite> to transform from geodetic to ITRS.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.frames.arctime_to_degrees.html#sorts.frames.arctime_to_degrees" title="sorts.frames.arctime_to_degrees"><code class="xref py py-obj docutils literal notranslate"><span class="pre">arctime_to_degrees</span></code></a>(minutes, seconds)</p></td>
+<td><p></p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.frames.azel_to_ecef.html#sorts.frames.azel_to_ecef" title="sorts.frames.azel_to_ecef"><code class="xref py py-obj docutils literal notranslate"><span class="pre">azel_to_ecef</span></code></a>(lat, lon, alt, az, el[, radians])</p></td>
 <td><p>Radar pointing (az,el) to unit vector in ECEF, not including translation.</p></td>
 </tr>
@@ -125,6 +131,17 @@
 <div class="section" id="contents">
 <h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
 <p class="rubric">Functions</p>
+<dl class="py function">
+<dt>
+<code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">ITRS_to_geodetic</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">z</span></em>, <em class="sig-param"><span class="n">radians</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">ellipsoid</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#ITRS_to_geodetic"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Use <cite>astropy.coordinates.EarthLocation</cite> to transform from geodetic to ITRS.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt>
+<code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">arctime_to_degrees</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">minutes</span></em>, <em class="sig-param"><span class="n">seconds</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#arctime_to_degrees"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
 <dl class="py function">
 <dt>
 <code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">azel_to_ecef</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lat</span></em>, <em class="sig-param"><span class="n">lon</span></em>, <em class="sig-param"><span class="n">alt</span></em>, <em class="sig-param"><span class="n">az</span></em>, <em class="sig-param"><span class="n">el</span></em>, <em class="sig-param"><span class="n">radians</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#azel_to_ecef"><span class="viewcode-link">[source]</span></a></dt>
@@ -184,7 +201,7 @@
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="sorts.frames.azel_to_ecef.html" title="azel_to_ecef"
+          <a href="sorts.frames.ITRS_to_geodetic.html" title="ITRS_to_geodetic"
              >next</a> |</li>
         <li class="right" >
           <a href="sorts.dates.unix_to_npdt.html" title="unix_to_npdt"

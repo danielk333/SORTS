@@ -19,9 +19,9 @@ Module summary
 .. autosummary::
     :toctree: .
     
-    plot_angles
+    az_el_to_xy
     
-    plot_snr
+    local_tracking
     
 
 
@@ -38,12 +38,12 @@ Contents
 .. rubric:: Functions
 
 
-.. autofunction:: plot_angles
+.. autofunction:: az_el_to_xy
    :noindex:
 
 
 
-.. autofunction:: plot_snr
+.. autofunction:: local_tracking
    :noindex:
 
 

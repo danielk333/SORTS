@@ -1,0 +1,8 @@
+generate\_measurements
+======================
+
+.. currentmodule:: sorts.correlator
+
+.. rubric:: generate_measurements
+
+.. autofunction:: generate_measurements

@@ -96,10 +96,10 @@ i    : 7.5000e+01   z : 6.0816e+06
 omega: 0.0000e+00   vx: -1.3986e+03
 Omega: 8.6000e+01   vy: -6.4897e+03
 anom : 6.0000e+01   vz: 3.5175e+03
-Parameters: d=0.100, C_D=2.300, A=1.000, m=1.000, C_R=1.000
-2020-09-17 12:27:17.336 INFO    ; Static:init
-2020-09-17 12:27:17.340 INFO    ; Static:init
-2020-09-17 12:27:17.343 INFO    ; Scanner:init
+Parameters: d=0.1, C_D=2.3, A=1.0, m=1.0, C_R=1.0
+2020-09-23 10:58:26.843 INFO    ; Static:init
+2020-09-23 10:58:26.846 INFO    ; Static:init
+2020-09-23 10:58:26.851 INFO    ; Scanner:init
 Temporal points obj: 4555
 Max SNR=-7.52150639802996 dB
 Max SNR=-7.426719944704181 dB
@@ -110,21 +110,21 @@ Max SNR=-6.157419687282379 dB
 --------------------------------------- Performance analysis --------------------------------------
  Name                                                   |   Executions | Mean time     | Total time
 --------------------------------------------------------+--------------+---------------+--------------
- equidistant_sampling                                   |            1 | 6.86646e-05 s | 0.00 %
- get_state                                              |            1 | 5.52654e-02 s | 0.41 %
- find_passes                                            |            1 | 5.68318e-03 s | 0.04 %
- Obs.Param.:calculate_observation:get_state             |            3 | 6.00181e-02 s | 1.33 %
- Obs.Param.:calculate_observation:enus,range,range_rate |            3 | 7.23600e-04 s | 0.02 %
- Scanner:generator:point_radar:_point_station[tx]       |         8361 | 1.14356e-04 s | 7.05 %
- Scanner:generator:point_radar:_point_station[rx]       |        25083 | 2.12747e-04 s | 39.34 %
- Scanner:generator:point_radar                          |         8361 | 9.04070e-04 s | 55.73 %
- Obs.Param.:calculate_observation:snr-step:gain         |         8361 | 6.41506e-04 s | 39.54 %
- Obs.Param.:calculate_observation:snr-step:snr          |         8361 | 2.43943e-05 s | 1.50 %
- Obs.Param.:calculate_observation:snr-step              |         8361 | 6.82654e-04 s | 42.08 %
- Obs.Param.:calculate_observation:generator             |            3 | 4.43992e+00 s | 98.19 %
- Obs.Param.:calculate_observation                       |            3 | 4.50076e+00 s | 99.54 %
- observe_passes                                         |            1 | 1.35033e+01 s | 99.55 %
- total                                                  |            1 | 1.35646e+01 s | 100.00 %
+ equidistant_sampling                                   |            1 | 1.25885e-04 s | 0.00 %
+ get_state                                              |            1 | 7.67790e-01 s | 5.70 %
+ find_passes                                            |            1 | 6.33717e-03 s | 0.05 %
+ Obs.Param.:calculate_observation:get_state             |            3 | 5.81103e-02 s | 1.29 %
+ Obs.Param.:calculate_observation:enus,range,range_rate |            3 | 7.02937e-04 s | 0.02 %
+ Scanner:generator:point_radar:_point_station[tx]       |         8361 | 1.04194e-04 s | 6.47 %
+ Scanner:generator:point_radar:_point_station[rx]       |        25083 | 1.96253e-04 s | 36.53 %
+ Scanner:generator:point_radar                          |         8361 | 8.29216e-04 s | 51.45 %
+ Obs.Param.:calculate_observation:snr-step:gain         |         8361 | 6.27113e-04 s | 38.91 %
+ Obs.Param.:calculate_observation:snr-step:snr          |         8361 | 2.13844e-05 s | 1.33 %
+ Obs.Param.:calculate_observation:snr-step              |         8361 | 6.63409e-04 s | 41.16 %
+ Obs.Param.:calculate_observation:generator             |            3 | 4.17428e+00 s | 92.93 %
+ Obs.Param.:calculate_observation                       |            3 | 4.23317e+00 s | 94.25 %
+ observe_passes                                         |            1 | 1.27004e+01 s | 94.25 %
+ total                                                  |            1 | 1.34749e+01 s | 100.00 %
 ---------------------------------------------------------------------------------------------------
 
 Temporal points obj: 4555
@@ -137,18 +137,18 @@ Max SNR=-6.157419687282379 dB
 --------------------------------------- Performance analysis --------------------------------------
  Name                                                   |   Executions | Mean time     | Total time
 --------------------------------------------------------+--------------+---------------+--------------
- equidistant_sampling                                   |            1 | 7.89165e-05 s | 0.00 %
- get_state                                              |            1 | 6.07996e-02 s | 1.12 %
- find_passes                                            |            1 | 2.65529e-02 s | 0.49 %
- Obs.Param.:calculate_observation:get_state             |            3 | 5.92041e-02 s | 3.29 %
- Obs.Param.:calculate_observation:enus,range,range_rate |            3 | 8.03471e-04 s | 0.04 %
- Obs.Param.:calculate_observation:snr-step:gain         |         8361 | 5.75736e-04 s | 89.05 %
- Obs.Param.:calculate_observation:snr-step:snr          |         8361 | 2.07818e-05 s | 3.21 %
- Obs.Param.:calculate_observation:snr-step              |         8361 | 6.11969e-04 s | 94.65 %
- Obs.Param.:calculate_observation:generator             |            3 | 1.71228e+00 s | 95.03 %
- Obs.Param.:calculate_observation                       |            3 | 1.77237e+00 s | 98.36 %
- observe_passes                                         |            1 | 5.31806e+00 s | 98.38 %
- total                                                  |            1 | 5.40572e+00 s | 100.00 %
+ equidistant_sampling                                   |            1 | 7.43866e-05 s | 0.00 %
+ get_state                                              |            1 | 5.60377e-02 s | 1.10 %
+ find_passes                                            |            1 | 5.87058e-03 s | 0.12 %
+ Obs.Param.:calculate_observation:get_state             |            3 | 5.57485e-02 s | 3.29 %
+ Obs.Param.:calculate_observation:enus,range,range_rate |            3 | 7.36634e-04 s | 0.04 %
+ Obs.Param.:calculate_observation:snr-step:gain         |         8361 | 5.47508e-04 s | 90.13 %
+ Obs.Param.:calculate_observation:snr-step:snr          |         8361 | 1.77173e-05 s | 2.92 %
+ Obs.Param.:calculate_observation:snr-step              |         8361 | 5.77886e-04 s | 95.13 %
+ Obs.Param.:calculate_observation:generator             |            3 | 1.61548e+00 s | 95.42 %
+ Obs.Param.:calculate_observation                       |            3 | 1.67204e+00 s | 98.76 %
+ observe_passes                                         |            1 | 5.01694e+00 s | 98.78 %
+ total                                                  |            1 | 5.07913e+00 s | 100.00 %
 ---------------------------------------------------------------------------------------------------
 
 Temporal points obj: 4555
@@ -161,18 +161,18 @@ Max SNR=-6.239996253442425 dB
 --------------------------------------- Performance analysis --------------------------------------
  Name                                                   |   Executions | Mean time     | Total time
 --------------------------------------------------------+--------------+---------------+--------------
- equidistant_sampling                                   |            1 | 6.34193e-05 s | 0.01 %
- get_state                                              |            1 | 5.61700e-02 s | 8.28 %
- find_passes                                            |            1 | 1.24094e-02 s | 1.83 %
- Obs.Param.:calculate_observation:get_state             |            3 | 2.41255e-02 s | 10.67 %
- Obs.Param.:calculate_observation:enus,range,range_rate |            3 | 5.30799e-04 s | 0.23 %
- Obs.Param.:calculate_observation:snr-step:gain         |          835 | 5.95767e-04 s | 73.34 %
- Obs.Param.:calculate_observation:snr-step:snr          |          835 | 2.41008e-05 s | 2.97 %
- Obs.Param.:calculate_observation:snr-step              |          835 | 6.37608e-04 s | 78.49 %
- Obs.Param.:calculate_observation:generator             |            3 | 1.78155e-01 s | 78.79 %
- Obs.Param.:calculate_observation                       |            3 | 2.02873e-01 s | 89.73 %
- observe_passes                                         |            1 | 6.09462e-01 s | 89.85 %
- total                                                  |            1 | 6.78300e-01 s | 100.00 %
+ equidistant_sampling                                   |            1 | 5.67436e-05 s | 0.01 %
+ get_state                                              |            1 | 5.22633e-02 s | 7.78 %
+ find_passes                                            |            1 | 5.87249e-03 s | 0.87 %
+ Obs.Param.:calculate_observation:get_state             |            3 | 2.52349e-02 s | 11.27 %
+ Obs.Param.:calculate_observation:enus,range,range_rate |            3 | 5.34296e-04 s | 0.24 %
+ Obs.Param.:calculate_observation:snr-step:gain         |          835 | 6.00615e-04 s | 74.67 %
+ Obs.Param.:calculate_observation:snr-step:snr          |          835 | 2.21267e-05 s | 2.75 %
+ Obs.Param.:calculate_observation:snr-step              |          835 | 6.38674e-04 s | 79.40 %
+ Obs.Param.:calculate_observation:generator             |            3 | 1.78332e-01 s | 79.66 %
+ Obs.Param.:calculate_observation                       |            3 | 2.04145e-01 s | 91.19 %
+ observe_passes                                         |            1 | 6.13208e-01 s | 91.30 %
+ total                                                  |            1 | 6.71628e-01 s | 100.00 %
 ---------------------------------------------------------------------------------------------------
 </pre></div>
 </div>
@@ -226,14 +226,14 @@ Max SNR=-6.239996253442425 dB
     <span class="k">pass</span>
 
 <span class="n">static_ctrl</span> <span class="o">=</span> <span class="n">Static</span><span class="p">(</span><span class="n">eiscat3d</span><span class="p">,</span> <span class="n">azimuth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">elevation</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span> <span class="n">meta</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;dwell&#39;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">})</span>
-<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">static_ctrl</span><span class="o">.</span><span class="n">t</span></a></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><a href="https://numpy.org/doc/stable/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">end_t</span><span class="p">,</span> <span class="n">static_ctrl</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;dwell&#39;</span><span class="p">])</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">static_ctrl</span><span class="o">.</span><span class="n">t</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">end_t</span><span class="p">,</span> <span class="n">static_ctrl</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;dwell&#39;</span><span class="p">])</span>
 
 <span class="n">static_ctrl_undersamp</span> <span class="o">=</span> <span class="n">Static</span><span class="p">(</span><span class="n">eiscat3d</span><span class="p">,</span> <span class="n">azimuth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">elevation</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span> <span class="n">meta</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;dwell&#39;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">})</span>
-<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">static_ctrl_undersamp</span><span class="o">.</span><span class="n">t</span></a></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><a href="https://numpy.org/doc/stable/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">end_t</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">static_ctrl_undersamp</span><span class="o">.</span><span class="n">t</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">end_t</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
 
 <span class="n">scan</span> <span class="o">=</span> <span class="n">Beampark</span><span class="p">(</span><span class="n">azimuth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">elevation</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">dwell</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
 <span class="n">scanner_ctrl</span> <span class="o">=</span> <span class="n">Scanner</span><span class="p">(</span><span class="n">eiscat3d</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">scan</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
-<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">scanner_ctrl</span><span class="o">.</span><span class="n">t</span></a></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><a href="https://numpy.org/doc/stable/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">end_t</span><span class="p">,</span> <span class="n">scan</span><span class="o">.</span><span class="n">dwell</span><span class="p">())</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">scanner_ctrl</span><span class="o">.</span><span class="n">t</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">end_t</span><span class="p">,</span> <span class="n">scan</span><span class="o">.</span><span class="n">dwell</span><span class="p">())</span>
 
 <span class="k">def</span> <span class="nf">run_scanning_simulation</span><span class="p">(</span><span class="n">radar_ctrl</span><span class="p">):</span>
 
@@ -277,7 +277,7 @@ Max SNR=-6.239996253442425 dB
     <span class="k">for</span> <span class="n">psi</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">txps</span> <span class="ow">in</span> <span class="n">psi</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">rxtxps</span> <span class="ow">in</span> <span class="n">txps</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Max SNR=</span><span class="si">{</span><span class="mi">10</span><span class="o">*</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.log10.html#numpy.log10" title="numpy.log10" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-data"><a href="https://numpy.org/doc/stable/reference/generated/numpy.log10.html#numpy.log10" title="numpy.log10" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-data"><span class="n">np</span><span class="o">.</span><span class="n">log10</span></a></a><span class="p">(</span><span class="n">rxtxps</span><span class="p">[</span><span class="s2">&quot;snr&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span><span class="si">}</span><span class="s1"> dB&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Max SNR=</span><span class="si">{</span><span class="mi">10</span><span class="o">*</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.log10.html#numpy.log10" title="numpy.log10" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-data"><span class="n">np</span><span class="o">.</span><span class="n">log10</span></a><span class="p">(</span><span class="n">rxtxps</span><span class="p">[</span><span class="s2">&quot;snr&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span><span class="si">}</span><span class="s1"> dB&#39;</span><span class="p">)</span>
 
     <span class="n">p</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;total&#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"> </span><span class="si">{</span><span class="n">radar_ctrl</span><span class="o">.</span><span class="vm">__class__</span><span class="si">}</span><span class="s1">: len(t) = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">radar_ctrl</span><span class="o">.</span><span class="n">t</span><span class="p">)</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -288,7 +288,7 @@ Max SNR=-6.239996253442425 dB
 <span class="n">run_scanning_simulation</span><span class="p">(</span><span class="n">static_ctrl_undersamp</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  19.677 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  19.258 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-gallery-static-radar-controller-speedup-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/b00324c6ec4d464a144f1875167040fb/static_radar_controller_speedup.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">static_radar_controller_speedup.py</span></code></a></p>

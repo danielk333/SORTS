@@ -21,7 +21,7 @@
     <script src="../_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="SGP4 standalone example" href="sgp4_package_example.html" />
+    <link rel="next" title="Using pyglow" href="using_pyglow.html" />
     <link rel="prev" title="Profiling SGP4" href="profiler_sgp4.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--[if lt IE 9]>
@@ -38,7 +38,7 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="sgp4_package_example.html" title="SGP4 standalone example"
+          <a href="using_pyglow.html" title="Using pyglow"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="profiler_sgp4.html" title="Profiling SGP4"
@@ -53,8 +53,8 @@
   <p class="topless"><a href="profiler_sgp4.html"
                         title="previous chapter">Profiling SGP4</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="sgp4_package_example.html"
-                        title="next chapter">SGP4 standalone example</a></p>
+  <p class="topless"><a href="using_pyglow.html"
+                        title="next chapter">Using pyglow</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -92,62 +92,62 @@ WARNING 30
 INFO    20
 DEBUG   10</p>
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2020-09-17 12:25:38.997 INFO    ; info message 0
-2020-09-17 12:25:38.997 WARNING ; warning message 0
-2020-09-17 12:25:38.997 ERROR   ; error message 0
-2020-09-17 12:25:38.997 CRITICAL; critical message 0
-2020-09-17 12:25:38.997 ALWAYS  ; always message 0
-2020-09-17 12:25:38.997 INFO    ; info message 1
-2020-09-17 12:25:38.997 WARNING ; warning message 1
-2020-09-17 12:25:38.998 ERROR   ; error message 1
-2020-09-17 12:25:38.998 CRITICAL; critical message 1
-2020-09-17 12:25:38.998 ALWAYS  ; always message 1
-2020-09-17 12:25:38.998 INFO    ; info message 2
-2020-09-17 12:25:38.998 WARNING ; warning message 2
-2020-09-17 12:25:38.998 ERROR   ; error message 2
-2020-09-17 12:25:38.998 CRITICAL; critical message 2
-2020-09-17 12:25:38.998 ALWAYS  ; always message 2
-2020-09-17 12:25:38.998 INFO    ; info message 3
-2020-09-17 12:25:38.998 WARNING ; warning message 3
-2020-09-17 12:25:38.998 ERROR   ; error message 3
-2020-09-17 12:25:38.998 CRITICAL; critical message 3
-2020-09-17 12:25:38.998 ALWAYS  ; always message 3
-2020-09-17 12:25:38.998 INFO    ; info message 4
-2020-09-17 12:25:38.998 WARNING ; warning message 4
-2020-09-17 12:25:38.998 ERROR   ; error message 4
-2020-09-17 12:25:38.998 CRITICAL; critical message 4
-2020-09-17 12:25:38.999 ALWAYS  ; always message 4
-2020-09-17 12:25:38.999 INFO    ; info message 5
-2020-09-17 12:25:38.999 WARNING ; warning message 5
-2020-09-17 12:25:38.999 ERROR   ; error message 5
-2020-09-17 12:25:38.999 CRITICAL; critical message 5
-2020-09-17 12:25:38.999 ALWAYS  ; always message 5
-2020-09-17 12:25:38.999 INFO    ; info message 6
-2020-09-17 12:25:38.999 WARNING ; warning message 6
-2020-09-17 12:25:38.999 ERROR   ; error message 6
-2020-09-17 12:25:38.999 CRITICAL; critical message 6
-2020-09-17 12:25:38.999 ALWAYS  ; always message 6
-2020-09-17 12:25:38.999 INFO    ; info message 7
-2020-09-17 12:25:38.999 WARNING ; warning message 7
-2020-09-17 12:25:38.999 ERROR   ; error message 7
-2020-09-17 12:25:38.999 CRITICAL; critical message 7
-2020-09-17 12:25:38.999 ALWAYS  ; always message 7
-2020-09-17 12:25:39.000 INFO    ; info message 8
-2020-09-17 12:25:39.000 WARNING ; warning message 8
-2020-09-17 12:25:39.000 ERROR   ; error message 8
-2020-09-17 12:25:39.000 CRITICAL; critical message 8
-2020-09-17 12:25:39.000 ALWAYS  ; always message 8
-2020-09-17 12:25:39.000 INFO    ; info message 9
-2020-09-17 12:25:39.000 WARNING ; warning message 9
-2020-09-17 12:25:39.000 ERROR   ; error message 9
-2020-09-17 12:25:39.000 CRITICAL; critical message 9
-2020-09-17 12:25:39.000 ALWAYS  ; always message 9
-2020-09-17 12:25:39.000 INFO    ; --------------- Performance analysis --------------
-2020-09-17 12:25:39.001 INFO    ;  Name   |   Executions | Mean time     | Total time
-2020-09-17 12:25:39.001 INFO    ; --------+--------------+---------------+---------------
-2020-09-17 12:25:39.001 INFO    ;  log    |           10 | 3.16429e-04 s | 3.16429e-03 s
-2020-09-17 12:25:39.001 INFO    ; ---------------------------------------------------
-2020-09-17 12:25:39.001 INFO    ;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2020-09-23 10:52:31.363 INFO    ; info message 0
+2020-09-23 10:52:31.363 WARNING ; warning message 0
+2020-09-23 10:52:31.363 ERROR   ; error message 0
+2020-09-23 10:52:31.363 CRITICAL; critical message 0
+2020-09-23 10:52:31.363 ALWAYS  ; always message 0
+2020-09-23 10:52:31.363 INFO    ; info message 1
+2020-09-23 10:52:31.363 WARNING ; warning message 1
+2020-09-23 10:52:31.363 ERROR   ; error message 1
+2020-09-23 10:52:31.363 CRITICAL; critical message 1
+2020-09-23 10:52:31.363 ALWAYS  ; always message 1
+2020-09-23 10:52:31.363 INFO    ; info message 2
+2020-09-23 10:52:31.363 WARNING ; warning message 2
+2020-09-23 10:52:31.363 ERROR   ; error message 2
+2020-09-23 10:52:31.363 CRITICAL; critical message 2
+2020-09-23 10:52:31.364 ALWAYS  ; always message 2
+2020-09-23 10:52:31.364 INFO    ; info message 3
+2020-09-23 10:52:31.364 WARNING ; warning message 3
+2020-09-23 10:52:31.364 ERROR   ; error message 3
+2020-09-23 10:52:31.364 CRITICAL; critical message 3
+2020-09-23 10:52:31.364 ALWAYS  ; always message 3
+2020-09-23 10:52:31.364 INFO    ; info message 4
+2020-09-23 10:52:31.364 WARNING ; warning message 4
+2020-09-23 10:52:31.364 ERROR   ; error message 4
+2020-09-23 10:52:31.364 CRITICAL; critical message 4
+2020-09-23 10:52:31.364 ALWAYS  ; always message 4
+2020-09-23 10:52:31.364 INFO    ; info message 5
+2020-09-23 10:52:31.364 WARNING ; warning message 5
+2020-09-23 10:52:31.364 ERROR   ; error message 5
+2020-09-23 10:52:31.364 CRITICAL; critical message 5
+2020-09-23 10:52:31.364 ALWAYS  ; always message 5
+2020-09-23 10:52:31.364 INFO    ; info message 6
+2020-09-23 10:52:31.364 WARNING ; warning message 6
+2020-09-23 10:52:31.364 ERROR   ; error message 6
+2020-09-23 10:52:31.364 CRITICAL; critical message 6
+2020-09-23 10:52:31.365 ALWAYS  ; always message 6
+2020-09-23 10:52:31.365 INFO    ; info message 7
+2020-09-23 10:52:31.365 WARNING ; warning message 7
+2020-09-23 10:52:31.365 ERROR   ; error message 7
+2020-09-23 10:52:31.365 CRITICAL; critical message 7
+2020-09-23 10:52:31.365 ALWAYS  ; always message 7
+2020-09-23 10:52:31.365 INFO    ; info message 8
+2020-09-23 10:52:31.365 WARNING ; warning message 8
+2020-09-23 10:52:31.365 ERROR   ; error message 8
+2020-09-23 10:52:31.365 CRITICAL; critical message 8
+2020-09-23 10:52:31.365 ALWAYS  ; always message 8
+2020-09-23 10:52:31.365 INFO    ; info message 9
+2020-09-23 10:52:31.365 WARNING ; warning message 9
+2020-09-23 10:52:31.365 ERROR   ; error message 9
+2020-09-23 10:52:31.365 CRITICAL; critical message 9
+2020-09-23 10:52:31.365 ALWAYS  ; always message 9
+2020-09-23 10:52:31.366 INFO    ; --------------- Performance analysis --------------
+2020-09-23 10:52:31.366 INFO    ;  Name   |   Executions | Mean time     | Total time
+2020-09-23 10:52:31.366 INFO    ; --------+--------------+---------------+---------------
+2020-09-23 10:52:31.366 INFO    ;  log    |           10 | 2.71702e-04 s | 2.71702e-03 s
+2020-09-23 10:52:31.366 INFO    ; ---------------------------------------------------
+2020-09-23 10:52:31.366 INFO    ;
 </pre></div>
 </div>
 <div class="line-block">
@@ -174,7 +174,7 @@ DEBUG   10</p>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.005 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.011 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-gallery-logger-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/7096d0bc9e83ed647fcf564817b94299/logger.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">logger.py</span></code></a></p>
@@ -202,7 +202,7 @@ DEBUG   10</p>
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="sgp4_package_example.html" title="SGP4 standalone example"
+          <a href="using_pyglow.html" title="Using pyglow"
              >next</a> |</li>
         <li class="right" >
           <a href="profiler_sgp4.html" title="Profiling SGP4"

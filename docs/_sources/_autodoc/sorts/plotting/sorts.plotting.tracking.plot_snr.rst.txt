@@ -1,8 +1,0 @@
-plot\_snr
-=========
-
-.. currentmodule:: sorts.plotting.tracking
-
-.. rubric:: plot_snr
-
-.. autofunction:: plot_snr

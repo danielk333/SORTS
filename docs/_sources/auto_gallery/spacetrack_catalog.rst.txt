@@ -64,9 +64,9 @@ Loading a TLE catalog (e.g. spacetrack)
     anom : 5.7506e+01   vz: 1.9273e+03
 
 
-    Space object 1: <Time object: scale='utc' format='mjd' value=59100.22859376995>:
+    Space object 329: <Time object: scale='utc' format='mjd' value=59100.22859376995>:
     ('1   329U 61015DF  20252.22859377 -.00000018  00000-0  63745-4 0  9990', '2   329  66.7785 271.2226 0119721 314.2276 118.4865 13.65287519942659')
-    Parameters: d=3398.118, C_D=2.300, A=1.000, m=102726828682.234, C_R=1.000
+    Parameters: d=3398.117705962821, C_D=2.3, A=1.0, m=102726828682.2335, C_R=1.0
     /home/danielk/venvs/sorts/lib/python3.7/site-packages/astropy/coordinates/builtin_frames/utils.py:76: AstropyWarning: (some) times are outside of range covered by IERS table. Assuming UT1-UTC=0 for coordinate transformations.
       warnings.warn(msg.format(ierserr.args[0]), AstropyWarning)
     /home/danielk/venvs/sorts/lib/python3.7/site-packages/astropy/coordinates/builtin_frames/utils.py:62: AstropyWarning: Tried to get polar motions for times after IERS data is valid. Defaulting to polar motion from the 50-yr mean for those. This may affect precision at the 10s of arcsec level
@@ -137,7 +137,7 @@ Loading a TLE catalog (e.g. spacetrack)
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  20.494 seconds)
+   **Total running time of the script:** ( 0 minutes  21.640 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_spacetrack_catalog.py:

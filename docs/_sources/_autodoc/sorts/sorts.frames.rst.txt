@@ -19,6 +19,10 @@ Module summary
 .. autosummary::
     :toctree: .
     
+    ITRS_to_geodetic
+    
+    arctime_to_degrees
+    
     azel_to_ecef
     
     convert
@@ -44,6 +48,16 @@ Contents
 
 
 .. rubric:: Functions
+
+
+.. autofunction:: ITRS_to_geodetic
+   :noindex:
+
+
+
+.. autofunction:: arctime_to_degrees
+   :noindex:
+
 
 
 .. autofunction:: azel_to_ecef

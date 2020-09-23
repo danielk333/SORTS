@@ -33,7 +33,7 @@ An example scheduler for tracking
     omega: 0.0000e+00   vx: -2.1687e+03
     Omega: 7.9000e+01   vy: -6.7605e+03
     anom : 6.0000e+01   vz: 3.1307e+03
-    Parameters: d=0.010, C_D=2.300, A=1.000, m=1.000, C_R=1.000
+    Parameters: d=0.01, C_D=2.3, A=1.0, m=1.0, C_R=1.0
 
     Space object 2: <Time object: scale='utc' format='mjd' value=57125.7729>:
     a    : 7.2000e+06   x : 1.7861e+06
@@ -42,61 +42,26 @@ An example scheduler for tracking
     omega: 0.0000e+00   vx: -2.8337e+03
     Omega: 7.4000e+01   vy: 8.1254e+02
     anom : 0.0000e+00   vz: 7.6794e+03
-    Parameters: d=0.010, C_D=2.300, A=1.000, m=1.000, C_R=1.000
-    2020-09-17 12:27:37.818 INFO    ; Tracking:get_passes(ind=0):propagating 177678 steps
-    2020-09-17 12:27:39.483 INFO    ; Tracking:get_passes(ind=0):propagating complete
+    Parameters: d=0.01, C_D=2.3, A=1.0, m=1.0, C_R=1.0
+    2020-09-23 10:54:18.491 INFO    ; Tracking:get_passes(ind=0):propagating 177678 steps
+    2020-09-23 10:54:19.948 INFO    ; Tracking:get_passes(ind=0):propagating complete
     /home/danielk/IRF/IRF_GITLAB/pyant/pyant/coordinates.py:89: RuntimeWarning: invalid value encountered in greater
       proj[proj > 1.0] = 1.0
     /home/danielk/IRF/IRF_GITLAB/pyant/pyant/coordinates.py:90: RuntimeWarning: invalid value encountered in less
       proj[proj < -1.0] = -1.0
     /home/danielk/IRF/IRF_GITLAB/SORTS/sorts/passes.py:269: RuntimeWarning: invalid value encountered in less
       check_st = zenith_st_ang < 90.0-station.min_elevation
-    2020-09-17 12:27:39.582 INFO    ; Tracking:get_passes(ind=0):tx0-rx0 2 passes
-    2020-09-17 12:27:39.582 INFO    ; Tracking:get_passes(ind=0):tx0-rx1 2 passes
-    2020-09-17 12:27:39.583 INFO    ; Tracking:get_passes(ind=0):tx0-rx2 2 passes
-    2020-09-17 12:27:39.584 INFO    ; Tracking:get_passes(ind=1):propagating 177678 steps
-    2020-09-17 12:27:41.342 INFO    ; Tracking:get_passes(ind=1):propagating complete
-    2020-09-17 12:27:41.429 INFO    ; Tracking:get_passes(ind=1):tx0-rx0 1 passes
-    2020-09-17 12:27:41.429 INFO    ; Tracking:get_passes(ind=1):tx0-rx1 1 passes
-    2020-09-17 12:27:41.430 INFO    ; Tracking:get_passes(ind=1):tx0-rx2 1 passes
-        t [s]      rx0 az    rx0 el      rx1 az    rx1 el     rx2 az    rx2 el  Controller    Target
-    ---------  ----------  --------  ----------  --------  ---------  --------  ------------  --------
-      105.4    -72.5595     44.2446  -64.8155     38.1225  -59.5643    42.3254  Tracker       Object 1
-      111.357  -69.4505     45.9338  -62.0589     39.4048  -56.1129    43.5081  Tracker       Object 1
-      117.314  -66.0239     47.5823  -59.1038     40.6492  -52.4403    44.5979  Tracker       Object 1
-      123.271  -62.2558     49.1627  -55.9445     41.8399  -48.5564    45.5742  Tracker       Object 1
-      129.228  -58.1288     50.6441  -52.5795     42.9594  -44.4799    46.4169  Tracker       Object 1
-      135.185  -53.6367     51.9923  -49.0125     43.9896  -40.2391    47.1076  Tracker       Object 1
-      141.141  -48.7897     53.1717  -45.2538     44.9118  -35.8715    47.6313  Tracker       Object 1
-      147.098  -43.6195     54.1476  -41.3215     45.7083  -31.4226    47.9771  Tracker       Object 1
-      153.055  -38.1827     54.8892  -37.2413     46.3629  -26.9435    48.1394  Tracker       Object 1
-      159.012  -32.5603     55.3728  -33.0472     46.8623  -22.4872    48.1183  Tracker       Object 1
-      164.969  -26.8525     55.5846  -28.7794     47.197   -18.1054    47.9196  Tracker       Object 1
-      170.926  -21.1693     55.5231  -24.4832     47.3618  -13.8445    47.554   Tracker       Object 1
-      176.883  -15.6177     55.1984  -20.2052     47.3566   -9.74323   47.0365  Tracker       Object 1
-      182.84   -10.2905     54.6315  -15.9912     47.1861   -5.83115   46.3847  Tracker       Object 1
-      188.796   -5.25808    53.8512  -11.8829     46.8596   -2.12828   45.6178  Tracker       Object 1
-      194.753   -0.565792   52.8908   -7.91549    46.3898    1.35424   44.7553  Tracker       Object 1
-      200.71     3.76472    51.7849   -4.11684    45.7921    4.61294   43.8163  Tracker       Object 1
-      206.667    7.7312     50.567    -0.506551   45.0833    7.65043   42.8184  Tracker       Object 1
-      212.624   11.3454     49.2676    2.90345    44.2811   10.4738    41.7777  Tracker       Object 1
-      218.581   14.6282     47.9136    6.10805    43.4026   13.0934    40.7081  Tracker       Object 1
-      224.538   17.6052     46.5277    9.10779    42.4639   15.5211    39.6216  Tracker       Object 1
-      230.495   20.3042     45.1284   11.9075     41.4801   17.7702    38.5283  Tracker       Object 1
-      236.451   22.7527     43.7307   14.5151     40.4643   19.854     37.4366  Tracker       Object 1
-      242.408   24.9768     42.3461   16.9406     39.4279   21.7856    36.3531  Tracker       Object 1
-      248.365   27.0009     40.9836   19.1951     38.381    23.5776    35.2831  Tracker       Object 1
-      254.322   28.8468     39.6495   21.2904     37.3316   25.2419    34.2307  Tracker       Object 1
-      260.279   30.5343     38.3486   23.2382     36.2864   26.7895    33.1989  Tracker       Object 1
-      266.236   32.0808     37.084    25.05       35.251    28.2307    32.19    Tracker       Object 1
-      272.193   33.5017     35.8575   26.7366     34.2295   29.5746    31.2055  Tracker       Object 1
-      278.149   34.8106     34.6701   28.3083     33.2253   30.83      30.2463  Tracker       Object 1
-      284.106   36.0193     33.5221   29.7748     32.2407   32.0043    29.3129  Tracker       Object 1
-      290.063   37.1383     32.4132   31.1448     31.2777   33.1046    28.4055  Tracker       Object 1
-      296.02    38.1767     31.3428   32.4265     30.3374   34.1373    27.5239  Tracker       Object 1
-      301.977   39.1428     30.3097   33.6272     29.4206   35.1079    26.6678  Tracker       Object 1
-    14614.5    -29.7736     41.9537  -27.9956     40.8112  -29.6036    41.0138  Tracker       Object 2
-    14614.6    -25.5715     30.2395  -23.7614     29.1205  -25.6811    29.2495  Tracker       Object 2
+    2020-09-23 10:54:20.046 INFO    ; Tracking:get_passes(ind=0):tx0-rx0 0 passes
+    2020-09-23 10:54:20.047 INFO    ; Tracking:get_passes(ind=0):tx0-rx1 0 passes
+    2020-09-23 10:54:20.047 INFO    ; Tracking:get_passes(ind=0):tx0-rx2 0 passes
+    2020-09-23 10:54:20.049 INFO    ; Tracking:get_passes(ind=1):propagating 177678 steps
+    2020-09-23 10:54:21.502 INFO    ; Tracking:get_passes(ind=1):propagating complete
+    2020-09-23 10:54:21.591 INFO    ; Tracking:get_passes(ind=1):tx0-rx0 0 passes
+    2020-09-23 10:54:21.591 INFO    ; Tracking:get_passes(ind=1):tx0-rx1 0 passes
+    2020-09-23 10:54:21.591 INFO    ; Tracking:get_passes(ind=1):tx0-rx2 0 passes
+    t [s]    rx0 az    rx0 el    rx1 az    rx1 el    rx2 az    rx2 el    Controller    Target
+    -------  --------  --------  --------  --------  --------  --------  ------------  --------
+    No handles with labels found to put in legend.
 
 
 
@@ -112,6 +77,7 @@ An example scheduler for tracking
     import numpy as np
     import matplotlib.pyplot as plt
     from tabulate import tabulate
+    from astropy.time import Time
 
     import sorts
     eiscat3d = sorts.radars.eiscat3d
@@ -185,12 +151,13 @@ An example scheduler for tracking
         timeslice = 0.1, 
         allocation = 0.1*200, 
         end_time = 3600*6.0,
+        epoch = Time(53005.0, format='mjd'),
         priority = [0.2, 1.0],
         logger = logger,
     )
 
     scheduler.update()
-    scheduler.calculate_measurements()
+    scheduler.set_measurements()
 
 
     sched_data = scheduler.schedule()
@@ -237,7 +204,7 @@ An example scheduler for tracking
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  5.222 seconds)
+   **Total running time of the script:** ( 0 minutes  3.592 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_tracking_scheduler.py:

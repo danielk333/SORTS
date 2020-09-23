@@ -1,0 +1,8 @@
+arctime\_to\_degrees
+====================
+
+.. currentmodule:: sorts.frames
+
+.. rubric:: arctime_to_degrees
+
+.. autofunction:: arctime_to_degrees

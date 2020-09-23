@@ -1,0 +1,8 @@
+Tracking.set\_measurements
+==========================
+
+.. currentmodule:: sorts.scheduler.tracking
+
+.. rubric:: Tracking.set_measurements
+
+.. automethod:: Tracking.set_measurements

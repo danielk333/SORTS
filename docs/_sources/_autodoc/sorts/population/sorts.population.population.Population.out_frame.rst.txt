@@ -1,0 +1,8 @@
+Population.out\_frame
+=====================
+
+.. currentmodule:: sorts.population.population
+
+.. rubric:: Population.out_frame
+
+.. autoproperty:: sorts.population.population.Population.out_frame

@@ -33,7 +33,7 @@ Observing a set of passes
     omega: 0.0000e+00   vx: -2.1177e+03
     Omega: 7.9000e+01   vy: -6.8611e+03
     anom : 6.2000e+01   vz: 2.8722e+03
-    Parameters: d=1.000, C_D=2.300, A=1.000, m=1.000, C_R=1.000
+    Parameters: d=1.0, C_D=2.3, A=1.0, m=1.0, C_R=1.0
 
     Space object 1: <Time object: scale='utc' format='mjd' value=53005.0>:
     a    : 7.2000e+06   x : -1.2822e+06
@@ -42,7 +42,7 @@ Observing a set of passes
     omega: 0.0000e+00   vx: -2.1203e+03
     Omega: 7.9000e+01   vy: -6.8563e+03
     anom : 6.1900e+01   vz: 2.8852e+03
-    Parameters: d=1.000, C_D=2.300, A=1.000, m=1.000, C_R=1.000
+    Parameters: d=1.0, C_D=2.3, A=1.0, m=1.0, C_R=1.0
     Temporal points: 177678
     /home/danielk/IRF/IRF_GITLAB/pyant/pyant/coordinates.py:89: RuntimeWarning: invalid value encountered in greater
       proj[proj > 1.0] = 1.0
@@ -66,14 +66,14 @@ Observing a set of passes
     --------------------------------------- Performance analysis --------------------------------------
      Name                                                   |   Executions | Mean time     | Total time
     --------------------------------------------------------+--------------+---------------+--------------
-     Obs.Param.:calculate_observation:get_state             |            3 | 1.91642e-02 s | 26.32 %
-     Obs.Param.:calculate_observation:enus,range,range_rate |            3 | 4.25498e-04 s | 0.58 %
-     Obs.Param.:calculate_observation:snr-step:gain         |           30 | 4.74799e-03 s | 65.20 %
-     Obs.Param.:calculate_observation:snr-step:snr          |           30 | 2.64406e-05 s | 0.36 %
-     Obs.Param.:calculate_observation:snr-step              |           30 | 4.79226e-03 s | 65.80 %
-     Obs.Param.:calculate_observation:generator             |            3 | 5.31078e-02 s | 72.92 %
-     Obs.Param.:calculate_observation                       |            3 | 7.27328e-02 s | 99.87 %
-     total                                                  |            1 | 2.18477e-01 s | 100.00 %
+     Obs.Param.:calculate_observation:get_state             |            3 | 2.25925e-02 s | 29.89 %
+     Obs.Param.:calculate_observation:enus,range,range_rate |            3 | 4.13895e-04 s | 0.55 %
+     Obs.Param.:calculate_observation:snr-step:gain         |           30 | 4.68296e-03 s | 61.96 %
+     Obs.Param.:calculate_observation:snr-step:snr          |           30 | 2.71002e-05 s | 0.36 %
+     Obs.Param.:calculate_observation:snr-step              |           30 | 4.72906e-03 s | 62.57 %
+     Obs.Param.:calculate_observation:generator             |            3 | 5.24684e-02 s | 69.42 %
+     Obs.Param.:calculate_observation                       |            3 | 7.55099e-02 s | 99.90 %
+     total                                                  |            1 | 2.26755e-01 s | 100.00 %
     ---------------------------------------------------------------------------------------------------
 
 
@@ -255,7 +255,7 @@ Observing a set of passes
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  4.112 seconds)
+   **Total running time of the script:** ( 0 minutes  4.132 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_observing_passes.py:

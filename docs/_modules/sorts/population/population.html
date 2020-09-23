@@ -68,6 +68,7 @@
 
 <span class="c1">#Python standard import</span>
 <span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
 
 <span class="c1">#Third party import</span>
 <span class="kn">import</span> <span class="nn">h5py</span>
@@ -194,6 +195,42 @@
 
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">out_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;settings&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagator_options</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="s1">&#39;out_frame&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagator_options</span><span class="p">[</span><span class="s1">&#39;settings&#39;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="kc">None</span> 
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagator_options</span><span class="p">[</span><span class="s1">&#39;settings&#39;</span><span class="p">][</span><span class="s1">&#39;out_frame&#39;</span><span class="p">]</span>
+            
+
+    <span class="nd">@out_frame</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">out_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;settings&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagator_options</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">propagator_options</span><span class="p">[</span><span class="s1">&#39;settings&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">propagator_options</span><span class="p">[</span><span class="s1">&#39;settings&#39;</span><span class="p">][</span><span class="s1">&#39;out_frame&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">in_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;settings&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagator_options</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="s1">&#39;in_frame&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagator_options</span><span class="p">[</span><span class="s1">&#39;settings&#39;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="kc">None</span> 
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagator_options</span><span class="p">[</span><span class="s1">&#39;settings&#39;</span><span class="p">][</span><span class="s1">&#39;in_frame&#39;</span><span class="p">]</span>
+            
+
+    <span class="nd">@in_frame</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">in_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;settings&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagator_options</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">propagator_options</span><span class="p">[</span><span class="s1">&#39;settings&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">propagator_options</span><span class="p">[</span><span class="s1">&#39;settings&#39;</span><span class="p">][</span><span class="s1">&#39;in_frame&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+
+
 
 <div class="viewcode-block" id="Population.copy"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.population.Population.copy.html#sorts.population.population.Population.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Return a copy of the current Population instance.</span>
@@ -400,6 +437,9 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">state_fields</span><span class="p">]</span>
 
+        <span class="k">if</span> <span class="s1">&#39;oid&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;oid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="s1">&#39;oid&#39;</span><span class="p">]</span>
+
 
         <span class="n">obj</span><span class="o">=</span><span class="n">so</span><span class="o">.</span><span class="n">SpaceObject</span><span class="p">(</span>
             <span class="n">propagator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagator</span><span class="p">,</span>
@@ -436,7 +476,13 @@
             <span class="n">n</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">fields</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span>
-        <span class="k">return</span> <span class="n">tabulate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="n">fields</span><span class="p">],</span> <span class="n">headers</span><span class="o">=</span><span class="n">fields</span><span class="p">)</span></div>
+        
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="n">fields</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">void</span><span class="p">):</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">[[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]]</span>
+
+        <span class="k">return</span> <span class="n">tabulate</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">fields</span><span class="p">)</span></div>
 
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -546,6 +592,9 @@
 
 
 <div class="viewcode-block" id="Population.save"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.population.Population.save.html#sorts.population.population.Population.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+
         <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
             <span class="n">hf</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
             <span class="n">hf</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;fields&#39;</span><span class="p">,</span>
@@ -567,6 +616,9 @@
 
 <div class="viewcode-block" id="Population.load"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.population.Population.load.html#sorts.population.population.Population.load">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">propagator</span><span class="p">,</span> <span class="n">propagator_options</span> <span class="o">=</span> <span class="p">{},</span> <span class="n">propagator_args</span> <span class="o">=</span> <span class="p">{}):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+
         <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
             <span class="n">pop</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span>
                 <span class="n">fields</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;fields&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">[()],</span>

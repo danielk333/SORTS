@@ -105,8 +105,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">min_elevation</span> <span class="o">=</span> <span class="n">min_elevation</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ecef</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">geodetic_to_ITRS</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">radians</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">beam</span> <span class="o">=</span> <span class="n">beam</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">True</span></div>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pointing_range</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="Station.copy"><a class="viewcode-back" href="../../../_autodoc/sorts/radar/sorts.radar.tx_rx.Station.copy.html#sorts.radar.tx_rx.Station.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">st</span> <span class="o">=</span> <span class="n">Station</span><span class="p">(</span>
@@ -169,7 +169,11 @@
             <span class="n">point</span><span class="p">,</span>
             <span class="n">radians</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">k_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">pointing_range</span> <span class="o">=</span> <span class="n">k_norm</span>
+
+        <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="o">/</span><span class="n">k_norm</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">point</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">k</span></div>
 

@@ -21,7 +21,7 @@
     <script src="../../../_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="plot_angles" href="sorts.plotting.tracking.plot_angles.html" />
+    <link rel="next" title="az_el_to_xy" href="sorts.plotting.tracking.az_el_to_xy.html" />
     <link rel="prev" title="radar_scan" href="sorts.plotting.scan.radar_scan.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--[if lt IE 9]>
@@ -38,7 +38,7 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="sorts.plotting.tracking.plot_angles.html" title="plot_angles"
+          <a href="sorts.plotting.tracking.az_el_to_xy.html" title="az_el_to_xy"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="sorts.plotting.scan.radar_scan.html" title="radar_scan"
@@ -62,8 +62,8 @@
   <p class="topless"><a href="sorts.plotting.scan.radar_scan.html"
                         title="previous chapter">radar_scan</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="sorts.plotting.tracking.plot_angles.html"
-                        title="next chapter">plot_angles</a></p>
+  <p class="topless"><a href="sorts.plotting.tracking.az_el_to_xy.html"
+                        title="next chapter">az_el_to_xy</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -101,11 +101,11 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.plotting.tracking.plot_angles.html#sorts.plotting.tracking.plot_angles" title="sorts.plotting.tracking.plot_angles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_angles</span></code></a>(ts, angs[, ax])</p></td>
-<td><p>Plot the angles data returned by the <code class="xref py py-func docutils literal notranslate"><span class="pre">simulate_tracking.get_angles()</span></code> function.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.plotting.tracking.az_el_to_xy.html#sorts.plotting.tracking.az_el_to_xy" title="sorts.plotting.tracking.az_el_to_xy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">az_el_to_xy</span></code></a>(az, el)</p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.plotting.tracking.plot_snr.html#sorts.plotting.tracking.plot_snr" title="sorts.plotting.tracking.plot_snr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_snr</span></code></a>(t, all_snrs, radar[, ax])</p></td>
-<td><p>Plots the SNR’s structure (list of lists of numpy.ndarray’s) returned by <code class="xref py py-func docutils literal notranslate"><span class="pre">simulate_tracking.get_track_snr()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">simulate_tracking.get_scan_snr()</span></code>.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.plotting.tracking.local_tracking.html#sorts.plotting.tracking.local_tracking" title="sorts.plotting.tracking.local_tracking"><code class="xref py py-obj docutils literal notranslate"><span class="pre">local_tracking</span></code></a>(azimuth, elevation[, ax])</p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
@@ -115,40 +115,13 @@
 <p class="rubric">Functions</p>
 <dl class="py function">
 <dt>
-<code class="sig-prename descclassname">sorts.plotting.tracking.</code><code class="sig-name descname">plot_angles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ts</span></em>, <em class="sig-param"><span class="n">angs</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/plotting/tracking.html#plot_angles"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Plot the angles data returned by the <code class="xref py py-func docutils literal notranslate"><span class="pre">simulate_tracking.get_angles()</span></code> function.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>ts</strong> (<em>list</em>) – List of times for each pass that the angles were evaluated over.</p></li>
-<li><p><strong>angs</strong> (<em>list</em>) – List of angles for each pass.</p></li>
-<li><p><strong>ax</strong> – matplotlib axis to plot the SNR’s on. If not given, create new figure and axis.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The matplotlib axis object</p>
-</dd>
-</dl>
-</dd></dl>
+<code class="sig-prename descclassname">sorts.plotting.tracking.</code><code class="sig-name descname">az_el_to_xy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">az</span></em>, <em class="sig-param"><span class="n">el</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/plotting/tracking.html#az_el_to_xy"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt>
-<code class="sig-prename descclassname">sorts.plotting.tracking.</code><code class="sig-name descname">plot_snr</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">all_snrs</span></em>, <em class="sig-param"><span class="n">radar</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/plotting/tracking.html#plot_snr"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Plots the SNR’s structure (list of lists of numpy.ndarray’s) returned by <code class="xref py py-func docutils literal notranslate"><span class="pre">simulate_tracking.get_track_snr()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">simulate_tracking.get_scan_snr()</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>t</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Times corresponding to the evaluated SNR’s.</p></li>
-<li><p><strong>all_snrs</strong> – List structure returned by <code class="xref py py-func docutils literal notranslate"><span class="pre">simulate_tracking.get_track_snr()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">simulate_tracking.get_scan_snr()</span></code>.</p></li>
-<li><p><strong>radar</strong> (<em>RadarSystem</em>) – Radar system that measured the SNR’s.</p></li>
-<li><p><strong>ax</strong> – matplotlib axis to plot the SNR’s on. If not given, create new figure and axis.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The matplotlib axis object</p>
-</dd>
-</dl>
-</dd></dl>
+<code class="sig-prename descclassname">sorts.plotting.tracking.</code><code class="sig-name descname">local_tracking</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">azimuth</span></em>, <em class="sig-param"><span class="n">elevation</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/plotting/tracking.html#local_tracking"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
 
 </div>
 </div>
@@ -169,7 +142,7 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="sorts.plotting.tracking.plot_angles.html" title="plot_angles"
+          <a href="sorts.plotting.tracking.az_el_to_xy.html" title="az_el_to_xy"
              >next</a> |</li>
         <li class="right" >
           <a href="sorts.plotting.scan.radar_scan.html" title="radar_scan"

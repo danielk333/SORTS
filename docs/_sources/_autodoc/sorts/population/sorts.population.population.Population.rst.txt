@@ -38,6 +38,8 @@ Population
    .. autosummary::
       :toctree: .
    
+      ~Population.in_frame
+      ~Population.out_frame
       ~Population.shape
    
    

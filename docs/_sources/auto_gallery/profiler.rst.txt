@@ -24,9 +24,9 @@ Profiling
     ------------------ Performance analysis ------------------
      Name          |   Executions | Mean time     | Total time
     ---------------+--------------+---------------+---------------
-     list init     |            1 | 5.00679e-06 s | 5.00679e-06 s
-     list reversal |         1000 | 1.14346e-06 s | 1.14346e-03 s
-     program       |            1 | 2.02942e-03 s | 2.02942e-03 s
+     list init     |            1 | 5.24521e-06 s | 5.24521e-06 s
+     list reversal |         1000 | 1.15371e-06 s | 1.15371e-03 s
+     program       |            1 | 2.01297e-03 s | 2.01297e-03 s
     ----------------------------------------------------------
 
 
@@ -60,7 +60,7 @@ Profiling
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.005 seconds)
+   **Total running time of the script:** ( 0 minutes  0.021 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_profiler.py:

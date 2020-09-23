@@ -103,11 +103,11 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.correlator.correlate.html#sorts.correlator.correlate" title="sorts.correlator.correlate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">correlate</span></code></a>(data, station, population, metric)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.correlator.correlate.html#sorts.correlator.correlate" title="sorts.correlator.correlate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">correlate</span></code></a>(measurements, population[, …])</p></td>
 <td><p>Given a mono-static measurement of ranges and rage-rates, a radar model and a population: correlate measurements with population.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.correlator.plot_correlation.html#sorts.correlator.plot_correlation" title="sorts.correlator.plot_correlation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_correlation</span></code></a>(dat, cdat)</p></td>
-<td><p>Plot the correlation between the measurement and simulated population object.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.correlator.generate_measurements.html#sorts.correlator.generate_measurements" title="sorts.correlator.generate_measurements"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_measurements</span></code></a>(state_ecef, rx_ecef, …)</p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.correlator.residual_distribution_metric.html#sorts.correlator.residual_distribution_metric" title="sorts.correlator.residual_distribution_metric"><code class="xref py py-obj docutils literal notranslate"><span class="pre">residual_distribution_metric</span></code></a>(t, r, v, r_ref, …)</p></td>
 <td><p>Using the simulated and the measured ranges and rage-rates calculate a de-correlation metric.</p></td>
@@ -120,40 +120,43 @@
 <p class="rubric">Functions</p>
 <dl class="py function">
 <dt>
-<code class="sig-prename descclassname">sorts.correlator.</code><code class="sig-name descname">correlate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">station</span></em>, <em class="sig-param"><span class="n">population</span></em>, <em class="sig-param"><span class="n">metric</span></em>, <em class="sig-param"><span class="n">n_closest</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">out_file</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">MPI_on</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/correlator.html#correlate"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-prename descclassname">sorts.correlator.</code><code class="sig-name descname">correlate</code><span class="sig-paren">(</span><em class="sig-param">measurements</em>, <em class="sig-param">population</em>, <em class="sig-param">metric=&lt;function residual_distribution_metric&gt;</em>, <em class="sig-param">metric_reduce=&lt;function &lt;lambda&gt;&gt;</em>, <em class="sig-param">n_closest=1</em>, <em class="sig-param">profiler=None</em>, <em class="sig-param">logger=None</em>, <em class="sig-param">MPI=False</em>, <em class="sig-param">propagator_lighttime_correction=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/correlator.html#correlate"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Given a mono-static measurement of ranges and rage-rates, a radar model and a population: correlate measurements with population.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<em>dict</em>) – Dictionary that contains measurement data. Contents are described below.</p></li>
-<li><p><strong>station</strong> (<em>AntennaRX</em>) – Model of receiver station that performed the measurement.</p></li>
+<li><p><strong>data</strong> (<em>list</em>) – List of dictionaries that contains measurement data. Contents are described below.</p></li>
+<li><p><strong>station</strong> (<em>station</em>) – Model of receiver station that performed the measurement.</p></li>
 <li><p><strong>population</strong> (<a class="reference internal" href="population/sorts.population.population.Population.html#sorts.population.population.Population" title="sorts.population.population.Population"><em>Population</em></a>) – Population to correlate against.</p></li>
-<li><p><strong>metric</strong> (<em>function</em>) – Metric used to correlate measurement and simulation of population.</p></li>
-<li><p><strong>n_closest</strong> (<em>int</em>) – Number of closest matches to output.</p></li>
-<li><p><strong>out_file</strong> (<em>str</em>) – If not <code class="code docutils literal notranslate"><span class="pre">None</span></code>, save the output data to this path.</p></li>
-<li><p><strong>MPI_on</strong> (<em>bool</em>) – If True use internal parallelization with MPI to calculate correlation. Turn to False to externally parallelize with MPI.</p></li>
+<li><p><strong>metric</strong> (<em>function</em>) – Metric used to correlate measurement and simulated object measurement.</p></li>
+<li><p><strong>profiler</strong> (<a class="reference internal" href="sorts.profiling.Profiler.html#sorts.profiling.Profiler" title="sorts.profiling.Profiler"><em>Profiler</em></a>) – </p></li>
+<li><p><strong>logger</strong> (<em>logging.Logger</em>) – </p></li>
+<li><p><strong>MPI</strong> (<em>bool</em>) – If True use internal parallelization with MPI to calculate correlation. Turn to False to externally parallelize with MPI.</p></li>
 </ul>
 </dd>
 </dl>
 <p><strong>Measurement data:</strong></p>
 <blockquote>
 <div><dl class="simple">
-<dt>The file must be a dictionary that contains three data-sets:</dt><dd><ul class="simple">
-<li><p>‘t’: Times in unix-seconds</p></li>
-<li><p>‘r’: Ranges in meters</p></li>
-<li><p>‘v’: Range-rates in meters per second</p></li>
+<dt>Each entry in the input <code class="code docutils literal notranslate"><span class="pre">measurements</span></code> list must be a dictionary that contains the following fields:</dt><dd><ul class="simple">
+<li><p>‘t’: [numpy.ndarray] Times relative epoch in seconds</p></li>
+<li><p>‘r’: [numpy.ndarray] Two-way ranges in meters</p></li>
+<li><p>‘v’: [numpy.ndarray] Two-way range-rates in meters per second</p></li>
+<li><p>‘epoch’: [astropy.Time] epoch for measurements</p></li>
+<li><p>‘tx’: [sorts.TX] Pointer to the TX station</p></li>
+<li><p>‘rx’: [sorts.RX] Pointer to the RX station</p></li>
 </ul>
 </dd>
 </dl>
-<p>They should all be numpy vectors of equal length.</p>
 </div></blockquote>
+<p>Optionally, if <cite>propagator_lighttime_correction</cite> should be applied, one can supply which index in the list is the TX-TX pair,
+assuming that the time <cite>t</cite> given is the transmission time.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt>
-<code class="sig-prename descclassname">sorts.correlator.</code><code class="sig-name descname">plot_correlation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dat</span></em>, <em class="sig-param"><span class="n">cdat</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/correlator.html#plot_correlation"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Plot the correlation between the measurement and simulated population object.</p>
-</dd></dl>
+<code class="sig-prename descclassname">sorts.correlator.</code><code class="sig-name descname">generate_measurements</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">state_ecef</span></em>, <em class="sig-param"><span class="n">rx_ecef</span></em>, <em class="sig-param"><span class="n">tx_ecef</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/correlator.html#generate_measurements"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt>
@@ -162,11 +165,11 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>t</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Times in seconds corresponding to measurement and simulation data.</p></li>
+<li><p><strong>t</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Times in seconds corresponding to measurement and object simulated data.</p></li>
 <li><p><strong>r</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Measured ranges in meters</p></li>
 <li><p><strong>v</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Measured rage-rates in meters per second</p></li>
-<li><p><strong>r_ref</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Simulated ranges in meters</p></li>
-<li><p><strong>v_ref</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Simulated rage-rates in meters per second</p></li>
+<li><p><strong>r_ref</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Object simulated ranges in meters</p></li>
+<li><p><strong>v_ref</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Object simulated rage-rates in meters per second</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>

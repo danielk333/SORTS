@@ -1,0 +1,8 @@
+PriorityTracking.set\_measurements
+==================================
+
+.. currentmodule:: sorts.scheduler.tracking
+
+.. rubric:: PriorityTracking.set_measurements
+
+.. automethod:: PriorityTracking.set_measurements

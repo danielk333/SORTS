@@ -1,0 +1,8 @@
+calculate\_delay
+================
+
+.. currentmodule:: sorts.errors.ionospheric_ray_trace
+
+.. rubric:: calculate_delay
+
+.. autofunction:: calculate_delay

@@ -25,20 +25,20 @@ Simulate tracking with simulation helper
 
  .. code-block:: none
 
-    2020-09-17 12:27:43.791 INFO    ; Simulation:run:find_passes
-    2020-09-17 12:27:43.919 INFO    ; Simulation:run:find_passes [completed]
-    2020-09-17 12:27:43.919 INFO    ; Simulation:run:calculate_measurements
-    2020-09-17 12:27:43.919 INFO    ; Simulation:run:calculate_measurements [completed]
-    2020-09-17 12:27:43.919 INFO    ; Simulation:run:observe_passes
-    2020-09-17 12:27:43.921 INFO    ; Simulation:run:observe_passes [completed]
-    2020-09-17 12:27:43.922 ALWAYS  ; 
+    2020-09-23 11:35:45.460 INFO    ; Simulation:run:find_passes
+    2020-09-23 11:35:46.933 INFO    ; Simulation:run:find_passes [completed]
+    2020-09-23 11:35:46.933 INFO    ; Simulation:run:calculate_measurements
+    2020-09-23 11:35:46.950 INFO    ; Simulation:run:calculate_measurements [completed]
+    2020-09-23 11:35:46.951 INFO    ; Simulation:run:observe_passes
+    2020-09-23 11:35:46.970 INFO    ; Simulation:run:observe_passes [completed]
+    2020-09-23 11:35:46.972 ALWAYS  ; 
     ------------------------------ Performance analysis ------------------------------
      Name                                  |   Executions | Mean time     | Total time
     ---------------------------------------+--------------+---------------+--------------
-     Simulation:run:find_passes            |            1 | 1.27673e-01 s | 98.06 %
-     Simulation:run:calculate_measurements |            1 | 4.80175e-04 s | 0.37 %
-     Simulation:run:observe_passes         |            1 | 1.44100e-03 s | 1.11 %
-     total                                 |            1 | 1.30197e-01 s | 100.00 %
+     Simulation:run:find_passes            |            1 | 1.47254e+00 s | 97.48 %
+     Simulation:run:calculate_measurements |            1 | 1.76449e-02 s | 1.17 %
+     Simulation:run:observe_passes         |            1 | 1.96676e-02 s | 1.30 %
+     total                                 |            1 | 1.51064e+00 s | 100.00 %
     ----------------------------------------------------------------------------------
 
 
@@ -57,6 +57,7 @@ Simulate tracking with simulation helper
     import matplotlib.pyplot as plt
     import h5py
     import pickle
+    from astropy.time import Time
 
     import sorts
     eiscat3d = sorts.radars.eiscat3d_interp
@@ -105,6 +106,7 @@ Simulate tracking with simulation helper
         end_time = 3600*6.0,
         priority = np.ones(len(objs)),
         use_pass_states = True,
+        epoch = Time(53005.0, format='mjd'),
     )
 
     class Tracking(Simulation):
@@ -203,7 +205,7 @@ Simulate tracking with simulation helper
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.601 seconds)
+   **Total running time of the script:** ( 0 minutes  2.023 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_simulation_helper_tracking.py:

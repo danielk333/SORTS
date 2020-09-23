@@ -1,8 +1,0 @@
-plot\_correlation
-=================
-
-.. currentmodule:: sorts.correlator
-
-.. rubric:: plot_correlation
-
-.. autofunction:: plot_correlation

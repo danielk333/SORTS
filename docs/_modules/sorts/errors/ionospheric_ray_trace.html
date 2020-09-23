@@ -1,0 +1,538 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>sorts.errors.ionospheric_ray_trace &#8212; SORTS 3.18.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for sorts.errors.ionospheric_ray_trace</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="sd">&#39;&#39;&#39;Ionospheric radio propagation effects studied using ray-tracing.</span>
+
+<span class="sd">2016-2018 Juha Vierinen</span>
+<span class="sd">2018-2020 Juha Vierinen, Daniel Kastinen</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pyglow.pyglow</span> <span class="kn">import</span> <span class="n">Point</span>
+    <span class="kn">from</span> <span class="nn">pyglow</span> <span class="kn">import</span> <span class="n">coord</span> <span class="k">as</span> <span class="n">gcoord</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">Point</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">gcoord</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="kn">from</span> <span class="nn">astropy.time</span> <span class="kn">import</span> <span class="n">Time</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.integrate</span> <span class="k">as</span> <span class="nn">integrate</span>
+<span class="kn">import</span> <span class="nn">scipy.interpolate</span> <span class="k">as</span> <span class="nn">interpolate</span>
+<span class="kn">import</span> <span class="nn">scipy.constants</span> <span class="k">as</span> <span class="nn">constants</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">frames</span>
+
+<div class="viewcode-block" id="calculate_delay"><a class="viewcode-back" href="../../../_autodoc/sorts/errors/sorts.errors.ionospheric_ray_trace.calculate_delay.html#sorts.errors.ionospheric_ray_trace.calculate_delay">[docs]</a><span class="k">def</span> <span class="nf">calculate_delay</span><span class="p">(</span>
+        <span class="n">time</span><span class="p">,</span>
+        <span class="n">lat</span><span class="p">,</span>
+        <span class="n">lon</span><span class="p">,</span>
+        <span class="n">frequency</span><span class="p">,</span>
+        <span class="n">elevation</span><span class="p">,</span>
+    <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;TODO: Docstring</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+
+    <span class="k">if</span> <span class="n">Point</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">gcoord</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;pyglow must be installed to calculate delay&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">Time</span><span class="p">):</span>
+        <span class="n">dn</span> <span class="o">=</span> <span class="n">time</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dn</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">tt</span><span class="o">.</span><span class="n">datetime</span>
+
+    <span class="n">num</span><span class="o">=</span><span class="mi">500</span>
+    <span class="n">alts</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">4000</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">distance</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">4000</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">ne</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">xyz_prev</span><span class="o">=</span><span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">ai</span><span class="p">,</span><span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">alts</span><span class="p">):</span>
+        <span class="n">llh</span><span class="o">=</span><span class="n">coord</span><span class="o">.</span><span class="n">az_el_r2geodetic</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">180.0</span><span class="p">,</span> <span class="n">elevation</span><span class="p">,</span> <span class="n">a</span><span class="o">*</span><span class="mf">1e3</span><span class="p">)</span>
+
+        <span class="n">pt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">dn</span><span class="p">,</span> <span class="n">llh</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">llh</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">llh</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="mf">1e3</span><span class="p">)</span>
+        <span class="n">pt</span><span class="o">.</span><span class="n">run_iri</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">pt</span><span class="o">.</span><span class="n">ne</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">ne</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="n">pt</span><span class="o">.</span><span class="n">ne</span><span class="o">*</span><span class="mf">1e6</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ne</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span>
+        <span class="n">xyz</span><span class="o">=</span><span class="n">gcoord</span><span class="o">.</span><span class="n">lla2ecef</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">lat</span><span class="p">,</span><span class="n">lon</span><span class="p">,</span><span class="n">a</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">ai</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">distance</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">distance</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">xyz</span><span class="o">-</span><span class="n">xyz_prev</span><span class="p">,</span><span class="n">xyz</span><span class="o">-</span><span class="n">xyz_prev</span><span class="p">))</span><span class="o">+</span><span class="n">distance</span><span class="p">[</span><span class="n">ai</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">xyz_prev</span><span class="o">=</span><span class="n">xyz</span>
+        
+    <span class="n">f_p</span><span class="o">=</span><span class="mf">8.98</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ne</span><span class="p">)</span>
+    <span class="n">v_g</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">c</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="p">(</span><span class="n">f_p</span><span class="o">/</span><span class="n">frequency</span><span class="p">)</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)</span>
+
+    <span class="n">dt2</span><span class="o">=</span><span class="n">integrate</span><span class="o">.</span><span class="n">simps</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="p">(</span><span class="n">f_p</span><span class="o">/</span><span class="n">frequency</span><span class="p">)</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)),</span><span class="n">distance</span><span class="o">*</span><span class="mf">1e3</span><span class="p">)</span><span class="o">/</span><span class="n">constants</span><span class="o">.</span><span class="n">c</span>
+
+    <span class="k">return</span> <span class="n">dt2</span><span class="p">,</span> <span class="n">ne</span><span class="p">,</span> <span class="n">distance</span> </div>
+
+
+<div class="viewcode-block" id="ray_trace"><a class="viewcode-back" href="../../../_autodoc/sorts/errors/sorts.errors.ionospheric_ray_trace.ray_trace.html#sorts.errors.ionospheric_ray_trace.ray_trace">[docs]</a><span class="k">def</span> <span class="nf">ray_trace</span><span class="p">(</span>
+        <span class="n">time</span><span class="p">,</span>
+        <span class="n">lat</span><span class="p">,</span>
+        <span class="n">lon</span><span class="p">,</span>
+        <span class="n">frequency</span><span class="p">,</span>
+        <span class="n">elevation</span><span class="p">,</span>
+        <span class="n">azimuth</span><span class="p">,</span>
+    <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;TODO: Docstring</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    
+    <span class="k">if</span> <span class="n">Point</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">gcoord</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;pyglow must be installed to ray trace&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">Time</span><span class="p">):</span>
+        <span class="n">dn</span> <span class="o">=</span> <span class="n">time</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dn</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">tt</span><span class="o">.</span><span class="n">datetime</span>
+
+    <span class="n">num</span><span class="o">=</span><span class="mi">1000</span>
+    <span class="n">alts</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">4000</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">distance</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">4000</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">ne</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">ne2</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">dnex</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">dtheta</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">dalt</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">dney</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">dnez</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">xyz_prev</span><span class="o">=</span><span class="mf">0.0</span>
+    <span class="n">px</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">dk</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">py</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">pz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">p0x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">p0y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">p0z</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+
+    <span class="c1"># initial direction and position</span>
+    <span class="n">k</span><span class="o">=</span><span class="n">frames</span><span class="o">.</span><span class="n">azel_to_ecef</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="mf">10e3</span><span class="p">,</span> <span class="n">azimuth</span><span class="p">,</span> <span class="n">elevation</span><span class="p">)</span>
+    <span class="n">k0</span><span class="o">=</span><span class="n">k</span>
+    <span class="n">p</span><span class="o">=</span><span class="n">frames</span><span class="o">.</span><span class="n">geodetic_to_ITRS</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="mf">10e3</span><span class="p">)</span>
+    <span class="n">pe</span><span class="o">=</span><span class="n">frames</span><span class="o">.</span><span class="n">geodetic_to_ITRS</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="mf">10e3</span><span class="p">)</span>
+    <span class="n">p0</span><span class="o">=</span><span class="n">frames</span><span class="o">.</span><span class="n">geodetic_to_ITRS</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="mf">10e3</span><span class="p">)</span>
+    <span class="n">dh</span><span class="o">=</span><span class="mf">4e3</span>
+    <span class="n">vg</span><span class="o">=</span><span class="mf">1.0</span>
+
+    <span class="n">p_orig</span><span class="o">=</span><span class="n">p</span>
+    <span class="n">ray_time</span><span class="o">=</span><span class="mf">0.0</span>
+    
+    <span class="k">for</span> <span class="n">ai</span><span class="p">,</span><span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">alts</span><span class="p">):</span>
+        <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="o">+</span><span class="n">k</span><span class="o">*</span><span class="n">dh</span><span class="o">*</span><span class="n">vg</span>
+        <span class="n">p0</span><span class="o">=</span><span class="n">p0</span><span class="o">+</span><span class="n">k0</span><span class="o">*</span><span class="n">dh</span>  
+        <span class="n">ray_time</span><span class="o">+=</span><span class="n">dh</span><span class="o">/</span><span class="n">constants</span><span class="o">.</span><span class="n">c</span>
+        
+        <span class="n">dpx</span><span class="o">=</span><span class="n">p</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">])</span><span class="o">*</span><span class="n">dh</span>
+        <span class="n">dpy</span><span class="o">=</span><span class="n">p</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">])</span><span class="o">*</span><span class="n">dh</span>
+        <span class="n">dpz</span><span class="o">=</span><span class="n">p</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">])</span><span class="o">*</span><span class="n">dh</span>
+
+        <span class="n">llh</span><span class="o">=</span><span class="n">frames</span><span class="o">.</span><span class="n">ITRS_to_geodetic</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">llh_1</span><span class="o">=</span><span class="n">frames</span><span class="o">.</span><span class="n">ITRS_to_geodetic</span><span class="p">(</span><span class="n">p0</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">p0</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">p0</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">dalt</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="n">llh_1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">llh</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="n">llh</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="mf">1e3</span> <span class="o">&gt;</span> <span class="mi">1900</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">alts</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="n">llh</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="mf">1e3</span>
+        <span class="n">pt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">dn</span><span class="p">,</span> <span class="n">llh</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">llh</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">llh</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="mf">1e3</span><span class="p">)</span>
+        <span class="n">pt</span><span class="o">.</span><span class="n">run_iri</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">pt</span><span class="o">.</span><span class="n">ne</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">ne</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="n">pt</span><span class="o">.</span><span class="n">ne</span><span class="o">*</span><span class="mf">1e6</span>
+            <span class="n">f_p</span><span class="o">=</span><span class="mf">8.98</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ne</span><span class="p">[</span><span class="n">ai</span><span class="p">])</span>
+            <span class="n">v_g</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="p">(</span><span class="n">f_p</span><span class="o">/</span><span class="n">frequency</span><span class="p">)</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ne</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span>
+            
+        <span class="n">llh</span><span class="o">=</span><span class="n">frames</span><span class="o">.</span><span class="n">ITRS_to_geodetic</span><span class="p">(</span><span class="n">dpx</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">dpx</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">dpx</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">pt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">dn</span><span class="p">,</span> <span class="n">llh</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">llh</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">llh</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="mf">1e3</span><span class="p">)</span>
+        <span class="n">pt</span><span class="o">.</span><span class="n">run_iri</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">pt</span><span class="o">.</span><span class="n">ne</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">dnex</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="p">(</span><span class="n">ne</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">-</span><span class="n">pt</span><span class="o">.</span><span class="n">ne</span><span class="o">*</span><span class="mf">1e6</span><span class="p">)</span><span class="o">/</span><span class="n">dh</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dnex</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span>
+
+        <span class="n">llh</span><span class="o">=</span><span class="n">frames</span><span class="o">.</span><span class="n">ITRS_to_geodetic</span><span class="p">(</span><span class="n">dpy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">dpy</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">dpy</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">pt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">dn</span><span class="p">,</span> <span class="n">llh</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">llh</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">llh</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="mf">1e3</span><span class="p">)</span>
+        <span class="n">pt</span><span class="o">.</span><span class="n">run_iri</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">pt</span><span class="o">.</span><span class="n">ne</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">dney</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="p">(</span><span class="n">ne</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">-</span><span class="n">pt</span><span class="o">.</span><span class="n">ne</span><span class="o">*</span><span class="mf">1e6</span><span class="p">)</span><span class="o">/</span><span class="n">dh</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dney</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span>
+            
+        <span class="n">llh</span><span class="o">=</span><span class="n">frames</span><span class="o">.</span><span class="n">ITRS_to_geodetic</span><span class="p">(</span><span class="n">dpz</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">dpz</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">dpz</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">pt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">dn</span><span class="p">,</span> <span class="n">llh</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">llh</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">llh</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="mf">1e3</span><span class="p">)</span>
+        <span class="n">pt</span><span class="o">.</span><span class="n">run_iri</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">pt</span><span class="o">.</span><span class="n">ne</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">dnez</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="p">(</span><span class="n">ne</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">-</span><span class="n">pt</span><span class="o">.</span><span class="n">ne</span><span class="o">*</span><span class="mf">1e6</span><span class="p">)</span><span class="o">/</span><span class="n">dh</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dnez</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span>
+        <span class="n">grad</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">dnex</span><span class="p">[</span><span class="n">ai</span><span class="p">],</span><span class="n">dney</span><span class="p">[</span><span class="n">ai</span><span class="p">],</span><span class="n">dnez</span><span class="p">[</span><span class="n">ai</span><span class="p">]])</span>
+        <span class="n">px</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">py</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">pz</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">p0x</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="n">p0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">p0y</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="n">p0</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">p0z</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="n">p0</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="n">dk</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">k0</span><span class="p">,</span><span class="n">k</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">k0</span><span class="p">,</span><span class="n">k0</span><span class="p">))</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">k</span><span class="p">))))</span>
+        <span class="c1"># no bending if gradient too small</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span><span class="n">grad</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">100.0</span><span class="p">:</span>
+            <span class="n">grad1</span><span class="o">=</span><span class="n">grad</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span><span class="n">grad</span><span class="p">))</span>
+            
+            <span class="n">p2</span><span class="o">=</span><span class="n">p</span><span class="o">+</span><span class="n">k</span><span class="o">*</span><span class="n">dh</span>
+            <span class="n">llh</span><span class="o">=</span><span class="n">frames</span><span class="o">.</span><span class="n">ITRS_to_geodetic</span><span class="p">(</span><span class="n">p2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">p2</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">p2</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">pt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">dn</span><span class="p">,</span> <span class="n">llh</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">llh</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">llh</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="mf">1e3</span><span class="p">)</span>
+            <span class="n">pt</span><span class="o">.</span><span class="n">run_iri</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">pt</span><span class="o">.</span><span class="n">ne</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+                <span class="n">ne2</span><span class="o">=</span><span class="n">pt</span><span class="o">.</span><span class="n">ne</span><span class="o">*</span><span class="mf">1e6</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ne2</span><span class="o">=</span><span class="mf">0.0</span>
+            <span class="n">f0</span><span class="o">=</span><span class="mf">8.98</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ne</span><span class="p">[</span><span class="n">ai</span><span class="p">])</span>
+            <span class="n">n0</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="p">(</span><span class="n">f0</span><span class="o">/</span><span class="n">frequency</span><span class="p">)</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)</span>
+            <span class="n">f1</span><span class="o">=</span><span class="mf">8.98</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ne2</span><span class="p">)</span>            
+            <span class="n">n1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="p">(</span><span class="n">f1</span><span class="o">/</span><span class="n">frequency</span><span class="p">)</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)</span>
+
+            <span class="n">theta0</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span><span class="n">k</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span><span class="n">grad</span><span class="p">))</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">k</span><span class="p">))))</span>
+            <span class="c1"># angle cannot be over 90</span>
+            <span class="k">if</span> <span class="n">theta0</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">2.0</span><span class="p">:</span>
+                <span class="n">theta0</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">-</span><span class="n">theta0</span>
+            <span class="n">sin_theta_1</span><span class="o">=</span><span class="p">(</span><span class="n">n0</span><span class="o">/</span><span class="n">n1</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta0</span><span class="p">)</span>
+            <span class="n">dtheta</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="mf">180.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">sin_theta_1</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">-</span><span class="mf">180.0</span><span class="o">*</span><span class="n">theta0</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+            <span class="c1">#print(&quot;n0/n1 %1.10f theta0 %1.2f theta1-theta0 %1.10f&quot;%(n0/n1,180.0*theta0/np.pi,dtheta[ai]))</span>
+            <span class="n">cos_theta_1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="n">sin_theta_1</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)</span>
+            <span class="n">k_ref</span><span class="o">=</span><span class="p">(</span><span class="n">n0</span><span class="o">/</span><span class="n">n1</span><span class="p">)</span><span class="o">*</span><span class="n">k</span><span class="o">+</span><span class="p">((</span><span class="n">n0</span><span class="o">/</span><span class="n">n1</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta0</span><span class="p">)</span><span class="o">-</span><span class="n">cos_theta_1</span><span class="p">)</span><span class="o">*</span><span class="n">grad1</span>
+            <span class="c1"># normalize</span>
+            <span class="n">k_ref</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">k_ref</span><span class="p">,</span><span class="n">k_ref</span><span class="p">))</span>
+            <span class="n">k</span><span class="o">=</span><span class="n">k_ref</span>
+            
+            <span class="n">angle</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span><span class="n">k</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span><span class="n">grad</span><span class="p">))</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">k</span><span class="p">)))</span>
+
+    <span class="n">los_time</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">p_orig</span><span class="o">-</span><span class="n">p</span><span class="p">,</span><span class="n">p_orig</span><span class="o">-</span><span class="n">p</span><span class="p">))</span><span class="o">/</span><span class="n">constants</span><span class="o">.</span><span class="n">c</span>
+    <span class="n">excess_ionospheric_delay</span><span class="o">=</span><span class="n">ray_time</span><span class="o">-</span><span class="n">los_time</span>
+
+    <span class="c1"># print(&quot;Excess propagation time %1.20f mus&quot;%((1e6*(ray_time-los_time))))</span>
+    
+    <span class="n">theta</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">k0</span><span class="p">,</span><span class="n">k</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">k0</span><span class="p">,</span><span class="n">k0</span><span class="p">))</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">k</span><span class="p">))))</span>
+    
+    <span class="n">theta_p</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span><span class="n">p</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span><span class="n">p0</span><span class="p">))</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">p</span><span class="p">))))</span>
+
+    <span class="n">llh0</span><span class="o">=</span><span class="n">frames</span><span class="o">.</span><span class="n">ITRS_to_geodetic</span><span class="p">(</span><span class="n">px</span><span class="p">[</span><span class="n">ai</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span><span class="n">py</span><span class="p">[</span><span class="n">ai</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span><span class="n">pz</span><span class="p">[</span><span class="n">ai</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">llh1</span><span class="o">=</span><span class="n">frames</span><span class="o">.</span><span class="n">ITRS_to_geodetic</span><span class="p">(</span><span class="n">p0x</span><span class="p">[</span><span class="n">ai</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span><span class="n">p0y</span><span class="p">[</span><span class="n">ai</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span><span class="n">p0z</span><span class="p">[</span><span class="n">ai</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="c1"># print(&quot;d_coord&quot;)</span>
+    <span class="c1"># print(llh0-llh1)</span>
+    
+    <span class="n">ret</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">px</span><span class="o">=</span><span class="n">px</span><span class="p">,</span>
+        <span class="n">py</span><span class="o">=</span><span class="n">py</span><span class="p">,</span>
+        <span class="n">pz</span><span class="o">=</span><span class="n">pz</span><span class="p">,</span>
+        <span class="n">p0x</span><span class="o">=</span><span class="n">p0x</span><span class="p">,</span>
+        <span class="n">p0y</span><span class="o">=</span><span class="n">p0y</span><span class="p">,</span>
+        <span class="n">p0z</span><span class="o">=</span><span class="n">p0z</span><span class="p">,</span>
+        <span class="n">ray_bending</span> <span class="o">=</span> <span class="n">dtheta</span><span class="p">,</span>
+        <span class="n">electron_density</span> <span class="o">=</span> <span class="n">ne</span><span class="p">,</span>
+        <span class="n">altitudes</span> <span class="o">=</span> <span class="n">alts</span><span class="p">,</span>
+        <span class="n">altitude_errors</span> <span class="o">=</span> <span class="n">dalt</span><span class="p">,</span>
+        <span class="n">excess_ionospheric_delay</span> <span class="o">=</span> <span class="n">excess_ionospheric_delay</span><span class="p">,</span>
+        <span class="n">total_angle_error</span> <span class="o">=</span> <span class="mf">180.0</span><span class="o">*</span><span class="n">theta_p</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span>
+        <span class="n">p_end</span> <span class="o">=</span> <span class="n">p</span><span class="p">,</span>
+        <span class="n">p0_end</span> <span class="o">=</span> <span class="n">p0</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ret</span></div>
+
+
+<div class="viewcode-block" id="ray_trace_error"><a class="viewcode-back" href="../../../_autodoc/sorts/errors/sorts.errors.ionospheric_ray_trace.ray_trace_error.html#sorts.errors.ionospheric_ray_trace.ray_trace_error">[docs]</a><span class="k">def</span> <span class="nf">ray_trace_error</span><span class="p">(</span>
+        <span class="n">time</span><span class="p">,</span>
+        <span class="n">lat</span><span class="p">,</span>
+        <span class="n">lon</span><span class="p">,</span>
+        <span class="n">frequency</span><span class="p">,</span>
+        <span class="n">elevation</span><span class="p">,</span>
+        <span class="n">azimuth</span><span class="p">,</span>
+        <span class="n">ionosphere</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">error_std</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+    <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;TODO: Docstring</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="k">if</span> <span class="n">Point</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">gcoord</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;pyglow must be installed to ray trace&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">Time</span><span class="p">):</span>
+        <span class="n">dn</span> <span class="o">=</span> <span class="n">time</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dn</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">tt</span><span class="o">.</span><span class="n">datetime</span>
+
+    <span class="n">num</span><span class="o">=</span><span class="mi">2000</span>
+    <span class="n">alts</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mf">1e99</span><span class="p">,</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">distance</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">4000</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">ne</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">ne2</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">dtheta</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">dalt</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>        
+    <span class="n">dnex</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">dney</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">dnez</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>            
+    <span class="n">xyz_prev</span><span class="o">=</span><span class="mf">0.0</span>
+    <span class="n">dk</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>        
+    <span class="n">px</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">py</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">pz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">t_vec</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+    <span class="n">t_i_vec</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>           
+    <span class="n">k_vecs</span><span class="o">=</span><span class="p">[]</span>
+    <span class="c1"># initial direction and position</span>
+    <span class="n">k</span><span class="o">=</span><span class="n">frames</span><span class="o">.</span><span class="n">azel_to_ecef</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="mf">10e3</span><span class="p">,</span> <span class="n">az</span><span class="p">,</span> <span class="n">elevation</span><span class="p">)</span>
+    <span class="n">k0</span><span class="o">=</span><span class="n">k</span>
+    <span class="n">p</span><span class="o">=</span><span class="n">frames</span><span class="o">.</span><span class="n">geodetic_to_ITRS</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="mf">10e3</span><span class="p">)</span>
+    <span class="n">dh</span><span class="o">=</span><span class="mf">4e3</span>
+    <span class="n">dt</span><span class="o">=</span><span class="mf">20e-6</span>
+    <span class="c1"># correlated errors std=1, 100 km correlation length</span>
+    <span class="n">scale_length</span><span class="o">=</span><span class="mf">40.0</span>
+    <span class="n">ne_errors_x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">scale_length</span><span class="p">),</span><span class="n">scale_length</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">10000</span><span class="p">))</span>
+    <span class="n">ne_errors_y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">scale_length</span><span class="p">),</span><span class="n">scale_length</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">10000</span><span class="p">))</span>
+    <span class="n">ne_errors_z</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">scale_length</span><span class="p">),</span><span class="n">scale_length</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">10000</span><span class="p">))</span>    
+    
+    <span class="n">p_orig</span><span class="o">=</span><span class="n">p</span>
+    <span class="n">ray_time</span><span class="o">=</span><span class="mf">0.0</span>
+    <span class="n">v_c</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">c</span>
+    <span class="k">for</span> <span class="n">ai</span><span class="p">,</span><span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">alts</span><span class="p">):</span>
+        <span class="c1"># go forward in time</span>
+        <span class="n">dhp</span><span class="o">=</span><span class="n">v_c</span><span class="o">*</span><span class="n">dt</span>
+        <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="o">+</span><span class="n">k</span><span class="o">*</span><span class="n">dhp</span>
+        <span class="n">ray_time</span><span class="o">+=</span><span class="n">dt</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">ray_time</span><span class="o">*</span><span class="mf">1e6</span><span class="p">)</span>
+        <span class="n">t_vec</span><span class="p">[</span><span class="n">ai</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">dt</span>
+        <span class="n">k_vecs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+        
+        <span class="n">dpx</span><span class="o">=</span><span class="n">p</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">])</span><span class="o">*</span><span class="n">dh</span>
+        <span class="n">dpy</span><span class="o">=</span><span class="n">p</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">])</span><span class="o">*</span><span class="n">dh</span>
+        <span class="n">dpz</span><span class="o">=</span><span class="n">p</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">])</span><span class="o">*</span><span class="n">dh</span>
+
+        <span class="n">llh</span><span class="o">=</span><span class="n">frames</span><span class="o">.</span><span class="n">ITRS_to_geodetic</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        
+        <span class="k">if</span> <span class="n">llh</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="mf">1e3</span> <span class="o">&gt;</span> <span class="mi">2100</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">alts</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="n">llh</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="mf">1e3</span>
+        <span class="n">pt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">dn</span><span class="p">,</span> <span class="n">llh</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">llh</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">llh</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="mf">1e3</span><span class="p">)</span>
+        <span class="n">pt</span><span class="o">.</span><span class="n">run_iri</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">pt</span><span class="o">.</span><span class="n">ne</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">ne</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="n">pt</span><span class="o">.</span><span class="n">ne</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span><span class="o">+</span><span class="n">error_std</span><span class="o">*</span><span class="n">ne_errors_x</span><span class="p">[</span><span class="n">ai</span><span class="p">])</span><span class="o">*</span><span class="mf">1e6</span>
+            <span class="k">if</span> <span class="n">ionosphere</span><span class="p">:</span>
+                <span class="n">f0</span><span class="o">=</span><span class="mf">8.98</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ne</span><span class="p">[</span><span class="n">ai</span><span class="p">])</span>            
+                <span class="n">f_p</span><span class="o">=</span><span class="mf">8.98</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ne</span><span class="p">[</span><span class="n">ai</span><span class="p">])</span>
+                <span class="c1"># update group velocity</span>
+                <span class="n">v_c</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">c</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="p">(</span><span class="n">f0</span><span class="o">/</span><span class="n">frequency</span><span class="p">)</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)</span>            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ne</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span>
+            
+        <span class="n">llh</span><span class="o">=</span><span class="n">frames</span><span class="o">.</span><span class="n">ITRS_to_geodetic</span><span class="p">(</span><span class="n">dpx</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">dpx</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">dpx</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">pt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">dn</span><span class="p">,</span> <span class="n">llh</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">llh</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">llh</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="mf">1e3</span><span class="p">)</span>
+        <span class="n">pt</span><span class="o">.</span><span class="n">run_iri</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">pt</span><span class="o">.</span><span class="n">ne</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">dnex</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="p">(</span><span class="n">ne</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">-</span><span class="n">pt</span><span class="o">.</span><span class="n">ne</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span><span class="o">+</span><span class="n">error_std</span><span class="o">*</span><span class="n">ne_errors_x</span><span class="p">[</span><span class="n">ai</span><span class="p">])</span><span class="o">*</span><span class="mf">1e6</span><span class="p">)</span><span class="o">/</span><span class="n">dh</span>            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dnex</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span>
+
+        <span class="n">llh</span><span class="o">=</span><span class="n">frames</span><span class="o">.</span><span class="n">ITRS_to_geodetic</span><span class="p">(</span><span class="n">dpy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">dpy</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">dpy</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">pt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">dn</span><span class="p">,</span> <span class="n">llh</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">llh</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">llh</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="mf">1e3</span><span class="p">)</span>
+        <span class="n">pt</span><span class="o">.</span><span class="n">run_iri</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="n">pt</span><span class="o">.</span><span class="n">ne</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">dney</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="p">(</span><span class="n">ne</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">-</span><span class="n">pt</span><span class="o">.</span><span class="n">ne</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span><span class="o">+</span><span class="n">error_std</span><span class="o">*</span><span class="n">ne_errors_x</span><span class="p">[</span><span class="n">ai</span><span class="p">])</span><span class="o">*</span><span class="mf">1e6</span><span class="p">)</span><span class="o">/</span><span class="n">dh</span>                        
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dney</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span>
+            
+        <span class="n">llh</span><span class="o">=</span><span class="n">frames</span><span class="o">.</span><span class="n">ITRS_to_geodetic</span><span class="p">(</span><span class="n">dpz</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">dpz</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">dpz</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">pt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">dn</span><span class="p">,</span> <span class="n">llh</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">llh</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">llh</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="mf">1e3</span><span class="p">)</span>
+        <span class="n">pt</span><span class="o">.</span><span class="n">run_iri</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">pt</span><span class="o">.</span><span class="n">ne</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">dnez</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="p">(</span><span class="n">ne</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">-</span><span class="n">pt</span><span class="o">.</span><span class="n">ne</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span><span class="o">+</span><span class="n">error_std</span><span class="o">*</span><span class="n">ne_errors_x</span><span class="p">[</span><span class="n">ai</span><span class="p">])</span><span class="o">*</span><span class="mf">1e6</span><span class="p">)</span><span class="o">/</span><span class="n">dh</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dnez</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span>
+            
+        <span class="n">grad</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">dnex</span><span class="p">[</span><span class="n">ai</span><span class="p">],</span><span class="n">dney</span><span class="p">[</span><span class="n">ai</span><span class="p">],</span><span class="n">dnez</span><span class="p">[</span><span class="n">ai</span><span class="p">]])</span>
+        
+        <span class="n">px</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">py</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">pz</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="n">dk</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">k0</span><span class="p">,</span><span class="n">k</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">k0</span><span class="p">,</span><span class="n">k0</span><span class="p">))</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">k</span><span class="p">))))</span>
+        <span class="c1"># no bending if gradient too small</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span><span class="n">grad</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">100.0</span> <span class="ow">and</span> <span class="n">ionosphere</span><span class="p">:</span>
+            <span class="n">grad1</span><span class="o">=</span><span class="n">grad</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span><span class="n">grad</span><span class="p">))</span>
+            
+            <span class="n">p2</span><span class="o">=</span><span class="n">p</span><span class="o">+</span><span class="n">k</span><span class="o">*</span><span class="n">dh</span>
+            <span class="n">llh</span><span class="o">=</span><span class="n">frames</span><span class="o">.</span><span class="n">ITRS_to_geodetic</span><span class="p">(</span><span class="n">p2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">p2</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">p2</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">pt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">dn</span><span class="p">,</span> <span class="n">llh</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">llh</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">llh</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="mf">1e3</span><span class="p">)</span>
+            <span class="n">pt</span><span class="o">.</span><span class="n">run_iri</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">pt</span><span class="o">.</span><span class="n">ne</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+                <span class="n">ne2</span><span class="o">=</span><span class="n">pt</span><span class="o">.</span><span class="n">ne</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span><span class="o">+</span><span class="n">error_std</span><span class="o">*</span><span class="n">ne_errors_x</span><span class="p">[</span><span class="n">ai</span><span class="p">])</span><span class="o">*</span><span class="mf">1e6</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ne2</span><span class="o">=</span><span class="mf">0.0</span>
+            <span class="n">f0</span><span class="o">=</span><span class="mf">8.98</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ne</span><span class="p">[</span><span class="n">ai</span><span class="p">])</span>
+            <span class="n">n0</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="p">(</span><span class="n">f0</span><span class="o">/</span><span class="n">frequency</span><span class="p">)</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)</span>
+            <span class="n">f1</span><span class="o">=</span><span class="mf">8.98</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ne2</span><span class="p">)</span>            
+            <span class="n">n1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="p">(</span><span class="n">f1</span><span class="o">/</span><span class="n">frequency</span><span class="p">)</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)</span>
+
+            <span class="n">theta0</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span><span class="n">k</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span><span class="n">grad</span><span class="p">))</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">k</span><span class="p">))))</span>
+            <span class="c1"># angle cannot be over 90</span>
+            <span class="k">if</span> <span class="n">theta0</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">2.0</span><span class="p">:</span>
+                <span class="n">theta0</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">-</span><span class="n">theta0</span>
+            <span class="n">sin_theta_1</span><span class="o">=</span><span class="p">(</span><span class="n">n0</span><span class="o">/</span><span class="n">n1</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta0</span><span class="p">)</span>
+            <span class="n">dtheta</span><span class="p">[</span><span class="n">ai</span><span class="p">]</span><span class="o">=</span><span class="mf">180.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">sin_theta_1</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">-</span><span class="mf">180.0</span><span class="o">*</span><span class="n">theta0</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+<span class="c1">#            print(&quot;n0/n1 %1.10f theta0 %1.2f theta1-theta0 %1.10f&quot;%(n0/n1,180.0*theta0/np.pi,dtheta[ai]))</span>
+            <span class="n">cos_theta_1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="n">sin_theta_1</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)</span>
+            <span class="n">k_ref</span><span class="o">=</span><span class="p">(</span><span class="n">n0</span><span class="o">/</span><span class="n">n1</span><span class="p">)</span><span class="o">*</span><span class="n">k</span><span class="o">+</span><span class="p">((</span><span class="n">n0</span><span class="o">/</span><span class="n">n1</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta0</span><span class="p">)</span><span class="o">-</span><span class="n">cos_theta_1</span><span class="p">)</span><span class="o">*</span><span class="n">grad1</span>
+            <span class="c1"># normalize</span>
+            <span class="n">k_ref</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">k_ref</span><span class="p">,</span><span class="n">k_ref</span><span class="p">))</span>
+            <span class="n">k</span><span class="o">=</span><span class="n">k_ref</span>
+            
+            <span class="n">angle</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span><span class="n">k</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span><span class="n">grad</span><span class="p">))</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">k</span><span class="p">)))</span>
+
+    <span class="k">return</span> <span class="n">t_vec</span><span class="p">,</span><span class="n">px</span><span class="p">,</span><span class="n">py</span><span class="p">,</span><span class="n">pz</span><span class="p">,</span><span class="n">alts</span><span class="p">,</span><span class="n">ne</span><span class="p">,</span><span class="n">k_vecs</span></div>
+
+
+
+<div class="viewcode-block" id="ionospheric_error"><a class="viewcode-back" href="../../../_autodoc/sorts/errors/sorts.errors.ionospheric_ray_trace.ionospheric_error.html#sorts.errors.ionospheric_ray_trace.ionospheric_error">[docs]</a><span class="k">def</span> <span class="nf">ionospheric_error</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">elevation</span><span class="o">=</span><span class="mf">90.0</span><span class="p">,</span><span class="n">n_samp</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span><span class="n">frequency</span><span class="o">=</span><span class="mf">233e6</span><span class="p">,</span> <span class="n">error_std</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;TODO: Docstring</span>
+
+<span class="sd">    # estimate using sampling what the ray-tracing error is</span>
+<span class="sd">    # return error in microseconds, round-trip time units.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">prop_errors</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">n_samp</span><span class="p">,</span><span class="mi">100</span><span class="p">])</span>
+    <span class="n">prop_error_mean</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">prop_error_std</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>        
+    <span class="n">prop_alts</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2000</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samp</span><span class="p">):</span>
+        <span class="n">t_vec_i</span><span class="p">,</span> <span class="n">px_i</span><span class="p">,</span> <span class="n">py_i</span><span class="p">,</span> <span class="n">pz_i</span><span class="p">,</span> <span class="n">alts_i</span><span class="p">,</span> <span class="n">ne_i</span><span class="p">,</span> <span class="n">k_i</span> <span class="o">=</span> <span class="n">ray_trace_error</span><span class="p">(</span>
+            <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">,</span>
+            <span class="n">frequency</span><span class="o">=</span><span class="n">frequency</span><span class="p">,</span>
+            <span class="n">elevation</span><span class="o">=</span><span class="n">elevation</span><span class="p">,</span>
+            <span class="n">ionosphere</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">error_std</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">t_vec_e_i</span><span class="p">,</span> <span class="n">px_e_i</span><span class="p">,</span> <span class="n">py_e_i</span><span class="p">,</span> <span class="n">pz_e_i</span><span class="p">,</span> <span class="n">alts_e_i</span><span class="p">,</span> <span class="n">ne_e_i</span><span class="p">,</span> <span class="n">k_e_i</span> <span class="o">=</span> <span class="n">ray_trace_error</span><span class="p">(</span>
+            <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">,</span>
+            <span class="n">frequency</span><span class="o">=</span><span class="n">frequency</span><span class="p">,</span>
+            <span class="n">elevation</span><span class="o">=</span><span class="n">elevation</span><span class="p">,</span>
+            <span class="n">ionosphere</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">error_std</span><span class="o">=</span><span class="n">error_std</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">maxi</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">alts_i</span> <span class="o">&gt;</span> <span class="mi">2050</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">alts_i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mf">0.0</span>
+
+        <span class="n">offsets</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">maxi</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ri</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">maxi</span><span class="p">):</span>
+            <span class="c1"># determine what is the additional distance needed to reach target</span>
+            <span class="n">p</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">px_i</span><span class="p">[</span><span class="n">ri</span><span class="p">],</span><span class="n">py_i</span><span class="p">[</span><span class="n">ri</span><span class="p">],</span><span class="n">pz_i</span><span class="p">[</span><span class="n">ri</span><span class="p">]])</span>
+            <span class="n">pe</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">px_e_i</span><span class="p">[</span><span class="n">ri</span><span class="p">],</span><span class="n">py_e_i</span><span class="p">[</span><span class="n">ri</span><span class="p">],</span><span class="n">pz_e_i</span><span class="p">[</span><span class="n">ri</span><span class="p">]])</span>
+
+            <span class="n">offsets</span><span class="p">[</span><span class="n">ri</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e6</span><span class="o">*</span><span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="n">pe</span><span class="p">,</span><span class="n">k_i</span><span class="p">[</span><span class="n">ri</span><span class="p">]</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">k_i</span><span class="p">[</span><span class="n">ri</span><span class="p">],</span><span class="n">k_i</span><span class="p">[</span><span class="n">ri</span><span class="p">]))))</span><span class="o">/</span><span class="n">constants</span><span class="o">.</span><span class="n">c</span>
+        <span class="n">pos_err_fun</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span><span class="n">alts_i</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxi</span><span class="p">],</span><span class="n">offsets</span><span class="p">)</span>
+        <span class="n">prop_errors</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="o">=</span><span class="n">pos_err_fun</span><span class="p">(</span><span class="n">prop_alts</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">ri</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prop_alts</span><span class="p">)):</span>
+        <span class="n">prop_error_mean</span><span class="p">[</span><span class="n">ri</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">prop_errors</span><span class="p">[:,</span><span class="n">ri</span><span class="p">])</span>
+        <span class="n">prop_error_std</span><span class="p">[</span><span class="n">ri</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">prop_errors</span><span class="p">[:,</span><span class="n">ri</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">prop_error_mean</span><span class="p">,</span> <span class="n">prop_error_std</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">n_samp</span><span class="p">)),</span> <span class="n">prop_alts</span><span class="p">,</span> <span class="n">ne_i</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxi</span><span class="p">],</span> <span class="n">ne_e_i</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxi</span><span class="p">],</span> <span class="n">alts_i</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxi</span><span class="p">]</span></div>
+    
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

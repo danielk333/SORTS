@@ -85,7 +85,7 @@ Predefined EISCAT 3D Radar
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  20.313 seconds)
+   **Total running time of the script:** ( 0 minutes  20.108 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_predefined_eiscat3d.py:

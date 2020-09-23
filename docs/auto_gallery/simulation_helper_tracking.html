@@ -22,7 +22,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Simulate scanning for objects" href="simulate_scanning.html" />
-    <link rel="prev" title="Custom Scheduler" href="custom_scheduler.html" />
+    <link rel="prev" title="Correlating data with TLE catalog" href="correlator_example.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--[if lt IE 9]>
     <script src="_static/css3-mediaqueries.js"></script>
@@ -41,7 +41,7 @@
           <a href="simulate_scanning.html" title="Simulate scanning for objects"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="custom_scheduler.html" title="Custom Scheduler"
+          <a href="correlator_example.html" title="Correlating data with TLE catalog"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Examples</a> &#187;</li> 
@@ -50,8 +50,8 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="custom_scheduler.html"
-                        title="previous chapter">Custom Scheduler</a></p>
+  <p class="topless"><a href="correlator_example.html"
+                        title="previous chapter">Correlating data with TLE catalog</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="simulate_scanning.html"
                         title="next chapter">Simulate scanning for objects</a></p>
@@ -88,20 +88,20 @@
 <span id="sphx-glr-auto-gallery-simulation-helper-tracking-py"></span><h1>Simulate tracking with simulation helper<a class="headerlink" href="#simulate-tracking-with-simulation-helper" title="Permalink to this headline">¶</a></h1>
 <img alt="simulation helper tracking" class="sphx-glr-single-img" src="../_images/sphx_glr_simulation_helper_tracking_001.png" />
 <p class="sphx-glr-script-out">Out:</p>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2020-09-17 12:27:43.791 INFO    ; Simulation:run:find_passes
-2020-09-17 12:27:43.919 INFO    ; Simulation:run:find_passes [completed]
-2020-09-17 12:27:43.919 INFO    ; Simulation:run:calculate_measurements
-2020-09-17 12:27:43.919 INFO    ; Simulation:run:calculate_measurements [completed]
-2020-09-17 12:27:43.919 INFO    ; Simulation:run:observe_passes
-2020-09-17 12:27:43.921 INFO    ; Simulation:run:observe_passes [completed]
-2020-09-17 12:27:43.922 ALWAYS  ;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2020-09-23 11:35:45.460 INFO    ; Simulation:run:find_passes
+2020-09-23 11:35:46.933 INFO    ; Simulation:run:find_passes [completed]
+2020-09-23 11:35:46.933 INFO    ; Simulation:run:calculate_measurements
+2020-09-23 11:35:46.950 INFO    ; Simulation:run:calculate_measurements [completed]
+2020-09-23 11:35:46.951 INFO    ; Simulation:run:observe_passes
+2020-09-23 11:35:46.970 INFO    ; Simulation:run:observe_passes [completed]
+2020-09-23 11:35:46.972 ALWAYS  ;
 ------------------------------ Performance analysis ------------------------------
  Name                                  |   Executions | Mean time     | Total time
 ---------------------------------------+--------------+---------------+--------------
- Simulation:run:find_passes            |            1 | 1.27673e-01 s | 98.06 %
- Simulation:run:calculate_measurements |            1 | 4.80175e-04 s | 0.37 %
- Simulation:run:observe_passes         |            1 | 1.44100e-03 s | 1.11 %
- total                                 |            1 | 1.30197e-01 s | 100.00 %
+ Simulation:run:find_passes            |            1 | 1.47254e+00 s | 97.48 %
+ Simulation:run:calculate_measurements |            1 | 1.76449e-02 s | 1.17 %
+ Simulation:run:observe_passes         |            1 | 1.96676e-02 s | 1.30 %
+ total                                 |            1 | 1.51064e+00 s | 100.00 %
 ----------------------------------------------------------------------------------
 </pre></div>
 </div>
@@ -112,6 +112,7 @@
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">h5py</span>
 <span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">from</span> <span class="nn">astropy.time</span> <span class="kn">import</span> <span class="n">Time</span>
 
 <span class="kn">import</span> <span class="nn">sorts</span>
 <span class="n">eiscat3d</span> <span class="o">=</span> <span class="n">sorts</span><span class="o">.</span><span class="n">radars</span><span class="o">.</span><span class="n">eiscat3d_interp</span>
@@ -145,7 +146,7 @@
             <span class="n">d</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
         <span class="p">),</span>
         <span class="n">oid</span> <span class="o">=</span> <span class="n">ind</span><span class="p">,</span>
-    <span class="p">)</span> <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">inc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.linspace.html#numpy.linspace" title="numpy.linspace" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><a href="https://numpy.org/doc/stable/reference/generated/numpy.linspace.html#numpy.linspace" title="numpy.linspace" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a></a><span class="p">(</span><span class="mi">69</span><span class="p">,</span><span class="mi">75</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
+    <span class="p">)</span> <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">inc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.linspace.html#numpy.linspace" title="numpy.linspace" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="mi">69</span><span class="p">,</span><span class="mi">75</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
 <span class="p">]</span>
 
 <span class="k">class</span> <span class="nc">ObservedTracking</span><span class="p">(</span><span class="n">PriorityTracking</span><span class="p">,</span> <span class="n">ObservedParameters</span><span class="p">):</span>
@@ -158,8 +159,9 @@
     <span class="n">timeslice</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
     <span class="n">allocation</span> <span class="o">=</span> <span class="mf">0.1</span><span class="o">*</span><span class="mi">600</span><span class="p">,</span>
     <span class="n">end_time</span> <span class="o">=</span> <span class="mi">3600</span><span class="o">*</span><span class="mf">6.0</span><span class="p">,</span>
-    <span class="n">priority</span> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ones.html#numpy.ones" title="numpy.ones" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><a href="https://numpy.org/doc/stable/reference/generated/numpy.ones.html#numpy.ones" title="numpy.ones" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">ones</span></a></a><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">objs</span><span class="p">)),</span>
+    <span class="n">priority</span> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ones.html#numpy.ones" title="numpy.ones" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">ones</span></a><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">objs</span><span class="p">)),</span>
     <span class="n">use_pass_states</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">epoch</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="mf">53005.0</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;mjd&#39;</span><span class="p">),</span>
 <span class="p">)</span>
 
 <span class="k">class</span> <span class="nc">Tracking</span><span class="p">(</span><span class="n">Simulation</span><span class="p">):</span>
@@ -203,7 +205,7 @@
     <span class="nd">@MPI_single_process</span><span class="p">(</span><span class="n">process_id</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oid</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">tx</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rx</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 
-        <span class="n">fig</span> <span class="o">=</span> <a href="https://matplotlib.org/api/_as_gen/matplotlib.pyplot.figure.html#matplotlib.pyplot.figure" title="matplotlib.pyplot.figure" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><a href="https://matplotlib.org/api/_as_gen/matplotlib.pyplot.figure.html#matplotlib.pyplot.figure" title="matplotlib.pyplot.figure" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a></a><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="mi">15</span><span class="p">))</span>
+        <span class="n">fig</span> <span class="o">=</span> <a href="https://matplotlib.org/api/_as_gen/matplotlib.pyplot.figure.html#matplotlib.pyplot.figure" title="matplotlib.pyplot.figure" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="mi">15</span><span class="p">))</span>
         <span class="n">axes</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">[</span>
                 <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">221</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">),</span>
@@ -228,7 +230,7 @@
                 <span class="k">if</span> <span class="n">dat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dat</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">/</span><span class="mf">3600.0</span><span class="p">,</span> <span class="n">dat</span><span class="p">[</span><span class="s1">&#39;range&#39;</span><span class="p">],</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;obj</span><span class="si">{</span><span class="n">ind</span><span class="si">}</span><span class="s1">-pass</span><span class="si">{</span><span class="n">pi</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
                     <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dat</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">/</span><span class="mf">3600.0</span><span class="p">,</span> <span class="n">dat</span><span class="p">[</span><span class="s1">&#39;range_rate&#39;</span><span class="p">],</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
-                    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dat</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">/</span><span class="mf">3600.0</span><span class="p">,</span> <span class="mi">10</span><span class="o">*</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.log10.html#numpy.log10" title="numpy.log10" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-data"><a href="https://numpy.org/doc/stable/reference/generated/numpy.log10.html#numpy.log10" title="numpy.log10" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-data"><span class="n">np</span><span class="o">.</span><span class="n">log10</span></a></a><span class="p">(</span><span class="n">dat</span><span class="p">[</span><span class="s1">&#39;snr&#39;</span><span class="p">]),</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dat</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">/</span><span class="mf">3600.0</span><span class="p">,</span> <span class="mi">10</span><span class="o">*</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.log10.html#numpy.log10" title="numpy.log10" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-data"><span class="n">np</span><span class="o">.</span><span class="n">log10</span></a><span class="p">(</span><span class="n">dat</span><span class="p">[</span><span class="s1">&#39;snr&#39;</span><span class="p">]),</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
 
 
         <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
@@ -254,10 +256,10 @@
 <span class="n">sim</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">always</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="n">sim</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">fmt</span><span class="p">(</span><span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;total&#39;</span><span class="p">))</span>
 
 <span class="n">sim</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">oid</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<a href="https://matplotlib.org/api/_as_gen/matplotlib.pyplot.show.html#matplotlib.pyplot.show" title="matplotlib.pyplot.show" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><a href="https://matplotlib.org/api/_as_gen/matplotlib.pyplot.show.html#matplotlib.pyplot.show" title="matplotlib.pyplot.show" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a></a><span class="p">()</span>
+<a href="https://matplotlib.org/api/_as_gen/matplotlib.pyplot.show.html#matplotlib.pyplot.show" title="matplotlib.pyplot.show" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">()</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.601 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  2.023 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-gallery-simulation-helper-tracking-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/1552cc3e8aa375535cce594c9ab1cd64/simulation_helper_tracking.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">simulation_helper_tracking.py</span></code></a></p>
@@ -288,7 +290,7 @@
           <a href="simulate_scanning.html" title="Simulate scanning for objects"
              >next</a> |</li>
         <li class="right" >
-          <a href="custom_scheduler.html" title="Custom Scheduler"
+          <a href="correlator_example.html" title="Correlating data with TLE catalog"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" >Examples</a> &#187;</li> 

@@ -85,7 +85,7 @@
 <h1>Tracking<a class="headerlink" href="#tracking" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt id="sorts.scheduler.tracking.Tracking">
-<em class="property">class </em><code class="sig-prename descclassname">sorts.scheduler.tracking.</code><code class="sig-name descname">Tracking</code><span class="sig-paren">(</span><em class="sig-param">radar</em>, <em class="sig-param">space_objects</em>, <em class="sig-param">timeslice</em>, <em class="sig-param">allocation</em>, <em class="sig-param">end_time</em>, <em class="sig-param">start_time=0.0</em>, <em class="sig-param">controller=&lt;class 'sorts.controller.tracker.Tracker'&gt;</em>, <em class="sig-param">controller_args={'return_copy': True}</em>, <em class="sig-param">max_dpos=1000.0</em>, <em class="sig-param">profiler=None</em>, <em class="sig-param">logger=None</em>, <em class="sig-param">use_pass_states=True</em>, <em class="sig-param">calculate_max_snr=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/scheduler/tracking.html#Tracking"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.scheduler.tracking.Tracking" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">sorts.scheduler.tracking.</code><code class="sig-name descname">Tracking</code><span class="sig-paren">(</span><em class="sig-param">radar</em>, <em class="sig-param">space_objects</em>, <em class="sig-param">end_time</em>, <em class="sig-param">epoch</em>, <em class="sig-param">start_time=0.0</em>, <em class="sig-param">controller=&lt;class 'sorts.controller.tracker.Tracker'&gt;</em>, <em class="sig-param">controller_args={'return_copy': True}</em>, <em class="sig-param">max_dpos=1000.0</em>, <em class="sig-param">max_samp=30.0</em>, <em class="sig-param">profiler=None</em>, <em class="sig-param">logger=None</em>, <em class="sig-param">use_pass_states=True</em>, <em class="sig-param">calculate_max_snr=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/scheduler/tracking.html#Tracking"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.scheduler.tracking.Tracking" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="sorts.scheduler.scheduler.Scheduler.html#sorts.scheduler.scheduler.Scheduler" title="sorts.scheduler.scheduler.Scheduler"><code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.scheduler.scheduler.Scheduler</span></code></a></p>
 <p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
@@ -94,7 +94,7 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.scheduler.tracking.Tracking.__init__.html#sorts.scheduler.tracking.Tracking.__init__" title="sorts.scheduler.tracking.Tracking.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(radar, space_objects, timeslice, …)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.scheduler.tracking.Tracking.__init__.html#sorts.scheduler.tracking.Tracking.__init__" title="sorts.scheduler.tracking.Tracking.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(radar, space_objects, end_time, epoch)</p></td>
 <td><p>Initialize self.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.scheduler.tracking.Tracking.calculate_observation.html#sorts.scheduler.tracking.Tracking.calculate_observation" title="sorts.scheduler.tracking.Tracking.calculate_observation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_observation</span></code></a>(txrx_pass, t, …)</p></td>
@@ -115,10 +115,13 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.scheduler.tracking.Tracking.observe_passes.html#sorts.scheduler.tracking.Tracking.observe_passes" title="sorts.scheduler.tracking.Tracking.observe_passes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">observe_passes</span></code></a>(passes, **kwargs)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.scheduler.tracking.Tracking.schedule.html#sorts.scheduler.tracking.Tracking.schedule" title="sorts.scheduler.tracking.Tracking.schedule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">schedule</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.scheduler.tracking.Tracking.schedule.html#sorts.scheduler.tracking.Tracking.schedule" title="sorts.scheduler.tracking.Tracking.schedule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">schedule</span></code></a>(**kwargs)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.scheduler.tracking.Tracking.update.html#sorts.scheduler.tracking.Tracking.update" title="sorts.scheduler.tracking.Tracking.update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.scheduler.tracking.Tracking.set_measurements.html#sorts.scheduler.tracking.Tracking.set_measurements" title="sorts.scheduler.tracking.Tracking.set_measurements"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_measurements</span></code></a>(*args, **kwargs)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.scheduler.tracking.Tracking.update.html#sorts.scheduler.tracking.Tracking.update" title="sorts.scheduler.tracking.Tracking.update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update</span></code></a>()</p></td>
 <td><p>Update the scheduler information.</p></td>
 </tr>
 </tbody>

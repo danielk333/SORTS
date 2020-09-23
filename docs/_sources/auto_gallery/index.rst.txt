@@ -76,6 +76,27 @@ This is all the examples and tutorials
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="Using pyglow">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_using_pyglow_thumb.png
+     :alt: Using pyglow
+
+     :ref:`sphx_glr_auto_gallery_using_pyglow.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/using_pyglow
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="SGP4 standalone example">
 
 .. only:: html
@@ -391,6 +412,27 @@ This is all the examples and tutorials
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="Ray-trace radar signals with Pyglow">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_raytrace_with_pyglow_thumb.png
+     :alt: Ray-trace radar signals with Pyglow
+
+     :ref:`sphx_glr_auto_gallery_raytrace_with_pyglow.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/raytrace_with_pyglow
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="Loading a TLE catalog (e.g. spacetrack)">
 
 .. only:: html
@@ -643,6 +685,27 @@ This is all the examples and tutorials
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="Custom Scheduler">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_custom_scheduler_thumb.png
+     :alt: Custom Scheduler
+
+     :ref:`sphx_glr_auto_gallery_custom_scheduler.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/custom_scheduler
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="An example scheduler for tracking">
 
 .. only:: html
@@ -664,14 +727,14 @@ This is all the examples and tutorials
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Custom Scheduler">
+    <div class="sphx-glr-thumbcontainer" tooltip="Correlating data with TLE catalog">
 
 .. only:: html
 
- .. figure:: /auto_gallery/images/thumb/sphx_glr_custom_scheduler_thumb.png
-     :alt: Custom Scheduler
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_correlator_example_thumb.png
+     :alt: Correlating data with TLE catalog
 
-     :ref:`sphx_glr_auto_gallery_custom_scheduler.py`
+     :ref:`sphx_glr_auto_gallery_correlator_example.py`
 
 .. raw:: html
 
@@ -681,7 +744,7 @@ This is all the examples and tutorials
 .. toctree::
    :hidden:
 
-   /auto_gallery/custom_scheduler
+   /auto_gallery/correlator_example
 
 .. raw:: html
 
@@ -808,6 +871,27 @@ This is all the examples and tutorials
    :hidden:
 
    /auto_gallery/simulation_helper_scanning
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="E3D Demonstrator SST planner">
+
+.. only:: html
+
+ .. figure:: /auto_gallery/images/thumb/sphx_glr_e3d_demo_planner_thumb.png
+     :alt: E3D Demonstrator SST planner
+
+     :ref:`sphx_glr_auto_gallery_e3d_demo_planner.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_gallery/e3d_demo_planner
 .. raw:: html
 
     <div class="sphx-glr-clear"></div>

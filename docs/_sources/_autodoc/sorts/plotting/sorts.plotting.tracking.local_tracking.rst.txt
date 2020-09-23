@@ -1,0 +1,8 @@
+local\_tracking
+===============
+
+.. currentmodule:: sorts.plotting.tracking
+
+.. rubric:: local_tracking
+
+.. autofunction:: local_tracking

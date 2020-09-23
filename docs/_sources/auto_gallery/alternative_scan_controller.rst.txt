@@ -40,18 +40,18 @@ Using scans on alternative parameters
     --------------------------------------- Performance analysis --------------------------------------
      Name                                                   |   Executions | Mean time     | Total time
     --------------------------------------------------------+--------------+---------------+--------------
-     equidistant_sampling                                   |            1 | 1.45435e-04 s | 0.00 %
-     get_state                                              |            1 | 2.46600e-01 s | 4.95 %
-     find_passes                                            |            1 | 6.21963e-03 s | 0.12 %
-     Obs.Param.:calculate_observation:get_state             |            1 | 1.27598e-01 s | 2.56 %
-     Obs.Param.:calculate_observation:enus,range,range_rate |            1 | 7.84397e-04 s | 0.02 %
-     Obs.Param.:calculate_observation:snr-step:gain         |         6695 | 6.53245e-04 s | 87.70 %
-     Obs.Param.:calculate_observation:snr-step:snr          |         6695 | 1.72825e-05 s | 2.32 %
-     Obs.Param.:calculate_observation:snr-step              |         6695 | 6.83270e-04 s | 91.73 %
-     Obs.Param.:calculate_observation:generator             |            1 | 4.60457e+00 s | 92.33 %
-     Obs.Param.:calculate_observation                       |            1 | 4.73306e+00 s | 94.91 %
-     observe_passes                                         |            1 | 4.73374e+00 s | 94.92 %
-     total                                                  |            1 | 4.98683e+00 s | 100.00 %
+     equidistant_sampling                                   |            1 | 1.40429e-04 s | 0.00 %
+     get_state                                              |            1 | 9.17996e-01 s | 15.57 %
+     find_passes                                            |            1 | 6.30879e-03 s | 0.11 %
+     Obs.Param.:calculate_observation:get_state             |            1 | 1.29303e-01 s | 2.19 %
+     Obs.Param.:calculate_observation:enus,range,range_rate |            1 | 8.10385e-04 s | 0.01 %
+     Obs.Param.:calculate_observation:snr-step:gain         |         6695 | 6.89164e-04 s | 78.24 %
+     Obs.Param.:calculate_observation:snr-step:snr          |         6695 | 1.68406e-05 s | 1.91 %
+     Obs.Param.:calculate_observation:snr-step              |         6695 | 7.18642e-04 s | 81.59 %
+     Obs.Param.:calculate_observation:generator             |            1 | 4.84159e+00 s | 82.10 %
+     Obs.Param.:calculate_observation                       |            1 | 4.97181e+00 s | 84.31 %
+     observe_passes                                         |            1 | 4.97249e+00 s | 84.32 %
+     total                                                  |            1 | 5.89707e+00 s | 100.00 %
     ---------------------------------------------------------------------------------------------------
 
 
@@ -269,7 +269,7 @@ Using scans on alternative parameters
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  7.547 seconds)
+   **Total running time of the script:** ( 0 minutes  8.813 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_alternative_scan_controller.py:

@@ -5,82 +5,90 @@
 
 Computation times
 =================
-**05:06.520** total execution time for **auto_gallery** files:
+**00:02.023** total execution time for **auto_gallery** files:
 
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_scheduler_interpolation_optimizing.py` (``scheduler_interpolation_optimizing.py``) | 02:36.903 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_simulation_helper_tracking.py` (``simulation_helper_tracking.py``)                 | 00:02.023 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_spacetrack_catalog.py` (``spacetrack_catalog.py``)                                 | 00:20.494 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_adding_random_errors.py` (``adding_random_errors.py``)                             | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_predefined_eiscat3d.py` (``predefined_eiscat3d.py``)                               | 00:20.313 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_alternative_scan_controller.py` (``alternative_scan_controller.py``)               | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_static_radar_controller_speedup.py` (``static_radar_controller_speedup.py``)       | 00:19.677 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_correlator_example.py` (``correlator_example.py``)                                 | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_simulate_scanning.py` (``simulate_scanning.py``)                                   | 00:14.489 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_custom_radar_controller.py` (``custom_radar_controller.py``)                       | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_using_frames.py` (``using_frames.py``)                                             | 00:13.573 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_custom_scans.py` (``custom_scans.py``)                                             | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_orekit_small_step.py` (``orekit_small_step.py``)                                   | 00:07.636 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_custom_scheduler.py` (``custom_scheduler.py``)                                     | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_alternative_scan_controller.py` (``alternative_scan_controller.py``)               | 00:07.547 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_e3d_demo_planner.py` (``e3d_demo_planner.py``)                                     | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_radar_passes.py` (``radar_passes.py``)                                             | 00:07.509 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_eiscat3d_demonstrator_array.py` (``eiscat3d_demonstrator_array.py``)               | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_tracking_scheduler.py` (``tracking_scheduler.py``)                                 | 00:05.222 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_finding_passes.py` (``finding_passes.py``)                                         | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_observing_passes.py` (``observing_passes.py``)                                     | 00:04.112 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_interpolating_states.py` (``interpolating_states.py``)                             | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_misc_passes_functions.py` (``misc_passes_functions.py``)                           | 00:03.873 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_logger.py` (``logger.py``)                                                         | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_populations.py` (``populations.py``)                                               | 00:03.770 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_logger_orekit.py` (``logger_orekit.py``)                                           | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_space_object.py` (``space_object.py``)                                             | 00:02.971 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_memory_profiler.py` (``memory_profiler.py``)                                       | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_memory_profiler.py` (``memory_profiler.py``)                                       | 00:02.825 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_misc_passes_functions.py` (``misc_passes_functions.py``)                           | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_profiler_orekit.py` (``profiler_orekit.py``)                                       | 00:02.609 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_observing_passes.py` (``observing_passes.py``)                                     | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_simulation_helper_scanning.py` (``simulation_helper_scanning.py``)                 | 00:01.673 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_orekit_propagator.py` (``orekit_propagator.py``)                                   | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_logger_orekit.py` (``logger_orekit.py``)                                           | 00:01.511 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_orekit_small_step.py` (``orekit_small_step.py``)                                   | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_predefined_scans.py` (``predefined_scans.py``)                                     | 00:01.281 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_populations.py` (``populations.py``)                                               | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_orekit_propagator.py` (``orekit_propagator.py``)                                   | 00:00.972 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_predefined_eiscat3d.py` (``predefined_eiscat3d.py``)                               | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_custom_radar_controller.py` (``custom_radar_controller.py``)                       | 00:00.914 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_predefined_scans.py` (``predefined_scans.py``)                                     | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_teme_coordinates.py` (``teme_coordinates.py``)                                     | 00:00.678 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_profiler.py` (``profiler.py``)                                                     | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_sgp4_propagator.py` (``sgp4_propagator.py``)                                       | 00:00.675 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_profiler_orekit.py` (``profiler_orekit.py``)                                       | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_finding_passes.py` (``finding_passes.py``)                                         | 00:00.633 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_profiler_sgp4.py` (``profiler_sgp4.py``)                                           | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_simulation_helper_tracking.py` (``simulation_helper_tracking.py``)                 | 00:00.601 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_radar_copy_from_controllers.py` (``radar_copy_from_controllers.py``)               | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_eiscat3d_demonstrator_array.py` (``eiscat3d_demonstrator_array.py``)               | 00:00.569 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_radar_passes.py` (``radar_passes.py``)                                             | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_custom_scans.py` (``custom_scans.py``)                                             | 00:00.555 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_radar_reference_from_controllers.py` (``radar_reference_from_controllers.py``)     | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_tle_propagation_with_sorts.py` (``tle_propagation_with_sorts.py``)                 | 00:00.534 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_raytrace_with_pyglow.py` (``raytrace_with_pyglow.py``)                             | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_interpolating_states.py` (``interpolating_states.py``)                             | 00:00.495 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_scheduler_interpolation_optimizing.py` (``scheduler_interpolation_optimizing.py``) | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_tracker_controller.py` (``tracker_controller.py``)                                 | 00:00.478 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_sgp4_package_example.py` (``sgp4_package_example.py``)                             | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_sgp4_package_example.py` (``sgp4_package_example.py``)                             | 00:00.469 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_sgp4_propagator.py` (``sgp4_propagator.py``)                                       | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_custom_scheduler.py` (``custom_scheduler.py``)                                     | 00:00.459 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_simulate_scanning.py` (``simulate_scanning.py``)                                   | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_adding_random_errors.py` (``adding_random_errors.py``)                             | 00:00.319 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_simulation_helper_scanning.py` (``simulation_helper_scanning.py``)                 | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_radar_copy_from_controllers.py` (``radar_copy_from_controllers.py``)               | 00:00.072 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_space_object.py` (``space_object.py``)                                             | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_radar_reference_from_controllers.py` (``radar_reference_from_controllers.py``)     | 00:00.066 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_spacetrack_catalog.py` (``spacetrack_catalog.py``)                                 | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_profiler_sgp4.py` (``profiler_sgp4.py``)                                           | 00:00.034 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_static_radar_controller_speedup.py` (``static_radar_controller_speedup.py``)       | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_profiler.py` (``profiler.py``)                                                     | 00:00.005 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_teme_coordinates.py` (``teme_coordinates.py``)                                     | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_auto_gallery_logger.py` (``logger.py``)                                                         | 00:00.005 | 0.0 MB |
+| :ref:`sphx_glr_auto_gallery_tle_propagation_with_sorts.py` (``tle_propagation_with_sorts.py``)                 | 00:00.000 | 0.0 MB |
++----------------------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_auto_gallery_tracker_controller.py` (``tracker_controller.py``)                                 | 00:00.000 | 0.0 MB |
++----------------------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_auto_gallery_tracking_scheduler.py` (``tracking_scheduler.py``)                                 | 00:00.000 | 0.0 MB |
++----------------------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_auto_gallery_using_frames.py` (``using_frames.py``)                                             | 00:00.000 | 0.0 MB |
++----------------------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_auto_gallery_using_pyglow.py` (``using_pyglow.py``)                                             | 00:00.000 | 0.0 MB |
 +----------------------------------------------------------------------------------------------------------------+-----------+--------+

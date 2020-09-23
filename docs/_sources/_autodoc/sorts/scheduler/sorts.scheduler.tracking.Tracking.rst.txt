@@ -22,6 +22,7 @@ Tracking
       ~Tracking.get_passes
       ~Tracking.observe_passes
       ~Tracking.schedule
+      ~Tracking.set_measurements
       ~Tracking.update
    
    

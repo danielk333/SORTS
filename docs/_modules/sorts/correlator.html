@@ -73,6 +73,7 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
@@ -83,18 +84,18 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">scipy</span>
 <span class="kn">import</span> <span class="nn">h5py</span>
-<span class="kn">import</span> <span class="nn">scipy.constants</span>
+<span class="kn">import</span> <span class="nn">scipy.constants</span> <span class="k">as</span> <span class="nn">constants</span>
 
 
 
 <div class="viewcode-block" id="residual_distribution_metric"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.correlator.residual_distribution_metric.html#sorts.correlator.residual_distribution_metric">[docs]</a><span class="k">def</span> <span class="nf">residual_distribution_metric</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">r_ref</span><span class="p">,</span> <span class="n">v_ref</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Using the simulated and the measured ranges and rage-rates calculate a de-correlation metric.</span>
 <span class="sd">    </span>
-<span class="sd">    :param numpy.ndarray t: Times in seconds corresponding to measurement and simulation data.</span>
+<span class="sd">    :param numpy.ndarray t: Times in seconds corresponding to measurement and object simulated data.</span>
 <span class="sd">    :param numpy.ndarray r: Measured ranges in meters</span>
 <span class="sd">    :param numpy.ndarray v: Measured rage-rates in meters per second</span>
-<span class="sd">    :param numpy.ndarray r_ref: Simulated ranges in meters</span>
-<span class="sd">    :param numpy.ndarray v_ref: Simulated rage-rates in meters per second</span>
+<span class="sd">    :param numpy.ndarray r_ref: Object simulated ranges in meters</span>
+<span class="sd">    :param numpy.ndarray v_ref: Object simulated rage-rates in meters per second</span>
 <span class="sd">    :return: Metric value, smaller values indicate better match.</span>
 <span class="sd">    :rtype: float</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -105,294 +106,183 @@
 
     <span class="k">return</span> <span class="n">metric</span></div>
 
+<div class="viewcode-block" id="generate_measurements"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.correlator.generate_measurements.html#sorts.correlator.generate_measurements">[docs]</a><span class="k">def</span> <span class="nf">generate_measurements</span><span class="p">(</span><span class="n">state_ecef</span><span class="p">,</span> <span class="n">rx_ecef</span><span class="p">,</span> <span class="n">tx_ecef</span><span class="p">):</span>
 
-<div class="viewcode-block" id="correlate"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.correlator.correlate.html#sorts.correlator.correlate">[docs]</a><span class="k">def</span> <span class="nf">correlate</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">station</span><span class="p">,</span> <span class="n">population</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">n_closest</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">out_file</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">MPI_on</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">r_tx</span> <span class="o">=</span> <span class="n">tx_ecef</span><span class="p">[:,</span><span class="kc">None</span><span class="p">]</span> <span class="o">-</span> <span class="n">state_ecef</span><span class="p">[:</span><span class="mi">3</span><span class="p">,:]</span>
+    <span class="n">r_rx</span> <span class="o">=</span> <span class="n">rx_ecef</span><span class="p">[:,</span><span class="kc">None</span><span class="p">]</span> <span class="o">-</span> <span class="n">state_ecef</span><span class="p">[:</span><span class="mi">3</span><span class="p">,:]</span>
+
+    <span class="n">r_tx_n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">r_tx</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">r_rx_n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">r_rx</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    
+    <span class="n">r_sim</span> <span class="o">=</span> <span class="n">r_tx_n</span> <span class="o">+</span> <span class="n">r_rx_n</span>
+    
+    <span class="n">v_tx</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">r_tx</span><span class="o">*</span><span class="n">state_ecef</span><span class="p">[</span><span class="mi">3</span><span class="p">:,:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">/</span><span class="n">r_tx_n</span>
+    <span class="n">v_rx</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">r_rx</span><span class="o">*</span><span class="n">state_ecef</span><span class="p">[</span><span class="mi">3</span><span class="p">:,:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">/</span><span class="n">r_rx_n</span>
+
+    <span class="n">v_sim</span> <span class="o">=</span> <span class="n">v_tx</span> <span class="o">+</span> <span class="n">v_rx</span>
+
+    <span class="k">return</span> <span class="n">r_sim</span><span class="p">,</span> <span class="n">v_sim</span></div>
+
+
+<div class="viewcode-block" id="correlate"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.correlator.correlate.html#sorts.correlator.correlate">[docs]</a><span class="k">def</span> <span class="nf">correlate</span><span class="p">(</span>
+        <span class="n">measurements</span><span class="p">,</span> 
+        <span class="n">population</span><span class="p">,</span> 
+        <span class="n">metric</span><span class="o">=</span><span class="n">residual_distribution_metric</span><span class="p">,</span> 
+        <span class="n">metric_reduce</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">:</span> <span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">,</span>
+        <span class="n">n_closest</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> 
+        <span class="n">profiler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+        <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+        <span class="n">MPI</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+        <span class="n">propagator_lighttime_correction</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Given a mono-static measurement of ranges and rage-rates, a radar model and a population: correlate measurements with population.</span>
 
-<span class="sd">    :param dict data: Dictionary that contains measurement data. Contents are described below.</span>
-<span class="sd">    :param AntennaRX station: Model of receiver station that performed the measurement.</span>
+<span class="sd">    :param list data: List of dictionaries that contains measurement data. Contents are described below.</span>
+<span class="sd">    :param station station: Model of receiver station that performed the measurement.</span>
 <span class="sd">    :param Population population: Population to correlate against.</span>
-<span class="sd">    :param function metric: Metric used to correlate measurement and simulation of population.</span>
-<span class="sd">    :param int n_closest: Number of closest matches to output.</span>
-<span class="sd">    :param str out_file: If not :code:`None`, save the output data to this path.</span>
-<span class="sd">    :param bool MPI_on: If True use internal parallelization with MPI to calculate correlation. Turn to False to externally parallelize with MPI.</span>
+<span class="sd">    :param function metric: Metric used to correlate measurement and simulated object measurement.</span>
+<span class="sd">    :param Profiler profiler: </span>
+<span class="sd">    :param logging.Logger logger: </span>
+<span class="sd">    :param bool MPI: If True use internal parallelization with MPI to calculate correlation. Turn to False to externally parallelize with MPI.</span>
 <span class="sd">    </span>
-
 <span class="sd">    **Measurement data:**</span>
 
-<span class="sd">      The file must be a dictionary that contains three data-sets:</span>
-<span class="sd">        * &#39;t&#39;: Times in unix-seconds</span>
-<span class="sd">        * &#39;r&#39;: Ranges in meters</span>
-<span class="sd">        * &#39;v&#39;: Range-rates in meters per second</span>
-<span class="sd">      They should all be numpy vectors of equal length.</span>
+<span class="sd">      Each entry in the input :code:`measurements` list must be a dictionary that contains the following fields:</span>
+<span class="sd">        * &#39;t&#39;: [numpy.ndarray] Times relative epoch in seconds</span>
+<span class="sd">        * &#39;r&#39;: [numpy.ndarray] Two-way ranges in meters</span>
+<span class="sd">        * &#39;v&#39;: [numpy.ndarray] Two-way range-rates in meters per second</span>
+<span class="sd">        * &#39;epoch&#39;: [astropy.Time] epoch for measurements</span>
+<span class="sd">        * &#39;tx&#39;: [sorts.TX] Pointer to the TX station</span>
+<span class="sd">        * &#39;rx&#39;: [sorts.RX] Pointer to the RX station</span>
+
+<span class="sd">    Optionally, if `propagator_lighttime_correction` should be applied, one can supply which index in the list is the TX-TX pair,</span>
+<span class="sd">    assuming that the time `t` given is the transmission time.</span>
 
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;TODO&#39;</span><span class="p">)</span>
     
-    <span class="n">r</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span>
-    <span class="n">t</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span>
-    <span class="n">v</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;v&#39;</span><span class="p">]</span>
+    <span class="n">correlation_data</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">population</span><span class="p">)</span>
+    <span class="n">match_pop</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">population</span><span class="p">),),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
 
-    <span class="n">t_sort</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
-    <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">t_sort</span><span class="p">]</span>
-    <span class="n">r</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">t_sort</span><span class="p">]</span>
-    <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">t_sort</span><span class="p">]</span>
-    
-    <span class="c1">#lt correction</span>
-    <span class="n">lt_correction</span> <span class="o">=</span> <span class="n">r</span><span class="o">/</span><span class="n">scipy</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">c</span>
-    <span class="n">t</span> <span class="o">+=</span> <span class="n">lt_correction</span>
 
-    <span class="n">_day</span> <span class="o">=</span> <span class="mf">3600.0</span><span class="o">*</span><span class="mf">24.0</span>
-
-    <span class="n">loc_ecef</span> <span class="o">=</span> <span class="n">station</span><span class="o">.</span><span class="n">ecef</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="n">loc_ecef_norm</span> <span class="o">=</span> <span class="n">loc_ecef</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">loc_ecef</span><span class="p">)</span>
-
-    <span class="n">jd_check</span> <span class="o">=</span> <span class="n">dpt</span><span class="o">.</span><span class="n">unix_to_jd</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
-
-    <span class="n">r_ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">r</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
-    <span class="n">v_ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">v</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
-
-    <span class="n">correlation_data</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">SO_generator</span> <span class="o">=</span> <span class="n">population</span><span class="o">.</span><span class="n">object_generator</span><span class="p">()</span>
-
-    <span class="k">if</span> <span class="n">MPI_on</span><span class="p">:</span>
-        <span class="n">step</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="o">.</span><span class="n">size</span>
-        <span class="n">next_check</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="o">.</span><span class="n">rank</span>
+    <span class="k">if</span> <span class="n">MPI</span> <span class="ow">and</span> <span class="n">comm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">size</span>
+        <span class="n">next_check</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">rank</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">step</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="n">next_check</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">SO_generator</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">ind</span> <span class="o">==</span> <span class="n">next_check</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">PID </span><span class="si">{}</span><span class="s1"> correlating </span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1"> -------&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="n">ind</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">population</span><span class="p">)))</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-            
-            <span class="n">jd_obj</span> <span class="o">=</span> <span class="n">dpt</span><span class="o">.</span><span class="n">mjd_to_jd</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">mjd0</span><span class="p">)</span>
-            
-            <span class="n">t_check</span> <span class="o">=</span> <span class="p">(</span><span class="n">jd_check</span> <span class="o">-</span> <span class="n">jd_obj</span><span class="p">)</span><span class="o">*</span><span class="n">_day</span>
-            <span class="n">states</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">t_check</span><span class="p">)</span>
+    <span class="n">pbars</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">pbar_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">step</span><span class="p">):</span>
+        <span class="n">pbars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">population</span><span class="p">)</span><span class="o">//</span><span class="n">step</span><span class="p">),</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">100</span><span class="p">))</span>
+    <span class="n">pbar</span> <span class="o">=</span> <span class="n">pbars</span><span class="p">[</span><span class="n">next_check</span><span class="p">]</span>
 
-            <span class="k">for</span> <span class="n">jdi</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">jd_check</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
-                <span class="n">r_tmp</span> <span class="o">=</span> <span class="n">loc_ecef</span> <span class="o">-</span> <span class="n">states</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span><span class="n">jdi</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">population</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ind</span> <span class="o">!=</span> <span class="n">next_check</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;skipping </span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">population</span><span class="p">)))</span>
+            <span class="k">continue</span>
 
-                <span class="n">r_ref</span><span class="p">[</span><span class="n">jdi</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">r_tmp</span><span class="p">)</span>
-                <span class="n">v_ref</span><span class="p">[</span><span class="n">jdi</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span>
-                    <span class="n">states</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span><span class="n">jdi</span><span class="p">],</span>
-                    <span class="n">r_tmp</span><span class="o">/</span><span class="n">r_ref</span><span class="p">[</span><span class="n">jdi</span><span class="p">],</span>
-                <span class="p">)</span>
+        <span class="n">pbar</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="s1">&#39;Correlating object </span><span class="si">{}</span><span class="s1"> &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="p">))</span>
+        <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-            <span class="n">residual_r_mu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">r_ref</span> <span class="o">-</span> <span class="n">r</span><span class="p">)</span>
-            <span class="n">residual_r_std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">r_ref</span> <span class="o">-</span> <span class="n">r</span><span class="p">)</span>
-            <span class="n">residual_v_mu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">v_ref</span> <span class="o">-</span> <span class="n">v</span><span class="p">)</span>
-            <span class="n">residual_v_std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">v_ref</span> <span class="o">-</span> <span class="n">v</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v_ref</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">residual_a</span> <span class="o">=</span> <span class="p">((</span><span class="n">v_ref</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">v_ref</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="n">v</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;correlating </span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ind</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">population</span><span class="p">)))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+        <span class="n">correlation_data</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">di</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">measurements</span><span class="p">):</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;v&#39;</span><span class="p">]</span>
+            <span class="n">tx</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;tx&#39;</span><span class="p">]</span>
+            <span class="n">rx</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;rx&#39;</span><span class="p">]</span>
+            <span class="n">epoch</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;epoch&#39;</span><span class="p">]</span>
+
+            <span class="n">t_sort</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">t_sort</span><span class="p">]</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">t_sort</span><span class="p">]</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">t_sort</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">propagator_lighttime_correction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">tx_r</span> <span class="o">=</span> <span class="n">measurements</span><span class="p">[</span><span class="n">propagator_lighttime_correction</span><span class="p">][</span><span class="s1">&#39;r&#39;</span><span class="p">]</span><span class="o">*</span><span class="mf">0.5</span>
+                <span class="n">lt_correction</span> <span class="o">=</span> <span class="n">tx_r</span><span class="o">/</span><span class="n">constants</span><span class="o">.</span><span class="n">c</span>
+                <span class="n">t</span> <span class="o">+=</span> <span class="n">lt_correction</span>
+
+            <span class="n">tx_ecef</span> <span class="o">=</span> <span class="n">tx</span><span class="o">.</span><span class="n">ecef</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">tx_ecef_norm</span> <span class="o">=</span> <span class="n">tx_ecef</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">tx_ecef</span><span class="p">)</span>
+            <span class="n">rx_ecef</span> <span class="o">=</span> <span class="n">rx</span><span class="o">.</span><span class="n">ecef</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">rx_ecef_norm</span> <span class="o">=</span> <span class="n">rx_ecef</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">rx_ecef</span><span class="p">)</span>
+
+            <span class="n">t_prop</span> <span class="o">=</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">-</span> <span class="n">obj</span><span class="o">.</span><span class="n">epoch</span><span class="p">)</span><span class="o">.</span><span class="n">sec</span> <span class="o">+</span> <span class="n">t</span>
+
+            <span class="n">states</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">t_prop</span><span class="p">)</span>
+
+            <span class="n">r_ref</span><span class="p">,</span> <span class="n">v_ref</span> <span class="o">=</span> <span class="n">generate_measurements</span><span class="p">(</span><span class="n">states</span><span class="p">,</span> <span class="n">rx_ecef</span><span class="p">,</span> <span class="n">tx_ecef</span><span class="p">)</span>
+
+            <span class="n">match</span> <span class="o">=</span> <span class="n">metric</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">r_ref</span><span class="p">,</span> <span class="n">v_ref</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">di</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">match_pop</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">match</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">residual_a</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">match_pop</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric_reduce</span><span class="p">(</span><span class="n">match_pop</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">match</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Residuals:&#39;</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;residual_r_mu  = </span><span class="si">{}</span><span class="s1"> m&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">residual_r_mu</span><span class="p">))</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;residual_r_std = </span><span class="si">{}</span><span class="s1"> m&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">residual_r_std</span><span class="p">))</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;residual_v_mu  = </span><span class="si">{}</span><span class="s1"> m/s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">residual_v_mu</span><span class="p">))</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;residual_v_std = </span><span class="si">{}</span><span class="s1"> m/s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">residual_v_std</span><span class="p">))</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;residual_a     = </span><span class="si">{}</span><span class="s1"> m/s^2&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">residual_a</span><span class="p">))</span>
-            
             <span class="n">cdat</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s1">&#39;r_ref&#39;</span><span class="p">:</span> <span class="n">r_ref</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
-                    <span class="s1">&#39;v_ref&#39;</span><span class="p">:</span> <span class="n">v_ref</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
-                    <span class="s1">&#39;sat_id&#39;</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">oid</span><span class="p">,</span>
-                    <span class="s1">&#39;stat&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">residual_r_mu</span><span class="p">,</span> <span class="n">residual_r_std</span><span class="p">,</span> <span class="n">residual_v_mu</span><span class="p">,</span> <span class="n">residual_v_std</span><span class="p">,</span> <span class="n">residual_a</span><span class="p">]</span>
-                <span class="p">}</span>
-            <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">oid</span> <span class="ow">in</span> <span class="n">correlation_data</span><span class="p">:</span>
-                <span class="n">correlation_data</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">oid</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cdat</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">correlation_data</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">oid</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">cdat</span><span class="p">]</span>
+                <span class="s1">&#39;r_ref&#39;</span><span class="p">:</span> <span class="n">r_ref</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+                <span class="s1">&#39;v_ref&#39;</span><span class="p">:</span> <span class="n">v_ref</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+                <span class="s1">&#39;match&#39;</span><span class="p">:</span> <span class="n">match</span><span class="p">,</span>
+            <span class="p">}</span>
 
-            <span class="n">next_check</span> <span class="o">+=</span> <span class="n">step</span>
+            <span class="n">correlation_data</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cdat</span><span class="p">)</span>
 
-    <span class="n">oids</span> <span class="o">=</span> <span class="n">population</span><span class="p">[</span><span class="s1">&#39;oid&#39;</span><span class="p">]</span>
+        <span class="n">next_check</span> <span class="o">+=</span> <span class="n">step</span>
 
-    <span class="k">if</span> <span class="n">step</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
 
-        <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;---&gt; PID </span><span class="si">%i</span><span class="s1">: Receiving all results &lt;barrier&gt;&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="o">.</span><span class="n">rank</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">MPI</span> <span class="ow">and</span> <span class="n">comm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">step</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
 
-            <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
-                <span class="k">for</span> <span class="n">ID</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">T</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">population</span><span class="p">),</span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
-                    <span class="n">oid</span> <span class="o">=</span> <span class="n">oids</span><span class="p">[</span><span class="n">ID</span><span class="p">]</span>
-                    <span class="n">correlation_data</span><span class="p">[</span><span class="n">oid</span><span class="p">]</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">T</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">oid</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;PID</span><span class="si">{}</span><span class="s1"> recived packet </span><span class="si">{}</span><span class="s1"> from PID</span><span class="si">{}</span><span class="s1"> &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="n">oid</span><span class="p">,</span> <span class="n">T</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">comm</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Receiving all results &lt;barrier&gt;&#39;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">comm</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">ID</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">T</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">population</span><span class="p">),</span><span class="n">comm</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+                    <span class="n">match_pop</span><span class="p">[</span><span class="n">ID</span><span class="p">]</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">T</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">ID</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;received packet </span><span class="si">{}</span><span class="s1"> from PID</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ID</span><span class="p">,</span> <span class="n">T</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;---&gt; PID </span><span class="si">%i</span><span class="s1">: Distributing all correlation results to process 0 &lt;barrier&gt;&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="o">.</span><span class="n">rank</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Distributing all correlation results to process 0 &lt;barrier&gt;&#39;</span><span class="p">)</span>
 
-            <span class="k">for</span> <span class="n">ID</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">population</span><span class="p">),</span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
-                <span class="n">oid</span> <span class="o">=</span> <span class="n">oids</span><span class="p">[</span><span class="n">ID</span><span class="p">]</span>
-                <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">correlation_data</span><span class="p">[</span><span class="n">oid</span><span class="p">],</span> <span class="n">dest</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">oid</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">ID</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">comm</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">population</span><span class="p">),</span><span class="n">comm</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+                <span class="n">comm</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">match_pop</span><span class="p">[</span><span class="n">ID</span><span class="p">],</span> <span class="n">dest</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">ID</span><span class="p">)</span>
         
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;---&gt; Distributing done &lt;/barrier&gt;&#39;</span><span class="p">)</span>
-
-    <span class="n">matches_cdat</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">MPI_on</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Finding best matches.&#39;</span><span class="p">)</span>
-        
-        <span class="n">match_metric</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">correlation_data</span><span class="p">),</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-        <span class="n">key_list</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">key_cnt</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">cdats</span> <span class="ow">in</span> <span class="n">correlation_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">key_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-            <span class="n">tmp_metrics</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">cdats</span><span class="p">),),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">cind</span><span class="p">,</span> <span class="n">cdat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cdats</span><span class="p">):</span>
-                <span class="n">tmp_metrics</span><span class="p">[</span><span class="n">cind</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">cdat</span><span class="p">[</span><span class="s1">&#39;r_ref&#39;</span><span class="p">],</span> <span class="n">cdat</span><span class="p">[</span><span class="s1">&#39;v_ref&#39;</span><span class="p">])</span>
-            <span class="n">tmp_match</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">tmp_metrics</span><span class="p">)</span>
-
-            <span class="n">match_metric</span><span class="p">[</span><span class="n">key_cnt</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp_metrics</span><span class="p">[</span><span class="n">tmp_match</span><span class="p">]</span>
-            <span class="n">match_metric</span><span class="p">[</span><span class="n">key_cnt</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp_match</span>
-            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">: </span><span class="si">{}</span><span class="s1"> metric&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">match_metric</span><span class="p">[</span><span class="n">key_cnt</span><span class="p">]))</span>
-            <span class="n">key_cnt</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;---&gt; Distributing done &lt;/barrier&gt;&#39;</span><span class="p">)</span>
 
 
-        <span class="n">match</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">match_metric</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span>
-        
-
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">match_metric</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">n_closest</span><span class="p">:</span>
-            <span class="n">all_match</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argpartition</span><span class="p">(</span><span class="n">match_metric</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_closest</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">MPI</span> <span class="ow">and</span> <span class="n">comm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">step</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">comm</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">best_matches</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">match_pop</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">all_match</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">correlation_data</span><span class="p">)))</span>
+            <span class="n">best_matches</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">best_matches</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">best_matches</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">best_matches</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">match_pop</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Best match </span><span class="si">{}</span><span class="s1">:</span><span class="si">{}</span><span class="s1"> at </span><span class="si">{}</span><span class="s1"> match metric&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="n">key_list</span><span class="p">[</span><span class="n">match</span><span class="p">],</span>
-                <span class="nb">int</span><span class="p">(</span><span class="n">match_metric</span><span class="p">[</span><span class="n">match</span><span class="p">,</span><span class="mi">1</span><span class="p">]),</span>
-                <span class="n">match_metric</span><span class="p">[</span><span class="n">match</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
-            <span class="p">))</span>
-        <span class="n">cdat</span> <span class="o">=</span> <span class="n">correlation_data</span><span class="p">[</span><span class="n">key_list</span><span class="p">[</span><span class="n">match</span><span class="p">]][</span><span class="nb">int</span><span class="p">(</span><span class="n">match_metric</span><span class="p">[</span><span class="n">match</span><span class="p">,</span><span class="mi">1</span><span class="p">])]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">best_matches</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">n_closest</span><span class="p">:</span>
+        <span class="n">best_matches</span> <span class="o">=</span> <span class="n">best_matches</span><span class="p">[:</span><span class="n">n_closest</span><span class="p">]</span>
 
-        <span class="n">r_ref</span> <span class="o">=</span> <span class="n">cdat</span><span class="p">[</span><span class="s1">&#39;r_ref&#39;</span><span class="p">]</span>
-        <span class="n">v_ref</span> <span class="o">=</span> <span class="n">cdat</span><span class="p">[</span><span class="s1">&#39;v_ref&#39;</span><span class="p">]</span>
+    <span class="n">best_cdata</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">best_matches</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">out_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-
-            <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">out_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">h_corr</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">cdat</span> <span class="ow">in</span> <span class="n">correlation_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="k">for</span> <span class="n">dat_key</span><span class="p">,</span> <span class="n">dat</span> <span class="ow">in</span> <span class="n">cdat</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                        <span class="n">h_corr</span><span class="p">[</span><span class="n">key</span><span class="o">+</span><span class="s1">&#39;/&#39;</span><span class="o">+</span><span class="n">dat_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dat</span><span class="p">)</span>
-
-                <span class="n">h_corr</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;sat_match&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">key_list</span><span class="p">[</span><span class="n">match</span><span class="p">]</span>
-                <span class="n">h_corr</span><span class="p">[</span><span class="s1">&#39;residuals&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cdat</span><span class="p">[</span><span class="s1">&#39;stat&#39;</span><span class="p">])</span>
-
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">match_metric</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">n_closest</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">may_match</span> <span class="ow">in</span> <span class="n">all_match</span><span class="p">[:</span><span class="n">n_closest</span><span class="p">]:</span>
-                <span class="n">matches_cdat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">correlation_data</span><span class="p">[</span><span class="n">key_list</span><span class="p">[</span><span class="n">may_match</span><span class="p">]][</span><span class="nb">int</span><span class="p">(</span><span class="n">match_metric</span><span class="p">[</span><span class="n">may_match</span><span class="p">,</span><span class="mi">1</span><span class="p">])])</span>
+    <span class="k">for</span> <span class="n">cind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">best_cdata</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">MPI</span> <span class="ow">and</span> <span class="n">comm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">step</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">source_rank</span> <span class="o">=</span> <span class="n">best_matches</span><span class="p">[</span><span class="n">cind</span><span class="p">]</span> <span class="o">%</span> <span class="n">comm</span><span class="o">.</span><span class="n">size</span>
+            <span class="n">best_cdata</span><span class="p">[</span><span class="n">cind</span><span class="p">]</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">correlation_data</span><span class="p">[</span><span class="n">best_matches</span><span class="p">[</span><span class="n">cind</span><span class="p">]],</span> <span class="n">root</span><span class="o">=</span><span class="n">source_rank</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">may_match</span> <span class="ow">in</span> <span class="n">all_match</span><span class="p">:</span>
-                <span class="n">matches_cdat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">correlation_data</span><span class="p">[</span><span class="n">key_list</span><span class="p">[</span><span class="n">may_match</span><span class="p">]][</span><span class="nb">int</span><span class="p">(</span><span class="n">match_metric</span><span class="p">[</span><span class="n">may_match</span><span class="p">,</span><span class="mi">1</span><span class="p">])])</span>
-    <span class="k">if</span> <span class="n">step</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">matches_cdat</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">matches_cdat</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">best_cdata</span><span class="p">[</span><span class="n">cind</span><span class="p">]</span> <span class="o">=</span> <span class="n">correlation_data</span><span class="p">[</span><span class="n">best_matches</span><span class="p">[</span><span class="n">cind</span><span class="p">]]</span>
 
-    <span class="k">return</span> <span class="n">matches_cdat</span></div>
+    <span class="k">return</span> <span class="n">best_matches</span><span class="p">,</span> <span class="n">match_pop</span><span class="p">[</span><span class="n">best_matches</span><span class="p">],</span> <span class="n">best_cdata</span></div>
 
 
-<div class="viewcode-block" id="plot_correlation"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.correlator.plot_correlation.html#sorts.correlator.plot_correlation">[docs]</a><span class="k">def</span> <span class="nf">plot_correlation</span><span class="p">(</span><span class="n">dat</span><span class="p">,</span> <span class="n">cdat</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Plot the correlation between the measurement and simulated population object.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">t</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span>
-    <span class="n">r</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span>
-    <span class="n">v</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="s1">&#39;v&#39;</span><span class="p">]</span>
-    <span class="n">r_ref</span> <span class="o">=</span> <span class="n">cdat</span><span class="p">[</span><span class="s1">&#39;r_ref&#39;</span><span class="p">]</span>
-    <span class="n">v_ref</span> <span class="o">=</span> <span class="n">cdat</span><span class="p">[</span><span class="s1">&#39;v_ref&#39;</span><span class="p">]</span>
-
-    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="mi">15</span><span class="p">))</span>
-    <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;measurement&#39;</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r_ref</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;simulation&#39;</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Range [km]&#39;</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time [s]&#39;</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;SAT ID </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cdat</span><span class="p">[</span><span class="s1">&#39;sat_id&#39;</span><span class="p">]))</span>
-
-    <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;measurement&#39;</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">v_ref</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;simulation&#39;</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Velocity [km/s]&#39;</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time [s]&#39;</span><span class="p">)</span>
-
-    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-
-    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="mi">15</span><span class="p">))</span>
-    <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">221</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">((</span><span class="n">r_ref</span> <span class="o">-</span> <span class="n">r</span><span class="p">)</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Range residuals [km]&#39;</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Residuals range: mu=</span><span class="si">{:.3f}</span><span class="s1"> km, std=</span><span class="si">{:.3f}</span><span class="s1"> km&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cdat</span><span class="p">[</span><span class="s1">&#39;stat&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">cdat</span><span class="p">[</span><span class="s1">&#39;stat&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">))</span>
-
-    <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">222</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">((</span><span class="n">v_ref</span> <span class="o">-</span> <span class="n">v</span><span class="p">)</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Velocity residuals [km/s]&#39;</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Residuals range rate: mu=</span><span class="si">{:.3f}</span><span class="s1"> km/s, std=</span><span class="si">{:.3f}</span><span class="s1"> km/s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cdat</span><span class="p">[</span><span class="s1">&#39;stat&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">cdat</span><span class="p">[</span><span class="s1">&#39;stat&#39;</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">))</span>
-    
-    <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">223</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="n">r_ref</span> <span class="o">-</span> <span class="n">r</span><span class="p">)</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Range residuals [km]&#39;</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time [s]&#39;</span><span class="p">)</span>
-
-    <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">224</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="n">v_ref</span> <span class="o">-</span> <span class="n">v</span><span class="p">)</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Velocity residuals [km/s]&#39;</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time [s]&#39;</span><span class="p">)</span></div>
-
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">population_library</span>
-    <span class="kn">import</span> <span class="nn">propagator_sgp4</span>
-    <span class="kn">import</span> <span class="nn">radar_library</span> <span class="k">as</span> <span class="nn">rlib</span>
-    <span class="kn">import</span> <span class="nn">radar_config</span>
-
-    <span class="n">radar</span> <span class="o">=</span> <span class="n">rlib</span><span class="o">.</span><span class="n">eiscat_uhf</span><span class="p">()</span>
-
-    <span class="n">measurement_folder</span> <span class="o">=</span> <span class="s1">&#39;./data/uhf_test_data/events&#39;</span>
-    <span class="n">tle_file</span> <span class="o">=</span> <span class="s1">&#39;./data/uhf_test_data/tle-201801.txt&#39;</span>
-    <span class="n">measurement_file</span> <span class="o">=</span> <span class="n">measurement_folder</span> <span class="o">+</span> <span class="s1">&#39;/det-000000.h5&#39;</span>
-
-    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">measurement_file</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">h_det</span><span class="p">:</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="n">h_det</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">*</span><span class="mf">1e3</span>
-        <span class="n">t</span> <span class="o">=</span> <span class="n">h_det</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-        <span class="n">v</span> <span class="o">=</span> <span class="o">-</span><span class="n">h_det</span><span class="p">[</span><span class="s1">&#39;v&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="c1">#i think juha has wrong sign in analysis</span>
-
-        <span class="n">dat</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="n">r</span><span class="p">,</span>
-            <span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="n">t</span><span class="p">,</span>
-            <span class="s1">&#39;v&#39;</span><span class="p">:</span> <span class="n">v</span><span class="p">,</span>
-        <span class="p">}</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loading population.&#39;</span><span class="p">)</span>
-    <span class="n">pop</span> <span class="o">=</span> <span class="n">population_library</span><span class="o">.</span><span class="n">tle_snapshot</span><span class="p">(</span><span class="n">tle_file</span><span class="p">,</span> <span class="n">sgp4_propagation</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-    <span class="c1">#pop.filter(&#39;oid&#39;, lambda oid: np.abs(oid - 43075) &lt; 4)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;population size: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pop</span><span class="p">)))</span>
-
-    <span class="n">cdat</span> <span class="o">=</span> <span class="n">correlate</span><span class="p">(</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">dat</span><span class="p">,</span>
-        <span class="n">station</span> <span class="o">=</span> <span class="n">radar</span><span class="o">.</span><span class="n">_rx</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-        <span class="n">population</span> <span class="o">=</span> <span class="n">pop</span><span class="p">,</span>
-        <span class="n">metric</span> <span class="o">=</span> <span class="n">residual_distribution_metric</span><span class="p">,</span>
-        <span class="n">n_closest</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="n">out_file</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">verbose</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">MPI_on</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">plot_correlation</span><span class="p">(</span><span class="n">dat</span><span class="p">,</span> <span class="n">cdat</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="n">plot_correlation</span><span class="p">(</span><span class="n">dat</span><span class="p">,</span> <span class="n">cdat</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-    
 </pre></div>
 
           </div>

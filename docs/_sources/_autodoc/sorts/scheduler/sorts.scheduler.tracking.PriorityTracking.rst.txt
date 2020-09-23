@@ -15,7 +15,6 @@ PriorityTracking
       :toctree: .
    
       ~PriorityTracking.__init__
-      ~PriorityTracking.calculate_measurements
       ~PriorityTracking.calculate_observation
       ~PriorityTracking.chain_generators
       ~PriorityTracking.generate_schedule
@@ -23,6 +22,7 @@ PriorityTracking
       ~PriorityTracking.get_passes
       ~PriorityTracking.observe_passes
       ~PriorityTracking.schedule
+      ~PriorityTracking.set_measurements
       ~PriorityTracking.update
    
    

@@ -1,0 +1,8 @@
+ionospheric\_error
+==================
+
+.. currentmodule:: sorts.errors.ionospheric_ray_trace
+
+.. rubric:: ionospheric_error
+
+.. autofunction:: ionospheric_error

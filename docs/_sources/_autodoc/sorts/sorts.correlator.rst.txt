@@ -21,7 +21,7 @@ Module summary
     
     correlate
     
-    plot_correlation
+    generate_measurements
     
     residual_distribution_metric
     
@@ -45,7 +45,7 @@ Contents
 
 
 
-.. autofunction:: plot_correlation
+.. autofunction:: generate_measurements
    :noindex:
 
 
