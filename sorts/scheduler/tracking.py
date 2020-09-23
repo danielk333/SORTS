@@ -153,13 +153,14 @@ class PriorityTracking(Tracking):
     def __init__(self,
             radar, 
             space_objects, 
-            end_time,
+            end_time, 
+            epoch, 
             timeslice, 
             allocation, 
             **kwargs
         ):
         self.priority = kwargs.pop('priority', None)
-        super().__init__(radar, space_objects, end_time, **kwargs)
+        super().__init__(radar, space_objects, end_time, epoch, **kwargs)
 
         self.timeslice = timeslice
         self.allocation = allocation

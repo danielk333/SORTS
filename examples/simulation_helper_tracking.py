@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import h5py
 import pickle
+from astropy.time import Time
 
 import sorts
 eiscat3d = sorts.radars.eiscat3d_interp
@@ -57,6 +58,7 @@ scheduler = ObservedTracking(
     end_time = 3600*6.0,
     priority = np.ones(len(objs)),
     use_pass_states = True,
+    epoch = Time(53005.0, format='mjd'),
 )
 
 class Tracking(Simulation):
