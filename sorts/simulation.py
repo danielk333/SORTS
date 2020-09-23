@@ -444,7 +444,7 @@ def cached_step(caches):
     '''Simulation step caching decorator
 
  
-    :param str caches: Is a list of strings for the caches to be used, available by default is "h5" and "pickle". Custom caches are implemented by implementing methods with the string name but prefixed with load_ and save_.
+    :param str caches: Is a list of strings for the caches to be used, available by default is "h5" and "pickle". Custom caches are implemented by implementing methods with the string name but prefixed with `load_` and `save_`.
 
     '''
     if isinstance(caches, str):

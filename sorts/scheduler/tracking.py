@@ -19,28 +19,28 @@ class Tracking(Scheduler):
     def __init__(self, 
             radar, 
             space_objects, 
-            timeslice, 
-            allocation, 
             end_time, 
+            epoch,
             start_time = 0.0, 
             controller = Tracker,
             controller_args = dict(return_copy=True),
             max_dpos = 1e3,
+            max_samp = 30.0,
             profiler = None, 
             logger = None,
             use_pass_states = True,
             calculate_max_snr = False,
         ):
         super().__init__(radar, profiler=profiler, logger=logger)
+        self.epoch = epoch
         self.controller = controller
         self.controller_args = controller_args
         self.space_objects = space_objects
-        self.timeslice = timeslice
-        self.allocation = allocation
         self.start_time = start_time
         self.end_time = end_time
 
         self.max_dpos = max_dpos
+        self.max_samp = max_samp
         self.use_pass_states = use_pass_states
         self.calculate_max_snr = calculate_max_snr
 
@@ -60,18 +60,25 @@ class Tracking(Scheduler):
 
 
     def get_passes(self, ind):
-        t = equidistant_sampling(
-            orbit = self.space_objects[ind].orbit, 
-            start_t = self.start_time, 
-            end_t = self.end_time, 
-            max_dpos = self.max_dpos,
-        )
+
+        dt = (self.space_objects[ind].epoch - self.epoch).to_value('sec')
+
+        if isinstance(self.space_objects[ind].state, pyorb.Orbit):
+            t = equidistant_sampling(
+                orbit = self.space_objects[ind].state, 
+                start_t = self.start_time, 
+                end_t = self.end_time, 
+                max_dpos = self.max_dpos,
+            )
+        else:
+            t = np.arange(self.start_time, self.end_time, self.max_samp)
+
         if self.logger is not None:
             self.logger.info(f'Tracking:get_passes(ind={ind}):propagating {len(t)} steps')
         if self.profiler is not None:
             self.profiler.start('Tracking:get_passes:propagating')
 
-        states = self.space_objects[ind].get_state(t)
+        states = self.space_objects[ind].get_state(t - dt)
         if self.use_pass_states:
             self.states[ind] = states
             self.states_t[ind] = t
@@ -109,6 +116,11 @@ class Tracking(Scheduler):
         return self.passes[ind], states, t
 
 
+    @abstractmethod
+    def set_measurements(self, *args, **kwargs):
+        pass
+
+
     def get_controllers(self):
         if self.logger is not None:
             self.logger.debug(f'Tracking:get_controllers')
@@ -138,15 +150,25 @@ class Tracking(Scheduler):
 
 class PriorityTracking(Tracking):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self,
+            radar, 
+            space_objects, 
+            end_time,
+            timeslice, 
+            allocation, 
+            **kwargs
+        ):
         self.priority = kwargs.pop('priority', None)
+        super().__init__(radar, space_objects, end_time, **kwargs)
 
-        super().__init__(*args, **kwargs)
+        self.timeslice = timeslice
+        self.allocation = allocation
+
         if self.priority is None:
             self.priority = np.ones((len(self.space_objects),), dtype=np.float64)
         
 
-    def calculate_measurements(self):
+    def set_measurements(self):
         total_measurements = int(self.allocation/self.timeslice)
         if not isinstance(self.priority, np.ndarray):
             pri = np.array(self.priority)

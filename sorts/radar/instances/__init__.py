@@ -5,6 +5,7 @@
 
 from .eiscat_3d import gen_eiscat3d, gen_eiscat3d_demonstrator
 from .tsdr import gen_tromso_space_debris_radar
+from .eiscat_uhf import gen_eiscat_uhf
 
 radar_instances = ['eiscat3d', 'eiscat3d_interp']
 
@@ -40,4 +41,6 @@ class RadarSystemsGetter:
             return gen_tromso_space_debris_radar(fence=False, phased=True)
         elif name == 'tsdr_phased_fence':
             return gen_tromso_space_debris_radar(fence=True, phased=True)
+        elif name == 'eiscat_uhf':
+            return gen_eiscat_uhf()
         raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
