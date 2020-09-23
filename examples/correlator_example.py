@@ -57,26 +57,27 @@ with h5py.File(str(obs_pth),'r') as h_det:
 
 print('Loading TLE population')
 pop = sorts.population.tle_catalog(tle_pth)
-#THIS NEEDS FIXING
-# pop.save('/tmp/test_pop.h5')
-# exit()
-# from sorts.propagator import SGP4
-# pop = sorts.Population.load(
-#     '/tmp/test_pop.h5',
-#     propagator = SGP4,
-#     propagator_options = dict(
-#         settings = dict(
-#             tle_input=True,
-#         ),
-#     ),
-# )
 
 #correlate requires output in ECEF 
 pop.out_frame = 'ITRS'
 
-#filter out some objects for speed of example
+#filter out some objects for speed (leave 100 random ones)
 #IRIDIUM = 43075U
-pop.filter('oid', lambda oid: np.abs(oid - 43075) < 4)
+random_selection = np.random.randint(low=0, high=len(pop), size=(100,))
+random_selection = pop['oid'][random_selection].tolist()
+
+pop.filter('oid', lambda oid: oid == 43075 or oid in random_selection)
+
+#Lets also remove all but 1 TLE for IRIDIUM
+#Using some numpy magic filtering
+keep = np.full((len(pop),), True, dtype=np.bool)
+mjds = pop.data[pop.data['oid'] == 43075]['mjd0']
+best_mjd = np.argmin(np.abs(mjds - epoch.mjd))
+best_mjd = mjds[best_mjd]
+keep[pop.data['oid'] == 43075] = False
+keep[np.logical_and(pop.data['oid'] == 43075, pop.data['mjd0'] == best_mjd)] = True
+pop.data = pop.data[keep]
+
 
 print('population size: {}'.format(len(pop)))
 
