@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 '''
-Custom Scans
-================================
+Ray-trace radar signals with Pyglow
+=====================================
 
 '''
 

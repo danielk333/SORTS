@@ -8,6 +8,7 @@ An example scheduler for tracking
 import numpy as np
 import matplotlib.pyplot as plt
 from tabulate import tabulate
+from astropy.time import Time
 
 import sorts
 eiscat3d = sorts.radars.eiscat3d
@@ -81,6 +82,7 @@ scheduler = ObservedTracking(
     timeslice = 0.1, 
     allocation = 0.1*200, 
     end_time = 3600*6.0,
+    epoch = Time(53005.0, format='mjd'),
     priority = [0.2, 1.0],
     logger = logger,
 )

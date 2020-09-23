@@ -24,10 +24,6 @@ When used for publications
 
 Please let us known before publishing data using SORTS and use the below Reference/DOI
 
-@article{
-    TO BE ADDED
-}
-
 DOI/TO.BE.ADDED
 
 
