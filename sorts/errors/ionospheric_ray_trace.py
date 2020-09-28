@@ -22,6 +22,7 @@ import scipy.interpolate as interpolate
 import scipy.constants as constants
 
 from .. import frames
+from .errors import Errors
 
 def calculate_delay(
         time,
@@ -448,3 +449,36 @@ def ionospheric_error(time, elevation=90.0,n_samp=20,frequency=233e6, error_std=
 
     return prop_error_mean, prop_error_std/np.sqrt(float(n_samp)), prop_alts, ne_i[0:maxi], ne_e_i[0:maxi], alts_i[0:maxi]
     
+
+class IonosphericRayTrace(Errors):
+    '''
+     
+
+    '''
+    VARIABLES = [
+        'range', 
+        'k',
+        't',
+    ]
+
+    def __init__(self, station, seed=None, electron_density_std=0.0):
+        super().__init__(seed=seed)
+
+        self.electron_density_std = electron_density_std
+        self.station = station
+
+
+
+    def range(self, data, time, azimuth, elevation):
+
+
+        ray_trace_error(
+                time,
+                self.station.lat,
+                self.station.lon,
+                self.station.beam.frequency,
+                elevation,
+                azimuth,
+                ionosphere=True,
+                error_std=self.electron_density_std,
+            )

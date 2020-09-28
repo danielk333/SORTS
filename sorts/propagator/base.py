@@ -24,6 +24,7 @@ class Propagator(ABC):
         epoch_scale = 'utc',
         time_format = 'sec',
         time_scale = None,
+        heartbeat = False,
     )
 
     def __init__(self, settings=None, profiler=None, logger=None):
@@ -129,6 +130,12 @@ class Propagator(ABC):
         :return: State vectors in SI-units.
         '''
         return None
+
+
+    def heartbeat(self, t, state, **kwargs):
+        '''Function applied after propagation to time `t` and state `state`, before next time step as given in the input time vector to `propagate`.
+        '''
+        pass
 
 
     def __str__(self):

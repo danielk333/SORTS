@@ -84,20 +84,47 @@ class SGP4(Propagator):
 
         t, epoch = self.convert_time(t, epoch)
         times = epoch + t
-        
-        states = np.empty((6,t.size), dtype=np.float64)
 
+        jd_f = times.jd2
+        jd0 = times.jd1
+        
         if self.profiler is not None:
             self.profiler.start('SGP4:propagate_tle:steps')
 
-        errors, r, v = satellite.sgp4_array(times.jd1, times.jd2)
+        if isinstance(jd_f, float) or isinstance(jd_f, int):
+            states = np.empty((6,), dtype=np.float64)
+
+            error, r, v = satellite.sgp4(jd0, jd_f)
+
+            if logger_profiler_on:
+                if error != 0 and self.logger is not None:
+                    self.logger.error(f'SGP4:propagate:step-{ind}:{SGP4_ERRORS[error]}')
+
+            states[:3] = r
+            states[3:] = v
+
+        else:
+            states = np.empty((6,jd_f.size), dtype=np.float64)
+
+            if self.settings['heartbeat']:
+                errors = []
+                for tind in range(jd_f.size):
+                    error, r, v = satellite.sgp4(jd0[tind], jd_f[tind])
+                    errors.append(error)
+                    states[:3,tind] = r
+                    states[3:,tind] = v
+                    self.heartbeat(jd0[tind] + jd_f[tind], states[:,tind], satellite=satellite)
+            else:
+                errors, r, v = satellite.sgp4_array(jd0, jd_f)
+                states[:3,...] = r.T
+                states[3:,...] = v.T
+
 
         for ind, err in enumerate(errors):
             if err != 0 and self.logger is not None:
                 self.logger.error(f'SGP4:propagate_tle:step-{ind}:{SGP4_ERRORS[err]}')
 
-        states[:3,...] = r.T*1e3 #km to m
-        states[3:,...] = v.T*1e3 #km/s to m
+        states *= 1e3 #km to m, km/s to m/s
 
         states = frames.convert(
             times, 
@@ -257,15 +284,23 @@ class SGP4(Propagator):
         else:
             states = np.empty((6,jd_f.size), dtype=np.float64)
 
-            errors, r, v = satellite.sgp4_array(jd0, jd_f)
+            if self.settings['heartbeat']:
+                errors = []
+                for tind in range(jd_f.size):
+                    error, r, v = satellite.sgp4(jd0[tind], jd_f[tind])
+                    errors.append(error)
+                    states[:3,tind] = r
+                    states[3:,tind] = v
+                    self.heartbeat(jd0[tind] + jd_f[tind], states[:,tind], satellite=satellite)
+            else:
+                errors, r, v = satellite.sgp4_array(jd0, jd_f)
+                states[:3,...] = r.T
+                states[3:,...] = v.T
 
             if logger_profiler_on:
                 for ind, err in enumerate(errors):
                     if err != 0 and self.logger is not None:
                         self.logger.error(f'SGP4:propagate:step-{ind}:{SGP4_ERRORS[err]}')
-
-            states[:3,...] = r.T
-            states[3:,...] = v.T
 
 
         states *= 1e3 #km to m and km/s to m/s
@@ -425,3 +460,5 @@ class SGP4(Propagator):
         kep[3] = tmp
         kep[5] = pyorb.true_to_mean(kep[5], kep[1], degrees=False)
         return kep
+
+
