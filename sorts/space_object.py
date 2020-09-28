@@ -33,7 +33,7 @@ import copy
 #Third party import
 import numpy as np
 import pyorb
-from astropy.time import Time
+from astropy.time import Time, TimeDelta
 
 
 class SpaceObject(object):
@@ -176,7 +176,7 @@ class SpaceObject(object):
             propagator_args = copy.deepcopy(self.propagator_args),
             epoch=self.oid,
             oid=self.oid,
-            state=copy.copy(self.state),
+            state=copy.deepcopy(self.state),
             parameters = copy.deepcopy(self.parameters),
         )
 
@@ -235,9 +235,9 @@ class SpaceObject(object):
             state = self.get_state(np.array([dt], dtype=np.float64))
 
 
-        self.mjd0 = self.mjd0 + dt/(3600.0*24.0)
+        self.epoch = self.epoch + TimeDelta(dt, format='sec')
 
-        x, y, z, vx, vy, vz = state_frame.flatten()
+        x, y, z, vx, vy, vz = state.flatten()
 
         self.update(
             x=x,
