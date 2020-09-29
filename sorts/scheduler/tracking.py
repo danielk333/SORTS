@@ -30,6 +30,7 @@ class Tracking(Scheduler):
             logger = None,
             use_pass_states = True,
             calculate_max_snr = False,
+            collect_passes = False,
         ):
         super().__init__(radar, profiler=profiler, logger=logger)
         self.epoch = epoch
@@ -38,6 +39,7 @@ class Tracking(Scheduler):
         self.space_objects = space_objects
         self.start_time = start_time
         self.end_time = end_time
+        self.collect_passes = collect_passes
 
         self.max_dpos = max_dpos
         self.max_samp = max_samp
@@ -127,23 +129,45 @@ class Tracking(Scheduler):
 
         ctrls = []
         for ind in range(len(self.space_objects)):
-            if self.use_pass_states:
-                minds = self.measurements[ind]
-                states = self.states[ind][:3,minds]
-                t = self.states_t[ind][minds]
-            else:
-                states = self.states[ind][:3,:]
-                t = self.states_t[ind][:]
+            if self.collect_passes:
+                if self.use_pass_states:
+                    minds = self.measurements[ind]
+                    states = self.states[ind][:3,minds]
+                    t = self.states_t[ind][minds]
+                else:
+                    states = self.states[ind][:3,:]
+                    t = self.states_t[ind][:]
 
-            ctrl = self.controller(
-                radar = self.radar, 
-                t=t, 
-                t0=0.0, 
-                ecefs = states[:3,:],
-                **self.controller_args
-            )
-            ctrl.meta['target'] = f'Object {self.space_objects[ind].oid}'
-            ctrls.append(ctrl)
+                ctrl = self.controller(
+                    radar = self.radar, 
+                    t=t, 
+                    t0=0.0, 
+                    ecefs = states[:3,:],
+                    **self.controller_args
+                )
+                ctrl.meta['target'] = f'Object {self.space_objects[ind].oid}'
+                ctrls.append(ctrl)
+
+            else:
+                for pass_ind in range(len(self.states_t[ind])):
+                    if self.use_pass_states:
+                        minds = self.measurements[ind][pass_ind]
+                        states = self.states[ind][pass_ind][:3,minds]
+                        t = self.states_t[ind][pass_ind][minds]
+                    else:
+                        states = self.states[ind][pass_ind][:3,:]
+                        t = self.states_t[ind][pass_ind][:]
+
+                    ctrl = self.controller(
+                        radar = self.radar, 
+                        t=t, 
+                        t0=0.0, 
+                        ecefs = states[:3,:],
+                        **self.controller_args
+                    )
+                    ctrl.meta['target'] = f'Object {self.space_objects[ind].oid}'
+                    ctrl.meta['pass'] = pass_ind
+                    ctrls.append(ctrl)
         
         return ctrls
 
@@ -170,6 +194,9 @@ class PriorityTracking(Tracking):
         
 
     def set_measurements(self):
+        if not self.collect_passes:
+            raise NotImplementedError()
+
         total_measurements = int(self.allocation/self.timeslice)
         if not isinstance(self.priority, np.ndarray):
             pri = np.array(self.priority)

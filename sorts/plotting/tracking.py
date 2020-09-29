@@ -28,26 +28,55 @@ def az_el_to_xy(az,el):
 
 
 
-def local_tracking(azimuth, elevation, ax=None):
+def local_tracking(azimuth, elevation, ax=None, t=None, add_track=False):
     if ax is None:
         fig = plt.figure()
         ax = fig.add_subplot(111)
 
-    x,y = az_el_to_xy(azimuth,elevation)
-    ax.plot( x, y )
+    x0,y0 = az_el_to_xy(azimuth,elevation)
+    ax.plot( x0, y0 )
 
-    x,y=az_el_to_xy(np.linspace(0,360,num=360),np.repeat(30.0,360))
-    ax.plot( x, y ,color="black")
+    if not add_track:
+        x,y=az_el_to_xy(np.linspace(0,360,num=360),np.repeat(0.0,360))
+        ax.plot( x, y ,color="green", alpha=0.5)
 
-    x,y=az_el_to_xy(np.linspace(0,360,num=360),np.repeat(60.0,360))
-    ax.plot( x, y ,color="black")
+        x,y=az_el_to_xy(np.linspace(0,360,num=360),np.repeat(30.0,360))
+        x[np.logical_and(x > 0, abs(y) < 0.1)] = np.nan
+        ax.plot( x, y ,color="black")
+        ax.text(np.cos(np.pi*30/180.0),0, r'$30\degree$', horizontalalignment='center', verticalalignment='center')
 
-    x,y=az_el_to_xy(np.linspace(0,360,num=360),np.repeat(80.0,360))
-    ax.plot( x, y ,color="black")
+        x,y=az_el_to_xy(np.linspace(0,360,num=360),np.repeat(60.0,360))
+        x[np.logical_and(x > 0, abs(y) < 0.1)] = np.nan
+        ax.plot( x, y ,color="black")
+        ax.text(np.cos(np.pi*60/180.0),0, r'$60\degree$', horizontalalignment='center', verticalalignment='center')
 
-    ax.axis('off')
-    ax.set_xlim([-1.1,1.1])
-    ax.set_ylim([-1.1,1.1])
-    ax.set_aspect('equal', 'datalim')
+        x,y=az_el_to_xy(np.linspace(0,360,num=360),np.repeat(80.0,360))
+        x[np.logical_and(x > 0, abs(y) < 0.1)] = np.nan
+        ax.plot( x, y ,color="black")
+        ax.text(np.cos(np.pi*80/180.0),0, r'$80\degree$', horizontalalignment='center', verticalalignment='center')
+
+    ax.plot( x0[0], y0[0] , 'o')
+    ax.plot( x0[-1], y0[-1] , 'x')
+
+    if t is None:
+        start = 'Start'
+        end = 'End'
+    else:
+        start = t[0].to_value('isot', subfmt='date_hm')
+        end = t[-1].to_value('isot', subfmt='date_hm')
+
+    ax.text(x0[0], y0[0], start)
+    ax.text(x0[-1], y0[-1], end)
+
+    if not add_track:
+        ax.text(0, 1, 'North', horizontalalignment='center', verticalalignment='bottom')
+        ax.text(0, -1, 'South', horizontalalignment='center', verticalalignment='top')
+        ax.text(1, 0, 'East', horizontalalignment='left')
+        ax.text(-1, 0, 'West', horizontalalignment='right')
+
+        ax.axis('off')
+        ax.set_xlim([-1.1,1.1])
+        ax.set_ylim([-1.1,1.1])
+        ax.set_aspect('equal', 'datalim')
 
     return ax
