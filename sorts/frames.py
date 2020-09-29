@@ -5,7 +5,6 @@
 '''
 
 #Python standard import
-import pkg_resources
 
 #Third party import
 import numpy as np
