@@ -467,11 +467,14 @@ class IonosphericRayTrace(Errors):
         self.electron_density_std = electron_density_std
         self.station = station
 
+    def k(self, data, time, azimuth, elevation):
+        raise NotImplementedError('')
 
+    def t(self, data, time, azimuth, elevation):
+        raise NotImplementedError('')
 
     def range(self, data, time, azimuth, elevation):
-
-
+        raise NotImplementedError('')
         ray_trace_error(
                 time,
                 self.station.lat,
