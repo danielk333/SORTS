@@ -87,6 +87,8 @@ class SGP4(Propagator):
 
         jd_f = times.jd2
         jd0 = times.jd1
+
+        logger_profiler_on = kwargs.get('logger_profiler_on', True)
         
         if self.profiler is not None:
             self.profiler.start('SGP4:propagate_tle:steps')
@@ -102,7 +104,7 @@ class SGP4(Propagator):
 
             states[:3] = r
             states[3:] = v
-
+            errors = [error]
         else:
             states = np.empty((6,jd_f.size), dtype=np.float64)
 
