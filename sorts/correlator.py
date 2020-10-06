@@ -67,11 +67,12 @@ def correlate(
         population, 
         metric=residual_distribution_metric, 
         metric_reduce=lambda x,y: x+y,
-        n_closest = 1, 
+        forward_model=generate_measurements,
+        variables=['r','v'],
+        n_closest=1, 
         profiler=None, 
         logger=None, 
         MPI=False, 
-        propagator_lighttime_correction=None,
     ):
     '''Given a mono-static measurement of ranges and rage-rates, a radar model and a population: correlate measurements with population.
 
@@ -79,6 +80,8 @@ def correlate(
     :param station station: Model of receiver station that performed the measurement.
     :param Population population: Population to correlate against.
     :param function metric: Metric used to correlate measurement and simulated object measurement.
+    :param function forward_model: A pointer to a function that takes in the ecef-state, the rx and tx station ecefs and calculates the observed variables return as a tuple.
+    :param list variables: The data variables recorded by the system.
     :param Profiler profiler: 
     :param logging.Logger logger: 
     :param bool MPI: If True use internal parallelization with MPI to calculate correlation. Turn to False to externally parallelize with MPI.
@@ -87,14 +90,13 @@ def correlate(
 
       Each entry in the input :code:`measurements` list must be a dictionary that contains the following fields:
         * 't': [numpy.ndarray] Times relative epoch in seconds
-        * 'r': [numpy.ndarray] Two-way ranges in meters
-        * 'v': [numpy.ndarray] Two-way range-rates in meters per second
         * 'epoch': [astropy.Time] epoch for measurements
         * 'tx': [sorts.TX] Pointer to the TX station
         * 'rx': [sorts.RX] Pointer to the RX station
 
-    Optionally, if `propagator_lighttime_correction` should be applied, one can supply which index in the list is the TX-TX pair,
-    assuming that the time `t` given is the transmission time.
+      Then it will contain a entry for each name in the `variables` list. By default this is
+        * 'r': [numpy.ndarray] Two-way ranges in meters
+        * 'v': [numpy.ndarray] Two-way range-rates in meters per second
 
     '''
     
@@ -129,22 +131,13 @@ def correlate(
         correlation_data[ind] = []
 
         for di, data in enumerate(measurements):
-            r = data['r']
             t = data['t']
-            v = data['v']
+            t_sort = t.argsort()
+            t = t[t_sort]
+            var = tuple(data[x][t_sort] for x in variables)
             tx = data['tx']
             rx = data['rx']
             epoch = data['epoch']
-
-            t_sort = t.argsort()
-            t = t[t_sort]
-            r = r[t_sort]
-            v = v[t_sort]
-
-            if propagator_lighttime_correction is not None:
-                tx_r = measurements[propagator_lighttime_correction]['r']*0.5
-                lt_correction = tx_r/constants.c
-                t += lt_correction
 
             tx_ecef = tx.ecef.copy()
             tx_ecef_norm = tx_ecef/np.linalg.norm(tx_ecef)
@@ -155,20 +148,17 @@ def correlate(
 
             states = obj.get_state(t_prop)
 
-            r_ref, v_ref = generate_measurements(states, rx_ecef, tx_ecef)
+            ref_var = forward_model(states, rx_ecef, tx_ecef)
 
-            match = metric(t, r, v, r_ref, v_ref)
+            match = metric(t, *(var + ref_var))
 
             if di == 0:
                 match_pop[ind] = match
             else:
                 match_pop[ind] = metric_reduce(match_pop[ind], match)
 
-            cdat = {
-                'r_ref': r_ref.copy(),
-                'v_ref': v_ref.copy(),
-                'match': match,
-            }
+            cdat = {f'{x}_ref': ref_var[i].copy()  for i,x in enumerate(variables)}
+            cdat['match'] = match
 
             correlation_data[ind].append(cdat)
 
@@ -208,6 +198,9 @@ def correlate(
 
     if len(best_matches) > n_closest:
         best_matches = best_matches[:n_closest]
+
+    for pbar in pbars:
+        pbar.close()
 
     best_cdata = [None]*len(best_matches)
 
