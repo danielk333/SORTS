@@ -3,6 +3,8 @@
 '''
 Correlating data with TLE catalog
 ===================================
+
+TO RUN THIS EXAMPLE, YOU NEED THE CELESTRACK CATALOG FROM 2018-01-01 in the 'data/uhf_correlation/tle-201801.txt' path
 '''
 import pathlib
 
@@ -14,6 +16,9 @@ from astropy.time import Time
 import sorts
 
 radar = sorts.radars.eiscat_uhf
+
+#TO RUN THIS EXAMPLE, YOU NEED THE CELESTRACK CATALOG FROM 2018-01-01
+
 
 try:
     tle_pth = pathlib.Path(__file__).parent / 'data' / 'uhf_correlation' / 'tle-201801.txt'
@@ -56,7 +61,7 @@ with h5py.File(str(obs_pth),'r') as h_det:
     }
 
 print('Loading TLE population')
-pop = sorts.population.tle_catalog(tle_pth)
+pop = sorts.population.tle_catalog(tle_pth, cartesian=False)
 
 #correlate requires output in ECEF 
 pop.out_frame = 'ITRS'
@@ -91,7 +96,7 @@ indecies, metric, cdat = sorts.correlate(
 print('Match metric:')
 for ind, dst in zip(indecies, metric):
     print(f'ind = {ind}: metric = {dst}')
-    print(pop.print(n=ind, fields=['oid', 'mjd0']) + '\n')
+    print(pop.print(n=ind, fields=['oid', 'mjd0', 'line1', 'line2']) + '\n')
 
 
 def plot_correlation(dat, cdat):

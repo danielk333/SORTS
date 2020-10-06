@@ -34,8 +34,7 @@ else:
     sgp4_v2 = False
 
 from sorts import frames, dates
-from sorts import using_astropy as uap
-from sorts.propagator.pysgp4 import SGP4
+from sorts.propagator import SGP4
 
 import astropy.units as u
 from astropy.time import Time, TimeDelta

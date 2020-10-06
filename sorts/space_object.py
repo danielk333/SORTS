@@ -220,6 +220,42 @@ class SpaceObject(object):
 
 
 
+    @property
+    def out_frame(self):
+        if 'settings' not in self.propagator_options:
+            return None
+        if 'out_frame' not in self.propagator_options['settings']:
+            return None 
+
+        return self.propagator_options['settings']['out_frame']
+            
+
+    @out_frame.setter
+    def out_frame(self, val):
+        if 'settings' not in self.propagator_options:
+            self.propagator_options['settings'] = {}
+        self.propagator_options['settings']['out_frame'] = val
+
+
+    @property
+    def in_frame(self):
+        if 'settings' not in self.propagator_options:
+            return None
+        if 'in_frame' not in self.propagator_options['settings']:
+            return None 
+
+        return self.propagator_options['settings']['in_frame']
+            
+
+    @in_frame.setter
+    def in_frame(self, val):
+        if 'settings' not in self.propagator_options:
+            self.propagator_options['settings'] = {}
+        self.propagator_options['settings']['in_frame'] = val
+
+
+
+
     def propagate(self, dt):
         '''Propagate and change the epoch of this space object if the state is a `pyorb.Orbit`.
         '''

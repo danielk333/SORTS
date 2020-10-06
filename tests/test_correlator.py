@@ -22,12 +22,10 @@ class TestCorrelator(unittest.TestCase):
     def test_correlator(self):
 
         try:
-            tle_pth = pathlib.Path(__file__).parent / 'data' / 'uhf_correlation' / 'tle-201801.txt'
-            obs_pth = pathlib.Path(__file__).parent / 'data' / 'uhf_correlation' / 'det-000000.h5'
+            obs_pth = pathlib.Path(__file__).parent.parent / 'examples' / 'data' / 'uhf_correlation' / 'det-000000.h5'
         except NameError:
             import os
-            tle_pth = 'data' + os.path.sep + 'uhf_correlation' + os.path.sep + 'tle-201801.txt'
-            obs_pth = 'data' + os.path.sep + 'uhf_correlation' + os.path.sep + 'det-000000.h5'
+            obs_pth = 'examples' + os.path.sep + 'data' + os.path.sep + 'uhf_correlation' + os.path.sep + 'det-000000.h5'
 
         # Each entry in the input `measurements` list must be a dictionary that contains the following fields:
         #   * 't': [numpy.ndarray] Times relative epoch in seconds
@@ -62,8 +60,8 @@ class TestCorrelator(unittest.TestCase):
 
         print('Loading TLE population')
         tles = [
-            '1 43075U 17083F   18004.50601262  .00000010  00000-0 -26700-5 0  9995',
-            '2 43075  86.5273 171.5023 0000810  83.8359 276.2943 14.58677444  1820',
+            ('1 43075U 17083F   18004.50601262  .00000010  00000-0 -26700-5 0  9995',
+            '2 43075  86.5273 171.5023 0000810  83.8359 276.2943 14.58677444  1820'),
         ]
         pop = sorts.population.tle_catalog(tles, cartesian=False)
 
@@ -76,16 +74,14 @@ class TestCorrelator(unittest.TestCase):
             population = pop,
             n_closest = 1,
         )
-
-
-        assert int(indecies[0]) == 43075
-
         r_ref = cdat[0][0]['r_ref']
         v_ref = cdat[0][0]['v_ref']
+        r = dat['r']
+        v = dat['v']
 
-        self.assertLess(n.abs(np.mean(r_ref - r)), 1e3)
-        self.assertLess(n.abs(np.std(r_ref - r)), 500)
-        self.assertLess(n.abs(np.mean(v_ref - v)), 10.0)
-        self.assertLess(n.abs(np.std(v_ref - v)), 5.0)
+        self.assertLess(np.abs(np.mean(r_ref - r)), 1e3)
+        self.assertLess(np.abs(np.std(r_ref - r)), 1e3)
+        self.assertLess(np.abs(np.mean(v_ref - v)), 10.0)
+        self.assertLess(np.abs(np.std(v_ref - v)), 8.0)
 
     
