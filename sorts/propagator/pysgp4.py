@@ -164,7 +164,8 @@ class SGP4(Propagator):
         :param float C_D: Drag coefficient
         :param float A: Cross-sectional Area
         :param float m: Mass
-        :param bool degrees: If false, all angles are assumed to be in radians.
+        :param bool radians: If true, all angles are assumed to be in radians.
+        :param bool SGP4_mean_elements: If True, the input is not cartesian state but SGP4 mean elements.
         :return: 6-D Cartesian state vectors in SI-units.
 
         '''
@@ -181,10 +182,6 @@ class SGP4(Propagator):
             states = self.propagate_tle(t, line1, line2, **kwargs)
 
         else:
-            if isinstance(state0, pyorb.Orbit):
-                state0_cart = np.squeeze(state0.cartesian)
-            else:
-                state0_cart = state0
 
             if epoch is None:
                 raise ValueError('Need epoch when propagating state and not TLE')
@@ -194,7 +191,6 @@ class SGP4(Propagator):
             epoch0 = epoch.mjd - self.sgp4_mjd0
             times = epoch + t
 
-
             if 'B' in kwargs:
                 B = kwargs['B']
             else:
@@ -203,19 +199,36 @@ class SGP4(Propagator):
             if self.logger is not None:
                 self.logger.debug(f'SGP4:propagate:B = {B}')
 
-            state0_cart = frames.convert(
-                epoch, 
-                state0_cart, 
-                in_frame=self.settings['in_frame'], 
-                out_frame='TEME',
-                profiler = self.profiler,
-                logger = self.logger,
-            )
+            input_mean = kwargs.get('SGP4_mean_elements', False)
 
-            mean_elements = self.TEME_to_TLE(state0_cart, epoch=epoch, B=B, kepler=False)
+            if input_mean:
+                if self.settings['in_frame'] != 'TEME':
+                    raise Exception(f'Cannot input mean elements in other frame than TEME (currently set to "{self.settings["in_frame"]}")')
+                mean_elements = state0.copy()
+                if not kwargs.get('radians', False):
+                    mean_elements[2:,...] = np.radians(mean_elements[2:,...])
 
-            if np.any(np.isnan(mean_elements)):
-                raise Exception('Could not compute SGP4 initial state: {}'.format(mean_elements))
+                mean_elements[0,...] *= 1e-3 #m to km
+
+            else:
+                if isinstance(state0, pyorb.Orbit):
+                    state0_cart = np.squeeze(state0.cartesian)
+                else:
+                    state0_cart = state0
+
+                state0_cart = frames.convert(
+                    epoch, 
+                    state0_cart, 
+                    in_frame=self.settings['in_frame'], 
+                    out_frame='TEME',
+                    profiler = self.profiler,
+                    logger = self.logger,
+                )
+
+                mean_elements = self.TEME_to_TLE(state0_cart, epoch=epoch, B=B, kepler=False)
+
+                if np.any(np.isnan(mean_elements)):
+                    raise Exception('Could not compute SGP4 initial state: {}'.format(mean_elements))
 
             states = self.propagate_mean_elements(times.jd1, times.jd2, mean_elements, epoch0, B, **kwargs)
 
