@@ -52,13 +52,17 @@ mean0[4] = mean0[3]
 mean0[3] = tmp
 
 res = sio.minimize(lsq, mean0, method='Nelder-Mead', options={'ftol': 1e-8, 'maxfev': 10000})
+print(res)
 
+initial_states = prop.propagate(t, mean0, mjd0, SGP4_mean_elements=True, **params)
 final_states = prop.propagate(t, res.x, mjd0, SGP4_mean_elements=True, **params)
 
-print(res.x)
-print(orb.kepler)
+print('Initial guess')
+print(' '.join([f'{x:.2f} {unit}' for x,unit in zip(mean0, ['m','','deg','deg','deg','deg'])]))
 
-print(res)
+print('\nLeast squares fit')
+print(' '.join([f'{x:.2f} {unit}' for x,unit in zip(res.x, ['m','','deg','deg','deg','deg'])]))
+
 
 fig = plt.figure(figsize=(15,15))
 for i in range(3):
@@ -66,6 +70,8 @@ for i in range(3):
     ax.plot(t/3600.0, final_states[i,:], '-r', label='Fitted states')
     ax.plot(t/3600.0, noisy_pos[i,:], '.b', label='Measured states')
     ax.plot(t/3600.0, states[i,:], '--g', label='True states')
+    ax.plot(t/3600.0, initial_states[i,:], '-k', label='Initial guess states')
+    
 
 ax.legend()
 
