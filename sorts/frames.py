@@ -25,7 +25,6 @@ from pyant.coordinates import rot_mat_x, rot_mat_y, rot_mat_z
 from . import dates
 from . import constants
 
-
 def arctime_to_degrees(minutes, seconds):
     return (minutes + seconds/60.0)/60.0
 
