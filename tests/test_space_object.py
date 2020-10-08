@@ -7,7 +7,7 @@ import numpy as n
 import numpy.testing as nt
 
 
-import space_object as so
+import sorts
 
 
 class TestSpaceObject(unittest.TestCase):
@@ -25,7 +25,7 @@ class TestSpaceObject(unittest.TestCase):
             'A': 1.0,
             'm': 1.0,
         }
-        self.o = so.SpaceObject(**self.init_obj)
+        self.o = sorts.SpaceObject(**self.init_obj)
         self.R_e = 6371.0
 
     def test_return_sizes(self):
@@ -53,7 +53,7 @@ class TestSpaceObject(unittest.TestCase):
         t = n.array([0.0], dtype=n.float)
         xv = self.o.get_state(t)
 
-        o2 = so.SpaceObject.cartesian(
+        o2 = sorts.SpaceObject.cartesian(
             self.o.x, self.o.y, self.o.z, 
             self.o.vx, self.o.vy, self.o.vz, 
             d=self.o.d, C_D=self.o.C_D, A=self.o.A, m=self.o.m,
@@ -141,13 +141,13 @@ class TestSpaceObject(unittest.TestCase):
     def test_propagator_options_sgp4(self):
         from propagator_sgp4 import PropagatorSGP4
 
-        obj0 = so.SpaceObject(
+        obj0 = sorts.SpaceObject(
             propagator = PropagatorSGP4,
             propagator_options = {'polar_motion': False},
             **self.init_obj
         )
 
-        obj1 = so.SpaceObject(
+        obj1 = sorts.SpaceObject(
             propagator = PropagatorSGP4,
             propagator_options = {'polar_motion': True},
             **self.init_obj
@@ -160,7 +160,7 @@ class TestSpaceObject(unittest.TestCase):
     def test_propagator_change_sgp4(self):
         from propagator_sgp4 import PropagatorSGP4
 
-        obj = so.SpaceObject(
+        obj = sorts.SpaceObject(
             propagator = PropagatorSGP4,
             propagator_options = {},
             **self.init_obj
@@ -176,7 +176,7 @@ class TestSpaceObject(unittest.TestCase):
     def test_propagator_change_orekit(self):
         from propagator_orekit import PropagatorOrekit
 
-        obj = so.SpaceObject(
+        obj = sorts.SpaceObject(
             propagator = PropagatorOrekit,
             propagator_options = {},
             **self.init_obj
@@ -191,13 +191,13 @@ class TestSpaceObject(unittest.TestCase):
     def test_propagator_options_orekit(self):
         from propagator_orekit import PropagatorOrekit
 
-        obj0 = so.SpaceObject(
+        obj0 = sorts.SpaceObject(
             propagator = PropagatorOrekit,
             propagator_options = {'drag_force': False},
             **self.init_obj
         )
 
-        obj1 = so.SpaceObject(
+        obj1 = sorts.SpaceObject(
             propagator = PropagatorOrekit,
             propagator_options = {'drag_force': True},
             **self.init_obj
