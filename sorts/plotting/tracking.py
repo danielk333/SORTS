@@ -21,14 +21,16 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 def az_el_to_xy(az,el):
-    r=np.cos(np.pi*el/180.0)
-    x=r*np.cos(-np.pi*az/180.0 + np.pi/2.0)
-    y=r*np.sin(-np.pi*az/180.0 + np.pi/2.0)
+    az, el = np.radians(az), np.radians(el)
+
+    r=np.cos(el)
+    x=r*np.sin(az)
+    y=r*np.cos(az)
     return x,y
 
 
 
-def local_tracking(azimuth, elevation, ax=None, t=None, add_track=False):
+def local_tracking(azimuth, elevation, ax=None, t=None, add_track=False, node_times=False, radians=False):
     if ax is None:
         fig = plt.figure()
         ax = fig.add_subplot(111)
@@ -58,7 +60,7 @@ def local_tracking(azimuth, elevation, ax=None, t=None, add_track=False):
     ax.plot( x0[0], y0[0] , 'o')
     ax.plot( x0[-1], y0[-1] , 'x')
 
-    if t is None:
+    if t is None or not node_times:
         start = 'Start'
         end = 'End'
     else:

@@ -192,9 +192,9 @@ class SGP4(Propagator):
             times = epoch + t
 
             if 'B' in kwargs:
-                B = kwargs['B']
+                B = kwargs.pop('B')
             else:
-                B = 0.5*kwargs.get('C_D',2.3)*kwargs.get('A',1.0)/kwargs.get('m',1.0)
+                B = 0.5*kwargs.pop('C_D',2.3)*kwargs.pop('A',1.0)/kwargs.pop('m',1.0)
 
             if self.logger is not None:
                 self.logger.debug(f'SGP4:propagate:B = {B}')
@@ -247,6 +247,33 @@ class SGP4(Propagator):
             self.logger.debug(f'SGP4:propagate:completed')
 
         return states
+
+    
+    def get_mean_elements(self, line1, line2):
+        '''Extract the mean elements in SI units (a [m], e [1], inc [deg], raan [deg], aop [deg], mu [deg]), B-parameter (not bstar) and epoch from a two line element pair.
+        '''
+
+        xpdotp = 1440.0/(2.0*np.pi)  # 229.1831180523293
+
+        satrec = Satrec.twoline2rv(line1, line2, self.grav_ind)
+
+        B = satrec.bstar/(self.grav_model.radiusearthkm*1e3)*2/self.rho0
+
+        epoch = Time(satrec.jdsatepoch + satrec.jdsatepochF, format='jd', scale='utc')
+
+        mean_elements = np.zeros((6,), dtype=np.float64)
+
+
+        n0 = satrec.no_kozai*xpdotp/(86400.0/(2*np.pi))
+
+        mean_elements[0] = (np.sqrt(self.grav_model.mu)/n0)**(2.0/3.0)*1e3
+        mean_elements[1] = satrec.ecco
+        mean_elements[2] = np.degrees(satrec.inclo)
+        mean_elements[3] = np.degrees(satrec.nodeo)
+        mean_elements[4] = np.degrees(satrec.argpo)
+        mean_elements[5] = np.degrees(satrec.mo)
+
+        return mean_elements, B, epoch
 
 
     def propagate_mean_elements(self, jd0, jd_f, mean_elements, epoch0, B, **kwargs):
