@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 '''
-Fitting mean elements
-======================
+Fitting SGP4 mean elements
+============================
 
 '''
 import numpy as np
