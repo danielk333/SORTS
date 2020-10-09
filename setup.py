@@ -6,7 +6,7 @@ from setuptools.command.egg_info import egg_info
 import subprocess
 import pip
 
-__version__ = '3.15.0'
+__version__ = '4.0.0-rc.1'
 
 
 with open('dependency-links', 'r') as fh:
@@ -49,9 +49,13 @@ setuptools.setup(
     long_description=long_description,
     url='https://gitlab.irf.se/danielk/SORTSpp',
     classifiers=[
-        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'License :: OSI Approved :: MIT',
-        'Operating System :: OS Independent',
+        'Operating System :: Unix',
+        'Intended Audience :: Science/Research',
     ],
     install_requires=pip_req,
     packages=setuptools.find_packages(),

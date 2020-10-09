@@ -1,49 +1,84 @@
+#!/usr/bin/env python
 
-def plot_angles(ts, angs, ax=None):
-    '''Plot the angles data returned by the :func:`simulate_tracking.get_angles` function.
+'''Plotting helper functions
 
-    :param list ts: List of times for each pass that the angles were evaluated over.
-    :param list angs: List of angles for each pass.
-    :param ax: matplotlib axis to plot the SNR's on. If not given, create new figure and axis.
-    :return: The matplotlib axis object
-    '''
+'''
+
+#Python standard import
+
+
+#Third party import
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+import matplotlib.cm as cm
+from mpl_toolkits.mplot3d import Axes3D
+
+
+#Local import
+
+
+
+
+def az_el_to_xy(az,el):
+    az, el = np.radians(az), np.radians(el)
+
+    r=np.cos(el)
+    x=r*np.sin(az)
+    y=r*np.cos(az)
+    return x,y
+
+
+
+def local_tracking(azimuth, elevation, ax=None, t=None, add_track=False, node_times=False, radians=False):
     if ax is None:
-        fig, ax = plt.subplots(1, 1, figsize=(14, 10), tight_layout=True)
-    txc = 0
-    for txt,txa in zip(ts,angs):
-        psc = 0
-        for pst,psa in zip(txt,txa):
-            tv = n.array(pst)/60.0
-            ax.plot(tv - tv[0], n.array(psa),label='TX{} - pass {}'.format(txc,psc))
-            psc+=1
-        txc+=1
-    ax.set( \
-        title='passes Angles', \
-        ylabel='Zenith angle [deg]', \
-        xlabel='Time since entering FOV [min]')
-    plt.legend()
-    return ax
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
 
+    x0,y0 = az_el_to_xy(azimuth,elevation)
+    ax.plot( x0, y0 )
 
-def plot_snr(t,all_snrs,radar, ax=None):
-    '''Plots the SNR's structure (list of lists of numpy.ndarray's) returned by :func:`simulate_tracking.get_track_snr` and :func:`simulate_tracking.get_scan_snr`.
+    if not add_track:
+        x,y=az_el_to_xy(np.linspace(0,360,num=360),np.repeat(0.0,360))
+        ax.plot( x, y ,color="green", alpha=0.5)
 
-    :param numpy.ndarray t: Times corresponding to the evaluated SNR's.
-    :param all_snrs: List structure returned by :func:`simulate_tracking.get_track_snr` and :func:`simulate_tracking.get_scan_snr`.
-    :param RadarSystem radar: Radar system that measured the SNR's.
-    :param ax: matplotlib axis to plot the SNR's on. If not given, create new figure and axis.
-    :return: The matplotlib axis object
-    '''
-    
-    tv = t/3600.0
-    for txi,snrs in enumerate(all_snrs):
-        if ax is None:
-            fig, ax = plt.subplots(len(snrs), 1, figsize=(14, 10), tight_layout=True)
-        for rxi,snr in enumerate(snrs):
-            ax.plot(tv, 10.0*n.log10(snr), label='SNR: {} to {}'.format(radar._tx[txi].name,radar._rx[rxi].name))
-        ax.set(
-            ylabel='SNR [dB]',
-            xlabel='time [h]',
-        )
-    plt.legend()
+        x,y=az_el_to_xy(np.linspace(0,360,num=360),np.repeat(30.0,360))
+        x[np.logical_and(x > 0, abs(y) < 0.1)] = np.nan
+        ax.plot( x, y ,color="black")
+        ax.text(np.cos(np.pi*30/180.0),0, r'$30\degree$', horizontalalignment='center', verticalalignment='center')
+
+        x,y=az_el_to_xy(np.linspace(0,360,num=360),np.repeat(60.0,360))
+        x[np.logical_and(x > 0, abs(y) < 0.1)] = np.nan
+        ax.plot( x, y ,color="black")
+        ax.text(np.cos(np.pi*60/180.0),0, r'$60\degree$', horizontalalignment='center', verticalalignment='center')
+
+        x,y=az_el_to_xy(np.linspace(0,360,num=360),np.repeat(80.0,360))
+        x[np.logical_and(x > 0, abs(y) < 0.1)] = np.nan
+        ax.plot( x, y ,color="black")
+        ax.text(np.cos(np.pi*80/180.0),0, r'$80\degree$', horizontalalignment='center', verticalalignment='center')
+
+    ax.plot( x0[0], y0[0] , 'o')
+    ax.plot( x0[-1], y0[-1] , 'x')
+
+    if t is None or not node_times:
+        start = 'Start'
+        end = 'End'
+    else:
+        start = t[0].to_value('isot', subfmt='date_hm')
+        end = t[-1].to_value('isot', subfmt='date_hm')
+
+    ax.text(x0[0], y0[0], start)
+    ax.text(x0[-1], y0[-1], end)
+
+    if not add_track:
+        ax.text(0, 1, 'North', horizontalalignment='center', verticalalignment='bottom')
+        ax.text(0, -1, 'South', horizontalalignment='center', verticalalignment='top')
+        ax.text(1, 0, 'East', horizontalalignment='left')
+        ax.text(-1, 0, 'West', horizontalalignment='right')
+
+        ax.axis('off')
+        ax.set_xlim([-1.1,1.1])
+        ax.set_ylim([-1.1,1.1])
+        ax.set_aspect('equal', 'datalim')
+
     return ax

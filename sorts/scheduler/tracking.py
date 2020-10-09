@@ -19,28 +19,30 @@ class Tracking(Scheduler):
     def __init__(self, 
             radar, 
             space_objects, 
-            timeslice, 
-            allocation, 
             end_time, 
+            epoch,
             start_time = 0.0, 
             controller = Tracker,
             controller_args = dict(return_copy=True),
             max_dpos = 1e3,
+            max_samp = 30.0,
             profiler = None, 
             logger = None,
             use_pass_states = True,
             calculate_max_snr = False,
+            collect_passes = False,
         ):
         super().__init__(radar, profiler=profiler, logger=logger)
+        self.epoch = epoch
         self.controller = controller
         self.controller_args = controller_args
         self.space_objects = space_objects
-        self.timeslice = timeslice
-        self.allocation = allocation
         self.start_time = start_time
         self.end_time = end_time
+        self.collect_passes = collect_passes
 
         self.max_dpos = max_dpos
+        self.max_samp = max_samp
         self.use_pass_states = use_pass_states
         self.calculate_max_snr = calculate_max_snr
 
@@ -60,18 +62,25 @@ class Tracking(Scheduler):
 
 
     def get_passes(self, ind):
-        t = equidistant_sampling(
-            orbit = self.space_objects[ind].orbit, 
-            start_t = self.start_time, 
-            end_t = self.end_time, 
-            max_dpos = self.max_dpos,
-        )
+
+        dt = (self.space_objects[ind].epoch - self.epoch).to_value('sec')
+
+        if isinstance(self.space_objects[ind].state, pyorb.Orbit):
+            t = equidistant_sampling(
+                orbit = self.space_objects[ind].state, 
+                start_t = self.start_time, 
+                end_t = self.end_time, 
+                max_dpos = self.max_dpos,
+            )
+        else:
+            t = np.arange(self.start_time, self.end_time, self.max_samp)
+
         if self.logger is not None:
             self.logger.info(f'Tracking:get_passes(ind={ind}):propagating {len(t)} steps')
         if self.profiler is not None:
             self.profiler.start('Tracking:get_passes:propagating')
 
-        states = self.space_objects[ind].get_state(t)
+        states = self.space_objects[ind].get_state(t - dt)
         if self.use_pass_states:
             self.states[ind] = states
             self.states_t[ind] = t
@@ -109,44 +118,85 @@ class Tracking(Scheduler):
         return self.passes[ind], states, t
 
 
+    @abstractmethod
+    def set_measurements(self, *args, **kwargs):
+        pass
+
+
     def get_controllers(self):
         if self.logger is not None:
-            self.logger.info(f'Tracking:get_controllers')
+            self.logger.debug(f'Tracking:get_controllers')
 
         ctrls = []
         for ind in range(len(self.space_objects)):
-            if self.use_pass_states:
-                minds = self.measurements[ind]
-                states = self.states[ind][:3,minds]
-                t = self.states_t[ind][minds]
-            else:
-                states = self.states[ind][:3,:]
-                t = self.states_t[ind][:]
+            if self.collect_passes:
+                if self.use_pass_states:
+                    minds = self.measurements[ind]
+                    states = self.states[ind][:3,minds]
+                    t = self.states_t[ind][minds]
+                else:
+                    states = self.states[ind][:3,:]
+                    t = self.states_t[ind][:]
 
-            ctrl = self.controller(
-                radar = self.radar, 
-                t=t, 
-                t0=0.0, 
-                ecefs = states[:3,:],
-                **self.controller_args
-            )
-            ctrl.meta['target'] = f'Object {self.space_objects[ind].oid}'
-            ctrls.append(ctrl)
+                ctrl = self.controller(
+                    radar = self.radar, 
+                    t=t, 
+                    t0=0.0, 
+                    ecefs = states[:3,:],
+                    **self.controller_args
+                )
+                ctrl.meta['target'] = f'Object {self.space_objects[ind].oid}'
+                ctrls.append(ctrl)
+
+            else:
+                for pass_ind in range(len(self.states_t[ind])):
+                    if self.use_pass_states:
+                        minds = self.measurements[ind][pass_ind]
+                        states = self.states[ind][pass_ind][:3,minds]
+                        t = self.states_t[ind][pass_ind][minds]
+                    else:
+                        states = self.states[ind][pass_ind][:3,:]
+                        t = self.states_t[ind][pass_ind][:]
+
+                    ctrl = self.controller(
+                        radar = self.radar, 
+                        t=t, 
+                        t0=0.0, 
+                        ecefs = states[:3,:],
+                        **self.controller_args
+                    )
+                    ctrl.meta['target'] = f'Object {self.space_objects[ind].oid}'
+                    ctrl.meta['pass'] = pass_ind
+                    ctrls.append(ctrl)
         
         return ctrls
 
 
 class PriorityTracking(Tracking):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self,
+            radar, 
+            space_objects, 
+            end_time, 
+            epoch, 
+            timeslice, 
+            allocation, 
+            **kwargs
+        ):
         self.priority = kwargs.pop('priority', None)
+        super().__init__(radar, space_objects, end_time, epoch, **kwargs)
 
-        super().__init__(*args, **kwargs)
+        self.timeslice = timeslice
+        self.allocation = allocation
+
         if self.priority is None:
             self.priority = np.ones((len(self.space_objects),), dtype=np.float64)
         
 
-    def calculate_measurements(self):
+    def set_measurements(self):
+        if not self.collect_passes:
+            raise NotImplementedError()
+
         total_measurements = int(self.allocation/self.timeslice)
         if not isinstance(self.priority, np.ndarray):
             pri = np.array(self.priority)
@@ -171,6 +221,8 @@ class PriorityTracking(Tracking):
                 
                 #uniform distribution
                 dt = int(len(all_inds)/measurements[ind])
+                if dt == 0:
+                    dt = 1
                 all_inds = all_inds[::dt]
                 self.measurements[ind] = all_inds
             else:

@@ -1,106 +1,87 @@
 import sys
 import os
+from copy import copy
 sys.path.insert(0, os.path.abspath('.'))
 
 import unittest
 import numpy as n
 import numpy.testing as nt
 
-import propagator_base
+from sorts import Propagator
 
-class new_propagator(propagator_base.PropagatorBase):
-    def get_orbit(self, t, a, e, inc, raan, aop, mu0, mjd0, **kwargs):
-        pass
-    def get_orbit_cart(self, t, x, y, z, vx, vy, vz, mjd0, **kwargs):
-        pass
+
 
 class TestBaseProp(unittest.TestCase):
 
     def test_base_prop_methods(self):
 
+        class new_propagator(Propagator):
+            def propagate(self, t, state0, epoch, **kwargs):
+                pass
+
         prop = new_propagator()
+        assert prop.propagate(0,0,0) is None
 
-        assert prop.get_orbit(0,
-            0,0,0,
-            0,0,0,
-            0,
-        ) is None
-
-        assert prop.get_orbit_cart(0,
-            0,0,0,
-            0,0,0,
-            0,
-        ) is None
 
     def test_meta_raise_no_method(self):
 
-        class new_wrong_propagator(propagator_base.PropagatorBase):
+        class no_propagate(Propagator):
             pass
 
-        self.assertRaises(TypeError, new_wrong_propagator)
+        with self.assertRaises(TypeError):
+            prop = no_propagate()
 
     def test_meta_raise_wrong_method(self):
 
-        class new_wrong_propagator(propagator_base.PropagatorBase):
-            def get_orbit(self):
-                pass
-            def get_orbit_cart(self, t, x, y, z, vx, vy, vz, mjd0, **kwargs):
+        class wrong_form(Propagator):
+            def propagate(self, state0):
                 pass
 
-        self.assertRaises(AssertionError, new_wrong_propagator)
+        with self.assertRaises(AssertionError):
+            prop = wrong_form()
 
 
-        class new_wrong_propagator(propagator_base.PropagatorBase):
-            def get_orbit(self, x, a, e, inc, raan, aop, mu0, mjd0, **kwargs):
+
+    def test_base_frame_property(self):
+
+        class new_propagator(Propagator):
+
+            DEFAULT_SETTINGS = copy(Propagator.DEFAULT_SETTINGS)
+            DEFAULT_SETTINGS.update(
+                dict(
+                    out_frame = 'out',
+                    in_frame = 'in',
+                )
+            )
+            def propagate(self, t, state0, epoch, **kwargs):
                 pass
-            def get_orbit_cart(self, t, x, y, z, vx, vy, vz, mjd0, **kwargs):
+
+        prop = new_propagator()
+        assert prop.in_frame == 'in'
+        assert prop.out_frame == 'out'
+
+        prop.in_frame = 'in2'
+        prop.out_frame = 'out2'
+
+        assert prop.in_frame == 'in2'
+        assert prop.out_frame == 'out2'
+
+
+    def test_base_frame_property_error(self):
+
+        class new_propagator(Propagator):
+            def propagate(self, t, state0, epoch, **kwargs):
                 pass
 
-        self.assertRaises(AssertionError, new_wrong_propagator)
-
-
-    def test_numpy_conv_float(self):
-
         prop = new_propagator()
-
-        x = 5.3
-        x_conv = prop._make_numpy(x)
-
-        assert isinstance(x_conv, n.ndarray)
-
-        nt.assert_almost_equal(x_conv[0], x, decimal=9)
-
-    def test_numpy_conv_list(self):
-
-        prop = new_propagator()
-
-        x = [5.3]
-        x_conv = prop._make_numpy(x)
-
-        assert isinstance(x_conv, n.ndarray)
-
-        nt.assert_almost_equal(x_conv[0], x[0], decimal=9)
-
-    def test_numpy_conv_numpy(self):
-
-        prop = new_propagator()
-
-        x = n.array([5.3], dtype=n.float)
-        x_conv = prop._make_numpy(x)
-
-        assert isinstance(x_conv, n.ndarray)
-
-        assert x is x_conv
-
-        nt.assert_array_almost_equal(x_conv, x, decimal=9)
-
-    def test_numpy_conv_raise(self):
-
-        prop = new_propagator()
-
-        x = '4'
-        self.assertRaises(Exception, prop._make_numpy, x)
-
+        with self.assertRaises(AttributeError):
+            a = prop.in_frame
+        with self.assertRaises(AttributeError):
+            a = prop.out_frame
+        with self.assertRaises(AttributeError):
+            prop.in_frame = ''
+        with self.assertRaises(AttributeError):
+            prop.out_frame = ''
 
 
 if __name__ == '__main__':

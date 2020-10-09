@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''
+'''Package that defines populations and methods for loading them from different data sources.
 
 '''
 
@@ -9,5 +9,4 @@ from .population import Population
 from .master import master_catalog
 from .master import master_catalog_factor
 
-def __getattr__(name):
-    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+from .tles import tle_catalog

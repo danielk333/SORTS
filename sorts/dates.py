@@ -14,8 +14,6 @@ import numpy as np
 
 #Local import
 
-
-
 os.environ['TZ'] = 'GMT'
 time.tzset()
 
@@ -127,65 +125,3 @@ def npdt_to_unix(dt):
     '''
     return (dt - np.datetime64('1970-01-01'))/np.timedelta64(1,'s')
 
-
-def gstime(jdut1):
-    '''This function finds the greenwich sidereal time (iau-82).
-
-    *References:* Vallado 2007, 193, Eq 3-43
-
-    Author: David Vallado 719-573-2600 7 jun 2002
-    Adapted to Python, Daniel Kastinen 2018
-
-    :param float jdut1: Julian date of ut1 in days from 4713 bc
-
-    :return: Greenwich sidereal time in radians, 0 to :math:`2\pi`
-    :rtype: float
-    '''
-    twopi      = 2.0*np.pi;
-    deg2rad    = np.pi/180.0;
-
-    # ------------------------  implementation   ------------------
-    # Julian centuries since the epoch; 2000-01-01T12:00 (UT1)
-    tut1= ( jdut1 - 2451545.0 ) / 36525.0
-
-    temp = - 6.2e-6 * np.multiply(np.multiply(tut1,tut1),tut1) + 0.093104 * np.multiply(tut1,tut1) \
-           + (876600.0 * 3600.0 + 8640184.812866) * tut1 + 67310.54841
-
-    # 360/86400 = 1/240, to deg, to rad
-    temp = np.fmod( temp*deg2rad/240.0,twopi )
-
-    # ------------------------ check quadrants --------------------
-    temp = np.where(temp < 0.0, temp+twopi, temp)
-
-
-    gst = temp
-    return gst
-
-
-def GMST1982(jd_ut1):
-    """Return the angle of Greenwich Mean Standard Time 1982 given the JD.
-    This angle defines the difference between the idiosyncratic True
-    Equator Mean Equinox (TEME) frame of reference used by SGP4 and the
-    more standard Pseudo Earth Fixed (PEF) frame of reference.
-
-
-    *Reference:* AIAA 2006-6753 Appendix C.
-
-    Original work Copyright (c) 2013-2018 Brandon Rhodes under the MIT license
-    Modified work Copyright (c) 2019 Daniel Kastinen
-
-    :param float jd_ut1: UT1 Julian date.
-    :returns: tuple of (Earth rotation [rad], Earth angular velocity [rad/day])
-
-    """
-    _second = 1.0 / (24.0 * 60.0 * 60.0)
-
-    T0 = 2451545.0
-
-    # t is Julian centuries since the epoch; 2000-01-01T12:00 (UT1)
-    t = (jd_ut1 - T0) / 36525.0
-    g = 67310.54841 + (8640184.812866 + (0.093104 + (-6.2e-6) * t) * t) * t
-    dg = 8640184.812866 + (0.093104 * 2.0 + (-6.2e-6 * 3.0) * t) * t
-    theta = (jd_ut1 % 1.0 + g * _second % 1.0) * 2.0 * np.pi
-    theta_dot = (1.0 + dg * _second / 36525.0) * 2.0 * np.pi
-    return theta, theta_dot

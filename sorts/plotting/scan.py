@@ -1,10 +1,32 @@
+#!/usr/bin/env python
 
-def plot_radar_scan(SC, earth=False, ax = None):
+'''Plotting helper functions
+
+'''
+
+#Python standard import
+
+
+#Third party import
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+import matplotlib.cm as cm
+from mpl_toolkits.mplot3d import Axes3D
+
+
+#Local import
+
+
+
+def radar_scan(SC, earth=False, ax = None):
     '''Plot a full cycle of the scan pattern based on the :code:`_scan_time` and the :code:`_function_data['dwell_time']` variable.
     
         :param RadarScan SC: Scan to plot.
         :param bool earth: Plot the surface of the Earth.
     '''
+    raise NotImplementedError('')
+
     if 'dwell_time' in SC._function_data:
         dwell_time = n.min(SC._function_data['dwell_time'])
     else:
@@ -58,6 +80,8 @@ def plot_radar_scan_movie(SC, earth=False, rotate=False, save_str=''):
         :param bool earth: Plot the surface of the Earth.
         :param str save_str: String of path to output movie file. Requers an avalible ffmpeg encoder on the system. If string is empty no movie is saved.
     '''
+    raise NotImplementedError('')
+    
     if 'dwell_time' in SC._function_data:
         dwell_time = n.min(SC._function_data['dwell_time'])
     else:

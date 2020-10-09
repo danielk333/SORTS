@@ -8,6 +8,13 @@ import scipy.constants
 
 
 def hard_target_rcs(wavelength, diameter):
+    '''Determine the radar cross section for a hard target.
+    Assume a smooth transition between Rayleigh and optical scattering. 
+    Ignore Mie regime and use either optical or Rayleigh scatter.
+
+    :param float wavelength: radar wavelength (meters)
+    :param float/numpy.ndarray diameter: diameter in meters of the objects.
+    '''
     is_rayleigh = diameter < wavelength/(np.pi*np.sqrt(3.0))
     is_optical = diameter >= wavelength/(np.pi*np.sqrt(3.0))
     optical_rcs = np.pi*diameter**2.0/4.0

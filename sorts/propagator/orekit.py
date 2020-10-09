@@ -24,16 +24,19 @@ Simple propagation showing time difference due to loading of model data.
 #Python standard import
 import os
 import time
+import copy
 
 #Third party import
 import numpy as np
 import scipy
 import scipy.constants
 import orekit
+import pyorb
 
 #Local import
 from .base import Propagator
 from .. import dates as dates
+from .. import frames
 
 
 orekit.initVM()
@@ -75,28 +78,6 @@ def mjd2absdate(mjd, utc):
     '''
 
     return npdt2absdate(dates.mjd_to_npdt(mjd), utc)
-
-
-
-def _get_frame(name, frame_tidal_effects = False):
-    '''Uses a string to identify which coordinate frame to initialize from Orekit package.
-
-    See `Orekit FramesFactory <https://www.orekit.org/static/apidocs/org/orekit/frames/FramesFactory.html>`_
-    '''
-    if name == 'EME':
-        return FramesFactory.getEME2000()
-    elif name == 'CIRF':
-        return FramesFactory.getCIRF(IERSConventions.IERS_2010, not frame_tidal_effects)
-    elif name == 'ITRF':
-        return FramesFactory.getITRF(IERSConventions.IERS_2010, not frame_tidal_effects)
-    elif name == 'TIRF':
-        return FramesFactory.getTIRF(IERSConventions.IERS_2010, not frame_tidal_effects)
-    elif name == 'ITRFEquinox':
-        return FramesFactory.getITRFEquinox(IERSConventions.IERS_2010, not frame_tidal_effects)
-    if name == 'TEME':
-        return FramesFactory.getTEME()
-    else:
-        raise Exception('Frame "{}" not recognized'.format(name))
 
 
 
@@ -155,12 +136,13 @@ class Orekit(Propagator):
     class OrekitVariableStep(PythonOrekitStepHandler):
         '''Class for handling the steps.
         '''
-        def set_params(self, t, start_date, states_pointer, outputFrame, profiler=None):
+        def set_params(self, t, start_date, states_pointer, outputFrame, heartbeat, profiler=None):
             self.t = t
             self.start_date = start_date
             self.states_pointer = states_pointer
             self.outputFrame = outputFrame
             self.profiler = profiler
+            self.__heartbeat = heartbeat
 
         def init(self, s0, t):
             pass
@@ -197,15 +179,20 @@ class Orekit(Propagator):
                 self.states_pointer[4,ti] = v_tmp.getY()
                 self.states_pointer[5,ti] = v_tmp.getZ()
 
+                if self.__heartbeat is not None:
+                    self.__heartbeat(float(t), self.states_pointer[:,ti], interpolator=interpolator)
+
                 if self.profiler is not None:
                     self.profiler.stop('Orekit:propagate:steps:step-handler:getState')
 
             if self.profiler is not None:
                 self.profiler.stop('Orekit:propagate:steps:step-handler')
 
-    DEFAULT_SETTINGS = dict(
-            in_frame='EME',
-            out_frame='ITRF',
+    DEFAULT_SETTINGS = copy.copy(Propagator.DEFAULT_SETTINGS)
+    DEFAULT_SETTINGS.update(
+        dict(
+            in_frame='Orekit-EME',
+            out_frame='Orekit-ITRF',
             frame_tidal_effects=False,
             integrator='DormandPrince853',
             min_step=0.001,
@@ -221,14 +208,7 @@ class Orekit(Propagator):
             constants_source='WGS84',
             solar_activity_strength='WEAK',
         )
-
-
-    def _check_settings(self):
-        for key_s, val_s in self.settings.items():
-            if key_s not in Orekit.DEFAULT_SETTINGS:
-                raise KeyError('Setting "{}" does not exist'.format(key_s))
-            if type(Orekit.DEFAULT_SETTINGS[key_s]) != type(val_s):
-                raise ValueError('Setting "{}" does not support "{}"'.format(key_s, type(val_s)))
+    )
 
 
     def __init__(self,
@@ -237,24 +217,17 @@ class Orekit(Propagator):
                 **kwargs
             ):
 
-        super(Orekit, self).__init__(**kwargs)
+        super(Orekit, self).__init__(settings=settings, **kwargs)
 
         if self.logger is not None:
-            self.logger.info(f'sorts.propagator.Orekit:init')
+            self.logger.debug(f'sorts.propagator.Orekit:init')
         if self.profiler is not None:
             self.profiler.start('Orekit:init')
-
-        self.settings.update(Orekit.DEFAULT_SETTINGS)
-        if settings is not None:
-            self.settings.update(settings)
-            self._check_settings()
 
         setup_orekit_curdir(filename = orekit_data)
 
         if self.logger is not None:
             self.logger.debug(f'Orekit:init:orekit-data = {orekit_data}')
-            for key in self.settings:
-                self.logger.debug(f'Orekit:settings:{key} = {self.settings[key]}')
 
         self.utc = TimeScalesFactory.getUTC()
 
@@ -274,16 +247,6 @@ class Orekit(Propagator):
         self.M_earth = self.mu/scipy.constants.G
 
         self.__params = None
-
-        self.inputFrame = self._get_frame(self.settings['in_frame'])
-        self.outputFrame = self._get_frame(self.settings['out_frame'])
-
-        if self.inputFrame.isPseudoInertial():
-            self.inertialFrame = self.inputFrame
-        else:
-            self.inertialFrame = FramesFactory.getEME2000()
-
-        self.body = OneAxisEllipsoid(self.R_earth, self.f_earth, self.outputFrame)
 
         self._forces = {}
 
@@ -369,6 +332,8 @@ class Orekit(Propagator):
             frame = FramesFactory.getEME2000()
         elif name == 'EME2000':
             frame = FramesFactory.getEME2000()
+        elif name == 'GCRF':
+            frame = FramesFactory.getGCRF()
         elif name == 'CIRF':
             frame = FramesFactory.getCIRF(IERSConventions.IERS_2010, not self.settings['frame_tidal_effects'])
         elif name == 'ITRF':
@@ -452,8 +417,12 @@ class Orekit(Propagator):
         if self.logger is not None:
             self.logger.debug(f'Orekit:set_forces:re_calc = {re_calc}')
 
+        self.atmosphere_instance = None
+        self.spacecraft_drag_model = None
+
         if re_calc:        
             self.__params = __params
+            self.force_params = {'A': A, 'C_D': cd, 'C_R': cr}
             if self.settings['drag_force']:
                 if self.settings['solar_activity'] == 'Marshall':
                     msafe = org.orekit.forces.drag.atmosphere.data.MarshallSolarActivityFutureEstimation(
@@ -464,16 +433,11 @@ class Orekit(Propagator):
                     manager.feed(msafe.getSupportedNames(), msafe)
 
                     if self.settings['atmosphere'] == 'DTM2000':
-                        atmosphere_instance = org.orekit.forces.drag.atmosphere.DTM2000(msafe, CelestialBodyFactory.getSun(), self.body)
+                        self.atmosphere_instance = org.orekit.forces.drag.atmosphere.DTM2000(msafe, CelestialBodyFactory.getSun(), self.body)
                     else:
                         raise Exception('Atmosphere model not recognized')
 
-                    drag_model = org.orekit.forces.drag.DragForce(
-                        atmosphere_instance,
-                        org.orekit.forces.drag.IsotropicDrag(float(A), float(cd)),
-                    )
-
-                    self._forces['drag_force'] = drag_model
+                    self._forces['drag_force'] = self.GetIsotropicDragForce(A, cd)
                 else:
                     raise Exception('Solar activity model not recognized')
 
@@ -488,14 +452,26 @@ class Orekit(Propagator):
 
             #self.propagator.removeForceModels()
 
-            for force_name, force in self._forces.items():
-                self.propagator.addForceModel(force)
+            self.UpdateForces()
 
         if self.profiler is not None:
             self.profiler.stop('Orekit:propagate:set_forces')
         
 
-    def propagate(self,t,state0,mjd0, **kwargs):
+    def UpdateForces(self):
+        for force_name, force in self._forces.items():
+            self.propagator.addForceModel(force)
+
+
+    def GetIsotropicDragForce(self, A, cd):
+        self.spacecraft_drag_model = org.orekit.forces.drag.IsotropicDrag(float(A), float(cd))
+        force_ = org.orekit.forces.drag.DragForce(
+            self.atmosphere_instance,
+            self.spacecraft_drag_model,
+        )
+        return force_
+
+    def propagate(self, t, state0, epoch, **kwargs):
         '''
         **Implementation:**
     
@@ -521,6 +497,34 @@ class Orekit(Propagator):
         if self.profiler is not None:
             self.profiler.start('Orekit:propagate')
 
+        if self.settings['in_frame'].startswith('Orekit-'):
+            self.inputFrame = self._get_frame(self.settings['in_frame'].replace('Orekit-', ''))
+            orekit_in_frame = True
+        else:
+            self.inputFrame = self._get_frame('GCRF')
+            orekit_in_frame = False
+
+        if self.settings['out_frame'].startswith('Orekit-'):
+            self.outputFrame = self._get_frame(self.settings['out_frame'].replace('Orekit-', ''))
+            orekit_out_frame = True
+        else:
+            self.outputFrame = self._get_frame('GCRF')
+            orekit_out_frame = False
+
+
+        if self.inputFrame.isPseudoInertial():
+            self.inertialFrame = self.inputFrame
+        else:
+            self.inertialFrame = FramesFactory.getEME2000()
+
+        self.body = OneAxisEllipsoid(self.R_earth, self.f_earth, self.outputFrame)
+
+
+        if isinstance(state0, pyorb.Orbit):
+            state0_cart = np.squeeze(state0.cartesian)
+        else:
+            state0_cart = state0
+
         if self.settings['radiation_pressure']:
             if 'C_R' not in kwargs:
                 raise Exception('Radiation pressure force enabled but no coefficient "C_R" given')
@@ -536,15 +540,32 @@ class Orekit(Propagator):
         if 'm' not in kwargs:
             kwargs['m'] = 0.0
 
-        t = self._make_numpy(t)
+        t, epoch = self.convert_time(t, epoch)
+        times = epoch + t
+
+        mjd0 = epoch.mjd
+        t = t.value
+        if not isinstance(t, np.ndarray):
+            t = np.array([t])
 
         if self.logger is not None:
-            self.logger.info(f'Orekit:propagate:len(t) = {len(t)}')
+            self.logger.debug(f'Orekit:propagate:len(t) = {len(t)}')
+
+        if not orekit_in_frame:
+            state0_cart = frames.convert(
+                epoch, 
+                state0_cart, 
+                in_frame=self.settings['in_frame'], 
+                out_frame='GCRS',
+                profiler = self.profiler,
+                logger = self.logger,
+            )
+
 
         initialDate = mjd2absdate(mjd0, self.utc)
 
-        pos = org.hipparchus.geometry.euclidean.threed.Vector3D(float(state0[0]), float(state0[1]), float(state0[2]))
-        vel = org.hipparchus.geometry.euclidean.threed.Vector3D(float(state0[3]), float(state0[4]), float(state0[5]))
+        pos = org.hipparchus.geometry.euclidean.threed.Vector3D(float(state0_cart[0]), float(state0_cart[1]), float(state0_cart[2]))
+        vel = org.hipparchus.geometry.euclidean.threed.Vector3D(float(state0_cart[3]), float(state0_cart[4]), float(state0_cart[5]))
         PV_state = PVCoordinates(pos, vel)
 
         if not self.inputFrame.isPseudoInertial():
@@ -583,13 +604,19 @@ class Orekit(Propagator):
         if self.profiler is not None:
             self.profiler.start('Orekit:propagate:steps')
 
+        if self.settings['heartbeat']:
+            __heartbeat = self.heartbeat
+        else:
+            __heartbeat = None
+
         if len(t_back) > 0:
             _t = t_back
             _t_order = np.argsort(np.abs(_t))
             _t_res = np.argsort(_t_order)
             _t = _t[_t_order]
             _state = np.empty((6, len(_t)), dtype=np.float) 
-            step_handler.set_params(_t, initialDate, _state, self.outputFrame, profiler = self.profiler)
+
+            step_handler.set_params(_t, initialDate, _state, self.outputFrame, __heartbeat, profiler = self.profiler)
 
             self.propagator.setMasterMode(step_handler)
 
@@ -604,7 +631,7 @@ class Orekit(Propagator):
             _t_res = np.argsort(_t_order)
             _t = _t[_t_order]
             _state = np.empty((6, len(_t)), dtype=np.float) 
-            step_handler.set_params(_t, initialDate, _state, self.outputFrame, profiler = self.profiler)
+            step_handler.set_params(_t, initialDate, _state, self.outputFrame, __heartbeat, profiler = self.profiler)
 
             self.propagator.setMasterMode(step_handler)
 
@@ -613,11 +640,21 @@ class Orekit(Propagator):
             #now _state is full and in the order of _t
             state[:, tf_indst] = _state[:, _t_res]
 
+        if not orekit_out_frame:
+            state = frames.convert(
+                times, 
+                state, 
+                in_frame='GCRS', 
+                out_frame=self.settings['out_frame'],
+                profiler = self.profiler,
+                logger = self.logger,
+            )
+
         if self.profiler is not None:
             self.profiler.stop('Orekit:propagate:steps')
             self.profiler.stop('Orekit:propagate')
 
         if self.logger is not None:
-            self.logger.info(f'Orekit:propagate:completed')
+            self.logger.debug(f'Orekit:propagate:completed')
 
         return state
