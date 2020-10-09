@@ -94,6 +94,14 @@ In case "pyant" or "pyorb" requirements fail on auto-install, run the following 
    pip install git+https://github.com/danielk333/pyant
    pip install git+https://github.com/danielk333/pyorb
 
+If you have trouble getting plotts from the examples, you might need to install a GUI-backed to `matplotlib` like TkAgg
+
+.. code-block:: bash
+
+   sudo apt install python3.7-tk
+
+and force matplotlib to use that backend by creating a matplotlibrc file ( https://matplotlib.org/tutorials/introductory/customizing.html ) and adding `backend : Agg` to it.
+
 
 Install MPI
 --------------
