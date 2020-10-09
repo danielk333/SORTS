@@ -78,7 +78,7 @@ class Propagator(ABC):
 
         if epoch is None:
             pass
-        elif isinstance(epoch, Time):
+        elif type(t) == Time:
             if epoch.format != self.settings['epoch_format']:
                 epoch.format = self.settings['epoch_format']
 
@@ -90,7 +90,7 @@ class Propagator(ABC):
 
         if t is None:
             pass
-        elif isinstance(t, TimeDelta):
+        elif type(t) == TimeDelta:
             if t.format != self.settings['time_format']:
                 t.format = self.settings['time_format']
 
@@ -98,6 +98,8 @@ class Propagator(ABC):
                 if t.scale != self.settings['time_scale']:
                     t = getattr(t,self.settings['time_scale'])
 
+        elif type(t) == Time:
+            t = t - epoch
         else:
             t = TimeDelta(t, format=self.settings['time_format'], scale=self.settings['time_scale'])
 

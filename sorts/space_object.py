@@ -358,8 +358,10 @@ class SpaceObject(object):
         :return: Array of state (position and velocity) as a function of time.
         :rtype: numpy.ndarray of size (6,len(t))
         '''
-        if isinstance(t, Time):
+        if type(t) == Time:
             t = t - self.epoch
+        elif type(t) == TimeDelta:
+            pass
         elif not isinstance(t,np.ndarray):
             if not isinstance(t,list):
                 t = [t]

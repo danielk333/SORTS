@@ -249,7 +249,7 @@ class SGP4(Propagator):
         return states
 
     
-    def get_mean_elements(self, line1, line2):
+    def get_mean_elements(self, line1, line2, radians=False):
         '''Extract the mean elements in SI units (a [m], e [1], inc [deg], raan [deg], aop [deg], mu [deg]), B-parameter (not bstar) and epoch from a two line element pair.
         '''
 
@@ -263,15 +263,16 @@ class SGP4(Propagator):
 
         mean_elements = np.zeros((6,), dtype=np.float64)
 
-
         n0 = satrec.no_kozai*xpdotp/(86400.0/(2*np.pi))
 
         mean_elements[0] = (np.sqrt(self.grav_model.mu)/n0)**(2.0/3.0)*1e3
         mean_elements[1] = satrec.ecco
-        mean_elements[2] = np.degrees(satrec.inclo)
-        mean_elements[3] = np.degrees(satrec.nodeo)
-        mean_elements[4] = np.degrees(satrec.argpo)
-        mean_elements[5] = np.degrees(satrec.mo)
+        mean_elements[2] = satrec.inclo
+        mean_elements[3] = satrec.nodeo
+        mean_elements[4] = satrec.argpo
+        mean_elements[5] = satrec.mo
+        if not radians:
+            mean_elements[2:] = np.degrees(mean_elements[2:])
 
         return mean_elements, B, epoch
 
