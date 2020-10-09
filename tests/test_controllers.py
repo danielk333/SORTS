@@ -107,9 +107,6 @@ class TestScanner(unittest.TestCase):
 
 
 
-
-
-
 class TestStatic(unittest.TestCase):
 
     def test_init(self):
