@@ -112,7 +112,6 @@ class SpaceObject(object):
     '''
 
     default_parameters = dict(
-        d = 0.01,
         C_D = 2.3,
         A = 1.0,
         m = 1.0,
@@ -207,7 +206,7 @@ class SpaceObject(object):
         elif 'A' in self.parameters:
             diam = np.sqrt(self.parameters['A']/np.pi)*2
         else:
-            raise ValueError('Space object does not have a diameter parameter: cannot calculate SNR/RCS')
+            raise AttributeError('Space object does not have a diameter parameter or any way to calculate one')
         return diam
 
 
@@ -222,12 +221,10 @@ class SpaceObject(object):
 
     @property
     def out_frame(self):
-        if 'settings' not in self.propagator_options:
-            return None
-        if 'out_frame' not in self.propagator_options['settings']:
+        if 'out_frame' not in self.propagator.settings:
             return None 
 
-        return self.propagator_options['settings']['out_frame']
+        return self.propagator.settings['out_frame']
             
 
     @out_frame.setter
@@ -235,23 +232,22 @@ class SpaceObject(object):
         if 'settings' not in self.propagator_options:
             self.propagator_options['settings'] = {}
         self.propagator_options['settings']['out_frame'] = val
+        self.propagator.settings['out_frame'] = val
 
 
     @property
     def in_frame(self):
-        if 'settings' not in self.propagator_options:
-            return None
-        if 'in_frame' not in self.propagator_options['settings']:
+        if 'in_frame' not in self.propagator.settings:
             return None 
 
-        return self.propagator_options['settings']['in_frame']
-            
+        return self.propagator.settings['in_frame']
 
     @in_frame.setter
     def in_frame(self, val):
         if 'settings' not in self.propagator_options:
             self.propagator_options['settings'] = {}
         self.propagator_options['settings']['in_frame'] = val
+        self.propagator.settings['in_frame'] = val
 
 
 
@@ -353,15 +349,18 @@ class SpaceObject(object):
     def get_state(self, t):
         '''Gets ECEF state at specified times using propagator instance.
 
-        :param float/list/numpy.ndarray t: Time relative epoch in seconds.
+        :param int/float/list/numpy.ndarray/astropy.time.Time/astropy.time.TimeDelta t: Time relative epoch in seconds.
 
         :return: Array of state (position and velocity) as a function of time.
         :rtype: numpy.ndarray of size (6,len(t))
         '''
         if type(t) == Time:
             t = t - self.epoch
+            if len(t.shape) == 0:
+                t = t.reshape((1,))
         elif type(t) == TimeDelta:
-            pass
+            if len(t.shape) == 0:
+                t = t.reshape((1,))
         elif not isinstance(t,np.ndarray):
             if not isinstance(t,list):
                 t = [t]

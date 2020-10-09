@@ -22,3 +22,6 @@ try:
     __all__.append('SGP4')
 except ImportError:
     SGP4 = None
+
+from .kepler import Kepler
+__all__.append('Kepler')

@@ -27,6 +27,8 @@ class Propagator(ABC):
         heartbeat = False,
     )
 
+
+
     def __init__(self, settings=None, profiler=None, logger=None):
         self.settings = dict()
         self._check_args()
@@ -52,6 +54,36 @@ class Propagator(ABC):
                 raise KeyError('Setting "{}" does not exist'.format(key_s))
             if type(self.DEFAULT_SETTINGS[key_s]) != type(val_s):
                 raise ValueError('Setting "{}" does not support "{}"'.format(key_s, type(val_s)))
+
+    @property
+    def out_frame(self):
+        if 'out_frame' in self.settings:
+            return self.settings['out_frame']
+        else:
+            raise AttributeError('No setting called "out_frame"')
+
+
+    @out_frame.setter
+    def out_frame(self, val):
+        if 'out_frame' in self.settings:
+            self.settings['out_frame'] = val
+        else:
+            raise AttributeError('No setting called "out_frame"')
+
+    @property
+    def in_frame(self):
+        if 'in_frame' in self.settings:
+            return self.settings['in_frame']
+        else:
+            raise AttributeError('No setting called "in_frame"')
+
+
+    @in_frame.setter
+    def in_frame(self, val):
+        if 'in_frame' in self.settings:
+            self.settings['in_frame'] = val
+        else:
+            raise AttributeError('No setting called "in_frame"')
 
 
     def _check_args(self):
