@@ -40,7 +40,7 @@ from sorts.propagator.pysgp4 import SGP4
 import astropy.units as u
 from astropy.time import Time, TimeDelta
 from astropy.coordinates import CartesianRepresentation, CartesianDifferential
-from astropy.coordinates.builtin_frames import ITRS
+from astropy.coordinates.builtin_frames import ITRS, TEME
 
 
 def vdot(va, vb):
@@ -145,10 +145,10 @@ class TestFrames(unittest.TestCase):
         # self.line1 = '1 25544U 98067A   08264.51782528 -.00002182  00000-0 -11606-4 0  2927'
         # self.line2 = '2 25544  51.6416 247.4627 0006703 130.5360 325.0288 15.72125391563537'
 
-        # "Earth Resources" TLE file downloaded as 'tests/eos_tle.txt'
+        # "Earth Resources" TLE file downloaded as 'eos_tle.txt'
         # from https://celestrak.com/NORAD/elements/ on 2020-07-21
-        self.tab = load_tle_table('tests/eos_tle.txt')
-        self.resorb = read_statevectors('tests/S1A_OPER_AUX_RESORB_OPOD_20200721T073339_V20200721T023852_20200721T055622.EOF')
+        self.tab = load_tle_table('eos_tle.txt')
+        self.resorb = read_statevectors('S1A_OPER_AUX_RESORB_OPOD_20200721T073339_V20200721T023852_20200721T055622.EOF')
 
 
     def test_sgp4_version_workaround(self):
@@ -183,69 +183,6 @@ class TestFrames(unittest.TestCase):
         assert ve0 == vel
 
 
-    def test_one_astropy_ITRF(self):
-        """
-        Using TLE and restituted orbit files for Sentinel-1A,
-        ensure that we can get a reasonably accurate ITRF statevector
-        from the underlying SGP4 propagator and the astropy-provided
-        matrix for rotating TEME into ITRF
-        https://astropy.slack.com/archives/C0LAGR5TP/p1583221032005400?thread_ts=1582732263.004700&cid=C0LAGR5TP
-        """
-
-        rv = self.tab['SENTINEL-1A']
-        s1_res = self.resorb
-
-        rv_epd = np.datetime64(rv.epoch, 'us')              # Numpy datetime64 value
-
-        # Find first statevector past TLE epoch
-        ix = np.where(s1_res.UTC > rv_epd)[0][0]
-        svec = s1_res[ix]
-
-        svt = Time(svec.UTC, scale='utc')                # Astropy Time object
-        pos, vel = _propagate(rv, svt)
-
-        pmat, pmatp = uap.teme_to_itrs_mat(svt, derivative=True)
-        rpos = 1e3 *  pmat @ pos
-        rvel = 1e3 * (pmat @ vel + pmatp @ pos)
-
-        # print(f"diff |pRES - pTEME->ITRF| {vnorm2(svec.POS - rpos)} (m)")
-        # print(f"diff |vRES - vTEME->ITRF| {vnorm2(svec.VEL - rvel)} (m/s)")
-
-        assert vnorm2(svec.POS - rpos) < 800.0, 'Inaccurate position'
-        assert vnorm2(svec.VEL - rvel) < 0.5,   'Inaccurate velocity'
-
-        return True
-
-    def test_array_astropy_ITRF(self):
-        """Same as test_one_astropy_ITRF but with an array of states"""
-
-        rv = self.tab['SENTINEL-1A']
-        s1_res = self.resorb
-
-        rv_ept = Time(rv.epoch, scale='utc')                # Astropy Time object
-        rv_epd = np.datetime64(rv.epoch, 'us')              # Numpy datetime64 value
-
-        # Find first statevector past TLE epoch
-        i0 = np.where(s1_res.UTC > rv_epd)[0][0]
-        ix = range(i0, i0+200, 10)
-        svec = s1_res[ix]
-        for ii in ix:
-            svec = s1_res[ii]
-            svt = Time(svec.UTC, scale='utc')                # Astropy Time object
-            pos, vel = _propagate(rv, svt)
-
-            pmat, pmatp = uap.teme_to_itrs_mat(svt, derivative=True)
-            rpos = 1e3 *  pmat @ pos
-            rvel = 1e3 * (pmat @ vel + pmatp @ pos)
-
-            # print(f"diff |pRES - pTEME->ITRF| {vnorm2(svec.POS - rpos)} (m)")
-            # print(f"diff |vRES - vTEME->ITRF| {vnorm2(svec.VEL - rvel)} (m/s)")
-
-            assert vnorm2(svec.POS - rpos) < 800.0, 'Inaccurate position'
-            assert vnorm2(svec.VEL - rvel) < 1.0,   'Inaccurate velocity'
-
-        return True
-
     def test_astropythonesque(self):
         """
         As above, but using the astropy frame transform framework
@@ -267,7 +204,7 @@ class TestFrames(unittest.TestCase):
 
         teme_p = CartesianRepresentation(pos * u.km)
         teme_v = CartesianDifferential(vel * u.km/u.s)
-        teme = uap.TEME(teme_p.with_differentials(teme_v), obstime=svt)
+        teme = TEME(teme_p.with_differentials(teme_v), obstime=svt)
 
         itrs = teme.transform_to(ITRS(obstime=teme.obstime))
 
@@ -279,7 +216,7 @@ class TestFrames(unittest.TestCase):
         np.testing.assert_allclose(rvel*u.m/u.s, itrs.velocity.d_xyz)
 
         # How about inverse transform?
-        teme2 = itrs.transform_to(uap.TEME(obstime=itrs.obstime))
+        teme2 = itrs.transform_to(TEME(obstime=itrs.obstime))
 
         np.testing.assert_allclose(teme.data.xyz, teme2.data.xyz)
         np.testing.assert_allclose(teme.velocity.d_xyz, teme2.velocity.d_xyz)
@@ -316,7 +253,7 @@ class TestFrames(unittest.TestCase):
         epoch_mjd = dates.npdt_to_mjd(svec.UTC)
 
         # SORTS-style SGP4 propagator
-        prp = SGP4()
+        prp = SGP4(settings=dict(out_frame='ITRF'))
 
         # Should be Cartesian ITRF coordinates in SI units
         posvel = prp.propagate(0., state_eci, epoch_mjd)[:,0]
@@ -370,7 +307,7 @@ class TestFrames(unittest.TestCase):
         epoch_mjd = dates.npdt_to_mjd(svec.UTC)
 
         # SORTS-style SGP4 propagator
-        prp = SGP4()
+        prp = SGP4(settings=dict(out_frame='ITRF'))
 
         # Should be Cartesian ITRF coordinates in SI units
         posvel = prp.propagate(0., state_eci, epoch_mjd)[:,0]
@@ -405,15 +342,14 @@ class TestFrames(unittest.TestCase):
         svt = Time(svec.UTC, scale='utc')
         itrs = ITRS(p.with_differentials(v), obstime=svt)
 
-        teme = itrs.transform_to(uap.TEME(obstime=itrs.obstime))
+        teme = itrs.transform_to(TEME(obstime=itrs.obstime))
         state_eci = np.r_[teme.data.xyz.to(u.m).value,
                           teme.velocity.d_xyz.to(u.m/u.s).value]
 
         # Find mean elements from osculating elements
         state = frames.TEME_to_TLE(state_eci, svt.mjd)
         # SORTS-style SGP4 propagator
-        prp = SGP4()
-        prp.settings['out_frame'] = 'ITRF'
+        prp = SGP4(settings=dict(out_frame='ITRF'))
 
         ii = np.arange(nprop)
 
@@ -519,8 +455,8 @@ if __name__ == '__main__':
 
     else:
 
-        rv = load_tle_table('tests/eos_tle.txt')['SENTINEL-1A']
-        s1_res = read_statevectors('tests/S1A_OPER_AUX_RESORB_OPOD_20200721T073339_V20200721T023852_20200721T055622.EOF')
+        rv = load_tle_table('eos_tle.txt')['SENTINEL-1A']
+        s1_res = read_statevectors('S1A_OPER_AUX_RESORB_OPOD_20200721T073339_V20200721T023852_20200721T055622.EOF')
 
         rv_epd = np.datetime64(rv.epoch, 'us')              # Numpy datetime64 value
 
