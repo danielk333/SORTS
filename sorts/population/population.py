@@ -6,6 +6,7 @@
 
 #Python standard import
 import copy
+import pathlib
 
 #Third party import
 import h5py
@@ -121,7 +122,13 @@ class Population:
         self.state_fields = state_fields
 
         if epoch_field is None:
-            epoch_field = Population._default_epoch['field']
+            epoch_field = copy.deepcopy(Population._default_epoch)
+        else:
+            if isinstance(epoch_field, str):
+                epoch_field_ = epoch_field
+                epoch_field = copy.deepcopy(Population._default_epoch)
+                epoch_field['field'] = epoch_field_
+
         self.epoch_field = epoch_field
 
         self.allocate(0)
@@ -132,6 +139,42 @@ class Population:
 
     def __len__(self):
         return(self.data.shape[0])
+
+
+    @property
+    def out_frame(self):
+        if 'settings' not in self.propagator_options:
+            return None
+        if 'out_frame' not in self.propagator_options['settings']:
+            return None 
+
+        return self.propagator_options['settings']['out_frame']
+            
+
+    @out_frame.setter
+    def out_frame(self, val):
+        if 'settings' not in self.propagator_options:
+            self.propagator_options['settings'] = {}
+        self.propagator_options['settings']['out_frame'] = val
+
+
+    @property
+    def in_frame(self):
+        if 'settings' not in self.propagator_options:
+            return None
+        if 'in_frame' not in self.propagator_options['settings']:
+            return None 
+
+        return self.propagator_options['settings']['in_frame']
+            
+
+    @in_frame.setter
+    def in_frame(self, val):
+        if 'settings' not in self.propagator_options:
+            self.propagator_options['settings'] = {}
+        self.propagator_options['settings']['in_frame'] = val
+
+
 
     def copy(self):
         '''Return a copy of the current Population instance.
@@ -313,8 +356,9 @@ class Population:
         '''Get the one row from the population as a :class:`space_object.SpaceObject` instance.
         '''
         parameters = {}
-        for key in self.space_object_fields:
-            parameters[key] = self.data[key][n]
+        if self.space_object_fields is not None:
+            for key in self.space_object_fields:
+                parameters[key] = self.data[key][n]
 
         cart_state = True
         kep_state = True
@@ -338,6 +382,8 @@ class Population:
         else:
             kwargs['state'] = self.data[n][self.state_fields]
 
+        if 'oid' in self.fields:
+            kwargs['oid'] = self.data[n]['oid']
 
         obj=so.SpaceObject(
             propagator = self.propagator,
@@ -374,7 +420,13 @@ class Population:
             n = slice(None, None, None)
         if fields is None:
             fields = self.fields
-        return tabulate(self.data[n][fields], headers=fields)
+        
+        data = self.data[n][fields]
+
+        if isinstance(data, np.void):
+            data = [[x for x in data]]
+
+        return tabulate(data, headers=fields)
 
 
     def __str__(self):
@@ -483,7 +535,16 @@ class Population:
             raise StopIteration
 
 
+    @property
+    def generator(self):
+        for obj in self:
+            yield obj
+
+
     def save(self, fname):
+        if isinstance(fname, str):
+            fname = pathlib.Path(fname)
+
         with h5py.File(fname,"w") as hf:
             hf.create_dataset('data', data=self.data)
             hf.create_dataset('fields',
@@ -505,6 +566,9 @@ class Population:
 
     @classmethod
     def load(cls, fname, propagator, propagator_options = {}, propagator_args = {}):
+        if isinstance(fname, str):
+            fname = pathlib.Path(fname)
+
         with h5py.File(fname,"r") as hf:
             pop = cls(
                 fields = hf['fields'].value[()],

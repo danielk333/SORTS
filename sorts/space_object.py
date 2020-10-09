@@ -33,7 +33,7 @@ import copy
 #Third party import
 import numpy as np
 import pyorb
-from astropy.time import Time
+from astropy.time import Time, TimeDelta
 
 
 class SpaceObject(object):
@@ -112,7 +112,6 @@ class SpaceObject(object):
     '''
 
     default_parameters = dict(
-        d = 0.01,
         C_D = 2.3,
         A = 1.0,
         m = 1.0,
@@ -176,7 +175,7 @@ class SpaceObject(object):
             propagator_args = copy.deepcopy(self.propagator_args),
             epoch=self.oid,
             oid=self.oid,
-            state=copy.copy(self.state),
+            state=copy.deepcopy(self.state),
             parameters = copy.deepcopy(self.parameters),
         )
 
@@ -207,7 +206,7 @@ class SpaceObject(object):
         elif 'A' in self.parameters:
             diam = np.sqrt(self.parameters['A']/np.pi)*2
         else:
-            raise ValueError('Space object does not have a diameter parameter: cannot calculate SNR/RCS')
+            raise AttributeError('Space object does not have a diameter parameter or any way to calculate one')
         return diam
 
 
@@ -217,6 +216,39 @@ class SpaceObject(object):
             return self.state
         else:
             raise AttributeError('SpaceObject state is not "pyorb.Orbit"')
+
+
+
+    @property
+    def out_frame(self):
+        if 'out_frame' not in self.propagator.settings:
+            return None 
+
+        return self.propagator.settings['out_frame']
+            
+
+    @out_frame.setter
+    def out_frame(self, val):
+        if 'settings' not in self.propagator_options:
+            self.propagator_options['settings'] = {}
+        self.propagator_options['settings']['out_frame'] = val
+        self.propagator.settings['out_frame'] = val
+
+
+    @property
+    def in_frame(self):
+        if 'in_frame' not in self.propagator.settings:
+            return None 
+
+        return self.propagator.settings['in_frame']
+
+    @in_frame.setter
+    def in_frame(self, val):
+        if 'settings' not in self.propagator_options:
+            self.propagator_options['settings'] = {}
+        self.propagator_options['settings']['in_frame'] = val
+        self.propagator.settings['in_frame'] = val
+
 
 
 
@@ -235,9 +267,9 @@ class SpaceObject(object):
             state = self.get_state(np.array([dt], dtype=np.float64))
 
 
-        self.mjd0 = self.mjd0 + dt/(3600.0*24.0)
+        self.epoch = self.epoch + TimeDelta(dt, format='sec')
 
-        x, y, z, vx, vy, vz = state_frame.flatten()
+        x, y, z, vx, vy, vz = state.flatten()
 
         self.update(
             x=x,
@@ -283,7 +315,10 @@ class SpaceObject(object):
     def __str__(self):
         p = '\nSpace object {}: {}:\n'.format(self.oid,repr(self.epoch))
         p+= str(self.state) + '\n'
-        p+= f'Parameters: ' + ', '.join([f'{key}={val:.3f}' for key,val in self.parameters.items()])
+        p+= f'Parameters: ' + ', '.join([
+            f'{key}={val}'
+            for key,val in self.parameters.items()
+        ])
         return p
 
 
@@ -314,13 +349,18 @@ class SpaceObject(object):
     def get_state(self, t):
         '''Gets ECEF state at specified times using propagator instance.
 
-        :param float/list/numpy.ndarray t: Time relative epoch in seconds.
+        :param int/float/list/numpy.ndarray/astropy.time.Time/astropy.time.TimeDelta t: Time relative epoch in seconds.
 
         :return: Array of state (position and velocity) as a function of time.
         :rtype: numpy.ndarray of size (6,len(t))
         '''
-        if isinstance(t, Time):
+        if type(t) == Time:
             t = t - self.epoch
+            if len(t.shape) == 0:
+                t = t.reshape((1,))
+        elif type(t) == TimeDelta:
+            if len(t.shape) == 0:
+                t = t.reshape((1,))
         elif not isinstance(t,np.ndarray):
             if not isinstance(t,list):
                 t = [t]

@@ -136,12 +136,13 @@ class Orekit(Propagator):
     class OrekitVariableStep(PythonOrekitStepHandler):
         '''Class for handling the steps.
         '''
-        def set_params(self, t, start_date, states_pointer, outputFrame, profiler=None):
+        def set_params(self, t, start_date, states_pointer, outputFrame, heartbeat, profiler=None):
             self.t = t
             self.start_date = start_date
             self.states_pointer = states_pointer
             self.outputFrame = outputFrame
             self.profiler = profiler
+            self.__heartbeat = heartbeat
 
         def init(self, s0, t):
             pass
@@ -177,6 +178,9 @@ class Orekit(Propagator):
                 self.states_pointer[3,ti] = v_tmp.getX()
                 self.states_pointer[4,ti] = v_tmp.getY()
                 self.states_pointer[5,ti] = v_tmp.getZ()
+
+                if self.__heartbeat is not None:
+                    self.__heartbeat(float(t), self.states_pointer[:,ti], interpolator=interpolator)
 
                 if self.profiler is not None:
                     self.profiler.stop('Orekit:propagate:steps:step-handler:getState')
@@ -413,8 +417,12 @@ class Orekit(Propagator):
         if self.logger is not None:
             self.logger.debug(f'Orekit:set_forces:re_calc = {re_calc}')
 
+        self.atmosphere_instance = None
+        self.spacecraft_drag_model = None
+
         if re_calc:        
             self.__params = __params
+            self.force_params = {'A': A, 'C_D': cd, 'C_R': cr}
             if self.settings['drag_force']:
                 if self.settings['solar_activity'] == 'Marshall':
                     msafe = org.orekit.forces.drag.atmosphere.data.MarshallSolarActivityFutureEstimation(
@@ -425,16 +433,11 @@ class Orekit(Propagator):
                     manager.feed(msafe.getSupportedNames(), msafe)
 
                     if self.settings['atmosphere'] == 'DTM2000':
-                        atmosphere_instance = org.orekit.forces.drag.atmosphere.DTM2000(msafe, CelestialBodyFactory.getSun(), self.body)
+                        self.atmosphere_instance = org.orekit.forces.drag.atmosphere.DTM2000(msafe, CelestialBodyFactory.getSun(), self.body)
                     else:
                         raise Exception('Atmosphere model not recognized')
 
-                    drag_model = org.orekit.forces.drag.DragForce(
-                        atmosphere_instance,
-                        org.orekit.forces.drag.IsotropicDrag(float(A), float(cd)),
-                    )
-
-                    self._forces['drag_force'] = drag_model
+                    self._forces['drag_force'] = self.GetIsotropicDragForce(A, cd)
                 else:
                     raise Exception('Solar activity model not recognized')
 
@@ -449,12 +452,24 @@ class Orekit(Propagator):
 
             #self.propagator.removeForceModels()
 
-            for force_name, force in self._forces.items():
-                self.propagator.addForceModel(force)
+            self.UpdateForces()
 
         if self.profiler is not None:
             self.profiler.stop('Orekit:propagate:set_forces')
         
+
+    def UpdateForces(self):
+        for force_name, force in self._forces.items():
+            self.propagator.addForceModel(force)
+
+
+    def GetIsotropicDragForce(self, A, cd):
+        self.spacecraft_drag_model = org.orekit.forces.drag.IsotropicDrag(float(A), float(cd))
+        force_ = org.orekit.forces.drag.DragForce(
+            self.atmosphere_instance,
+            self.spacecraft_drag_model,
+        )
+        return force_
 
     def propagate(self, t, state0, epoch, **kwargs):
         '''
@@ -589,13 +604,19 @@ class Orekit(Propagator):
         if self.profiler is not None:
             self.profiler.start('Orekit:propagate:steps')
 
+        if self.settings['heartbeat']:
+            __heartbeat = self.heartbeat
+        else:
+            __heartbeat = None
+
         if len(t_back) > 0:
             _t = t_back
             _t_order = np.argsort(np.abs(_t))
             _t_res = np.argsort(_t_order)
             _t = _t[_t_order]
             _state = np.empty((6, len(_t)), dtype=np.float) 
-            step_handler.set_params(_t, initialDate, _state, self.outputFrame, profiler = self.profiler)
+
+            step_handler.set_params(_t, initialDate, _state, self.outputFrame, __heartbeat, profiler = self.profiler)
 
             self.propagator.setMasterMode(step_handler)
 
@@ -610,7 +631,7 @@ class Orekit(Propagator):
             _t_res = np.argsort(_t_order)
             _t = _t[_t_order]
             _state = np.empty((6, len(_t)), dtype=np.float) 
-            step_handler.set_params(_t, initialDate, _state, self.outputFrame, profiler = self.profiler)
+            step_handler.set_params(_t, initialDate, _state, self.outputFrame, __heartbeat, profiler = self.profiler)
 
             self.propagator.setMasterMode(step_handler)
 

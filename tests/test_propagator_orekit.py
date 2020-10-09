@@ -24,7 +24,7 @@ class TestOrekit(unittest.TestCase):
 
         self.init_data = dict(
             state0 = np.array([-7100297.113,-3897715.442,18568433.707,86.771,-3407.231,2961.571]),
-            mjd0 = 57125.7729,
+            epoch = 57125.7729,
             C_D = 2.3,
             C_R = 1.0,
             m = 8000,
@@ -41,22 +41,6 @@ class TestOrekit(unittest.TestCase):
         self.assertEqual(ecefs.shape, (6,len(self.t)))
 
 
-    def test_circ_orbit(self):
-        p = Orekit(
-            orekit_data = self.orekit_data,
-            settings=dict(
-                solarsystem_perturbers=[], 
-                radiation_pressure=False,
-                drag_force=False,
-            ),
-        )
-
-        ecefs = p.propagate(self.t, **self.init_data_circ)
-        rn = np.sum(ecefs[:3,:]**2, axis=0)/36000.0e3**2
-
-        nt.assert_array_almost_equal(rn, np.ones(rn.shape, dtype=ecefs.dtype), decimal=4)
-
-
     def test_options_tidal(self):
         p = Orekit(
             orekit_data = self.orekit_data,
@@ -71,8 +55,8 @@ class TestOrekit(unittest.TestCase):
         p = Orekit(
             orekit_data = self.orekit_data,
             settings=dict(
-                in_frame='ITRF',
-                out_frame='EME',
+                in_frame='ITRS',
+                out_frame='GCRS',
             ),
         )
         ecefs = p.propagate(self.t0, **self.init_data)

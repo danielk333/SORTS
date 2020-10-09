@@ -24,7 +24,10 @@ class Propagator(ABC):
         epoch_scale = 'utc',
         time_format = 'sec',
         time_scale = None,
+        heartbeat = False,
     )
+
+
 
     def __init__(self, settings=None, profiler=None, logger=None):
         self.settings = dict()
@@ -52,6 +55,36 @@ class Propagator(ABC):
             if type(self.DEFAULT_SETTINGS[key_s]) != type(val_s):
                 raise ValueError('Setting "{}" does not support "{}"'.format(key_s, type(val_s)))
 
+    @property
+    def out_frame(self):
+        if 'out_frame' in self.settings:
+            return self.settings['out_frame']
+        else:
+            raise AttributeError('No setting called "out_frame"')
+
+
+    @out_frame.setter
+    def out_frame(self, val):
+        if 'out_frame' in self.settings:
+            self.settings['out_frame'] = val
+        else:
+            raise AttributeError('No setting called "out_frame"')
+
+    @property
+    def in_frame(self):
+        if 'in_frame' in self.settings:
+            return self.settings['in_frame']
+        else:
+            raise AttributeError('No setting called "in_frame"')
+
+
+    @in_frame.setter
+    def in_frame(self, val):
+        if 'in_frame' in self.settings:
+            self.settings['in_frame'] = val
+        else:
+            raise AttributeError('No setting called "in_frame"')
+
 
     def _check_args(self):
         '''This method makes sure that the function signature of the implemented are correct.
@@ -77,7 +110,7 @@ class Propagator(ABC):
 
         if epoch is None:
             pass
-        elif isinstance(epoch, Time):
+        elif type(t) == Time:
             if epoch.format != self.settings['epoch_format']:
                 epoch.format = self.settings['epoch_format']
 
@@ -89,7 +122,7 @@ class Propagator(ABC):
 
         if t is None:
             pass
-        elif isinstance(t, TimeDelta):
+        elif type(t) == TimeDelta:
             if t.format != self.settings['time_format']:
                 t.format = self.settings['time_format']
 
@@ -97,6 +130,8 @@ class Propagator(ABC):
                 if t.scale != self.settings['time_scale']:
                     t = getattr(t,self.settings['time_scale'])
 
+        elif type(t) == Time:
+            t = t - epoch
         else:
             t = TimeDelta(t, format=self.settings['time_format'], scale=self.settings['time_scale'])
 
@@ -129,6 +164,12 @@ class Propagator(ABC):
         :return: State vectors in SI-units.
         '''
         return None
+
+
+    def heartbeat(self, t, state, **kwargs):
+        '''Function applied after propagation to time `t` and state `state`, before next time step as given in the input time vector to `propagate`.
+        '''
+        pass
 
 
     def __str__(self):

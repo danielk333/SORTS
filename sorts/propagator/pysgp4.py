@@ -84,20 +84,49 @@ class SGP4(Propagator):
 
         t, epoch = self.convert_time(t, epoch)
         times = epoch + t
-        
-        states = np.empty((6,t.size), dtype=np.float64)
 
+        jd_f = times.jd2
+        jd0 = times.jd1
+
+        logger_profiler_on = kwargs.get('logger_profiler_on', True)
+        
         if self.profiler is not None:
             self.profiler.start('SGP4:propagate_tle:steps')
 
-        errors, r, v = satellite.sgp4_array(times.jd1, times.jd2)
+        if isinstance(jd_f, float) or isinstance(jd_f, int):
+            states = np.empty((6,), dtype=np.float64)
+
+            error, r, v = satellite.sgp4(jd0, jd_f)
+
+            if logger_profiler_on:
+                if error != 0 and self.logger is not None:
+                    self.logger.error(f'SGP4:propagate:step-{ind}:{SGP4_ERRORS[error]}')
+
+            states[:3] = r
+            states[3:] = v
+            errors = [error]
+        else:
+            states = np.empty((6,jd_f.size), dtype=np.float64)
+
+            if self.settings['heartbeat']:
+                errors = []
+                for tind in range(jd_f.size):
+                    error, r, v = satellite.sgp4(jd0[tind], jd_f[tind])
+                    errors.append(error)
+                    states[:3,tind] = r
+                    states[3:,tind] = v
+                    self.heartbeat(jd0[tind] + jd_f[tind], states[:,tind], satellite=satellite)
+            else:
+                errors, r, v = satellite.sgp4_array(jd0, jd_f)
+                states[:3,...] = r.T
+                states[3:,...] = v.T
+
 
         for ind, err in enumerate(errors):
             if err != 0 and self.logger is not None:
                 self.logger.error(f'SGP4:propagate_tle:step-{ind}:{SGP4_ERRORS[err]}')
 
-        states[:3,...] = r.T*1e3 #km to m
-        states[3:,...] = v.T*1e3 #km/s to m
+        states *= 1e3 #km to m, km/s to m/s
 
         states = frames.convert(
             times, 
@@ -135,7 +164,8 @@ class SGP4(Propagator):
         :param float C_D: Drag coefficient
         :param float A: Cross-sectional Area
         :param float m: Mass
-        :param bool degrees: If false, all angles are assumed to be in radians.
+        :param bool radians: If true, all angles are assumed to be in radians.
+        :param bool SGP4_mean_elements: If True, the input is not cartesian state but SGP4 mean elements.
         :return: 6-D Cartesian state vectors in SI-units.
 
         '''
@@ -145,14 +175,13 @@ class SGP4(Propagator):
             self.logger.debug(f'SGP4:propagate:len(t) = {len(t)}')
 
         if self.settings['tle_input']:
+            if isinstance(state0, np.ndarray):
+                if state0.size == 1:
+                    state0 = state0[0]
             line1, line2 = state0
             states = self.propagate_tle(t, line1, line2, **kwargs)
 
         else:
-            if isinstance(state0, pyorb.Orbit):
-                state0_cart = np.squeeze(state0.cartesian)
-            else:
-                state0_cart = state0
 
             if epoch is None:
                 raise ValueError('Need epoch when propagating state and not TLE')
@@ -162,28 +191,44 @@ class SGP4(Propagator):
             epoch0 = epoch.mjd - self.sgp4_mjd0
             times = epoch + t
 
-
             if 'B' in kwargs:
-                B = kwargs['B']
+                B = kwargs.pop('B')
             else:
-                B = 0.5*kwargs.get('C_D',2.3)*kwargs.get('A',1.0)/kwargs.get('m',1.0)
+                B = 0.5*kwargs.pop('C_D',2.3)*kwargs.pop('A',1.0)/kwargs.pop('m',1.0)
 
             if self.logger is not None:
                 self.logger.debug(f'SGP4:propagate:B = {B}')
 
-            state0_cart = frames.convert(
-                epoch, 
-                state0_cart, 
-                in_frame=self.settings['in_frame'], 
-                out_frame='TEME',
-                profiler = self.profiler,
-                logger = self.logger,
-            )
+            input_mean = kwargs.get('SGP4_mean_elements', False)
 
-            mean_elements = self.TEME_to_TLE(state0_cart, epoch=epoch, B=B, kepler=False)
+            if input_mean:
+                if self.settings['in_frame'] != 'TEME':
+                    raise Exception(f'Cannot input mean elements in other frame than TEME (currently set to "{self.settings["in_frame"]}")')
+                mean_elements = state0.copy()
+                if not kwargs.get('radians', False):
+                    mean_elements[2:,...] = np.radians(mean_elements[2:,...])
 
-            if np.any(np.isnan(mean_elements)):
-                raise Exception('Could not compute SGP4 initial state: {}'.format(mean_elements))
+                mean_elements[0,...] *= 1e-3 #m to km
+
+            else:
+                if isinstance(state0, pyorb.Orbit):
+                    state0_cart = np.squeeze(state0.cartesian)
+                else:
+                    state0_cart = state0
+
+                state0_cart = frames.convert(
+                    epoch, 
+                    state0_cart, 
+                    in_frame=self.settings['in_frame'], 
+                    out_frame='TEME',
+                    profiler = self.profiler,
+                    logger = self.logger,
+                )
+
+                mean_elements = self.TEME_to_TLE(state0_cart, epoch=epoch, B=B, kepler=False)
+
+                if np.any(np.isnan(mean_elements)):
+                    raise Exception('Could not compute SGP4 initial state: {}'.format(mean_elements))
 
             states = self.propagate_mean_elements(times.jd1, times.jd2, mean_elements, epoch0, B, **kwargs)
 
@@ -202,6 +247,34 @@ class SGP4(Propagator):
             self.logger.debug(f'SGP4:propagate:completed')
 
         return states
+
+    
+    def get_mean_elements(self, line1, line2, radians=False):
+        '''Extract the mean elements in SI units (a [m], e [1], inc [deg], raan [deg], aop [deg], mu [deg]), B-parameter (not bstar) and epoch from a two line element pair.
+        '''
+
+        xpdotp = 1440.0/(2.0*np.pi)  # 229.1831180523293
+
+        satrec = Satrec.twoline2rv(line1, line2, self.grav_ind)
+
+        B = satrec.bstar/(self.grav_model.radiusearthkm*1e3)*2/self.rho0
+
+        epoch = Time(satrec.jdsatepoch + satrec.jdsatepochF, format='jd', scale='utc')
+
+        mean_elements = np.zeros((6,), dtype=np.float64)
+
+        n0 = satrec.no_kozai*xpdotp/(86400.0/(2*np.pi))
+
+        mean_elements[0] = (np.sqrt(self.grav_model.mu)/n0)**(2.0/3.0)*1e3
+        mean_elements[1] = satrec.ecco
+        mean_elements[2] = satrec.inclo
+        mean_elements[3] = satrec.nodeo
+        mean_elements[4] = satrec.argpo
+        mean_elements[5] = satrec.mo
+        if not radians:
+            mean_elements[2:] = np.degrees(mean_elements[2:])
+
+        return mean_elements, B, epoch
 
 
     def propagate_mean_elements(self, jd0, jd_f, mean_elements, epoch0, B, **kwargs):
@@ -254,15 +327,23 @@ class SGP4(Propagator):
         else:
             states = np.empty((6,jd_f.size), dtype=np.float64)
 
-            errors, r, v = satellite.sgp4_array(jd0, jd_f)
+            if self.settings['heartbeat']:
+                errors = []
+                for tind in range(jd_f.size):
+                    error, r, v = satellite.sgp4(jd0[tind], jd_f[tind])
+                    errors.append(error)
+                    states[:3,tind] = r
+                    states[3:,tind] = v
+                    self.heartbeat(jd0[tind] + jd_f[tind], states[:,tind], satellite=satellite)
+            else:
+                errors, r, v = satellite.sgp4_array(jd0, jd_f)
+                states[:3,...] = r.T
+                states[3:,...] = v.T
 
             if logger_profiler_on:
                 for ind, err in enumerate(errors):
                     if err != 0 and self.logger is not None:
                         self.logger.error(f'SGP4:propagate:step-{ind}:{SGP4_ERRORS[err]}')
-
-            states[:3,...] = r.T
-            states[3:,...] = v.T
 
 
         states *= 1e3 #km to m and km/s to m/s
@@ -422,3 +503,5 @@ class SGP4(Propagator):
         kep[3] = tmp
         kep[5] = pyorb.true_to_mean(kep[5], kep[1], degrees=False)
         return kep
+
+

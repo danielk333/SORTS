@@ -44,6 +44,16 @@ class Station(object):
         self.ecef = frames.geodetic_to_ITRS(lat, lon, alt, radians = False)
         self.beam = beam
         self.enabled = True
+        self.pointing_range = None
+
+
+    def rebase(self, lat, lon, alt):
+        '''Change geographical location of the station.
+        '''
+        self.lat = lat
+        self.lon = lon
+        self.alt = alt
+        self.ecef = frames.geodetic_to_ITRS(lat, lon, alt, radians = False)
 
 
     def copy(self):
@@ -107,7 +117,11 @@ class Station(object):
             point,
             radians=False,
         )
-        k = k/np.linalg.norm(k, axis=0)
+        k_norm = np.linalg.norm(k, axis=0)
+        
+        self.pointing_range = k_norm
+
+        k = k/k_norm
         self.beam.point(k)
         return k
 
