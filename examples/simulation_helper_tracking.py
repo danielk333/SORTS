@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import h5py
 import pickle
+from astropy.time import Time
 
 import sorts
 eiscat3d = sorts.radars.eiscat3d_interp
@@ -37,8 +38,10 @@ objs = [
         raan = 79,
         aop = 0,
         mu0 = 60,
-        mjd0 = 53005.0,
-        d = 1.0,
+        epoch = 53005.0,
+        parameters = dict(
+            d = 0.1,
+        ),
         oid = ind,
     ) for ind, inc in enumerate(np.linspace(69,75,num=10))
 ]
@@ -55,6 +58,7 @@ scheduler = ObservedTracking(
     end_time = 3600*6.0,
     priority = np.ones(len(objs)),
     use_pass_states = True,
+    epoch = Time(53005.0, format='mjd'),
 )
 
 class Tracking(Simulation):
@@ -71,7 +75,7 @@ class Tracking(Simulation):
     @MPI_action(action='bcast', iterable=True)
     @iterable_step(iterable='scheduler.space_objects', MPI=True)
     @cached_step(caches='pickle')
-    def find_passes(self, index, item):
+    def find_passes(self, index, item, **kw):
         passes, states, t = self.scheduler.get_passes(index)
         return passes, states, t
 
@@ -80,7 +84,7 @@ class Tracking(Simulation):
     @MPI_action(action='bcast')
     @MPI_single_process(process_id = 0)
     @cached_step(caches='pickle')
-    def calculate_measurements(self):
+    def calculate_measurements(self, **kw):
         self.scheduler.calculate_measurements()
         return self.scheduler.measurements
 
@@ -90,7 +94,7 @@ class Tracking(Simulation):
     @MPI_action(action='gather-clear', iterable=True)
     @iterable_step(iterable='scheduler.passes', MPI=True)
     @cached_step(caches='pickle')
-    def observe_passes(self, index, item):
+    def observe_passes(self, index, item, **kw):
         data = scheduler.observe_passes(item, space_object = self.scheduler.space_objects[index], snr_limit=True)
         return data
 

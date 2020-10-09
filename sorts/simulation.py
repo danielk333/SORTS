@@ -14,6 +14,7 @@ import copy
 import pickle
 import datetime
 from glob import glob
+import os
 
 #Third party import
 import h5py
@@ -29,6 +30,8 @@ except ImportError:
 from . import profiling
 
 def mpi_wrap_master_thread(func):
+    '''Wrap function to only execute on thread rank=0
+    '''
     def master_th_func(*args, **kwargs):
         if comm is not None:
             if comm.rank == 0:
@@ -44,11 +47,15 @@ def mpi_wrap_master_thread(func):
 
 @mpi_wrap_master_thread
 def mpi_mkdir(path):
+    '''Make directory on thread rank=0
+    '''
     path.mkdir(exist_ok=True)
 
 
 @mpi_wrap_master_thread
 def mpi_rmdir(path):
+    '''Remove directory on thread rank=0 with `shutil.rmtree`
+    '''
     shutil.rmtree(path)
 
 
@@ -67,7 +74,8 @@ def mpi_copy(src, dst, linkfiles=False):
 
 
 def log_exceptions(func):
-
+    '''If instance has a logger, log exceptions raised by this method.
+    '''
     def wrapped_step(self, *args, **kwargs):
 
         try:
@@ -343,7 +351,7 @@ def iterable_cache(steps, caches, MPI=False, log=False, reduce=None):
                 dir_ = self.get_path(step)
                 if not dir_.is_dir():
                     raise ValueError(f'Input step {step} has no cache {cache}')
-                files = [pathlib.Path(x) for x in glob(str(dir_ / f'*.{cache}'))]
+                files = [pathlib.Path(x) for x in glob(str(dir_ / f'*'))]
                 indecies = [int(file.stem.split('_')[0]) for file in files]
                 
                 files = [x for _, x in sorted(zip(indecies,files), key=lambda pair: pair[0])]
@@ -437,7 +445,7 @@ def cached_step(caches):
     '''Simulation step caching decorator
 
  
-    :param str caches: Is a list of strings for the caches to be used, available by default is "h5" and "pickle". Custom caches are implemented by implementing methods with the string name but prefixed with load_ and save_.
+    :param str caches: Is a list of strings for the caches to be used, available by default is "h5" and "pickle". Custom caches are implemented by implementing methods with the string name but prefixed with `load_` and `save_`.
 
     '''
     if isinstance(caches, str):
@@ -623,20 +631,31 @@ class Simulation:
             self.make_paths()
 
 
-    def branch(self, name, empty=False, linkfiles=False):
+    def branch(self, name, empty=False, linkfiles=None):
         '''Create branch.
         '''
         if (self.root / name).is_dir():
             if self.logger is not None:
                 self.logger.info(f'Branch "{name}" already exists')
-                # return
         else:
             if empty:
                 mpi_mkdir(self.root / name)
                 for path in self.paths:
                     mpi_mkdir(self.root / name / path)
             else:
-                mpi_copy(self.root / self.branch_name, self.root / name, linkfiles=linkfiles)
+                if linkfiles is None:
+                    mpi_copy(self.root / self.branch_name, self.root / name, linkfiles=False)
+                elif isinstance(linkfiles, list):
+                    listing = pathlib.Path(self.root / self.branch_name).glob('./*')
+                    for pth in listing:
+                        if pth.name in linkfiles:
+                            mpi_copy(pth, self.root / name / pth.name, linkfiles=True)
+                        else:
+                            mpi_copy(pth, self.root / name / pth.name, linkfiles=False)
+                elif linkfiles:
+                    mpi_copy(self.root / self.branch_name, self.root / name, linkfiles=True)
+                else:
+                    raise TypeError(f'linkfiles type "{type(linkfiles)}" not supported')
 
         # Make sure log directory exists
         mpi_mkdir(self.root / name / 'logs')

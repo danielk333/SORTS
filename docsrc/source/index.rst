@@ -11,61 +11,26 @@ SORTS
 
 
 .. toctree::
-   :glob:
-   :maxdepth: 2
-   :caption: Contents:
-
-   introduction/introduction
-   introduction/*
-
-
-Features
----------------
-
-* Things
-* More Things
-
-
-
-Getting started
------------------
-
-To install (Not yet available)
-
-.. code-block:: bash
-
-   pip install pyant
-
-or 
-
-.. code-block:: bash
-
-   pip install git+https://github.com/danielk333/pyant
-   pip install git+https://github.com/danielk333/pyorb
+   :maxdepth: 3
    
-   git clone https://github.com/danielk333/SORTS
-   cd sorts
-   pip install .
+   intro
+   install
+   auto_gallery/index
+   api
 
 
-Examples
+When used for publications
+---------------------------
+
+Please let us known before publishing data using SORTS and use the below Reference/DOI
+
+DOI/TO.BE.ADDED
+
+
+License
 ---------
 
-Example gallery of the different modular functionality of the toolbox.
-
-.. toctree::
-   :maxdepth: 2
-
-   auto_gallery/index
-
-
-API Reference
-===============
-
-.. toctree::
-   :maxdepth: 3
-
-   api
+.. include:: ../../../LICENSE
 
 
 

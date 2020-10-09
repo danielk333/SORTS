@@ -55,11 +55,11 @@ class Scheduler(ABC):
             yield from generator
 
 
-    def schedule(self):
+    def schedule(self, **kwargs):
         ctrls = self.get_controllers()
         times = np.concatenate([c.t for c in ctrls], axis=0)
         sched = Scheduler.chain_generators([c.run() for c in ctrls])
-        return self.generate_schedule(times, sched)
+        return self.generate_schedule(times, sched, **kwargs)
 
 
     def __call__(self, start, stop):

@@ -16,8 +16,8 @@ orekit_data = '/home/danielk/IRF/IRF_GITLAB/orekit_build/orekit-data-master.zip'
 prop = Orekit(
     orekit_data = orekit_data, 
     settings=dict(
-        in_frame='ITRF',
-        out_frame='ITRF',
+        in_frame='Orekit-ITRF',
+        out_frame='Orekit-ITRF',
         drag_force = False,
         radiation_pressure = False,
     )
