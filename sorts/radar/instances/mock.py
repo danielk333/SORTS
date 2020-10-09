@@ -12,6 +12,15 @@ from ..tx_rx import TX, RX
 
 def gen_mock():
     class Omni(pyant.Beam):
+        def copy(self):
+            ret = Omni(
+                azimuth = self.azimuth, 
+                elevation = self.elevation,
+                frequency = self.frequency,
+                radians = self.radians,
+            )
+            return ret
+
         def gain(self, k, polarization=None, ind=None):
             if len(k.shape) == 1:
                 return 1.0
