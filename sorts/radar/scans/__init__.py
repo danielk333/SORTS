@@ -13,6 +13,7 @@ from .plane import Plane
 from .bp import Beampark
 
 __all__ = [
+    'Scan',
     'Plane',
     'Uniform',
     'RandomUniform',
