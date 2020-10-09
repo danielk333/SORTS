@@ -1,5 +1,6 @@
 import sys
 import os
+from copy import copy
 sys.path.insert(0, os.path.abspath('.'))
 
 import unittest
@@ -41,6 +42,46 @@ class TestBaseProp(unittest.TestCase):
 
 
 
+    def test_base_frame_property(self):
+
+        class new_propagator(Propagator):
+
+            DEFAULT_SETTINGS = copy(Propagator.DEFAULT_SETTINGS)
+            DEFAULT_SETTINGS.update(
+                dict(
+                    out_frame = 'out',
+                    in_frame = 'in',
+                )
+            )
+            def propagate(self, t, state0, epoch, **kwargs):
+                pass
+
+        prop = new_propagator()
+        assert prop.in_frame == 'in'
+        assert prop.out_frame == 'out'
+
+        prop.in_frame = 'in2'
+        prop.out_frame = 'out2'
+
+        assert prop.in_frame == 'in2'
+        assert prop.out_frame == 'out2'
+
+
+    def test_base_frame_property_error(self):
+
+        class new_propagator(Propagator):
+            def propagate(self, t, state0, epoch, **kwargs):
+                pass
+
+        prop = new_propagator()
+        with self.assertRaises(AttributeError):
+            a = prop.in_frame
+        with self.assertRaises(AttributeError):
+            a = prop.out_frame
+        with self.assertRaises(AttributeError):
+            prop.in_frame = ''
+        with self.assertRaises(AttributeError):
+            prop.out_frame = ''
 
 
 if __name__ == '__main__':

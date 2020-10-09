@@ -320,6 +320,7 @@ class TestSpaceObject(unittest.TestCase):
             self.assertNotEqual(xv1[ind,0], xv0[ind,0])
 
     def test_propagate_epoch(self):
+        self.orb_init['propagator'] = sorts.propagator.Kepler
         obj = SpaceObject(**self.orb_init)
         obj.out_frame = obj.in_frame
 
