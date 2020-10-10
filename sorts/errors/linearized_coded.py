@@ -174,7 +174,31 @@ class LinearizedCoded(Errors):
         self.dopfun = scipy.interpolate.interp1d(np.log10(enrs),np.log10(ddops))
 
     def range(self, data, snr):
+        '''Range in m
+        '''
+        self.set_numpy_seed()
+        return data + np.random.randn(*data.shape)*self.range_std(snr)
 
+
+
+    def doppler(self, data, snr):
+        '''Doppler shift in Hz
+        '''
+        self.set_numpy_seed()
+        return data + np.random.randn(*data.shape)*self.doppler_std(snr)
+
+
+    def range_rate(self, data, snr):
+        '''Range rate in m/s
+        '''
+        self.set_numpy_seed()
+        return data + np.random.randn(*data.shape)*self.range_rate_std(snr)
+
+
+
+    def range_std(self, snr):
+        '''The expected standard error of a range measurement in m.
+        '''
         dr = 10.0**(self.rfun(np.log10(snr)))
 
         # if object diameter is larger than range error, make it at least as big as target
@@ -185,11 +209,12 @@ class LinearizedCoded(Errors):
             else:
                 dr[dr < self.min_range_std] = self.min_range_std
 
-        self.set_numpy_seed()
-        return data + np.random.randn(*data.shape)*dr
+        return dr
 
 
-    def _get_ddop(self, snr):
+    def doppler_std(self, snr):
+        '''The expected standard error of a Doppler measurement in Hz.
+        '''
         ddop = 10.0**(self.dopfun(np.log10(snr)))
 
 
@@ -201,22 +226,11 @@ class LinearizedCoded(Errors):
         return ddop
 
 
-    def doppler(self, data, snr):
-        '''Range rate in m/s
+    def range_rate_std(self, snr):
+        '''The expected standard error of a range rate measurement in m/s.
         '''
-        ddop = self._get_ddop(snr)
-        self.set_numpy_seed()
-        return data + np.random.randn(*data.shape)*ddop
-
-
-    def range_rate(self, data, snr):
-        '''Range rate in m/s
-        '''
-        ddop = self._get_ddop(snr)
-        rr_std = scipy.constants.c*ddop/self.freq/2.0
-        self.set_numpy_seed()
-        return data + np.random.randn(*data.shape)*rr_std
-
+        rr_std = scipy.constants.c*self.doppler_std(snr)/self.freq/2.0
+        return rr_std
 
 
 
