@@ -113,7 +113,6 @@ class SpaceObject(object):
 
     default_parameters = dict(
         C_D = 2.3,
-        A = 1.0,
         m = 1.0,
         C_R = 1.0,
     )
