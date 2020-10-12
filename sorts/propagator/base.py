@@ -110,7 +110,7 @@ class Propagator(ABC):
 
         if epoch is None:
             pass
-        elif type(t) == Time:
+        elif isinstance(epoch, Time) and not isinstance(epoch, TimeDelta):
             if epoch.format != self.settings['epoch_format']:
                 epoch.format = self.settings['epoch_format']
 
@@ -119,18 +119,32 @@ class Propagator(ABC):
         else:
             epoch = Time(epoch, format=self.settings['epoch_format'], scale=self.settings['epoch_scale'])
 
+        if len(epoch.shape) > 0:
+            if epoch.size > 1:
+                raise ValueError(f'Can only have one epoch, not "{epoch.size}"')
+            else:
+                epoch = epoch[0]
+
 
         if t is None:
             pass
-        elif type(t) == TimeDelta:
+        elif isinstance(t, Time) and not isinstance(t, TimeDelta):
+            t = t - epoch
+        elif isinstance(t, TimeDelta):
             if t.format != self.settings['time_format']:
                 t.format = self.settings['time_format']
 
             if self.settings['time_scale'] is not None:
                 if t.scale != self.settings['time_scale']:
                     t = getattr(t,self.settings['time_scale'])
-
-        elif type(t) == Time:
+        elif isinstance(t, np.ndarray):
+            if np.issubdtype(t.dtype, np.datetime64):
+                t = Time(t, scale=self.settings['time_scale'])
+                t = t - epoch
+            else:
+                t = TimeDelta(t, format=self.settings['time_format'], scale=self.settings['time_scale'])
+        elif isinstance(t, np.datetime64):
+            t = Time(t, scale=self.settings['time_scale'])
             t = t - epoch
         else:
             t = TimeDelta(t, format=self.settings['time_format'], scale=self.settings['time_scale'])

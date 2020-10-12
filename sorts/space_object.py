@@ -172,7 +172,7 @@ class SpaceObject(object):
             propagator = self.__propagator,
             propagator_options = copy.deepcopy(self.propagator_options),
             propagator_args = copy.deepcopy(self.propagator_args),
-            epoch=self.oid,
+            epoch=copy.deepcopy(self.epoch),
             oid=self.oid,
             state=copy.deepcopy(self.state),
             parameters = copy.deepcopy(self.parameters),
@@ -353,18 +353,6 @@ class SpaceObject(object):
         :return: Array of state (position and velocity) as a function of time.
         :rtype: numpy.ndarray of size (6,len(t))
         '''
-        if type(t) == Time:
-            t = t - self.epoch
-            if len(t.shape) == 0:
-                t = t.reshape((1,))
-        elif type(t) == TimeDelta:
-            if len(t.shape) == 0:
-                t = t.reshape((1,))
-        elif not isinstance(t,np.ndarray):
-            if not isinstance(t,list):
-                t = [t]
-            t = np.array(t,dtype=np.float64)
-        
         kw = {}
         kw.update(self.propagator_args)
         kw.update(self.parameters)
@@ -375,5 +363,10 @@ class SpaceObject(object):
             epoch = self.epoch,
             **kw
         )
+        
+        #this ensures a 2d-object is returned
+        if len(ecefs.shape) == 1:
+            ecefs = ecefs.reshape((6,1))
+
         return ecefs
 

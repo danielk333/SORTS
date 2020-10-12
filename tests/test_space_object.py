@@ -146,9 +146,6 @@ class TestSpaceObject(unittest.TestCase):
         
         obj = SpaceObject(**self.orb_init)
         #test default value
-        x = obj.d
-
-        del obj.parameters['A']
         with self.assertRaises(AttributeError):
             x = obj.d
 
@@ -202,18 +199,23 @@ class TestSpaceObject(unittest.TestCase):
 
         obj = SpaceObject(**self.orb_init)
 
+        dt = 10.0
+
         states = []
-        states += [obj.get_state(np.array([1.0], dtype=np.float))]
-        states += [obj.get_state(1.0)]
-        states += [obj.get_state(1)]
-        states += [obj.get_state(TimeDelta(1.0, format='sec'))]
-        states += [obj.get_state(obj.epoch + TimeDelta(1.0, format='sec'))]
+        states += [obj.get_state(np.array([dt], dtype=np.float))] #0
+        states += [obj.get_state(dt)] #1
+        states += [obj.get_state(int(dt))] #2
+        states += [obj.get_state(TimeDelta(dt, format='sec'))] #3
+        states += [obj.get_state(obj.epoch + TimeDelta(dt, format='sec'))] #4
+        states += [obj.get_state(obj.epoch + TimeDelta([dt], format='sec'))] #5
+        states += [obj.get_state((obj.epoch + TimeDelta(dt, format='sec')).datetime64)] #6
+        states += [obj.get_state((obj.epoch + TimeDelta([dt], format='sec')).datetime64)] #7
 
-        for state in states:
-            self.assertEqual(state.shape, (6,1))
+        for ind, state in enumerate(states):
+            self.assertEqual(state.shape, (6,1), msg=f'ind={ind}')
 
-        for state in states:
-            nt.assert_array_equal(state, states[0])
+        for ind, state in enumerate(states):
+            nt.assert_almost_equal(state, states[0], decimal=4, err_msg=f'ind={ind}')
 
 
     def test_update_elements_cart(self):

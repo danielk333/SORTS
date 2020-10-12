@@ -4,8 +4,10 @@ from copy import copy
 sys.path.insert(0, os.path.abspath('.'))
 
 import unittest
-import numpy as n
+import numpy as np
 import numpy.testing as nt
+
+from astropy.time import TimeDelta, Time
 
 from sorts import Propagator
 
@@ -21,6 +23,45 @@ class TestBaseProp(unittest.TestCase):
 
         prop = new_propagator()
         assert prop.propagate(0,0,0) is None
+
+
+    def test_convert_time(self):
+        
+        
+        class new_propagator(Propagator):
+            def propagate(self, t, state0, epoch, **kwargs):
+                pass
+
+        prop = new_propagator()
+
+        mjd0 = 57125.7729
+        epoch = Time(mjd0, format='mjd')
+        dt = 10.0
+
+        t_ref = TimeDelta(dt, format='sec')
+
+        
+
+        times = []
+        times += [prop.convert_time(np.array([dt], dtype=np.float), epoch)] #0
+        times += [prop.convert_time(dt, epoch)] #1
+        times += [prop.convert_time(int(dt), epoch)] #2
+        times += [prop.convert_time(TimeDelta(dt, format='sec'), epoch)] #3
+        times += [prop.convert_time(epoch + TimeDelta(dt, format='sec'), epoch)] #4
+        times += [prop.convert_time(epoch + TimeDelta([dt], format='sec'), epoch)] #5
+        times += [prop.convert_time((epoch + TimeDelta(dt, format='sec')).datetime64, epoch)] #6
+        times += [prop.convert_time((epoch + TimeDelta([dt], format='sec')).datetime64, epoch)] #7
+        times += [prop.convert_time(dt, mjd0)] #8
+        times += [prop.convert_time(dt, [mjd0])] #9
+        times += [prop.convert_time(dt, np.array([mjd0], dtype=np.float))] #10
+
+        for t, ep in times:
+            if len(t.shape) > 0:
+                t = t[0]
+            nt.assert_almost_equal(t.sec, t_ref.sec, decimal=5)
+
+            assert len(ep.shape) == 0
+            assert ep == epoch
 
 
     def test_meta_raise_no_method(self):

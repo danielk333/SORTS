@@ -544,7 +544,7 @@ class Orekit(Propagator):
         times = epoch + t
 
         mjd0 = epoch.mjd
-        t = t.value
+        t = t.sec
         if not isinstance(t, np.ndarray):
             t = np.array([t])
 
