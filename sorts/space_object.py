@@ -209,6 +209,16 @@ class SpaceObject(object):
         return diam
 
 
+    def __getattr__(self, name):
+        if name in self.parameters:
+            return self.parameters[name]
+        elif name in pyorb.Orbit.UPDATE_KW:
+            return getattr(self.state, name)
+        else:
+            raise AttributeError(f'No attribute called "{name}"')
+
+
+
     @property
     def orbit(self):
         if isinstance(self.state, pyorb.Orbit):
