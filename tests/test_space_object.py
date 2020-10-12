@@ -290,6 +290,17 @@ class TestSpaceObject(unittest.TestCase):
 
 
 
+    def test_update_parameters(self):
+        obj = SpaceObject(**self.orb_init)
+
+        obj.update(XX=5.8)
+        obj.update(C_D=0)
+
+        assert obj.parameters['XX'] == 5.8
+        assert obj.parameters['C_D'] == 0
+
+
+
     def test_update_error(self):
         obj = SpaceObject(**self.orb_init)
         with self.assertRaises(ValueError):

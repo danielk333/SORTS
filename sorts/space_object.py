@@ -300,12 +300,19 @@ class SpaceObject(object):
         :param float vy: Y-direction velocity in km/s
         :param float vz: Z-direction velocity in km/s
         '''
+        if not isinstance(self.state, pyorb.Orbit):
+            raise ValueError(f'Cannot update non-Orbit state ({type(self.state)})')
+
         if 'aop' in kwargs:
             kwargs['omega'] = kwargs.pop('aop')
         if 'raan' in kwargs:
             kwargs['Omega'] = kwargs.pop('raan')
         if 'mu0' in kwargs:
             kwargs['anom'] = kwargs.pop('mu0')
+
+        for key in kwargs:
+            if key not in pyorb.Orbit.UPDATE_KW:
+                self.parameters[key] = kwargs[key]
 
         self.orbit.update(**kwargs)
 
