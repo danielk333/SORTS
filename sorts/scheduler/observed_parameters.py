@@ -35,7 +35,7 @@ class ObservedParameters(Scheduler):
         )
 
 
-    def calculate_observation_jacobian(self, txrx_pass, space_object, variables, deltas, **kwargs):
+    def calculate_observation_jacobian(self, txrx_pass, space_object, variables, deltas, transforms={}, **kwargs):
         '''Calculate the observation and its Jacobean of a pass of a specific space object given the current state of the Scheduler. 
 
         The Jacobean assumes that the SpaceObject has a Orbit state. To perturb non Orbit states a custom implementation is needed.
@@ -67,8 +67,14 @@ class ObservedParameters(Scheduler):
                 self.profiler.start(f'Obs.Param.:calculate_observation_jacobian:d_{var}')
 
             dso = space_object.copy()
-            dso.update(**{var: getattr(dso, var) + deltas[ind]})
-            
+            if var in transforms:
+                Tx = transforms[var][0](getattr(dso, var)) + deltas[ind]
+                dx = transforms[var][1](Tx)
+            else:
+                dx = getattr(dso, var) + deltas[ind]
+
+            dso.update(**{var: dx})
+
             ddata = self.calculate_observation(txrx_pass, t, generator, dso, **kwargs)
             dr = (ddata['range'] - data0['range'])/deltas[ind]
             dv = (ddata['range_rate'] - data0['range_rate'])/deltas[ind]

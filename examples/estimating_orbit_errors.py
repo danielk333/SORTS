@@ -52,14 +52,14 @@ obj = sorts.SpaceObject(
     state = orb,
     epoch=Time(53005.0, format='mjd', scale='utc'),
     parameters = dict(
-        d = 0.2,
+        A = 1.0,
     )
 )
 
 
 t = np.arange(0.0, end_t, dt)
 
-print(f'Orbit:\n {str(orb)}')
+print(f'Orbit:\n{str(orb)}')
 print(f'Temporal points: {len(t)}')
 
 states = obj.get_state(t)
@@ -103,14 +103,22 @@ except NameError:
 print(f'\nUsing "{pth}" as cache for LinearizedCoded errors.')
 err = errors.LinearizedCoded(radar.tx[0], seed=123, cache_folder=pth)
 
-variables = ['x','y','z','vx','vy','vz']
+variables = ['x','y','z','vx','vy','vz','A']
+deltas = [1e-4]*3 + [1e-6]*3 + [1e-2]
 
 #observe one pass from all rx stations, including measurement Jacobian
-
-
 for rxi in range(len(radar.rx)):
     #the Jacobean is stacked as [r_measurements, v_measurements]^T so we stack the measurement covariance equally
-    data, J_rx = sched.calculate_observation_jacobian(rx_passes[rxi], space_object=obj, variables=variables, deltas=[1e-4]*3 + [1e-6]*3, snr_limit=True)
+    data, J_rx = sched.calculate_observation_jacobian(
+        rx_passes[rxi], 
+        space_object=obj, 
+        variables=variables, 
+        deltas=deltas, 
+        snr_limit=True,
+        transforms = {
+            'A': (lambda A: np.log10(A), lambda Ainv: 10.0**Ainv),
+        },
+    )
 
     #now we get the expected standard deviations
     r_stds_tx = err.range_std(data['snr'])
@@ -134,10 +142,15 @@ for rxi in range(len(radar.rx)):
     print(v_stds_tx)
 
 
+#Add a prior to the Area
+Sigma_p_inv = np.zeros((len(variables), len(variables)), dtype=np.float64)
+Sigma_p[-1,-1] = 1.0/0.59**2
+
 #diagonal matrix inverse is just element wise inverse of the diagonal
 Sigma_m_inv = np.diag(1.0/Sigma_m_diag)
 
-Sigma_orb = np.linalg.inv(np.transpose(J) @ Sigma_m_inv @ J)
+#For a thorough derivation of this formula, see XXXX
+Sigma_orb = np.linalg.inv(np.transpose(J) @ Sigma_m_inv @ J + Sigma_p_inv)
 
 
 print('Measurement Jacobian size')
@@ -146,12 +159,15 @@ print(J.shape)
 p.stop('total')
 print('\n'+p.fmt(normalize='total'))
 
-print('\nLinear orbit estimator covariance [km & km/s]:')
+print(f'\nLinear orbit estimator covariance [SI-units] (shape={Sigma_orb.shape}):')
 
-list_sig = (Sigma_orb*1e-3).tolist()
-list_sig = [[var] + row for row,var in zip(list_sig, variables)]
+header = ['']+variables
+header[-1] = 'log10(A)'
 
-print(tabulate(list_sig, ['']+variables, tablefmt="simple"))
+list_sig = (Sigma_orb).tolist()
+list_sig = [[var] + row for row,var in zip(list_sig, header[1:])]
+
+print(tabulate(list_sig, header, tablefmt="simple"))
 
 ax = sorts.plotting.local_passes([ps])
 plt.show()
