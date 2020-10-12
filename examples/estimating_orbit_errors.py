@@ -10,6 +10,9 @@ import pathlib
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.time import Time
+from tabulate import tabulate
+
+import pyorb
 
 import sorts.propagator as propagators
 import sorts.errors as errors
@@ -39,7 +42,7 @@ orb = pyorb.Orbit(
     anom=72, 
 )
 obj = sorts.SpaceObject(
-    SGP4,
+    propagators.SGP4,
     propagator_options = dict(
         settings = dict(
             in_frame='TEME', 
@@ -63,11 +66,13 @@ states = obj.get_state(t)
 
 passes = radar.find_passes(t, states)
 
-#Extract a pass over a tx-rx pair
-p_tx0_rx0 = passes[0][0]
+#Create a list the same pass at the other rx stations
+#in this example we know that its index 0 at all of them and that it was tri-static
+#(otherwise it is simple to find the other passes from this structure)
+rx_passes = [p_tx0_rx[0] for p_tx0_rx in passes[0]]
 
-#choose the first one
-ps = p_tx0_rx0[0]
+#choose the tx0-rx0 one
+ps = rx_passes[0]
 
 #Measure 10 points along pass
 use_inds = np.arange(0,len(ps.inds),len(ps.inds)//10)
@@ -82,63 +87,71 @@ class Schedule(
     ):
     pass
 
-sched = Schedule(radar = eiscat3d, controllers=[track])
+p = sorts.Profiler()
+p.start('total')
 
-#observe one pass
-t, generator = sched(ps.start(), ps.end())
-data = sched.calculate_observation(ps, t, generator, space_object=obj, snr_limit=True)
+sched = Schedule(radar = radar, controllers=[track], profiler=p)
 
+
+try:
+    pth = pathlib.Path(__file__).parent / 'data'
+except NameError:
+    import os
+    pth = 'data' + os.path.sep
 
 #Now we load the error model
-print(f'Using "{pth}" as cache for LinearizedCoded errors.')
+print(f'\nUsing "{pth}" as cache for LinearizedCoded errors.')
 err = errors.LinearizedCoded(radar.tx[0], seed=123, cache_folder=pth)
 
-#now we get the expected standard deviations
-r_stds = err.range_std(data['snr'])
-v_stds = err.range_rate_std(data['snr'])
+variables = ['x','y','z','vx','vy','vz']
+
+#observe one pass from all rx stations, including measurement Jacobian
 
 
-from pyod import OptimizeLeastSquares, MCMCLeastSquares
+for rxi in range(len(radar.rx)):
+    #the Jacobean is stacked as [r_measurements, v_measurements]^T so we stack the measurement covariance equally
+    data, J_rx = sched.calculate_observation_jacobian(rx_passes[rxi], space_object=obj, variables=variables, deltas=[1e-4]*3 + [1e-6]*3, snr_limit=True)
 
-import pyorb
+    #now we get the expected standard deviations
+    r_stds_tx = err.range_std(data['snr'])
+    v_stds_tx = err.range_rate_std(data['snr'])
 
-prop = SGP4(
-    settings=dict(
-        in_frame='TEME',
-        out_frame='ITRS',
-    )
-)
+    #Assume uncorrelated errors = diagonal covariance matrix
+    Sigma_m_diag_tx = np.r_[r_stds_tx**2, v_stds_tx**2]
+
+    #we simply append the results on top of each other for each station
+    if rxi > 0:
+        J = np.append(J, J_rx, axis=0)
+        Sigma_m_diag = np.append(Sigma_m_diag, Sigma_m_diag_tx, axis=0)
+    else:
+        J = J_rx
+        Sigma_m_diag = Sigma_m_diag_tx
+        v_stds = v_stds_tx
+
+    print(f'Range errors std [m] (rx={rxi}):')
+    print(r_stds_tx)
+    print(f'Velocity errors std [m/s] (rx={rxi}):')
+    print(v_stds_tx)
 
 
-variables = ['x', 'y', 'z', 'vx', 'vy', 'vz']
-dtype = [(name, 'float64') for name in variables]
+#diagonal matrix inverse is just element wise inverse of the diagonal
+Sigma_m_inv = np.diag(1.0/Sigma_m_diag)
 
-state0_named = np.empty((1,), dtype=dtype)
-step_arr = np.array([1e3,1e3,1e3,1e1,1e1,1e1], dtype=np.float64)
-step = np.empty((1,), dtype=dtype)
-
-for ind, name in enumerate(variables):
-    state0_named[name] = state0[ind]
-    step[name] = step_arr[ind]
+Sigma_orb = np.linalg.inv(np.transpose(J) @ Sigma_m_inv @ J)
 
 
-input_data_state = {
-    'sources': sources,
-    'Model': ,
-    'date0': prior_time,
-    'params': params,
-}
+print('Measurement Jacobian size')
+print(J.shape)
 
-post_init = OptimizeLeastSquares(
-    data = input_data_state,
-    variables = variables,
-    start = state0_named,
-    prior = None,
-    propagator = prop,
-    method = 'Nelder-Mead',
-    options = dict(
-        maxiter = 10000,
-        disp = False,
-        xatol = 1e-3,
-    ),
-)
+p.stop('total')
+print('\n'+p.fmt(normalize='total'))
+
+print('\nLinear orbit estimator covariance [km & km/s]:')
+
+list_sig = (Sigma_orb*1e-3).tolist()
+list_sig = [[var] + row for row,var in zip(list_sig, variables)]
+
+print(tabulate(list_sig, ['']+variables, tablefmt="simple"))
+
+ax = sorts.plotting.local_passes([ps])
+plt.show()

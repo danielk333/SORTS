@@ -23,7 +23,7 @@ from .scheduler import Scheduler
 from .passes import Pass
 from .errors import Errors
 from .simulation import Simulation
-
+from .profiling import Profiler
 
 
 #modules
