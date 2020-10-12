@@ -16,6 +16,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 #Local import
+from .. import frames
 
 
 
@@ -28,6 +29,31 @@ def az_el_to_xy(az,el):
     y=r*np.cos(az)
     return x,y
 
+
+def local_passes(passes, **kwargs):
+    enu_ind = kwargs.pop('station_ind', 0)
+
+    for ind, ps in enumerate(passes):
+        
+        if 'add_track' not in kwargs:
+            if ind == 0:
+                kwargs['add_track'] = False
+            else:
+                kwargs['add_track'] = True
+
+        if isinstance(ps.enu, list):
+            enu = ps.enu[enu_ind]
+        else:
+            enu = ps.enu
+
+        azelr = frames.cart_to_sph(enu[:3,:], radians=kwargs.setdefault('radians', False))
+
+        ax = local_tracking(azelr[0,:], azelr[1,:], **kwargs)
+
+        if 'ax' not in kwargs:
+            kwargs['ax'] = ax
+
+    return ax
 
 
 def local_tracking(azimuth, elevation, ax=None, t=None, add_track=False, node_times=False, radians=False):
