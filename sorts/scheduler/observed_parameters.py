@@ -55,11 +55,30 @@ class ObservedParameters(Scheduler):
 
         if self.profiler is not None:
             self.profiler.start('Obs.Param.:calculate_observation_jacobian:reference')
+        
+        snr_limit = kwargs.get('snr_limit', True)
+
+        kwargs['snr_limit'] = False
         data0 = self.calculate_observation(txrx_pass, t, generator, space_object, **kwargs)
+
+        snr_inds = np.full(data0['snr'].shape, True, dtype=np.bool)
+        if snr_limit:
+            snr_db = np.log10(data0['snr'])*10.0
+            snr_inds[np.logical_or(np.isnan(snr_db),np.isinf(snr_db))] = False
+            snr_inds[snr_inds] = snr_db[snr_inds] > self.radar.min_SNRdb
+
+        for key in data0:
+            data0[key] = data0[key][...,snr_inds]
+
+
         if self.profiler is not None:
             self.profiler.stop('Obs.Param.:calculate_observation_jacobian:reference')
 
-        J = np.zeros([len(t)*2,len(variables)], dtype=np.float64)
+        if data0 is None:
+            return None, None
+
+        t_filt = t[snr_inds]
+        J = np.zeros([len(t_filt)*2,len(variables)], dtype=np.float64)
 
         kwargs['calculate_snr'] = False
         for ind, var in enumerate(variables):
@@ -76,11 +95,14 @@ class ObservedParameters(Scheduler):
             dso.update(**{var: dx})
 
             ddata = self.calculate_observation(txrx_pass, t, generator, dso, **kwargs)
+            for key in data0:
+                ddata[key] = ddata[key][...,snr_inds]
+            
             dr = (ddata['range'] - data0['range'])/deltas[ind]
             dv = (ddata['range_rate'] - data0['range_rate'])/deltas[ind]
 
-            J[:len(t),ind]=dr
-            J[len(t):,ind]=dv
+            J[:len(t_filt),ind]=dr
+            J[len(t_filt):,ind]=dv
 
             if self.profiler is not None:
                 self.profiler.stop(f'Obs.Param.:calculate_observation_jacobian:d_{var}')

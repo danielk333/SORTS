@@ -308,23 +308,42 @@ def find_simultaneous_passes(t, states, stations, cache_data=True):
     return passes
 
 
-def select_simultaneous_passes(passes):
-    '''TODO, should this be a thing????
-
+def group_passes(passes):
+    '''Takes a list of passes structured as [tx][rx][pass] and find all simultaneous passes and groups them according to [tx], resulting in a [tx][pass][rx] structure.
     '''
 
     def overlap(ps1, ps2):
         return ps1.start() <= ps2.end() and ps2.start() <= ps1.end()
 
     grouped_passes = []
-    added = np.full((len(passes),), False, dtype=np.bool)
-    for x in range(len(passes)):
-        if not added[x]:
-            grouped_passes.append([passes[x]])
-            added[x] = True
-        for y in range(x+1, len(passes)):
-            if not added[y]:
-                if overlap(passes[x], passes[y]):
-                    grouped_passes[-1].append(passes[y])
-                    added[y] = True
+    for tx_passes in passes:
+        grouped_passes.append([])
+
+
+        #first flatten
+        flat_passes = [x for rx_passes in tx_passes for x in rx_passes]
+
+        if len(flat_passes) > 0:
+            grouped_passes[-1].append([flat_passes[0]])
+        else:
+            continue
+
+        for x in range(1,len(flat_passes)):
+            for y in range(len(grouped_passes[-1])):
+                member = False
+                for gps in grouped_passes[-1][y]:
+                    if overlap(gps, flat_passes[x]):
+                        member = True
+                        break
+
+                if member:
+                    member_id = y
+                    break
+
+            if member:
+                grouped_passes[-1][member_id].append(flat_passes[x])
+            else:
+                grouped_passes[-1].append([flat_passes[x]])
+
     return grouped_passes
+

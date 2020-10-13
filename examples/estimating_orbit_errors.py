@@ -101,7 +101,8 @@ except NameError:
 
 #Now we load the error model
 print(f'\nUsing "{pth}" as cache for LinearizedCoded errors.')
-err = errors.LinearizedCoded(radar.tx[0], seed=123, cache_folder=pth)
+err = errors.LinearizedCodedIonospheric(radar.tx[0], seed=123, cache_folder=pth)
+
 
 variables = ['x','y','z','vx','vy','vz','A']
 deltas = [1e-4]*3 + [1e-6]*3 + [1e-2]
@@ -121,7 +122,7 @@ for rxi in range(len(radar.rx)):
     )
 
     #now we get the expected standard deviations
-    r_stds_tx = err.range_std(data['snr'])
+    r_stds_tx = err.range_std(data['range'], data['snr'])
     v_stds_tx = err.range_rate_std(data['snr'])
 
     #Assume uncorrelated errors = diagonal covariance matrix
@@ -134,7 +135,6 @@ for rxi in range(len(radar.rx)):
     else:
         J = J_rx
         Sigma_m_diag = Sigma_m_diag_tx
-        v_stds = v_stds_tx
 
     print(f'Range errors std [m] (rx={rxi}):')
     print(r_stds_tx)
@@ -144,12 +144,13 @@ for rxi in range(len(radar.rx)):
 
 #Add a prior to the Area
 Sigma_p_inv = np.zeros((len(variables), len(variables)), dtype=np.float64)
-Sigma_p[-1,-1] = 1.0/0.59**2
+Sigma_p_inv[-1,-1] = 1.0/0.59**2
 
 #diagonal matrix inverse is just element wise inverse of the diagonal
 Sigma_m_inv = np.diag(1.0/Sigma_m_diag)
 
-#For a thorough derivation of this formula, see XXXX
+#For a thorough derivation of this formula:
+#see Fisher Information Matrix of a MLE with Gaussian errors and a Linearized measurement model
 Sigma_orb = np.linalg.inv(np.transpose(J) @ Sigma_m_inv @ J + Sigma_p_inv)
 
 

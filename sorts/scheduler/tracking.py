@@ -10,7 +10,7 @@ import pyorb
 
 from ..controller import Tracker
 from .scheduler import Scheduler
-from ..passes import equidistant_sampling, select_simultaneous_passes
+from ..passes import equidistant_sampling
 
 class Tracking(Scheduler):
     '''
