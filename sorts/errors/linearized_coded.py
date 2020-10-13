@@ -239,22 +239,21 @@ class LinearizedCodedIonospheric(LinearizedCoded):
     '''233e6 Hz worst case scenario at zenith only!
     '''
 
-    def __init__(self, tx, seed=None, cache_folder=None, diameter=None):
-        super().__init__(tx, seed=seed, cache_folder=cache_folder, diameter=diameter)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         r = np.array([0.0,1000.0,1000000.0])
         e = np.array([0.0,0.1,100.0])*150.0
         self.iono_errfun = scipy.interpolate.interp1d(r,e)
 
 
-    def range(self, data, snr, tx_range):
-        '''Two way range in meters
+    def range_std(self, path_range, snr):
+        '''The expected standard error of a range measurement in m.
         '''
-
         dr = 10.0**(self.rfun(np.log10(snr)))
 
         # add ionospheric error
-        dr = np.sqrt(dr**2.0 + self.iono_errfun(tx_range/1e3)**2.0)
+        dr = np.sqrt(dr**2.0 + self.iono_errfun(path_range/1e3)**2.0)
 
         if self.min_range_std is not None:
             if len(dr.shape) == 0:
@@ -263,6 +262,12 @@ class LinearizedCodedIonospheric(LinearizedCoded):
             else:
                 dr[dr < self.min_range_std] = self.min_range_std
 
+        return dr
+
+
+    def range(self, data, snr):
+        '''Range in m
+        '''
         self.set_numpy_seed()
-        return data + np.random.randn(*data.shape)*dr
+        return data + np.random.randn(*data.shape)*self.range_std(data, snr)
 
