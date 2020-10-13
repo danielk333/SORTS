@@ -76,14 +76,15 @@ def correlate(
     ):
     '''Given a mono-static measurement of ranges and rage-rates, a radar model and a population: correlate measurements with population.
 
-    :param list data: List of dictionaries that contains measurement data. Contents are described below.
-    :param station station: Model of receiver station that performed the measurement.
+    :param list measurements: List of dictionaries that contains measurement data. Contents are described below.
     :param Population population: Population to correlate against.
     :param function metric: Metric used to correlate measurement and simulated object measurement.
+    :param function metric_reduce: Metric used to correlate measurement and simulated object measurement.
     :param function forward_model: A pointer to a function that takes in the ecef-state, the rx and tx station ecefs and calculates the observed variables return as a tuple.
     :param list variables: The data variables recorded by the system.
-    :param Profiler profiler: 
-    :param logging.Logger logger: 
+    :param int n_closest: Number of closest matches to save.
+    :param Profiler profiler: Profiler instance for checking function performance.
+    :param logging.Logger logger: Logger instance for logging the execution of the function.
     :param bool MPI: If True use internal parallelization with MPI to calculate correlation. Turn to False to externally parallelize with MPI.
     
     **Measurement data:**

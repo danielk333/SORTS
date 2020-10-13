@@ -34,6 +34,8 @@ class Pass:
 
 
     def calculate_max_snr(self, tx, rx, diameter):
+        '''
+        '''
         assert self.stations == 2, 'Can only calculate SNR for TX-RX pairs'
 
         ranges = self.range()
