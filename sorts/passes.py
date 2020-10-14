@@ -4,6 +4,7 @@
 Also provides convenience functions for finding passes given states and stations and sorting structures of passes in particular ways.
 
 '''
+import datetime
 
 import numpy as np
 import pyorb
@@ -33,6 +34,19 @@ class Pass:
         self._r = None
         self._v = None
         self._zang = None
+
+
+    def __str__(self):
+        str_ = 'Pass '
+        if self.station_id is not None:
+            str_ += f'Station {self.station_id} | '
+        str_ += f'Rise {str(datetime.timedelta(seconds=self.start()))} ({(self.end() - self.start())/60.0:.1f} min) {str(datetime.timedelta(seconds=self.end()))} Fall'
+        
+        return str_
+
+
+    def __repr__(self):
+        return str(self)
 
 
     def calculate_snr(self, tx, rx, diameter):

@@ -248,7 +248,7 @@ To test
 To make doc
 -----------------
 
-**THIS MAKE TARGET NEEDS UPDATE** (currently manually handled with `make html` instead)
+To compile the github pages documentation run
 
 .. code-block:: bash
 
@@ -256,10 +256,19 @@ To make doc
    git cd docsrc
    make github
 
+Otherwise, one can compile the documentation directly on the current branch by running 
 
+.. code-block:: bash
+
+   git cd docsrc
+   make html
+
+which causes the output to go into the "build" folder.
 
 When used for publications
 ===========================
+
+A paper and a DOI is underway and will soon be available, for now: please just tell us by email (daniel.kastinen@irf.se) or here on Github.
 
 @article{
     autor="",
