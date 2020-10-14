@@ -123,7 +123,7 @@ If you have trouble getting plotts from the examples, you might need to install 
 
    sudo apt install python3.7-tk
 
-and force matplotlib to use that backend by creating a matplotlibrc file ( https://matplotlib.org/tutorials/introductory/customizing.html ) and adding `backend : TkAgg` to it.
+and force matplotlib to use that backend by creating a matplotlibrc file ( https://matplotlib.org/tutorials/introductory/customizing.html ) and adding "backend : TkAgg" to it.
 
 
 Install MPI

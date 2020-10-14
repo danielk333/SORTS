@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-'''
+'''Encapsulates a fundamental component of tracking space objects: a pass over a geographic location. 
+Also provides convenience functions for finding passes given states and stations and sorting structures of passes in particular ways.
 
 '''
 
@@ -14,6 +15,7 @@ from .signals import hard_target_snr
 
 class Pass:
     '''Saves the local coordinate data for a single pass. Optionally also indicates the location of that pass in a bigger dataset.
+
     '''
 
     def __init__(self, t, enu, inds=None, cache=True, station_id=None):
@@ -33,8 +35,16 @@ class Pass:
         self._zang = None
 
 
-    def calculate_max_snr(self, tx, rx, diameter):
-        '''
+    def calculate_snr(self, tx, rx, diameter):
+        '''Uses the :code:`signals.hard_target_snr` function to calculate the optimal SNR curve of a target during the pass **if the TX and RX stations are pointing at the object**.
+        The SNR's are returned from the function but also stored in the property :code:`self.snr`. 
+
+        :param TX tx: The TX station that observed the pass.
+        :param RX rx: The RX station that observed the pass.
+        :param float diameter: The diameter of the object.
+        :return: (n,) Vector with the SNR's during the pass.
+        :rtype: numpy.ndarray
+
         '''
         assert self.stations == 2, 'Can only calculate SNR for TX-RX pairs'
 
@@ -58,11 +68,14 @@ class Pass:
                 bandwidth=tx.coh_int_bandwidth,
                 rx_noise_temp=rx.noise,
             )
+        return self.snr
 
 
 
     @property
     def stations(self):
+        '''The number of stations that can observe the pass.
+        '''
         if self.station_id is not None:
             if isinstance(self.station_id, list):
                 return len(self.station_id)
@@ -73,6 +86,8 @@ class Pass:
 
 
     def start(self):
+        '''The Start time of the pass (uses cached value after first call if :code:`self.cache=True`).
+        '''
         if self.cache:
             if self._start is None:
                 self._start = self.t.min()
@@ -81,6 +96,8 @@ class Pass:
             return self.t.min()
 
     def end(self):
+        '''The ending time of the pass (uses cached value after first call if :code:`self.cache=True`).
+        '''
         if self.cache:
             if self._end is None:
                 self._end = self.t.max()
@@ -90,23 +107,40 @@ class Pass:
 
     @staticmethod
     def calculate_range(enu):
+        '''Norm of the ENU coordinates.
+        '''
         return np.linalg.norm(enu[:3,:], axis=0)
 
     @staticmethod
     def calculate_range_rate(enu):
+        '''Projected ENU velocity along the ENU range.
+        '''
         return np.sum(enu[3:,:]*(enu[:3,:]/np.linalg.norm(enu[:3,:], axis=0)), axis=0)
 
     @staticmethod
     def calculate_zenith_angle(enu, radians=False):
+        '''Zenith angle of the ENU coordinates.
+        '''
         return pyant.coordinates.vector_angle(np.array([0,0,1], dtype=np.float64), enu[:3,:], radians=radians)
 
     def get_range(self):
+        '''Get ranges from all stations involved in the pass.
+
+        :rtype: list of numpy.ndarray or numpy.ndarray
+        :return: If there is one station observing the pass, return a vector of ranges, otherwise return a list of vectors with ranges.
+        '''
         if self.stations > 1:
             return [Pass.calculate_range(enu) for enu in self.enu]
         else:
             return Pass.calculate_range(self.enu)
 
     def range(self):
+        '''Get ranges from all stations involved in the pass (uses cached value after first call if :code:`self.cache=True`).
+        The cache is stored in :code:`self._r`.
+
+        :rtype: list of numpy.ndarray or numpy.ndarray
+        :return: If there is one station observing the pass, return a vector of ranges, otherwise return a list of vectors with ranges.
+        '''
         if self.cache:
             if self._r is None:
                 self._r = self.get_range()
@@ -115,12 +149,23 @@ class Pass:
             return self.get_range()
 
     def get_range_rate(self):
+        '''Get range rates from all stations involved in the pass.
+
+        :rtype: list of numpy.ndarray or numpy.ndarray
+        :return: If there is one station observing the pass, return a vector of range rates, otherwise return a list of vectors with range rates.
+        '''
         if self.stations > 1:
             return [Pass.calculate_range_rate(enu) for enu in self.enu]
         else:
             return Pass.calculate_range_rate(self.enu)
 
     def range_rate(self):
+        '''Get range rates from all stations involved in the pass (uses cached value after first call if :code:`self.cache=True`).
+        The cache is stored in :code:`self._v`.
+
+        :rtype: list of numpy.ndarray or numpy.ndarray
+        :return: If there is one station observing the pass, return a vector of range rates, otherwise return a list of vectors with range rates.
+        '''
         if self.cache:
             if self._v is None:
                 self._v = self.get_range_rate()
@@ -130,6 +175,11 @@ class Pass:
 
 
     def get_zenith_angle(self, radians=False):
+        '''Get zenith angles for all stations involved in the pass.
+
+        :rtype: list of numpy.ndarray or numpy.ndarray
+        :return: If there is one station observing the pass, return a vector of zenith angles, otherwise return a list of vectors with zenith angles.
+        '''
         if self.stations > 1:
             return [
                 Pass.calculate_zenith_angle(enu, radians=radians)
@@ -139,6 +189,12 @@ class Pass:
             return Pass.calculate_zenith_angle(self.enu, radians=radians)
 
     def zenith_angle(self, radians=False):
+        '''Get zenith angles from all stations involved in the pass (uses cached value after first call if :code:`self.cache=True`).
+        The cache is stored in :code:`self._v`.
+
+        :rtype: list of numpy.ndarray or numpy.ndarray
+        :return: If there is one station observing the pass, return a vector of zenith angles, otherwise return a list of vectors with zenith angles.
+        '''
         if self.cache:
             if self._zang is None:
                 self._zang = self.get_zenith_angle(radians=radians)
