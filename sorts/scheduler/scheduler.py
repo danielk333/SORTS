@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''Scheduler
+'''Scheduler base class.
 
 '''
 #Python standard import
@@ -15,6 +15,8 @@ import numpy as np
 
 class Scheduler(ABC):
     '''A Scheduler for executing time-slices of different radar controllers.
+
+    #TODO: Docstring
     '''
 
     def __init__(self, radar, profiler=None, logger=None):

@@ -25,6 +25,8 @@ class ObservedParameters(Scheduler):
         * receiver pointing to target k
         * radar cross section
 
+        #TODO: Docstring
+
     ''' 
 
     def __init__(self, radar, logger=None, profiler=None, **kwargs):
@@ -41,6 +43,8 @@ class ObservedParameters(Scheduler):
         The Jacobean assumes that the SpaceObject has a Orbit state. To perturb non Orbit states a custom implementation is needed.
 
         NOTE: During the numerical calculation of the Jacobean only the range and range rates are calculated and `calculate_snr=False`.
+
+        #TODO: Docstring
         '''
 
         if self.logger is not None:
@@ -97,7 +101,7 @@ class ObservedParameters(Scheduler):
             ddata = self.calculate_observation(txrx_pass, t, generator, dso, **kwargs)
             for key in data0:
                 ddata[key] = ddata[key][...,snr_inds]
-            
+
             dr = (ddata['range'] - data0['range'])/deltas[ind]
             dv = (ddata['range_rate'] - data0['range_rate'])/deltas[ind]
 
@@ -115,6 +119,8 @@ class ObservedParameters(Scheduler):
 
     def calculate_observation(self, txrx_pass, t, generator, space_object, calculate_snr=True, interpolator=None, snr_limit=True):
         '''Calculate the observation of a pass of a specific space object given the current state of the Scheduler.
+
+        #TODO: Docstring
         '''
 
         txi, rxi = txrx_pass.station_id

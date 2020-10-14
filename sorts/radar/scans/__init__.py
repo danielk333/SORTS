@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-'''
+'''Defines the concept of a survey or "scanning" pattern as a function of time for a radar station. 
+Has a number of predefined subclasses such as "fence" or "beampark".
 
 '''
 

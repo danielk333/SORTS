@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''
+'''Basis for developing a scheduler for tracking multiple space objects.
 
 '''
 from abc import abstractmethod
@@ -13,7 +13,7 @@ from .scheduler import Scheduler
 from ..passes import equidistant_sampling
 
 class Tracking(Scheduler):
-    '''
+    '''#TODO: Docstring
     '''
 
     def __init__(self, 

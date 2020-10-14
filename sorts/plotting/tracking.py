@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''Plotting helper functions
+'''Tracking plot functions
 
 '''
 

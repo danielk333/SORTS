@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''
+'''Contains functions related to error calculation and a generalized method of generating random noisy data.
 
 '''
 
