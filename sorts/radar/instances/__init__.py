@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''
+'''Defines all the pre-configured radar instances available and provides a simple "getter" instance.
 '''
 
 from .eiscat_3d import gen_eiscat3d, gen_eiscat3d_demonstrator
