@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''
+'''Provides a static list of controllers, simplest scheduler.
 
 '''
 
@@ -10,7 +10,7 @@ from .scheduler import Scheduler
 
 
 class StaticList(Scheduler):
-    '''
+    '''#TODO: Docstring
     '''
 
     def __init__(self, radar, controllers, profiler=None, logger=None, **kwargs):

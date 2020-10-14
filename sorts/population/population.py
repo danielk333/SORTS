@@ -122,7 +122,13 @@ class Population:
         self.state_fields = state_fields
 
         if epoch_field is None:
-            epoch_field = Population._default_epoch['field']
+            epoch_field = copy.deepcopy(Population._default_epoch)
+        else:
+            if isinstance(epoch_field, str):
+                epoch_field_ = epoch_field
+                epoch_field = copy.deepcopy(Population._default_epoch)
+                epoch_field['field'] = epoch_field_
+
         self.epoch_field = epoch_field
 
         self.allocate(0)
@@ -350,8 +356,9 @@ class Population:
         '''Get the one row from the population as a :class:`space_object.SpaceObject` instance.
         '''
         parameters = {}
-        for key in self.space_object_fields:
-            parameters[key] = self.data[key][n]
+        if self.space_object_fields is not None:
+            for key in self.space_object_fields:
+                parameters[key] = self.data[key][n]
 
         cart_state = True
         kep_state = True
@@ -377,7 +384,6 @@ class Population:
 
         if 'oid' in self.fields:
             kwargs['oid'] = self.data[n]['oid']
-
 
         obj=so.SpaceObject(
             propagator = self.propagator,
@@ -527,6 +533,12 @@ class Population:
             return ret
         else:
             raise StopIteration
+
+
+    @property
+    def generator(self):
+        for obj in self:
+            yield obj
 
 
     def save(self, fname):

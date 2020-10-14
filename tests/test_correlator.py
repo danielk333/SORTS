@@ -4,57 +4,84 @@ sys.path.insert(0, os.path.abspath('.'))
 import time
 
 import unittest
-import numpy as n
+import pathlib
+
+import numpy as np
 import numpy.testing as nt
 import scipy
 import h5py
+from astropy.time import Time
 
-import correlator
+import sorts
 
-import population_library
-import radar_library as rlib
+radar = sorts.radars.eiscat_uhf
+
 
 class TestCorrelator(unittest.TestCase):
 
     def test_correlator(self):
 
+        try:
+            obs_pth = pathlib.Path(__file__).parent.parent / 'examples' / 'data' / 'uhf_correlation' / 'det-000000.h5'
+        except NameError:
+            import os
+            obs_pth = 'examples' + os.path.sep + 'data' + os.path.sep + 'uhf_correlation' + os.path.sep + 'det-000000.h5'
 
-        radar = rlib.eiscat_uhf()
+        # Each entry in the input `measurements` list must be a dictionary that contains the following fields:
+        #   * 't': [numpy.ndarray] Times relative epoch in seconds
+        #   * 'r': [numpy.ndarray] Two-way ranges in meters
+        #   * 'v': [numpy.ndarray] Two-way range-rates in meters per second
+        #   * 'epoch': [astropy.Time] epoch for measurements
+        #   * 'tx': [sorts.TX] Pointer to the TX station
+        #   * 'rx': [sorts.RX] Pointer to the RX station
+        print('Loading EISCAT UHF monostatic measurements')
+        with h5py.File(str(obs_pth),'r') as h_det:
+            r = h_det['r'][()]*1e3 #km -> m, one way
+            t = h_det['t'][()] #Unix seconds
+            v = -h_det['v'][()] #Inverted definition of range rate, one way
 
-        measurement_folder = './data/uhf_test_data/events'
-        tle_file = './data/uhf_test_data/tle-201801.txt'
-        measurement_file = measurement_folder + '/det-000000.h5'
+            inds = np.argsort(t)
+            t = t[inds]
+            r = r[inds]
+            v = v[inds]
 
-        with h5py.File(measurement_file,'r') as h_det:
-            r = h_det['r'].value*1e3
-            t = h_det['t'].value
-            v = -h_det['v'].value
+            t = Time(t, format='unix', scale='utc')
+            epoch = t[0]
+            t = (t - epoch).sec
 
             dat = {
-                'r': r,
+                'r': r*2,
                 't': t,
-                'v': v,
+                'v': v*2,
+                'epoch': epoch,
+                'tx': radar.tx[0],
+                'rx': radar.rx[0],
             }
 
-        pop = population_library.tle_snapshot(tle_file, sgp4_propagation=True)
+        print('Loading TLE population')
+        tles = [
+            ('1 43075U 17083F   18004.50601262  .00000010  00000-0 -26700-5 0  9995',
+            '2 43075  86.5273 171.5023 0000810  83.8359 276.2943 14.58677444  1820'),
+        ]
+        pop = sorts.population.tle_catalog(tles, cartesian=False)
 
-        pop.filter('oid', lambda oid: n.abs(oid - 43075) < 50)
+        #correlate requires output in ECEF 
+        pop.out_frame = 'ITRS'
 
-        cdat = correlator.correlate(
-            data = dat,
-            station = radar._rx[0],
+        print('Correlating data and population')
+        indecies, metric, cdat = sorts.correlate(
+            measurements = [dat],
             population = pop,
-            metric = correlator.residual_distribution_metric,
-            n_closest = 2,
-            out_file = None,
-            verbose = False,
-            MPI_on = False,
+            n_closest = 1,
         )
+        r_ref = cdat[0][0]['r_ref']
+        v_ref = cdat[0][0]['v_ref']
+        r = dat['r']
+        v = dat['v']
 
-        assert int(cdat[0]['sat_id']) == 43075
-        self.assertLess(n.abs(cdat[0]['stat'][0]), 1e3)
-        self.assertLess(n.abs(cdat[0]['stat'][1]), 500)
-        self.assertLess(n.abs(cdat[0]['stat'][2]), 10.0)
-        self.assertLess(n.abs(cdat[0]['stat'][3]), 5.0)
+        self.assertLess(np.abs(np.mean(r_ref - r)), 1e3)
+        self.assertLess(np.abs(np.std(r_ref - r)), 1e3)
+        self.assertLess(np.abs(np.mean(v_ref - v)), 10.0)
+        self.assertLess(np.abs(np.std(v_ref - v)), 8.0)
 
     

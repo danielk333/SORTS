@@ -2,7 +2,7 @@
 
 '''Defines an antenna's or entire radar system's radiation pattern, also defines physical antennas for RX and TX.
 
-(c) 2016-2019 Juha Vierinen, Daniel Kastinen
+(c) 2016-2020 Juha Vierinen, Daniel Kastinen
 '''
 
 #Python standard import
@@ -45,6 +45,16 @@ class Station(object):
         self.beam = beam
         self.enabled = True
         self.pointing_range = None
+
+
+    def rebase(self, lat, lon, alt):
+        '''Change geographical location of the station.
+        '''
+        self.lat = lat
+        self.lon = lon
+        self.alt = alt
+        self.ecef = frames.geodetic_to_ITRS(lat, lon, alt, radians = False)
+
 
     def copy(self):
         st = Station(

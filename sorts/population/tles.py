@@ -15,6 +15,7 @@ from .population import Population
 def tle_catalog(
         tles,
         sgp4_propagation = True, 
+        cartesian = True,
         kepler = False,
         propagator = None,
         propagator_options = {},
@@ -105,23 +106,24 @@ def tle_catalog(
         epoch = Time(params['jdsatepoch'] + params['jdsatepochF'], format='jd', scale='utc').mjd
         oid = params['satnum']
 
-        state_TEME = prop.propagate([0.0], lines)
+        if cartesian or kepler:
+            state_TEME = prop.propagate([0.0], lines)
 
-        if kepler:
-            kep = pyorb.cart_to_kep(state_TEME, mu=pyorb.G*pyorb.M_earth, degrees=True)
-            pop.data[line_id]['a'] = kep[0]
-            pop.data[line_id]['e'] = kep[1]
-            pop.data[line_id]['i'] = kep[2]
-            pop.data[line_id]['aop'] = kep[3]
-            pop.data[line_id]['raan'] = kep[4]
-            pop.data[line_id]['mu0'] = pyorb.true_to_mean(kep[5], kep[1], degrees=True)
+            if kepler:
+                kep = pyorb.cart_to_kep(state_TEME, mu=pyorb.G*pyorb.M_earth, degrees=True)
+                pop.data[line_id]['a'] = kep[0]
+                pop.data[line_id]['e'] = kep[1]
+                pop.data[line_id]['i'] = kep[2]
+                pop.data[line_id]['aop'] = kep[3]
+                pop.data[line_id]['raan'] = kep[4]
+                pop.data[line_id]['mu0'] = pyorb.true_to_mean(kep[5], kep[1], degrees=True)
 
-        pop.data[line_id]['x'] = state_TEME[0]
-        pop.data[line_id]['y'] = state_TEME[1]
-        pop.data[line_id]['z'] = state_TEME[2]
-        pop.data[line_id]['vx'] = state_TEME[4]
-        pop.data[line_id]['vy'] = state_TEME[3]
-        pop.data[line_id]['vz'] = state_TEME[5]
+            pop.data[line_id]['x'] = state_TEME[0]
+            pop.data[line_id]['y'] = state_TEME[1]
+            pop.data[line_id]['z'] = state_TEME[2]
+            pop.data[line_id]['vx'] = state_TEME[4]
+            pop.data[line_id]['vy'] = state_TEME[3]
+            pop.data[line_id]['vz'] = state_TEME[5]
         
         pop.data[line_id]['oid'] = oid
         pop.data[line_id]['mjd0'] = epoch

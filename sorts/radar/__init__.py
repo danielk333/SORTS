@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''
+'''Defines the required properties of a radar system and its components, including predefined instances.
 
 '''
 

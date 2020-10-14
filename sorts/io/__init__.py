@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''
+'''Provides functions for read and writing data in standardized formats such as the CCSDS standards.
 
 '''
 

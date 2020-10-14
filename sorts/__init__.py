@@ -23,7 +23,7 @@ from .scheduler import Scheduler
 from .passes import Pass
 from .errors import Errors
 from .simulation import Simulation
-
+from .profiling import Profiler
 
 
 #modules
@@ -46,6 +46,6 @@ from .radar import instances as radars
 #Functions
 from .correlator import correlate
 from .passes import equidistant_sampling
-from .passes import find_passes, find_simultaneous_passes
+from .passes import find_passes, find_simultaneous_passes, group_passes
 from .signals import hard_target_snr
 from .simulation import MPI_single_process, MPI_action, iterable_step, store_step, cached_step, iterable_cache

@@ -25,6 +25,8 @@ class ObservedParameters(Scheduler):
         * receiver pointing to target k
         * radar cross section
 
+        #TODO: Docstring
+
     ''' 
 
     def __init__(self, radar, logger=None, profiler=None, **kwargs):
@@ -35,7 +37,92 @@ class ObservedParameters(Scheduler):
         )
 
 
-    def calculate_observation(self, txrx_pass, t, generator, space_object, interpolator=None, snr_limit=True):
+    def calculate_observation_jacobian(self, txrx_pass, space_object, variables, deltas, transforms={}, **kwargs):
+        '''Calculate the observation and its Jacobean of a pass of a specific space object given the current state of the Scheduler. 
+
+        The Jacobean assumes that the SpaceObject has a Orbit state. To perturb non Orbit states a custom implementation is needed.
+
+        NOTE: During the numerical calculation of the Jacobean only the range and range rates are calculated and `calculate_snr=False`.
+
+        #TODO: Docstring
+        '''
+
+        if self.logger is not None:
+            self.logger.debug(f'Obs.Param.:calculate_observation_jacobian:{variables}, deltas={deltas}')
+
+        if self.profiler is not None:
+            self.profiler.start('Obs.Param.:calculate_observation_jacobian')
+
+        t, generator = self(txrx_pass.start(), txrx_pass.end())
+        if generator is None:
+            return None, None
+
+        if self.profiler is not None:
+            self.profiler.start('Obs.Param.:calculate_observation_jacobian:reference')
+        
+        snr_limit = kwargs.get('snr_limit', True)
+
+        kwargs['snr_limit'] = False
+        data0 = self.calculate_observation(txrx_pass, t, generator, space_object, **kwargs)
+
+        snr_inds = np.full(data0['snr'].shape, True, dtype=np.bool)
+        if snr_limit:
+            snr_db = np.log10(data0['snr'])*10.0
+            snr_inds[np.logical_or(np.isnan(snr_db),np.isinf(snr_db))] = False
+            snr_inds[snr_inds] = snr_db[snr_inds] > self.radar.min_SNRdb
+
+        for key in data0:
+            data0[key] = data0[key][...,snr_inds]
+
+
+        if self.profiler is not None:
+            self.profiler.stop('Obs.Param.:calculate_observation_jacobian:reference')
+
+        if data0 is None:
+            return None, None
+
+        t_filt = t[snr_inds]
+        J = np.zeros([len(t_filt)*2,len(variables)], dtype=np.float64)
+
+        kwargs['calculate_snr'] = False
+        for ind, var in enumerate(variables):
+            if self.profiler is not None:
+                self.profiler.start(f'Obs.Param.:calculate_observation_jacobian:d_{var}')
+
+            dso = space_object.copy()
+            if var in transforms:
+                Tx = transforms[var][0](getattr(dso, var)) + deltas[ind]
+                dx = transforms[var][1](Tx)
+            else:
+                dx = getattr(dso, var) + deltas[ind]
+
+            dso.update(**{var: dx})
+
+            ddata = self.calculate_observation(txrx_pass, t, generator, dso, **kwargs)
+            for key in data0:
+                ddata[key] = ddata[key][...,snr_inds]
+
+            dr = (ddata['range'] - data0['range'])/deltas[ind]
+            dv = (ddata['range_rate'] - data0['range_rate'])/deltas[ind]
+
+            J[:len(t_filt),ind]=dr
+            J[len(t_filt):,ind]=dv
+
+            if self.profiler is not None:
+                self.profiler.stop(f'Obs.Param.:calculate_observation_jacobian:d_{var}')
+
+        if self.profiler is not None:
+            self.profiler.stop('Obs.Param.:calculate_observation_jacobian')
+
+        return data0, J
+
+
+    def calculate_observation(self, txrx_pass, t, generator, space_object, calculate_snr=True, interpolator=None, snr_limit=True):
+        '''Calculate the observation of a pass of a specific space object given the current state of the Scheduler.
+
+        #TODO: Docstring
+        '''
+
         txi, rxi = txrx_pass.station_id
 
         if self.logger is not None:
@@ -44,8 +131,10 @@ class ObservedParameters(Scheduler):
         if self.profiler is not None:
             self.profiler.start('Obs.Param.:calculate_observation')
 
-
-        diam = space_object.d
+        if calculate_snr:
+            diam = space_object.d
+        else:
+            diam = None
 
         if self.profiler is not None:
             self.profiler.start('Obs.Param.:calculate_observation:get_state')
@@ -83,7 +172,7 @@ class ObservedParameters(Scheduler):
             if self.profiler is not None:
                 self.profiler.start('Obs.Param.:calculate_observation:snr-step')
 
-            if radar.tx[txi].enabled and radar.rx[rxi].enabled:
+            if radar.tx[txi].enabled and radar.rx[rxi].enabled and calculate_snr:
 
                 if self.profiler is not None:
                     self.profiler.start('Obs.Param.:calculate_observation:snr-step:gain')
@@ -134,7 +223,8 @@ class ObservedParameters(Scheduler):
             else:
                 snr[ti] = np.nan
                 rcs[ti] = np.nan
-                keep[ti] = False
+                if calculate_snr:
+                    keep[ti] = False
             
             if self.profiler is not None:
                 self.profiler.stop('Obs.Param.:calculate_observation:snr-step')
@@ -151,12 +241,12 @@ class ObservedParameters(Scheduler):
             rcs = rcs,
         )
 
-        if snr_limit:
-            if np.any(keep):
-                for key in data:
-                    data[key] = data[key][...,keep]
-            else:
-                data = None
+        if np.any(keep):
+            for key in data:
+                data[key] = data[key][...,keep]
+        else:
+            data = None
+
         if self.profiler is not None:
             self.profiler.stop('Obs.Param.:calculate_observation')
 

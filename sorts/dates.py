@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''
+'''Functions that concern dates and times.
 
 '''
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''This module is used to define the radar network configuration.
+'''This module is used to define the radar system
 
 '''
 import copy
