@@ -16,6 +16,7 @@ ObservedParameters
    
       ~ObservedParameters.__init__
       ~ObservedParameters.calculate_observation
+      ~ObservedParameters.calculate_observation_jacobian
       ~ObservedParameters.chain_generators
       ~ObservedParameters.generate_schedule
       ~ObservedParameters.get_controllers

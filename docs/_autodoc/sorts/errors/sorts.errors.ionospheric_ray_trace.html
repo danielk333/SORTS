@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>ionospheric_ray_trace &#8212; SORTS 3.18.0 documentation</title>
+    <title>ionospheric_ray_trace &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -21,7 +21,7 @@
     <script src="../../../_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="calculate_delay" href="sorts.errors.ionospheric_ray_trace.calculate_delay.html" />
+    <link rel="next" title="IonosphericRayTrace" href="sorts.errors.ionospheric_ray_trace.IonosphericRayTrace.html" />
     <link rel="prev" title="sorts.errors.errors.Errors.VARIABLES" href="sorts.errors.errors.Errors.VARIABLES.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--[if lt IE 9]>
@@ -38,12 +38,12 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="sorts.errors.ionospheric_ray_trace.calculate_delay.html" title="calculate_delay"
+          <a href="sorts.errors.ionospheric_ray_trace.IonosphericRayTrace.html" title="IonosphericRayTrace"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="sorts.errors.errors.Errors.VARIABLES.html" title="sorts.errors.errors.Errors.VARIABLES"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" accesskey="U">API Reference</a> &#187;</li> 
       </ul>
     </div>
@@ -52,7 +52,9 @@
   <h3><a href="../../../index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">ionospheric_ray_trace</a><ul>
-<li><a class="reference internal" href="#module-summary">Module summary</a></li>
+<li><a class="reference internal" href="#module-summary">Module summary</a><ul>
+</ul>
+</li>
 <li><a class="reference internal" href="#contents">Contents</a></li>
 </ul>
 </li>
@@ -62,8 +64,8 @@
   <p class="topless"><a href="sorts.errors.errors.Errors.VARIABLES.html"
                         title="previous chapter">sorts.errors.errors.Errors.VARIABLES</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="sorts.errors.ionospheric_ray_trace.calculate_delay.html"
-                        title="next chapter">calculate_delay</a></p>
+  <p class="topless"><a href="sorts.errors.ionospheric_ray_trace.IonosphericRayTrace.html"
+                        title="next chapter">IonosphericRayTrace</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -96,6 +98,18 @@
 2018-2020 Juha Vierinen, Daniel Kastinen</p>
 <div class="section" id="module-summary">
 <h2>Module summary<a class="headerlink" href="#module-summary" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Classes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.errors.ionospheric_ray_trace.IonosphericRayTrace.html#sorts.errors.ionospheric_ray_trace.IonosphericRayTrace" title="sorts.errors.ionospheric_ray_trace.IonosphericRayTrace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IonosphericRayTrace</span></code></a>(station[, seed, …])</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Functions</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -120,6 +134,19 @@
 </div>
 <div class="section" id="contents">
 <h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">IonosphericRayTrace</p>
+<dl class="py class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">sorts.errors.ionospheric_ray_trace.</code><code class="sig-name descname">IonosphericRayTrace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">station</span></em>, <em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">electron_density_std</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/errors/ionospheric_ray_trace.html#IonosphericRayTrace"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="sorts.errors.errors.Errors.html#sorts.errors.errors.Errors" title="sorts.errors.errors.Errors"><code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.errors.errors.Errors</span></code></a></p>
+<dl class="py method">
+<dt>
+<code class="sig-name descname">set_numpy_seed</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>This should be called before any error generating methods if reproduction of results needs to be ensured.</p>
+</dd></dl>
+
+</dd></dl>
+
 <p class="rubric">Functions</p>
 <dl class="py function">
 <dt>
@@ -166,12 +193,12 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="sorts.errors.ionospheric_ray_trace.calculate_delay.html" title="calculate_delay"
+          <a href="sorts.errors.ionospheric_ray_trace.IonosphericRayTrace.html" title="IonosphericRayTrace"
              >next</a> |</li>
         <li class="right" >
           <a href="sorts.errors.errors.Errors.VARIABLES.html" title="sorts.errors.errors.Errors.VARIABLES"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li> 
       </ul>
     </div>

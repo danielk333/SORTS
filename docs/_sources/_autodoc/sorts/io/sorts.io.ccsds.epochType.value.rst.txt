@@ -1,0 +1,8 @@
+epochType.value
+===============
+
+.. currentmodule:: sorts.io.ccsds
+
+.. rubric:: epochType.value
+
+.. autoproperty:: sorts.io.ccsds.epochType.value

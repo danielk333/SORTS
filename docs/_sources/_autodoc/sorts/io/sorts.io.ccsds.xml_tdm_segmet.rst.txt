@@ -1,0 +1,8 @@
+xml\_tdm\_segmet
+================
+
+.. currentmodule:: sorts.io.ccsds
+
+.. rubric:: xml_tdm_segmet
+
+.. autofunction:: xml_tdm_segmet

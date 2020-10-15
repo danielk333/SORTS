@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>sorts.io.ccsds &#8212; SORTS 3.18.0 documentation</title>
+    <title>sorts.io.ccsds &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -66,33 +66,109 @@
 
 <span class="sd">https://public.ccsds.org/Pubs/503x0b1c1.pdf</span>
 <span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">pkg_resources</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
 
+<span class="kn">from</span> <span class="nn">lxml</span> <span class="kn">import</span> <span class="n">etree</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">scipy.constants</span> <span class="k">as</span> <span class="nn">consts</span>
+<span class="kn">from</span> <span class="nn">astropy.time</span> <span class="kn">import</span> <span class="n">TimeISO</span><span class="p">,</span> <span class="n">Time</span>
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">dates</span>
+<span class="kn">from</span> <span class="nn">..version</span> <span class="kn">import</span> <span class="n">__version__</span>
+
+<span class="k">def</span> <span class="nf">_get_tdm_schema</span><span class="p">():</span>
+    <span class="n">tdm_xsd</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_stream</span><span class="p">(</span><span class="s1">&#39;sorts.data&#39;</span><span class="p">,</span> <span class="s1">&#39;ndmxml-1.0-tdm-2.0.xsd&#39;</span><span class="p">)</span>
+    <span class="n">tdm_schema</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">XMLSchema</span><span class="p">(</span><span class="n">etree</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">tdm_xsd</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">tdm_schema</span>
+
+<span class="k">def</span> <span class="nf">_get_oem_schema</span><span class="p">():</span>
+    <span class="n">oem_xsd</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_stream</span><span class="p">(</span><span class="s1">&#39;sorts.data&#39;</span><span class="p">,</span> <span class="s1">&#39;ndmxml-1.0-oem-2.0.xsd&#39;</span><span class="p">)</span>
+    <span class="n">oem_schema</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">XMLSchema</span><span class="p">(</span><span class="n">etree</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">oem_xsd</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">oem_schema</span>
 
 
-<div class="viewcode-block" id="write_oem"><a class="viewcode-back" href="../../../_autodoc/sorts/io/sorts.io.ccsds.write_oem.html#sorts.io.ccsds.write_oem">[docs]</a><span class="k">def</span> <span class="nf">write_oem</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Uses a series of unix-times and state vectors in ITRF2000 to create a CCSDS OEM file.</span>
+<div class="viewcode-block" id="epochType"><a class="viewcode-back" href="../../../_autodoc/sorts/io/sorts.io.ccsds.epochType.html#sorts.io.ccsds.epochType">[docs]</a><span class="k">class</span> <span class="nc">epochType</span><span class="p">(</span><span class="n">TimeISO</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Convert astropy time to &quot;yyyy-dddThh:mm:ss.d-&gt;dZ&quot; CCSDS 2.0 epochType standard.&#39;&#39;&#39;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;CCSDS_epoch&#39;</span>  <span class="c1"># Unique format name</span>
+    <span class="n">subfmts</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span>
+            <span class="s1">&#39;date_hms&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;%Y-%jT%H:%M:%S&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;</span><span class="si">{year:d}</span><span class="s1">-</span><span class="si">{yday:03d}</span><span class="s1">T</span><span class="si">{hour:02d}</span><span class="s1">:</span><span class="si">{min:02d}</span><span class="s1">:</span><span class="si">{sec:02d}</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">)</span></div>
 
-<span class="sd">    # TODO: Document function.</span>
-<span class="sd">    # TODO: Update function to be more general</span>
-<span class="sd">    # TODO: add arbitrary fields and meta data</span>
+<div class="viewcode-block" id="xml_tdm_segmet"><a class="viewcode-back" href="../../../_autodoc/sorts/io/sorts.io.ccsds.xml_tdm_segmet.html#sorts.io.ccsds.xml_tdm_segmet">[docs]</a><span class="k">def</span> <span class="nf">xml_tdm_segmet</span><span class="p">(</span><span class="n">datas</span><span class="p">):</span>
+    <span class="n">segments</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">datas</span><span class="p">:</span>
+        <span class="n">segment</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;segment&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;ndm:tdmSegment&#39;</span><span class="p">)</span>
 
-<span class="sd">    **Uses:**</span>
-<span class="sd">       * :func:`~sorts.dates.unix_to_datestrf`</span>
-<span class="sd">       * :func:`~sorts.dates.unix_to_datestr`</span>
+        <span class="n">seg_meta</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;ndm:tdmMetadata&#39;</span><span class="p">)</span>
+        <span class="n">seg_data</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;ndm:tdmData&#39;</span><span class="p">)</span>
 
-<span class="sd">    :param list/numpy.ndarray t: Vector of unix-times</span>
+        <span class="n">segment</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">seg_meta</span><span class="p">)</span>
+        <span class="n">segment</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">seg_data</span><span class="p">)</span>
+
+        <span class="n">segments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="xml_tdm_tree"><a class="viewcode-back" href="../../../_autodoc/sorts/io/sorts.io.ccsds.xml_tdm_tree.html#sorts.io.ccsds.xml_tdm_tree">[docs]</a><span class="k">def</span> <span class="nf">xml_tdm_tree</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="n">segments</span><span class="p">):</span>
+
+    <span class="n">header</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;header&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;ndm:tdmHeader&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s1">&#39;COMMENT&#39;</span> <span class="ow">in</span> <span class="n">meta</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;COMMENT&#39;</span><span class="p">]:</span>
+            <span class="n">cmt</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;COMMENT&#39;</span><span class="p">)</span>
+            <span class="n">cmt</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">header</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cmt</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s1">&#39;CREATION_DATE&#39;</span> <span class="ow">in</span> <span class="n">meta</span><span class="p">:</span>
+        <span class="n">el</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;CREATION_DATE&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;ndm:epochType&#39;</span><span class="p">)</span>
+        <span class="n">el</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;CREATION_DATE&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">CCSDS_epoch</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">el</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;CREATION_DATE&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;ndm:epochType&#39;</span><span class="p">)</span>
+        <span class="n">el</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">Time</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">CCSDS_epoch</span>
+    <span class="n">header</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">el</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s1">&#39;ORIGINATOR&#39;</span> <span class="ow">in</span> <span class="n">meta</span><span class="p">:</span>
+        <span class="n">el</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;ORIGINATOR&#39;</span><span class="p">)</span>
+        <span class="n">el</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;ORIGINATOR&#39;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">el</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;ORIGINATOR&#39;</span><span class="p">)</span>
+        <span class="n">el</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;SORTS </span><span class="si">{</span><span class="n">__version__</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="n">header</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">el</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s1">&#39;MESSAGE_ID&#39;</span> <span class="ow">in</span> <span class="n">meta</span><span class="p">:</span>
+        <span class="n">el</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;MESSAGE_ID&#39;</span><span class="p">)</span>
+        <span class="n">el</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;MESSAGE_ID&#39;</span><span class="p">]</span>
+        <span class="n">header</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">el</span><span class="p">)</span>
+    
+    <span class="n">body</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;body&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;ndm:tdmBody&#39;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">segment</span> <span class="ow">in</span> <span class="n">segments</span><span class="p">:</span>
+        <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
+
+    <span class="n">root</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;tdm&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;tdmType&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;CCSDS_TDM_VERS&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;2.0&#39;</span><span class="p">)</span>
+    <span class="n">root</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+    <span class="n">root</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">root</span></div>
+
+
+<div class="viewcode-block" id="write_oem"><a class="viewcode-back" href="../../../_autodoc/sorts/io/sorts.io.ccsds.write_oem.html#sorts.io.ccsds.write_oem">[docs]</a><span class="k">def</span> <span class="nf">write_oem</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">meta</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xml</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Uses a series of astropy times and state vectors to create a CCSDS OEM file (plain-text of xml) or return a string.</span>
+
+<span class="sd">    :param astropy.Time t: Vector of unix-times</span>
 <span class="sd">    :param numpy.ndarray state: 6-D states given in SI units in the ITRF2000 frame. Rows correspond to different states and columns to dimensions.</span>
-<span class="sd">    :param int OID: Object ID and name (written in OEM as the same but with different formating)</span>
+<span class="sd">    :param dict meta: Dict containing all the standard CCSDS 2.0 meta data.</span>
+<span class="sd">    :param bool xml: If `False`, use the plain-text format</span>
 <span class="sd">    :param str fname: Output file-path for OEM.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-
-    <span class="n">fo</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">xml</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    
     <span class="n">fo</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;CCSDS_OEM_VERS = 2.0</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">fo</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;CREATION_DATE = </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">dates</span><span class="o">.</span><span class="n">unix_to_datestr</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">min</span><span class="p">())))</span> <span class="c1"># 1996-11-04T17:22:31</span>
     <span class="n">fo</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;ORIGINATOR = SORTS</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -112,85 +188,88 @@
     <span class="k">for</span> <span class="n">ti</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)):</span>
         <span class="c1">#print(t[ti])</span>
         <span class="n">fo</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> </span><span class="si">%1.3f</span><span class="s2"> </span><span class="si">%1.3f</span><span class="s2"> </span><span class="si">%1.3f</span><span class="s2"> </span><span class="si">%1.3f</span><span class="s2"> </span><span class="si">%1.3f</span><span class="s2"> </span><span class="si">%1.3f</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">dates</span><span class="o">.</span><span class="n">unix_to_datestrf</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">ti</span><span class="p">]),</span><span class="n">state</span><span class="p">[</span><span class="n">ti</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span><span class="n">state</span><span class="p">[</span><span class="n">ti</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">state</span><span class="p">[</span><span class="n">ti</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">state</span><span class="p">[</span><span class="n">ti</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span><span class="n">state</span><span class="p">[</span><span class="n">ti</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span><span class="n">state</span><span class="p">[</span><span class="n">ti</span><span class="p">,</span><span class="mi">5</span><span class="p">]))</span>
-    <span class="n">fo</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+    
+    <span class="k">if</span> <span class="n">fname</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="n">fo</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
+        <span class="n">fo</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="read_oem"><a class="viewcode-back" href="../../../_autodoc/sorts/io/sorts.io.ccsds.read_oem.html#sorts.io.ccsds.read_oem">[docs]</a><span class="k">def</span> <span class="nf">read_oem</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+<div class="viewcode-block" id="read_oem"><a class="viewcode-back" href="../../../_autodoc/sorts/io/sorts.io.ccsds.read_oem.html#sorts.io.ccsds.read_oem">[docs]</a><span class="k">def</span> <span class="nf">read_oem</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">xml</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Todo: docstring</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">meta</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;COMMENT&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">xml</span><span class="p">:</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">XMLParser</span><span class="p">(</span><span class="n">schema</span> <span class="o">=</span> <span class="n">_get_oem_schema</span><span class="p">())</span>
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">),</span> <span class="n">parser</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tree</span>
 
-    <span class="n">_dtype</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="p">(</span><span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="s1">&#39;datetime64[us]&#39;</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;float64&#39;</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;float64&#39;</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="s1">&#39;float64&#39;</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;vx&#39;</span><span class="p">,</span> <span class="s1">&#39;float64&#39;</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;vy&#39;</span><span class="p">,</span> <span class="s1">&#39;float64&#39;</span><span class="p">),</span>
-        <span class="p">(</span><span class="s1">&#39;vz&#39;</span><span class="p">,</span> <span class="s1">&#39;float64&#39;</span><span class="p">),</span>
-    <span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;COMMENT&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">}</span>
 
-    <span class="n">raw_data</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">DATA_ON</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">META_ON</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">_dtype</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="s1">&#39;datetime64[us]&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;float64&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;float64&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="s1">&#39;float64&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;vx&#39;</span><span class="p">,</span> <span class="s1">&#39;float64&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;vy&#39;</span><span class="p">,</span> <span class="s1">&#39;float64&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;vz&#39;</span><span class="p">,</span> <span class="s1">&#39;float64&#39;</span><span class="p">),</span>
+        <span class="p">]</span>
 
-            <span class="k">if</span> <span class="n">META_ON</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;META_STOP&#39;</span><span class="p">:</span>
-                    <span class="n">META_ON</span> <span class="o">=</span> <span class="kc">False</span>
-                    <span class="n">DATA_ON</span> <span class="o">=</span> <span class="kc">True</span>
-                    <span class="k">continue</span>
+        <span class="n">raw_data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">DATA_ON</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">META_ON</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
 
-                <span class="n">_tmp</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)]</span>
-                <span class="n">meta</span><span class="p">[</span><span class="n">_tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">_tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="k">elif</span> <span class="n">DATA_ON</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">line</span><span class="p">[:</span><span class="mi">7</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;COMMENT&#39;</span><span class="p">:</span>
-                    <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;COMMENT&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">line</span><span class="p">[</span><span class="mi">7</span><span class="p">:]</span>
+                <span class="k">if</span> <span class="n">META_ON</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;META_STOP&#39;</span><span class="p">:</span>
+                        <span class="n">META_ON</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="n">DATA_ON</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">continue</span>
+
+                    <span class="n">_tmp</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)]</span>
+                    <span class="n">meta</span><span class="p">[</span><span class="n">_tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">_tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">elif</span> <span class="n">DATA_ON</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">line</span><span class="p">[:</span><span class="mi">7</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;COMMENT&#39;</span><span class="p">:</span>
+                        <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;COMMENT&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">line</span><span class="p">[</span><span class="mi">7</span><span class="p">:]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">raw_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">))</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">raw_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;META_START&#39;</span><span class="p">:</span>
-                    <span class="n">META_ON</span> <span class="o">=</span> <span class="kc">True</span>
-                    <span class="k">continue</span>
-                <span class="n">_tmp</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)]</span>
-                <span class="n">meta</span><span class="p">[</span><span class="n">_tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">_tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;META_START&#39;</span><span class="p">:</span>
+                        <span class="n">META_ON</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">continue</span>
+                    <span class="n">_tmp</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)]</span>
+                    <span class="n">meta</span><span class="p">[</span><span class="n">_tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">_tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
 
-    <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_data</span><span class="p">)</span>
+        <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_data</span><span class="p">)</span>
 
-    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">data_len</span><span class="p">,</span> <span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">_dtype</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">data_len</span><span class="p">,</span> <span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">_dtype</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">raw_data</span><span class="p">):</span>
-        <span class="n">rown</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="n">_dtype</span><span class="p">:</span>
-            <span class="n">data</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">rown</span><span class="p">]</span>
-            <span class="n">rown</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">raw_data</span><span class="p">):</span>
+            <span class="n">rown</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="n">_dtype</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">rown</span><span class="p">]</span>
+                <span class="n">rown</span> <span class="o">+=</span> <span class="mi">1</span>
 
-    <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">meta</span></div>
+        <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">meta</span></div>
 
 
 
 <div class="viewcode-block" id="write_tdm"><a class="viewcode-back" href="../../../_autodoc/sorts/io/sorts.io.ccsds.write_tdm.html#sorts.io.ccsds.write_tdm">[docs]</a><span class="k">def</span> <span class="nf">write_tdm</span><span class="p">(</span>
-        <span class="n">fname</span><span class="p">,</span>
-        <span class="n">t_pulse</span><span class="p">,</span>
-        <span class="n">m_range</span><span class="p">,</span>
-        <span class="n">m_range_rate</span><span class="p">,</span>
-        <span class="n">m_range_std</span><span class="p">,</span>
-        <span class="n">m_range_rate_std</span><span class="p">,</span>
-        <span class="n">freq</span><span class="o">=</span><span class="mf">230e6</span><span class="p">,</span>
-        <span class="n">tx_ecef</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
-        <span class="n">rx_ecef</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
-        <span class="n">tx_name</span><span class="o">=</span><span class="s2">&quot;EISCAT UHF&quot;</span><span class="p">,</span>
-        <span class="n">rx_name</span><span class="o">=</span><span class="s2">&quot;EISCAT UHF&quot;</span><span class="p">,</span>
-        <span class="n">oid</span><span class="o">=</span><span class="s2">&quot;ERS-1&quot;</span><span class="p">,</span>
-        <span class="n">tdm_type</span><span class="o">=</span><span class="s2">&quot;track&quot;</span><span class="p">,</span>
+        <span class="n">datas</span><span class="p">,</span>
+        <span class="n">meta</span><span class="p">,</span>
+        <span class="n">fname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    # TODO: Document function.</span>
 <span class="sd">    # TODO: Update function to be more general</span>
 <span class="sd">    # TODO: add arbitrary fields and meta data</span>
 <span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">segments</span> <span class="o">=</span> <span class="n">xml_tdm_segmet</span><span class="p">(</span><span class="n">datas</span><span class="p">)</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">xml_tdm_tree</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="n">segments</span><span class="p">)</span>
+
     <span class="n">fo</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
     <span class="n">fo</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;CCSDS_TDM_VERS = 1.0</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">fo</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;   COMMENT MASTER ID </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">oid</span><span class="p">))</span>
@@ -230,84 +309,91 @@
     <span class="n">fo</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="read_tdm"><a class="viewcode-back" href="../../../_autodoc/sorts/io/sorts.io.ccsds.read_tdm.html#sorts.io.ccsds.read_tdm">[docs]</a><span class="k">def</span> <span class="nf">read_tdm</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+<div class="viewcode-block" id="read_tdm"><a class="viewcode-back" href="../../../_autodoc/sorts/io/sorts.io.ccsds.read_tdm.html#sorts.io.ccsds.read_tdm">[docs]</a><span class="k">def</span> <span class="nf">read_tdm</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">xml</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Just get the range data # TODO: the rest</span>
 
 <span class="sd">    # TODO: Document function.</span>
-<span class="sd">    # TODO: Update function to be more general</span>
-<span class="sd">    # TODO: add arbitrary fields and meta data</span>
+<span class="sd">    # TODO: Update plain text function to be more general and conform to CCSDS 2.0</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">meta</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;COMMENT&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">}</span>
 
-    <span class="n">RANGE_UNITS</span> <span class="o">=</span> <span class="s1">&#39;km&#39;</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="n">DATA_ON</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">META_ON</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">data_raw</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;DATA_STOP&#39;</span><span class="p">:</span>
-                <span class="k">break</span>
+    <span class="k">if</span> <span class="n">xml</span><span class="p">:</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">XMLParser</span><span class="p">(</span><span class="n">schema</span> <span class="o">=</span> <span class="n">_get_tdm_schema</span><span class="p">())</span>
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">),</span> <span class="n">parser</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tree</span>
 
-            <span class="k">if</span> <span class="n">META_ON</span><span class="p">:</span>
-                <span class="n">tmp_lin</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmp_lin</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">meta</span><span class="p">[</span><span class="n">tmp_lin</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="n">tmp_lin</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-                    <span class="k">if</span> <span class="n">tmp_lin</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;RANGE_UNITS&#39;</span><span class="p">:</span>
-                        <span class="n">RANGE_UNITS</span> <span class="o">=</span> <span class="n">tmp_lin</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-            <span class="k">elif</span> <span class="n">DATA_ON</span><span class="p">:</span>
-                <span class="n">name</span><span class="p">,</span> <span class="n">tmp_dat</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
 
-                <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-                <span class="n">tmp_dat</span> <span class="o">=</span> <span class="n">tmp_dat</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;COMMENT&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">}</span>
 
-                <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">data_raw</span><span class="p">:</span>
-                    <span class="n">data_raw</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp_dat</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">data_raw</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">tmp_dat</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()[:</span><span class="mi">7</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;COMMENT&#39;</span><span class="p">:</span>
-                    <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;COMMENT&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">line</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()[</span><span class="mi">7</span><span class="p">:]</span>
-                <span class="k">else</span><span class="p">:</span>
+        <span class="n">RANGE_UNITS</span> <span class="o">=</span> <span class="s1">&#39;km&#39;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">DATA_ON</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">META_ON</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">data_raw</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;DATA_STOP&#39;</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+                <span class="k">if</span> <span class="n">META_ON</span><span class="p">:</span>
                     <span class="n">tmp_lin</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmp_lin</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                         <span class="n">meta</span><span class="p">[</span><span class="n">tmp_lin</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="n">tmp_lin</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">tmp_lin</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;RANGE_UNITS&#39;</span><span class="p">:</span>
+                            <span class="n">RANGE_UNITS</span> <span class="o">=</span> <span class="n">tmp_lin</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="k">elif</span> <span class="n">DATA_ON</span><span class="p">:</span>
+                    <span class="n">name</span><span class="p">,</span> <span class="n">tmp_dat</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;META_START&#39;</span><span class="p">:</span>
-                <span class="n">META_ON</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;DATA_START&#39;</span><span class="p">:</span>
-                <span class="n">META_ON</span> <span class="o">=</span> <span class="kc">False</span>
-                <span class="n">DATA_ON</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">_dtype</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="p">(</span><span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="s1">&#39;datetime64[us]&#39;</span><span class="p">),</span>
-    <span class="p">]</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                    <span class="n">tmp_dat</span> <span class="o">=</span> <span class="n">tmp_dat</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
 
-    <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_raw</span><span class="p">[</span><span class="n">data_raw</span><span class="o">.</span><span class="n">keys</span><span class="p">()[</span><span class="mi">0</span><span class="p">]])</span>
+                    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">data_raw</span><span class="p">:</span>
+                        <span class="n">data_raw</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp_dat</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">data_raw</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">tmp_dat</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()[:</span><span class="mi">7</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;COMMENT&#39;</span><span class="p">:</span>
+                        <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;COMMENT&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">line</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()[</span><span class="mi">7</span><span class="p">:]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">tmp_lin</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmp_lin</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="n">meta</span><span class="p">[</span><span class="n">tmp_lin</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="n">tmp_lin</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
-    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">data_raw</span><span class="p">:</span>
-        <span class="n">_dtype</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;float64&#39;</span><span class="p">)</span> <span class="p">)</span>
-        <span class="n">_dtype</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_err&#39;</span><span class="p">,</span> <span class="s1">&#39;float64&#39;</span><span class="p">)</span> <span class="p">)</span>
+                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;META_START&#39;</span><span class="p">:</span>
+                    <span class="n">META_ON</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;DATA_START&#39;</span><span class="p">:</span>
+                    <span class="n">META_ON</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">DATA_ON</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">_dtype</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="s1">&#39;datetime64[us]&#39;</span><span class="p">),</span>
+        <span class="p">]</span>
 
-    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">data_len</span><span class="p">,</span> <span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">_dtype</span><span class="p">)</span>
+        <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_raw</span><span class="p">[</span><span class="n">data_raw</span><span class="o">.</span><span class="n">keys</span><span class="p">()[</span><span class="mi">0</span><span class="p">]])</span>
 
-    <span class="n">date_set</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">series</span> <span class="ow">in</span> <span class="n">data_raw</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">series</span><span class="p">):</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">date_set</span><span class="p">:</span>
-                <span class="n">data</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="s1">&#39;date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;us&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">data_raw</span><span class="p">:</span>
+            <span class="n">_dtype</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;float64&#39;</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">_dtype</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_err&#39;</span><span class="p">,</span> <span class="s1">&#39;float64&#39;</span><span class="p">)</span> <span class="p">)</span>
 
-            <span class="n">data</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">data</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_err&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">data</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_err&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">data_len</span><span class="p">,</span> <span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">_dtype</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;range&#39;</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">RANGE_UNITS</span> <span class="o">==</span> <span class="s1">&#39;s&#39;</span><span class="p">:</span>
-                    <span class="n">data</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">*=</span> <span class="n">consts</span><span class="o">.</span><span class="n">c</span><span class="o">*</span><span class="mf">1e-3</span>
+        <span class="n">date_set</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">series</span> <span class="ow">in</span> <span class="n">data_raw</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">series</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">date_set</span><span class="p">:</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="s1">&#39;date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;us&#39;</span><span class="p">)</span>
 
-        <span class="n">date_set</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_err&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_err&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
 
-    <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">meta</span></div>
+                <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;range&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">RANGE_UNITS</span> <span class="o">==</span> <span class="s1">&#39;s&#39;</span><span class="p">:</span>
+                        <span class="n">data</span><span class="p">[</span><span class="n">ind</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">*=</span> <span class="n">consts</span><span class="o">.</span><span class="n">c</span><span class="o">*</span><span class="mf">1e-3</span>
+
+            <span class="n">date_set</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">meta</span></div>
 </pre></div>
 
           </div>
@@ -324,7 +410,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

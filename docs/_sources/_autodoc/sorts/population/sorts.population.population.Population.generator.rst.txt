@@ -1,0 +1,8 @@
+Population.generator
+====================
+
+.. currentmodule:: sorts.population.population
+
+.. rubric:: Population.generator
+
+.. autoproperty:: sorts.population.population.Population.generator

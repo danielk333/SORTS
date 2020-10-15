@@ -33,7 +33,7 @@ The SpaceObject class
     omega: 0.0000e+00   vx: -0.0000e+00
     Omega: 0.0000e+00   vy: 2.7043e+03
     anom : 0.0000e+00   vz: 7.0448e+03
-    Parameters: d=0.2, C_D=2.3, A=1.0, m=1.0, C_R=1.0
+    Parameters: C_D=2.3, m=1.0, C_R=1.0, d=0.2
 
 
 
@@ -104,7 +104,7 @@ The SpaceObject class
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  2.887 seconds)
+   **Total running time of the script:** ( 0 minutes  2.965 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_space_object.py:

@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>SGP4 &#8212; SORTS 3.18.0 documentation</title>
+    <title>SGP4 &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.propagator.pysgp4.html" title="pysgp4"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.propagator.pysgp4.html" accesskey="U">pysgp4</a> &#187;</li> 
       </ul>
@@ -125,6 +125,12 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.pysgp4.SGP4.get_TLE_parameters.html#sorts.propagator.pysgp4.SGP4.get_TLE_parameters" title="sorts.propagator.pysgp4.SGP4.get_TLE_parameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_TLE_parameters</span></code></a>(line1, line2[, gravity_model])</p></td>
 <td><p></p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.propagator.pysgp4.SGP4.get_mean_elements.html#sorts.propagator.pysgp4.SGP4.get_mean_elements" title="sorts.propagator.pysgp4.SGP4.get_mean_elements"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_mean_elements</span></code></a>(line1, line2[, radians])</p></td>
+<td><p>Extract the mean elements in SI units (a [m], e [1], inc [deg], raan [deg], aop [deg], mu [deg]), B-parameter (not bstar) and epoch from a two line element pair.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.pysgp4.SGP4.heartbeat.html#sorts.propagator.pysgp4.SGP4.heartbeat" title="sorts.propagator.pysgp4.SGP4.heartbeat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">heartbeat</span></code></a>(t, state, **kwargs)</p></td>
+<td><p>Function applied after propagation to time <cite>t</cite> and state <cite>state</cite>, before next time step as given in the input time vector to <cite>propagate</cite>.</p></td>
+</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.propagator.pysgp4.SGP4.propagate.html#sorts.propagator.pysgp4.SGP4.propagate" title="sorts.propagator.pysgp4.SGP4.propagate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">propagate</span></code></a>(t, state0[, epoch])</p></td>
 <td><p>Propagate a state</p></td>
 </tr>
@@ -147,6 +153,12 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.pysgp4.SGP4.DEFAULT_SETTINGS.html#sorts.propagator.pysgp4.SGP4.DEFAULT_SETTINGS" title="sorts.propagator.pysgp4.SGP4.DEFAULT_SETTINGS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_SETTINGS</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.propagator.pysgp4.SGP4.in_frame.html#sorts.propagator.pysgp4.SGP4.in_frame" title="sorts.propagator.pysgp4.SGP4.in_frame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">in_frame</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.pysgp4.SGP4.out_frame.html#sorts.propagator.pysgp4.SGP4.out_frame" title="sorts.propagator.pysgp4.SGP4.out_frame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">out_frame</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -176,7 +188,7 @@
         <li class="right" >
           <a href="sorts.propagator.pysgp4.html" title="pysgp4"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.propagator.pysgp4.html" >pysgp4</a> &#187;</li> 
       </ul>

@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>tracking &#8212; SORTS 3.18.0 documentation</title>
+    <title>tracking &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.plotting.scan.radar_scan.html" title="radar_scan"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" accesskey="U">API Reference</a> &#187;</li> 
       </ul>
     </div>
@@ -91,7 +91,7 @@
             
   <div class="section" id="module-sorts.plotting.tracking">
 <span id="tracking"></span><h1>tracking<a class="headerlink" href="#module-sorts.plotting.tracking" title="Permalink to this headline">¶</a></h1>
-<p>Plotting helper functions</p>
+<p>Tracking plot functions</p>
 <div class="section" id="module-summary">
 <h2>Module summary<a class="headerlink" href="#module-summary" title="Permalink to this headline">¶</a></h2>
 <p class="rubric">Functions</p>
@@ -104,7 +104,10 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.plotting.tracking.az_el_to_xy.html#sorts.plotting.tracking.az_el_to_xy" title="sorts.plotting.tracking.az_el_to_xy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">az_el_to_xy</span></code></a>(az, el)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.plotting.tracking.local_tracking.html#sorts.plotting.tracking.local_tracking" title="sorts.plotting.tracking.local_tracking"><code class="xref py py-obj docutils literal notranslate"><span class="pre">local_tracking</span></code></a>(azimuth, elevation[, ax])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.plotting.tracking.local_passes.html#sorts.plotting.tracking.local_passes" title="sorts.plotting.tracking.local_passes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">local_passes</span></code></a>(passes, **kwargs)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.plotting.tracking.local_tracking.html#sorts.plotting.tracking.local_tracking" title="sorts.plotting.tracking.local_tracking"><code class="xref py py-obj docutils literal notranslate"><span class="pre">local_tracking</span></code></a>(azimuth, elevation[, ax, t, …])</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -120,7 +123,12 @@
 
 <dl class="py function">
 <dt>
-<code class="sig-prename descclassname">sorts.plotting.tracking.</code><code class="sig-name descname">local_tracking</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">azimuth</span></em>, <em class="sig-param"><span class="n">elevation</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/plotting/tracking.html#local_tracking"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-prename descclassname">sorts.plotting.tracking.</code><code class="sig-name descname">local_passes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">passes</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/plotting/tracking.html#local_passes"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt>
+<code class="sig-prename descclassname">sorts.plotting.tracking.</code><code class="sig-name descname">local_tracking</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">azimuth</span></em>, <em class="sig-param"><span class="n">elevation</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">t</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">add_track</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">node_times</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">radians</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/plotting/tracking.html#local_tracking"><span class="viewcode-link">[source]</span></a></dt>
 <dd></dd></dl>
 
 </div>
@@ -147,7 +155,7 @@
         <li class="right" >
           <a href="sorts.plotting.scan.radar_scan.html" title="radar_scan"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li> 
       </ul>
     </div>

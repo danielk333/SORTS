@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Profiling components &#8212; SORTS 3.18.0 documentation</title>
+    <title>Profiling components &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="orekit_small_step.html" title="Orekit propagator small time step"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Examples</a> &#187;</li> 
       </ul>
     </div>
@@ -89,40 +89,41 @@
 <p class="sphx-glr-script-out">Out:</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span> SETTING DEBUG MODE
 
-2020-09-23 10:52:42.684 DEBUG   ; Propagator:_check_settings
-2020-09-23 10:52:42.684 DEBUG   ; Propagator:settings:epoch_format = mjd
-2020-09-23 10:52:42.684 DEBUG   ; Propagator:settings:epoch_scale = utc
-2020-09-23 10:52:42.684 DEBUG   ; Propagator:settings:time_format = sec
-2020-09-23 10:52:42.684 DEBUG   ; Propagator:settings:time_scale = None
-2020-09-23 10:52:42.684 DEBUG   ; Propagator:settings:in_frame = Orekit-ITRF
-2020-09-23 10:52:42.684 DEBUG   ; Propagator:settings:out_frame = Orekit-EME
-2020-09-23 10:52:42.684 DEBUG   ; Propagator:settings:frame_tidal_effects = False
-2020-09-23 10:52:42.684 DEBUG   ; Propagator:settings:integrator = DormandPrince853
-2020-09-23 10:52:42.684 DEBUG   ; Propagator:settings:min_step = 0.001
-2020-09-23 10:52:42.684 DEBUG   ; Propagator:settings:max_step = 120.0
-2020-09-23 10:52:42.684 DEBUG   ; Propagator:settings:position_tolerance = 10.0
-2020-09-23 10:52:42.684 DEBUG   ; Propagator:settings:earth_gravity = HolmesFeatherstone
-2020-09-23 10:52:42.684 DEBUG   ; Propagator:settings:gravity_order = (10, 10)
-2020-09-23 10:52:42.684 DEBUG   ; Propagator:settings:solarsystem_perturbers = [&#39;Moon&#39;, &#39;Sun&#39;]
-2020-09-23 10:52:42.684 DEBUG   ; Propagator:settings:drag_force = False
-2020-09-23 10:52:42.685 DEBUG   ; Propagator:settings:atmosphere = DTM2000
-2020-09-23 10:52:42.685 DEBUG   ; Propagator:settings:radiation_pressure = False
-2020-09-23 10:52:42.685 DEBUG   ; Propagator:settings:solar_activity = Marshall
-2020-09-23 10:52:42.685 DEBUG   ; Propagator:settings:constants_source = WGS84
-2020-09-23 10:52:42.685 DEBUG   ; Propagator:settings:solar_activity_strength = WEAK
-2020-09-23 10:52:42.685 DEBUG   ; sorts.propagator.Orekit:init
-2020-09-23 10:52:42.685 DEBUG   ; Orekit:init:orekit-data = /home/danielk/IRF/IRF_GITLAB/orekit_build/orekit-data-master.zip
-2020-09-23 10:52:42.844 DEBUG   ; Orekit:init:_forces:earth_gravity = &lt;class &#39;org.orekit.forces.gravity.HolmesFeatherstoneAttractionModel&#39;&gt;
-2020-09-23 10:52:42.844 DEBUG   ; Orekit:init:_forces:perturbation_Moon = &lt;class &#39;org.orekit.forces.gravity.ThirdBodyAttraction&#39;&gt;
-2020-09-23 10:52:42.844 DEBUG   ; Orekit:init:_forces:perturbation_Sun = &lt;class &#39;org.orekit.forces.gravity.ThirdBodyAttraction&#39;&gt;
-2020-09-23 10:52:42.844 DEBUG   ; Propagator:convert_time
-2020-09-23 10:52:42.845 DEBUG   ; Propagator:convert_time:completed
-2020-09-23 10:52:42.848 DEBUG   ; Orekit:propagate:len(t) = 5000
-2020-09-23 10:52:42.849 DEBUG   ; Orekit:set_forces:A = 1.0
-2020-09-23 10:52:42.849 DEBUG   ; Orekit:set_forces:cd = 1.0
-2020-09-23 10:52:42.849 DEBUG   ; Orekit:set_forces:cr = 1.0
-2020-09-23 10:52:42.849 DEBUG   ; Orekit:set_forces:re_calc = True
-2020-09-23 10:52:43.413 DEBUG   ; Orekit:propagate:completed
+2020-10-15 13:21:27.736 DEBUG   ; Propagator:_check_settings
+2020-10-15 13:21:27.736 DEBUG   ; Propagator:settings:epoch_format = mjd
+2020-10-15 13:21:27.736 DEBUG   ; Propagator:settings:epoch_scale = utc
+2020-10-15 13:21:27.736 DEBUG   ; Propagator:settings:time_format = sec
+2020-10-15 13:21:27.736 DEBUG   ; Propagator:settings:time_scale = None
+2020-10-15 13:21:27.736 DEBUG   ; Propagator:settings:heartbeat = False
+2020-10-15 13:21:27.736 DEBUG   ; Propagator:settings:in_frame = Orekit-ITRF
+2020-10-15 13:21:27.736 DEBUG   ; Propagator:settings:out_frame = Orekit-EME
+2020-10-15 13:21:27.736 DEBUG   ; Propagator:settings:frame_tidal_effects = False
+2020-10-15 13:21:27.736 DEBUG   ; Propagator:settings:integrator = DormandPrince853
+2020-10-15 13:21:27.736 DEBUG   ; Propagator:settings:min_step = 0.001
+2020-10-15 13:21:27.736 DEBUG   ; Propagator:settings:max_step = 120.0
+2020-10-15 13:21:27.736 DEBUG   ; Propagator:settings:position_tolerance = 10.0
+2020-10-15 13:21:27.736 DEBUG   ; Propagator:settings:earth_gravity = HolmesFeatherstone
+2020-10-15 13:21:27.736 DEBUG   ; Propagator:settings:gravity_order = (10, 10)
+2020-10-15 13:21:27.736 DEBUG   ; Propagator:settings:solarsystem_perturbers = [&#39;Moon&#39;, &#39;Sun&#39;]
+2020-10-15 13:21:27.736 DEBUG   ; Propagator:settings:drag_force = False
+2020-10-15 13:21:27.736 DEBUG   ; Propagator:settings:atmosphere = DTM2000
+2020-10-15 13:21:27.736 DEBUG   ; Propagator:settings:radiation_pressure = False
+2020-10-15 13:21:27.737 DEBUG   ; Propagator:settings:solar_activity = Marshall
+2020-10-15 13:21:27.737 DEBUG   ; Propagator:settings:constants_source = WGS84
+2020-10-15 13:21:27.737 DEBUG   ; Propagator:settings:solar_activity_strength = WEAK
+2020-10-15 13:21:27.737 DEBUG   ; sorts.propagator.Orekit:init
+2020-10-15 13:21:27.737 DEBUG   ; Orekit:init:orekit-data = /home/danielk/IRF/IRF_GITLAB/orekit_build/orekit-data-master.zip
+2020-10-15 13:21:27.899 DEBUG   ; Orekit:init:_forces:earth_gravity = &lt;class &#39;org.orekit.forces.gravity.HolmesFeatherstoneAttractionModel&#39;&gt;
+2020-10-15 13:21:27.900 DEBUG   ; Orekit:init:_forces:perturbation_Moon = &lt;class &#39;org.orekit.forces.gravity.ThirdBodyAttraction&#39;&gt;
+2020-10-15 13:21:27.900 DEBUG   ; Orekit:init:_forces:perturbation_Sun = &lt;class &#39;org.orekit.forces.gravity.ThirdBodyAttraction&#39;&gt;
+2020-10-15 13:21:27.900 DEBUG   ; Propagator:convert_time
+2020-10-15 13:21:27.900 DEBUG   ; Propagator:convert_time:completed
+2020-10-15 13:21:27.905 DEBUG   ; Orekit:propagate:len(t) = 5000
+2020-10-15 13:21:27.906 DEBUG   ; Orekit:set_forces:A = 1.0
+2020-10-15 13:21:27.906 DEBUG   ; Orekit:set_forces:cd = 1.0
+2020-10-15 13:21:27.906 DEBUG   ; Orekit:set_forces:cr = 1.0
+2020-10-15 13:21:27.906 DEBUG   ; Orekit:set_forces:re_calc = True
+2020-10-15 13:21:28.460 DEBUG   ; Orekit:propagate:completed
 </pre></div>
 </div>
 <div class="line-block">
@@ -148,22 +149,22 @@
         <span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="n">state0</span> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><span class="o">-</span><span class="mf">7100297.113</span><span class="p">,</span><span class="o">-</span><span class="mf">3897715.442</span><span class="p">,</span><span class="mf">18568433.707</span><span class="p">,</span><span class="mf">86.771</span><span class="p">,</span><span class="o">-</span><span class="mf">3407.231</span><span class="p">,</span><span class="mf">2961.571</span><span class="p">])</span>
-    <span class="n">t</span> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.linspace.html#numpy.linspace" title="numpy.linspace" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3600</span><span class="o">*</span><span class="mf">24.0</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
+    <span class="n">state0</span> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><a href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a></a><span class="p">([</span><span class="o">-</span><span class="mf">7100297.113</span><span class="p">,</span><span class="o">-</span><span class="mf">3897715.442</span><span class="p">,</span><span class="mf">18568433.707</span><span class="p">,</span><span class="mf">86.771</span><span class="p">,</span><span class="o">-</span><span class="mf">3407.231</span><span class="p">,</span><span class="mf">2961.571</span><span class="p">])</span>
+    <span class="n">t</span> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.linspace.html#numpy.linspace" title="numpy.linspace" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><a href="https://numpy.org/doc/stable/reference/generated/numpy.linspace.html#numpy.linspace" title="numpy.linspace" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3600</span><span class="o">*</span><span class="mf">24.0</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
     <span class="n">mjd0</span> <span class="o">=</span> <span class="mi">53005</span>
 
-    <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">states</span></a> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">state0</span><span class="p">,</span> <span class="n">mjd0</span><span class="p">,</span> <span class="n">A</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">C_R</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">C_D</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span>
-    <span class="k">return</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">states</span></a>
+    <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">states</span></a></a> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">state0</span><span class="p">,</span> <span class="n">mjd0</span><span class="p">,</span> <span class="n">A</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">C_R</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">C_D</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="k">return</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">states</span></a></a>
 
-<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">states</span></a> <span class="o">=</span> <span class="n">run_prop</span><span class="p">()</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">states</span></a></a> <span class="o">=</span> <span class="n">run_prop</span><span class="p">()</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"> SETTING DEBUG MODE </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 <span class="n">sorts</span><span class="o">.</span><span class="n">profiling</span><span class="o">.</span><span class="n">term_level</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="s1">&#39;DEBUG&#39;</span><span class="p">)</span>
 
-<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">states</span></a> <span class="o">=</span> <span class="n">run_prop</span><span class="p">()</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">states</span></a></a> <span class="o">=</span> <span class="n">run_prop</span><span class="p">()</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  1.542 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  1.565 seconds)</p>
 <div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-gallery-logger-orekit-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/c94c20cba749176d66d55aa4fe6886ae/logger_orekit.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">logger_orekit.py</span></code></a></p>
@@ -196,7 +197,7 @@
         <li class="right" >
           <a href="orekit_small_step.html" title="Orekit propagator small time step"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" >Examples</a> &#187;</li> 
       </ul>
     </div>

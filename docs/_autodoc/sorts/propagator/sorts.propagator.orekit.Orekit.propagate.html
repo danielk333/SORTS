@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Orekit.propagate &#8212; SORTS 3.18.0 documentation</title>
+    <title>Orekit.propagate &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -22,7 +22,7 @@
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="Orekit.set" href="sorts.propagator.orekit.Orekit.set.html" />
-    <link rel="prev" title="Orekit.convert_time" href="sorts.propagator.orekit.Orekit.convert_time.html" />
+    <link rel="prev" title="Orekit.heartbeat" href="sorts.propagator.orekit.Orekit.heartbeat.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--[if lt IE 9]>
     <script src="_static/css3-mediaqueries.js"></script>
@@ -41,9 +41,9 @@
           <a href="sorts.propagator.orekit.Orekit.set.html" title="Orekit.set"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="sorts.propagator.orekit.Orekit.convert_time.html" title="Orekit.convert_time"
+          <a href="sorts.propagator.orekit.Orekit.heartbeat.html" title="Orekit.heartbeat"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.propagator.orekit.html" >orekit</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="sorts.propagator.orekit.Orekit.html" accesskey="U">Orekit</a> &#187;</li> 
@@ -52,8 +52,8 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="sorts.propagator.orekit.Orekit.convert_time.html"
-                        title="previous chapter">Orekit.convert_time</a></p>
+  <p class="topless"><a href="sorts.propagator.orekit.Orekit.heartbeat.html"
+                        title="previous chapter">Orekit.heartbeat</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="sorts.propagator.orekit.Orekit.set.html"
                         title="next chapter">Orekit.set</a></p>
@@ -89,7 +89,6 @@
 <dt id="sorts.propagator.orekit.Orekit.propagate">
 <code class="sig-prename descclassname">Orekit.</code><code class="sig-name descname">propagate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">state0</span></em>, <em class="sig-param"><span class="n">epoch</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/propagator/orekit.html#Orekit.propagate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.propagator.orekit.Orekit.propagate" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>Implementation:</strong></p>
-<p>Units are in meters and degrees.</p>
 <p>Keyword arguments are:</p>
 <blockquote>
 <div><ul class="simple">
@@ -99,15 +98,6 @@
 <li><p>float m: Mass of object in kg</p></li>
 </ul>
 </div></blockquote>
-<dl class="simple">
-<dt><em>NOTE:</em></dt><dd><ul class="simple">
-<li><p>If the eccentricity is below 1e-10 the eccentricity will be set to 1e-10 to prevent Keplerian Jacobian becoming singular.</p></li>
-</ul>
-</dd>
-</dl>
-<p>The implementation first checks if the input frame is Pseudo inertial, if this is true this is used as the propagation frame. If not it is automatically converted to EME (ECI-J2000).</p>
-<p>Since there are forces that are dependent on the space-craft parameters, if these parameter has been changed since the last iteration the numerical integrator is re-initialized at every call of this method. The forces that can be initialized without spacecraft parameters (e.g. Earth gravitational field) are done at propagator construction.</p>
-<p>See <code class="xref py py-func docutils literal notranslate"><span class="pre">propagator_base.PropagatorBase.get_orbit()</span></code>.</p>
 </dd></dl>
 
 </div>
@@ -131,9 +121,9 @@
           <a href="sorts.propagator.orekit.Orekit.set.html" title="Orekit.set"
              >next</a> |</li>
         <li class="right" >
-          <a href="sorts.propagator.orekit.Orekit.convert_time.html" title="Orekit.convert_time"
+          <a href="sorts.propagator.orekit.Orekit.heartbeat.html" title="Orekit.heartbeat"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.propagator.orekit.html" >orekit</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="sorts.propagator.orekit.Orekit.html" >Orekit</a> &#187;</li> 

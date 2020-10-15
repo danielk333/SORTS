@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Simulation &#8212; SORTS 3.18.0 documentation</title>
+    <title>Simulation &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.simulation.html" title="simulation"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.simulation.html" accesskey="U">simulation</a> &#187;</li> 
       </ul>
@@ -88,6 +88,16 @@
 <em class="property">class </em><code class="sig-prename descclassname">sorts.simulation.</code><code class="sig-name descname">Simulation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">scheduler</span></em>, <em class="sig-param"><span class="n">root</span></em>, <em class="sig-param"><span class="n">logger</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">profiler</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/simulation.html#Simulation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.simulation.Simulation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Convenience simulation handler, creates a step-by-step simulation sequence and creates file system structure for saving of data to disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scheduler</strong> (<a class="reference internal" href="scheduler/sorts.scheduler.scheduler.Scheduler.html#sorts.scheduler.scheduler.Scheduler" title="sorts.scheduler.scheduler.Scheduler"><em>Scheduler</em></a>) – A scheduler instance to run. This input is used to assure that the same logger and profiler is used for the Simulation and the Scheduler.</p></li>
+<li><p><strong>root</strong> (<em>str/pathlib.Path</em>) – The path to the root folder where all files will be stored.</p></li>
+<li><p><strong>logger</strong> (<em>bool</em>) – If <code class="code docutils literal notranslate"><span class="pre">False</span></code>, do not instantiate a logger.</p></li>
+<li><p><strong>profiler</strong> (<em>bool</em>) – If <code class="code docutils literal notranslate"><span class="pre">False</span></code>, do not instantiate a profiler.</p></li>
+</ul>
+</dd>
+</dl>
 <p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -99,7 +109,7 @@
 <td><p>Initialize self.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.simulation.Simulation.branch.html#sorts.simulation.Simulation.branch" title="sorts.simulation.Simulation.branch"><code class="xref py py-obj docutils literal notranslate"><span class="pre">branch</span></code></a>(name[, empty, linkfiles])</p></td>
-<td><p>Create branch.</p></td>
+<td><p>Create branch by creating a copy of the current branch state and checkout that branch.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.simulation.Simulation.checkout.html#sorts.simulation.Simulation.checkout" title="sorts.simulation.Simulation.checkout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">checkout</span></code></a>(branch)</p></td>
 <td><p>Change to branch.</p></td>
@@ -108,7 +118,7 @@
 <td><p>Delete branch.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.simulation.Simulation.get_path.html#sorts.simulation.Simulation.get_path" title="sorts.simulation.Simulation.get_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_path</span></code></a>([name])</p></td>
-<td><p></p></td>
+<td><p>Given a relative file path, get the absolute path including root and branch.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.simulation.Simulation.load_h5.html#sorts.simulation.Simulation.load_h5" title="sorts.simulation.Simulation.load_h5"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_h5</span></code></a>(path)</p></td>
 <td><p></p></td>
@@ -117,7 +127,7 @@
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.simulation.Simulation.make_paths.html#sorts.simulation.Simulation.make_paths" title="sorts.simulation.Simulation.make_paths"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_paths</span></code></a>()</p></td>
-<td><p></p></td>
+<td><p>Make all the folder for the current branch according to <code class="code docutils literal notranslate"><span class="pre">self.paths</span></code>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.simulation.Simulation.run.html#sorts.simulation.Simulation.run" title="sorts.simulation.Simulation.run"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run</span></code></a>(*args, **kwargs)</p></td>
 <td><p></p></td>
@@ -138,10 +148,10 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.simulation.Simulation.log_path.html#sorts.simulation.Simulation.log_path" title="sorts.simulation.Simulation.log_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log_path</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Path to the current log-output folder</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.simulation.Simulation.paths.html#sorts.simulation.Simulation.paths" title="sorts.simulation.Simulation.paths"><code class="xref py py-obj docutils literal notranslate"><span class="pre">paths</span></code></a></p></td>
-<td><p></p></td>
+<td><p>List of the name of all folders</p></td>
 </tr>
 </tbody>
 </table>
@@ -170,7 +180,7 @@
         <li class="right" >
           <a href="sorts.simulation.html" title="simulation"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.simulation.html" >simulation</a> &#187;</li> 
       </ul>

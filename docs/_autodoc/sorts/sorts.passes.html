@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>passes &#8212; SORTS 3.18.0 documentation</title>
+    <title>passes &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.interpolation.legendre8_loop.html" title="legendre8_loop"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" accesskey="U">API Reference</a> &#187;</li> 
       </ul>
     </div>
@@ -93,6 +93,8 @@
             
   <div class="section" id="module-sorts.passes">
 <span id="passes"></span><h1>passes<a class="headerlink" href="#module-sorts.passes" title="Permalink to this headline">¶</a></h1>
+<p>Encapsulates a fundamental component of tracking space objects: a pass over a geographic location. 
+Also provides convenience functions for finding passes given states and stations and sorting structures of passes in particular ways.</p>
 <div class="section" id="module-summary">
 <h2>Module summary<a class="headerlink" href="#module-summary" title="Permalink to this headline">¶</a></h2>
 <p class="rubric">Classes</p>
@@ -123,8 +125,8 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.passes.find_simultaneous_passes.html#sorts.passes.find_simultaneous_passes" title="sorts.passes.find_simultaneous_passes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_simultaneous_passes</span></code></a>(t, states, stations)</p></td>
 <td><p>Finds all passes that are simultaneously inside a multiple stations FOV’s.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.passes.select_simultaneous_passes.html#sorts.passes.select_simultaneous_passes" title="sorts.passes.select_simultaneous_passes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">select_simultaneous_passes</span></code></a>(passes)</p></td>
-<td><p>TODO, should this be a thing????</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.passes.group_passes.html#sorts.passes.group_passes" title="sorts.passes.group_passes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_passes</span></code></a>(passes)</p></td>
+<td><p>Takes a list of passes structured as [tx][rx][pass] and find all simultaneous passes and groups them according to [tx], resulting in a [tx][pass][rx] structure.</p></td>
 </tr>
 </tbody>
 </table>
@@ -137,6 +139,151 @@
 <em class="property">class </em><code class="sig-prename descclassname">sorts.passes.</code><code class="sig-name descname">Pass</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">enu</span></em>, <em class="sig-param"><span class="n">inds</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cache</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">station_id</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/passes.html#Pass"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Saves the local coordinate data for a single pass. Optionally also indicates the location of that pass in a bigger dataset.</p>
+<dl class="py method">
+<dt>
+<em class="property">static </em><code class="sig-name descname">calculate_range</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">enu</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/passes.html#Pass.calculate_range"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Norm of the ENU coordinates.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">static </em><code class="sig-name descname">calculate_range_rate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">enu</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/passes.html#Pass.calculate_range_rate"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Projected ENU velocity along the ENU range.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">calculate_snr</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tx</span></em>, <em class="sig-param"><span class="n">rx</span></em>, <em class="sig-param"><span class="n">diameter</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/passes.html#Pass.calculate_snr"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Uses the <code class="code docutils literal notranslate"><span class="pre">signals.hard_target_snr</span></code> function to calculate the optimal SNR curve of a target during the pass <strong>if the TX and RX stations are pointing at the object</strong>.
+The SNR’s are returned from the function but also stored in the property <code class="code docutils literal notranslate"><span class="pre">self.snr</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tx</strong> (<a class="reference internal" href="radar/sorts.radar.tx_rx.TX.html#sorts.radar.tx_rx.TX" title="sorts.radar.tx_rx.TX"><em>TX</em></a>) – The TX station that observed the pass.</p></li>
+<li><p><strong>rx</strong> (<a class="reference internal" href="radar/sorts.radar.tx_rx.RX.html#sorts.radar.tx_rx.RX" title="sorts.radar.tx_rx.RX"><em>RX</em></a>) – The RX station that observed the pass.</p></li>
+<li><p><strong>diameter</strong> (<em>float</em>) – The diameter of the object.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(n,) Vector with the SNR’s during the pass.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">static </em><code class="sig-name descname">calculate_zenith_angle</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">enu</span></em>, <em class="sig-param"><span class="n">radians</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/passes.html#Pass.calculate_zenith_angle"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Zenith angle of the ENU coordinates.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">end</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/passes.html#Pass.end"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>The ending time of the pass (uses cached value after first call if <code class="code docutils literal notranslate"><span class="pre">self.cache=True</span></code>).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">get_range</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/passes.html#Pass.get_range"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Get ranges from all stations involved in the pass.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of numpy.ndarray or <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If there is one station observing the pass, return a vector of ranges, otherwise return a list of vectors with ranges.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">get_range_rate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/passes.html#Pass.get_range_rate"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Get range rates from all stations involved in the pass.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of numpy.ndarray or <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If there is one station observing the pass, return a vector of range rates, otherwise return a list of vectors with range rates.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">get_zenith_angle</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">radians</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/passes.html#Pass.get_zenith_angle"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Get zenith angles for all stations involved in the pass.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of numpy.ndarray or <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If there is one station observing the pass, return a vector of zenith angles, otherwise return a list of vectors with zenith angles.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">range</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/passes.html#Pass.range"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Get ranges from all stations involved in the pass (uses cached value after first call if <code class="code docutils literal notranslate"><span class="pre">self.cache=True</span></code>).
+The cache is stored in <code class="code docutils literal notranslate"><span class="pre">self._r</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of numpy.ndarray or <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If there is one station observing the pass, return a vector of ranges, otherwise return a list of vectors with ranges.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">range_rate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/passes.html#Pass.range_rate"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Get range rates from all stations involved in the pass (uses cached value after first call if <code class="code docutils literal notranslate"><span class="pre">self.cache=True</span></code>).
+The cache is stored in <code class="code docutils literal notranslate"><span class="pre">self._v</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of numpy.ndarray or <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If there is one station observing the pass, return a vector of range rates, otherwise return a list of vectors with range rates.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/passes.html#Pass.start"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>The Start time of the pass (uses cached value after first call if <code class="code docutils literal notranslate"><span class="pre">self.cache=True</span></code>).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">stations</code></dt>
+<dd><p>The number of stations that can observe the pass.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">zenith_angle</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">radians</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/passes.html#Pass.zenith_angle"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Get zenith angles from all stations involved in the pass (uses cached value after first call if <code class="code docutils literal notranslate"><span class="pre">self.cache=True</span></code>).
+The cache is stored in <code class="code docutils literal notranslate"><span class="pre">self._v</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of numpy.ndarray or <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If there is one station observing the pass, return a vector of zenith angles, otherwise return a list of vectors with zenith angles.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <p class="rubric">Functions</p>
@@ -209,8 +356,8 @@ If eccentricity is small, uses periapsis speed and uniform sampling in time.</p>
 
 <dl class="py function">
 <dt>
-<code class="sig-prename descclassname">sorts.passes.</code><code class="sig-name descname">select_simultaneous_passes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">passes</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/passes.html#select_simultaneous_passes"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>TODO, should this be a thing????</p>
+<code class="sig-prename descclassname">sorts.passes.</code><code class="sig-name descname">group_passes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">passes</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/passes.html#group_passes"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Takes a list of passes structured as [tx][rx][pass] and find all simultaneous passes and groups them according to [tx], resulting in a [tx][pass][rx] structure.</p>
 </dd></dl>
 
 </div>
@@ -237,7 +384,7 @@ If eccentricity is small, uses periapsis speed and uniform sampling in time.</p>
         <li class="right" >
           <a href="sorts.interpolation.legendre8_loop.html" title="legendre8_loop"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li> 
       </ul>
     </div>

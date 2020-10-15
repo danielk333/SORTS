@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>sorts.propagator.pysgp4 &#8212; SORTS 3.18.0 documentation</title>
+    <title>sorts.propagator.pysgp4 &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -146,20 +146,49 @@
 
         <span class="n">t</span><span class="p">,</span> <span class="n">epoch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_time</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">epoch</span><span class="p">)</span>
         <span class="n">times</span> <span class="o">=</span> <span class="n">epoch</span> <span class="o">+</span> <span class="n">t</span>
-        
-        <span class="n">states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span><span class="n">t</span><span class="o">.</span><span class="n">size</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
 
+        <span class="n">jd_f</span> <span class="o">=</span> <span class="n">times</span><span class="o">.</span><span class="n">jd2</span>
+        <span class="n">jd0</span> <span class="o">=</span> <span class="n">times</span><span class="o">.</span><span class="n">jd1</span>
+
+        <span class="n">logger_profiler_on</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;logger_profiler_on&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;SGP4:propagate_tle:steps&#39;</span><span class="p">)</span>
 
-        <span class="n">errors</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">satellite</span><span class="o">.</span><span class="n">sgp4_array</span><span class="p">(</span><span class="n">times</span><span class="o">.</span><span class="n">jd1</span><span class="p">,</span> <span class="n">times</span><span class="o">.</span><span class="n">jd2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">jd_f</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">jd_f</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">6</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+            <span class="n">error</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">satellite</span><span class="o">.</span><span class="n">sgp4</span><span class="p">(</span><span class="n">jd0</span><span class="p">,</span> <span class="n">jd_f</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">logger_profiler_on</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">error</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SGP4:propagate:step-</span><span class="si">{</span><span class="n">ind</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">SGP4_ERRORS</span><span class="p">[</span><span class="n">error</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="n">states</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span>
+            <span class="n">states</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span> <span class="o">=</span> <span class="n">v</span>
+            <span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="n">error</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span><span class="n">jd_f</span><span class="o">.</span><span class="n">size</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;heartbeat&#39;</span><span class="p">]:</span>
+                <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">tind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">jd_f</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+                    <span class="n">error</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">satellite</span><span class="o">.</span><span class="n">sgp4</span><span class="p">(</span><span class="n">jd0</span><span class="p">[</span><span class="n">tind</span><span class="p">],</span> <span class="n">jd_f</span><span class="p">[</span><span class="n">tind</span><span class="p">])</span>
+                    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+                    <span class="n">states</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span><span class="n">tind</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span>
+                    <span class="n">states</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span><span class="n">tind</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">heartbeat</span><span class="p">(</span><span class="n">jd0</span><span class="p">[</span><span class="n">tind</span><span class="p">]</span> <span class="o">+</span> <span class="n">jd_f</span><span class="p">[</span><span class="n">tind</span><span class="p">],</span> <span class="n">states</span><span class="p">[:,</span><span class="n">tind</span><span class="p">],</span> <span class="n">satellite</span><span class="o">=</span><span class="n">satellite</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">errors</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">satellite</span><span class="o">.</span><span class="n">sgp4_array</span><span class="p">(</span><span class="n">jd0</span><span class="p">,</span> <span class="n">jd_f</span><span class="p">)</span>
+                <span class="n">states</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span><span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">T</span>
+                <span class="n">states</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span><span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">T</span>
+
 
         <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">err</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">errors</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SGP4:propagate_tle:step-</span><span class="si">{</span><span class="n">ind</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">SGP4_ERRORS</span><span class="p">[</span><span class="n">err</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-        <span class="n">states</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span><span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">T</span><span class="o">*</span><span class="mf">1e3</span> <span class="c1">#km to m</span>
-        <span class="n">states</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span><span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">T</span><span class="o">*</span><span class="mf">1e3</span> <span class="c1">#km/s to m</span>
+        <span class="n">states</span> <span class="o">*=</span> <span class="mf">1e3</span> <span class="c1">#km to m, km/s to m/s</span>
 
         <span class="n">states</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span>
             <span class="n">times</span><span class="p">,</span> 
@@ -197,7 +226,8 @@
 <span class="sd">        :param float C_D: Drag coefficient</span>
 <span class="sd">        :param float A: Cross-sectional Area</span>
 <span class="sd">        :param float m: Mass</span>
-<span class="sd">        :param bool degrees: If false, all angles are assumed to be in radians.</span>
+<span class="sd">        :param bool radians: If true, all angles are assumed to be in radians.</span>
+<span class="sd">        :param bool SGP4_mean_elements: If True, the input is not cartesian state but SGP4 mean elements.</span>
 <span class="sd">        :return: 6-D Cartesian state vectors in SI-units.</span>
 
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -214,10 +244,6 @@
             <span class="n">states</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagate_tle</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">line1</span><span class="p">,</span> <span class="n">line2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">state0</span><span class="p">,</span> <span class="n">pyorb</span><span class="o">.</span><span class="n">Orbit</span><span class="p">):</span>
-                <span class="n">state0_cart</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">state0</span><span class="o">.</span><span class="n">cartesian</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">state0_cart</span> <span class="o">=</span> <span class="n">state0</span>
 
             <span class="k">if</span> <span class="n">epoch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Need epoch when propagating state and not TLE&#39;</span><span class="p">)</span>
@@ -227,28 +253,44 @@
             <span class="n">epoch0</span> <span class="o">=</span> <span class="n">epoch</span><span class="o">.</span><span class="n">mjd</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">sgp4_mjd0</span>
             <span class="n">times</span> <span class="o">=</span> <span class="n">epoch</span> <span class="o">+</span> <span class="n">t</span>
 
-
             <span class="k">if</span> <span class="s1">&#39;B&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-                <span class="n">B</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">]</span>
+                <span class="n">B</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;B&#39;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">B</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;C_D&#39;</span><span class="p">,</span><span class="mf">2.3</span><span class="p">)</span><span class="o">*</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span><span class="o">/</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+                <span class="n">B</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;C_D&#39;</span><span class="p">,</span><span class="mf">2.3</span><span class="p">)</span><span class="o">*</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span><span class="o">/</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SGP4:propagate:B = </span><span class="si">{</span><span class="n">B</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-            <span class="n">state0_cart</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span>
-                <span class="n">epoch</span><span class="p">,</span> 
-                <span class="n">state0_cart</span><span class="p">,</span> 
-                <span class="n">in_frame</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;in_frame&#39;</span><span class="p">],</span> 
-                <span class="n">out_frame</span><span class="o">=</span><span class="s1">&#39;TEME&#39;</span><span class="p">,</span>
-                <span class="n">profiler</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="p">,</span>
-                <span class="n">logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span>
-            <span class="p">)</span>
+            <span class="n">input_mean</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;SGP4_mean_elements&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
-            <span class="n">mean_elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">TEME_to_TLE</span><span class="p">(</span><span class="n">state0_cart</span><span class="p">,</span> <span class="n">epoch</span><span class="o">=</span><span class="n">epoch</span><span class="p">,</span> <span class="n">B</span><span class="o">=</span><span class="n">B</span><span class="p">,</span> <span class="n">kepler</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">input_mean</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;in_frame&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;TEME&#39;</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cannot input mean elements in other frame than TEME (currently set to &quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;in_frame&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&quot;)&#39;</span><span class="p">)</span>
+                <span class="n">mean_elements</span> <span class="o">=</span> <span class="n">state0</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;radians&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+                    <span class="n">mean_elements</span><span class="p">[</span><span class="mi">2</span><span class="p">:,</span><span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">mean_elements</span><span class="p">[</span><span class="mi">2</span><span class="p">:,</span><span class="o">...</span><span class="p">])</span>
 
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">mean_elements</span><span class="p">)):</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Could not compute SGP4 initial state: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mean_elements</span><span class="p">))</span>
+                <span class="n">mean_elements</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="o">...</span><span class="p">]</span> <span class="o">*=</span> <span class="mf">1e-3</span> <span class="c1">#m to km</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">state0</span><span class="p">,</span> <span class="n">pyorb</span><span class="o">.</span><span class="n">Orbit</span><span class="p">):</span>
+                    <span class="n">state0_cart</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">state0</span><span class="o">.</span><span class="n">cartesian</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">state0_cart</span> <span class="o">=</span> <span class="n">state0</span>
+
+                <span class="n">state0_cart</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span>
+                    <span class="n">epoch</span><span class="p">,</span> 
+                    <span class="n">state0_cart</span><span class="p">,</span> 
+                    <span class="n">in_frame</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;in_frame&#39;</span><span class="p">],</span> 
+                    <span class="n">out_frame</span><span class="o">=</span><span class="s1">&#39;TEME&#39;</span><span class="p">,</span>
+                    <span class="n">profiler</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="p">,</span>
+                    <span class="n">logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="n">mean_elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">TEME_to_TLE</span><span class="p">(</span><span class="n">state0_cart</span><span class="p">,</span> <span class="n">epoch</span><span class="o">=</span><span class="n">epoch</span><span class="p">,</span> <span class="n">B</span><span class="o">=</span><span class="n">B</span><span class="p">,</span> <span class="n">kepler</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">mean_elements</span><span class="p">)):</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Could not compute SGP4 initial state: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mean_elements</span><span class="p">))</span>
 
             <span class="n">states</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagate_mean_elements</span><span class="p">(</span><span class="n">times</span><span class="o">.</span><span class="n">jd1</span><span class="p">,</span> <span class="n">times</span><span class="o">.</span><span class="n">jd2</span><span class="p">,</span> <span class="n">mean_elements</span><span class="p">,</span> <span class="n">epoch0</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -267,6 +309,34 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SGP4:propagate:completed&#39;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">states</span></div>
+
+    
+<div class="viewcode-block" id="SGP4.get_mean_elements"><a class="viewcode-back" href="../../../_autodoc/sorts/propagator/sorts.propagator.pysgp4.SGP4.get_mean_elements.html#sorts.propagator.pysgp4.SGP4.get_mean_elements">[docs]</a>    <span class="k">def</span> <span class="nf">get_mean_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line1</span><span class="p">,</span> <span class="n">line2</span><span class="p">,</span> <span class="n">radians</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Extract the mean elements in SI units (a [m], e [1], inc [deg], raan [deg], aop [deg], mu [deg]), B-parameter (not bstar) and epoch from a two line element pair.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">xpdotp</span> <span class="o">=</span> <span class="mf">1440.0</span><span class="o">/</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>  <span class="c1"># 229.1831180523293</span>
+
+        <span class="n">satrec</span> <span class="o">=</span> <span class="n">Satrec</span><span class="o">.</span><span class="n">twoline2rv</span><span class="p">(</span><span class="n">line1</span><span class="p">,</span> <span class="n">line2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grav_ind</span><span class="p">)</span>
+
+        <span class="n">B</span> <span class="o">=</span> <span class="n">satrec</span><span class="o">.</span><span class="n">bstar</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grav_model</span><span class="o">.</span><span class="n">radiusearthkm</span><span class="o">*</span><span class="mf">1e3</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">rho0</span>
+
+        <span class="n">epoch</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="n">satrec</span><span class="o">.</span><span class="n">jdsatepoch</span> <span class="o">+</span> <span class="n">satrec</span><span class="o">.</span><span class="n">jdsatepochF</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;jd&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;utc&#39;</span><span class="p">)</span>
+
+        <span class="n">mean_elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">6</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="n">n0</span> <span class="o">=</span> <span class="n">satrec</span><span class="o">.</span><span class="n">no_kozai</span><span class="o">*</span><span class="n">xpdotp</span><span class="o">/</span><span class="p">(</span><span class="mf">86400.0</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span>
+
+        <span class="n">mean_elements</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grav_model</span><span class="o">.</span><span class="n">mu</span><span class="p">)</span><span class="o">/</span><span class="n">n0</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mf">2.0</span><span class="o">/</span><span class="mf">3.0</span><span class="p">)</span><span class="o">*</span><span class="mf">1e3</span>
+        <span class="n">mean_elements</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">satrec</span><span class="o">.</span><span class="n">ecco</span>
+        <span class="n">mean_elements</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">satrec</span><span class="o">.</span><span class="n">inclo</span>
+        <span class="n">mean_elements</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">satrec</span><span class="o">.</span><span class="n">nodeo</span>
+        <span class="n">mean_elements</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">satrec</span><span class="o">.</span><span class="n">argpo</span>
+        <span class="n">mean_elements</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">satrec</span><span class="o">.</span><span class="n">mo</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">radians</span><span class="p">:</span>
+            <span class="n">mean_elements</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">mean_elements</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
+
+        <span class="k">return</span> <span class="n">mean_elements</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">epoch</span></div>
 
 
 <div class="viewcode-block" id="SGP4.propagate_mean_elements"><a class="viewcode-back" href="../../../_autodoc/sorts/propagator/sorts.propagator.pysgp4.SGP4.propagate_mean_elements.html#sorts.propagator.pysgp4.SGP4.propagate_mean_elements">[docs]</a>    <span class="k">def</span> <span class="nf">propagate_mean_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jd0</span><span class="p">,</span> <span class="n">jd_f</span><span class="p">,</span> <span class="n">mean_elements</span><span class="p">,</span> <span class="n">epoch0</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -319,15 +389,23 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span><span class="n">jd_f</span><span class="o">.</span><span class="n">size</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
 
-            <span class="n">errors</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">satellite</span><span class="o">.</span><span class="n">sgp4_array</span><span class="p">(</span><span class="n">jd0</span><span class="p">,</span> <span class="n">jd_f</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;heartbeat&#39;</span><span class="p">]:</span>
+                <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">tind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">jd_f</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+                    <span class="n">error</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">satellite</span><span class="o">.</span><span class="n">sgp4</span><span class="p">(</span><span class="n">jd0</span><span class="p">[</span><span class="n">tind</span><span class="p">],</span> <span class="n">jd_f</span><span class="p">[</span><span class="n">tind</span><span class="p">])</span>
+                    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+                    <span class="n">states</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span><span class="n">tind</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span>
+                    <span class="n">states</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span><span class="n">tind</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">heartbeat</span><span class="p">(</span><span class="n">jd0</span><span class="p">[</span><span class="n">tind</span><span class="p">]</span> <span class="o">+</span> <span class="n">jd_f</span><span class="p">[</span><span class="n">tind</span><span class="p">],</span> <span class="n">states</span><span class="p">[:,</span><span class="n">tind</span><span class="p">],</span> <span class="n">satellite</span><span class="o">=</span><span class="n">satellite</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">errors</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">satellite</span><span class="o">.</span><span class="n">sgp4_array</span><span class="p">(</span><span class="n">jd0</span><span class="p">,</span> <span class="n">jd_f</span><span class="p">)</span>
+                <span class="n">states</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span><span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">T</span>
+                <span class="n">states</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span><span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">T</span>
 
             <span class="k">if</span> <span class="n">logger_profiler_on</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">err</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">errors</span><span class="p">):</span>
                     <span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SGP4:propagate:step-</span><span class="si">{</span><span class="n">ind</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">SGP4_ERRORS</span><span class="p">[</span><span class="n">err</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
-            <span class="n">states</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span><span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">T</span>
-            <span class="n">states</span><span class="p">[</span><span class="mi">3</span><span class="p">:,</span><span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">T</span>
 
 
         <span class="n">states</span> <span class="o">*=</span> <span class="mf">1e3</span> <span class="c1">#km to m and km/s to m/s</span>
@@ -487,6 +565,8 @@
         <span class="n">kep</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp</span>
         <span class="n">kep</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">pyorb</span><span class="o">.</span><span class="n">true_to_mean</span><span class="p">(</span><span class="n">kep</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">kep</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">degrees</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">kep</span></div>
+
+
 </pre></div>
 
           </div>
@@ -503,7 +583,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

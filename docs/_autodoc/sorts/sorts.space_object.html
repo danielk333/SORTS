@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>space_object &#8212; SORTS 3.18.0 documentation</title>
+    <title>space_object &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.simulation.store_step.html" title="store_step"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" accesskey="U">API Reference</a> &#187;</li> 
       </ul>
     </div>
@@ -94,13 +94,54 @@
 <p>Defines a space object. Encapsulates orbital elements, propagation and related methods.</p>
 <p><strong>Example:</strong></p>
 <p>Using space object for propagation.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">n</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-</pre></div>
-</div>
-<p>Using space object with a different propagator.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">n</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d</span> <span class="kn">import</span> <span class="n">Axes3D</span>
+<span class="kn">from</span> <span class="nn">astropy.time</span> <span class="kn">import</span> <span class="n">Time</span>
+
+<span class="kn">from</span> <span class="nn">sorts.propagator</span> <span class="kn">import</span> <span class="n">Kepler</span>
+<span class="kn">from</span> <span class="nn">sorts</span> <span class="kn">import</span> <span class="n">SpaceObject</span>
+
+<span class="n">options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">settings</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">in_frame</span><span class="o">=</span><span class="s1">&#39;GCRS&#39;</span><span class="p">,</span>
+        <span class="n">out_frame</span><span class="o">=</span><span class="s1">&#39;GCRS&#39;</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3600</span><span class="o">*</span><span class="mf">24.0</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
+
+<span class="n">obj</span> <span class="o">=</span> <span class="n">SpaceObject</span><span class="p">(</span>
+    <span class="n">Kepler</span><span class="p">,</span>
+    <span class="n">propagator_options</span> <span class="o">=</span> <span class="n">options</span><span class="p">,</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="mf">7000e3</span><span class="p">,</span> 
+    <span class="n">e</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> 
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">69</span><span class="p">,</span> 
+    <span class="n">raan</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> 
+    <span class="n">aop</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> 
+    <span class="n">mu0</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> 
+    <span class="n">epoch</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="mf">57125.7729</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;mjd&#39;</span><span class="p">),</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+<span class="n">states</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="mi">15</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="mi">0</span><span class="p">,:],</span> <span class="n">states</span><span class="p">[</span><span class="mi">1</span><span class="p">,:],</span> <span class="n">states</span><span class="p">[</span><span class="mi">2</span><span class="p">,:],</span><span class="s2">&quot;-b&quot;</span><span class="p">)</span>
+
+<span class="n">max_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="mi">2</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="n">max_range</span><span class="p">,</span> <span class="n">max_range</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="n">max_range</span><span class="p">,</span> <span class="n">max_range</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_zlim</span><span class="p">(</span><span class="o">-</span><span class="n">max_range</span><span class="p">,</span> <span class="n">max_range</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 <div class="section" id="module-summary">
@@ -234,7 +275,7 @@ must be applied externally of the method.</p>
 <dd><p>Gets ECEF state at specified times using propagator instance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>t</strong> (<em>float/list/numpy.ndarray</em>) – Time relative epoch in seconds.</p>
+<dd class="field-odd"><p><strong>t</strong> (<em>int/float/list/numpy.ndarray/astropy.time.Time/astropy.time.TimeDelta</em>) – Time relative epoch in seconds.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Array of state (position and velocity) as a function of time.</p>
@@ -326,7 +367,7 @@ must be applied externally of the method.</p>
         <li class="right" >
           <a href="sorts.simulation.store_step.html" title="store_step"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li> 
       </ul>
     </div>

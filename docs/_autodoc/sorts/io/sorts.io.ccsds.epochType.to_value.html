@@ -1,0 +1,146 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>epochType.to_value &#8212; SORTS 4.0.0-rc.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="epochType.cache" href="sorts.io.ccsds.epochType.cache.html" />
+    <link rel="prev" title="epochType.str_kwargs" href="sorts.io.ccsds.epochType.str_kwargs.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.io.ccsds.epochType.cache.html" title="epochType.cache"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sorts.io.ccsds.epochType.str_kwargs.html" title="epochType.str_kwargs"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.io.ccsds.html" >ccsds</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="sorts.io.ccsds.epochType.html" accesskey="U">epochType</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sorts.io.ccsds.epochType.str_kwargs.html"
+                        title="previous chapter">epochType.str_kwargs</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sorts.io.ccsds.epochType.cache.html"
+                        title="next chapter">epochType.cache</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/_autodoc/sorts/io/sorts.io.ccsds.epochType.to_value.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="epochtype-to-value">
+<h1>epochType.to_value<a class="headerlink" href="#epochtype-to-value" title="Permalink to this headline">¶</a></h1>
+<p class="rubric">epochType.to_value</p>
+<dl class="py method">
+<dt id="sorts.io.ccsds.epochType.to_value">
+<code class="sig-prename descclassname">epochType.</code><code class="sig-name descname">to_value</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">out_subfmt</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sorts.io.ccsds.epochType.to_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return time representation from internal jd1 and jd2 in specified
+<code class="docutils literal notranslate"><span class="pre">out_subfmt</span></code>.</p>
+<p>This is the base method that ignores <code class="docutils literal notranslate"><span class="pre">parent</span></code> and uses the <code class="docutils literal notranslate"><span class="pre">value</span></code>
+property to compute the output. This is done by temporarily setting
+<code class="docutils literal notranslate"><span class="pre">self.out_subfmt</span></code> and calling <code class="docutils literal notranslate"><span class="pre">self.value</span></code>. This is required for
+legacy Format subclasses prior to astropy 4.0  New code should instead
+implement the value functionality in <code class="docutils literal notranslate"><span class="pre">to_value()</span></code> and then make the
+<code class="docutils literal notranslate"><span class="pre">value</span></code> property be a simple call to <code class="docutils literal notranslate"><span class="pre">self.to_value()</span></code>.</p>
+<dl>
+<dt>parent<span class="classifier">obj</span></dt><dd><p>Parent <cite>~astropy.time.Time</cite> object associated with this
+<cite>~astropy.time.TimeFormat</cite> object</p>
+</dd>
+<dt>out_subfmt<span class="classifier">str or <cite>None</cite></span></dt><dd><p>Output subformt (use existing self.out_subfmt if <cite>None</cite>)</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>value<span class="classifier">numpy.array, numpy.ma.array</span></dt><dd><p>Array or masked array of formatted time representation values</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.io.ccsds.epochType.cache.html" title="epochType.cache"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sorts.io.ccsds.epochType.str_kwargs.html" title="epochType.str_kwargs"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.io.ccsds.html" >ccsds</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="sorts.io.ccsds.epochType.html" >epochType</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

@@ -48,93 +48,97 @@ E3D Demonstrator SST planner
 
  .. code-block:: none
 
-    2020-09-23 11:05:00.199 ALWAYS  ; Found 3 objects to track
-    2020-09-23 11:05:00.200 INFO    ; Tracking:get_passes(ind=0):propagating 1440 steps
-    2020-09-23 11:05:00.226 INFO    ; Tracking:get_passes(ind=0):propagating complete
-    2020-09-23 11:05:00.226 INFO    ; Tracking:get_passes(ind=0):tx0-rx0 1 passes
-    2020-09-23 11:05:00.227 INFO    ; Tracking:get_passes(ind=1):propagating 1440 steps
-    2020-09-23 11:05:00.255 INFO    ; Tracking:get_passes(ind=1):propagating complete
-    2020-09-23 11:05:00.255 INFO    ; Tracking:get_passes(ind=1):tx0-rx0 1 passes
-    2020-09-23 11:05:00.256 INFO    ; Tracking:get_passes(ind=2):propagating 1440 steps
-    2020-09-23 11:05:00.284 INFO    ; Tracking:get_passes(ind=2):propagating complete
-    2020-09-23 11:05:00.285 INFO    ; Tracking:get_passes(ind=2):tx0-rx0 2 passes
-    2020-09-23 11:05:00.285 INFO    ; Propagating 18 measurement states for object 0
-    2020-09-23 11:05:00.301 INFO    ; Propagating 15 measurement states for object 1
-    2020-09-23 11:05:00.316 INFO    ; Propagating 39 measurement states for object 2
-      t [s]    TX0-az [deg]    TX0-el [deg]    RX0-az [deg]    RX0-el [deg]    RX0-r [km]  Experiment    Target
-    -------  --------------  --------------  --------------  --------------  ------------  ------------  --------------
-      24750        -7.81567         31.3756        -7.81567         31.3756      1320.93   SST           Object [27386]
-      24760        -7.81567         31.3756        -7.81567         31.3756      1320.93   SST           Object [27386]
-      24770       -10.9492          32.6741       -10.9492          32.6741      1286.73   SST           Object [27386]
-      24780       -14.3446          33.9237       -14.3446          33.9237      1255.66   SST           Object [27386]
-      24790       -18.0087          35.0997       -18.0087          35.0997      1227.97   SST           Object [27386]
-      24800       -21.9405          36.1746       -21.9405          36.1746      1203.9    SST           Object [27386]
-      24810       -26.1288          37.1192       -26.1288          37.1192      1183.66   SST           Object [27386]
-      24820       -30.5501          37.9039       -30.5501          37.9039      1167.46   SST           Object [27386]
-      24830       -35.167           38.5015       -35.167           38.5015      1155.47   SST           Object [27386]
-      24840       -39.9289          38.8891       -39.9289          38.8891      1147.83   SST           Object [27386]
-      24850       -44.7741          39.051        -44.7741          39.051       1144.62   SST           Object [27386]
-      24860       -49.6339          38.9804       -49.6339          38.9804      1145.87   SST           Object [27386]
-      24870       -54.4387          38.6801       -54.4387          38.6801      1151.58   SST           Object [27386]
-      24880       -59.1232          38.1623       -59.1232          38.1623      1161.68   SST           Object [27386]
-      24890       -63.6317          37.4472       -63.6317          37.4472      1176.05   SST           Object [27386]
-      24900       -67.9213          36.5605       -67.9213          36.5605      1194.55   SST           Object [27386]
-      24910       -71.9627          35.5312       -71.9627          35.5312      1216.96   SST           Object [27386]
-      24920       -75.7398          34.389        -75.7398          34.389       1243.1    SST           Object [27386]
-      20610        -7.69244         35.213         -7.69244         35.213       1021.75   SST           Object [35227]
-      20620        -7.69244         35.213         -7.69244         35.213       1021.75   SST           Object [35227]
-      20630       -11.8053          37.1346       -11.8053          37.1346       985.026  SST           Object [35227]
-      20640       -16.4491          38.9899       -16.4491          38.9899       952.516  SST           Object [35227]
-      20650       -21.6584          40.7126       -21.6584          40.7126       924.669  SST           Object [35227]
-      20660       -27.439           42.2238       -27.439           42.2238       901.923  SST           Object [35227]
-      20670       -33.7518          43.4377       -33.7518          43.4377       884.673  SST           Object [35227]
-      20680       -40.4997          44.2723       -40.4997          44.2723       873.247  SST           Object [35227]
-      20690       -47.5251          44.6635       -47.5251          44.6635       867.879  SST           Object [35227]
-      20700       -54.6252          44.5784       -54.6252          44.5784       868.68   SST           Object [35227]
-      20710       -61.5846          44.0232       -61.5846          44.0232       875.635  SST           Object [35227]
-      20720       -68.2118          43.0417       -68.2118          43.0417       888.598  SST           Object [35227]
-      20730       -74.3672          41.7052       -74.3672          41.7052       907.312  SST           Object [35227]
-      20740       -79.9727          40.0985       -79.9727          40.0985       931.427  SST           Object [35227]
-      20750       -85.0047          38.3063       -85.0047          38.3063       960.534  SST           Object [35227]
-      32010        15.2723          33.9166        15.2723          33.9166      1457.62   SST           Object [35245]
-      32020        15.2723          33.9166        15.2723          33.9166      1457.62   SST           Object [35245]
-      32030        14.0382          35.8629        14.0382          35.8629      1406.73   SST           Object [35245]
-      32040        12.6392          37.9138        12.6392          37.9138      1357.52   SST           Object [35245]
-      32050        11.0426          40.0719        11.0426          40.0719      1310.19   SST           Object [35245]
-      32060         9.208           42.337          9.208           42.337       1264.95   SST           Object [35245]
-      32070         7.08378         44.7056         7.08378         44.7056      1222.04   SST           Object [35245]
-      32080         4.60463         47.1683         4.60463         47.1683      1181.72   SST           Object [35245]
-      32090         1.68739         49.7084         1.68739         49.7084      1144.28   SST           Object [35245]
-      32100        -1.77317         52.2979        -1.77317         52.2979      1109.99   SST           Object [35245]
-      32110        -5.90806         54.8944        -5.90806         54.8944      1079.18   SST           Object [35245]
-      32120       -10.8743          57.4358       -10.8743          57.4358      1052.15   SST           Object [35245]
-      32130       -16.8453          59.8355       -16.8453          59.8355      1029.21   SST           Object [35245]
-      32140       -23.9808          61.9795       -23.9808          61.9795      1010.63   SST           Object [35245]
-      32150       -32.3608          63.728        -32.3608          63.728        996.663  SST           Object [35245]
-      32160       -41.885           64.9311       -41.885           64.9311       987.508  SST           Object [35245]
-      32170       -52.1847          65.4602       -52.1847          65.4602       983.299  SST           Object [35245]
-      32180       -62.6468          65.2493       -62.6468          65.2493       984.103  SST           Object [35245]
-      32190       -72.6004          64.3218       -72.6004          64.3218       989.909  SST           Object [35245]
-      32200       -81.548           62.7801       -81.548           62.7801      1000.63   SST           Object [35245]
-      32210       -89.2694          60.7685       -89.2694          60.7685      1016.11   SST           Object [35245]
-      32220       264.227           58.4345       264.227           58.4345      1036.13   SST           Object [35245]
-      32230       258.807           55.9058       258.807           55.9058      1060.45   SST           Object [35245]
-      32240       254.3             53.2827       254.3             53.2827      1088.75   SST           Object [35245]
-      32250       250.538           50.6392       250.538           50.6392      1120.76   SST           Object [35245]
-      32260       247.378           48.0274       247.378           48.0274      1156.15   SST           Object [35245]
-      32270       244.702           45.4823       244.702           45.4823      1194.61   SST           Object [35245]
-      38160       -13.9109          31.7204       -13.9109          31.7204      1520.62   SST           Object [35245]
-      38170       -13.9109          31.7204       -13.9109          31.7204      1520.62   SST           Object [35245]
-      38180       -17.1277          32.2152       -17.1277          32.2152      1505.38   SST           Object [35245]
-      38190       -20.4367          32.61         -20.4367          32.61        1493.3    SST           Object [35245]
-      38200       -23.8189          32.8964       -23.8189          32.8964      1484.44   SST           Object [35245]
-      38210       -27.2525          33.068        -27.2525          33.068       1478.87   SST           Object [35245]
-      38220       -30.7134          33.1207       -30.7134          33.1207      1476.62   SST           Object [35245]
-      38230       -34.1764          33.0531       -34.1764          33.0531      1477.72   SST           Object [35245]
-      38240       -37.6162          32.8662       -37.6162          32.8662      1482.16   SST           Object [35245]
-      38250       -41.0087          32.5638       -41.0087          32.5638      1489.9    SST           Object [35245]
-      38260       -44.3313          32.1522       -44.3313          32.1522      1500.89   SST           Object [35245]
-      38270       -47.5647          31.6394       -47.5647          31.6394      1515.07   SST           Object [35245]
+    2020-10-15 13:33:00.292 ALWAYS  ; Found 3 objects to track
+    2020-10-15 13:33:00.293 INFO    ; Tracking:get_passes(ind=0):propagating 1440 steps
+    /home/danielk/venvs/sorts/lib/python3.7/site-packages/astropy/coordinates/builtin_frames/utils.py:76: AstropyWarning: (some) times are outside of range covered by IERS table. Assuming UT1-UTC=0 for coordinate transformations.
+      warnings.warn(msg.format(ierserr.args[0]), AstropyWarning)
+    /home/danielk/venvs/sorts/lib/python3.7/site-packages/astropy/coordinates/builtin_frames/utils.py:62: AstropyWarning: Tried to get polar motions for times after IERS data is valid. Defaulting to polar motion from the 50-yr mean for those. This may affect precision at the 10s of arcsec level
+      warnings.warn(wmsg, AstropyWarning)
+    2020-10-15 13:33:00.316 INFO    ; Tracking:get_passes(ind=0):propagating complete
+    2020-10-15 13:33:00.317 INFO    ; Tracking:get_passes(ind=0):tx0-rx0 1 passes
+    2020-10-15 13:33:00.317 INFO    ; Tracking:get_passes(ind=1):propagating 1440 steps
+    2020-10-15 13:33:00.342 INFO    ; Tracking:get_passes(ind=1):propagating complete
+    2020-10-15 13:33:00.343 INFO    ; Tracking:get_passes(ind=1):tx0-rx0 1 passes
+    2020-10-15 13:33:00.343 INFO    ; Tracking:get_passes(ind=2):propagating 1440 steps
+    2020-10-15 13:33:00.368 INFO    ; Tracking:get_passes(ind=2):propagating complete
+    2020-10-15 13:33:00.369 INFO    ; Tracking:get_passes(ind=2):tx0-rx0 2 passes
+    2020-10-15 13:33:00.369 INFO    ; Propagating 18 measurement states for object 0
+    2020-10-15 13:33:00.383 INFO    ; Propagating 15 measurement states for object 1
+    2020-10-15 13:33:00.396 INFO    ; Propagating 39 measurement states for object 2
+      t [s]    TX0-az [deg]    TX0-el [deg]    RX0-az [deg]    RX0-el [deg]    RX0-r [km]  Experiment    Target            Pass
+    -------  --------------  --------------  --------------  --------------  ------------  ------------  --------------  ------
+      24750        -7.81651         31.3753        -7.81651         31.3753      1320.94   SST           Object [27386]       0
+      24760        -7.81651         31.3753        -7.81651         31.3753      1320.94   SST           Object [27386]       0
+      24770       -10.9501          32.6738       -10.9501          32.6738      1286.74   SST           Object [27386]       0
+      24780       -14.3455          33.9233       -14.3455          33.9233      1255.67   SST           Object [27386]       0
+      24790       -18.0096          35.0992       -18.0096          35.0992      1227.98   SST           Object [27386]       0
+      24800       -21.9414          36.174        -21.9414          36.174       1203.91   SST           Object [27386]       0
+      24810       -26.1297          37.1185       -26.1297          37.1185      1183.67   SST           Object [27386]       0
+      24820       -30.5509          37.9032       -30.5509          37.9032      1167.48   SST           Object [27386]       0
+      24830       -35.1677          38.5007       -35.1677          38.5007      1155.49   SST           Object [27386]       0
+      24840       -39.9295          38.8882       -39.9295          38.8882      1147.84   SST           Object [27386]       0
+      24850       -44.7746          39.05         -44.7746          39.05        1144.63   SST           Object [27386]       0
+      24860       -49.6343          38.9794       -49.6343          38.9794      1145.89   SST           Object [27386]       0
+      24870       -54.4389          38.679        -54.4389          38.679       1151.6    SST           Object [27386]       0
+      24880       -59.1232          38.1612       -59.1232          38.1612      1161.7    SST           Object [27386]       0
+      24890       -63.6316          37.4461       -63.6316          37.4461      1176.08   SST           Object [27386]       0
+      24900       -67.921           36.5595       -67.921           36.5595      1194.57   SST           Object [27386]       0
+      24910       -71.9623          35.5302       -71.9623          35.5302      1216.99   SST           Object [27386]       0
+      24920       -75.7393          34.388        -75.7393          34.388       1243.12   SST           Object [27386]       0
+      20610        -7.6938          35.2126        -7.6938          35.2126      1021.76   SST           Object [35227]       0
+      20620        -7.6938          35.2126        -7.6938          35.2126      1021.76   SST           Object [35227]       0
+      20630       -11.8068          37.1342       -11.8068          37.1342       985.034  SST           Object [35227]       0
+      20640       -16.4506          38.9893       -16.4506          38.9893       952.525  SST           Object [35227]       0
+      20650       -21.6599          40.7119       -21.6599          40.7119       924.68   SST           Object [35227]       0
+      20660       -27.4404          42.2229       -27.4404          42.2229       901.935  SST           Object [35227]       0
+      20670       -33.7532          43.4366       -33.7532          43.4366       884.687  SST           Object [35227]       0
+      20680       -40.5009          44.2711       -40.5009          44.2711       873.263  SST           Object [35227]       0
+      20690       -47.526           44.6621       -47.526           44.6621       867.896  SST           Object [35227]       0
+      20700       -54.6258          44.577        -54.6258          44.577        868.698  SST           Object [35227]       0
+      20710       -61.5849          44.0217       -61.5849          44.0217       875.654  SST           Object [35227]       0
+      20720       -68.2117          43.0402       -68.2117          43.0402       888.619  SST           Object [35227]       0
+      20730       -74.3668          41.7038       -74.3668          41.7038       907.333  SST           Object [35227]       0
+      20740       -79.972           40.0971       -79.972           40.0971       931.449  SST           Object [35227]       0
+      20750       -85.0038          38.305        -85.0038          38.305        960.557  SST           Object [35227]       0
+      32010        15.2715          33.9166        15.2715          33.9166      1457.62   SST           Object [35245]       0
+      32020        15.2715          33.9166        15.2715          33.9166      1457.62   SST           Object [35245]       0
+      32030        14.0373          35.863         14.0373          35.863       1406.73   SST           Object [35245]       0
+      32040        12.6381          37.9139        12.6381          37.9139      1357.52   SST           Object [35245]       0
+      32050        11.0415          40.0719        11.0415          40.0719      1310.19   SST           Object [35245]       0
+      32060         9.20671         42.337          9.20671         42.337       1264.95   SST           Object [35245]       0
+      32070         7.08235         44.7055         7.08235         44.7055      1222.04   SST           Object [35245]       0
+      32080         4.60303         47.1682         4.60303         47.1682      1181.73   SST           Object [35245]       0
+      32090         1.6856          49.7082         1.6856          49.7082      1144.28   SST           Object [35245]       0
+      32100        -1.77517         52.2977        -1.77517         52.2977      1110      SST           Object [35245]       0
+      32110        -5.91026         54.894         -5.91026         54.894       1079.19   SST           Object [35245]       0
+      32120       -10.8767          57.4352       -10.8767          57.4352      1052.16   SST           Object [35245]       0
+      32130       -16.8479          59.8348       -16.8479          59.8348      1029.22   SST           Object [35245]       0
+      32140       -23.9834          61.9786       -23.9834          61.9786      1010.64   SST           Object [35245]       0
+      32150       -32.3633          63.7269       -32.3633          63.7269       996.672  SST           Object [35245]       0
+      32160       -41.8871          64.9298       -41.8871          64.9298       987.517  SST           Object [35245]       0
+      32170       -52.1862          65.4586       -52.1862          65.4586       983.31   SST           Object [35245]       0
+      32180       -62.6475          65.2476       -62.6475          65.2476       984.115  SST           Object [35245]       0
+      32190       -72.6003          64.32         -72.6003          64.32         989.921  SST           Object [35245]       0
+      32200       -81.5473          62.7784       -81.5473          62.7784      1000.64   SST           Object [35245]       0
+      32210       -89.2682          60.7668       -89.2682          60.7668      1016.12   SST           Object [35245]       0
+      32220       264.228           58.4329       264.228           58.4329      1036.15   SST           Object [35245]       0
+      32230       258.809           55.9043       258.809           55.9043      1060.46   SST           Object [35245]       0
+      32240       254.302           53.2814       254.302           53.2814      1088.77   SST           Object [35245]       0
+      32250       250.54            50.638        250.54            50.638       1120.77   SST           Object [35245]       0
+      32260       247.38            48.0263       247.38            48.0263      1156.16   SST           Object [35245]       0
+      32270       244.704           45.4812       244.704           45.4812      1194.63   SST           Object [35245]       0
+      38160       -13.9116          31.7201       -13.9116          31.7201      1520.63   SST           Object [35245]       1
+      38170       -13.9116          31.7201       -13.9116          31.7201      1520.63   SST           Object [35245]       1
+      38180       -17.1283          32.2148       -17.1283          32.2148      1505.39   SST           Object [35245]       1
+      38190       -20.4372          32.6095       -20.4372          32.6095      1493.31   SST           Object [35245]       1
+      38200       -23.8194          32.8959       -23.8194          32.8959      1484.45   SST           Object [35245]       1
+      38210       -27.253           33.0675       -27.253           33.0675      1478.88   SST           Object [35245]       1
+      38220       -30.7138          33.1202       -30.7138          33.1202      1476.64   SST           Object [35245]       1
+      38230       -34.1768          33.0525       -34.1768          33.0525      1477.74   SST           Object [35245]       1
+      38240       -37.6166          32.8655       -37.6166          32.8655      1482.18   SST           Object [35245]       1
+      38250       -41.0089          32.5632       -41.0089          32.5632      1489.92   SST           Object [35245]       1
+      38260       -44.3315          32.1515       -44.3315          32.1515      1500.91   SST           Object [35245]       1
+      38270       -47.5648          31.6387       -47.5648          31.6387      1515.09   SST           Object [35245]       1
 
 
 
@@ -152,7 +156,7 @@ E3D Demonstrator SST planner
     import matplotlib.pyplot as plt
     from tabulate import tabulate
     from mpl_toolkits.mplot3d import Axes3D
-    from astropy.time import Time
+    from astropy.time import Time, TimeDelta
 
     import sorts
 
@@ -176,57 +180,78 @@ E3D Demonstrator SST planner
         def set_measurements(self):
             dw = self.controller_args['dwell']
 
+            #we probably need to make sure we do not have overlapping measurements
+            #this is a very "stupid" scheduler but we can do at least that!
+            #So create a vector of all scheduled measurements
+            t_all = []
+
             for ind, so in enumerate(self.space_objects):
+                #This is a list of all passes times
                 t_vec = []
+            
                 for txi in range(len(self.radar.tx)):
                     for rxi in range(len(self.radar.rx)):
                         for ps in self.passes[ind][txi][rxi]:
-                            #lets just measure it all!
-                            t_vec += np.arange(ps.start(), ps.end(), dw).tolist()
+                            #lets just measure it all! From rise to fall
+                            __t = np.arange(ps.start(), ps.end(), dw)
 
-                #we probably need to make sure we do not have overlapping measurements
-                #this is a very "stupid" scheduler
-                t = np.array(t_vec)
-                t_keep = np.full(t.shape, True, dtype=np.bool)
+                            #Check for overlap
 
-                for ch_ind in range(ind):
-                    t_ch_keep = np.full(self.states_t[ch_ind].shape, True, dtype=np.bool)
-                    #this creates a matrix of all possible time differences
-                    t_diff = self.states_t[ch_ind][:,None] - t[None,:]
+                            #to keep from this pass
+                            t_keep = np.full(__t.shape, True, dtype=np.bool)
+                            #to remove (index form) from all previous scheduled
+                            t_all_del = []
 
-                    #find the ones that overlap with previously selected measurements
-                    inds = np.argwhere(np.logical_and(t_diff <= 0, t_diff >= -dw ))
+                            #this creates a matrix of all possible time differences
+                            t_diff = np.array(t_all)[:,None] - __t[None,:]
 
-                    #just do every other
-                    first_one = True
-                    for bad_samp in inds:
-                        if first_one:
-                            t_keep[bad_samp[1]] = False
-                        else:
-                            t_ch_keep[bad_samp[0]] = False
+                            #find the ones that overlap with previously selected measurements
+                            inds = np.argwhere(np.logical_and(t_diff <= 0, t_diff >= -dw ))
 
-                        first_one = not first_one
-                    t = t[t_keep]
+                            #just keep every other, so we are "fair"
+                            first_one = True
+                            for bad_samp in inds:
+                                if first_one:
+                                    t_keep[bad_samp[1]] = False
+                                else:
+                                    t_all_del.append(bad_samp[0])
+                                first_one = not first_one
 
-                    self.states_t[ch_ind] = self.states_t[ch_ind][t_ch_keep]
-                    self.states[ch_ind] = self.states[ch_ind][:,t_ch_keep]
+                            __t = __t[t_keep]
+
+                            #slow and ugly but does the job (filter away measurements)
+                            t_all = [t_all[x] for x in range(len(t_all)) if x not in t_all_del]
+
+                            t_vec += [__t]
+                            t_all += __t.tolist()
 
                 if self.logger is not None:
-                    self.logger.info(f'Propagating {len(t)} measurement states for object {ind}')
+                    self.logger.info(f'Propagating {sum(len(t) for t in t_vec)} measurement states for object {ind}')
 
+                #epoch difference
                 dt = (self.space_objects[ind].epoch - self.epoch).to_value('sec')
-                self.states[ind] = so.get_state(t - dt)
-                self.states_t[ind] = t
 
+                if self.collect_passes:
+                    t_vec = np.concatenate(t_vec)
+
+                    self.states[ind] = so.get_state(t_vec - dt)
+                    self.states_t[ind] = t
+                else:
+                    self.states[ind] = [so.get_state(t - dt) for t in t_vec]
+                    self.states_t[ind] = t_vec
 
         def generate_schedule(self, t, generator, group_target=False):
             data = np.empty((len(t),len(self.radar.tx)*2+len(self.radar.rx)*3+1), dtype=np.float64)
+
+            #here we get a time vector of radar events and the generator that gives the "radar" and meta data for that event
+            #Use that to create a schedule table
 
             all_targets = dict()
 
             data[:,0] = t
             targets = []
             experiment = []
+            passid = []
             for ind,mrad in enumerate(generator):
                 radar, meta = mrad
                 targets.append(meta['target'])
@@ -237,6 +262,7 @@ E3D Demonstrator SST planner
                     all_targets[meta['target']] = [ind]
 
                 experiment.append('SST')
+                passid.append(meta['pass'])
 
                 for ti, tx in enumerate(radar.tx):
                     data[ind,1+ti*2] = tx.beam.azimuth
@@ -247,10 +273,11 @@ E3D Demonstrator SST planner
                     data[ind,len(radar.tx)*2+2+ri*3] = rx.beam.elevation
                     data[ind,len(radar.tx)*2+3+ri*3] = rx.pointing_range*1e-3 #to km
 
-            data = data.T.tolist() + [experiment, targets]
+            data = data.T.tolist() + [experiment, targets, passid]
             data = list(map(list, zip(*data)))
 
             if group_target:
+                #Create a dict of tables instead
                 data_ = dict()
                 for key in all_targets:
                     for ind in all_targets[key]:
@@ -289,15 +316,16 @@ E3D Demonstrator SST planner
     logger = sorts.profiling.get_logger()
 
     try:
-        pth = pathlib.Path(__file__).parent / 'data' / 'space_track_tle.txt'
+        pth = pathlib.Path(__file__).parent / 'data' / 'tle.txt'
     except NameError:
         import os
-        pth = 'data' + os.path.sep + 'space_track_tle.txt'
+        pth = 'data' + os.path.sep + 'tle.txt'
 
     pop = tle_catalog(pth, kepler=True)
 
     pop.propagator_options['settings']['out_frame'] = 'ITRS' #output states in ECEF
 
+    #Get the space objects to track
     space_objects = []
     for obj in objects:
         ind = np.argwhere(pop.data['oid'] == obj)
@@ -306,6 +334,7 @@ E3D Demonstrator SST planner
 
     logger.always(f'Found {len(space_objects)} objects to track')
 
+    #Initialize the scheduler
     scheduler = ObservedTracking(
         radar = e3d_demo, 
         epoch = epoch,
@@ -319,27 +348,45 @@ E3D Demonstrator SST planner
         use_pass_states = False,
     )
 
+    #update the passes
     scheduler.update()
+
+    #set the measurements using the current passes
     scheduler.set_measurements()
 
+    #Generate the schedule, grouped by target
     grouped_data = scheduler.schedule(group_target=True)
 
     for key in grouped_data:
-        ax = sorts.plotting.local_tracking(
-            np.array([x[1] for x in grouped_data[key]]),
-            np.array([x[2] for x in grouped_data[key]]),
-        )
+        pass_id = np.array([x[-1] for x in grouped_data[key]], dtype=np.int) #pass index is last variable
+        passes = np.unique(pass_id)
+
+        tv = np.array([x[0] for x in grouped_data[key]]) #we put t at index 0
+        az = np.array([x[1] for x in grouped_data[key]]) #we put az at index 1
+        el = np.array([x[2] for x in grouped_data[key]]) #and el at index 2
+
+        fig, ax = plt.subplots(1,1)
+        for pi, ps in enumerate(passes):
+            ax = sorts.plotting.local_tracking(
+                az[pass_id == ps], 
+                el[pass_id == ps], 
+                ax=ax, 
+                t=epoch + TimeDelta(tv, format='sec'),
+                add_track = pi > 0, #if there are more then one, dont redraw all the extra, just add the track
+            )
         ax.set_title(key)
 
+    #Generate a combined schedule
     data = scheduler.schedule()
 
+    #Format and print schedule
     rx_head = [f'TX{i}-{co}' for i in range(len(e3d_demo.tx)) for co in ['az [deg]', 'el [deg]']]
     rx_head += [f'RX{i}-{co}' for i in range(len(e3d_demo.rx)) for co in ['az [deg]', 'el [deg]', 'r [km]']]
-    sched_tab = tabulate(data, headers=["t [s]"] + rx_head + ['Experiment', 'Target'])
+    sched_tab = tabulate(data, headers=["t [s]"] + rx_head + ['Experiment', 'Target', 'Pass'])
 
     print(sched_tab)
 
-
+    #Plot radar pointing diagram
     fig = plt.figure(figsize=(15,15))
     ax = fig.add_subplot(211)
     ax.plot([x[0]/3600.0 for x in data], [x[1] for x in data], ".b")
@@ -356,7 +403,7 @@ E3D Demonstrator SST planner
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  16.081 seconds)
+   **Total running time of the script:** ( 0 minutes  16.788 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_e3d_demo_planner.py:

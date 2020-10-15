@@ -21,6 +21,8 @@ Module summary
     
     az_el_to_xy
     
+    local_passes
+    
     local_tracking
     
 
@@ -39,6 +41,11 @@ Contents
 
 
 .. autofunction:: az_el_to_xy
+   :noindex:
+
+
+
+.. autofunction:: local_passes
    :noindex:
 
 

@@ -1,0 +1,8 @@
+epochType.str\_kwargs
+=====================
+
+.. currentmodule:: sorts.io.ccsds
+
+.. rubric:: epochType.str_kwargs
+
+.. automethod:: epochType.str_kwargs

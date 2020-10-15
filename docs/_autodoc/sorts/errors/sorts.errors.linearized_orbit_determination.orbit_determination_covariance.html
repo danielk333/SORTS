@@ -1,0 +1,126 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>orbit_determination_covariance &#8212; SORTS 4.0.0-rc.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="ccsds" href="../io/sorts.io.ccsds.html" />
+    <link rel="prev" title="covariance_propagation" href="sorts.errors.linearized_orbit_determination.covariance_propagation.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../io/sorts.io.ccsds.html" title="ccsds"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sorts.errors.linearized_orbit_determination.covariance_propagation.html" title="covariance_propagation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.errors.linearized_orbit_determination.html" accesskey="U">linearized_orbit_determination</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sorts.errors.linearized_orbit_determination.covariance_propagation.html"
+                        title="previous chapter">covariance_propagation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../io/sorts.io.ccsds.html"
+                        title="next chapter">ccsds</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/_autodoc/sorts/errors/sorts.errors.linearized_orbit_determination.orbit_determination_covariance.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="orbit-determination-covariance">
+<h1>orbit_determination_covariance<a class="headerlink" href="#orbit-determination-covariance" title="Permalink to this headline">¶</a></h1>
+<p class="rubric">orbit_determination_covariance</p>
+<dl class="py function">
+<dt id="sorts.errors.linearized_orbit_determination.orbit_determination_covariance">
+<code class="sig-prename descclassname">sorts.errors.linearized_orbit_determination.</code><code class="sig-name descname">orbit_determination_covariance</code><span class="sig-paren">(</span><em class="sig-param">passes, scheduler, space_object, variables=['x', 'y', 'z', 'vx', 'vy', 'vz', 'A'], deltas=[0.0001, 0.0001, 0.0001, 1e-06, 1e-06, 1e-06, 0.01], cache_folder=None, ray_bending=True, prior_cov_inv=None, transforms={'A': (&lt;function &lt;lambda&gt;&gt;, &lt;function &lt;lambda&gt;&gt;)}</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/errors/linearized_orbit_determination.html#orbit_determination_covariance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.errors.linearized_orbit_determination.orbit_determination_covariance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a series of passes and calculates a orbit determination covariance of the measurement model is linear and linearized coded errors with optionally ionospheric effects are included.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../io/sorts.io.ccsds.html" title="ccsds"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sorts.errors.linearized_orbit_determination.covariance_propagation.html" title="covariance_propagation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.errors.linearized_orbit_determination.html" >linearized_orbit_determination</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

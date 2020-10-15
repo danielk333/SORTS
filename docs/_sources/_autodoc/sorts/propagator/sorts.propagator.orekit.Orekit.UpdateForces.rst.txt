@@ -1,0 +1,8 @@
+Orekit.UpdateForces
+===================
+
+.. currentmodule:: sorts.propagator.orekit
+
+.. rubric:: Orekit.UpdateForces
+
+.. automethod:: Orekit.UpdateForces

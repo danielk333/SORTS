@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>base &#8212; SORTS 3.18.0 documentation</title>
+    <title>base &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -22,7 +22,7 @@
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="Propagator" href="sorts.propagator.base.Propagator.html" />
-    <link rel="prev" title="SpaceObject.orbit" href="../sorts.space_object.SpaceObject.orbit.html" />
+    <link rel="prev" title="SpaceObject.out_frame" href="../sorts.space_object.SpaceObject.out_frame.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--[if lt IE 9]>
     <script src="_static/css3-mediaqueries.js"></script>
@@ -41,9 +41,9 @@
           <a href="sorts.propagator.base.Propagator.html" title="Propagator"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="../sorts.space_object.SpaceObject.orbit.html" title="SpaceObject.orbit"
+          <a href="../sorts.space_object.SpaceObject.out_frame.html" title="SpaceObject.out_frame"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" accesskey="U">API Reference</a> &#187;</li> 
       </ul>
     </div>
@@ -59,8 +59,8 @@
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="../sorts.space_object.SpaceObject.orbit.html"
-                        title="previous chapter">SpaceObject.orbit</a></p>
+  <p class="topless"><a href="../sorts.space_object.SpaceObject.out_frame.html"
+                        title="previous chapter">SpaceObject.out_frame</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="sorts.propagator.base.Propagator.html"
                         title="next chapter">Propagator</a></p>
@@ -122,6 +122,12 @@
 
 <dl class="py method">
 <dt>
+<code class="sig-name descname">heartbeat</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">state</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/propagator/base.html#Propagator.heartbeat"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Function applied after propagation to time <cite>t</cite> and state <cite>state</cite>, before next time step as given in the input time vector to <cite>propagate</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
 <em class="property">abstract </em><code class="sig-name descname">propagate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">state0</span></em>, <em class="sig-param"><span class="n">epoch</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/propagator/base.html#Propagator.propagate"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Propagate a state</p>
 <p>This function uses key-word argument to supply additional information to the propagator, such as area or mass.</p>
@@ -165,9 +171,9 @@
           <a href="sorts.propagator.base.Propagator.html" title="Propagator"
              >next</a> |</li>
         <li class="right" >
-          <a href="../sorts.space_object.SpaceObject.orbit.html" title="SpaceObject.orbit"
+          <a href="../sorts.space_object.SpaceObject.out_frame.html" title="SpaceObject.out_frame"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li> 
       </ul>
     </div>

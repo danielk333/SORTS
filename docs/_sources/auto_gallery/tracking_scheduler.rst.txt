@@ -26,42 +26,86 @@ An example scheduler for tracking
  .. code-block:: none
 
 
-    Space object 1: <Time object: scale='utc' format='mjd' value=57125.7729>:
-    a    : 7.2000e+06   x : -1.2134e+06
-    e    : 1.0000e-01   y : 2.5788e+06
-    i    : 7.5000e+01   z : 6.2817e+06
-    omega: 0.0000e+00   vx: -2.1687e+03
-    Omega: 7.9000e+01   vy: -6.7605e+03
-    anom : 6.0000e+01   vz: 3.1307e+03
-    Parameters: d=0.01, C_D=2.3, A=1.0, m=1.0, C_R=1.0
+    Space object 1: <Time object: scale='utc' format='mjd' value=53005.0>:
+    a    : 7.2000e+06   x : -9.2921e+05
+    e    : 1.0000e-02   y : 3.7192e+06
+    i    : 7.5000e+01   z : 6.0527e+06
+    omega: 0.0000e+00   vx: -2.1772e+03
+    Omega: 7.9000e+01   vy: -6.2065e+03
+    anom : 6.0000e+01   vz: 3.5565e+03
+    Parameters: C_D=2.3, m=1.0, C_R=1.0, d=1.0
 
-    Space object 2: <Time object: scale='utc' format='mjd' value=57125.7729>:
-    a    : 7.2000e+06   x : 1.7861e+06
-    e    : 1.0000e-01   y : 6.2290e+06
+    Space object 42: <Time object: scale='utc' format='mjd' value=53005.0>:
+    a    : 7.2000e+06   x : 1.9647e+06
+    e    : 1.0000e-02   y : 6.8519e+06
     i    : 6.9000e+01   z : 0.0000e+00
-    omega: 0.0000e+00   vx: -2.8337e+03
-    Omega: 7.4000e+01   vy: 8.1254e+02
-    anom : 0.0000e+00   vz: 7.6794e+03
-    Parameters: d=0.01, C_D=2.3, A=1.0, m=1.0, C_R=1.0
-    2020-09-23 10:54:18.491 INFO    ; Tracking:get_passes(ind=0):propagating 177678 steps
-    2020-09-23 10:54:19.948 INFO    ; Tracking:get_passes(ind=0):propagating complete
-    /home/danielk/IRF/IRF_GITLAB/pyant/pyant/coordinates.py:89: RuntimeWarning: invalid value encountered in greater
-      proj[proj > 1.0] = 1.0
-    /home/danielk/IRF/IRF_GITLAB/pyant/pyant/coordinates.py:90: RuntimeWarning: invalid value encountered in less
-      proj[proj < -1.0] = -1.0
-    /home/danielk/IRF/IRF_GITLAB/SORTS/sorts/passes.py:269: RuntimeWarning: invalid value encountered in less
-      check_st = zenith_st_ang < 90.0-station.min_elevation
-    2020-09-23 10:54:20.046 INFO    ; Tracking:get_passes(ind=0):tx0-rx0 0 passes
-    2020-09-23 10:54:20.047 INFO    ; Tracking:get_passes(ind=0):tx0-rx1 0 passes
-    2020-09-23 10:54:20.047 INFO    ; Tracking:get_passes(ind=0):tx0-rx2 0 passes
-    2020-09-23 10:54:20.049 INFO    ; Tracking:get_passes(ind=1):propagating 177678 steps
-    2020-09-23 10:54:21.502 INFO    ; Tracking:get_passes(ind=1):propagating complete
-    2020-09-23 10:54:21.591 INFO    ; Tracking:get_passes(ind=1):tx0-rx0 0 passes
-    2020-09-23 10:54:21.591 INFO    ; Tracking:get_passes(ind=1):tx0-rx1 0 passes
-    2020-09-23 10:54:21.591 INFO    ; Tracking:get_passes(ind=1):tx0-rx2 0 passes
-    t [s]    rx0 az    rx0 el    rx1 az    rx1 el    rx2 az    rx2 el    Controller    Target
-    -------  --------  --------  --------  --------  --------  --------  ------------  --------
-    No handles with labels found to put in legend.
+    omega: 0.0000e+00   vx: -2.5889e+03
+    Omega: 7.4000e+01   vy: 7.4236e+02
+    anom : 0.0000e+00   vz: 7.0161e+03
+    Parameters: C_D=2.3, m=1.0, C_R=1.0, d=1.0
+    2020-10-15 13:25:07.012 INFO    ; Tracking:get_passes(ind=0):propagating 32467 steps
+    2020-10-15 13:25:07.323 INFO    ; Tracking:get_passes(ind=0):propagating complete
+    2020-10-15 13:25:07.343 INFO    ; Tracking:get_passes(ind=0):tx0-rx0 5 passes
+    2020-10-15 13:25:07.343 INFO    ; Tracking:get_passes(ind=0):tx0-rx1 5 passes
+    2020-10-15 13:25:07.343 INFO    ; Tracking:get_passes(ind=0):tx0-rx2 5 passes
+    2020-10-15 13:25:07.344 INFO    ; Tracking:get_passes(ind=1):propagating 32467 steps
+    2020-10-15 13:25:07.708 INFO    ; Tracking:get_passes(ind=1):propagating complete
+    2020-10-15 13:25:07.727 INFO    ; Tracking:get_passes(ind=1):tx0-rx0 3 passes
+    2020-10-15 13:25:07.727 INFO    ; Tracking:get_passes(ind=1):tx0-rx1 3 passes
+    2020-10-15 13:25:07.728 INFO    ; Tracking:get_passes(ind=1):tx0-rx2 3 passes
+        t [s]    rx0 az    rx0 el    rx1 az    rx1 el    rx2 az    rx2 el  Controller    Target
+    ---------  --------  --------  --------  --------  --------  --------  ------------  ---------
+      131.731  216.13     46.6683  229.657    47.2974  222.079    52.7021  Tracker       Object 1
+      324.671   50.888    49.0413   40.7894   48.7283   43.3103   44.011   Tracker       Object 1
+     6413.59   -48.0509   52.8083  -44.9576   46.2558  -38.0438   48.5331  Tracker       Object 1
+     6606.53    43.5413   30.4887   38.9828   30.0099   39.5514   27.3577  Tracker       Object 1
+    12746       30.7813   45.4085   23.2488   43.2993   26.9295   40.0694  Tracker       Object 1
+    18865.5    -25.0317   51.5186  -26.1979   45.4591  -19.1973   45.9287  Tracker       Object 1
+    19058.5     97.4958   40.5511   92.9755   44.4608   87.8783   39.9397  Tracker       Object 1
+    25118.1    261.275    62.5315  -83.5205   57.4678  -79.0123   63.7625  Tracker       Object 1
+    25311.1    163.834    30.986   169.08     34.5103  160.01     34.6522  Tracker       Object 1
+     7331.72   253.646    30.0609  261.399    28.2752  259.755    31.6237  Tracker       Object 42
+     7355.67   253.064    35.0062  261.755    32.9105  260.308    36.856   Tracker       Object 42
+     7379.62   252.22     40.8511  262.207    38.3734  261.054    43.0626  Tracker       Object 42
+     7403.57   250.924    47.7954  262.816    44.8651  262.144    50.4523  Tracker       Object 42
+     7427.52   248.747    56.0139  263.717    52.5938  263.948    59.1937  Tracker       Object 42
+     7451.48   244.474    65.54    265.258    61.7093  267.66     69.289   Tracker       Object 42
+     7475.43   233.033    75.9531  268.692    72.1663  -79.862    80.2639  Tracker       Object 42
+     7499.38   176.398    83.8848  -75.8299   83.3889   26.2546   85.2344  Tracker       Object 42
+     7523.33   106.949    77.4746   56.235    83.5115   63.8875   74.8802  Tracker       Object 42
+     7547.28    93.1786   67.1633   72.0856   72.3816   70.108    64.3605  Tracker       Object 42
+     7571.23    88.3804   57.6262   75.5549   62.0612   72.6141   55.0814  Tracker       Object 42
+     7595.18    86.0116   49.379    77.1063   53.0963   73.9944   47.1814  Tracker       Object 42
+     7619.13    84.6265   42.4057   78.0126   45.5076   74.888    40.5392  Tracker       Object 42
+     7643.08    83.7341   36.5361   78.6249   39.1353   75.5277   34.953   Tracker       Object 42
+     7667.04    83.1232   31.571    79.0787   33.7698   76.0182   30.2199  Tracker       Object 42
+    13575      -82.5089   33.3807  -76.1741   30.2224  -75.3584   33.2528  Tracker       Object 42
+    13598.9    -83.3905   38.8372  -76.2466   35.1317  -74.8291   38.7016  Tracker       Object 42
+    13622.9    -84.6997   45.289   -76.3834   40.9257  -74.1097   45.1591  Tracker       Object 42
+    13646.8    -86.7957   52.9114  -76.6304   47.8055  -73.0388   52.8225  Tracker       Object 42
+    13670.8    269.414    61.7847  -77.0917   55.9619  -71.2032   61.8275  Tracker       Object 42
+    13694.7    260.872    71.6729  -78.0627   65.4949  -67.1339   72.1125  Tracker       Object 42
+    13718.7    231.01     81.002   -80.8398   76.2745  -49.7025   83.0317  Tracker       Object 42
+    13742.6    151.976    80.5195  248.361    87.4934   73.1889   83.5312  Tracker       Object 42
+    13766.6    125.024    71.093   114.336    80.1447   92.5828   72.718   Tracker       Object 42
+    13790.6    117.023    61.3871  109.675    69.1472   96.8525   62.5149  Tracker       Object 42
+    13814.5    113.401    52.7461  108.358    59.3053   98.7441   53.5966  Tracker       Object 42
+    13838.5    111.375    45.347   107.775    50.8356   99.8374   46.0138  Tracker       Object 42
+    13862.4    110.102    39.0882  107.471    43.6779  100.568    39.6253  Tracker       Object 42
+    13886.4    109.24     33.7906  107.302    37.6532  101.102    34.2334  Tracker       Object 42
+    19795.6    -81.3969   31.0712  -75.4759   28.1323  -74.8653   30.898   Tracker       Object 42
+    19819.6    -85.8548   35.3173  -78.9956   32.1254  -78.2883   35.4351  Tracker       Object 42
+    19843.5    268.292    39.8977  -83.565    36.5341  -82.9017   40.5201  Tracker       Object 42
+    19867.5    260.485    44.6193  -89.6281   41.2908  -89.3311   46.0803  Tracker       Object 42
+    19891.4    250.054    49.0581  262.187    46.1744  261.427    51.8199  Tracker       Object 42
+    19915.4    236.557    52.4965  251.126    50.7018  248.009    57.023   Tracker       Object 42
+    19939.3    220.568    54.0721  236.737    54.0637  229.595    60.4226  Tracker       Object 42
+    19963.3    204.186    53.2843  219.855    55.3342  208.365    60.6984  Tracker       Object 42
+    19987.3    189.808    50.4228  203.019    54.0829  189.35     57.748   Tracker       Object 42
+    20011.2    178.474    46.3065  188.731    50.773   175.272    52.8108  Tracker       Object 42
+    20035.2    169.948    41.7219  177.769    46.3333  165.55     47.2053  Tracker       Object 42
+    20059.1    163.571    37.1721  169.659    41.556   158.808    41.7079  Tracker       Object 42
+    20083.1    158.74     32.9049  163.648    36.9074  153.99     36.6506  Tracker       Object 42
 
 
 
@@ -80,48 +124,57 @@ An example scheduler for tracking
     from astropy.time import Time
 
     import sorts
-    eiscat3d = sorts.radars.eiscat3d
+
     from sorts.scheduler import PriorityTracking, ObservedParameters
     from sorts import SpaceObject
     from sorts.profiling import Profiler
-
-
     from sorts.propagator import SGP4
-    Prop_cls = SGP4
-    Prop_opts = dict(
+
+
+    eiscat3d = sorts.radars.eiscat3d
+
+
+    poptions = dict(
         settings = dict(
-            out_frame='ITRF',
+            in_frame='GCRS',
+            out_frame='ITRS',
         ),
     )
+
+    epoch = Time(53005.0, format='mjd')
 
     logger = sorts.profiling.get_logger('tracking')
 
     objs = [
         SpaceObject(
-            Prop_cls,
-            propagator_options = Prop_opts,
+            SGP4,
+            propagator_options = poptions,
             a = 7200e3, 
-            e = 0.1, 
+            e = 0.01, 
             i = 75, 
             raan = 79,
             aop = 0,
             mu0 = 60,
-            mjd0 = 53005.0,
-            d = 1.0,
+            epoch = epoch,
+            parameters = dict(
+                d = 1.0,
+            ),
             oid = 1,
         ),
         SpaceObject(
-            Prop_cls,
-            propagator_options = Prop_opts,
+            SGP4,
+            propagator_options = poptions,
             a = 7200e3, 
-            e = 0.1, 
+            e = 0.01, 
             i = 69, 
             raan = 74,
             aop = 0,
             mu0 = 0,
-            mjd0 = 53005.0,
-            d = 1.0,
-            oid = 2,
+            epoch = epoch,
+            parameters = dict(
+                d = 1.0,
+            ),
+            oid = 42,
         )
     ]
 
@@ -149,11 +202,14 @@ An example scheduler for tracking
         radar = eiscat3d, 
         space_objects = objs, 
         timeslice = 0.1, 
-        allocation = 0.1*200, 
-        end_time = 3600*6.0,
-        epoch = Time(53005.0, format='mjd'),
+        allocation = 0.1*50, 
+        end_time = 3600*12.0,
+        max_dpos = 1e4,
+        epoch = epoch,
         priority = [0.2, 1.0],
         logger = logger,
+        use_pass_states = True,
+        collect_passes = True,
     )
 
     scheduler.update()
@@ -171,7 +227,6 @@ An example scheduler for tracking
         data = scheduler.observe_passes(scheduler.passes[ind], space_object = objs[ind], snr_limit=False)
         datas.append(data)
 
-    # print(data)
 
     fig = plt.figure(figsize=(15,15))
     axes = [
@@ -185,26 +240,35 @@ An example scheduler for tracking
         ],
     ]
 
-
-
     for ind in range(len(objs)):
-        for pi in range(len(scheduler.passes[ind][0][0])):
-            ps = scheduler.passes[ind][0][0][pi]
-            axes[0][0].plot(ps.enu[0][0,:], ps.enu[0][1,:], ps.enu[0][2,:], '-')
-            dat = datas[ind][0][0][pi]
+        for pi, ps in enumerate(scheduler.passes[ind][0][0]):
 
-            if dat is not None:
-                axes[0][1].plot(dat['t']/3600.0, dat['range'], '-', label=f'obj{ind}-pass{pi}')
-                axes[1][0].plot(dat['t']/3600.0, dat['range_rate'], '-')
-                axes[1][1].plot(dat['t']/3600.0, 10*np.log10(dat['snr']), '-')
+            zang = ps.zenith_angle()
+            snr = ps.calculate_snr(eiscat3d.tx[0], eiscat3d.rx[0], diameter=objs[ind].d)
 
+            axes[0][0].plot(ps.enu[0][0,:], ps.enu[0][1,:], ps.enu[0][2,:], '-', label=f'pass-{pi}')
+            axes[0][0].set_xlabel('East-North-Up coordinates')
 
-    axes[0][1].legend()
+            axes[0][1].plot((ps.t - ps.start())/3600.0, zang[0], '-', label=f'pass-{pi}')
+            axes[0][1].set_xlabel('Time past epoch [h]')
+            axes[0][1].set_ylabel('Zenith angle from TX [deg]')
+
+            axes[1][0].plot((ps.t - ps.start())/3600.0, ps.range()[0]*1e-3, '-', label=f'pass-{pi}')
+            axes[1][0].set_xlabel('Time past epoch [h]')
+            axes[1][0].set_ylabel('Range from TX [km]')
+
+            axes[1][1].plot((ps.t - ps.start())/3600.0, 10*np.log10(snr), '-', label=f'optimal-pass-{pi}')
+            axes[1][1].plot((datas[ind][0][0][pi]['t'] - ps.start())/3600.0, 10*np.log10(datas[ind][0][0][pi]['snr']), '.', label=f'observed-pass-{pi}')
+            axes[1][1].set_xlabel('Time past epoch [h]')
+            axes[1][1].set_ylabel('SNR [dB]')
+
+    axes[1][1].legend()
     plt.show()
+
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.592 seconds)
+   **Total running time of the script:** ( 0 minutes  10.727 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_tracking_scheduler.py:

@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>sorts.errors.ionospheric_ray_trace &#8212; SORTS 3.18.0 documentation</title>
+    <title>sorts.errors.ionospheric_ray_trace &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -84,6 +84,7 @@
 <span class="kn">import</span> <span class="nn">scipy.constants</span> <span class="k">as</span> <span class="nn">constants</span>
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">frames</span>
+<span class="kn">from</span> <span class="nn">.errors</span> <span class="kn">import</span> <span class="n">Errors</span>
 
 <div class="viewcode-block" id="calculate_delay"><a class="viewcode-back" href="../../../_autodoc/sorts/errors/sorts.errors.ionospheric_ray_trace.calculate_delay.html#sorts.errors.ionospheric_ray_trace.calculate_delay">[docs]</a><span class="k">def</span> <span class="nf">calculate_delay</span><span class="p">(</span>
         <span class="n">time</span><span class="p">,</span>
@@ -510,6 +511,42 @@
 
     <span class="k">return</span> <span class="n">prop_error_mean</span><span class="p">,</span> <span class="n">prop_error_std</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">n_samp</span><span class="p">)),</span> <span class="n">prop_alts</span><span class="p">,</span> <span class="n">ne_i</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxi</span><span class="p">],</span> <span class="n">ne_e_i</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxi</span><span class="p">],</span> <span class="n">alts_i</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">maxi</span><span class="p">]</span></div>
     
+
+<div class="viewcode-block" id="IonosphericRayTrace"><a class="viewcode-back" href="../../../_autodoc/sorts/errors/sorts.errors.ionospheric_ray_trace.IonosphericRayTrace.html#sorts.errors.ionospheric_ray_trace.IonosphericRayTrace">[docs]</a><span class="k">class</span> <span class="nc">IonosphericRayTrace</span><span class="p">(</span><span class="n">Errors</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">     </span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">VARIABLES</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;range&#39;</span><span class="p">,</span> 
+        <span class="s1">&#39;k&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;t&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+<div class="viewcode-block" id="IonosphericRayTrace.__init__"><a class="viewcode-back" href="../../../_autodoc/sorts/errors/sorts.errors.ionospheric_ray_trace.IonosphericRayTrace.__init__.html#sorts.errors.ionospheric_ray_trace.IonosphericRayTrace.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">station</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">electron_density_std</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">electron_density_std</span> <span class="o">=</span> <span class="n">electron_density_std</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">station</span> <span class="o">=</span> <span class="n">station</span></div>
+
+<div class="viewcode-block" id="IonosphericRayTrace.k"><a class="viewcode-back" href="../../../_autodoc/sorts/errors/sorts.errors.ionospheric_ray_trace.IonosphericRayTrace.k.html#sorts.errors.ionospheric_ray_trace.IonosphericRayTrace.k">[docs]</a>    <span class="k">def</span> <span class="nf">k</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">azimuth</span><span class="p">,</span> <span class="n">elevation</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="IonosphericRayTrace.t"><a class="viewcode-back" href="../../../_autodoc/sorts/errors/sorts.errors.ionospheric_ray_trace.IonosphericRayTrace.t.html#sorts.errors.ionospheric_ray_trace.IonosphericRayTrace.t">[docs]</a>    <span class="k">def</span> <span class="nf">t</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">azimuth</span><span class="p">,</span> <span class="n">elevation</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="IonosphericRayTrace.range"><a class="viewcode-back" href="../../../_autodoc/sorts/errors/sorts.errors.ionospheric_ray_trace.IonosphericRayTrace.range.html#sorts.errors.ionospheric_ray_trace.IonosphericRayTrace.range">[docs]</a>    <span class="k">def</span> <span class="nf">range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">azimuth</span><span class="p">,</span> <span class="n">elevation</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">ray_trace_error</span><span class="p">(</span>
+                <span class="n">time</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">station</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">frequency</span><span class="p">,</span>
+                <span class="n">elevation</span><span class="p">,</span>
+                <span class="n">azimuth</span><span class="p">,</span>
+                <span class="n">ionosphere</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">error_std</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">electron_density_std</span><span class="p">,</span>
+            <span class="p">)</span></div></div>
 </pre></div>
 
           </div>
@@ -526,7 +563,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

@@ -1,0 +1,8 @@
+epochType.out\_subfmt
+=====================
+
+.. currentmodule:: sorts.io.ccsds
+
+.. rubric:: epochType.out_subfmt
+
+.. autoproperty:: sorts.io.ccsds.epochType.out_subfmt

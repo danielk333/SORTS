@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>sorts.errors.linearized_coded &#8212; SORTS 3.18.0 documentation</title>
+    <title>sorts.errors.linearized_coded &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -236,7 +236,31 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dopfun</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">enrs</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">ddops</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="LinearizedCoded.range"><a class="viewcode-back" href="../../../_autodoc/sorts/errors/sorts.errors.linearized_coded.LinearizedCoded.range.html#sorts.errors.linearized_coded.LinearizedCoded.range">[docs]</a>    <span class="k">def</span> <span class="nf">range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">snr</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Range in m</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_numpy_seed</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">data</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="o">*</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">range_std</span><span class="p">(</span><span class="n">snr</span><span class="p">)</span></div>
 
+
+
+<div class="viewcode-block" id="LinearizedCoded.doppler"><a class="viewcode-back" href="../../../_autodoc/sorts/errors/sorts.errors.linearized_coded.LinearizedCoded.doppler.html#sorts.errors.linearized_coded.LinearizedCoded.doppler">[docs]</a>    <span class="k">def</span> <span class="nf">doppler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">snr</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Doppler shift in Hz</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_numpy_seed</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">data</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="o">*</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">doppler_std</span><span class="p">(</span><span class="n">snr</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="LinearizedCoded.range_rate"><a class="viewcode-back" href="../../../_autodoc/sorts/errors/sorts.errors.linearized_coded.LinearizedCoded.range_rate.html#sorts.errors.linearized_coded.LinearizedCoded.range_rate">[docs]</a>    <span class="k">def</span> <span class="nf">range_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">snr</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Range rate in m/s</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_numpy_seed</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">data</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="o">*</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">range_rate_std</span><span class="p">(</span><span class="n">snr</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="LinearizedCoded.range_std"><a class="viewcode-back" href="../../../_autodoc/sorts/errors/sorts.errors.linearized_coded.LinearizedCoded.range_std.html#sorts.errors.linearized_coded.LinearizedCoded.range_std">[docs]</a>    <span class="k">def</span> <span class="nf">range_std</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snr</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;The expected standard error of a range measurement in m.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">dr</span> <span class="o">=</span> <span class="mf">10.0</span><span class="o">**</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rfun</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">snr</span><span class="p">)))</span>
 
         <span class="c1"># if object diameter is larger than range error, make it at least as big as target</span>
@@ -247,11 +271,12 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">dr</span><span class="p">[</span><span class="n">dr</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_range_std</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_range_std</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_numpy_seed</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">data</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="o">*</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">*</span><span class="n">dr</span></div>
+        <span class="k">return</span> <span class="n">dr</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_get_ddop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snr</span><span class="p">):</span>
+<div class="viewcode-block" id="LinearizedCoded.doppler_std"><a class="viewcode-back" href="../../../_autodoc/sorts/errors/sorts.errors.linearized_coded.LinearizedCoded.doppler_std.html#sorts.errors.linearized_coded.LinearizedCoded.doppler_std">[docs]</a>    <span class="k">def</span> <span class="nf">doppler_std</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snr</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;The expected standard error of a Doppler measurement in Hz.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">ddop</span> <span class="o">=</span> <span class="mf">10.0</span><span class="o">**</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dopfun</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">snr</span><span class="p">)))</span>
 
 
@@ -260,25 +285,14 @@
                 <span class="n">ddop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_range_rate_std</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ddop</span><span class="p">[</span><span class="n">ddop</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_range_rate_std</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_range_rate_std</span>
-        <span class="k">return</span> <span class="n">ddop</span>
+        <span class="k">return</span> <span class="n">ddop</span></div>
 
 
-<div class="viewcode-block" id="LinearizedCoded.doppler"><a class="viewcode-back" href="../../../_autodoc/sorts/errors/sorts.errors.linearized_coded.LinearizedCoded.doppler.html#sorts.errors.linearized_coded.LinearizedCoded.doppler">[docs]</a>    <span class="k">def</span> <span class="nf">doppler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">snr</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Range rate in m/s</span>
+<div class="viewcode-block" id="LinearizedCoded.range_rate_std"><a class="viewcode-back" href="../../../_autodoc/sorts/errors/sorts.errors.linearized_coded.LinearizedCoded.range_rate_std.html#sorts.errors.linearized_coded.LinearizedCoded.range_rate_std">[docs]</a>    <span class="k">def</span> <span class="nf">range_rate_std</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snr</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;The expected standard error of a range rate measurement in m/s.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">ddop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ddop</span><span class="p">(</span><span class="n">snr</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_numpy_seed</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">data</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="o">*</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">*</span><span class="n">ddop</span></div>
-
-
-<div class="viewcode-block" id="LinearizedCoded.range_rate"><a class="viewcode-back" href="../../../_autodoc/sorts/errors/sorts.errors.linearized_coded.LinearizedCoded.range_rate.html#sorts.errors.linearized_coded.LinearizedCoded.range_rate">[docs]</a>    <span class="k">def</span> <span class="nf">range_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">snr</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Range rate in m/s</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">ddop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ddop</span><span class="p">(</span><span class="n">snr</span><span class="p">)</span>
-        <span class="n">rr_std</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">c</span><span class="o">*</span><span class="n">ddop</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">freq</span><span class="o">/</span><span class="mf">2.0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_numpy_seed</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">data</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="o">*</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">*</span><span class="n">rr_std</span></div></div>
-
+        <span class="n">rr_std</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">c</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">doppler_std</span><span class="p">(</span><span class="n">snr</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">freq</span><span class="o">/</span><span class="mf">2.0</span>
+        <span class="k">return</span> <span class="n">rr_std</span></div></div>
 
 
 
@@ -287,22 +301,21 @@
     <span class="sd">&#39;&#39;&#39;233e6 Hz worst case scenario at zenith only!</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
-<div class="viewcode-block" id="LinearizedCodedIonospheric.__init__"><a class="viewcode-back" href="../../../_autodoc/sorts/errors/sorts.errors.linearized_coded.LinearizedCodedIonospheric.__init__.html#sorts.errors.linearized_coded.LinearizedCodedIonospheric.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tx</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cache_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">diameter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">tx</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span> <span class="n">cache_folder</span><span class="o">=</span><span class="n">cache_folder</span><span class="p">,</span> <span class="n">diameter</span><span class="o">=</span><span class="n">diameter</span><span class="p">)</span>
+<div class="viewcode-block" id="LinearizedCodedIonospheric.__init__"><a class="viewcode-back" href="../../../_autodoc/sorts/errors/sorts.errors.linearized_coded.LinearizedCodedIonospheric.__init__.html#sorts.errors.linearized_coded.LinearizedCodedIonospheric.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1000.0</span><span class="p">,</span><span class="mf">1000000.0</span><span class="p">])</span>
         <span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">100.0</span><span class="p">])</span><span class="o">*</span><span class="mf">150.0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">iono_errfun</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">e</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="LinearizedCodedIonospheric.range"><a class="viewcode-back" href="../../../_autodoc/sorts/errors/sorts.errors.linearized_coded.LinearizedCodedIonospheric.range.html#sorts.errors.linearized_coded.LinearizedCodedIonospheric.range">[docs]</a>    <span class="k">def</span> <span class="nf">range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">snr</span><span class="p">,</span> <span class="n">tx_range</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Two way range in meters</span>
+<div class="viewcode-block" id="LinearizedCodedIonospheric.range_std"><a class="viewcode-back" href="../../../_autodoc/sorts/errors/sorts.errors.linearized_coded.LinearizedCodedIonospheric.range_std.html#sorts.errors.linearized_coded.LinearizedCodedIonospheric.range_std">[docs]</a>    <span class="k">def</span> <span class="nf">range_std</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_range</span><span class="p">,</span> <span class="n">snr</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;The expected standard error of a range measurement in m.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-
         <span class="n">dr</span> <span class="o">=</span> <span class="mf">10.0</span><span class="o">**</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rfun</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">snr</span><span class="p">)))</span>
 
         <span class="c1"># add ionospheric error</span>
-        <span class="n">dr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dr</span><span class="o">**</span><span class="mf">2.0</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">iono_errfun</span><span class="p">(</span><span class="n">tx_range</span><span class="o">/</span><span class="mf">1e3</span><span class="p">)</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)</span>
+        <span class="n">dr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dr</span><span class="o">**</span><span class="mf">2.0</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">iono_errfun</span><span class="p">(</span><span class="n">path_range</span><span class="o">/</span><span class="mf">1e3</span><span class="p">)</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_range_std</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -311,8 +324,14 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">dr</span><span class="p">[</span><span class="n">dr</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_range_std</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_range_std</span>
 
+        <span class="k">return</span> <span class="n">dr</span></div>
+
+
+<div class="viewcode-block" id="LinearizedCodedIonospheric.range"><a class="viewcode-back" href="../../../_autodoc/sorts/errors/sorts.errors.linearized_coded.LinearizedCodedIonospheric.range.html#sorts.errors.linearized_coded.LinearizedCodedIonospheric.range">[docs]</a>    <span class="k">def</span> <span class="nf">range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">snr</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Range in m</span>
+<span class="sd">        &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_numpy_seed</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">data</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="o">*</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">*</span><span class="n">dr</span></div></div>
+        <span class="k">return</span> <span class="n">data</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="o">*</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">range_std</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">snr</span><span class="p">)</span></div></div>
 
 </pre></div>
 
@@ -330,7 +349,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

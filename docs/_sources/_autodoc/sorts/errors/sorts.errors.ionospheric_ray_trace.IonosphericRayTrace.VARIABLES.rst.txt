@@ -1,0 +1,6 @@
+sorts.errors.ionospheric\_ray\_trace.IonosphericRayTrace.VARIABLES
+==================================================================
+
+.. currentmodule:: sorts.errors.ionospheric_ray_trace
+
+.. autoattribute:: IonosphericRayTrace.VARIABLES

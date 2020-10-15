@@ -1,0 +1,8 @@
+epochType.cache
+===============
+
+.. currentmodule:: sorts.io.ccsds
+
+.. rubric:: epochType.cache
+
+.. autoproperty:: sorts.io.ccsds.epochType.cache

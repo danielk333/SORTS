@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>tracking &#8212; SORTS 3.18.0 documentation</title>
+    <title>tracking &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.scheduler.static_list.StaticList.update.html" title="StaticList.update"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" accesskey="U">API Reference</a> &#187;</li> 
       </ul>
     </div>
@@ -91,6 +91,7 @@
             
   <div class="section" id="module-sorts.scheduler.tracking">
 <span id="tracking"></span><h1>tracking<a class="headerlink" href="#module-sorts.scheduler.tracking" title="Permalink to this headline">¶</a></h1>
+<p>Basis for developing a scheduler for tracking multiple space objects.</p>
 <div class="section" id="module-summary">
 <h2>Module summary<a class="headerlink" href="#module-summary" title="Permalink to this headline">¶</a></h2>
 <p class="rubric">Classes</p>
@@ -101,10 +102,10 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.scheduler.tracking.PriorityTracking.html#sorts.scheduler.tracking.PriorityTracking" title="sorts.scheduler.tracking.PriorityTracking"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PriorityTracking</span></code></a>(radar, space_objects, …)</p></td>
-<td><p></p></td>
+<td><p>#TODO: Docstring</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.scheduler.tracking.Tracking.html#sorts.scheduler.tracking.Tracking" title="sorts.scheduler.tracking.Tracking"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Tracking</span></code></a>(radar, space_objects, end_time, epoch)</p></td>
-<td><p></p></td>
+<td><p>#TODO: Docstring</p></td>
 </tr>
 </tbody>
 </table>
@@ -116,6 +117,7 @@
 <dt>
 <em class="property">class </em><code class="sig-prename descclassname">sorts.scheduler.tracking.</code><code class="sig-name descname">PriorityTracking</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">radar</span></em>, <em class="sig-param"><span class="n">space_objects</span></em>, <em class="sig-param"><span class="n">end_time</span></em>, <em class="sig-param"><span class="n">epoch</span></em>, <em class="sig-param"><span class="n">timeslice</span></em>, <em class="sig-param"><span class="n">allocation</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/scheduler/tracking.html#PriorityTracking"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Bases: <a class="reference internal" href="sorts.scheduler.tracking.Tracking.html#sorts.scheduler.tracking.Tracking" title="sorts.scheduler.tracking.Tracking"><code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.scheduler.tracking.Tracking</span></code></a></p>
+<p>#TODO: Docstring</p>
 <dl class="py method">
 <dt>
 <code class="sig-name descname">calculate_observation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">txrx_pass</span></em>, <em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">generator</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span></dt>
@@ -131,7 +133,31 @@
 <dl class="py method">
 <dt>
 <code class="sig-name descname">get_controllers</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
-<dd><p>This should init a list of controllers and set the <cite>t</cite> (global time) and <cite>t0</cite> (global time reference for controller) variables on them for their individual time samplings.</p>
+<dd><p>#TODO: Docstring</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">get_passes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ind</span></em><span class="sig-paren">)</span></dt>
+<dd><p>#TODO: Docstring</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">observe_passes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">passes</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span></dt>
+<dd><p>#TODO: Docstring</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">schedule</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span></dt>
+<dd><p>#TODO: Docstring</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">set_measurements</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/scheduler/tracking.html#PriorityTracking.set_measurements"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>#TODO: Docstring</p>
 </dd></dl>
 
 <dl class="py method">
@@ -145,8 +171,9 @@
 <p class="rubric">Tracking</p>
 <dl class="py class">
 <dt>
-<em class="property">class </em><code class="sig-prename descclassname">sorts.scheduler.tracking.</code><code class="sig-name descname">Tracking</code><span class="sig-paren">(</span><em class="sig-param">radar</em>, <em class="sig-param">space_objects</em>, <em class="sig-param">end_time</em>, <em class="sig-param">epoch</em>, <em class="sig-param">start_time=0.0</em>, <em class="sig-param">controller=&lt;class 'sorts.controller.tracker.Tracker'&gt;</em>, <em class="sig-param">controller_args={'return_copy': True}</em>, <em class="sig-param">max_dpos=1000.0</em>, <em class="sig-param">max_samp=30.0</em>, <em class="sig-param">profiler=None</em>, <em class="sig-param">logger=None</em>, <em class="sig-param">use_pass_states=True</em>, <em class="sig-param">calculate_max_snr=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/scheduler/tracking.html#Tracking"><span class="viewcode-link">[source]</span></a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">sorts.scheduler.tracking.</code><code class="sig-name descname">Tracking</code><span class="sig-paren">(</span><em class="sig-param">radar</em>, <em class="sig-param">space_objects</em>, <em class="sig-param">end_time</em>, <em class="sig-param">epoch</em>, <em class="sig-param">start_time=0.0</em>, <em class="sig-param">controller=&lt;class 'sorts.controller.tracker.Tracker'&gt;</em>, <em class="sig-param">controller_args={'return_copy': True}</em>, <em class="sig-param">max_dpos=1000.0</em>, <em class="sig-param">max_samp=30.0</em>, <em class="sig-param">profiler=None</em>, <em class="sig-param">logger=None</em>, <em class="sig-param">use_pass_states=True</em>, <em class="sig-param">calculate_max_snr=False</em>, <em class="sig-param">collect_passes=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/scheduler/tracking.html#Tracking"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Bases: <a class="reference internal" href="sorts.scheduler.scheduler.Scheduler.html#sorts.scheduler.scheduler.Scheduler" title="sorts.scheduler.scheduler.Scheduler"><code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.scheduler.scheduler.Scheduler</span></code></a></p>
+<p>#TODO: Docstring</p>
 <dl class="py method">
 <dt>
 <code class="sig-name descname">calculate_observation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">txrx_pass</span></em>, <em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">generator</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span></dt>
@@ -162,7 +189,31 @@
 <dl class="py method">
 <dt>
 <code class="sig-name descname">get_controllers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/scheduler/tracking.html#Tracking.get_controllers"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>This should init a list of controllers and set the <cite>t</cite> (global time) and <cite>t0</cite> (global time reference for controller) variables on them for their individual time samplings.</p>
+<dd><p>#TODO: Docstring</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">get_passes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ind</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/scheduler/tracking.html#Tracking.get_passes"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>#TODO: Docstring</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">observe_passes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">passes</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span></dt>
+<dd><p>#TODO: Docstring</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">schedule</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span></dt>
+<dd><p>#TODO: Docstring</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">abstract </em><code class="sig-name descname">set_measurements</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/scheduler/tracking.html#Tracking.set_measurements"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>#TODO: Docstring</p>
 </dd></dl>
 
 <dl class="py method">
@@ -197,7 +248,7 @@
         <li class="right" >
           <a href="sorts.scheduler.static_list.StaticList.update.html" title="StaticList.update"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li> 
       </ul>
     </div>

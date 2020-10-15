@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>API Reference &#8212; SORTS 3.18.0 documentation</title>
+    <title>API Reference &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="auto_gallery/e3d_demo_planner.html" title="E3D Demonstrator SST planner"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SORTS 3.18.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -120,10 +120,10 @@
 <td><p>Correlate measurement time series with a population of objects to find the best match.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autodoc/sorts/sorts.dates.html#module-sorts.dates" title="sorts.dates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sorts.dates</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Functions that concern dates and times.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_autodoc/sorts/sorts.frames.html#module-sorts.frames" title="sorts.frames"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sorts.frames</span></code></a></p></td>
-<td><p>Coordinate frame transformations and related functions</p></td>
+<td><p>Coordinate frame transformations and related functions.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autodoc/sorts/sorts.functions.html#module-sorts.functions" title="sorts.functions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sorts.functions</span></code></a></p></td>
 <td><p>Miscellaneous functions</p></td>
@@ -132,7 +132,7 @@
 <td><p>Interpolation functions.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autodoc/sorts/sorts.passes.html#module-sorts.passes" title="sorts.passes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sorts.passes</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Encapsulates a fundamental component of tracking space objects: a pass over a geographic location.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_autodoc/sorts/sorts.profiling.html#module-sorts.profiling" title="sorts.profiling"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sorts.profiling</span></code></a></p></td>
 <td><p>Sets up a logging framework that can be imported and used anywhere.</p></td>
@@ -141,7 +141,7 @@
 <td><p>This module is used to define the radar network configuration.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_autodoc/sorts/sorts.simulation.html#module-sorts.simulation" title="sorts.simulation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sorts.simulation</span></code></a></p></td>
-<td><p>Main simulation handler in the form of a class using the capabilities of the entire toolbox.</p></td>
+<td><p>Contains all helper functions to automate parallelization with MPI, handle caching and stepping of simulations.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autodoc/sorts/sorts.space_object.html#module-sorts.space_object" title="sorts.space_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sorts.space_object</span></code></a></p></td>
 <td><p>Defines a space object.</p></td>
@@ -183,7 +183,7 @@
 <td><p>Defines a population of space objects in the form of a class.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_autodoc/sorts/population/sorts.population.master.html#module-sorts.population.master" title="sorts.population.master"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sorts.population.master</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Defines function for reading the MASTER catalog files.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autodoc/sorts/population/sorts.population.tles.html#module-sorts.population.tles" title="sorts.population.tles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sorts.population.tles</span></code></a></p></td>
 <td><p>TLE list loading to population</p></td>
@@ -203,13 +203,13 @@
 <td><p>This module is used to define the radar controller</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_autodoc/sorts/controller/sorts.controller.scanner.html#module-sorts.controller.scanner" title="sorts.controller.scanner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sorts.controller.scanner</span></code></a></p></td>
-<td><p></p></td>
+<td><p>#TODO</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autodoc/sorts/controller/sorts.controller.tracker.html#module-sorts.controller.tracker" title="sorts.controller.tracker"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sorts.controller.tracker</span></code></a></p></td>
-<td><p></p></td>
+<td><p>#TODO</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_autodoc/sorts/controller/sorts.controller.static.html#module-sorts.controller.static" title="sorts.controller.static"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sorts.controller.static</span></code></a></p></td>
-<td><p></p></td>
+<td><p>#TODO</p></td>
 </tr>
 </tbody>
 </table>
@@ -223,16 +223,16 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autodoc/sorts/scheduler/sorts.scheduler.scheduler.html#module-sorts.scheduler.scheduler" title="sorts.scheduler.scheduler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sorts.scheduler.scheduler</span></code></a></p></td>
-<td><p>Scheduler</p></td>
+<td><p>Scheduler base class.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_autodoc/sorts/scheduler/sorts.scheduler.observed_parameters.html#module-sorts.scheduler.observed_parameters" title="sorts.scheduler.observed_parameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sorts.scheduler.observed_parameters</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autodoc/sorts/scheduler/sorts.scheduler.static_list.html#module-sorts.scheduler.static_list" title="sorts.scheduler.static_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sorts.scheduler.static_list</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Provides a static list of controllers, simplest scheduler.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_autodoc/sorts/scheduler/sorts.scheduler.tracking.html#module-sorts.scheduler.tracking" title="sorts.scheduler.tracking"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sorts.scheduler.tracking</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Basis for developing a scheduler for tracking multiple space objects.</p></td>
 </tr>
 </tbody>
 </table>
@@ -253,6 +253,12 @@
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autodoc/sorts/errors/sorts.errors.linearized_coded.html#module-sorts.errors.linearized_coded" title="sorts.errors.linearized_coded"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sorts.errors.linearized_coded</span></code></a></p></td>
 <td><p>Errors</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autodoc/sorts/errors/sorts.errors.atmospheric_drag.html#module-sorts.errors.atmospheric_drag" title="sorts.errors.atmospheric_drag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sorts.errors.atmospheric_drag</span></code></a></p></td>
+<td><p>Monte-Carlo sampling of errors due to atmospheric drag force uncertainty.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autodoc/sorts/errors/sorts.errors.linearized_orbit_determination.html#module-sorts.errors.linearized_orbit_determination" title="sorts.errors.linearized_orbit_determination"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sorts.errors.linearized_orbit_determination</span></code></a></p></td>
+<td><p>Estimating orbit determination errors</p></td>
 </tr>
 </tbody>
 </table>
@@ -280,16 +286,16 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autodoc/sorts/plotting/sorts.plotting.general.html#module-sorts.plotting.general" title="sorts.plotting.general"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sorts.plotting.general</span></code></a></p></td>
-<td><p>Plotting helper functions</p></td>
+<td><p>General plotting functions</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_autodoc/sorts/plotting/sorts.plotting.radar.html#module-sorts.plotting.radar" title="sorts.plotting.radar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sorts.plotting.radar</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Radar configuration plot functions</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autodoc/sorts/plotting/sorts.plotting.scan.html#module-sorts.plotting.scan" title="sorts.plotting.scan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sorts.plotting.scan</span></code></a></p></td>
-<td><p>Plotting helper functions</p></td>
+<td><p>Radar scan plot functions</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_autodoc/sorts/plotting/sorts.plotting.tracking.html#module-sorts.plotting.tracking" title="sorts.plotting.tracking"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sorts.plotting.tracking</span></code></a></p></td>
-<td><p>Plotting helper functions</p></td>
+<td><p>Tracking plot functions</p></td>
 </tr>
 </tbody>
 </table>
@@ -303,7 +309,7 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autodoc/sorts/radar/sorts.radar.radar.html#module-sorts.radar.radar" title="sorts.radar.radar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sorts.radar.radar</span></code></a></p></td>
-<td><p>This module is used to define the radar network configuration.</p></td>
+<td><p>This module is used to define the radar system</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_autodoc/sorts/radar/sorts.radar.tx_rx.html#module-sorts.radar.tx_rx" title="sorts.radar.tx_rx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sorts.radar.tx_rx</span></code></a></p></td>
 <td><p>Defines an antenna’s or entire radar system’s radiation pattern, also defines physical antennas for RX and TX.</p></td>
@@ -345,6 +351,17 @@
 <h2>Instances<a class="headerlink" href="#instances" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="module-sorts.radar.instances">
 <span id="radars"></span><h3>Radars<a class="headerlink" href="#module-sorts.radar.instances" title="Permalink to this headline">¶</a></h3>
+<p>Defines all the pre-configured radar instances available and provides a simple “getter” instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">eiscat3d</dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+<p>TODO: Docstring</p>
+<dl class="field-list simple">
+<dt class="field-odd">eiscat3d_interp</dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+<p>TODO: Docstring</p>
 </div>
 </div>
 </div>
@@ -370,7 +387,7 @@
         <li class="right" >
           <a href="auto_gallery/e3d_demo_planner.html" title="E3D Demonstrator SST planner"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SORTS 3.18.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

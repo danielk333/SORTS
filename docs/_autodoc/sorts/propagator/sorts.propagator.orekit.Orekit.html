@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Orekit &#8212; SORTS 3.18.0 documentation</title>
+    <title>Orekit &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -21,7 +21,7 @@
     <script src="../../../_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="Orekit.__init__" href="sorts.propagator.orekit.Orekit.__init__.html" />
+    <link rel="next" title="Orekit.GetIsotropicDragForce" href="sorts.propagator.orekit.Orekit.GetIsotropicDragForce.html" />
     <link rel="prev" title="orekit" href="sorts.propagator.orekit.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--[if lt IE 9]>
@@ -38,12 +38,12 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="sorts.propagator.orekit.Orekit.__init__.html" title="Orekit.__init__"
+          <a href="sorts.propagator.orekit.Orekit.GetIsotropicDragForce.html" title="Orekit.GetIsotropicDragForce"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="sorts.propagator.orekit.html" title="orekit"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.propagator.orekit.html" accesskey="U">orekit</a> &#187;</li> 
       </ul>
@@ -54,8 +54,8 @@
   <p class="topless"><a href="sorts.propagator.orekit.html"
                         title="previous chapter">orekit</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="sorts.propagator.orekit.Orekit.__init__.html"
-                        title="next chapter">Orekit.__init__</a></p>
+  <p class="topless"><a href="sorts.propagator.orekit.Orekit.GetIsotropicDragForce.html"
+                        title="next chapter">Orekit.GetIsotropicDragForce</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -88,6 +88,8 @@
 <em class="property">class </em><code class="sig-prename descclassname">sorts.propagator.orekit.</code><code class="sig-name descname">Orekit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">orekit_data</span></em>, <em class="sig-param"><span class="n">settings</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/propagator/orekit.html#Orekit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.propagator.orekit.Orekit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="sorts.propagator.base.Propagator.html#sorts.propagator.base.Propagator" title="sorts.propagator.base.Propagator"><code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.propagator.base.Propagator</span></code></a></p>
 <p>Propagator class implementing the Orekit propagator.</p>
+<p>#TODO: Update docs according to new “settings dict” method.
+#TODO: Valdiate Orekit v10 compatibility</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
@@ -161,16 +163,25 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.orekit.Orekit.GetIsotropicDragForce.html#sorts.propagator.orekit.Orekit.GetIsotropicDragForce" title="sorts.propagator.orekit.Orekit.GetIsotropicDragForce"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GetIsotropicDragForce</span></code></a>(A, cd)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.propagator.orekit.Orekit.UpdateForces.html#sorts.propagator.orekit.Orekit.UpdateForces" title="sorts.propagator.orekit.Orekit.UpdateForces"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UpdateForces</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.orekit.Orekit.__init__.html#sorts.propagator.orekit.Orekit.__init__" title="sorts.propagator.orekit.Orekit.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(orekit_data[, settings])</p></td>
 <td><p>Initialize self.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.propagator.orekit.Orekit.convert_time.html#sorts.propagator.orekit.Orekit.convert_time" title="sorts.propagator.orekit.Orekit.convert_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_time</span></code></a>(t, epoch)</p></td>
 <td><p>Convert input time and epoch variables to <code class="code docutils literal notranslate"><span class="pre">astropy.TimeDelta</span></code> and <code class="code docutils literal notranslate"><span class="pre">astropy.Time</span></code> variables of the correct format and scale.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.orekit.Orekit.propagate.html#sorts.propagator.orekit.Orekit.propagate" title="sorts.propagator.orekit.Orekit.propagate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">propagate</span></code></a>(t, state0, epoch, **kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.orekit.Orekit.heartbeat.html#sorts.propagator.orekit.Orekit.heartbeat" title="sorts.propagator.orekit.Orekit.heartbeat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">heartbeat</span></code></a>(t, state, **kwargs)</p></td>
+<td><p>Function applied after propagation to time <cite>t</cite> and state <cite>state</cite>, before next time step as given in the input time vector to <cite>propagate</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.propagator.orekit.Orekit.propagate.html#sorts.propagator.orekit.Orekit.propagate" title="sorts.propagator.orekit.Orekit.propagate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">propagate</span></code></a>(t, state0, epoch, **kwargs)</p></td>
 <td><p><strong>Implementation:</strong></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.propagator.orekit.Orekit.set.html#sorts.propagator.orekit.Orekit.set" title="sorts.propagator.orekit.Orekit.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code></a>(**kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.orekit.Orekit.set.html#sorts.propagator.orekit.Orekit.set" title="sorts.propagator.orekit.Orekit.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code></a>(**kwargs)</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -183,6 +194,12 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.orekit.Orekit.DEFAULT_SETTINGS.html#sorts.propagator.orekit.Orekit.DEFAULT_SETTINGS" title="sorts.propagator.orekit.Orekit.DEFAULT_SETTINGS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_SETTINGS</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.propagator.orekit.Orekit.in_frame.html#sorts.propagator.orekit.Orekit.in_frame" title="sorts.propagator.orekit.Orekit.in_frame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">in_frame</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.orekit.Orekit.out_frame.html#sorts.propagator.orekit.Orekit.out_frame" title="sorts.propagator.orekit.Orekit.out_frame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">out_frame</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -207,12 +224,12 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="sorts.propagator.orekit.Orekit.__init__.html" title="Orekit.__init__"
+          <a href="sorts.propagator.orekit.Orekit.GetIsotropicDragForce.html" title="Orekit.GetIsotropicDragForce"
              >next</a> |</li>
         <li class="right" >
           <a href="sorts.propagator.orekit.html" title="orekit"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.propagator.orekit.html" >orekit</a> &#187;</li> 
       </ul>

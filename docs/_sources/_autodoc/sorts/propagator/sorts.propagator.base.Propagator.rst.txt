@@ -16,6 +16,7 @@ Propagator
    
       ~Propagator.__init__
       ~Propagator.convert_time
+      ~Propagator.heartbeat
       ~Propagator.propagate
       ~Propagator.set
    
@@ -29,5 +30,7 @@ Propagator
       :toctree: .
    
       ~Propagator.DEFAULT_SETTINGS
+      ~Propagator.in_frame
+      ~Propagator.out_frame
    
    

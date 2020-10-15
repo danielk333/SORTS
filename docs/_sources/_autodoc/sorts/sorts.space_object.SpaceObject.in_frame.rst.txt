@@ -1,0 +1,8 @@
+SpaceObject.in\_frame
+=====================
+
+.. currentmodule:: sorts.space_object
+
+.. rubric:: SpaceObject.in_frame
+
+.. autoproperty:: sorts.space_object.SpaceObject.in_frame

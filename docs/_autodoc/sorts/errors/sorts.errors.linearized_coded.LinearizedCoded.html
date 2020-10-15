@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>LinearizedCoded &#8212; SORTS 3.18.0 documentation</title>
+    <title>LinearizedCoded &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.errors.linearized_coded.html" title="linearized_coded"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.errors.linearized_coded.html" accesskey="U">linearized_coded</a> &#187;</li> 
       </ul>
@@ -111,18 +111,27 @@ estimate based on typical GNU Ionospheric tomography receiver phase curves.</p>
 <td><p>Initialize self.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCoded.doppler.html#sorts.errors.linearized_coded.LinearizedCoded.doppler" title="sorts.errors.linearized_coded.LinearizedCoded.doppler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">doppler</span></code></a>(data, snr)</p></td>
-<td><p>Range rate in m/s</p></td>
+<td><p>Doppler shift in Hz</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCoded.get.html#sorts.errors.linearized_coded.LinearizedCoded.get" title="sorts.errors.linearized_coded.LinearizedCoded.get"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get</span></code></a>(var, data, *args, **kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCoded.doppler_std.html#sorts.errors.linearized_coded.LinearizedCoded.doppler_std" title="sorts.errors.linearized_coded.LinearizedCoded.doppler_std"><code class="xref py py-obj docutils literal notranslate"><span class="pre">doppler_std</span></code></a>(snr)</p></td>
+<td><p>The expected standard error of a Doppler measurement in Hz.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCoded.get.html#sorts.errors.linearized_coded.LinearizedCoded.get" title="sorts.errors.linearized_coded.LinearizedCoded.get"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get</span></code></a>(var, data, *args, **kwargs)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCoded.range.html#sorts.errors.linearized_coded.LinearizedCoded.range" title="sorts.errors.linearized_coded.LinearizedCoded.range"><code class="xref py py-obj docutils literal notranslate"><span class="pre">range</span></code></a>(data, snr)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCoded.range.html#sorts.errors.linearized_coded.LinearizedCoded.range" title="sorts.errors.linearized_coded.LinearizedCoded.range"><code class="xref py py-obj docutils literal notranslate"><span class="pre">range</span></code></a>(data, snr)</p></td>
+<td><p>Range in m</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCoded.range_rate.html#sorts.errors.linearized_coded.LinearizedCoded.range_rate" title="sorts.errors.linearized_coded.LinearizedCoded.range_rate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">range_rate</span></code></a>(data, snr)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCoded.range_rate.html#sorts.errors.linearized_coded.LinearizedCoded.range_rate" title="sorts.errors.linearized_coded.LinearizedCoded.range_rate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">range_rate</span></code></a>(data, snr)</p></td>
 <td><p>Range rate in m/s</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCoded.set_numpy_seed.html#sorts.errors.linearized_coded.LinearizedCoded.set_numpy_seed" title="sorts.errors.linearized_coded.LinearizedCoded.set_numpy_seed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_numpy_seed</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCoded.range_rate_std.html#sorts.errors.linearized_coded.LinearizedCoded.range_rate_std" title="sorts.errors.linearized_coded.LinearizedCoded.range_rate_std"><code class="xref py py-obj docutils literal notranslate"><span class="pre">range_rate_std</span></code></a>(snr)</p></td>
+<td><p>The expected standard error of a range rate measurement in m/s.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCoded.range_std.html#sorts.errors.linearized_coded.LinearizedCoded.range_std" title="sorts.errors.linearized_coded.LinearizedCoded.range_std"><code class="xref py py-obj docutils literal notranslate"><span class="pre">range_std</span></code></a>(snr)</p></td>
+<td><p>The expected standard error of a range measurement in m.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCoded.set_numpy_seed.html#sorts.errors.linearized_coded.LinearizedCoded.set_numpy_seed" title="sorts.errors.linearized_coded.LinearizedCoded.set_numpy_seed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_numpy_seed</span></code></a>()</p></td>
 <td><p>This should be called before any error generating methods if reproduction of results needs to be ensured.</p></td>
 </tr>
 </tbody>
@@ -164,7 +173,7 @@ estimate based on typical GNU Ionospheric tomography receiver phase curves.</p>
         <li class="right" >
           <a href="sorts.errors.linearized_coded.html" title="linearized_coded"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.errors.linearized_coded.html" >linearized_coded</a> &#187;</li> 
       </ul>

@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>ccsds &#8212; SORTS 3.18.0 documentation</title>
+    <title>ccsds &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -21,8 +21,8 @@
     <script src="../../../_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="read_oem" href="sorts.io.ccsds.read_oem.html" />
-    <link rel="prev" title="simulate_echo" href="../errors/sorts.errors.linearized_coded.simulate_echo.html" />
+    <link rel="next" title="epochType" href="sorts.io.ccsds.epochType.html" />
+    <link rel="prev" title="orbit_determination_covariance" href="../errors/sorts.errors.linearized_orbit_determination.orbit_determination_covariance.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--[if lt IE 9]>
     <script src="_static/css3-mediaqueries.js"></script>
@@ -38,12 +38,12 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="sorts.io.ccsds.read_oem.html" title="read_oem"
+          <a href="sorts.io.ccsds.epochType.html" title="epochType"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="../errors/sorts.errors.linearized_coded.simulate_echo.html" title="simulate_echo"
+          <a href="../errors/sorts.errors.linearized_orbit_determination.orbit_determination_covariance.html" title="orbit_determination_covariance"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" accesskey="U">API Reference</a> &#187;</li> 
       </ul>
     </div>
@@ -52,18 +52,20 @@
   <h3><a href="../../../index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">ccsds</a><ul>
-<li><a class="reference internal" href="#module-summary">Module summary</a></li>
+<li><a class="reference internal" href="#module-summary">Module summary</a><ul>
+</ul>
+</li>
 <li><a class="reference internal" href="#contents">Contents</a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="../errors/sorts.errors.linearized_coded.simulate_echo.html"
-                        title="previous chapter">simulate_echo</a></p>
+  <p class="topless"><a href="../errors/sorts.errors.linearized_orbit_determination.orbit_determination_covariance.html"
+                        title="previous chapter">orbit_determination_covariance</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="sorts.io.ccsds.read_oem.html"
-                        title="next chapter">read_oem</a></p>
+  <p class="topless"><a href="sorts.io.ccsds.epochType.html"
+                        title="next chapter">epochType</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -95,6 +97,18 @@
 <p><a class="reference external" href="https://public.ccsds.org/Pubs/503x0b1c1.pdf">https://public.ccsds.org/Pubs/503x0b1c1.pdf</a></p>
 <div class="section" id="module-summary">
 <h2>Module summary<a class="headerlink" href="#module-summary" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">Classes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.io.ccsds.epochType.html#sorts.io.ccsds.epochType" title="sorts.io.ccsds.epochType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">epochType</span></code></a>(val1, val2, scale, precision, …)</p></td>
+<td><p>Convert astropy time to “yyyy-dddThh:mm:ss.d-&gt;dZ” CCSDS 2.0 epochType standard.</p></td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Functions</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -102,59 +116,126 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.io.ccsds.read_oem.html#sorts.io.ccsds.read_oem" title="sorts.io.ccsds.read_oem"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_oem</span></code></a>(fname)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.io.ccsds.read_oem.html#sorts.io.ccsds.read_oem" title="sorts.io.ccsds.read_oem"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_oem</span></code></a>(fname[, xml])</p></td>
 <td><p>Todo: docstring</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.io.ccsds.read_tdm.html#sorts.io.ccsds.read_tdm" title="sorts.io.ccsds.read_tdm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_tdm</span></code></a>(fname)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.io.ccsds.read_tdm.html#sorts.io.ccsds.read_tdm" title="sorts.io.ccsds.read_tdm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_tdm</span></code></a>(fname[, xml])</p></td>
 <td><p>Just get the range data # TODO: the rest</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.io.ccsds.write_oem.html#sorts.io.ccsds.write_oem" title="sorts.io.ccsds.write_oem"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_oem</span></code></a>(t, state, fname)</p></td>
-<td><p>Uses a series of unix-times and state vectors in ITRF2000 to create a CCSDS OEM file.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.io.ccsds.write_oem.html#sorts.io.ccsds.write_oem" title="sorts.io.ccsds.write_oem"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_oem</span></code></a>(t, state, meta[, fname, xml])</p></td>
+<td><p>Uses a series of astropy times and state vectors to create a CCSDS OEM file (plain-text of xml) or return a string.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.io.ccsds.write_tdm.html#sorts.io.ccsds.write_tdm" title="sorts.io.ccsds.write_tdm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_tdm</span></code></a>(fname, t_pulse, m_range, …[, …])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.io.ccsds.write_tdm.html#sorts.io.ccsds.write_tdm" title="sorts.io.ccsds.write_tdm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_tdm</span></code></a>(datas, meta[, fname])</p></td>
 <td><p># TODO: Document function.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.io.ccsds.xml_tdm_segmet.html#sorts.io.ccsds.xml_tdm_segmet" title="sorts.io.ccsds.xml_tdm_segmet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xml_tdm_segmet</span></code></a>(datas)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.io.ccsds.xml_tdm_tree.html#sorts.io.ccsds.xml_tdm_tree" title="sorts.io.ccsds.xml_tdm_tree"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xml_tdm_tree</span></code></a>(meta, segments)</p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="section" id="contents">
 <h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<p class="rubric">epochType</p>
+<dl class="py class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">sorts.io.ccsds.</code><code class="sig-name descname">epochType</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">val1</span></em>, <em class="sig-param"><span class="n">val2</span></em>, <em class="sig-param"><span class="n">scale</span></em>, <em class="sig-param"><span class="n">precision</span></em>, <em class="sig-param"><span class="n">in_subfmt</span></em>, <em class="sig-param"><span class="n">out_subfmt</span></em>, <em class="sig-param"><span class="n">from_jd</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/io/ccsds.html#epochType"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">astropy.time.formats.TimeISO</span></code></p>
+<p>Convert astropy time to “yyyy-dddThh:mm:ss.d-&gt;dZ” CCSDS 2.0 epochType standard.</p>
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">cache</code></dt>
+<dd><p>Return the cache associated with this instance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">format_string</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">str_fmt</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span></dt>
+<dd><p>Write time to a string using a given format.</p>
+<p>By default, just interprets str_fmt as a format string,
+but subclasses can add to this.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">parse_string</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timestr</span></em>, <em class="sig-param"><span class="n">subfmts</span></em><span class="sig-paren">)</span></dt>
+<dd><p>Read time from a single string, using a set of possible formats.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">scale</code></dt>
+<dd><p>Time scale</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">set_jds</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">val1</span></em>, <em class="sig-param"><span class="n">val2</span></em><span class="sig-paren">)</span></dt>
+<dd><p>Parse the time strings contained in val1 and set jd1, jd2</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">str_kwargs</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Generator that yields a dict of values corresponding to the
+calendar date and time for the internal JD values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">to_value</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">out_subfmt</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span></dt>
+<dd><p>Return time representation from internal jd1 and jd2 in specified
+<code class="docutils literal notranslate"><span class="pre">out_subfmt</span></code>.</p>
+<p>This is the base method that ignores <code class="docutils literal notranslate"><span class="pre">parent</span></code> and uses the <code class="docutils literal notranslate"><span class="pre">value</span></code>
+property to compute the output. This is done by temporarily setting
+<code class="docutils literal notranslate"><span class="pre">self.out_subfmt</span></code> and calling <code class="docutils literal notranslate"><span class="pre">self.value</span></code>. This is required for
+legacy Format subclasses prior to astropy 4.0  New code should instead
+implement the value functionality in <code class="docutils literal notranslate"><span class="pre">to_value()</span></code> and then make the
+<code class="docutils literal notranslate"><span class="pre">value</span></code> property be a simple call to <code class="docutils literal notranslate"><span class="pre">self.to_value()</span></code>.</p>
+<dl>
+<dt>parent<span class="classifier">obj</span></dt><dd><p>Parent <cite>~astropy.time.Time</cite> object associated with this
+<cite>~astropy.time.TimeFormat</cite> object</p>
+</dd>
+<dt>out_subfmt<span class="classifier">str or <cite>None</cite></span></dt><dd><p>Output subformt (use existing self.out_subfmt if <cite>None</cite>)</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>value<span class="classifier">numpy.array, numpy.ma.array</span></dt><dd><p>Array or masked array of formatted time representation values</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 <p class="rubric">Functions</p>
 <dl class="py function">
 <dt>
-<code class="sig-prename descclassname">sorts.io.ccsds.</code><code class="sig-name descname">read_oem</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fname</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/io/ccsds.html#read_oem"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-prename descclassname">sorts.io.ccsds.</code><code class="sig-name descname">read_oem</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fname</span></em>, <em class="sig-param"><span class="n">xml</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/io/ccsds.html#read_oem"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Todo: docstring</p>
 </dd></dl>
 
 <dl class="py function">
 <dt>
-<code class="sig-prename descclassname">sorts.io.ccsds.</code><code class="sig-name descname">read_tdm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fname</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/io/ccsds.html#read_tdm"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-prename descclassname">sorts.io.ccsds.</code><code class="sig-name descname">read_tdm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fname</span></em>, <em class="sig-param"><span class="n">xml</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/io/ccsds.html#read_tdm"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Just get the range data # TODO: the rest</p>
 <p># TODO: Document function.
-# TODO: Update function to be more general
-# TODO: add arbitrary fields and meta data</p>
+# TODO: Update plain text function to be more general and conform to CCSDS 2.0</p>
 </dd></dl>
 
 <dl class="py function">
 <dt>
-<code class="sig-prename descclassname">sorts.io.ccsds.</code><code class="sig-name descname">write_oem</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">state</span></em>, <em class="sig-param"><span class="n">fname</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/io/ccsds.html#write_oem"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Uses a series of unix-times and state vectors in ITRF2000 to create a CCSDS OEM file.</p>
-<p># TODO: Document function.
-# TODO: Update function to be more general
-# TODO: add arbitrary fields and meta data</p>
-<dl class="simple">
-<dt><strong>Uses:</strong></dt><dd><ul class="simple">
-<li><p><a class="reference internal" href="../sorts.dates.unix_to_datestrf.html#sorts.dates.unix_to_datestrf" title="sorts.dates.unix_to_datestrf"><code class="xref py py-func docutils literal notranslate"><span class="pre">unix_to_datestrf()</span></code></a></p></li>
-<li><p><a class="reference internal" href="../sorts.dates.unix_to_datestr.html#sorts.dates.unix_to_datestr" title="sorts.dates.unix_to_datestr"><code class="xref py py-func docutils literal notranslate"><span class="pre">unix_to_datestr()</span></code></a></p></li>
-</ul>
-</dd>
-</dl>
+<code class="sig-prename descclassname">sorts.io.ccsds.</code><code class="sig-name descname">write_oem</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">state</span></em>, <em class="sig-param"><span class="n">meta</span></em>, <em class="sig-param"><span class="n">fname</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">xml</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/io/ccsds.html#write_oem"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Uses a series of astropy times and state vectors to create a CCSDS OEM file (plain-text of xml) or return a string.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>t</strong> (<em>list/numpy.ndarray</em>) – Vector of unix-times</p></li>
+<li><p><strong>t</strong> (<em>astropy.Time</em>) – Vector of unix-times</p></li>
 <li><p><strong>state</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – 6-D states given in SI units in the ITRF2000 frame. Rows correspond to different states and columns to dimensions.</p></li>
-<li><p><strong>OID</strong> (<em>int</em>) – Object ID and name (written in OEM as the same but with different formating)</p></li>
+<li><p><strong>meta</strong> (<em>dict</em>) – Dict containing all the standard CCSDS 2.0 meta data.</p></li>
+<li><p><strong>xml</strong> (<em>bool</em>) – If <cite>False</cite>, use the plain-text format</p></li>
 <li><p><strong>fname</strong> (<em>str</em>) – Output file-path for OEM.</p></li>
 </ul>
 </dd>
@@ -163,11 +244,21 @@
 
 <dl class="py function">
 <dt>
-<code class="sig-prename descclassname">sorts.io.ccsds.</code><code class="sig-name descname">write_tdm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fname</span></em>, <em class="sig-param"><span class="n">t_pulse</span></em>, <em class="sig-param"><span class="n">m_range</span></em>, <em class="sig-param"><span class="n">m_range_rate</span></em>, <em class="sig-param"><span class="n">m_range_std</span></em>, <em class="sig-param"><span class="n">m_range_rate_std</span></em>, <em class="sig-param"><span class="n">freq</span><span class="o">=</span><span class="default_value">230000000.0</span></em>, <em class="sig-param"><span class="n">tx_ecef</span><span class="o">=</span><span class="default_value">[0, 0, 0]</span></em>, <em class="sig-param"><span class="n">rx_ecef</span><span class="o">=</span><span class="default_value">[0, 0, 0]</span></em>, <em class="sig-param"><span class="n">tx_name</span><span class="o">=</span><span class="default_value">'EISCAT UHF'</span></em>, <em class="sig-param"><span class="n">rx_name</span><span class="o">=</span><span class="default_value">'EISCAT UHF'</span></em>, <em class="sig-param"><span class="n">oid</span><span class="o">=</span><span class="default_value">'ERS-1'</span></em>, <em class="sig-param"><span class="n">tdm_type</span><span class="o">=</span><span class="default_value">'track'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/io/ccsds.html#write_tdm"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-prename descclassname">sorts.io.ccsds.</code><code class="sig-name descname">write_tdm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">datas</span></em>, <em class="sig-param"><span class="n">meta</span></em>, <em class="sig-param"><span class="n">fname</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/io/ccsds.html#write_tdm"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p># TODO: Document function.
 # TODO: Update function to be more general
 # TODO: add arbitrary fields and meta data</p>
 </dd></dl>
+
+<dl class="py function">
+<dt>
+<code class="sig-prename descclassname">sorts.io.ccsds.</code><code class="sig-name descname">xml_tdm_segmet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">datas</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/io/ccsds.html#xml_tdm_segmet"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt>
+<code class="sig-prename descclassname">sorts.io.ccsds.</code><code class="sig-name descname">xml_tdm_tree</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">meta</span></em>, <em class="sig-param"><span class="n">segments</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/io/ccsds.html#xml_tdm_tree"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
 
 </div>
 </div>
@@ -188,12 +279,12 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="sorts.io.ccsds.read_oem.html" title="read_oem"
+          <a href="sorts.io.ccsds.epochType.html" title="epochType"
              >next</a> |</li>
         <li class="right" >
-          <a href="../errors/sorts.errors.linearized_coded.simulate_echo.html" title="simulate_echo"
+          <a href="../errors/sorts.errors.linearized_orbit_determination.orbit_determination_covariance.html" title="orbit_determination_covariance"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li> 
       </ul>
     </div>

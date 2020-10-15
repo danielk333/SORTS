@@ -1,0 +1,8 @@
+epochType.mask\_if\_needed
+==========================
+
+.. currentmodule:: sorts.io.ccsds
+
+.. rubric:: epochType.mask_if_needed
+
+.. automethod:: epochType.mask_if_needed

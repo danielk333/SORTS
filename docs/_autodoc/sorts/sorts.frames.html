@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>frames &#8212; SORTS 3.18.0 documentation</title>
+    <title>frames &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.dates.unix_to_npdt.html" title="unix_to_npdt"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" accesskey="U">API Reference</a> &#187;</li> 
       </ul>
     </div>
@@ -91,7 +91,7 @@
             
   <div class="section" id="module-sorts.frames">
 <span id="frames"></span><h1>frames<a class="headerlink" href="#module-sorts.frames" title="Permalink to this headline">¶</a></h1>
-<p>Coordinate frame transformations and related functions</p>
+<p>Coordinate frame transformations and related functions. Main usage is the <code class="code docutils literal notranslate"><span class="pre">convert</span></code> function that wraps Astropy frame transformations.</p>
 <div class="section" id="module-summary">
 <h2>Module summary<a class="headerlink" href="#module-summary" title="Permalink to this headline">¶</a></h2>
 <p class="rubric">Functions</p>
@@ -111,7 +111,7 @@
 <td><p>Radar pointing (az,el) to unit vector in ECEF, not including translation.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.frames.convert.html#sorts.frames.convert" title="sorts.frames.convert"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert</span></code></a>(t, states, in_frame, out_frame[, …])</p></td>
-<td><p>Perform predefined coordinate transformations.</p></td>
+<td><p>Perform predefined coordinate transformations using Astropy.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.frames.ecef_to_enu.html#sorts.frames.ecef_to_enu" title="sorts.frames.ecef_to_enu"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ecef_to_enu</span></code></a>(lat, lon, alt, ecef[, radians])</p></td>
 <td><p>ECEF coordinate system to local ENU (east,north,up), not including translation.</p></td>
@@ -135,6 +135,23 @@
 <dt>
 <code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">ITRS_to_geodetic</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">z</span></em>, <em class="sig-param"><span class="n">radians</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">ellipsoid</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#ITRS_to_geodetic"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Use <cite>astropy.coordinates.EarthLocation</cite> to transform from geodetic to ITRS.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>float</em>) – X-coordinate in ITRS</p></li>
+<li><p><strong>y</strong> (<em>float</em>) – Y-coordinate in ITRS</p></li>
+<li><p><strong>z</strong> (<em>float</em>) – Z-coordinate in ITRS</p></li>
+<li><p><strong>radians</strong> (<em>bool</em>) – If <code class="code docutils literal notranslate"><span class="pre">True</span></code> then all values are given in radians instead of degrees.</p></li>
+<li><p><strong>ellipsoid</strong> (<em>str/None</em>) – Name of the ellipsoid model used for geodetic coordinates, for default value see Astropy <cite>EarthLocation</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(3,) array of longitude, latitude and height above ellipsoid</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -152,21 +169,71 @@
 <dl class="py function">
 <dt>
 <code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">convert</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">states</span></em>, <em class="sig-param"><span class="n">in_frame</span></em>, <em class="sig-param"><span class="n">out_frame</span></em>, <em class="sig-param"><span class="n">logger</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">profiler</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#convert"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Perform predefined coordinate transformations. Always returns a copy of the array.</p>
+<dd><p>Perform predefined coordinate transformations using Astropy. Always returns a copy of the array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t</strong> (<em>numpy.ndarray/float</em>) – Absolute time corresponding to the input states.</p></li>
+<li><p><strong>states</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Size <cite>(6,n)</cite> matrix of states in SI units where rows 1-3 are position and 4-6 are velocity.</p></li>
+<li><p><strong>in_frame</strong> (<em>str</em>) – Name of the frame the input states are currently in.</p></li>
+<li><p><strong>out_frame</strong> (<em>str</em>) – Name of the state to transform to.</p></li>
+<li><p><strong>profiler</strong> (<a class="reference internal" href="sorts.profiling.Profiler.html#sorts.profiling.Profiler" title="sorts.profiling.Profiler"><em>Profiler</em></a>) – Profiler instance for checking function performance.</p></li>
+<li><p><strong>logger</strong> (<em>logging.Logger</em>) – Logger instance for logging the execution of the function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Size <cite>(6,n)</cite> matrix of states in SI units where rows 1-3 are position and 4-6 are velocity.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt>
 <code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">ecef_to_enu</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lat</span></em>, <em class="sig-param"><span class="n">lon</span></em>, <em class="sig-param"><span class="n">alt</span></em>, <em class="sig-param"><span class="n">ecef</span></em>, <em class="sig-param"><span class="n">radians</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#ecef_to_enu"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>ECEF coordinate system to local ENU (east,north,up), not including translation.</p>
-<p>TODO: Docstring</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat</strong> (<em>float</em>) – Latitude on the ellipsoid</p></li>
+<li><p><strong>lon</strong> (<em>float</em>) – Longitude on the ellipsoid</p></li>
+<li><p><strong>alt</strong> (<em>float</em>) – Altitude above ellipsoid, <strong>Unused in this implementation</strong>.</p></li>
+<li><p><strong>ecef</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – (3,n) array x,y and z coordinates in ECEF.</p></li>
+<li><p><strong>radians</strong> (<em>bool</em>) – If <code class="code docutils literal notranslate"><span class="pre">True</span></code> then all values are given in radians instead of degrees.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(3,n) array x,y and z in local coordinates in the ENU-convention.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt>
 <code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">enu_to_ecef</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lat</span></em>, <em class="sig-param"><span class="n">lon</span></em>, <em class="sig-param"><span class="n">alt</span></em>, <em class="sig-param"><span class="n">enu</span></em>, <em class="sig-param"><span class="n">radians</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#enu_to_ecef"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>ENU (east/north/up) to ECEF coordinate system conversion, not including translation.</p>
-<p>TODO: Docstring</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat</strong> (<em>float</em>) – Latitude on the ellipsoid</p></li>
+<li><p><strong>lon</strong> (<em>float</em>) – Longitude on the ellipsoid</p></li>
+<li><p><strong>alt</strong> (<em>float</em>) – Altitude above ellipsoid, <strong>Unused in this implementation</strong>.</p></li>
+<li><p><strong>enu</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – (3,n) input matrix of positions in the ENU-convention.</p></li>
+<li><p><strong>radians</strong> (<em>bool</em>) – If <code class="code docutils literal notranslate"><span class="pre">True</span></code> then all values are given in radians instead of degrees.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(3,n) array x,y and z coordinates in ECEF.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -179,7 +246,23 @@
 <dt>
 <code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">ned_to_ecef</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lat</span></em>, <em class="sig-param"><span class="n">lon</span></em>, <em class="sig-param"><span class="n">alt</span></em>, <em class="sig-param"><span class="n">ned</span></em>, <em class="sig-param"><span class="n">radians</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#ned_to_ecef"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>NED (north/east/down) to ECEF coordinate system conversion, not including translation.</p>
-<p>TODO: Docstring</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat</strong> (<em>float</em>) – Latitude on the ellipsoid</p></li>
+<li><p><strong>lon</strong> (<em>float</em>) – Longitude on the ellipsoid</p></li>
+<li><p><strong>alt</strong> (<em>float</em>) – Altitude above ellipsoid, <strong>Unused in this implementation</strong>.</p></li>
+<li><p><strong>ned</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – (3,n) input matrix of positions in the NED-convention.</p></li>
+<li><p><strong>radians</strong> (<em>bool</em>) – If <code class="code docutils literal notranslate"><span class="pre">True</span></code> then all values are given in radians instead of degrees.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(3,n) array x,y and z coordinates in ECEF.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -206,7 +289,7 @@
         <li class="right" >
           <a href="sorts.dates.unix_to_npdt.html" title="unix_to_npdt"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li> 
       </ul>
     </div>

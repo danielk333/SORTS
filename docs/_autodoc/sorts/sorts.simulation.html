@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>simulation &#8212; SORTS 3.18.0 documentation</title>
+    <title>simulation &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.signals.hard_target_snr.html" title="hard_target_snr"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" accesskey="U">API Reference</a> &#187;</li> 
       </ul>
     </div>
@@ -93,7 +93,7 @@
             
   <div class="section" id="module-sorts.simulation">
 <span id="simulation"></span><h1>simulation<a class="headerlink" href="#module-sorts.simulation" title="Permalink to this headline">¶</a></h1>
-<p>Main simulation handler in the form of a class using the capabilities of the entire toolbox.</p>
+<p>Contains all helper functions to automate parallelization with MPI, handle caching and stepping of simulations.</p>
 <div class="section" id="module-summary">
 <h2>Module summary<a class="headerlink" href="#module-summary" title="Permalink to this headline">¶</a></h2>
 <p class="rubric">Classes</p>
@@ -116,19 +116,19 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.simulation.MPI_action.html#sorts.simulation.MPI_action" title="sorts.simulation.MPI_action"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MPI_action</span></code></a>(action[, iterable, root])</p></td>
-<td><p>Simulation step MPI post step action decorator</p></td>
+<td><p>Simulation step MPI post step action decorator.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.simulation.MPI_single_process.html#sorts.simulation.MPI_single_process" title="sorts.simulation.MPI_single_process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MPI_single_process</span></code></a>(process_id)</p></td>
-<td><p>Simulation step single process method restriction decorator</p></td>
+<td><p>Simulation step single process method restriction decorator.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.simulation.cached_step.html#sorts.simulation.cached_step" title="sorts.simulation.cached_step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cached_step</span></code></a>(caches)</p></td>
 <td><p>Simulation step caching decorator</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.simulation.iterable_cache.html#sorts.simulation.iterable_cache" title="sorts.simulation.iterable_cache"><code class="xref py py-obj docutils literal notranslate"><span class="pre">iterable_cache</span></code></a>(steps, caches[, MPI, log, reduce])</p></td>
-<td><p>Simulation step iteration decorator</p></td>
+<td><p>Simulation step cache iteration decorator</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.simulation.iterable_step.html#sorts.simulation.iterable_step" title="sorts.simulation.iterable_step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">iterable_step</span></code></a>(iterable[, MPI, log, reduce])</p></td>
-<td><p>Simulation step iteration decorator</p></td>
+<td><p>Simulation step iteration decorator.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.simulation.log_exceptions.html#sorts.simulation.log_exceptions" title="sorts.simulation.log_exceptions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log_exceptions</span></code></a>(func)</p></td>
 <td><p>If instance has a logger, log exceptions raised by this method.</p></td>
@@ -159,10 +159,32 @@
 <em class="property">class </em><code class="sig-prename descclassname">sorts.simulation.</code><code class="sig-name descname">Simulation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">scheduler</span></em>, <em class="sig-param"><span class="n">root</span></em>, <em class="sig-param"><span class="n">logger</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">profiler</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/simulation.html#Simulation"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Convenience simulation handler, creates a step-by-step simulation sequence and creates file system structure for saving of data to disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scheduler</strong> (<a class="reference internal" href="scheduler/sorts.scheduler.scheduler.Scheduler.html#sorts.scheduler.scheduler.Scheduler" title="sorts.scheduler.scheduler.Scheduler"><em>Scheduler</em></a>) – A scheduler instance to run. This input is used to assure that the same logger and profiler is used for the Simulation and the Scheduler.</p></li>
+<li><p><strong>root</strong> (<em>str/pathlib.Path</em>) – The path to the root folder where all files will be stored.</p></li>
+<li><p><strong>logger</strong> (<em>bool</em>) – If <code class="code docutils literal notranslate"><span class="pre">False</span></code>, do not instantiate a logger.</p></li>
+<li><p><strong>profiler</strong> (<em>bool</em>) – If <code class="code docutils literal notranslate"><span class="pre">False</span></code>, do not instantiate a profiler.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt>
 <code class="sig-name descname">branch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">empty</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">linkfiles</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/simulation.html#Simulation.branch"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Create branch.</p>
+<dd><p>Create branch by creating a copy of the current branch state and checkout that branch. If the branch exists, just checkout that branch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Name of the new branch</p></li>
+<li><p><strong>empty</strong> (<em>bool</em>) – If <code class="code docutils literal notranslate"><span class="pre">True</span></code> do not copy the state of the current branch.</p></li>
+<li><p><strong>linkfiles</strong> (<em>list/bool</em>) – If a list of paths that should be soft-linked rather then copied. If <code class="code docutils literal notranslate"><span class="pre">True</span></code>, soft-link all files.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -177,16 +199,44 @@
 <dd><p>Delete branch.</p>
 </dd></dl>
 
+<dl class="py method">
+<dt>
+<code class="sig-name descname">get_path</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/simulation.html#Simulation.get_path"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Given a relative file path, get the absolute path including root and branch.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">log_path</code></dt>
+<dd><p>Path to the current log-output folder</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">make_paths</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/simulation.html#Simulation.make_paths"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Make all the folder for the current branch according to <code class="code docutils literal notranslate"><span class="pre">self.paths</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">paths</code></dt>
+<dd><p>List of the name of all folders</p>
+</dd></dl>
+
 </dd></dl>
 
 <p class="rubric">Functions</p>
 <dl class="py function">
 <dt>
 <code class="sig-prename descclassname">sorts.simulation.</code><code class="sig-name descname">MPI_action</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">action</span></em>, <em class="sig-param"><span class="n">iterable</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">root</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/simulation.html#MPI_action"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Simulation step MPI post step action decorator</p>
+<dd><p>Simulation step MPI post step action decorator.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>action</strong> (<em>str</em>) – Mode of operations on node-data communication, available options are “gather”, “gather-clear”, “bcast” and “barrier”.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>action</strong> (<em>str</em>) – Mode of operations on node-data communication, available options are “gather”, “gather-clear”, “bcast” and “barrier”.</p></li>
+<li><p><strong>iterable</strong> (<em>bool</em>) – Indicates if the “gather”, “gather-clear” or “bcast” should consider an iterable (that has been parallelized with MPI).</p></li>
+<li><p><strong>root</strong> (<em>int</em>) – The target MPI process for the “gather”, “gather-clear” and for the source process for “bcast” if <code class="code docutils literal notranslate"><span class="pre">iterable=False</span></code>.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -194,7 +244,12 @@
 <dl class="py function">
 <dt>
 <code class="sig-prename descclassname">sorts.simulation.</code><code class="sig-name descname">MPI_single_process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">process_id</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/simulation.html#MPI_single_process"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Simulation step single process method restriction decorator</p>
+<dd><p>Simulation step single process method restriction decorator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>process_id</strong> (<em>int</em>) – The process id the wrapped function should only execute on. All other processes return <code class="code docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -203,7 +258,7 @@
 <dd><p>Simulation step caching decorator</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>caches</strong> (<em>str</em>) – Is a list of strings for the caches to be used, available by default is “h5” and “pickle”. Custom caches are implemented by implementing methods with the string name but prefixed with <cite>load_</cite> and <cite>save_</cite>.</p>
+<dd class="field-odd"><p><strong>caches</strong> (<em>str</em>) – Is a list of strings for the caches to be used, available by default is “h5” and “pickle”. Custom caches are implemented by implementing methods with the string name but prefixed with <code class="code docutils literal notranslate"><span class="pre">load_</span></code> and <code class="code docutils literal notranslate"><span class="pre">save_</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -211,13 +266,34 @@
 <dl class="py function">
 <dt>
 <code class="sig-prename descclassname">sorts.simulation.</code><code class="sig-name descname">iterable_cache</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">steps</span></em>, <em class="sig-param"><span class="n">caches</span></em>, <em class="sig-param"><span class="n">MPI</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">log</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">reduce</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/simulation.html#iterable_cache"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Simulation step iteration decorator</p>
+<dd><p>Simulation step cache iteration decorator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>steps</strong> (<em>str/list</em>) – The name/list of names of the cached steps to be iterated over. It uses the step name to find the files in the corresponding folder.</p></li>
+<li><p><strong>caches</strong> (<em>str/list</em>) – The name/list of cache-methods to be used to load the caches of the steps.</p></li>
+<li><p><strong>MPI</strong> (<em>bool</em>) – Determines if the iteration should be MPI-parallelized.</p></li>
+<li><p><strong>log</strong> (<em>bool</em>) – Use the <code class="code docutils literal notranslate"><span class="pre">self.logger</span></code> instance, if it exists, to log the execution of the iteration.</p></li>
+<li><p><strong>reduce</strong> (<em>function</em>) – A pointer to the binary-function used to reduce the results.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt>
 <code class="sig-prename descclassname">sorts.simulation.</code><code class="sig-name descname">iterable_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">iterable</span></em>, <em class="sig-param"><span class="n">MPI</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">log</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">reduce</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/simulation.html#iterable_step"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Simulation step iteration decorator</p>
+<dd><p>Simulation step iteration decorator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>iterable</strong> (<em>str/list</em>) – The name/list of names of the instance properties (fetched using <code class="code docutils literal notranslate"><span class="pre">getattr</span></code>) to iterate over. Can be multiple levels, e.g. <code class="code docutils literal notranslate"><span class="pre">object.subobject.a_list</span></code>.</p></li>
+<li><p><strong>MPI</strong> (<em>bool</em>) – Determines if the iteration should be MPI-parallelized</p></li>
+<li><p><strong>log</strong> (<em>bool</em>) – Use the <code class="code docutils literal notranslate"><span class="pre">self.logger</span></code> instance, if it exists, to log the execution of the iteration.</p></li>
+<li><p><strong>reduce</strong> (<em>function</em>) – A pointer to the binary-function used to reduce the results.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -251,6 +327,14 @@
 <dt>
 <code class="sig-prename descclassname">sorts.simulation.</code><code class="sig-name descname">store_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">store</span></em>, <em class="sig-param"><span class="n">iterable</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/simulation.html#store_step"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Simulation step storing decorator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>store</strong> (<em>str/list</em>) – The name/list names of the properties to save the method return as (set using <code class="code docutils literal notranslate"><span class="pre">setattr</span></code>). Can be multiple levels, e.g. <code class="code docutils literal notranslate"><span class="pre">object.subobject.a_property</span></code>. The order of the names correspond to the order of method returned variables.</p></li>
+<li><p><strong>iterable</strong> (<em>bool</em>) – Determines if the return of the method is an iteration or not. If its an iteration, it splits the return values into different lists based on the number of variables.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -277,7 +361,7 @@
         <li class="right" >
           <a href="sorts.signals.hard_target_snr.html" title="hard_target_snr"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li> 
       </ul>
     </div>

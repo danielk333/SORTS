@@ -1,0 +1,8 @@
+SGP4.out\_frame
+===============
+
+.. currentmodule:: sorts.propagator.pysgp4
+
+.. rubric:: SGP4.out_frame
+
+.. autoproperty:: sorts.propagator.pysgp4.SGP4.out_frame

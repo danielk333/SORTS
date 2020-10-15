@@ -1,0 +1,8 @@
+get\_inertial\_basis
+====================
+
+.. currentmodule:: sorts.errors.atmospheric_drag
+
+.. rubric:: get_inertial_basis
+
+.. autofunction:: get_inertial_basis

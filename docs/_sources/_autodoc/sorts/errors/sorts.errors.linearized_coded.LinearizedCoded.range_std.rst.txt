@@ -1,0 +1,8 @@
+LinearizedCoded.range\_std
+==========================
+
+.. currentmodule:: sorts.errors.linearized_coded
+
+.. rubric:: LinearizedCoded.range_std
+
+.. automethod:: LinearizedCoded.range_std

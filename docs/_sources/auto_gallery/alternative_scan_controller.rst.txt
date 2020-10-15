@@ -36,22 +36,24 @@ Using scans on alternative parameters
 
  .. code-block:: none
 
+    /home/danielk/IRF/IRF_GITLAB/pyant/pyant/plotting.py:236: RuntimeWarning: invalid value encountered in log10
+      SdB = np.log10(S)*10.0
     Temporal points obj 0: 27328
     --------------------------------------- Performance analysis --------------------------------------
      Name                                                   |   Executions | Mean time     | Total time
     --------------------------------------------------------+--------------+---------------+--------------
-     equidistant_sampling                                   |            1 | 1.40429e-04 s | 0.00 %
-     get_state                                              |            1 | 9.17996e-01 s | 15.57 %
-     find_passes                                            |            1 | 6.30879e-03 s | 0.11 %
-     Obs.Param.:calculate_observation:get_state             |            1 | 1.29303e-01 s | 2.19 %
-     Obs.Param.:calculate_observation:enus,range,range_rate |            1 | 8.10385e-04 s | 0.01 %
-     Obs.Param.:calculate_observation:snr-step:gain         |         6695 | 6.89164e-04 s | 78.24 %
-     Obs.Param.:calculate_observation:snr-step:snr          |         6695 | 1.68406e-05 s | 1.91 %
-     Obs.Param.:calculate_observation:snr-step              |         6695 | 7.18642e-04 s | 81.59 %
-     Obs.Param.:calculate_observation:generator             |            1 | 4.84159e+00 s | 82.10 %
-     Obs.Param.:calculate_observation                       |            1 | 4.97181e+00 s | 84.31 %
-     observe_passes                                         |            1 | 4.97249e+00 s | 84.32 %
-     total                                                  |            1 | 5.89707e+00 s | 100.00 %
+     equidistant_sampling                                   |            1 | 1.95503e-04 s | 0.00 %
+     get_state                                              |            1 | 2.56772e-01 s | 4.55 %
+     find_passes                                            |            1 | 6.34050e-03 s | 0.11 %
+     Obs.Param.:calculate_observation:get_state             |            1 | 1.28603e-01 s | 2.28 %
+     Obs.Param.:calculate_observation:enus,range,range_rate |            1 | 8.59261e-04 s | 0.02 %
+     Obs.Param.:calculate_observation:snr-step:gain         |         6695 | 7.48235e-04 s | 88.72 %
+     Obs.Param.:calculate_observation:snr-step:snr          |         6695 | 1.80442e-05 s | 2.14 %
+     Obs.Param.:calculate_observation:snr-step              |         6695 | 7.79843e-04 s | 92.46 %
+     Obs.Param.:calculate_observation:generator             |            1 | 5.25253e+00 s | 93.02 %
+     Obs.Param.:calculate_observation                       |            1 | 5.38251e+00 s | 95.32 %
+     observe_passes                                         |            1 | 5.38322e+00 s | 95.33 %
+     total                                                  |            1 | 5.64664e+00 s | 100.00 %
     ---------------------------------------------------------------------------------------------------
 
 
@@ -269,7 +271,7 @@ Using scans on alternative parameters
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  8.813 seconds)
+   **Total running time of the script:** ( 0 minutes  8.585 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_alternative_scan_controller.py:

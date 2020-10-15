@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>pysgp4 &#8212; SORTS 3.18.0 documentation</title>
+    <title>pysgp4 &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.propagator.orekit.npdt2absdate.html" title="npdt2absdate"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" accesskey="U">API Reference</a> &#187;</li> 
       </ul>
     </div>
@@ -186,6 +186,18 @@ to mean elements used in two line element sets (TLE’s).</p>
 
 <dl class="py method">
 <dt>
+<code class="sig-name descname">get_mean_elements</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">line1</span></em>, <em class="sig-param"><span class="n">line2</span></em>, <em class="sig-param"><span class="n">radians</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/propagator/pysgp4.html#SGP4.get_mean_elements"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Extract the mean elements in SI units (a [m], e [1], inc [deg], raan [deg], aop [deg], mu [deg]), B-parameter (not bstar) and epoch from a two line element pair.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">heartbeat</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">state</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span></dt>
+<dd><p>Function applied after propagation to time <cite>t</cite> and state <cite>state</cite>, before next time step as given in the input time vector to <cite>propagate</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
 <code class="sig-name descname">propagate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">state0</span></em>, <em class="sig-param"><span class="n">epoch</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/propagator/pysgp4.html#SGP4.propagate"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Propagate a state</p>
 <p>#TODO: UPDATE THIS DOCSTRING</p>
@@ -204,7 +216,8 @@ They also contain a option to give angles in radians or degrees. By default inpu
 <li><p><strong>C_D</strong> (<em>float</em>) – Drag coefficient</p></li>
 <li><p><strong>A</strong> (<em>float</em>) – Cross-sectional Area</p></li>
 <li><p><strong>m</strong> (<em>float</em>) – Mass</p></li>
-<li><p><strong>degrees</strong> (<em>bool</em>) – If false, all angles are assumed to be in radians.</p></li>
+<li><p><strong>radians</strong> (<em>bool</em>) – If true, all angles are assumed to be in radians.</p></li>
+<li><p><strong>SGP4_mean_elements</strong> (<em>bool</em>) – If True, the input is not cartesian state but SGP4 mean elements.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -251,7 +264,7 @@ They also contain a option to give angles in radians or degrees. By default inpu
         <li class="right" >
           <a href="sorts.propagator.orekit.npdt2absdate.html" title="npdt2absdate"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li> 
       </ul>
     </div>

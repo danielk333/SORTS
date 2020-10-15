@@ -15,9 +15,9 @@ Pass
       :toctree: .
    
       ~Pass.__init__
-      ~Pass.calculate_max_snr
       ~Pass.calculate_range
       ~Pass.calculate_range_rate
+      ~Pass.calculate_snr
       ~Pass.calculate_zenith_angle
       ~Pass.end
       ~Pass.get_range

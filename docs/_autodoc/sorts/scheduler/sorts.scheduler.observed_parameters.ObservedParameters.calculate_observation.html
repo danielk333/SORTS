@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>ObservedParameters.calculate_observation &#8212; SORTS 3.18.0 documentation</title>
+    <title>ObservedParameters.calculate_observation &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -21,7 +21,7 @@
     <script src="../../../_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="ObservedParameters.chain_generators" href="sorts.scheduler.observed_parameters.ObservedParameters.chain_generators.html" />
+    <link rel="next" title="ObservedParameters.calculate_observation_jacobian" href="sorts.scheduler.observed_parameters.ObservedParameters.calculate_observation_jacobian.html" />
     <link rel="prev" title="ObservedParameters.__init__" href="sorts.scheduler.observed_parameters.ObservedParameters.__init__.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--[if lt IE 9]>
@@ -38,12 +38,12 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="sorts.scheduler.observed_parameters.ObservedParameters.chain_generators.html" title="ObservedParameters.chain_generators"
+          <a href="sorts.scheduler.observed_parameters.ObservedParameters.calculate_observation_jacobian.html" title="ObservedParameters.calculate_observation_jacobian"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="sorts.scheduler.observed_parameters.ObservedParameters.__init__.html" title="ObservedParameters.__init__"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.scheduler.observed_parameters.html" >observed_parameters</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="sorts.scheduler.observed_parameters.ObservedParameters.html" accesskey="U">ObservedParameters</a> &#187;</li> 
@@ -55,8 +55,8 @@
   <p class="topless"><a href="sorts.scheduler.observed_parameters.ObservedParameters.__init__.html"
                         title="previous chapter">ObservedParameters.__init__</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="sorts.scheduler.observed_parameters.ObservedParameters.chain_generators.html"
-                        title="next chapter">ObservedParameters.chain_generators</a></p>
+  <p class="topless"><a href="sorts.scheduler.observed_parameters.ObservedParameters.calculate_observation_jacobian.html"
+                        title="next chapter">ObservedParameters.calculate_observation_jacobian</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -87,8 +87,9 @@
 <p class="rubric">ObservedParameters.calculate_observation</p>
 <dl class="py method">
 <dt id="sorts.scheduler.observed_parameters.ObservedParameters.calculate_observation">
-<code class="sig-prename descclassname">ObservedParameters.</code><code class="sig-name descname">calculate_observation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">txrx_pass</span></em>, <em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">generator</span></em>, <em class="sig-param"><span class="n">space_object</span></em>, <em class="sig-param"><span class="n">interpolator</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">snr_limit</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/scheduler/observed_parameters.html#ObservedParameters.calculate_observation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.scheduler.observed_parameters.ObservedParameters.calculate_observation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes a pass over a tx-rx pair and the corresponding evaluated times and generator that returns radar instances to generate a set of observed data.</p>
+<code class="sig-prename descclassname">ObservedParameters.</code><code class="sig-name descname">calculate_observation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">txrx_pass</span></em>, <em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">generator</span></em>, <em class="sig-param"><span class="n">space_object</span></em>, <em class="sig-param"><span class="n">calculate_snr</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">interpolator</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">snr_limit</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/scheduler/observed_parameters.html#ObservedParameters.calculate_observation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.scheduler.observed_parameters.ObservedParameters.calculate_observation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the observation of a pass of a specific space object given the current state of the Scheduler.</p>
+<p>#TODO: Docstring</p>
 </dd></dl>
 
 </div>
@@ -109,12 +110,12 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="sorts.scheduler.observed_parameters.ObservedParameters.chain_generators.html" title="ObservedParameters.chain_generators"
+          <a href="sorts.scheduler.observed_parameters.ObservedParameters.calculate_observation_jacobian.html" title="ObservedParameters.calculate_observation_jacobian"
              >next</a> |</li>
         <li class="right" >
           <a href="sorts.scheduler.observed_parameters.ObservedParameters.__init__.html" title="ObservedParameters.__init__"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.scheduler.observed_parameters.html" >observed_parameters</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="sorts.scheduler.observed_parameters.ObservedParameters.html" >ObservedParameters</a> &#187;</li> 

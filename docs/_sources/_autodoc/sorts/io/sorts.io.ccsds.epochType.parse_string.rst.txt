@@ -1,0 +1,8 @@
+epochType.parse\_string
+=======================
+
+.. currentmodule:: sorts.io.ccsds
+
+.. rubric:: epochType.parse_string
+
+.. automethod:: epochType.parse_string

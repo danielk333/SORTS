@@ -28,62 +28,62 @@ DEBUG   10
 
  .. code-block:: none
 
-    2020-09-23 10:52:31.363 INFO    ; info message 0
-    2020-09-23 10:52:31.363 WARNING ; warning message 0
-    2020-09-23 10:52:31.363 ERROR   ; error message 0
-    2020-09-23 10:52:31.363 CRITICAL; critical message 0
-    2020-09-23 10:52:31.363 ALWAYS  ; always message 0
-    2020-09-23 10:52:31.363 INFO    ; info message 1
-    2020-09-23 10:52:31.363 WARNING ; warning message 1
-    2020-09-23 10:52:31.363 ERROR   ; error message 1
-    2020-09-23 10:52:31.363 CRITICAL; critical message 1
-    2020-09-23 10:52:31.363 ALWAYS  ; always message 1
-    2020-09-23 10:52:31.363 INFO    ; info message 2
-    2020-09-23 10:52:31.363 WARNING ; warning message 2
-    2020-09-23 10:52:31.363 ERROR   ; error message 2
-    2020-09-23 10:52:31.363 CRITICAL; critical message 2
-    2020-09-23 10:52:31.364 ALWAYS  ; always message 2
-    2020-09-23 10:52:31.364 INFO    ; info message 3
-    2020-09-23 10:52:31.364 WARNING ; warning message 3
-    2020-09-23 10:52:31.364 ERROR   ; error message 3
-    2020-09-23 10:52:31.364 CRITICAL; critical message 3
-    2020-09-23 10:52:31.364 ALWAYS  ; always message 3
-    2020-09-23 10:52:31.364 INFO    ; info message 4
-    2020-09-23 10:52:31.364 WARNING ; warning message 4
-    2020-09-23 10:52:31.364 ERROR   ; error message 4
-    2020-09-23 10:52:31.364 CRITICAL; critical message 4
-    2020-09-23 10:52:31.364 ALWAYS  ; always message 4
-    2020-09-23 10:52:31.364 INFO    ; info message 5
-    2020-09-23 10:52:31.364 WARNING ; warning message 5
-    2020-09-23 10:52:31.364 ERROR   ; error message 5
-    2020-09-23 10:52:31.364 CRITICAL; critical message 5
-    2020-09-23 10:52:31.364 ALWAYS  ; always message 5
-    2020-09-23 10:52:31.364 INFO    ; info message 6
-    2020-09-23 10:52:31.364 WARNING ; warning message 6
-    2020-09-23 10:52:31.364 ERROR   ; error message 6
-    2020-09-23 10:52:31.364 CRITICAL; critical message 6
-    2020-09-23 10:52:31.365 ALWAYS  ; always message 6
-    2020-09-23 10:52:31.365 INFO    ; info message 7
-    2020-09-23 10:52:31.365 WARNING ; warning message 7
-    2020-09-23 10:52:31.365 ERROR   ; error message 7
-    2020-09-23 10:52:31.365 CRITICAL; critical message 7
-    2020-09-23 10:52:31.365 ALWAYS  ; always message 7
-    2020-09-23 10:52:31.365 INFO    ; info message 8
-    2020-09-23 10:52:31.365 WARNING ; warning message 8
-    2020-09-23 10:52:31.365 ERROR   ; error message 8
-    2020-09-23 10:52:31.365 CRITICAL; critical message 8
-    2020-09-23 10:52:31.365 ALWAYS  ; always message 8
-    2020-09-23 10:52:31.365 INFO    ; info message 9
-    2020-09-23 10:52:31.365 WARNING ; warning message 9
-    2020-09-23 10:52:31.365 ERROR   ; error message 9
-    2020-09-23 10:52:31.365 CRITICAL; critical message 9
-    2020-09-23 10:52:31.365 ALWAYS  ; always message 9
-    2020-09-23 10:52:31.366 INFO    ; --------------- Performance analysis --------------
-    2020-09-23 10:52:31.366 INFO    ;  Name   |   Executions | Mean time     | Total time
-    2020-09-23 10:52:31.366 INFO    ; --------+--------------+---------------+---------------
-    2020-09-23 10:52:31.366 INFO    ;  log    |           10 | 2.71702e-04 s | 2.71702e-03 s
-    2020-09-23 10:52:31.366 INFO    ; ---------------------------------------------------
-    2020-09-23 10:52:31.366 INFO    ; 
+    2020-10-15 13:21:00.604 INFO    ; info message 0
+    2020-10-15 13:21:00.604 WARNING ; warning message 0
+    2020-10-15 13:21:00.604 ERROR   ; error message 0
+    2020-10-15 13:21:00.604 CRITICAL; critical message 0
+    2020-10-15 13:21:00.604 ALWAYS  ; always message 0
+    2020-10-15 13:21:00.604 INFO    ; info message 1
+    2020-10-15 13:21:00.604 WARNING ; warning message 1
+    2020-10-15 13:21:00.604 ERROR   ; error message 1
+    2020-10-15 13:21:00.604 CRITICAL; critical message 1
+    2020-10-15 13:21:00.604 ALWAYS  ; always message 1
+    2020-10-15 13:21:00.604 INFO    ; info message 2
+    2020-10-15 13:21:00.604 WARNING ; warning message 2
+    2020-10-15 13:21:00.605 ERROR   ; error message 2
+    2020-10-15 13:21:00.605 CRITICAL; critical message 2
+    2020-10-15 13:21:00.605 ALWAYS  ; always message 2
+    2020-10-15 13:21:00.605 INFO    ; info message 3
+    2020-10-15 13:21:00.605 WARNING ; warning message 3
+    2020-10-15 13:21:00.605 ERROR   ; error message 3
+    2020-10-15 13:21:00.605 CRITICAL; critical message 3
+    2020-10-15 13:21:00.605 ALWAYS  ; always message 3
+    2020-10-15 13:21:00.605 INFO    ; info message 4
+    2020-10-15 13:21:00.605 WARNING ; warning message 4
+    2020-10-15 13:21:00.605 ERROR   ; error message 4
+    2020-10-15 13:21:00.605 CRITICAL; critical message 4
+    2020-10-15 13:21:00.605 ALWAYS  ; always message 4
+    2020-10-15 13:21:00.605 INFO    ; info message 5
+    2020-10-15 13:21:00.605 WARNING ; warning message 5
+    2020-10-15 13:21:00.605 ERROR   ; error message 5
+    2020-10-15 13:21:00.605 CRITICAL; critical message 5
+    2020-10-15 13:21:00.605 ALWAYS  ; always message 5
+    2020-10-15 13:21:00.606 INFO    ; info message 6
+    2020-10-15 13:21:00.606 WARNING ; warning message 6
+    2020-10-15 13:21:00.606 ERROR   ; error message 6
+    2020-10-15 13:21:00.606 CRITICAL; critical message 6
+    2020-10-15 13:21:00.606 ALWAYS  ; always message 6
+    2020-10-15 13:21:00.606 INFO    ; info message 7
+    2020-10-15 13:21:00.606 WARNING ; warning message 7
+    2020-10-15 13:21:00.606 ERROR   ; error message 7
+    2020-10-15 13:21:00.606 CRITICAL; critical message 7
+    2020-10-15 13:21:00.606 ALWAYS  ; always message 7
+    2020-10-15 13:21:00.606 INFO    ; info message 8
+    2020-10-15 13:21:00.606 WARNING ; warning message 8
+    2020-10-15 13:21:00.606 ERROR   ; error message 8
+    2020-10-15 13:21:00.606 CRITICAL; critical message 8
+    2020-10-15 13:21:00.606 ALWAYS  ; always message 8
+    2020-10-15 13:21:00.606 INFO    ; info message 9
+    2020-10-15 13:21:00.606 WARNING ; warning message 9
+    2020-10-15 13:21:00.606 ERROR   ; error message 9
+    2020-10-15 13:21:00.607 CRITICAL; critical message 9
+    2020-10-15 13:21:00.607 ALWAYS  ; always message 9
+    2020-10-15 13:21:00.607 INFO    ; --------------- Performance analysis --------------
+    2020-10-15 13:21:00.607 INFO    ;  Name   |   Executions | Mean time     | Total time
+    2020-10-15 13:21:00.607 INFO    ; --------+--------------+---------------+---------------
+    2020-10-15 13:21:00.607 INFO    ;  log    |           10 | 3.04699e-04 s | 3.04699e-03 s
+    2020-10-15 13:21:00.607 INFO    ; ---------------------------------------------------
+    2020-10-15 13:21:00.607 INFO    ; 
 
 
 
@@ -119,7 +119,7 @@ DEBUG   10
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.011 seconds)
+   **Total running time of the script:** ( 0 minutes  0.005 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_logger.py:

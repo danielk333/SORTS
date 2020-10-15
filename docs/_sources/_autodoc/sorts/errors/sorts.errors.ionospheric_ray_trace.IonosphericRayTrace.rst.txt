@@ -1,0 +1,35 @@
+IonosphericRayTrace
+===================
+
+.. currentmodule:: sorts.errors.ionospheric_ray_trace
+
+.. autoclass:: IonosphericRayTrace
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~IonosphericRayTrace.__init__
+      ~IonosphericRayTrace.get
+      ~IonosphericRayTrace.k
+      ~IonosphericRayTrace.range
+      ~IonosphericRayTrace.set_numpy_seed
+      ~IonosphericRayTrace.t
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~IonosphericRayTrace.VARIABLES
+   
+   

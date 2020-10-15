@@ -36,6 +36,6 @@ $(window).resize(function(){
         $("li.nav-item-0 a").text("Top");
     }
     else {
-        $("li.nav-item-0 a").text("SORTS 3.18.0 documentation");
+        $("li.nav-item-0 a").text("SORTS 4.0.0-rc.1 documentation");
     }
 });

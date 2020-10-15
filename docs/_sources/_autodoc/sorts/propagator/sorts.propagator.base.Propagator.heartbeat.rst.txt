@@ -1,0 +1,8 @@
+Propagator.heartbeat
+====================
+
+.. currentmodule:: sorts.propagator.base
+
+.. rubric:: Propagator.heartbeat
+
+.. automethod:: Propagator.heartbeat

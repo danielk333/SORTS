@@ -32,10 +32,10 @@ Also reducing time sampling of the radar controller can speed up calculations.
     omega: 0.0000e+00   vx: -1.3986e+03
     Omega: 8.6000e+01   vy: -6.4897e+03
     anom : 6.0000e+01   vz: 3.5175e+03
-    Parameters: d=0.1, C_D=2.3, A=1.0, m=1.0, C_R=1.0
-    2020-09-23 10:58:26.843 INFO    ; Static:init
-    2020-09-23 10:58:26.846 INFO    ; Static:init
-    2020-09-23 10:58:26.851 INFO    ; Scanner:init
+    Parameters: C_D=2.3, m=1.0, C_R=1.0, d=0.1
+    2020-10-15 13:24:47.300 INFO    ; Static:init
+    2020-10-15 13:24:47.303 INFO    ; Static:init
+    2020-10-15 13:24:47.306 INFO    ; Scanner:init
     Temporal points obj: 4555
     Max SNR=-7.52150639802996 dB
     Max SNR=-7.426719944704181 dB
@@ -46,21 +46,21 @@ Also reducing time sampling of the radar controller can speed up calculations.
     --------------------------------------- Performance analysis --------------------------------------
      Name                                                   |   Executions | Mean time     | Total time
     --------------------------------------------------------+--------------+---------------+--------------
-     equidistant_sampling                                   |            1 | 1.25885e-04 s | 0.00 %
-     get_state                                              |            1 | 7.67790e-01 s | 5.70 %
-     find_passes                                            |            1 | 6.33717e-03 s | 0.05 %
-     Obs.Param.:calculate_observation:get_state             |            3 | 5.81103e-02 s | 1.29 %
-     Obs.Param.:calculate_observation:enus,range,range_rate |            3 | 7.02937e-04 s | 0.02 %
-     Scanner:generator:point_radar:_point_station[tx]       |         8361 | 1.04194e-04 s | 6.47 %
-     Scanner:generator:point_radar:_point_station[rx]       |        25083 | 1.96253e-04 s | 36.53 %
-     Scanner:generator:point_radar                          |         8361 | 8.29216e-04 s | 51.45 %
-     Obs.Param.:calculate_observation:snr-step:gain         |         8361 | 6.27113e-04 s | 38.91 %
-     Obs.Param.:calculate_observation:snr-step:snr          |         8361 | 2.13844e-05 s | 1.33 %
-     Obs.Param.:calculate_observation:snr-step              |         8361 | 6.63409e-04 s | 41.16 %
-     Obs.Param.:calculate_observation:generator             |            3 | 4.17428e+00 s | 92.93 %
-     Obs.Param.:calculate_observation                       |            3 | 4.23317e+00 s | 94.25 %
-     observe_passes                                         |            1 | 1.27004e+01 s | 94.25 %
-     total                                                  |            1 | 1.34749e+01 s | 100.00 %
+     equidistant_sampling                                   |            1 | 6.65188e-05 s | 0.00 %
+     get_state                                              |            1 | 5.63178e-02 s | 0.44 %
+     find_passes                                            |            1 | 5.84817e-03 s | 0.05 %
+     Obs.Param.:calculate_observation:get_state             |            3 | 5.38036e-02 s | 1.27 %
+     Obs.Param.:calculate_observation:enus,range,range_rate |            3 | 7.07547e-04 s | 0.02 %
+     Scanner:generator:point_radar:_point_station[tx]       |         8361 | 1.03405e-04 s | 6.80 %
+     Scanner:generator:point_radar:_point_station[rx]       |        25083 | 1.96192e-04 s | 38.68 %
+     Scanner:generator:point_radar                          |         8361 | 8.26807e-04 s | 54.34 %
+     Obs.Param.:calculate_observation:snr-step:gain         |         8361 | 6.26064e-04 s | 41.15 %
+     Obs.Param.:calculate_observation:snr-step:snr          |         8361 | 2.11980e-05 s | 1.39 %
+     Obs.Param.:calculate_observation:snr-step              |         8361 | 6.62585e-04 s | 43.55 %
+     Obs.Param.:calculate_observation:generator             |            3 | 4.16464e+00 s | 98.21 %
+     Obs.Param.:calculate_observation                       |            3 | 4.21945e+00 s | 99.50 %
+     observe_passes                                         |            1 | 1.26592e+01 s | 99.51 %
+     total                                                  |            1 | 1.27217e+01 s | 100.00 %
     ---------------------------------------------------------------------------------------------------
 
     Temporal points obj: 4555
@@ -73,18 +73,18 @@ Also reducing time sampling of the radar controller can speed up calculations.
     --------------------------------------- Performance analysis --------------------------------------
      Name                                                   |   Executions | Mean time     | Total time
     --------------------------------------------------------+--------------+---------------+--------------
-     equidistant_sampling                                   |            1 | 7.43866e-05 s | 0.00 %
-     get_state                                              |            1 | 5.60377e-02 s | 1.10 %
-     find_passes                                            |            1 | 5.87058e-03 s | 0.12 %
-     Obs.Param.:calculate_observation:get_state             |            3 | 5.57485e-02 s | 3.29 %
-     Obs.Param.:calculate_observation:enus,range,range_rate |            3 | 7.36634e-04 s | 0.04 %
-     Obs.Param.:calculate_observation:snr-step:gain         |         8361 | 5.47508e-04 s | 90.13 %
-     Obs.Param.:calculate_observation:snr-step:snr          |         8361 | 1.77173e-05 s | 2.92 %
-     Obs.Param.:calculate_observation:snr-step              |         8361 | 5.77886e-04 s | 95.13 %
-     Obs.Param.:calculate_observation:generator             |            3 | 1.61548e+00 s | 95.42 %
-     Obs.Param.:calculate_observation                       |            3 | 1.67204e+00 s | 98.76 %
-     observe_passes                                         |            1 | 5.01694e+00 s | 98.78 %
-     total                                                  |            1 | 5.07913e+00 s | 100.00 %
+     equidistant_sampling                                   |            1 | 6.62804e-05 s | 0.00 %
+     get_state                                              |            1 | 5.27039e-02 s | 1.05 %
+     find_passes                                            |            1 | 5.74374e-03 s | 0.11 %
+     Obs.Param.:calculate_observation:get_state             |            3 | 5.15394e-02 s | 3.08 %
+     Obs.Param.:calculate_observation:enus,range,range_rate |            3 | 7.63178e-04 s | 0.05 %
+     Obs.Param.:calculate_observation:snr-step:gain         |         8361 | 5.41809e-04 s | 90.36 %
+     Obs.Param.:calculate_observation:snr-step:snr          |         8361 | 1.71599e-05 s | 2.86 %
+     Obs.Param.:calculate_observation:snr-step              |         8361 | 5.71848e-04 s | 95.37 %
+     Obs.Param.:calculate_observation:generator             |            3 | 1.59862e+00 s | 95.67 %
+     Obs.Param.:calculate_observation                       |            3 | 1.65118e+00 s | 98.81 %
+     observe_passes                                         |            1 | 4.95437e+00 s | 98.83 %
+     total                                                  |            1 | 5.01308e+00 s | 100.00 %
     ---------------------------------------------------------------------------------------------------
 
     Temporal points obj: 4555
@@ -97,18 +97,18 @@ Also reducing time sampling of the radar controller can speed up calculations.
     --------------------------------------- Performance analysis --------------------------------------
      Name                                                   |   Executions | Mean time     | Total time
     --------------------------------------------------------+--------------+---------------+--------------
-     equidistant_sampling                                   |            1 | 5.67436e-05 s | 0.01 %
-     get_state                                              |            1 | 5.22633e-02 s | 7.78 %
-     find_passes                                            |            1 | 5.87249e-03 s | 0.87 %
-     Obs.Param.:calculate_observation:get_state             |            3 | 2.52349e-02 s | 11.27 %
-     Obs.Param.:calculate_observation:enus,range,range_rate |            3 | 5.34296e-04 s | 0.24 %
-     Obs.Param.:calculate_observation:snr-step:gain         |          835 | 6.00615e-04 s | 74.67 %
-     Obs.Param.:calculate_observation:snr-step:snr          |          835 | 2.21267e-05 s | 2.75 %
-     Obs.Param.:calculate_observation:snr-step              |          835 | 6.38674e-04 s | 79.40 %
-     Obs.Param.:calculate_observation:generator             |            3 | 1.78332e-01 s | 79.66 %
-     Obs.Param.:calculate_observation                       |            3 | 2.04145e-01 s | 91.19 %
-     observe_passes                                         |            1 | 6.13208e-01 s | 91.30 %
-     total                                                  |            1 | 6.71628e-01 s | 100.00 %
+     equidistant_sampling                                   |            1 | 7.27177e-05 s | 0.01 %
+     get_state                                              |            1 | 4.79825e-02 s | 7.31 %
+     find_passes                                            |            1 | 5.87559e-03 s | 0.89 %
+     Obs.Param.:calculate_observation:get_state             |            3 | 2.22474e-02 s | 10.16 %
+     Obs.Param.:calculate_observation:enus,range,range_rate |            3 | 5.24441e-04 s | 0.24 %
+     Obs.Param.:calculate_observation:snr-step:gain         |          835 | 5.97733e-04 s | 75.99 %
+     Obs.Param.:calculate_observation:snr-step:snr          |          835 | 2.23976e-05 s | 2.85 %
+     Obs.Param.:calculate_observation:snr-step              |          835 | 6.36720e-04 s | 80.94 %
+     Obs.Param.:calculate_observation:generator             |            3 | 1.77813e-01 s | 81.21 %
+     Obs.Param.:calculate_observation                       |            3 | 2.00671e-01 s | 91.65 %
+     observe_passes                                         |            1 | 6.02712e-01 s | 91.76 %
+     total                                                  |            1 | 6.56831e-01 s | 100.00 %
     ---------------------------------------------------------------------------------------------------
 
 
@@ -233,7 +233,7 @@ Also reducing time sampling of the radar controller can speed up calculations.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  19.258 seconds)
+   **Total running time of the script:** ( 0 minutes  18.415 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_static_radar_controller_speedup.py:

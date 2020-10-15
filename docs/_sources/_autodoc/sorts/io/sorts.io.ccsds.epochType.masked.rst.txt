@@ -1,0 +1,8 @@
+epochType.masked
+================
+
+.. currentmodule:: sorts.io.ccsds
+
+.. rubric:: epochType.masked
+
+.. autoproperty:: sorts.io.ccsds.epochType.masked

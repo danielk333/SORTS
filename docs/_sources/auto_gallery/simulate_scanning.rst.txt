@@ -33,27 +33,27 @@ Simulate scanning for objects
     omega: 0.0000e+00   vx: -1.3986e+03
     Omega: 8.6000e+01   vy: -6.4897e+03
     anom : 6.0000e+01   vz: 3.5175e+03
-    Parameters: d=0.1, C_D=2.3, A=1.0, m=1.0, C_R=1.0
-    2020-09-23 10:58:46.280 INFO    ; Scanner:init
+    Parameters: C_D=2.3, m=1.0, C_R=1.0, d=0.1
+    2020-10-15 13:25:53.795 INFO    ; Scanner:init
     Temporal points obj 0: 4555
     --------------------------------------- Performance analysis --------------------------------------
      Name                                                   |   Executions | Mean time     | Total time
     --------------------------------------------------------+--------------+---------------+--------------
-     equidistant_sampling                                   |            1 | 7.15256e-05 s | 0.00 %
-     get_state                                              |            1 | 5.76415e-02 s | 0.46 %
-     find_passes                                            |            1 | 5.81145e-03 s | 0.05 %
-     Obs.Param.:calculate_observation:get_state             |            3 | 5.73374e-02 s | 1.38 %
-     Obs.Param.:calculate_observation:enus,range,range_rate |            3 | 6.97215e-04 s | 0.02 %
-     Scanner:generator:point_radar:_point_station[tx]       |         8361 | 1.07907e-04 s | 7.23 %
-     Scanner:generator:point_radar:_point_station[rx]       |        25083 | 1.93265e-04 s | 38.87 %
-     Scanner:generator:point_radar                          |         8361 | 8.31348e-04 s | 55.74 %
-     Obs.Param.:calculate_observation:snr-step:gain         |         8149 | 6.06318e-04 s | 39.62 %
-     Obs.Param.:calculate_observation:snr-step:snr          |         8149 | 2.11225e-05 s | 1.38 %
-     Obs.Param.:calculate_observation:snr-step              |         8361 | 6.25960e-04 s | 41.97 %
-     Obs.Param.:calculate_observation:generator             |            3 | 4.07724e+00 s | 98.09 %
-     Obs.Param.:calculate_observation                       |            3 | 4.13535e+00 s | 99.48 %
-     observe_passes                                         |            1 | 1.24068e+01 s | 99.49 %
-     total                                                  |            1 | 1.24704e+01 s | 100.00 %
+     equidistant_sampling                                   |            1 | 6.91414e-05 s | 0.00 %
+     get_state                                              |            1 | 5.40323e-02 s | 0.42 %
+     find_passes                                            |            1 | 5.85890e-03 s | 0.05 %
+     Obs.Param.:calculate_observation:get_state             |            3 | 5.40149e-02 s | 1.27 %
+     Obs.Param.:calculate_observation:enus,range,range_rate |            3 | 6.99520e-04 s | 0.02 %
+     Scanner:generator:point_radar:_point_station[tx]       |         8361 | 1.10018e-04 s | 7.22 %
+     Scanner:generator:point_radar:_point_station[rx]       |        25083 | 1.96978e-04 s | 38.76 %
+     Scanner:generator:point_radar                          |         8361 | 8.46843e-04 s | 55.54 %
+     Obs.Param.:calculate_observation:snr-step:gain         |         8149 | 6.24864e-04 s | 39.95 %
+     Obs.Param.:calculate_observation:snr-step:snr          |         8149 | 2.17805e-05 s | 1.39 %
+     Obs.Param.:calculate_observation:snr-step              |         8361 | 6.45645e-04 s | 42.35 %
+     Obs.Param.:calculate_observation:generator             |            3 | 4.17384e+00 s | 98.23 %
+     Obs.Param.:calculate_observation                       |            3 | 4.22882e+00 s | 99.52 %
+     observe_passes                                         |            1 | 1.26873e+01 s | 99.53 %
+     total                                                  |            1 | 1.27473e+01 s | 100.00 %
     ---------------------------------------------------------------------------------------------------
 
     /home/danielk/IRF/IRF_GITLAB/SORTS/examples/simulate_scanning.py:146: RuntimeWarning: divide by zero encountered in log10
@@ -241,7 +241,7 @@ Simulate scanning for objects
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  14.059 seconds)
+   **Total running time of the script:** ( 0 minutes  14.315 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_simulate_scanning.py:

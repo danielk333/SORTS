@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>sorts.population.population &#8212; SORTS 3.18.0 documentation</title>
+    <title>sorts.population.population &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -184,7 +184,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">state_fields</span> <span class="o">=</span> <span class="n">state_fields</span>
 
         <span class="k">if</span> <span class="n">epoch_field</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">epoch_field</span> <span class="o">=</span> <span class="n">Population</span><span class="o">.</span><span class="n">_default_epoch</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]</span>
+            <span class="n">epoch_field</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">Population</span><span class="o">.</span><span class="n">_default_epoch</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">epoch_field</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">epoch_field_</span> <span class="o">=</span> <span class="n">epoch_field</span>
+                <span class="n">epoch_field</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">Population</span><span class="o">.</span><span class="n">_default_epoch</span><span class="p">)</span>
+                <span class="n">epoch_field</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">epoch_field_</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">epoch_field</span> <span class="o">=</span> <span class="n">epoch_field</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">allocate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -412,8 +418,9 @@
         <span class="sd">&#39;&#39;&#39;Get the one row from the population as a :class:`space_object.SpaceObject` instance.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">parameters</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">space_object_fields</span><span class="p">:</span>
-            <span class="n">parameters</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">n</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">space_object_fields</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">space_object_fields</span><span class="p">:</span>
+                <span class="n">parameters</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">n</span><span class="p">]</span>
 
         <span class="n">cart_state</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">kep_state</span> <span class="o">=</span> <span class="kc">True</span>
@@ -439,7 +446,6 @@
 
         <span class="k">if</span> <span class="s1">&#39;oid&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;oid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="s1">&#39;oid&#39;</span><span class="p">]</span>
-
 
         <span class="n">obj</span><span class="o">=</span><span class="n">so</span><span class="o">.</span><span class="n">SpaceObject</span><span class="p">(</span>
             <span class="n">propagator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propagator</span><span class="p">,</span>
@@ -591,6 +597,12 @@
             <span class="k">raise</span> <span class="ne">StopIteration</span>
 
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">generator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">obj</span>
+
+
 <div class="viewcode-block" id="Population.save"><a class="viewcode-back" href="../../../_autodoc/sorts/population/sorts.population.population.Population.save.html#sorts.population.population.Population.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">fname</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
@@ -656,7 +668,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

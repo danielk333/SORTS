@@ -1,0 +1,47 @@
+epochType
+=========
+
+.. currentmodule:: sorts.io.ccsds
+
+.. autoclass:: epochType
+   :show-inheritance:
+   :no-inherited-members:
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      ~epochType.__init__
+      ~epochType.format_string
+      ~epochType.mask_if_needed
+      ~epochType.parse_string
+      ~epochType.set_jds
+      ~epochType.str_kwargs
+      ~epochType.to_value
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree: .
+   
+      ~epochType.cache
+      ~epochType.in_subfmt
+      ~epochType.jd1
+      ~epochType.jd2
+      ~epochType.jd2_filled
+      ~epochType.mask
+      ~epochType.masked
+      ~epochType.name
+      ~epochType.out_subfmt
+      ~epochType.scale
+      ~epochType.subfmts
+      ~epochType.value
+   
+   

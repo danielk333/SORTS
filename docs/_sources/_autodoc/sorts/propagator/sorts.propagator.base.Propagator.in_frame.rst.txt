@@ -1,0 +1,8 @@
+Propagator.in\_frame
+====================
+
+.. currentmodule:: sorts.propagator.base
+
+.. rubric:: Propagator.in_frame
+
+.. autoproperty:: sorts.propagator.base.Propagator.in_frame

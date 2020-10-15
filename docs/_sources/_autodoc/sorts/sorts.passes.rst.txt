@@ -34,7 +34,7 @@ Module summary
     
     find_simultaneous_passes
     
-    select_simultaneous_passes
+    group_passes
     
 
 
@@ -78,7 +78,7 @@ Contents
 
 
 
-.. autofunction:: select_simultaneous_passes
+.. autofunction:: group_passes
    :noindex:
 
 

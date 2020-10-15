@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>ObservedParameters &#8212; SORTS 3.18.0 documentation</title>
+    <title>ObservedParameters &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.scheduler.observed_parameters.html" title="observed_parameters"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.scheduler.observed_parameters.html" accesskey="U">observed_parameters</a> &#187;</li> 
       </ul>
@@ -99,6 +99,7 @@
 <li><p>receiver pointing to target k</p></li>
 <li><p>radar cross section</p></li>
 </ul>
+<p>#TODO: Docstring</p>
 </div></blockquote>
 <p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
@@ -111,24 +112,27 @@
 <td><p>Initialize self.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.scheduler.observed_parameters.ObservedParameters.calculate_observation.html#sorts.scheduler.observed_parameters.ObservedParameters.calculate_observation" title="sorts.scheduler.observed_parameters.ObservedParameters.calculate_observation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_observation</span></code></a>(txrx_pass, t, …[, …])</p></td>
-<td><p>Takes a pass over a tx-rx pair and the corresponding evaluated times and generator that returns radar instances to generate a set of observed data.</p></td>
+<td><p>Calculate the observation of a pass of a specific space object given the current state of the Scheduler.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.scheduler.observed_parameters.ObservedParameters.chain_generators.html#sorts.scheduler.observed_parameters.ObservedParameters.chain_generators" title="sorts.scheduler.observed_parameters.ObservedParameters.chain_generators"><code class="xref py py-obj docutils literal notranslate"><span class="pre">chain_generators</span></code></a>(generators)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.scheduler.observed_parameters.ObservedParameters.calculate_observation_jacobian.html#sorts.scheduler.observed_parameters.ObservedParameters.calculate_observation_jacobian" title="sorts.scheduler.observed_parameters.ObservedParameters.calculate_observation_jacobian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_observation_jacobian</span></code></a>(txrx_pass, …)</p></td>
+<td><p>Calculate the observation and its Jacobean of a pass of a specific space object given the current state of the Scheduler.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.scheduler.observed_parameters.ObservedParameters.chain_generators.html#sorts.scheduler.observed_parameters.ObservedParameters.chain_generators" title="sorts.scheduler.observed_parameters.ObservedParameters.chain_generators"><code class="xref py py-obj docutils literal notranslate"><span class="pre">chain_generators</span></code></a>(generators)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.scheduler.observed_parameters.ObservedParameters.generate_schedule.html#sorts.scheduler.observed_parameters.ObservedParameters.generate_schedule" title="sorts.scheduler.observed_parameters.ObservedParameters.generate_schedule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_schedule</span></code></a>(t, generator)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.scheduler.observed_parameters.ObservedParameters.generate_schedule.html#sorts.scheduler.observed_parameters.ObservedParameters.generate_schedule" title="sorts.scheduler.observed_parameters.ObservedParameters.generate_schedule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_schedule</span></code></a>(t, generator)</p></td>
 <td><p>Takes times and a corresponding generator that returns radar instances to generate a radar schedule.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.scheduler.observed_parameters.ObservedParameters.get_controllers.html#sorts.scheduler.observed_parameters.ObservedParameters.get_controllers" title="sorts.scheduler.observed_parameters.ObservedParameters.get_controllers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_controllers</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.scheduler.observed_parameters.ObservedParameters.get_controllers.html#sorts.scheduler.observed_parameters.ObservedParameters.get_controllers" title="sorts.scheduler.observed_parameters.ObservedParameters.get_controllers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_controllers</span></code></a>()</p></td>
 <td><p>This should init a list of controllers and set the <cite>t</cite> (global time) and <cite>t0</cite> (global time reference for controller) variables on them for their individual time samplings.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.scheduler.observed_parameters.ObservedParameters.observe_passes.html#sorts.scheduler.observed_parameters.ObservedParameters.observe_passes" title="sorts.scheduler.observed_parameters.ObservedParameters.observe_passes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">observe_passes</span></code></a>(passes, **kwargs)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.scheduler.observed_parameters.ObservedParameters.observe_passes.html#sorts.scheduler.observed_parameters.ObservedParameters.observe_passes" title="sorts.scheduler.observed_parameters.ObservedParameters.observe_passes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">observe_passes</span></code></a>(passes, **kwargs)</p></td>
+<td><p>#TODO: Docstring</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.scheduler.observed_parameters.ObservedParameters.schedule.html#sorts.scheduler.observed_parameters.ObservedParameters.schedule" title="sorts.scheduler.observed_parameters.ObservedParameters.schedule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">schedule</span></code></a>(**kwargs)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.scheduler.observed_parameters.ObservedParameters.schedule.html#sorts.scheduler.observed_parameters.ObservedParameters.schedule" title="sorts.scheduler.observed_parameters.ObservedParameters.schedule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">schedule</span></code></a>(**kwargs)</p></td>
+<td><p>#TODO: Docstring</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.scheduler.observed_parameters.ObservedParameters.update.html#sorts.scheduler.observed_parameters.ObservedParameters.update" title="sorts.scheduler.observed_parameters.ObservedParameters.update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update</span></code></a>(*args, **kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.scheduler.observed_parameters.ObservedParameters.update.html#sorts.scheduler.observed_parameters.ObservedParameters.update" title="sorts.scheduler.observed_parameters.ObservedParameters.update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update</span></code></a>(*args, **kwargs)</p></td>
 <td><p>Update the scheduler information.</p></td>
 </tr>
 </tbody>
@@ -158,7 +162,7 @@
         <li class="right" >
           <a href="sorts.scheduler.observed_parameters.html" title="observed_parameters"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.scheduler.observed_parameters.html" >observed_parameters</a> &#187;</li> 
       </ul>

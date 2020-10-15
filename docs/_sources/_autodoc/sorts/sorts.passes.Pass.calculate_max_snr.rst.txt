@@ -1,8 +1,0 @@
-Pass.calculate\_max\_snr
-========================
-
-.. currentmodule:: sorts.passes
-
-.. rubric:: Pass.calculate_max_snr
-
-.. automethod:: Pass.calculate_max_snr

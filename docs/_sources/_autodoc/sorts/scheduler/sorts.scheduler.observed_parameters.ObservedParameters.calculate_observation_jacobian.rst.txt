@@ -1,0 +1,8 @@
+ObservedParameters.calculate\_observation\_jacobian
+===================================================
+
+.. currentmodule:: sorts.scheduler.observed_parameters
+
+.. rubric:: ObservedParameters.calculate_observation_jacobian
+
+.. automethod:: ObservedParameters.calculate_observation_jacobian

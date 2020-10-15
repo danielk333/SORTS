@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>SGP4.propagate &#8212; SORTS 3.18.0 documentation</title>
+    <title>SGP4.propagate &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -22,7 +22,7 @@
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="SGP4.propagate_mean_elements" href="sorts.propagator.pysgp4.SGP4.propagate_mean_elements.html" />
-    <link rel="prev" title="SGP4.get_TLE_parameters" href="sorts.propagator.pysgp4.SGP4.get_TLE_parameters.html" />
+    <link rel="prev" title="SGP4.heartbeat" href="sorts.propagator.pysgp4.SGP4.heartbeat.html" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!--[if lt IE 9]>
     <script src="_static/css3-mediaqueries.js"></script>
@@ -41,9 +41,9 @@
           <a href="sorts.propagator.pysgp4.SGP4.propagate_mean_elements.html" title="SGP4.propagate_mean_elements"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="sorts.propagator.pysgp4.SGP4.get_TLE_parameters.html" title="SGP4.get_TLE_parameters"
+          <a href="sorts.propagator.pysgp4.SGP4.heartbeat.html" title="SGP4.heartbeat"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.propagator.pysgp4.html" >pysgp4</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="sorts.propagator.pysgp4.SGP4.html" accesskey="U">SGP4</a> &#187;</li> 
@@ -52,8 +52,8 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="sorts.propagator.pysgp4.SGP4.get_TLE_parameters.html"
-                        title="previous chapter">SGP4.get_TLE_parameters</a></p>
+  <p class="topless"><a href="sorts.propagator.pysgp4.SGP4.heartbeat.html"
+                        title="previous chapter">SGP4.heartbeat</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="sorts.propagator.pysgp4.SGP4.propagate_mean_elements.html"
                         title="next chapter">SGP4.propagate_mean_elements</a></p>
@@ -105,7 +105,8 @@ They also contain a option to give angles in radians or degrees. By default inpu
 <li><p><strong>C_D</strong> (<em>float</em>) – Drag coefficient</p></li>
 <li><p><strong>A</strong> (<em>float</em>) – Cross-sectional Area</p></li>
 <li><p><strong>m</strong> (<em>float</em>) – Mass</p></li>
-<li><p><strong>degrees</strong> (<em>bool</em>) – If false, all angles are assumed to be in radians.</p></li>
+<li><p><strong>radians</strong> (<em>bool</em>) – If true, all angles are assumed to be in radians.</p></li>
+<li><p><strong>SGP4_mean_elements</strong> (<em>bool</em>) – If True, the input is not cartesian state but SGP4 mean elements.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -135,9 +136,9 @@ They also contain a option to give angles in radians or degrees. By default inpu
           <a href="sorts.propagator.pysgp4.SGP4.propagate_mean_elements.html" title="SGP4.propagate_mean_elements"
              >next</a> |</li>
         <li class="right" >
-          <a href="sorts.propagator.pysgp4.SGP4.get_TLE_parameters.html" title="SGP4.get_TLE_parameters"
+          <a href="sorts.propagator.pysgp4.SGP4.heartbeat.html" title="SGP4.heartbeat"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.propagator.pysgp4.html" >pysgp4</a> &#187;</li>
           <li class="nav-item nav-item-3"><a href="sorts.propagator.pysgp4.SGP4.html" >SGP4</a> &#187;</li> 

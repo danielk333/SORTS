@@ -14,8 +14,11 @@ Orekit
    .. autosummary::
       :toctree: .
    
+      ~Orekit.GetIsotropicDragForce
+      ~Orekit.UpdateForces
       ~Orekit.__init__
       ~Orekit.convert_time
+      ~Orekit.heartbeat
       ~Orekit.propagate
       ~Orekit.set
    
@@ -29,5 +32,7 @@ Orekit
       :toctree: .
    
       ~Orekit.DEFAULT_SETTINGS
+      ~Orekit.in_frame
+      ~Orekit.out_frame
    
    

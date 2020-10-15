@@ -1,0 +1,8 @@
+IonosphericRayTrace.get
+=======================
+
+.. currentmodule:: sorts.errors.ionospheric_ray_trace
+
+.. rubric:: IonosphericRayTrace.get
+
+.. automethod:: IonosphericRayTrace.get

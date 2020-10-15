@@ -1,0 +1,6 @@
+sorts.io.ccsds.epochType.name
+=============================
+
+.. currentmodule:: sorts.io.ccsds
+
+.. autoattribute:: epochType.name

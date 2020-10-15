@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>observed_parameters &#8212; SORTS 3.18.0 documentation</title>
+    <title>observed_parameters &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.scheduler.scheduler.Scheduler.update.html" title="Scheduler.update"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" accesskey="U">API Reference</a> &#187;</li> 
       </ul>
     </div>
@@ -125,11 +125,22 @@
 <li><p>receiver pointing to target k</p></li>
 <li><p>radar cross section</p></li>
 </ul>
+<p>#TODO: Docstring</p>
 </div></blockquote>
 <dl class="py method">
 <dt>
-<code class="sig-name descname">calculate_observation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">txrx_pass</span></em>, <em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">generator</span></em>, <em class="sig-param"><span class="n">space_object</span></em>, <em class="sig-param"><span class="n">interpolator</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">snr_limit</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/scheduler/observed_parameters.html#ObservedParameters.calculate_observation"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Takes a pass over a tx-rx pair and the corresponding evaluated times and generator that returns radar instances to generate a set of observed data.</p>
+<code class="sig-name descname">calculate_observation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">txrx_pass</span></em>, <em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">generator</span></em>, <em class="sig-param"><span class="n">space_object</span></em>, <em class="sig-param"><span class="n">calculate_snr</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">interpolator</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">snr_limit</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/scheduler/observed_parameters.html#ObservedParameters.calculate_observation"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Calculate the observation of a pass of a specific space object given the current state of the Scheduler.</p>
+<p>#TODO: Docstring</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">calculate_observation_jacobian</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">txrx_pass</span></em>, <em class="sig-param"><span class="n">space_object</span></em>, <em class="sig-param"><span class="n">variables</span></em>, <em class="sig-param"><span class="n">deltas</span></em>, <em class="sig-param"><span class="n">transforms</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/scheduler/observed_parameters.html#ObservedParameters.calculate_observation_jacobian"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Calculate the observation and its Jacobean of a pass of a specific space object given the current state of the Scheduler.</p>
+<p>The Jacobean assumes that the SpaceObject has a Orbit state. To perturb non Orbit states a custom implementation is needed.</p>
+<p>NOTE: During the numerical calculation of the Jacobean only the range and range rates are calculated and <cite>calculate_snr=False</cite>.</p>
+<p>#TODO: Docstring</p>
 </dd></dl>
 
 <dl class="py method">
@@ -142,6 +153,18 @@
 <dt>
 <em class="property">abstract </em><code class="sig-name descname">get_controllers</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
 <dd><p>This should init a list of controllers and set the <cite>t</cite> (global time) and <cite>t0</cite> (global time reference for controller) variables on them for their individual time samplings.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">observe_passes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">passes</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span></dt>
+<dd><p>#TODO: Docstring</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">schedule</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span></dt>
+<dd><p>#TODO: Docstring</p>
 </dd></dl>
 
 <dl class="py method">
@@ -176,7 +199,7 @@
         <li class="right" >
           <a href="sorts.scheduler.scheduler.Scheduler.update.html" title="Scheduler.update"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li> 
       </ul>
     </div>

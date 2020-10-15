@@ -1,0 +1,8 @@
+local\_passes
+=============
+
+.. currentmodule:: sorts.plotting.tracking
+
+.. rubric:: local_passes
+
+.. autofunction:: local_passes

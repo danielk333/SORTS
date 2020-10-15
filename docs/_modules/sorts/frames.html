@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>sorts.frames &#8212; SORTS 3.18.0 documentation</title>
+    <title>sorts.frames &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -62,12 +62,11 @@
   <h1>Source code for sorts.frames</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
 
-<span class="sd">&#39;&#39;&#39;Coordinate frame transformations and related functions</span>
+<span class="sd">&#39;&#39;&#39;Coordinate frame transformations and related functions. Main usage is the :code:`convert` function that wraps Astropy frame transformations.</span>
 
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="c1">#Python standard import</span>
-<span class="kn">import</span> <span class="nn">pkg_resources</span>
 
 <span class="c1">#Third party import</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -94,7 +93,17 @@
 
 
 <div class="viewcode-block" id="convert"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.frames.convert.html#sorts.frames.convert">[docs]</a><span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">states</span><span class="p">,</span> <span class="n">in_frame</span><span class="p">,</span> <span class="n">out_frame</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">profiler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Perform predefined coordinate transformations. Always returns a copy of the array.</span>
+    <span class="sd">&#39;&#39;&#39;Perform predefined coordinate transformations using Astropy. Always returns a copy of the array.</span>
+
+<span class="sd">    :param numpy.ndarray/float t: Absolute time corresponding to the input states.</span>
+<span class="sd">    :param numpy.ndarray states: Size `(6,n)` matrix of states in SI units where rows 1-3 are position and 4-6 are velocity.</span>
+<span class="sd">    :param str in_frame: Name of the frame the input states are currently in.</span>
+<span class="sd">    :param str out_frame: Name of the state to transform to.</span>
+<span class="sd">    :param Profiler profiler: Profiler instance for checking function performance.</span>
+<span class="sd">    :param logging.Logger logger: Logger instance for logging the execution of the function.</span>
+<span class="sd">    :rtype: numpy.ndarray</span>
+<span class="sd">    :return: Size `(6,n)` matrix of states in SI units where rows 1-3 are position and 4-6 are velocity.</span>
+
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">if</span> <span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -170,6 +179,14 @@
 
 <div class="viewcode-block" id="ITRS_to_geodetic"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.frames.ITRS_to_geodetic.html#sorts.frames.ITRS_to_geodetic">[docs]</a><span class="k">def</span> <span class="nf">ITRS_to_geodetic</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">radians</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ellipsoid</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Use `astropy.coordinates.EarthLocation` to transform from geodetic to ITRS.</span>
+
+<span class="sd">    :param float x: X-coordinate in ITRS</span>
+<span class="sd">    :param float y: Y-coordinate in ITRS</span>
+<span class="sd">    :param float z: Z-coordinate in ITRS</span>
+<span class="sd">    :param bool radians: If :code:`True` then all values are given in radians instead of degrees.</span>
+<span class="sd">    :param str/None ellipsoid: Name of the ellipsoid model used for geodetic coordinates, for default value see Astropy `EarthLocation`.</span>
+<span class="sd">    :rtype: numpy.ndarray</span>
+<span class="sd">    :return: (3,) array of longitude, latitude and height above ellipsoid</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="n">cord</span> <span class="o">=</span> <span class="n">EarthLocation</span><span class="o">.</span><span class="n">from_geocentric</span><span class="p">(</span>
@@ -202,7 +219,13 @@
 <div class="viewcode-block" id="enu_to_ecef"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.frames.enu_to_ecef.html#sorts.frames.enu_to_ecef">[docs]</a><span class="k">def</span> <span class="nf">enu_to_ecef</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">enu</span><span class="p">,</span> <span class="n">radians</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;ENU (east/north/up) to ECEF coordinate system conversion, not including translation. </span>
 
-<span class="sd">    TODO: Docstring</span>
+<span class="sd">    :param float lat: Latitude on the ellipsoid</span>
+<span class="sd">    :param float lon: Longitude on the ellipsoid</span>
+<span class="sd">    :param float alt: Altitude above ellipsoid, **Unused in this implementation**.</span>
+<span class="sd">    :param numpy.ndarray enu: (3,n) input matrix of positions in the ENU-convention.</span>
+<span class="sd">    :param bool radians: If :code:`True` then all values are given in radians instead of degrees.</span>
+<span class="sd">    :rtype: numpy.ndarray</span>
+<span class="sd">    :return: (3,n) array x,y and z coordinates in ECEF.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">radians</span><span class="p">:</span>
         <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
@@ -218,7 +241,13 @@
 <div class="viewcode-block" id="ned_to_ecef"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.frames.ned_to_ecef.html#sorts.frames.ned_to_ecef">[docs]</a><span class="k">def</span> <span class="nf">ned_to_ecef</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">ned</span><span class="p">,</span> <span class="n">radians</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;NED (north/east/down) to ECEF coordinate system conversion, not including translation.</span>
 
-<span class="sd">    TODO: Docstring</span>
+<span class="sd">    :param float lat: Latitude on the ellipsoid</span>
+<span class="sd">    :param float lon: Longitude on the ellipsoid</span>
+<span class="sd">    :param float alt: Altitude above ellipsoid, **Unused in this implementation**.</span>
+<span class="sd">    :param numpy.ndarray ned: (3,n) input matrix of positions in the NED-convention.</span>
+<span class="sd">    :param bool radians: If :code:`True` then all values are given in radians instead of degrees.</span>
+<span class="sd">    :rtype: numpy.ndarray</span>
+<span class="sd">    :return: (3,n) array x,y and z coordinates in ECEF.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">enu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">ned</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">ned</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
     <span class="n">enu</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">ned</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="o">...</span><span class="p">]</span>
@@ -230,7 +259,13 @@
 <div class="viewcode-block" id="ecef_to_enu"><a class="viewcode-back" href="../../_autodoc/sorts/sorts.frames.ecef_to_enu.html#sorts.frames.ecef_to_enu">[docs]</a><span class="k">def</span> <span class="nf">ecef_to_enu</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">ecef</span><span class="p">,</span> <span class="n">radians</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;ECEF coordinate system to local ENU (east,north,up), not including translation.</span>
 
-<span class="sd">    TODO: Docstring</span>
+<span class="sd">    :param float lat: Latitude on the ellipsoid</span>
+<span class="sd">    :param float lon: Longitude on the ellipsoid</span>
+<span class="sd">    :param float alt: Altitude above ellipsoid, **Unused in this implementation**.</span>
+<span class="sd">    :param numpy.ndarray ecef: (3,n) array x,y and z coordinates in ECEF.</span>
+<span class="sd">    :param bool radians: If :code:`True` then all values are given in radians instead of degrees.</span>
+<span class="sd">    :rtype: numpy.ndarray</span>
+<span class="sd">    :return: (3,n) array x,y and z in local coordinates in the ENU-convention.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">radians</span><span class="p">:</span>
         <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
@@ -290,7 +325,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

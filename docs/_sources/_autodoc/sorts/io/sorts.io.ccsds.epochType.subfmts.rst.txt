@@ -1,0 +1,6 @@
+sorts.io.ccsds.epochType.subfmts
+================================
+
+.. currentmodule:: sorts.io.ccsds
+
+.. autoattribute:: epochType.subfmts

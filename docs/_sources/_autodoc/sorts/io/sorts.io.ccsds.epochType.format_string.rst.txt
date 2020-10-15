@@ -1,0 +1,8 @@
+epochType.format\_string
+========================
+
+.. currentmodule:: sorts.io.ccsds
+
+.. rubric:: epochType.format_string
+
+.. automethod:: epochType.format_string

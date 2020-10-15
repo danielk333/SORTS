@@ -1,0 +1,8 @@
+epochType.\_\_init\_\_
+======================
+
+.. currentmodule:: sorts.io.ccsds
+
+.. rubric:: epochType.__init__
+
+.. automethod:: epochType.__init__

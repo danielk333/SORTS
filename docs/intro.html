@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Introduction &#8212; SORTS 3.18.0 documentation</title>
+    <title>Introduction &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="index.html" title="SORTS"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SORTS 3.18.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -98,7 +98,30 @@
 <div class="section" id="feature-list">
 <h2>Feature list<a class="headerlink" href="#feature-list" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><p>TO BE ADDED</p></li>
+<li><p>Vast library of usage examples</p></li>
+<li><p>Quick calculation of passes over a radar system</p></li>
+<li><p>Easy simulation of observed variables of hard targets with radar systems (range, range rate, radar cross section, signal to noise ratio, …) given an arbitrary radar and radar observation schema</p></li>
+<li><p>Definition of arbitrary radar control systems</p></li>
+<li><p>Definition of arbitrary scheduler systems that manage radar-controllers</p></li>
+<li><p>Pre-defined library of radar systems, radar survay patterns, standard radar controllers and schedulers</p></li>
+<li><p>Standardized interface to a collection of propagators</p></li>
+<li><p>Allows modification of any level of a simulation trough sub-classing the basic models</p></li>
+<li><p>Large collection of helper functions for simulation to automate e.g. MPI-trivial parallelization and disk-caching</p></li>
+<li><p>Execution time and memory usage profiler compatible with most base models</p></li>
+<li><p>Logging compatible with most base models</p></li>
+<li><p>Frame transformations implemented trough Astropy</p></li>
+<li><p>Time handling implemented trough Astropy</p></li>
+<li><p>All time-critical calculations implemented using numpy to accelerate calculation</p></li>
+<li><p>Predefined error models such as ionospheric ray bending and coded transmission matched filter errors</p></li>
+<li><p>Ray-tracing simulation of radar signals trough the ionosphere using pyglow</p></li>
+<li><p>Measurement Jacobian calculation and linearized orbit error calculation and propagation</p></li>
+<li><p>Ability to plan measurement campaigns using the output from a scheduler simulation</p></li>
+<li><p>Collection of predefined population formats for loading e.g. TLE catalogs</p></li>
+<li><p>Correlation algorithms for correlating measurement data to a population</p></li>
+<li><p>Input/Output package for writing and reading standardized data formats e.g. CCSDS TDM files</p></li>
+<li><p>Large collection of plotting functions for quick visualization</p></li>
+<li><p>Interpolation methods for propagation optimization</p></li>
+<li><p>…</p></li>
 </ul>
 </div>
 <div class="section" id="example">
@@ -115,10 +138,10 @@
 <span class="n">eiscat3d</span> <span class="o">=</span> <span class="n">sorts</span><span class="o">.</span><span class="n">radars</span><span class="o">.</span><span class="n">eiscat3d</span>
 
 <span class="n">prop</span> <span class="o">=</span> <span class="n">SGP4</span><span class="p">(</span>
-      <span class="n">settings</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-          <span class="n">out_frame</span><span class="o">=</span><span class="s1">&#39;ITRS&#39;</span><span class="p">,</span>
-      <span class="p">),</span>
-  <span class="p">)</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">out_frame</span><span class="o">=</span><span class="s1">&#39;ITRS&#39;</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">)</span>
 
 <span class="n">orb</span> <span class="o">=</span> <span class="n">pyorb</span><span class="o">.</span><span class="n">Orbit</span><span class="p">(</span>
     <span class="n">M0</span> <span class="o">=</span> <span class="n">pyorb</span><span class="o">.</span><span class="n">M_earth</span><span class="p">,</span>
@@ -139,14 +162,16 @@
     <span class="n">orbit</span> <span class="o">=</span> <span class="n">orb</span><span class="p">,</span>
     <span class="n">start_t</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">end_t</span> <span class="o">=</span> <span class="mi">3600</span><span class="o">*</span><span class="mi">24</span><span class="o">*</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">max_dpos</span><span class="o">=</span><span class="mf">1e3</span><span class="p">,</span>
+    <span class="n">max_dpos</span><span class="o">=</span><span class="mf">1e4</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">states</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">propagate</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">orb</span><span class="o">.</span><span class="n">cartesian</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">orb</span><span class="o">.</span><span class="n">epoch</span><span class="p">)</span>
 
 <span class="n">passes</span> <span class="o">=</span> <span class="n">eiscat3d</span><span class="o">.</span><span class="n">find_passes</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">states</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="n">passes</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">txi</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">eiscat3d</span><span class="o">.</span><span class="n">tx</span><span class="p">)):</span>
+    <span class="k">for</span> <span class="n">rxi</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">eiscat3d</span><span class="o">.</span><span class="n">rx</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">ps</span> <span class="ow">in</span> <span class="n">passes</span><span class="p">[</span><span class="n">txi</span><span class="p">][</span><span class="n">rxi</span><span class="p">]:</span> <span class="nb">print</span><span class="p">(</span><span class="n">ps</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -173,7 +198,7 @@
         <li class="right" >
           <a href="index.html" title="SORTS"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SORTS 3.18.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

@@ -1,0 +1,201 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>epochType &#8212; SORTS 4.0.0-rc.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="epochType.__init__" href="sorts.io.ccsds.epochType.__init__.html" />
+    <link rel="prev" title="ccsds" href="sorts.io.ccsds.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.io.ccsds.epochType.__init__.html" title="epochType.__init__"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sorts.io.ccsds.html" title="ccsds"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.io.ccsds.html" accesskey="U">ccsds</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sorts.io.ccsds.html"
+                        title="previous chapter">ccsds</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sorts.io.ccsds.epochType.__init__.html"
+                        title="next chapter">epochType.__init__</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/_autodoc/sorts/io/sorts.io.ccsds.epochType.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="epochtype">
+<h1>epochType<a class="headerlink" href="#epochtype" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="sorts.io.ccsds.epochType">
+<em class="property">class </em><code class="sig-prename descclassname">sorts.io.ccsds.</code><code class="sig-name descname">epochType</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">val1</span></em>, <em class="sig-param"><span class="n">val2</span></em>, <em class="sig-param"><span class="n">scale</span></em>, <em class="sig-param"><span class="n">precision</span></em>, <em class="sig-param"><span class="n">in_subfmt</span></em>, <em class="sig-param"><span class="n">out_subfmt</span></em>, <em class="sig-param"><span class="n">from_jd</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/io/ccsds.html#epochType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.io.ccsds.epochType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">astropy.time.formats.TimeISO</span></code></p>
+<p>Convert astropy time to “yyyy-dddThh:mm:ss.d-&gt;dZ” CCSDS 2.0 epochType standard.</p>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.io.ccsds.epochType.__init__.html#sorts.io.ccsds.epochType.__init__" title="sorts.io.ccsds.epochType.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(val1, val2, scale, precision, …)</p></td>
+<td><p>Initialize self.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.io.ccsds.epochType.format_string.html#sorts.io.ccsds.epochType.format_string" title="sorts.io.ccsds.epochType.format_string"><code class="xref py py-obj docutils literal notranslate"><span class="pre">format_string</span></code></a>(str_fmt, **kwargs)</p></td>
+<td><p>Write time to a string using a given format.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.io.ccsds.epochType.mask_if_needed.html#sorts.io.ccsds.epochType.mask_if_needed" title="sorts.io.ccsds.epochType.mask_if_needed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mask_if_needed</span></code></a>(value)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.io.ccsds.epochType.parse_string.html#sorts.io.ccsds.epochType.parse_string" title="sorts.io.ccsds.epochType.parse_string"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_string</span></code></a>(timestr, subfmts)</p></td>
+<td><p>Read time from a single string, using a set of possible formats.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.io.ccsds.epochType.set_jds.html#sorts.io.ccsds.epochType.set_jds" title="sorts.io.ccsds.epochType.set_jds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_jds</span></code></a>(val1, val2)</p></td>
+<td><p>Parse the time strings contained in val1 and set jd1, jd2</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.io.ccsds.epochType.str_kwargs.html#sorts.io.ccsds.epochType.str_kwargs" title="sorts.io.ccsds.epochType.str_kwargs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str_kwargs</span></code></a>()</p></td>
+<td><p>Generator that yields a dict of values corresponding to the calendar date and time for the internal JD values.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.io.ccsds.epochType.to_value.html#sorts.io.ccsds.epochType.to_value" title="sorts.io.ccsds.epochType.to_value"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_value</span></code></a>([parent, out_subfmt])</p></td>
+<td><p>Return time representation from internal jd1 and jd2 in specified <code class="docutils literal notranslate"><span class="pre">out_subfmt</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.io.ccsds.epochType.cache.html#sorts.io.ccsds.epochType.cache" title="sorts.io.ccsds.epochType.cache"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cache</span></code></a></p></td>
+<td><p>Return the cache associated with this instance.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.io.ccsds.epochType.in_subfmt.html#sorts.io.ccsds.epochType.in_subfmt" title="sorts.io.ccsds.epochType.in_subfmt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">in_subfmt</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.io.ccsds.epochType.jd1.html#sorts.io.ccsds.epochType.jd1" title="sorts.io.ccsds.epochType.jd1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jd1</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.io.ccsds.epochType.jd2.html#sorts.io.ccsds.epochType.jd2" title="sorts.io.ccsds.epochType.jd2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jd2</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.io.ccsds.epochType.jd2_filled.html#sorts.io.ccsds.epochType.jd2_filled" title="sorts.io.ccsds.epochType.jd2_filled"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jd2_filled</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.io.ccsds.epochType.mask.html#sorts.io.ccsds.epochType.mask" title="sorts.io.ccsds.epochType.mask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mask</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.io.ccsds.epochType.masked.html#sorts.io.ccsds.epochType.masked" title="sorts.io.ccsds.epochType.masked"><code class="xref py py-obj docutils literal notranslate"><span class="pre">masked</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.io.ccsds.epochType.name.html#sorts.io.ccsds.epochType.name" title="sorts.io.ccsds.epochType.name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.io.ccsds.epochType.out_subfmt.html#sorts.io.ccsds.epochType.out_subfmt" title="sorts.io.ccsds.epochType.out_subfmt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">out_subfmt</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.io.ccsds.epochType.scale.html#sorts.io.ccsds.epochType.scale" title="sorts.io.ccsds.epochType.scale"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scale</span></code></a></p></td>
+<td><p>Time scale</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.io.ccsds.epochType.subfmts.html#sorts.io.ccsds.epochType.subfmts" title="sorts.io.ccsds.epochType.subfmts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subfmts</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.io.ccsds.epochType.value.html#sorts.io.ccsds.epochType.value" title="sorts.io.ccsds.epochType.value"><code class="xref py py-obj docutils literal notranslate"><span class="pre">value</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.io.ccsds.epochType.__init__.html" title="epochType.__init__"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sorts.io.ccsds.html" title="ccsds"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.io.ccsds.html" >ccsds</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

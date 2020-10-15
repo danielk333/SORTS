@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>scheduler &#8212; SORTS 3.18.0 documentation</title>
+    <title>scheduler &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="../controller/sorts.controller.static.Static.META_FIELDS.html" title="sorts.controller.static.Static.META_FIELDS"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" accesskey="U">API Reference</a> &#187;</li> 
       </ul>
     </div>
@@ -91,7 +91,7 @@
             
   <div class="section" id="module-sorts.scheduler.scheduler">
 <span id="scheduler"></span><h1>scheduler<a class="headerlink" href="#module-sorts.scheduler.scheduler" title="Permalink to this headline">¶</a></h1>
-<p>Scheduler</p>
+<p>Scheduler base class.</p>
 <div class="section" id="module-summary">
 <h2>Module summary<a class="headerlink" href="#module-summary" title="Permalink to this headline">¶</a></h2>
 <p class="rubric">Classes</p>
@@ -115,6 +115,7 @@
 <em class="property">class </em><code class="sig-prename descclassname">sorts.scheduler.scheduler.</code><code class="sig-name descname">Scheduler</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">radar</span></em>, <em class="sig-param"><span class="n">profiler</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">logger</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/scheduler/scheduler.html#Scheduler"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
 <p>A Scheduler for executing time-slices of different radar controllers.</p>
+<p>#TODO: Docstring</p>
 <dl class="py method">
 <dt>
 <code class="sig-name descname">calculate_observation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">txrx_pass</span></em>, <em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">generator</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/scheduler/scheduler.html#Scheduler.calculate_observation"><span class="viewcode-link">[source]</span></a></dt>
@@ -131,6 +132,18 @@
 <dt>
 <em class="property">abstract </em><code class="sig-name descname">get_controllers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/scheduler/scheduler.html#Scheduler.get_controllers"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>This should init a list of controllers and set the <cite>t</cite> (global time) and <cite>t0</cite> (global time reference for controller) variables on them for their individual time samplings.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">observe_passes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">passes</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/scheduler/scheduler.html#Scheduler.observe_passes"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>#TODO: Docstring</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">schedule</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/scheduler/scheduler.html#Scheduler.schedule"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>#TODO: Docstring</p>
 </dd></dl>
 
 <dl class="py method">
@@ -165,7 +178,7 @@
         <li class="right" >
           <a href="../controller/sorts.controller.static.Static.META_FIELDS.html" title="sorts.controller.static.Static.META_FIELDS"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li> 
       </ul>
     </div>

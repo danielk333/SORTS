@@ -11,48 +11,57 @@ from tabulate import tabulate
 from astropy.time import Time
 
 import sorts
-eiscat3d = sorts.radars.eiscat3d
+
 from sorts.scheduler import PriorityTracking, ObservedParameters
 from sorts import SpaceObject
 from sorts.profiling import Profiler
-
-
 from sorts.propagator import SGP4
-Prop_cls = SGP4
-Prop_opts = dict(
+
+
+eiscat3d = sorts.radars.eiscat3d
+
+
+poptions = dict(
     settings = dict(
-        out_frame='ITRF',
+        in_frame='GCRS',
+        out_frame='ITRS',
     ),
 )
+
+epoch = Time(53005.0, format='mjd')
 
 logger = sorts.profiling.get_logger('tracking')
 
 objs = [
     SpaceObject(
-        Prop_cls,
-        propagator_options = Prop_opts,
+        SGP4,
+        propagator_options = poptions,
         a = 7200e3, 
-        e = 0.1, 
+        e = 0.01, 
         i = 75, 
         raan = 79,
         aop = 0,
         mu0 = 60,
-        mjd0 = 53005.0,
-        d = 1.0,
+        epoch = epoch,
+        parameters = dict(
+            d = 1.0,
+        ),
         oid = 1,
     ),
     SpaceObject(
-        Prop_cls,
-        propagator_options = Prop_opts,
+        SGP4,
+        propagator_options = poptions,
         a = 7200e3, 
-        e = 0.1, 
+        e = 0.01, 
         i = 69, 
         raan = 74,
         aop = 0,
         mu0 = 0,
-        mjd0 = 53005.0,
-        d = 1.0,
-        oid = 2,
+        epoch = epoch,
+        parameters = dict(
+            d = 1.0,
+        ),
+        oid = 42,
     )
 ]
 
@@ -80,11 +89,14 @@ scheduler = ObservedTracking(
     radar = eiscat3d, 
     space_objects = objs, 
     timeslice = 0.1, 
-    allocation = 0.1*200, 
-    end_time = 3600*6.0,
-    epoch = Time(53005.0, format='mjd'),
+    allocation = 0.1*50, 
+    end_time = 3600*12.0,
+    max_dpos = 1e4,
+    epoch = epoch,
     priority = [0.2, 1.0],
     logger = logger,
+    use_pass_states = True,
+    collect_passes = True,
 )
 
 scheduler.update()
@@ -102,7 +114,6 @@ for ind in range(len(objs)):
     data = scheduler.observe_passes(scheduler.passes[ind], space_object = objs[ind], snr_limit=False)
     datas.append(data)
 
-# print(data)
 
 fig = plt.figure(figsize=(15,15))
 axes = [
@@ -116,19 +127,27 @@ axes = [
     ],
 ]
 
-
-
 for ind in range(len(objs)):
-    for pi in range(len(scheduler.passes[ind][0][0])):
-        ps = scheduler.passes[ind][0][0][pi]
-        axes[0][0].plot(ps.enu[0][0,:], ps.enu[0][1,:], ps.enu[0][2,:], '-')
-        dat = datas[ind][0][0][pi]
+    for pi, ps in enumerate(scheduler.passes[ind][0][0]):
 
-        if dat is not None:
-            axes[0][1].plot(dat['t']/3600.0, dat['range'], '-', label=f'obj{ind}-pass{pi}')
-            axes[1][0].plot(dat['t']/3600.0, dat['range_rate'], '-')
-            axes[1][1].plot(dat['t']/3600.0, 10*np.log10(dat['snr']), '-')
+        zang = ps.zenith_angle()
+        snr = ps.calculate_snr(eiscat3d.tx[0], eiscat3d.rx[0], diameter=objs[ind].d)
 
+        axes[0][0].plot(ps.enu[0][0,:], ps.enu[0][1,:], ps.enu[0][2,:], '-', label=f'pass-{pi}')
+        axes[0][0].set_xlabel('East-North-Up coordinates')
 
-axes[0][1].legend()
+        axes[0][1].plot((ps.t - ps.start())/3600.0, zang[0], '-', label=f'pass-{pi}')
+        axes[0][1].set_xlabel('Time past epoch [h]')
+        axes[0][1].set_ylabel('Zenith angle from TX [deg]')
+
+        axes[1][0].plot((ps.t - ps.start())/3600.0, ps.range()[0]*1e-3, '-', label=f'pass-{pi}')
+        axes[1][0].set_xlabel('Time past epoch [h]')
+        axes[1][0].set_ylabel('Range from TX [km]')
+
+        axes[1][1].plot((ps.t - ps.start())/3600.0, 10*np.log10(snr), '-', label=f'optimal-pass-{pi}')
+        axes[1][1].plot((datas[ind][0][0][pi]['t'] - ps.start())/3600.0, 10*np.log10(datas[ind][0][0][pi]['snr']), '.', label=f'observed-pass-{pi}')
+        axes[1][1].set_xlabel('Time past epoch [h]')
+        axes[1][1].set_ylabel('SNR [dB]')
+
+axes[1][1].legend()
 plt.show()

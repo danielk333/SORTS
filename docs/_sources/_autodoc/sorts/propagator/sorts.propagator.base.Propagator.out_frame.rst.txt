@@ -1,0 +1,8 @@
+Propagator.out\_frame
+=====================
+
+.. currentmodule:: sorts.propagator.base
+
+.. rubric:: Propagator.out_frame
+
+.. autoproperty:: sorts.propagator.base.Propagator.out_frame

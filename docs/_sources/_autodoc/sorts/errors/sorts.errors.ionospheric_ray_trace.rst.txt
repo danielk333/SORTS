@@ -12,6 +12,15 @@ Module summary
 
 
 
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    IonosphericRayTrace
+    
+
+
 
 
 .. rubric:: Functions
@@ -34,6 +43,18 @@ Contents
 ----------
 
 
+
+
+
+
+
+.. rubric:: IonosphericRayTrace
+
+.. autoclass:: IonosphericRayTrace
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
 
 
 

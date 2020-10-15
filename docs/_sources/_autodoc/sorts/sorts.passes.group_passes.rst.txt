@@ -1,0 +1,8 @@
+group\_passes
+=============
+
+.. currentmodule:: sorts.passes
+
+.. rubric:: group_passes
+
+.. autofunction:: group_passes

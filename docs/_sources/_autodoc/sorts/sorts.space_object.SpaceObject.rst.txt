@@ -33,7 +33,9 @@ SpaceObject
    
       ~SpaceObject.d
       ~SpaceObject.default_parameters
+      ~SpaceObject.in_frame
       ~SpaceObject.m
       ~SpaceObject.orbit
+      ~SpaceObject.out_frame
    
    

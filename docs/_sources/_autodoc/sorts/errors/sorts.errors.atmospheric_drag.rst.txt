@@ -1,0 +1,49 @@
+atmospheric\_drag
+=================
+
+.. automodule:: sorts.errors.atmospheric_drag
+
+.. currentmodule:: sorts.errors.atmospheric_drag
+
+Module summary
+--------------
+
+
+
+
+
+
+
+.. rubric:: Functions
+
+.. autosummary::
+    :toctree: .
+    
+    atmospheric_errors
+    
+    get_inertial_basis
+    
+
+
+
+Contents
+----------
+
+
+
+
+
+
+
+.. rubric:: Functions
+
+
+.. autofunction:: atmospheric_errors
+   :noindex:
+
+
+
+.. autofunction:: get_inertial_basis
+   :noindex:
+
+

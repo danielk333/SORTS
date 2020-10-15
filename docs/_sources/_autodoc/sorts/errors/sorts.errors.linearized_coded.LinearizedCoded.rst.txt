@@ -16,9 +16,12 @@ LinearizedCoded
    
       ~LinearizedCoded.__init__
       ~LinearizedCoded.doppler
+      ~LinearizedCoded.doppler_std
       ~LinearizedCoded.get
       ~LinearizedCoded.range
       ~LinearizedCoded.range_rate
+      ~LinearizedCoded.range_rate_std
+      ~LinearizedCoded.range_std
       ~LinearizedCoded.set_numpy_seed
    
    

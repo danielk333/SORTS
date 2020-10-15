@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>ITRS_to_geodetic &#8212; SORTS 3.18.0 documentation</title>
+    <title>ITRS_to_geodetic &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.frames.html" title="frames"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.frames.html" accesskey="U">frames</a> &#187;</li> 
       </ul>
@@ -88,6 +88,23 @@
 <dt id="sorts.frames.ITRS_to_geodetic">
 <code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">ITRS_to_geodetic</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">z</span></em>, <em class="sig-param"><span class="n">radians</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">ellipsoid</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#ITRS_to_geodetic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.frames.ITRS_to_geodetic" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use <cite>astropy.coordinates.EarthLocation</cite> to transform from geodetic to ITRS.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>float</em>) – X-coordinate in ITRS</p></li>
+<li><p><strong>y</strong> (<em>float</em>) – Y-coordinate in ITRS</p></li>
+<li><p><strong>z</strong> (<em>float</em>) – Z-coordinate in ITRS</p></li>
+<li><p><strong>radians</strong> (<em>bool</em>) – If <code class="code docutils literal notranslate"><span class="pre">True</span></code> then all values are given in radians instead of degrees.</p></li>
+<li><p><strong>ellipsoid</strong> (<em>str/None</em>) – Name of the ellipsoid model used for geodetic coordinates, for default value see Astropy <cite>EarthLocation</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(3,) array of longitude, latitude and height above ellipsoid</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -113,7 +130,7 @@
         <li class="right" >
           <a href="sorts.frames.html" title="frames"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.frames.html" >frames</a> &#187;</li> 
       </ul>

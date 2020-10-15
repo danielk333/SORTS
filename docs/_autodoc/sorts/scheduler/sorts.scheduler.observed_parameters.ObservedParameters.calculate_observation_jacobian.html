@@ -1,0 +1,131 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>ObservedParameters.calculate_observation_jacobian &#8212; SORTS 4.0.0-rc.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="ObservedParameters.chain_generators" href="sorts.scheduler.observed_parameters.ObservedParameters.chain_generators.html" />
+    <link rel="prev" title="ObservedParameters.calculate_observation" href="sorts.scheduler.observed_parameters.ObservedParameters.calculate_observation.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.scheduler.observed_parameters.ObservedParameters.chain_generators.html" title="ObservedParameters.chain_generators"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sorts.scheduler.observed_parameters.ObservedParameters.calculate_observation.html" title="ObservedParameters.calculate_observation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.scheduler.observed_parameters.html" >observed_parameters</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="sorts.scheduler.observed_parameters.ObservedParameters.html" accesskey="U">ObservedParameters</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sorts.scheduler.observed_parameters.ObservedParameters.calculate_observation.html"
+                        title="previous chapter">ObservedParameters.calculate_observation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sorts.scheduler.observed_parameters.ObservedParameters.chain_generators.html"
+                        title="next chapter">ObservedParameters.chain_generators</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/_autodoc/sorts/scheduler/sorts.scheduler.observed_parameters.ObservedParameters.calculate_observation_jacobian.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="observedparameters-calculate-observation-jacobian">
+<h1>ObservedParameters.calculate_observation_jacobian<a class="headerlink" href="#observedparameters-calculate-observation-jacobian" title="Permalink to this headline">¶</a></h1>
+<p class="rubric">ObservedParameters.calculate_observation_jacobian</p>
+<dl class="py method">
+<dt id="sorts.scheduler.observed_parameters.ObservedParameters.calculate_observation_jacobian">
+<code class="sig-prename descclassname">ObservedParameters.</code><code class="sig-name descname">calculate_observation_jacobian</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">txrx_pass</span></em>, <em class="sig-param"><span class="n">space_object</span></em>, <em class="sig-param"><span class="n">variables</span></em>, <em class="sig-param"><span class="n">deltas</span></em>, <em class="sig-param"><span class="n">transforms</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/scheduler/observed_parameters.html#ObservedParameters.calculate_observation_jacobian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.scheduler.observed_parameters.ObservedParameters.calculate_observation_jacobian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the observation and its Jacobean of a pass of a specific space object given the current state of the Scheduler.</p>
+<p>The Jacobean assumes that the SpaceObject has a Orbit state. To perturb non Orbit states a custom implementation is needed.</p>
+<p>NOTE: During the numerical calculation of the Jacobean only the range and range rates are calculated and <cite>calculate_snr=False</cite>.</p>
+<p>#TODO: Docstring</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sorts.scheduler.observed_parameters.ObservedParameters.chain_generators.html" title="ObservedParameters.chain_generators"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sorts.scheduler.observed_parameters.ObservedParameters.calculate_observation.html" title="ObservedParameters.calculate_observation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="sorts.scheduler.observed_parameters.html" >observed_parameters</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="sorts.scheduler.observed_parameters.ObservedParameters.html" >ObservedParameters</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

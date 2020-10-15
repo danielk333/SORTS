@@ -1,0 +1,8 @@
+epochType.in\_subfmt
+====================
+
+.. currentmodule:: sorts.io.ccsds
+
+.. rubric:: epochType.in_subfmt
+
+.. autoproperty:: sorts.io.ccsds.epochType.in_subfmt

@@ -1,0 +1,8 @@
+orbit\_determination\_covariance
+================================
+
+.. currentmodule:: sorts.errors.linearized_orbit_determination
+
+.. rubric:: orbit_determination_covariance
+
+.. autofunction:: orbit_determination_covariance

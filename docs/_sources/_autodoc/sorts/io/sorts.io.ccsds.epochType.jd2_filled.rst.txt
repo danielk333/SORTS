@@ -1,0 +1,8 @@
+epochType.jd2\_filled
+=====================
+
+.. currentmodule:: sorts.io.ccsds
+
+.. rubric:: epochType.jd2_filled
+
+.. autoproperty:: sorts.io.ccsds.epochType.jd2_filled

@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>linearized_coded &#8212; SORTS 3.18.0 documentation</title>
+    <title>linearized_coded &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.errors.ionospheric_ray_trace.ray_trace_error.html" title="ray_trace_error"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" accesskey="U">API Reference</a> &#187;</li> 
       </ul>
     </div>
@@ -106,7 +106,7 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCoded.html#sorts.errors.linearized_coded.LinearizedCoded" title="sorts.errors.linearized_coded.LinearizedCoded"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearizedCoded</span></code></a>(tx[, seed, cache_folder, …])</p></td>
 <td><p>Determine linearized errors for range and range-rate error</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCodedIonospheric.html#sorts.errors.linearized_coded.LinearizedCodedIonospheric" title="sorts.errors.linearized_coded.LinearizedCodedIonospheric"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearizedCodedIonospheric</span></code></a>(tx[, seed, …])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCodedIonospheric.html#sorts.errors.linearized_coded.LinearizedCodedIonospheric" title="sorts.errors.linearized_coded.LinearizedCodedIonospheric"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearizedCodedIonospheric</span></code></a>(*args, **kwargs)</p></td>
 <td><p>233e6 Hz worst case scenario at zenith only!</p></td>
 </tr>
 </tbody>
@@ -153,13 +153,37 @@ estimate based on typical GNU Ionospheric tomography receiver phase curves.</p>
 <dl class="py method">
 <dt>
 <code class="sig-name descname">doppler</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">snr</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/errors/linearized_coded.html#LinearizedCoded.doppler"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Range rate in m/s</p>
+<dd><p>Doppler shift in Hz</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">doppler_std</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">snr</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/errors/linearized_coded.html#LinearizedCoded.doppler_std"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>The expected standard error of a Doppler measurement in Hz.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">range</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">snr</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/errors/linearized_coded.html#LinearizedCoded.range"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Range in m</p>
 </dd></dl>
 
 <dl class="py method">
 <dt>
 <code class="sig-name descname">range_rate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">snr</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/errors/linearized_coded.html#LinearizedCoded.range_rate"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Range rate in m/s</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">range_rate_std</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">snr</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/errors/linearized_coded.html#LinearizedCoded.range_rate_std"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>The expected standard error of a range rate measurement in m/s.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">range_std</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">snr</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/errors/linearized_coded.html#LinearizedCoded.range_std"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>The expected standard error of a range measurement in m.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -173,25 +197,43 @@ estimate based on typical GNU Ionospheric tomography receiver phase curves.</p>
 <p class="rubric">LinearizedCodedIonospheric</p>
 <dl class="py class">
 <dt>
-<em class="property">class </em><code class="sig-prename descclassname">sorts.errors.linearized_coded.</code><code class="sig-name descname">LinearizedCodedIonospheric</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tx</span></em>, <em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cache_folder</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">diameter</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/errors/linearized_coded.html#LinearizedCodedIonospheric"><span class="viewcode-link">[source]</span></a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">sorts.errors.linearized_coded.</code><code class="sig-name descname">LinearizedCodedIonospheric</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/errors/linearized_coded.html#LinearizedCodedIonospheric"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Bases: <a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCoded.html#sorts.errors.linearized_coded.LinearizedCoded" title="sorts.errors.linearized_coded.LinearizedCoded"><code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.errors.linearized_coded.LinearizedCoded</span></code></a></p>
 <p>233e6 Hz worst case scenario at zenith only!</p>
 <dl class="py method">
 <dt>
 <code class="sig-name descname">doppler</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">snr</span></em><span class="sig-paren">)</span></dt>
-<dd><p>Range rate in m/s</p>
+<dd><p>Doppler shift in Hz</p>
 </dd></dl>
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname">range</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">snr</span></em>, <em class="sig-param"><span class="n">tx_range</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/errors/linearized_coded.html#LinearizedCodedIonospheric.range"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Two way range in meters</p>
+<code class="sig-name descname">doppler_std</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">snr</span></em><span class="sig-paren">)</span></dt>
+<dd><p>The expected standard error of a Doppler measurement in Hz.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">range</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">snr</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/errors/linearized_coded.html#LinearizedCodedIonospheric.range"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Range in m</p>
 </dd></dl>
 
 <dl class="py method">
 <dt>
 <code class="sig-name descname">range_rate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">snr</span></em><span class="sig-paren">)</span></dt>
 <dd><p>Range rate in m/s</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">range_rate_std</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">snr</span></em><span class="sig-paren">)</span></dt>
+<dd><p>The expected standard error of a range rate measurement in m/s.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">range_std</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_range</span></em>, <em class="sig-param"><span class="n">snr</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/errors/linearized_coded.html#LinearizedCodedIonospheric.range_std"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>The expected standard error of a range measurement in m.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -254,7 +296,7 @@ This is used for linearized error estimates of range and range-rate errors.</p>
         <li class="right" >
           <a href="sorts.errors.ionospheric_ray_trace.ray_trace_error.html" title="ray_trace_error"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li> 
       </ul>
     </div>

@@ -33,40 +33,40 @@ Optimizing with interpolation
     omega: 0.0000e+00   vx: -1.3986e+03
     Omega: 8.6000e+01   vy: -6.4897e+03
     anom : 6.0000e+01   vz: 3.5175e+03
-    Parameters: d=0.1, C_D=2.3, A=1.0, m=1.0, C_R=1.0
-    2020-09-23 10:59:08.571 INFO    ; Scanner:init
+    Parameters: C_D=2.3, m=1.0, C_R=1.0, d=0.1, A=1.0
+    2020-10-15 13:29:52.074 INFO    ; Scanner:init
     Temporal points obj 0: 1440
     --------------------------------------- Performance analysis --------------------------------------
      Name                                                   |   Executions | Mean time     | Total time
     --------------------------------------------------------+--------------+---------------+--------------
-     get_state                                              |            1 | 3.75929e+00 s | 2.34 %
-     find_passes                                            |            1 | 1.89948e-03 s | 0.00 %
-     Obs.Param.:calculate_observation:get_state             |           36 | 1.13874e+00 s | 25.54 %
-     Obs.Param.:calculate_observation:enus,range,range_rate |           36 | 5.53045e-04 s | 0.01 %
-     Scanner:generator:point_radar:_point_station[tx]       |        78036 | 1.09865e-04 s | 5.34 %
-     Scanner:generator:point_radar:_point_station[rx]       |       234108 | 1.96384e-04 s | 28.64 %
-     Scanner:generator:point_radar                          |        78036 | 8.45090e-04 s | 41.08 %
-     Obs.Param.:calculate_observation:snr-step:gain         |        76274 | 6.10369e-04 s | 29.00 %
-     Obs.Param.:calculate_observation:snr-step:snr          |        76274 | 2.15591e-05 s | 1.02 %
-     Obs.Param.:calculate_observation:snr-step              |        78036 | 6.32501e-04 s | 30.75 %
-     Obs.Param.:calculate_observation:generator             |           36 | 3.21400e+00 s | 72.07 %
-     Obs.Param.:calculate_observation                       |           36 | 4.35335e+00 s | 97.62 %
-     observe_passes                                         |            1 | 9.97917e+01 s | 62.16 %
-     observe_passes_interpolator                            |            1 | 5.69860e+01 s | 35.50 %
-     total                                                  |            1 | 1.60539e+02 s | 100.00 %
+     get_state                                              |            1 | 2.03223e+00 s | 1.27 %
+     find_passes                                            |            1 | 3.71742e-03 s | 0.00 %
+     Obs.Param.:calculate_observation:get_state             |           36 | 1.11971e+00 s | 25.23 %
+     Obs.Param.:calculate_observation:enus,range,range_rate |           36 | 5.28826e-04 s | 0.01 %
+     Scanner:generator:point_radar:_point_station[tx]       |        78036 | 1.10661e-04 s | 5.40 %
+     Scanner:generator:point_radar:_point_station[rx]       |       234108 | 1.98539e-04 s | 29.09 %
+     Scanner:generator:point_radar                          |        78036 | 8.53267e-04 s | 41.67 %
+     Obs.Param.:calculate_observation:snr-step:gain         |        76274 | 6.22534e-04 s | 29.72 %
+     Obs.Param.:calculate_observation:snr-step:snr          |        76274 | 2.17526e-05 s | 1.04 %
+     Obs.Param.:calculate_observation:snr-step              |        78036 | 6.45173e-04 s | 31.51 %
+     Obs.Param.:calculate_observation:generator             |           36 | 3.25961e+00 s | 73.44 %
+     Obs.Param.:calculate_observation                       |           36 | 4.38008e+00 s | 98.69 %
+     observe_passes                                         |            1 | 9.89323e+01 s | 61.92 %
+     observe_passes_interpolator                            |            1 | 5.88130e+01 s | 36.81 %
+     total                                                  |            1 | 1.59781e+02 s | 100.00 %
     ---------------------------------------------------------------------------------------------------
 
-    /home/danielk/IRF/IRF_GITLAB/SORTS/examples/scheduler_interpolation_optimizing.py:151: RuntimeWarning: divide by zero encountered in log10
+    /home/danielk/IRF/IRF_GITLAB/SORTS/examples/scheduler_interpolation_optimizing.py:152: RuntimeWarning: divide by zero encountered in log10
       SNRdB = 10*np.log10(dat['snr'])
-    /home/danielk/IRF/IRF_GITLAB/SORTS/examples/scheduler_interpolation_optimizing.py:151: RuntimeWarning: divide by zero encountered in log10
+    /home/danielk/IRF/IRF_GITLAB/SORTS/examples/scheduler_interpolation_optimizing.py:152: RuntimeWarning: divide by zero encountered in log10
       SNRdB = 10*np.log10(dat['snr'])
-    /home/danielk/IRF/IRF_GITLAB/SORTS/examples/scheduler_interpolation_optimizing.py:151: RuntimeWarning: divide by zero encountered in log10
+    /home/danielk/IRF/IRF_GITLAB/SORTS/examples/scheduler_interpolation_optimizing.py:152: RuntimeWarning: divide by zero encountered in log10
       SNRdB = 10*np.log10(dat['snr'])
-    /home/danielk/IRF/IRF_GITLAB/SORTS/examples/scheduler_interpolation_optimizing.py:151: RuntimeWarning: divide by zero encountered in log10
+    /home/danielk/IRF/IRF_GITLAB/SORTS/examples/scheduler_interpolation_optimizing.py:152: RuntimeWarning: divide by zero encountered in log10
       SNRdB = 10*np.log10(dat['snr'])
-    /home/danielk/IRF/IRF_GITLAB/SORTS/examples/scheduler_interpolation_optimizing.py:151: RuntimeWarning: divide by zero encountered in log10
+    /home/danielk/IRF/IRF_GITLAB/SORTS/examples/scheduler_interpolation_optimizing.py:152: RuntimeWarning: divide by zero encountered in log10
       SNRdB = 10*np.log10(dat['snr'])
-    /home/danielk/IRF/IRF_GITLAB/SORTS/examples/scheduler_interpolation_optimizing.py:151: RuntimeWarning: divide by zero encountered in log10
+    /home/danielk/IRF/IRF_GITLAB/SORTS/examples/scheduler_interpolation_optimizing.py:152: RuntimeWarning: divide by zero encountered in log10
       SNRdB = 10*np.log10(dat['snr'])
 
 
@@ -127,6 +127,7 @@ Optimizing with interpolation
             epoch = 53005.0,
             parameters = dict(
                 d = 0.1,
+                A = 1.0,
             ),
         ),
     ]
@@ -256,7 +257,7 @@ Optimizing with interpolation
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  45.896 seconds)
+   **Total running time of the script:** ( 2 minutes  41.576 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_scheduler_interpolation_optimizing.py:

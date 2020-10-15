@@ -12,6 +12,15 @@ Module summary
 
 
 
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    
+    epochType
+    
+
+
 
 
 .. rubric:: Functions
@@ -27,6 +36,10 @@ Module summary
     
     write_tdm
     
+    xml_tdm_segmet
+    
+    xml_tdm_tree
+    
 
 
 
@@ -34,6 +47,18 @@ Contents
 ----------
 
 
+
+
+
+
+
+.. rubric:: epochType
+
+.. autoclass:: epochType
+   :show-inheritance:
+   :noindex:
+   :members:
+   :inherited-members:
 
 
 
@@ -58,6 +83,16 @@ Contents
 
 
 .. autofunction:: write_tdm
+   :noindex:
+
+
+
+.. autofunction:: xml_tdm_segmet
+   :noindex:
+
+
+
+.. autofunction:: xml_tdm_tree
    :noindex:
 
 

@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>correlate &#8212; SORTS 3.18.0 documentation</title>
+    <title>correlate &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.correlator.html" title="correlator"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.correlator.html" accesskey="U">correlator</a> &#187;</li> 
       </ul>
@@ -86,17 +86,20 @@
 <p class="rubric">correlate</p>
 <dl class="py function">
 <dt id="sorts.correlator.correlate">
-<code class="sig-prename descclassname">sorts.correlator.</code><code class="sig-name descname">correlate</code><span class="sig-paren">(</span><em class="sig-param">measurements</em>, <em class="sig-param">population</em>, <em class="sig-param">metric=&lt;function residual_distribution_metric&gt;</em>, <em class="sig-param">metric_reduce=&lt;function &lt;lambda&gt;&gt;</em>, <em class="sig-param">n_closest=1</em>, <em class="sig-param">profiler=None</em>, <em class="sig-param">logger=None</em>, <em class="sig-param">MPI=False</em>, <em class="sig-param">propagator_lighttime_correction=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/correlator.html#correlate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.correlator.correlate" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">sorts.correlator.</code><code class="sig-name descname">correlate</code><span class="sig-paren">(</span><em class="sig-param">measurements, population, metric=&lt;function residual_distribution_metric&gt;, metric_reduce=&lt;function &lt;lambda&gt;&gt;, forward_model=&lt;function generate_measurements&gt;, variables=['r', 'v'], n_closest=1, profiler=None, logger=None, MPI=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/correlator.html#correlate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.correlator.correlate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a mono-static measurement of ranges and rage-rates, a radar model and a population: correlate measurements with population.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<em>list</em>) – List of dictionaries that contains measurement data. Contents are described below.</p></li>
-<li><p><strong>station</strong> (<em>station</em>) – Model of receiver station that performed the measurement.</p></li>
+<li><p><strong>measurements</strong> (<em>list</em>) – List of dictionaries that contains measurement data. Contents are described below.</p></li>
 <li><p><strong>population</strong> (<a class="reference internal" href="population/sorts.population.population.Population.html#sorts.population.population.Population" title="sorts.population.population.Population"><em>Population</em></a>) – Population to correlate against.</p></li>
 <li><p><strong>metric</strong> (<em>function</em>) – Metric used to correlate measurement and simulated object measurement.</p></li>
-<li><p><strong>profiler</strong> (<a class="reference internal" href="sorts.profiling.Profiler.html#sorts.profiling.Profiler" title="sorts.profiling.Profiler"><em>Profiler</em></a>) – </p></li>
-<li><p><strong>logger</strong> (<em>logging.Logger</em>) – </p></li>
+<li><p><strong>metric_reduce</strong> (<em>function</em>) – Metric used to correlate measurement and simulated object measurement.</p></li>
+<li><p><strong>forward_model</strong> (<em>function</em>) – A pointer to a function that takes in the ecef-state, the rx and tx station ecefs and calculates the observed variables return as a tuple.</p></li>
+<li><p><strong>variables</strong> (<em>list</em>) – The data variables recorded by the system.</p></li>
+<li><p><strong>n_closest</strong> (<em>int</em>) – Number of closest matches to save.</p></li>
+<li><p><strong>profiler</strong> (<a class="reference internal" href="sorts.profiling.Profiler.html#sorts.profiling.Profiler" title="sorts.profiling.Profiler"><em>Profiler</em></a>) – Profiler instance for checking function performance.</p></li>
+<li><p><strong>logger</strong> (<em>logging.Logger</em>) – Logger instance for logging the execution of the function.</p></li>
 <li><p><strong>MPI</strong> (<em>bool</em>) – If True use internal parallelization with MPI to calculate correlation. Turn to False to externally parallelize with MPI.</p></li>
 </ul>
 </dd>
@@ -106,17 +109,18 @@
 <div><dl class="simple">
 <dt>Each entry in the input <code class="code docutils literal notranslate"><span class="pre">measurements</span></code> list must be a dictionary that contains the following fields:</dt><dd><ul class="simple">
 <li><p>‘t’: [numpy.ndarray] Times relative epoch in seconds</p></li>
-<li><p>‘r’: [numpy.ndarray] Two-way ranges in meters</p></li>
-<li><p>‘v’: [numpy.ndarray] Two-way range-rates in meters per second</p></li>
 <li><p>‘epoch’: [astropy.Time] epoch for measurements</p></li>
 <li><p>‘tx’: [sorts.TX] Pointer to the TX station</p></li>
 <li><p>‘rx’: [sorts.RX] Pointer to the RX station</p></li>
 </ul>
 </dd>
+<dt>Then it will contain a entry for each name in the <cite>variables</cite> list. By default this is</dt><dd><ul class="simple">
+<li><p>‘r’: [numpy.ndarray] Two-way ranges in meters</p></li>
+<li><p>‘v’: [numpy.ndarray] Two-way range-rates in meters per second</p></li>
+</ul>
+</dd>
 </dl>
 </div></blockquote>
-<p>Optionally, if <cite>propagator_lighttime_correction</cite> should be applied, one can supply which index in the list is the TX-TX pair,
-assuming that the time <cite>t</cite> given is the transmission time.</p>
 </dd></dl>
 
 </div>
@@ -142,7 +146,7 @@ assuming that the time <cite>t</cite> given is the transmission time.</p>
         <li class="right" >
           <a href="sorts.correlator.html" title="correlator"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.correlator.html" >correlator</a> &#187;</li> 
       </ul>

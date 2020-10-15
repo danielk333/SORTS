@@ -1,8 +1,0 @@
-select\_simultaneous\_passes
-============================
-
-.. currentmodule:: sorts.passes
-
-.. rubric:: select_simultaneous_passes
-
-.. autofunction:: select_simultaneous_passes

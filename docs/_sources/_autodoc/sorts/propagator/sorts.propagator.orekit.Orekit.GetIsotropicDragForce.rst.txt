@@ -1,0 +1,8 @@
+Orekit.GetIsotropicDragForce
+============================
+
+.. currentmodule:: sorts.propagator.orekit
+
+.. rubric:: Orekit.GetIsotropicDragForce
+
+.. automethod:: Orekit.GetIsotropicDragForce

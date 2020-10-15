@@ -1,0 +1,8 @@
+epochType.to\_value
+===================
+
+.. currentmodule:: sorts.io.ccsds
+
+.. rubric:: epochType.to_value
+
+.. automethod:: epochType.to_value

@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Propagator &#8212; SORTS 3.18.0 documentation</title>
+    <title>Propagator &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.propagator.base.html" title="base"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.propagator.base.html" accesskey="U">base</a> &#187;</li> 
       </ul>
@@ -100,10 +100,13 @@
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.propagator.base.Propagator.convert_time.html#sorts.propagator.base.Propagator.convert_time" title="sorts.propagator.base.Propagator.convert_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_time</span></code></a>(t, epoch)</p></td>
 <td><p>Convert input time and epoch variables to <code class="code docutils literal notranslate"><span class="pre">astropy.TimeDelta</span></code> and <code class="code docutils literal notranslate"><span class="pre">astropy.Time</span></code> variables of the correct format and scale.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.base.Propagator.propagate.html#sorts.propagator.base.Propagator.propagate" title="sorts.propagator.base.Propagator.propagate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">propagate</span></code></a>(t, state0, epoch, **kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.base.Propagator.heartbeat.html#sorts.propagator.base.Propagator.heartbeat" title="sorts.propagator.base.Propagator.heartbeat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">heartbeat</span></code></a>(t, state, **kwargs)</p></td>
+<td><p>Function applied after propagation to time <cite>t</cite> and state <cite>state</cite>, before next time step as given in the input time vector to <cite>propagate</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.propagator.base.Propagator.propagate.html#sorts.propagator.base.Propagator.propagate" title="sorts.propagator.base.Propagator.propagate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">propagate</span></code></a>(t, state0, epoch, **kwargs)</p></td>
 <td><p>Propagate a state</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.propagator.base.Propagator.set.html#sorts.propagator.base.Propagator.set" title="sorts.propagator.base.Propagator.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code></a>(**kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.base.Propagator.set.html#sorts.propagator.base.Propagator.set" title="sorts.propagator.base.Propagator.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code></a>(**kwargs)</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -116,6 +119,12 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.base.Propagator.DEFAULT_SETTINGS.html#sorts.propagator.base.Propagator.DEFAULT_SETTINGS" title="sorts.propagator.base.Propagator.DEFAULT_SETTINGS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_SETTINGS</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.propagator.base.Propagator.in_frame.html#sorts.propagator.base.Propagator.in_frame" title="sorts.propagator.base.Propagator.in_frame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">in_frame</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.propagator.base.Propagator.out_frame.html#sorts.propagator.base.Propagator.out_frame" title="sorts.propagator.base.Propagator.out_frame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">out_frame</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -145,7 +154,7 @@
         <li class="right" >
           <a href="sorts.propagator.base.html" title="base"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.propagator.base.html" >base</a> &#187;</li> 
       </ul>

@@ -1,0 +1,8 @@
+atmospheric\_errors
+===================
+
+.. currentmodule:: sorts.errors.atmospheric_drag
+
+.. rubric:: atmospheric_errors
+
+.. autofunction:: atmospheric_errors

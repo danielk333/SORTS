@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>store_step &#8212; SORTS 3.18.0 documentation</title>
+    <title>store_step &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.simulation.mpi_wrap_master_thread.html" title="mpi_wrap_master_thread"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.simulation.html" accesskey="U">simulation</a> &#187;</li> 
       </ul>
@@ -88,6 +88,14 @@
 <dt id="sorts.simulation.store_step">
 <code class="sig-prename descclassname">sorts.simulation.</code><code class="sig-name descname">store_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">store</span></em>, <em class="sig-param"><span class="n">iterable</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/simulation.html#store_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.simulation.store_step" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simulation step storing decorator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>store</strong> (<em>str/list</em>) – The name/list names of the properties to save the method return as (set using <code class="code docutils literal notranslate"><span class="pre">setattr</span></code>). Can be multiple levels, e.g. <code class="code docutils literal notranslate"><span class="pre">object.subobject.a_property</span></code>. The order of the names correspond to the order of method returned variables.</p></li>
+<li><p><strong>iterable</strong> (<em>bool</em>) – Determines if the return of the method is an iteration or not. If its an iteration, it splits the return values into different lists based on the number of variables.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -113,7 +121,7 @@
         <li class="right" >
           <a href="sorts.simulation.mpi_wrap_master_thread.html" title="mpi_wrap_master_thread"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.simulation.html" >simulation</a> &#187;</li> 
       </ul>

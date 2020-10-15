@@ -1,0 +1,289 @@
+
+
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Atmospheric drag variation &#8212; SORTS 4.0.0-rc.1 documentation</title>
+    <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery-dataframe.css" />
+    
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="SGP4 standalone example" href="sgp4_package_example.html" />
+    <link rel="prev" title="Using pyglow" href="using_pyglow.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sgp4_package_example.html" title="SGP4 standalone example"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="using_pyglow.html" title="Using pyglow"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Examples</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="using_pyglow.html"
+                        title="previous chapter">Using pyglow</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sgp4_package_example.html"
+                        title="next chapter">SGP4 standalone example</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/auto_gallery/atmospheric_drag_variation.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-auto-gallery-atmospheric-drag-variation-py"><span class="std std-ref">here</span></a>     to download the full example code</p>
+</div>
+<div class="sphx-glr-example-title section" id="atmospheric-drag-variation">
+<span id="sphx-glr-auto-gallery-atmospheric-drag-variation-py"></span><h1>Atmospheric drag variation<a class="headerlink" href="#atmospheric-drag-variation" title="Permalink to this headline">¶</a></h1>
+<img alt="a 6800000 (km) e 0.00 i 69 (deg) aop 0 (deg) raan 0 (deg) A 2.00$\pm$ 1% (m$^2$) mass 1.00 (kg) $\alpha=nan$ $t_1=8943.7$ $\beta=12.3$" class="sphx-glr-single-img" src="../_images/sphx_glr_atmospheric_drag_variation_001.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>n_days 18
+/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/errors/atmospheric_drag.py:26: RuntimeWarning: divide by zero encountered in true_divide
+  normal = ecef0/n.sqrt(ecef0[0,:]**2.0+ecef0[1,:]**2.0+ecef0[2,:]**2.0)
+/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/errors/atmospheric_drag.py:26: RuntimeWarning: invalid value encountered in true_divide
+  normal = ecef0/n.sqrt(ecef0[0,:]**2.0+ecef0[1,:]**2.0+ecef0[2,:]**2.0)
+1/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+2/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+3/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+4/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/errors/atmospheric_drag.py:25: RuntimeWarning: divide by zero encountered in true_divide
+  along_track=along_track/n.sqrt(along_track[0,:]**2.0+along_track[1,:]**2.0+along_track[2,:]**2.0)
+/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/errors/atmospheric_drag.py:29: RuntimeWarning: invalid value encountered in subtract
+  cross_track[0,:] = along_track[1,:]*normal[2,:] - along_track[2,:]*normal[1,:]
+/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/errors/atmospheric_drag.py:68: RuntimeWarning: invalid value encountered in add
+  err[0,:]+=n.abs(err_now[0,:]*at[0,:]+err_now[1,:]*at[1,:]+err_now[2,:]*at[2,:])**2.0
+5/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+6/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+7/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+8/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+9/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/errors/atmospheric_drag.py:32: RuntimeWarning: invalid value encountered in true_divide
+  cross_track=cross_track/n.sqrt(cross_track[0,:]**2.0+cross_track[1,:]**2.0+cross_track[2,:]**2.0)
+10/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+11/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+12/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+13/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+14/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+15/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+16/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+17/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+18/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+19/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+20/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+21/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+22/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+23/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+24/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+25/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+26/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+27/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+28/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+29/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+30/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+31/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+32/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+33/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+34/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+35/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+36/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+37/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+38/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+39/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+40/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+41/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+42/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+43/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+44/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+45/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+46/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+47/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+48/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+49/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+50/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+51/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+52/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+53/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+54/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+55/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+56/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+57/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+58/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+59/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+60/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+61/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+62/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+63/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+64/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+65/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+66/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+67/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+68/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+69/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+70/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+71/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+72/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+73/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+74/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+75/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+76/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+77/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+78/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+79/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+80/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+81/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+82/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+83/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+84/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+85/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+86/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+87/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+88/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+89/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+90/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+91/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+92/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+93/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+94/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+95/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+96/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+97/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+98/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+99/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+100/100 done - time elapsed 0.00  h | estimated time remaining 0.00
+/home/danielk/IRF/IRF_GITLAB/SORTS/sorts/errors/atmospheric_drag.py:108: UserWarning: Attempted to set non-positive left xlim on a log-scaled axis.
+Invalid limit will be ignored.
+  plt.xlim([0,n.max(t)/24.0/3600.0])
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pathlib</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">astropy.time</span> <span class="kn">import</span> <span class="n">Time</span>
+
+<span class="kn">import</span> <span class="nn">sorts</span>
+
+
+<span class="n">obj</span> <span class="o">=</span> <span class="n">sorts</span><span class="o">.</span><span class="n">SpaceObject</span><span class="p">(</span>
+    <span class="n">sorts</span><span class="o">.</span><span class="n">propagator</span><span class="o">.</span><span class="n">SGP4</span><span class="p">,</span>
+    <span class="n">propagator_options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">settings</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">in_frame</span><span class="o">=</span><span class="s1">&#39;GCRS&#39;</span><span class="p">,</span>
+            <span class="n">out_frame</span><span class="o">=</span><span class="s1">&#39;ITRS&#39;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">),</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="mf">6800e3</span><span class="p">,</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">69</span><span class="p">,</span>
+    <span class="n">raan</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">aop</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">mu0</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">epoch</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="mf">57125.7729</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;mjd&#39;</span><span class="p">),</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">hour0</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">t1</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="n">sorts</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">atmospheric_drag</span><span class="o">.</span><span class="n">atmospheric_errors</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<a href="https://matplotlib.org/api/_as_gen/matplotlib.pyplot.show.html#matplotlib.pyplot.show" title="matplotlib.pyplot.show" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><a href="https://matplotlib.org/api/_as_gen/matplotlib.pyplot.show.html#matplotlib.pyplot.show" title="matplotlib.pyplot.show" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a></a><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  16.124 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-gallery-atmospheric-drag-variation-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/b5ec9d9561fe1d5a7c1ac13c05d3acff/atmospheric_drag_variation.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">atmospheric_drag_variation.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/d92ebcca47ebd67bd34c133bbdf276e0/atmospheric_drag_variation.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">atmospheric_drag_variation.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sgp4_package_example.html" title="SGP4 standalone example"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="using_pyglow.html" title="Using pyglow"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Examples</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright [2020-2020] Daniel Kastinen, Juha Vierinen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.3.
+    </div>
+  </body>
+</html>

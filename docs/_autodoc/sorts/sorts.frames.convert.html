@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>convert &#8212; SORTS 3.18.0 documentation</title>
+    <title>convert &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.frames.azel_to_ecef.html" title="azel_to_ecef"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.frames.html" accesskey="U">frames</a> &#187;</li> 
       </ul>
@@ -87,7 +87,25 @@
 <dl class="py function">
 <dt id="sorts.frames.convert">
 <code class="sig-prename descclassname">sorts.frames.</code><code class="sig-name descname">convert</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">states</span></em>, <em class="sig-param"><span class="n">in_frame</span></em>, <em class="sig-param"><span class="n">out_frame</span></em>, <em class="sig-param"><span class="n">logger</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">profiler</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/sorts/frames.html#convert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.frames.convert" title="Permalink to this definition">¶</a></dt>
-<dd><p>Perform predefined coordinate transformations. Always returns a copy of the array.</p>
+<dd><p>Perform predefined coordinate transformations using Astropy. Always returns a copy of the array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t</strong> (<em>numpy.ndarray/float</em>) – Absolute time corresponding to the input states.</p></li>
+<li><p><strong>states</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – Size <cite>(6,n)</cite> matrix of states in SI units where rows 1-3 are position and 4-6 are velocity.</p></li>
+<li><p><strong>in_frame</strong> (<em>str</em>) – Name of the frame the input states are currently in.</p></li>
+<li><p><strong>out_frame</strong> (<em>str</em>) – Name of the state to transform to.</p></li>
+<li><p><strong>profiler</strong> (<a class="reference internal" href="sorts.profiling.Profiler.html#sorts.profiling.Profiler" title="sorts.profiling.Profiler"><em>Profiler</em></a>) – Profiler instance for checking function performance.</p></li>
+<li><p><strong>logger</strong> (<em>logging.Logger</em>) – Logger instance for logging the execution of the function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Size <cite>(6,n)</cite> matrix of states in SI units where rows 1-3 are position and 4-6 are velocity.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -113,7 +131,7 @@
         <li class="right" >
           <a href="sorts.frames.azel_to_ecef.html" title="azel_to_ecef"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.frames.html" >frames</a> &#187;</li> 
       </ul>

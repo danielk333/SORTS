@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>write_oem &#8212; SORTS 3.18.0 documentation</title>
+    <title>write_oem &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.io.ccsds.read_tdm.html" title="read_tdm"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.io.ccsds.html" accesskey="U">ccsds</a> &#187;</li> 
       </ul>
@@ -86,24 +86,15 @@
 <p class="rubric">write_oem</p>
 <dl class="py function">
 <dt id="sorts.io.ccsds.write_oem">
-<code class="sig-prename descclassname">sorts.io.ccsds.</code><code class="sig-name descname">write_oem</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">state</span></em>, <em class="sig-param"><span class="n">fname</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/io/ccsds.html#write_oem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.io.ccsds.write_oem" title="Permalink to this definition">¶</a></dt>
-<dd><p>Uses a series of unix-times and state vectors in ITRF2000 to create a CCSDS OEM file.</p>
-<p># TODO: Document function.
-# TODO: Update function to be more general
-# TODO: add arbitrary fields and meta data</p>
-<dl class="simple">
-<dt><strong>Uses:</strong></dt><dd><ul class="simple">
-<li><p><a class="reference internal" href="../sorts.dates.unix_to_datestrf.html#sorts.dates.unix_to_datestrf" title="sorts.dates.unix_to_datestrf"><code class="xref py py-func docutils literal notranslate"><span class="pre">unix_to_datestrf()</span></code></a></p></li>
-<li><p><a class="reference internal" href="../sorts.dates.unix_to_datestr.html#sorts.dates.unix_to_datestr" title="sorts.dates.unix_to_datestr"><code class="xref py py-func docutils literal notranslate"><span class="pre">unix_to_datestr()</span></code></a></p></li>
-</ul>
-</dd>
-</dl>
+<code class="sig-prename descclassname">sorts.io.ccsds.</code><code class="sig-name descname">write_oem</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">state</span></em>, <em class="sig-param"><span class="n">meta</span></em>, <em class="sig-param"><span class="n">fname</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">xml</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/io/ccsds.html#write_oem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.io.ccsds.write_oem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses a series of astropy times and state vectors to create a CCSDS OEM file (plain-text of xml) or return a string.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>t</strong> (<em>list/numpy.ndarray</em>) – Vector of unix-times</p></li>
+<li><p><strong>t</strong> (<em>astropy.Time</em>) – Vector of unix-times</p></li>
 <li><p><strong>state</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><em>numpy.ndarray</em></a>) – 6-D states given in SI units in the ITRF2000 frame. Rows correspond to different states and columns to dimensions.</p></li>
-<li><p><strong>OID</strong> (<em>int</em>) – Object ID and name (written in OEM as the same but with different formating)</p></li>
+<li><p><strong>meta</strong> (<em>dict</em>) – Dict containing all the standard CCSDS 2.0 meta data.</p></li>
+<li><p><strong>xml</strong> (<em>bool</em>) – If <cite>False</cite>, use the plain-text format</p></li>
 <li><p><strong>fname</strong> (<em>str</em>) – Output file-path for OEM.</p></li>
 </ul>
 </dd>
@@ -133,7 +124,7 @@
         <li class="right" >
           <a href="sorts.io.ccsds.read_tdm.html" title="read_tdm"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.io.ccsds.html" >ccsds</a> &#187;</li> 
       </ul>

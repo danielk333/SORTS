@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>LinearizedCodedIonospheric &#8212; SORTS 3.18.0 documentation</title>
+    <title>LinearizedCodedIonospheric &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.errors.linearized_coded.LinearizedCoded.VARIABLES.html" title="sorts.errors.linearized_coded.LinearizedCoded.VARIABLES"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.errors.linearized_coded.html" accesskey="U">linearized_coded</a> &#187;</li> 
       </ul>
@@ -85,7 +85,7 @@
 <h1>LinearizedCodedIonospheric<a class="headerlink" href="#linearizedcodedionospheric" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt id="sorts.errors.linearized_coded.LinearizedCodedIonospheric">
-<em class="property">class </em><code class="sig-prename descclassname">sorts.errors.linearized_coded.</code><code class="sig-name descname">LinearizedCodedIonospheric</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tx</span></em>, <em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cache_folder</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">diameter</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/errors/linearized_coded.html#LinearizedCodedIonospheric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.errors.linearized_coded.LinearizedCodedIonospheric" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">sorts.errors.linearized_coded.</code><code class="sig-name descname">LinearizedCodedIonospheric</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/sorts/errors/linearized_coded.html#LinearizedCodedIonospheric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sorts.errors.linearized_coded.LinearizedCodedIonospheric" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCoded.html#sorts.errors.linearized_coded.LinearizedCoded" title="sorts.errors.linearized_coded.LinearizedCoded"><code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.errors.linearized_coded.LinearizedCoded</span></code></a></p>
 <p>233e6 Hz worst case scenario at zenith only!</p>
 <p class="rubric">Methods</p>
@@ -95,22 +95,31 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCodedIonospheric.__init__.html#sorts.errors.linearized_coded.LinearizedCodedIonospheric.__init__" title="sorts.errors.linearized_coded.LinearizedCodedIonospheric.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(tx[, seed, cache_folder, diameter])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCodedIonospheric.__init__.html#sorts.errors.linearized_coded.LinearizedCodedIonospheric.__init__" title="sorts.errors.linearized_coded.LinearizedCodedIonospheric.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(*args, **kwargs)</p></td>
 <td><p>Initialize self.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCodedIonospheric.doppler.html#sorts.errors.linearized_coded.LinearizedCodedIonospheric.doppler" title="sorts.errors.linearized_coded.LinearizedCodedIonospheric.doppler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">doppler</span></code></a>(data, snr)</p></td>
-<td><p>Range rate in m/s</p></td>
+<td><p>Doppler shift in Hz</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCodedIonospheric.get.html#sorts.errors.linearized_coded.LinearizedCodedIonospheric.get" title="sorts.errors.linearized_coded.LinearizedCodedIonospheric.get"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get</span></code></a>(var, data, *args, **kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCodedIonospheric.doppler_std.html#sorts.errors.linearized_coded.LinearizedCodedIonospheric.doppler_std" title="sorts.errors.linearized_coded.LinearizedCodedIonospheric.doppler_std"><code class="xref py py-obj docutils literal notranslate"><span class="pre">doppler_std</span></code></a>(snr)</p></td>
+<td><p>The expected standard error of a Doppler measurement in Hz.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCodedIonospheric.get.html#sorts.errors.linearized_coded.LinearizedCodedIonospheric.get" title="sorts.errors.linearized_coded.LinearizedCodedIonospheric.get"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get</span></code></a>(var, data, *args, **kwargs)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCodedIonospheric.range.html#sorts.errors.linearized_coded.LinearizedCodedIonospheric.range" title="sorts.errors.linearized_coded.LinearizedCodedIonospheric.range"><code class="xref py py-obj docutils literal notranslate"><span class="pre">range</span></code></a>(data, snr, tx_range)</p></td>
-<td><p>Two way range in meters</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCodedIonospheric.range.html#sorts.errors.linearized_coded.LinearizedCodedIonospheric.range" title="sorts.errors.linearized_coded.LinearizedCodedIonospheric.range"><code class="xref py py-obj docutils literal notranslate"><span class="pre">range</span></code></a>(data, snr)</p></td>
+<td><p>Range in m</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCodedIonospheric.range_rate.html#sorts.errors.linearized_coded.LinearizedCodedIonospheric.range_rate" title="sorts.errors.linearized_coded.LinearizedCodedIonospheric.range_rate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">range_rate</span></code></a>(data, snr)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCodedIonospheric.range_rate.html#sorts.errors.linearized_coded.LinearizedCodedIonospheric.range_rate" title="sorts.errors.linearized_coded.LinearizedCodedIonospheric.range_rate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">range_rate</span></code></a>(data, snr)</p></td>
 <td><p>Range rate in m/s</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCodedIonospheric.set_numpy_seed.html#sorts.errors.linearized_coded.LinearizedCodedIonospheric.set_numpy_seed" title="sorts.errors.linearized_coded.LinearizedCodedIonospheric.set_numpy_seed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_numpy_seed</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCodedIonospheric.range_rate_std.html#sorts.errors.linearized_coded.LinearizedCodedIonospheric.range_rate_std" title="sorts.errors.linearized_coded.LinearizedCodedIonospheric.range_rate_std"><code class="xref py py-obj docutils literal notranslate"><span class="pre">range_rate_std</span></code></a>(snr)</p></td>
+<td><p>The expected standard error of a range rate measurement in m/s.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCodedIonospheric.range_std.html#sorts.errors.linearized_coded.LinearizedCodedIonospheric.range_std" title="sorts.errors.linearized_coded.LinearizedCodedIonospheric.range_std"><code class="xref py py-obj docutils literal notranslate"><span class="pre">range_std</span></code></a>(path_range, snr)</p></td>
+<td><p>The expected standard error of a range measurement in m.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.errors.linearized_coded.LinearizedCodedIonospheric.set_numpy_seed.html#sorts.errors.linearized_coded.LinearizedCodedIonospheric.set_numpy_seed" title="sorts.errors.linearized_coded.LinearizedCodedIonospheric.set_numpy_seed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_numpy_seed</span></code></a>()</p></td>
 <td><p>This should be called before any error generating methods if reproduction of results needs to be ensured.</p></td>
 </tr>
 </tbody>
@@ -152,7 +161,7 @@
         <li class="right" >
           <a href="sorts.errors.linearized_coded.LinearizedCoded.VARIABLES.html" title="sorts.errors.linearized_coded.LinearizedCoded.VARIABLES"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.errors.linearized_coded.html" >linearized_coded</a> &#187;</li> 
       </ul>

@@ -36,7 +36,7 @@ Predefined EISCAT 3D Radar
 
  .. code-block:: none
 
-    /home/danielk/IRF/IRF_GITLAB/pyant/pyant/plotting.py:232: RuntimeWarning: divide by zero encountered in log10
+    /home/danielk/IRF/IRF_GITLAB/pyant/pyant/plotting.py:236: RuntimeWarning: divide by zero encountered in log10
       SdB = np.log10(S)*10.0
 
 
@@ -85,7 +85,7 @@ Predefined EISCAT 3D Radar
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  20.108 seconds)
+   **Total running time of the script:** ( 0 minutes  20.031 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_predefined_eiscat3d.py:

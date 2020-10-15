@@ -1,0 +1,8 @@
+epochType.scale
+===============
+
+.. currentmodule:: sorts.io.ccsds
+
+.. rubric:: epochType.scale
+
+.. autoproperty:: sorts.io.ccsds.epochType.scale

@@ -25,10 +25,10 @@ Profiling SGP4
     ----------------------- Performance analysis -----------------------
      Name                    |   Executions | Mean time     | Total time
     -------------------------+--------------+---------------+---------------
-     Propagator:convert_time |            1 | 6.24657e-04 s | 6.24657e-04 s
-     SGP4:TEME_to_TLE        |            1 | 2.06876e-03 s | 2.06876e-03 s
-     SGP4:propagate:steps    |            1 | 1.55072e-02 s | 1.55072e-02 s
-     SGP4:propagate          |            1 | 2.29735e-02 s | 2.29735e-02 s
+     Propagator:convert_time |            1 | 5.91993e-04 s | 5.91993e-04 s
+     SGP4:TEME_to_TLE        |            1 | 2.08282e-03 s | 2.08282e-03 s
+     SGP4:propagate:steps    |            1 | 1.49801e-02 s | 1.49801e-02 s
+     SGP4:propagate          |            1 | 2.21229e-02 s | 2.21229e-02 s
     --------------------------------------------------------------------
 
 
@@ -68,7 +68,7 @@ Profiling SGP4
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.026 seconds)
+   **Total running time of the script:** ( 0 minutes  0.025 seconds)
 
 
 .. _sphx_glr_download_auto_gallery_profiler_sgp4.py:

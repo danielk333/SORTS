@@ -19,6 +19,8 @@ SGP4
       ~SGP4.__init__
       ~SGP4.convert_time
       ~SGP4.get_TLE_parameters
+      ~SGP4.get_mean_elements
+      ~SGP4.heartbeat
       ~SGP4.propagate
       ~SGP4.propagate_mean_elements
       ~SGP4.propagate_tle
@@ -34,5 +36,7 @@ SGP4
       :toctree: .
    
       ~SGP4.DEFAULT_SETTINGS
+      ~SGP4.in_frame
+      ~SGP4.out_frame
    
    

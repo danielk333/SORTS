@@ -1,0 +1,8 @@
+Orekit.in\_frame
+================
+
+.. currentmodule:: sorts.propagator.orekit
+
+.. rubric:: Orekit.in_frame
+
+.. autoproperty:: sorts.propagator.orekit.Orekit.in_frame

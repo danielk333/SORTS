@@ -1,0 +1,8 @@
+Orekit.out\_frame
+=================
+
+.. currentmodule:: sorts.propagator.orekit
+
+.. rubric:: Orekit.out_frame
+
+.. autoproperty:: sorts.propagator.orekit.Orekit.out_frame

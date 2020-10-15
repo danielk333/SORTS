@@ -1,0 +1,8 @@
+epochType.set\_jds
+==================
+
+.. currentmodule:: sorts.io.ccsds
+
+.. rubric:: epochType.set_jds
+
+.. automethod:: epochType.set_jds

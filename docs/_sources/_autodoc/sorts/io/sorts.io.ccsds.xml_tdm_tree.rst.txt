@@ -1,0 +1,8 @@
+xml\_tdm\_tree
+==============
+
+.. currentmodule:: sorts.io.ccsds
+
+.. rubric:: xml_tdm_tree
+
+.. autofunction:: xml_tdm_tree

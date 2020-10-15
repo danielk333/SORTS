@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>sorts.scheduler.scheduler &#8212; SORTS 3.18.0 documentation</title>
+    <title>sorts.scheduler.scheduler &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/gallery.css" />
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -62,7 +62,7 @@
   <h1>Source code for sorts.scheduler.scheduler</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
 
-<span class="sd">&#39;&#39;&#39;Scheduler</span>
+<span class="sd">&#39;&#39;&#39;Scheduler base class.</span>
 
 <span class="sd">&#39;&#39;&#39;</span>
 <span class="c1">#Python standard import</span>
@@ -77,6 +77,8 @@
 
 <div class="viewcode-block" id="Scheduler"><a class="viewcode-back" href="../../../_autodoc/sorts/scheduler/sorts.scheduler.scheduler.Scheduler.html#sorts.scheduler.observed_parameters.Scheduler">[docs]</a><span class="k">class</span> <span class="nc">Scheduler</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;A Scheduler for executing time-slices of different radar controllers.</span>
+
+<span class="sd">    #TODO: Docstring</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
 <div class="viewcode-block" id="Scheduler.__init__"><a class="viewcode-back" href="../../../_autodoc/sorts/scheduler/sorts.scheduler.scheduler.Scheduler.__init__.html#sorts.scheduler.observed_parameters.Scheduler.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radar</span><span class="p">,</span> <span class="n">profiler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -118,6 +120,8 @@
 
 
 <div class="viewcode-block" id="Scheduler.schedule"><a class="viewcode-back" href="../../../_autodoc/sorts/scheduler/sorts.scheduler.scheduler.Scheduler.schedule.html#sorts.scheduler.observed_parameters.Scheduler.schedule">[docs]</a>    <span class="k">def</span> <span class="nf">schedule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;#TODO: Docstring</span>
+<span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">ctrls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_controllers</span><span class="p">()</span>
         <span class="n">times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">t</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">ctrls</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">sched</span> <span class="o">=</span> <span class="n">Scheduler</span><span class="o">.</span><span class="n">chain_generators</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">ctrls</span><span class="p">])</span>
@@ -125,6 +129,8 @@
 
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;#TODO: Docstring</span>
+<span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">ctrls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_controllers</span><span class="p">()</span>
 
         <span class="n">check_t</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">c</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">t</span> <span class="o">&gt;=</span> <span class="n">start</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">t</span> <span class="o">&lt;=</span> <span class="n">stop</span><span class="p">)</span>
@@ -143,6 +149,8 @@
 
 
 <div class="viewcode-block" id="Scheduler.observe_passes"><a class="viewcode-back" href="../../../_autodoc/sorts/scheduler/sorts.scheduler.scheduler.Scheduler.observe_passes.html#sorts.scheduler.observed_parameters.Scheduler.observe_passes">[docs]</a>    <span class="k">def</span> <span class="nf">observe_passes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">passes</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;#TODO: Docstring</span>
+<span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">txi</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">passes</span><span class="p">)):</span>
             <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
@@ -172,7 +180,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

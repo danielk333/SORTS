@@ -16,9 +16,12 @@ LinearizedCodedIonospheric
    
       ~LinearizedCodedIonospheric.__init__
       ~LinearizedCodedIonospheric.doppler
+      ~LinearizedCodedIonospheric.doppler_std
       ~LinearizedCodedIonospheric.get
       ~LinearizedCodedIonospheric.range
       ~LinearizedCodedIonospheric.range_rate
+      ~LinearizedCodedIonospheric.range_rate_std
+      ~LinearizedCodedIonospheric.range_std
       ~LinearizedCodedIonospheric.set_numpy_seed
    
    

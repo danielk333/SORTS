@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>sorts.correlator &#8212; SORTS 3.18.0 documentation</title>
+    <title>sorts.correlator &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>
@@ -129,34 +129,37 @@
         <span class="n">population</span><span class="p">,</span> 
         <span class="n">metric</span><span class="o">=</span><span class="n">residual_distribution_metric</span><span class="p">,</span> 
         <span class="n">metric_reduce</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">:</span> <span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">,</span>
-        <span class="n">n_closest</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> 
+        <span class="n">forward_model</span><span class="o">=</span><span class="n">generate_measurements</span><span class="p">,</span>
+        <span class="n">variables</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">,</span><span class="s1">&#39;v&#39;</span><span class="p">],</span>
+        <span class="n">n_closest</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
         <span class="n">profiler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
         <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
         <span class="n">MPI</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
-        <span class="n">propagator_lighttime_correction</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Given a mono-static measurement of ranges and rage-rates, a radar model and a population: correlate measurements with population.</span>
 
-<span class="sd">    :param list data: List of dictionaries that contains measurement data. Contents are described below.</span>
-<span class="sd">    :param station station: Model of receiver station that performed the measurement.</span>
+<span class="sd">    :param list measurements: List of dictionaries that contains measurement data. Contents are described below.</span>
 <span class="sd">    :param Population population: Population to correlate against.</span>
 <span class="sd">    :param function metric: Metric used to correlate measurement and simulated object measurement.</span>
-<span class="sd">    :param Profiler profiler: </span>
-<span class="sd">    :param logging.Logger logger: </span>
+<span class="sd">    :param function metric_reduce: Metric used to correlate measurement and simulated object measurement.</span>
+<span class="sd">    :param function forward_model: A pointer to a function that takes in the ecef-state, the rx and tx station ecefs and calculates the observed variables return as a tuple.</span>
+<span class="sd">    :param list variables: The data variables recorded by the system.</span>
+<span class="sd">    :param int n_closest: Number of closest matches to save.</span>
+<span class="sd">    :param Profiler profiler: Profiler instance for checking function performance.</span>
+<span class="sd">    :param logging.Logger logger: Logger instance for logging the execution of the function.</span>
 <span class="sd">    :param bool MPI: If True use internal parallelization with MPI to calculate correlation. Turn to False to externally parallelize with MPI.</span>
 <span class="sd">    </span>
 <span class="sd">    **Measurement data:**</span>
 
 <span class="sd">      Each entry in the input :code:`measurements` list must be a dictionary that contains the following fields:</span>
 <span class="sd">        * &#39;t&#39;: [numpy.ndarray] Times relative epoch in seconds</span>
-<span class="sd">        * &#39;r&#39;: [numpy.ndarray] Two-way ranges in meters</span>
-<span class="sd">        * &#39;v&#39;: [numpy.ndarray] Two-way range-rates in meters per second</span>
 <span class="sd">        * &#39;epoch&#39;: [astropy.Time] epoch for measurements</span>
 <span class="sd">        * &#39;tx&#39;: [sorts.TX] Pointer to the TX station</span>
 <span class="sd">        * &#39;rx&#39;: [sorts.RX] Pointer to the RX station</span>
 
-<span class="sd">    Optionally, if `propagator_lighttime_correction` should be applied, one can supply which index in the list is the TX-TX pair,</span>
-<span class="sd">    assuming that the time `t` given is the transmission time.</span>
+<span class="sd">      Then it will contain a entry for each name in the `variables` list. By default this is</span>
+<span class="sd">        * &#39;r&#39;: [numpy.ndarray] Two-way ranges in meters</span>
+<span class="sd">        * &#39;v&#39;: [numpy.ndarray] Two-way range-rates in meters per second</span>
 
 <span class="sd">    &#39;&#39;&#39;</span>
     
@@ -191,22 +194,13 @@
         <span class="n">correlation_data</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">di</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">measurements</span><span class="p">):</span>
-            <span class="n">r</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span>
             <span class="n">t</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span>
-            <span class="n">v</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;v&#39;</span><span class="p">]</span>
+            <span class="n">t_sort</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">t_sort</span><span class="p">]</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">t_sort</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">)</span>
             <span class="n">tx</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;tx&#39;</span><span class="p">]</span>
             <span class="n">rx</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;rx&#39;</span><span class="p">]</span>
             <span class="n">epoch</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;epoch&#39;</span><span class="p">]</span>
-
-            <span class="n">t_sort</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
-            <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">t_sort</span><span class="p">]</span>
-            <span class="n">r</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">t_sort</span><span class="p">]</span>
-            <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">t_sort</span><span class="p">]</span>
-
-            <span class="k">if</span> <span class="n">propagator_lighttime_correction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">tx_r</span> <span class="o">=</span> <span class="n">measurements</span><span class="p">[</span><span class="n">propagator_lighttime_correction</span><span class="p">][</span><span class="s1">&#39;r&#39;</span><span class="p">]</span><span class="o">*</span><span class="mf">0.5</span>
-                <span class="n">lt_correction</span> <span class="o">=</span> <span class="n">tx_r</span><span class="o">/</span><span class="n">constants</span><span class="o">.</span><span class="n">c</span>
-                <span class="n">t</span> <span class="o">+=</span> <span class="n">lt_correction</span>
 
             <span class="n">tx_ecef</span> <span class="o">=</span> <span class="n">tx</span><span class="o">.</span><span class="n">ecef</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="n">tx_ecef_norm</span> <span class="o">=</span> <span class="n">tx_ecef</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">tx_ecef</span><span class="p">)</span>
@@ -217,20 +211,17 @@
 
             <span class="n">states</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">t_prop</span><span class="p">)</span>
 
-            <span class="n">r_ref</span><span class="p">,</span> <span class="n">v_ref</span> <span class="o">=</span> <span class="n">generate_measurements</span><span class="p">(</span><span class="n">states</span><span class="p">,</span> <span class="n">rx_ecef</span><span class="p">,</span> <span class="n">tx_ecef</span><span class="p">)</span>
+            <span class="n">ref_var</span> <span class="o">=</span> <span class="n">forward_model</span><span class="p">(</span><span class="n">states</span><span class="p">,</span> <span class="n">rx_ecef</span><span class="p">,</span> <span class="n">tx_ecef</span><span class="p">)</span>
 
-            <span class="n">match</span> <span class="o">=</span> <span class="n">metric</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">r_ref</span><span class="p">,</span> <span class="n">v_ref</span><span class="p">)</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">metric</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="n">var</span> <span class="o">+</span> <span class="n">ref_var</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="n">di</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">match_pop</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">match</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">match_pop</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric_reduce</span><span class="p">(</span><span class="n">match_pop</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">match</span><span class="p">)</span>
 
-            <span class="n">cdat</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s1">&#39;r_ref&#39;</span><span class="p">:</span> <span class="n">r_ref</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
-                <span class="s1">&#39;v_ref&#39;</span><span class="p">:</span> <span class="n">v_ref</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
-                <span class="s1">&#39;match&#39;</span><span class="p">:</span> <span class="n">match</span><span class="p">,</span>
-            <span class="p">}</span>
+            <span class="n">cdat</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1">_ref&#39;</span><span class="p">:</span> <span class="n">ref_var</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">variables</span><span class="p">)}</span>
+            <span class="n">cdat</span><span class="p">[</span><span class="s1">&#39;match&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">match</span>
 
             <span class="n">correlation_data</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cdat</span><span class="p">)</span>
 
@@ -271,6 +262,9 @@
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">best_matches</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">n_closest</span><span class="p">:</span>
         <span class="n">best_matches</span> <span class="o">=</span> <span class="n">best_matches</span><span class="p">[:</span><span class="n">n_closest</span><span class="p">]</span>
 
+    <span class="k">for</span> <span class="n">pbar</span> <span class="ow">in</span> <span class="n">pbars</span><span class="p">:</span>
+        <span class="n">pbar</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
     <span class="n">best_cdata</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">best_matches</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">cind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">best_cdata</span><span class="p">)):</span>
@@ -299,7 +293,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

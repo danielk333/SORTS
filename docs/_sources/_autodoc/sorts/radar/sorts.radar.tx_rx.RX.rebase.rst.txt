@@ -1,0 +1,8 @@
+RX.rebase
+=========
+
+.. currentmodule:: sorts.radar.tx_rx
+
+.. rubric:: RX.rebase
+
+.. automethod:: RX.rebase

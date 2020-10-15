@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Pass &#8212; SORTS 3.18.0 documentation</title>
+    <title>Pass &#8212; SORTS 4.0.0-rc.1 documentation</title>
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/gallery.css" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sorts.passes.html" title="passes"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.passes.html" accesskey="U">passes</a> &#187;</li> 
       </ul>
@@ -98,41 +98,41 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.passes.Pass.__init__.html#sorts.passes.Pass.__init__" title="sorts.passes.Pass.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(t, enu[, inds, cache, station_id])</p></td>
 <td><p>Initialize self.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.passes.Pass.calculate_max_snr.html#sorts.passes.Pass.calculate_max_snr" title="sorts.passes.Pass.calculate_max_snr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_max_snr</span></code></a>(tx, rx, diameter)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.passes.Pass.calculate_range.html#sorts.passes.Pass.calculate_range" title="sorts.passes.Pass.calculate_range"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_range</span></code></a>(enu)</p></td>
+<td><p>Norm of the ENU coordinates.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="sorts.passes.Pass.calculate_range.html#sorts.passes.Pass.calculate_range" title="sorts.passes.Pass.calculate_range"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_range</span></code></a>(enu)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sorts.passes.Pass.calculate_range_rate.html#sorts.passes.Pass.calculate_range_rate" title="sorts.passes.Pass.calculate_range_rate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_range_rate</span></code></a>(enu)</p></td>
+<td><p>Projected ENU velocity along the ENU range.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="sorts.passes.Pass.calculate_range_rate.html#sorts.passes.Pass.calculate_range_rate" title="sorts.passes.Pass.calculate_range_rate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_range_rate</span></code></a>(enu)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="sorts.passes.Pass.calculate_snr.html#sorts.passes.Pass.calculate_snr" title="sorts.passes.Pass.calculate_snr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_snr</span></code></a>(tx, rx, diameter)</p></td>
+<td><p>Uses the <code class="code docutils literal notranslate"><span class="pre">signals.hard_target_snr</span></code> function to calculate the optimal SNR curve of a target during the pass <strong>if the TX and RX stations are pointing at the object</strong>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.passes.Pass.calculate_zenith_angle.html#sorts.passes.Pass.calculate_zenith_angle" title="sorts.passes.Pass.calculate_zenith_angle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_zenith_angle</span></code></a>(enu[, radians])</p></td>
-<td><p></p></td>
+<td><p>Zenith angle of the ENU coordinates.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.passes.Pass.end.html#sorts.passes.Pass.end" title="sorts.passes.Pass.end"><code class="xref py py-obj docutils literal notranslate"><span class="pre">end</span></code></a>()</p></td>
-<td><p></p></td>
+<td><p>The ending time of the pass (uses cached value after first call if <code class="code docutils literal notranslate"><span class="pre">self.cache=True</span></code>).</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.passes.Pass.get_range.html#sorts.passes.Pass.get_range" title="sorts.passes.Pass.get_range"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_range</span></code></a>()</p></td>
-<td><p></p></td>
+<td><p>Get ranges from all stations involved in the pass.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.passes.Pass.get_range_rate.html#sorts.passes.Pass.get_range_rate" title="sorts.passes.Pass.get_range_rate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_range_rate</span></code></a>()</p></td>
-<td><p></p></td>
+<td><p>Get range rates from all stations involved in the pass.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.passes.Pass.get_zenith_angle.html#sorts.passes.Pass.get_zenith_angle" title="sorts.passes.Pass.get_zenith_angle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_zenith_angle</span></code></a>([radians])</p></td>
-<td><p></p></td>
+<td><p>Get zenith angles for all stations involved in the pass.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.passes.Pass.range.html#sorts.passes.Pass.range" title="sorts.passes.Pass.range"><code class="xref py py-obj docutils literal notranslate"><span class="pre">range</span></code></a>()</p></td>
-<td><p></p></td>
+<td><p>Get ranges from all stations involved in the pass (uses cached value after first call if <code class="code docutils literal notranslate"><span class="pre">self.cache=True</span></code>).</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.passes.Pass.range_rate.html#sorts.passes.Pass.range_rate" title="sorts.passes.Pass.range_rate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">range_rate</span></code></a>()</p></td>
-<td><p></p></td>
+<td><p>Get range rates from all stations involved in the pass (uses cached value after first call if <code class="code docutils literal notranslate"><span class="pre">self.cache=True</span></code>).</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.passes.Pass.start.html#sorts.passes.Pass.start" title="sorts.passes.Pass.start"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start</span></code></a>()</p></td>
-<td><p></p></td>
+<td><p>The Start time of the pass (uses cached value after first call if <code class="code docutils literal notranslate"><span class="pre">self.cache=True</span></code>).</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.passes.Pass.zenith_angle.html#sorts.passes.Pass.zenith_angle" title="sorts.passes.Pass.zenith_angle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zenith_angle</span></code></a>([radians])</p></td>
-<td><p></p></td>
+<td><p>Get zenith angles from all stations involved in the pass (uses cached value after first call if <code class="code docutils literal notranslate"><span class="pre">self.cache=True</span></code>).</p></td>
 </tr>
 </tbody>
 </table>
@@ -144,7 +144,7 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.passes.Pass.stations.html#sorts.passes.Pass.stations" title="sorts.passes.Pass.stations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stations</span></code></a></p></td>
-<td><p></p></td>
+<td><p>The number of stations that can observe the pass.</p></td>
 </tr>
 </tbody>
 </table>
@@ -173,7 +173,7 @@
         <li class="right" >
           <a href="sorts.passes.html" title="passes"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 3.18.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">SORTS 4.0.0-rc.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../api.html" >API Reference</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="sorts.passes.html" >passes</a> &#187;</li> 
       </ul>
