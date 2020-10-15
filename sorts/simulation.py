@@ -519,6 +519,11 @@ def cached_step(caches):
 
 class Simulation:
     '''Convenience simulation handler, creates a step-by-step simulation sequence and creates file system structure for saving of data to disk.
+
+    :param Scheduler scheduler: A scheduler instance to run. This input is used to assure that the same logger and profiler is used for the Simulation and the Scheduler.
+    :param string/pathlib.Path root: The path to the root folder where all files will be stored.
+    :param bool logger: If :code:`False`, do not instantiate a logger.
+    :param bool profiler: If :code:`False`, do not instantiate a profiler.
     '''
     def __init__(self, scheduler, root, logger=True, profiler=True, **kwargs):
         self.steps = OrderedDict()
@@ -612,22 +617,30 @@ class Simulation:
 
 
     def make_paths(self):
+        '''Make all the folder for the current branch according to :code:`self.paths`.
+        '''
         for path in self.paths:
             mpi_mkdir(self.get_path(path))
 
 
     @property
     def paths(self):
+        '''List of the name of all folders
+        '''
         return [key for key in self.steps] + ['logs']
 
 
     @property
     def log_path(self):
+        '''Path to the current log-output folder
+        '''
         return self.root / self.branch_name / 'logs'
 
 
 
     def get_path(self, name=None):
+        '''Given a relative file path, get the absolute path including root and branch.
+        '''
         if name is None:
             return self.root / self.branch_name
         else:
@@ -645,7 +658,12 @@ class Simulation:
 
 
     def branch(self, name, empty=False, linkfiles=None):
-        '''Create branch.
+        '''Create branch by creating a copy of the current branch state and checkout that branch. If the branch exists, just checkout that branch.
+
+        :param string name: Name of the new branch
+        :param bool empty: If :code:`True` do not copy the state of the current branch.
+        :param list/bool linkfiles: If a list of paths that should be soft-linked rather then copied. If :code:`True`, soft-link all files.
+        :return: None
         '''
         if (self.root / name).is_dir():
             if self.logger is not None:
