@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 
+'''
+Starting example
+=========================
+
+'''
+
 import numpy as np
 import pyorb
 
