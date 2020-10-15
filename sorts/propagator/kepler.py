@@ -73,7 +73,9 @@ class Kepler(Propagator):
         t, epoch = self.convert_time(t, epoch)
         times = epoch + t
         tv = t.sec
-
+        if not isinstance(tv, np.ndarray):
+            tv = np.array([tv])
+        
         if self.profiler is not None:
             self.profiler.start('Kepler:propagate:in_frame')
         if isinstance(state0, pyorb.Orbit):

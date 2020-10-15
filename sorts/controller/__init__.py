@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''
+'''Defines a radar controller
 
 '''
 

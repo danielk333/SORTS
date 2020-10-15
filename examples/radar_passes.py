@@ -37,6 +37,10 @@ states = prop.propagate(t, orb.cartesian[:,0], orb.epoch, A=1.0, C_R = 1.0, C_D 
 
 passes = eiscat3d.find_passes(t, states)
 
+for ps in passes[0][0]: #tx-0 and rx-0
+    print(ps)
+
+
 fig = plt.figure(figsize=(15,15))
 ax = fig.add_subplot(111, projection='3d')
 ax.plot(states[0,:], states[1,:], states[2,:])
@@ -55,10 +59,22 @@ axes = [
 
 for pi, ps in enumerate(passes[0][0]):
     zang = ps.zenith_angle()
+    snr = ps.calculate_snr(eiscat3d.tx[0], eiscat3d.rx[0], diameter=0.05)
+
     axes[0][0].plot(ps.enu[0][0,:], ps.enu[0][1,:], ps.enu[0][2,:], '-', label=f'pass-{pi}')
+    axes[0][0].set_xlabel('East-North-Up coordinates')
+
     axes[0][1].plot((ps.t - ps.start())/3600.0, zang[0], '-', label=f'pass-{pi}')
-    axes[1][0].plot((ps.t - ps.start())/3600.0, ps.range()[0], '-', label=f'pass-{pi}')
-    axes[1][1].plot((ps.t - ps.start())/3600.0, zang[1], '-', label=f'pass-{pi}')
+    axes[0][1].set_xlabel('Time past epoch [h]')
+    axes[0][1].set_ylabel('Zenith angle from TX [deg]')
+
+    axes[1][0].plot((ps.t - ps.start())/3600.0, ps.range()[0]*1e-3, '-', label=f'pass-{pi}')
+    axes[1][0].set_xlabel('Time past epoch [h]')
+    axes[1][0].set_ylabel('Range from TX [km]')
+
+    axes[1][1].plot((ps.t - ps.start())/3600.0, 10*np.log10(snr), '-', label=f'pass-{pi}')
+    axes[1][1].set_xlabel('Time past epoch [h]')
+    axes[1][1].set_ylabel('Optimal SNR [dB]')
 
 axes[1][1].legend()
 plt.show()

@@ -2,7 +2,7 @@
 
 '''Defines an antenna's or entire radar system's radiation pattern, also defines physical antennas for RX and TX.
 
-(c) 2016-2019 Juha Vierinen, Daniel Kastinen
+(c) 2016-2020 Juha Vierinen, Daniel Kastinen
 '''
 
 #Python standard import

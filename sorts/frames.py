@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''Coordinate frame transformations and related functions
+'''Coordinate frame transformations and related functions. Main usage is the :code:`convert` function that wraps Astropy frame transformations.
 
 '''
 
@@ -31,7 +31,17 @@ def arctime_to_degrees(minutes, seconds):
 
 
 def convert(t, states, in_frame, out_frame, logger=None, profiler=None, **kwargs):
-    '''Perform predefined coordinate transformations. Always returns a copy of the array.
+    '''Perform predefined coordinate transformations using Astropy. Always returns a copy of the array.
+
+    :param numpy.ndarray/float t: Absolute time corresponding to the input states.
+    :param numpy.ndarray states: Size `(6,n)` matrix of states in SI units where rows 1-3 are position and 4-6 are velocity.
+    :param str in_frame: Name of the frame the input states are currently in.
+    :param str out_frame: Name of the state to transform to.
+    :param Profiler profiler: Profiler instance for checking function performance.
+    :param logging.Logger logger: Logger instance for logging the execution of the function.
+    :rtype: numpy.ndarray
+    :return: Size `(6,n)` matrix of states in SI units where rows 1-3 are position and 4-6 are velocity.
+
     '''
 
     if logger is not None:
@@ -107,6 +117,14 @@ def geodetic_to_ITRS(lat, lon, alt, radians=False, ellipsoid=None):
 
 def ITRS_to_geodetic(x, y, z, radians=False, ellipsoid=None):
     '''Use `astropy.coordinates.EarthLocation` to transform from geodetic to ITRS.
+
+    :param float x: X-coordinate in ITRS
+    :param float y: Y-coordinate in ITRS
+    :param float z: Z-coordinate in ITRS
+    :param bool radians: If :code:`True` then all values are given in radians instead of degrees.
+    :param str/None ellipsoid: Name of the ellipsoid model used for geodetic coordinates, for default value see Astropy `EarthLocation`.
+    :rtype: numpy.ndarray
+    :return: (3,) array of longitude, latitude and height above ellipsoid
     '''
 
     cord = EarthLocation.from_geocentric(
@@ -139,7 +157,13 @@ def _convert_to_astropy(states, frame, **kw):
 def enu_to_ecef(lat, lon, alt, enu, radians=False):
     '''ENU (east/north/up) to ECEF coordinate system conversion, not including translation. 
 
-    TODO: Docstring
+    :param float lat: Latitude on the ellipsoid
+    :param float lon: Longitude on the ellipsoid
+    :param float alt: Altitude above ellipsoid, **Unused in this implementation**.
+    :param numpy.ndarray enu: (3,n) input matrix of positions in the ENU-convention.
+    :param bool radians: If :code:`True` then all values are given in radians instead of degrees.
+    :rtype: numpy.ndarray
+    :return: (3,n) array x,y and z coordinates in ECEF.
     '''
     if not radians:
         lat, lon = np.radians(lat), np.radians(lon)
@@ -155,7 +179,13 @@ def enu_to_ecef(lat, lon, alt, enu, radians=False):
 def ned_to_ecef(lat, lon, alt, ned, radians=False):
     '''NED (north/east/down) to ECEF coordinate system conversion, not including translation.
 
-    TODO: Docstring
+    :param float lat: Latitude on the ellipsoid
+    :param float lon: Longitude on the ellipsoid
+    :param float alt: Altitude above ellipsoid, **Unused in this implementation**.
+    :param numpy.ndarray ned: (3,n) input matrix of positions in the NED-convention.
+    :param bool radians: If :code:`True` then all values are given in radians instead of degrees.
+    :rtype: numpy.ndarray
+    :return: (3,n) array x,y and z coordinates in ECEF.
     '''
     enu = np.empty(ned.size, dtype=ned.dtype)
     enu[0,...] = ned[1,...]
@@ -167,7 +197,13 @@ def ned_to_ecef(lat, lon, alt, ned, radians=False):
 def ecef_to_enu(lat, lon, alt, ecef, radians=False):
     '''ECEF coordinate system to local ENU (east,north,up), not including translation.
 
-    TODO: Docstring
+    :param float lat: Latitude on the ellipsoid
+    :param float lon: Longitude on the ellipsoid
+    :param float alt: Altitude above ellipsoid, **Unused in this implementation**.
+    :param numpy.ndarray ecef: (3,n) array x,y and z coordinates in ECEF.
+    :param bool radians: If :code:`True` then all values are given in radians instead of degrees.
+    :rtype: numpy.ndarray
+    :return: (3,n) array x,y and z in local coordinates in the ENU-convention.
     '''
     if not radians:
         lat, lon = np.radians(lat), np.radians(lon)

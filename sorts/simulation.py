@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''Main simulation handler in the form of a class using the capabilities of the entire toolbox.
+'''Contains all helper functions to automate parallelization with MPI, handle caching and stepping of simulations.
 
 '''
 
@@ -53,13 +53,15 @@ def mpi_mkdir(path):
 
 @mpi_wrap_master_thread
 def mpi_rmdir(path):
-    '''Remove directory on thread rank=0 with `shutil.rmtree`
+    '''Remove directory on thread rank=0 with :code:`shutil.rmtree`
     '''
     shutil.rmtree(path)
 
 
 @mpi_wrap_master_thread
 def mpi_copy(src, dst, linkfiles=False):
+    '''Copy path on thread rank=0 with :code:`shutil.copytree` or :code:`copy2` for files. If :code:`linkfiles` is true, files are soft-linked rather then copied.
+    '''
     if src.is_dir():
         if linkfiles:
             shutil.copytree(src, dst, copy_function=os.link)
@@ -93,7 +95,9 @@ def log_exceptions(func):
 
 
 def MPI_single_process(process_id):
-    '''Simulation step single process method restriction decorator
+    '''Simulation step single process method restriction decorator.
+
+    :param int process_id: The process id the wrapped function should only execute on. All other processes return :code:`None`.
 
     '''
     def step_wrapping(func):
@@ -116,9 +120,11 @@ def MPI_single_process(process_id):
 
 
 def MPI_action(action, iterable = False, root = 0):
-    '''Simulation step MPI post step action decorator
+    '''Simulation step MPI post step action decorator.
 
     :param str action: Mode of operations on node-data communication, available options are "gather", "gather-clear", "bcast" and "barrier".
+    :param bool iterable: Indicates if the "gather", "gather-clear" or "bcast" should consider an iterable (that has been parallelized with MPI).
+    :param int root: The target MPI process for the "gather", "gather-clear" and for the source process for "bcast" if :code:`iterable=False`.
     '''
 
     def step_wrapping(func):
@@ -188,9 +194,12 @@ def MPI_action(action, iterable = False, root = 0):
 
 
 def iterable_step(iterable, MPI=False, log=False, reduce=None):
-    '''Simulation step iteration decorator
+    '''Simulation step iteration decorator.
 
- 
+    :param str/list iterable: The name/list of names of the instance properties (fetched using :code:`getattr`) to iterate over. Can be multiple levels, e.g. :code:`object.subobject.a_list`.
+    :param bool MPI: Determines if the iteration should be MPI-parallelized
+    :param bool log: Use the :code:`self.logger` instance, if it exists, to log the execution of the iteration.
+    :param function reduce: A pointer to the binary-function used to reduce the results.
     '''
     reduce_ = reduce;
 
@@ -280,7 +289,8 @@ def iterable_step(iterable, MPI=False, log=False, reduce=None):
 def store_step(store, iterable=False):
     '''Simulation step storing decorator
 
- 
+    :param str/list store: The name/list names of the properties to save the method return as (set using :code:`setattr`). Can be multiple levels, e.g. :code:`object.subobject.a_property`. The order of the names correspond to the order of method returned variables.
+    :param bool iterable: Determines if the return of the method is an iteration or not. If its an iteration, it splits the return values into different lists based on the number of variables.
     '''
     if isinstance(store, str):
         store = [store]
@@ -328,9 +338,13 @@ def store_step(store, iterable=False):
 
 
 def iterable_cache(steps, caches, MPI=False, log=False, reduce=None):
-    '''Simulation step iteration decorator
+    '''Simulation step cache iteration decorator
 
- 
+    :param str/list steps: The name/list of names of the cached steps to be iterated over. It uses the step name to find the files in the corresponding folder.
+    :param str/list caches: The name/list of cache-methods to be used to load the caches of the steps.
+    :param bool MPI: Determines if the iteration should be MPI-parallelized.
+    :param bool log: Use the :code:`self.logger` instance, if it exists, to log the execution of the iteration.
+    :param function reduce: A pointer to the binary-function used to reduce the results.
     '''
     reduce_ = reduce;
 
@@ -444,7 +458,7 @@ def cached_step(caches):
     '''Simulation step caching decorator
 
  
-    :param str caches: Is a list of strings for the caches to be used, available by default is "h5" and "pickle". Custom caches are implemented by implementing methods with the string name but prefixed with `load_` and `save_`.
+    :param str caches: Is a list of strings for the caches to be used, available by default is "h5" and "pickle". Custom caches are implemented by implementing methods with the string name but prefixed with :code:`load_` and :code:`save_`.
 
     '''
     if isinstance(caches, str):
@@ -505,6 +519,11 @@ def cached_step(caches):
 
 class Simulation:
     '''Convenience simulation handler, creates a step-by-step simulation sequence and creates file system structure for saving of data to disk.
+
+    :param Scheduler scheduler: A scheduler instance to run. This input is used to assure that the same logger and profiler is used for the Simulation and the Scheduler.
+    :param str/pathlib.Path root: The path to the root folder where all files will be stored.
+    :param bool logger: If :code:`False`, do not instantiate a logger.
+    :param bool profiler: If :code:`False`, do not instantiate a profiler.
     '''
     def __init__(self, scheduler, root, logger=True, profiler=True, **kwargs):
         self.steps = OrderedDict()
@@ -598,22 +617,30 @@ class Simulation:
 
 
     def make_paths(self):
+        '''Make all the folder for the current branch according to :code:`self.paths`.
+        '''
         for path in self.paths:
             mpi_mkdir(self.get_path(path))
 
 
     @property
     def paths(self):
+        '''List of the name of all folders
+        '''
         return [key for key in self.steps] + ['logs']
 
 
     @property
     def log_path(self):
+        '''Path to the current log-output folder
+        '''
         return self.root / self.branch_name / 'logs'
 
 
 
     def get_path(self, name=None):
+        '''Given a relative file path, get the absolute path including root and branch.
+        '''
         if name is None:
             return self.root / self.branch_name
         else:
@@ -631,7 +658,12 @@ class Simulation:
 
 
     def branch(self, name, empty=False, linkfiles=None):
-        '''Create branch.
+        '''Create branch by creating a copy of the current branch state and checkout that branch. If the branch exists, just checkout that branch.
+
+        :param str name: Name of the new branch
+        :param bool empty: If :code:`True` do not copy the state of the current branch.
+        :param list/bool linkfiles: If a list of paths that should be soft-linked rather then copied. If :code:`True`, soft-link all files.
+        :return: None
         '''
         if (self.root / name).is_dir():
             if self.logger is not None:
@@ -672,6 +704,7 @@ class Simulation:
 
     @log_exceptions
     def run(self, step = None, *args, **kwargs):
+        '''Run specific step with the supplied arguments or run all steps'''
 
         self.make_paths()
 

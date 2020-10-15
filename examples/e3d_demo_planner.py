@@ -171,10 +171,10 @@ profiler = sorts.profiling.Profiler()
 logger = sorts.profiling.get_logger()
 
 try:
-    pth = pathlib.Path(__file__).parent / 'data' / 'space_track_tle.txt'
+    pth = pathlib.Path(__file__).parent / 'data' / 'tle.txt'
 except NameError:
     import os
-    pth = 'data' + os.path.sep + 'space_track_tle.txt'
+    pth = 'data' + os.path.sep + 'tle.txt'
 
 pop = tle_catalog(pth, kepler=True)
 
