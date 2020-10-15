@@ -196,7 +196,7 @@ def MPI_action(action, iterable = False, root = 0):
 def iterable_step(iterable, MPI=False, log=False, reduce=None):
     '''Simulation step iteration decorator.
 
-    :param string/list iterable: The name/list of names of the instance properties (fetched using :code:`getattr`) to iterate over. Can be multiple levels, e.g. :code:`object.subobject.a_list`.
+    :param str/list iterable: The name/list of names of the instance properties (fetched using :code:`getattr`) to iterate over. Can be multiple levels, e.g. :code:`object.subobject.a_list`.
     :param bool MPI: Determines if the iteration should be MPI-parallelized
     :param bool log: Use the :code:`self.logger` instance, if it exists, to log the execution of the iteration.
     :param function reduce: A pointer to the binary-function used to reduce the results.
@@ -289,7 +289,7 @@ def iterable_step(iterable, MPI=False, log=False, reduce=None):
 def store_step(store, iterable=False):
     '''Simulation step storing decorator
 
-    :param string/list store: The name/list names of the properties to save the method return as (set using :code:`setattr`). Can be multiple levels, e.g. :code:`object.subobject.a_property`. The order of the names correspond to the order of method returned variables.
+    :param str/list store: The name/list names of the properties to save the method return as (set using :code:`setattr`). Can be multiple levels, e.g. :code:`object.subobject.a_property`. The order of the names correspond to the order of method returned variables.
     :param bool iterable: Determines if the return of the method is an iteration or not. If its an iteration, it splits the return values into different lists based on the number of variables.
     '''
     if isinstance(store, str):
@@ -340,8 +340,8 @@ def store_step(store, iterable=False):
 def iterable_cache(steps, caches, MPI=False, log=False, reduce=None):
     '''Simulation step cache iteration decorator
 
-    :param string/list steps: The name/list of names of the cached steps to be iterated over. It uses the step name to find the files in the corresponding folder.
-    :param string/list caches: The name/list of cache-methods to be used to load the caches of the steps.
+    :param str/list steps: The name/list of names of the cached steps to be iterated over. It uses the step name to find the files in the corresponding folder.
+    :param str/list caches: The name/list of cache-methods to be used to load the caches of the steps.
     :param bool MPI: Determines if the iteration should be MPI-parallelized.
     :param bool log: Use the :code:`self.logger` instance, if it exists, to log the execution of the iteration.
     :param function reduce: A pointer to the binary-function used to reduce the results.
@@ -521,7 +521,7 @@ class Simulation:
     '''Convenience simulation handler, creates a step-by-step simulation sequence and creates file system structure for saving of data to disk.
 
     :param Scheduler scheduler: A scheduler instance to run. This input is used to assure that the same logger and profiler is used for the Simulation and the Scheduler.
-    :param string/pathlib.Path root: The path to the root folder where all files will be stored.
+    :param str/pathlib.Path root: The path to the root folder where all files will be stored.
     :param bool logger: If :code:`False`, do not instantiate a logger.
     :param bool profiler: If :code:`False`, do not instantiate a profiler.
     '''
@@ -660,7 +660,7 @@ class Simulation:
     def branch(self, name, empty=False, linkfiles=None):
         '''Create branch by creating a copy of the current branch state and checkout that branch. If the branch exists, just checkout that branch.
 
-        :param string name: Name of the new branch
+        :param str name: Name of the new branch
         :param bool empty: If :code:`True` do not copy the state of the current branch.
         :param list/bool linkfiles: If a list of paths that should be soft-linked rather then copied. If :code:`True`, soft-link all files.
         :return: None

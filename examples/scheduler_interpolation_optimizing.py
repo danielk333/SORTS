@@ -52,6 +52,7 @@ objs = [
         epoch = 53005.0,
         parameters = dict(
             d = 0.1,
+            A = 1.0,
         ),
     ),
 ]

@@ -35,8 +35,8 @@ def convert(t, states, in_frame, out_frame, logger=None, profiler=None, **kwargs
 
     :param numpy.ndarray/float t: Absolute time corresponding to the input states.
     :param numpy.ndarray states: Size `(6,n)` matrix of states in SI units where rows 1-3 are position and 4-6 are velocity.
-    :param string in_frame: Name of the frame the input states are currently in.
-    :param string out_frame: Name of the state to transform to.
+    :param str in_frame: Name of the frame the input states are currently in.
+    :param str out_frame: Name of the state to transform to.
     :param Profiler profiler: Profiler instance for checking function performance.
     :param logging.Logger logger: Logger instance for logging the execution of the function.
     :rtype: numpy.ndarray
@@ -122,7 +122,7 @@ def ITRS_to_geodetic(x, y, z, radians=False, ellipsoid=None):
     :param float y: Y-coordinate in ITRS
     :param float z: Z-coordinate in ITRS
     :param bool radians: If :code:`True` then all values are given in radians instead of degrees.
-    :param string/None ellipsoid: Name of the ellipsoid model used for geodetic coordinates, for default value see Astropy `EarthLocation`.
+    :param str/None ellipsoid: Name of the ellipsoid model used for geodetic coordinates, for default value see Astropy `EarthLocation`.
     :rtype: numpy.ndarray
     :return: (3,) array of longitude, latitude and height above ellipsoid
     '''
