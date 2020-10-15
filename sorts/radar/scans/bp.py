@@ -9,7 +9,7 @@ import numpy as np
 from .scan import Scan
 
 class Beampark(Scan):
-    '''General fence scan.
+    '''Static beampark.
     '''
     def __init__(self, azimuth = 0.0, elevation=90.0, dwell = 0.1):
         super().__init__(coordinates='azelr')

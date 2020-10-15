@@ -58,6 +58,8 @@ class Scheduler(ABC):
 
 
     def schedule(self, **kwargs):
+        '''#TODO: Docstring
+        '''
         ctrls = self.get_controllers()
         times = np.concatenate([c.t for c in ctrls], axis=0)
         sched = Scheduler.chain_generators([c.run() for c in ctrls])
@@ -65,6 +67,8 @@ class Scheduler(ABC):
 
 
     def __call__(self, start, stop):
+        '''#TODO: Docstring
+        '''
         ctrls = self.get_controllers()
 
         check_t = lambda c: np.logical_and(c.t >= start, c.t <= stop)
@@ -83,6 +87,8 @@ class Scheduler(ABC):
 
 
     def observe_passes(self, passes, **kwargs):
+        '''#TODO: Docstring
+        '''
         data = []
         for txi in range(len(passes)):
             data.append([])

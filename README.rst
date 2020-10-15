@@ -180,50 +180,51 @@ Finding passes over radar system
 
 .. code-block:: python
 
-  #!/usr/bin/env python
+    #!/usr/bin/env python
 
-  import numpy as np
-  import pyorb
+    import numpy as np
+    import pyorb
 
-  import sorts
-  from sorts.propagator import SGP4
+    import sorts
+    from sorts.propagator import SGP4
 
-  eiscat3d = sorts.radars.eiscat3d
+    eiscat3d = sorts.radars.eiscat3d
 
-  prop = SGP4(
+    prop = SGP4(
         settings = dict(
             out_frame='ITRS',
         ),
     )
 
-  orb = pyorb.Orbit(
-      M0 = pyorb.M_earth, 
-      direct_update=True, 
-      auto_update=True, 
-      degrees=True, 
-      a=7200e3, 
-      e=0.05, 
-      i=75, 
-      omega=0, 
-      Omega=79, 
-      anom=72, 
-      epoch=53005.0,
-  )
-  print(orb)
+    orb = pyorb.Orbit(
+        M0 = pyorb.M_earth, 
+        direct_update=True, 
+        auto_update=True, 
+        degrees=True, 
+        a=7200e3, 
+        e=0.05, 
+        i=75, 
+        omega=0, 
+        Omega=79, 
+        anom=72, 
+        epoch=53005.0,
+    )
+    print(orb)
 
-  t = sorts.equidistant_sampling(
-      orbit = orb, 
-      start_t = 0, 
-      end_t = 3600*24*1, 
-      max_dpos=1e3,
-  )
+    t = sorts.equidistant_sampling(
+        orbit = orb, 
+        start_t = 0, 
+        end_t = 3600*24*1, 
+        max_dpos=1e4,
+    )
 
-  states = prop.propagate(t, orb.cartesian[:,0], orb.epoch)
+    states = prop.propagate(t, orb.cartesian[:,0], orb.epoch)
 
-  passes = eiscat3d.find_passes(t, states)
+    passes = eiscat3d.find_passes(t, states)
 
-  print(passes)
-
+    for txi in range(len(eiscat3d.tx)):
+        for rxi in range(len(eiscat3d.rx)):
+            for ps in passes[txi][rxi]: print(ps)
 
 For developers
 ===============
@@ -248,7 +249,7 @@ To test
 To make doc
 -----------------
 
-**THIS MAKE TARGET NEEDS UPDATE** (currently manually handled with `make html` instead)
+To compile the github pages documentation run
 
 .. code-block:: bash
 
@@ -256,13 +257,17 @@ To make doc
    git cd docsrc
    make github
 
+Otherwise, one can compile the documentation directly on the current branch by running 
 
+.. code-block:: bash
+
+   git cd docsrc
+   make html
+
+which causes the output to go into the "build" folder.
 
 When used for publications
 ===========================
 
-@article{
-    autor="",
-    title=""
-}
+A paper and a DOI is underway and will soon be available, for now: please just tell us by email (daniel.kastinen@irf.se) or here on Github.
 

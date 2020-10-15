@@ -21,11 +21,11 @@ radar = sorts.radars.eiscat_uhf
 
 
 try:
-    tle_pth = pathlib.Path(__file__).parent / 'data' / 'uhf_correlation' / 'tle-201801.txt'
+    tle_pth = pathlib.Path(__file__).parent / 'data' / 'tle-201801.txt'
     obs_pth = pathlib.Path(__file__).parent / 'data' / 'uhf_correlation' / 'det-000000.h5'
 except NameError:
     import os
-    tle_pth = 'data' + os.path.sep + 'uhf_correlation' + os.path.sep + 'tle-201801.txt'
+    tle_pth = 'data' + os.path.sep + 'tle-201801.txt'
     obs_pth = 'data' + os.path.sep + 'uhf_correlation' + os.path.sep + 'det-000000.h5'
 
 
