@@ -534,8 +534,13 @@ class Orekit(Propagator):
         if self.settings['drag_force']:
             if 'C_D' not in kwargs:
                 raise Exception('Drag force enabled but no drag coefficient "C_D" given')
+            if 'A' not in kwargs:
+                raise Exception('Drag force enabled but no area "A" given')
         else:
-            kwargs['C_D'] = 1.0
+            if 'C_D' not in kwargs:
+                kwargs['C_D'] = 2.3
+            if 'A' not in kwargs:
+                kwargs['A'] = 1.0
 
         if 'm' not in kwargs:
             kwargs['m'] = 0.0
