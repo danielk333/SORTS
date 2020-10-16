@@ -14,12 +14,11 @@ import pyorb
 from astropy.time import Time, TimeDelta
 
 import sorts
-eiscat3d = sorts.radars.eiscat3d_demonstrator_interp
-
-
 from sorts.population import tle_catalog
 
-e3d_demo = sorts.radars.eiscat3d_demonstrator_interp
+eiscat3d = sorts.radars.eiscat3d_demonstrator_interp
+
+print(f'lat={eiscat3d.tx[0].lat:.2f} deg, lon={eiscat3d.tx[0].lon:.2f} deg')
 
 #############
 # CHOOSE OBJECTS
@@ -56,10 +55,15 @@ passes = eiscat3d.find_passes(t, states)
 
 for pi, ps in enumerate(passes[0][0]): #tx-0 and rx-0
     date_ = (epoch + TimeDelta(ps.start(), format='sec')).iso
+    date_end_ = (epoch + TimeDelta(ps.end(), format='sec')).iso
     zang = ps.zenith_angle()
-    print(f'Pass id={pi} (min-zang={np.min(zang):.1f} deg) -> ' + str(date_) + ' -> ' + str(ps))
+    print(f'Pass id={pi} (min-zang={np.min(zang):.1f} deg) -> ' + str(date_) + ' UTC -> ' + str(date_end_) + ' UTC')
 
-exit()
+
+select_passes = [22,29]
+
+ax = sorts.plotting.local_passes([passes[0][0][pi] for pi in select_passes])
+
 
 fig = plt.figure(figsize=(15,15))
 ax = fig.add_subplot(111, projection='3d')
@@ -78,6 +82,8 @@ axes = [
 ]
 
 for pi, ps in enumerate(passes[0][0]):
+    if pi not in select_passes:
+        continue
     zang = ps.zenith_angle()
     snr = ps.calculate_snr(eiscat3d.tx[0], eiscat3d.rx[0], diameter=obj.d)
 
@@ -85,16 +91,22 @@ for pi, ps in enumerate(passes[0][0]):
     axes[0][0].set_xlabel('East-North-Up coordinates')
 
     axes[0][1].plot((ps.t - ps.start())/60.0, zang[0], '-', label=f'pass-{pi}')
-    axes[0][1].set_xlabel('Time past epoch [min]')
+    axes[0][1].set_xlabel('Time past rise time [min]')
     axes[0][1].set_ylabel('Zenith angle from TX [deg]')
 
     axes[1][0].plot((ps.t - ps.start())/60.0, ps.range()[0]*1e-3, '-', label=f'pass-{pi}')
-    axes[1][0].set_xlabel('Time past epoch [min]')
+    axes[1][0].set_xlabel('Time past rise time [min]')
     axes[1][0].set_ylabel('Range from TX [km]')
+    
+    ax2 = axes[1][0].twinx()  # instantiate a second axes that shares the same x-axis
+
+    ax2.set_ylabel('Range rate from TX [km/s]')  # we already handled the x-label with ax1
+    ax2.plot((ps.t - ps.start())/60.0, ps.range_rate()[0]*1e-3, '-')
+    ax2.tick_params(axis='y')
 
     axes[1][1].plot((ps.t - ps.start())/60.0, 10*np.log10(snr), '-', label=f'pass-{pi}')
-    axes[1][1].set_xlabel('Time past epoch [min]')
-    axes[1][1].set_ylabel('Optimal SNR [dB]')
+    axes[1][1].set_xlabel('Time past rise time [min]')
+    axes[1][1].set_ylabel('Optimal SNR/0.1s [dB]')
 
 axes[1][1].legend()
 plt.show()
