@@ -247,3 +247,40 @@ def azel_to_ecef(lat, lon, alt, az, el, radians=False):
     enu = sph_to_cart(sph, radians=radians)
     return enu_to_ecef(lat, lon, alt, enu, radians=radians)
 
+
+
+def vec_to_vec(vec_in, vec_out):
+    '''Get the rotation matrix that rotates `vec_in` to `vec_out` along the plane containing both. Uses quaternion calculations.
+    '''
+
+    N = len(vec_in)
+    if N != len(vec_out):
+        raise ValueError('Input and output vectors must be same dimensionality.')
+
+    assert N == 3, 'Only implemented for 3d vectors'
+
+    a = vec_in/np.linalg.norm(vec_in)
+    b = vec_out/np.linalg.norm(vec_out)
+
+    adotb = np.dot(a,b)
+    axb = np.cross(a,b)
+    axb_norm = np.linalg.norm(axb)
+
+    #rotation in the plane frame of `vec_in` and `vec_out`
+    G = np.zeros((N,N), dtype=vec_in.dtype)
+    G[0,0] = adotb
+    G[0,1] = -axb_norm
+    G[1,0] = axb_norm
+    G[1,1] = adotb
+    G[2,2] = 1
+
+    #inverse of change of basis from standard orthonormal to `vec_in` and `vec_out` plane
+    F = np.zeros((N,N), dtype=vec_in.dtype)
+    F[:,0] = a
+    F[:,1] = (b - adotb*a)/np.linalg.norm(b - adotb*a)
+    F[:,2] = axb
+
+    #go to frame, rotation in plane, leave frame
+    R = F @ G @ np.linalg.inv(F)
+
+    return R
