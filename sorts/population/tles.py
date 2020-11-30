@@ -133,6 +133,9 @@ def tle_catalog(
             pop.data[line_id]['line2'] = line2
     
         bstar = bstar/(prop.grav_model.radiusearthkm*1000.0)
+        
+        pop.data[line_id]['BSTAR'] = bstar
+
         B = bstar*2.0/prop.rho0
         if B < 1e-9:
             rho = 500.0

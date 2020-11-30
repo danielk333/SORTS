@@ -28,10 +28,16 @@ profiler = sorts.profiling.Profiler()
 logger = sorts.profiling.get_logger()
 
 # ENVISAT
+# tles = [
+#     (
+#         '1 27386U 02009A   20290.00854375  .00000022  00000-0  20588-4 0  9993',
+#         '2 27386  98.1398 290.7332 0001195  90.6832 325.5676 14.37995280975942',
+#      ),
+# ]
 tles = [
     (
-        '1 27386U 02009A   20290.00854375  .00000022  00000-0  20588-4 0  9993',
-        '2 27386  98.1398 290.7332 0001195  90.6832 325.5676 14.37995280975942',
+        '1 27386U 02009A   20312.78435403  .00000027  00000-0  22314-4 0  9994',
+        '2 27386  98.1400 312.3173 0001249  93.0784  80.0609 14.37998238979212',
      ),
 ]
 
@@ -46,7 +52,7 @@ epoch = obj.epoch
 print(epoch.iso)
 print(obj)
 
-t = np.arange(0, 3600.0*24.0*10, 10.0)
+t = np.arange(3600.0*24.0*0, 3600.0*24.0*4, 10.0)
 
 print(f'Temporal points: {len(t)}')
 states = obj.get_state(t)
@@ -60,7 +66,7 @@ for pi, ps in enumerate(passes[0][0]): #tx-0 and rx-0
     print(f'Pass id={pi} (min-zang={np.min(zang):.1f} deg) -> ' + str(date_) + ' UTC -> ' + str(date_end_) + ' UTC')
 
 
-select_passes = [22,29]
+select_passes = [10]
 
 ax = sorts.plotting.local_passes([passes[0][0][pi] for pi in select_passes])
 
@@ -100,9 +106,14 @@ for pi, ps in enumerate(passes[0][0]):
     
     ax2 = axes[1][0].twinx()  # instantiate a second axes that shares the same x-axis
 
-    ax2.set_ylabel('Range rate from TX [km/s]')  # we already handled the x-label with ax1
-    ax2.plot((ps.t - ps.start())/60.0, ps.range_rate()[0]*1e-3, '-')
-    ax2.tick_params(axis='y')
+    if len(select_passes) == 1:
+        color = 'tab:red'
+    else:
+        color = None
+
+    ax2.set_ylabel('Range rate from TX [km/s]', color=color)  # we already handled the x-label with ax1
+    ax2.plot((ps.t - ps.start())/60.0, ps.range_rate()[0]*1e-3, '-', color=color)
+    ax2.tick_params(axis='y', labelcolor=color)
 
     axes[1][1].plot((ps.t - ps.start())/60.0, 10*np.log10(snr), '-', label=f'pass-{pi}')
     axes[1][1].set_xlabel('Time past rise time [min]')
