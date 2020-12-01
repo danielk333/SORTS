@@ -17,12 +17,17 @@ try:
 except ImportError:
     Orekit = None
 
-
 try:
     from .pysgp4 import SGP4
     __all__.append('SGP4')
 except ImportError:
     SGP4 = None
+
+try:
+    from .rebound import Rebound
+    __all__.append('Rebound')
+except ImportError:
+    Rebound = None
 
 from .kepler import Kepler
 __all__.append('Kepler')
