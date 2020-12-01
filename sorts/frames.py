@@ -15,7 +15,7 @@ import astropy.coordinates as coord
 import astropy.units as units
 
 from astropy.coordinates import TEME, ITRS, ICRS, GCRS
-from astropy.coordinates import HeliocentricMeanEcliptic
+from astropy.coordinates import HeliocentricMeanEcliptic, GeocentricMeanEcliptic
 from astropy.coordinates import EarthLocation, AltAz, SkyCoord
 from astropy.time import Time
 
@@ -26,6 +26,7 @@ from pyant.coordinates import rot_mat_x, rot_mat_y, rot_mat_z
 from . import dates
 from . import constants
 
+NON_GEOCENTRIC_COORDS = ['ICRS', 'ICRF', 'HeliocentricMeanEcliptic']
 
 def arctime_to_degrees(minutes, seconds):
     return (minutes + seconds/60.0)/60.0
@@ -64,8 +65,10 @@ def convert(t, states, in_frame, out_frame, logger=None, profiler=None, **kwargs
         astropy_states = _convert_to_astropy(states, ICRS)
     elif in_frame in ['GCRS', 'GCRF']:
         astropy_states = _convert_to_astropy(states, GCRS, obstime=t)
-    elif in_frame == 'HeliocentricMeanEcliptic':
+    elif in_frame == 'HeliocentricMeanEcliptic'.upper():
         astropy_states = _convert_to_astropy(states, HeliocentricMeanEcliptic, obstime=t, **kwargs)
+    elif in_frame == 'GeocentricMeanEcliptic'.upper():
+        astropy_states = _convert_to_astropy(states, GeocentricMeanEcliptic, obstime=t, **kwargs)
     else:
         raise ValueError(f'In frame "{in_frame}" not recognized, please perform manual transformation')
 
@@ -78,8 +81,10 @@ def convert(t, states, in_frame, out_frame, logger=None, profiler=None, **kwargs
         out_states = astropy_states.transform_to(ICRS())
     elif out_frame in ['GCRS', 'GCRF']:
         out_states = astropy_states.transform_to(GCRS(obstime=t))
-    elif out_frame == 'HeliocentricMeanEcliptic':
+    elif out_frame == 'HeliocentricMeanEcliptic'.upper():
         out_states = astropy_states.transform_to(HeliocentricMeanEcliptic(obstime=t, **kwargs))
+    elif out_frame == 'GeocentricMeanEcliptic'.upper():
+        out_states = astropy_states.transform_to(GeocentricMeanEcliptic(obstime=t, **kwargs))
     else:
         raise ValueError(f'Out frame "{out_frame}" not recognized, please perform manual transformation')
 
