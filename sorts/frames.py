@@ -15,6 +15,7 @@ import astropy.coordinates as coord
 import astropy.units as units
 
 from astropy.coordinates import TEME, ITRS, ICRS, GCRS
+from astropy.coordinates import HeliocentricMeanEcliptic
 from astropy.coordinates import EarthLocation, AltAz, SkyCoord
 from astropy.time import Time
 
@@ -63,6 +64,8 @@ def convert(t, states, in_frame, out_frame, logger=None, profiler=None, **kwargs
         astropy_states = _convert_to_astropy(states, ICRS)
     elif in_frame in ['GCRS', 'GCRF']:
         astropy_states = _convert_to_astropy(states, GCRS, obstime=t)
+    elif in_frame == 'HeliocentricMeanEcliptic':
+        astropy_states = _convert_to_astropy(states, HeliocentricMeanEcliptic, obstime=t, **kwargs)
     else:
         raise ValueError(f'In frame "{in_frame}" not recognized, please perform manual transformation')
 
@@ -75,6 +78,8 @@ def convert(t, states, in_frame, out_frame, logger=None, profiler=None, **kwargs
         out_states = astropy_states.transform_to(ICRS())
     elif out_frame in ['GCRS', 'GCRF']:
         out_states = astropy_states.transform_to(GCRS(obstime=t))
+    elif out_frame == 'HeliocentricMeanEcliptic':
+        out_states = astropy_states.transform_to(HeliocentricMeanEcliptic(obstime=t, **kwargs))
     else:
         raise ValueError(f'Out frame "{out_frame}" not recognized, please perform manual transformation')
 
