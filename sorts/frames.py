@@ -26,7 +26,16 @@ from pyant.coordinates import rot_mat_x, rot_mat_y, rot_mat_z
 from . import dates
 from . import constants
 
-NON_GEOCENTRIC_COORDS = ['ICRS', 'ICRF', 'HeliocentricMeanEcliptic']
+def not_geocentric(frame):
+    '''Check if the given frame name is one of the non-geocentric frames.
+    '''
+    frame = frame.upper()
+    return frame in ['ICRS', 'ICRF', 'HeliocentricMeanEcliptic'.upper()]
+
+def is_geocentric(frame):
+    '''Check if the frame name is a supported geocentric frame
+    '''
+    return not not_geocentric(frame)
 
 def arctime_to_degrees(minutes, seconds):
     return (minutes + seconds/60.0)/60.0
