@@ -53,13 +53,14 @@ class Scanner(RadarController):
             point = self.scan.ecef_pointing(t, tx)
 
             if self.as_altitude:
-                r = self.r[None,:]/np.squeeze(point[2,...])
 
                 if len(point.shape) > 1:
+                    r = self.r[None,:]/point[2,:]
                     point_tx.append(point + tx.ecef[:,None])
                     __ptx = point[:,:,None]*r[None,:,:] + tx.ecef[:,None,None]
                     point_rx_to_tx.append(__ptx.reshape(3, __ptx.shape[1]*__ptx.shape[2]))
                 else:
+                    r = self.r/point[2]
                     point_tx.append(point + tx.ecef)
                     point_rx_to_tx.append(point[:,None]*r[None,:] + tx.ecef[:,None])
             else:
