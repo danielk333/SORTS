@@ -96,14 +96,10 @@ def master_catalog_factor(
     ):
     '''Returns a random realization of the master population specified by the input file/population. In other words, each sampling object in the catalog is sampled a "factor" number of times with random mean anomalies to create the population.
 
-    :param str input_file: Path to the input MASTER file. Is not used if :code:`master_base` is given.
-    :param float mjd0: The epoch of the catalog file in Modified Julian Days. Is not used if :code:`master_base` is given.
     :param population.Population master_base: A master catalog consisting only of sampling objects. This catalog will be modified and the pointer to it returned.
-    :param bool sort: If :code:`True` sort according to diameters in ascending order.
     :param float treshhold: Diameter limit in meters below witch sampling objects are not included. Can be :code:`None` to skip filtering.
     :param int seed: Random number generator seed given to :code:`numpy.random.seed` to allow for consisted generation of a random realization of the population. If seed is :code:`None` a random seed from high-entropy data is used.
-    :param PropagatorBase propagator: Propagator class pointer used for :class:`space_object.SpaceObject`. Is not used if :code:`master_base` is given.
-    :param dict propagator_options: Propagator initialization keyword arguments. Is not used if :code:`master_base` is given.
+    :param bool copy: Modify the given `master_base` instance or return a modified copy.
     
 
     :return: Master population
