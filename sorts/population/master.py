@@ -105,7 +105,9 @@ def master_catalog_factor(
     :return: Master population
     :rtype: population.Population
     '''
-    np.random.seed(seed=seed)
+    if seed is not None:
+        st0 = np.random.get_state()
+        np.random.seed(seed=seed)
     
     if copy:
         master = master_base.copy()
@@ -137,5 +139,9 @@ def master_catalog_factor(
     master.allocate(full_objs.shape[0])
 
     master[:,:] = full_objs
+
+    if seed is not None:
+        np.random.seed(None)
+        np.random.set_state(st0)
 
     return master
