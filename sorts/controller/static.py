@@ -19,8 +19,8 @@ class Static(RadarController):
         'dwell',
     ]
 
-    def __init__(self, radar, azimuth = 0.0, elevation=90.0, r=np.linspace(300e3,1000e3,num=10), profiler=None, logger=None, meta=None, **kwargs):
-        super().__init__(radar.copy(), profiler=profiler, logger=logger, meta=meta)
+    def __init__(self, radar, azimuth=0.0, elevation=90.0, r=np.linspace(300e3,1000e3,num=10), profiler=None, logger=None, meta=None, **kwargs):
+        super().__init__(radar.copy(), profiler=profiler, logger=logger, meta=meta, **kwargs)
         if self.meta['dwell'] is None:
             self.meta['dwell'] = 0.1
 

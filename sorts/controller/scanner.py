@@ -19,14 +19,24 @@ class Scanner(RadarController):
     ]
 
     def __init__(self, radar, scan, r=np.linspace(300e3,1000e3,num=10), as_altitude=False, profiler=None, logger=None, return_copy=False, meta=None, **kwargs):
-        super().__init__(radar, profiler=profiler, logger=logger, meta=meta)
+        super().__init__(radar, profiler=profiler, logger=logger, meta=meta, **kwargs)
         self.scan = scan
+        self.dwell = scan.min_dwell()
         self.r = r
         self.return_copy = return_copy
         self.as_altitude = as_altitude
 
         if self.logger is not None:
             self.logger.info(f'Scanner:init')
+
+    @property
+    def dwell(self):
+        return self.t_slice
+
+    @dwell.setter
+    def dwell(self, val):
+        self.t_slice = val
+
 
     def default_meta(self):
         dic = super().default_meta()

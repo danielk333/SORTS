@@ -21,10 +21,11 @@ class RadarController(ABC):
         'controller_type',
     ]
 
-    def __init__(self, radar, t=None, t0=0.0, profiler=None, logger=None, meta=None):
+    def __init__(self, radar, t=None, t0=0.0, t_slice=None, profiler=None, logger=None, meta=None):
         self.radar = radar
         self.t = t
         self.t0 = t0
+        self.t_slice = t_slice
         self.logger = logger
         self.profiler = profiler
 

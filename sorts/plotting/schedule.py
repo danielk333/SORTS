@@ -119,3 +119,52 @@ def schedule_pointing(
         fig.tight_layout()
 
     return fig, ax
+
+
+
+def controller_slices(controllers, ax=None):
+
+    if ax is None:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+    else:
+        fig = None
+
+    times = {}
+    max_t = 0
+    for ctrl in controllers:
+        var = ctrl.__class__.__name__
+        if var not in times:
+            times[var] = []
+
+        if isinstance(ctrl.t_slice, float) or isinstance(ctrl.t_slice, int):
+            t_slice = np.empty(ctrl.t.shape, dtype=np.float64)
+            t_slice[:] = ctrl.t_slice
+        else:
+            t_slice = ctrl.t_slice
+
+        for i in range(len(ctrl.t)):
+            times[var].append((ctrl.t[i], t_slice[i]))
+        
+        if ctrl.t.max() > max_t:
+            max_t = ctrl.t.max()
+
+    ticks = []
+
+    for var in times:
+        ticks.append(var)
+        ax.broken_barh(times[var], (len(ticks)*10, 10))
+        ax.plot([x0 + 0.5*x1 for x0,x1 in times[var]], [len(ticks)*10 + 5 for x in times[var]], '.')
+
+
+    ax.set_ylim(5, 15 + len(ticks)*10)
+    ax.set_xlim(0, max_t*1.1)
+    ax.set_xlabel('Time [s]')
+
+    ax.set_yticks(list(range(15, 15 + 10*len(ticks), 10)))
+    ax.set_yticklabels(ticks)
+
+    ax.grid(True)
+
+
+    return fig, ax
