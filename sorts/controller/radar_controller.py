@@ -118,6 +118,15 @@ class RadarController(ABC):
 
 
     @staticmethod
+    def coh_integration(radar, dwell):
+        '''Set the coherent integration settings based on the dwell time.
+        '''
+        for tx in radar.tx:
+            tx.n_ipp = int(dwell/tx.ipp)
+            tx.coh_int_bandwidth = 1.0/(tx.pulse_length*tx.n_ipp)
+
+
+    @staticmethod
     def point(radar, enu):
         '''Point all sites into the direction of a given East, North, Up (ENU) local coordinate system.
         '''
