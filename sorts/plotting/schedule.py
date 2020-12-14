@@ -53,10 +53,17 @@ def schedule_pointing(
     for rx in scheduler.radar.rx:
         ax.plot([rx.ecef[0]],[rx.ecef[1]],[rx.ecef[2]], 'og')
 
+    def get_c_inds(c):
+        if c.t_slice is not None:
+            return np.logical_and(c.t + c.t_slice >= t0, c.t <= t1)
+        else:
+            return np.logical_and(c.t >= t0, c.t <= t1)
+        
+
     #get sched data
     ctrls = scheduler.get_controllers()
-    times = np.concatenate([c.t[np.logical_and(c.t >= t0, c.t <= t1)] for c in ctrls], axis=0)
-    sched = scheduler.chain_generators([c(c.t[np.logical_and(c.t >= t0, c.t <= t1)] - c.t0) for c in ctrls])
+    times = np.concatenate([c.t[get_c_inds(c)] for c in ctrls], axis=0)
+    sched = scheduler.chain_generators([c(c.t[get_c_inds(c)] - c.t0) for c in ctrls])
     sched_data = scheduler.generate_schedule(times, sched)
 
     for ti, t in enumerate(sched_data['t']):
