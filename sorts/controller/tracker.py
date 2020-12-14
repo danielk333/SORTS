@@ -59,6 +59,7 @@ class Tracker(RadarController):
 
             dt = t[ti] - self.t
             check = np.logical_and(dt >= 0, dt <= self.dwell)
+            meta = self.default_meta()
 
             if np.any(check):
                 ind = np.argmax(check)
@@ -69,8 +70,8 @@ class Tracker(RadarController):
 
             if self.profiler is not None:
                 self.profiler.stop('Tracker:generator:step')
-
-            yield radar, self.default_meta()
+            
+            yield radar, meta
 
         if self.profiler is not None:
             self.profiler.stop('Tracker:generator')

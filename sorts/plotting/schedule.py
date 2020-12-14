@@ -17,6 +17,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 #Local import
 from . import general
+from ..controller import Tracker
 
 
 def schedule_pointing(
@@ -59,17 +60,52 @@ def schedule_pointing(
     sched_data = scheduler.generate_schedule(times, sched)
 
     for ti, t in enumerate(sched_data['t']):
+
         if plot_rx:
             for p, ecef in zip(sched_data['rx'][ti], sched_data['rx_pos'][ti]):
                 if len(p.shape) == 1: p.shape = (3,1)
+
                 for pi in range(p.shape[1]):
-                    ax.plot([ecef[0], ecef[0]+p[0,pi]*point_range], [ecef[1], ecef[1]+p[1,pi]*point_range], [ecef[2], ecef[2]+p[2,pi]*point_range], '-g', alpha=alpha)
+                    if 'id' in sched_data['meta'][ti]:
+                        ctrl = ctrls[sched_data['meta'][ti]['id']]
+                        if isinstance(ctrl, Tracker):
+                            t_ind = np.argmin(np.abs(t - ctrl.t))
+                            targetx = ctrl.ecefs[0,t_ind]
+                            targety = ctrl.ecefs[1,t_ind]
+                            targetz = ctrl.ecefs[2,t_ind]
+                        else:
+                            targetx = ecef[0]+p[0,pi]*point_range
+                            targety = ecef[1]+p[1,pi]*point_range
+                            targetz = ecef[2]+p[2,pi]*point_range
+                    else:
+                        targetx = ecef[0]+p[0,pi]*point_range
+                        targety = ecef[1]+p[1,pi]*point_range
+                        targetz = ecef[2]+p[2,pi]*point_range
+                    
+                    ax.plot([ecef[0], targetx], [ecef[1], targety], [ecef[2], targetz], '-g', alpha=alpha)
 
         if plot_tx:
             for p, ecef in zip(sched_data['tx'][ti], sched_data['tx_pos'][ti]):
                 if len(p.shape) == 1: p.shape = (3,1)
+
                 for pi in range(p.shape[1]):
-                    ax.plot([ecef[0], ecef[0]+p[0,pi]*point_range], [ecef[1], ecef[1]+p[1,pi]*point_range], [ecef[2], ecef[2]+p[2,pi]*point_range], '-r', alpha=alpha)
+                    if 'id' in sched_data['meta'][ti]:
+                        ctrl = ctrls[sched_data['meta'][ti]['id']]
+                        if isinstance(ctrl, Tracker):
+                            t_ind = np.argmin(np.abs(t - ctrl.t))
+                            targetx = ctrl.ecefs[0,t_ind]
+                            targety = ctrl.ecefs[1,t_ind]
+                            targetz = ctrl.ecefs[2,t_ind]
+                        else:
+                            targetx = ecef[0]+p[0,pi]*point_range
+                            targety = ecef[1]+p[1,pi]*point_range
+                            targetz = ecef[2]+p[2,pi]*point_range
+                    else:
+                        targetx = ecef[0]+p[0,pi]*point_range
+                        targety = ecef[1]+p[1,pi]*point_range
+                        targetz = ecef[2]+p[2,pi]*point_range
+                    
+                    ax.plot([ecef[0], targetx], [ecef[1], targety], [ecef[2], targetz], '-r', alpha=alpha)
 
 
     p0 = [tx.ecef for tx in scheduler.radar.tx]

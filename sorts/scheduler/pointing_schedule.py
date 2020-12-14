@@ -18,8 +18,11 @@ class PointingSchedule(Scheduler):
         txp = []
         rx_pos = []
         tx_pos = []
+        metas = []
         for ind, mrad in enumerate(generator):
             radar, meta = mrad
+
+            metas.append(meta)
             
             rxp.append([])
             rx_pos.append([])
@@ -34,10 +37,11 @@ class PointingSchedule(Scheduler):
                 tx_pos[-1].append(tx.ecef)
 
         data = {
-            't': t, 
+            't': t,
             'rx': rxp,
             'tx': txp,
             'rx_pos': rx_pos,
             'tx_pos': tx_pos,
+            'meta': metas,
         }
         return data
