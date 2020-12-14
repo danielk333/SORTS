@@ -18,7 +18,7 @@ class Tracker(RadarController):
         'target',
     ]
 
-    def __init__(self, radar, t, ecefs, t0=0.0, dwell=0.1, return_copy=False, profiler=None, logger=None, meta=None, **kwargs):
+    def __init__(self, radar, t, ecefs, t0=0.0, dwell=0.1, return_copy=True, profiler=None, logger=None, meta=None, **kwargs):
         super().__init__(radar, t=t, t0=t0, profiler=profiler, logger=logger, meta=meta, **kwargs)
         self.ecefs = ecefs
         self.dwell = dwell
@@ -72,6 +72,7 @@ class Tracker(RadarController):
             if np.any(check):
                 ind = np.argmax(check)
                 RadarController.turn_on(radar)
+                RadarController.coh_integration(radar, self.dwell)
                 self.point_radar(radar, ind)
             else:
                 RadarController.turn_off(radar)

@@ -246,7 +246,10 @@ class ObservedParameters(Scheduler):
 
         if np.any(keep):
             for key in data:
-                data[key] = data[key][...,keep]
+                if isinstance(data[key], np.ndarray):
+                    data[key] = data[key][...,keep]
+                else:
+                    data[key] = [x for ind_, x in enumerate(data[key]) if keep[ind_]]
         else:
             data = None
 

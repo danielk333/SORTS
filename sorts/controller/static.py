@@ -75,6 +75,8 @@ class Static(RadarController):
 
             RadarController._point_station(rx, rx_point)
 
+        RadarController.coh_integration(radar, self.meta['dwell'])
+
         if self.profiler is not None:
             self.profiler.stop('Static:generator:point_radar')
 
