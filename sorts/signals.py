@@ -115,11 +115,11 @@ def doppler_spread_hard_target_snr(
     doppler_bandwidth = 4*np.pi*diameter/(wavelength*spin_period)
 
     # for serendipitous discovery
-    detection_bandwidth = np.max([doppler_bandwidth, 1.0/(bandwidth*duty_cycle), 1.0/t_obs])
+    detection_bandwidth = np.max([doppler_bandwidth, bandwidth*duty_cycle, 1.0/t_obs])
 
     # for detection with a periori know orbit
     # the bandwidth cannot be smaller than permitted by the observation duration.
-    incoh_int_bandwidth=np.max([doppler_bandwidth, (1.0/t_obs) ])
+    base_int_bandwidth = np.max([doppler_bandwidth, (1.0/t_obs) ])
 
     #standard one segment rx noise
     rx_noise = scipy.constants.k*rx_noise_temp*bandwidth
@@ -128,7 +128,7 @@ def doppler_spread_hard_target_snr(
     p_n0 = scipy.constants.k*rx_noise_temp*detection_bandwidth/duty_cycle
 
     # effective noise power when doing incoherent integration and using a good a priori orbital elements
-    p_n1 = scipy.constants.k*rx_noise_temp*incoh_int_bandwidth/duty_cycle
+    p_n1 = scipy.constants.k*rx_noise_temp*base_int_bandwidth/duty_cycle
     
     h_snr = hard_target_snr(
         gain_tx = gain_tx, 
@@ -145,7 +145,7 @@ def doppler_spread_hard_target_snr(
     p_s = h_snr*rx_noise
 
 
-    snr, snr_incoh, te = incoherent_snr(p_s, p_n1, B=incoh_int_bandwidth, t_incoh=t_obs)
+    snr, snr_incoh, te = incoherent_snr(p_s, p_n1, B=base_int_bandwidth, t_incoh=t_obs)
     
     snr_coh = p_s/p_n0
     return snr_coh, snr_incoh
