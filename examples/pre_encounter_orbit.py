@@ -31,11 +31,13 @@ with h5py.File(pth, 'r') as h:
     state[3:] = h['vel'][()]
     epoch = Time(h['t0'][()], scale='tai', format='unix').utc
 
-print(np.linalg.norm(state[:3])*1e-3)
-print(np.linalg.norm(state[3:])*1e-3)
-print(epoch.iso)
+print(f'Encounter Geocentric range (ITRS): {np.linalg.norm(state[:3])*1e-3} km')
+print(f'Encounter Geocentric speed (ITRS): {np.linalg.norm(state[3:])*1e-3} km/s')
+print(f'At epoch: {epoch.iso}')
 
 kernel = '/home/danielk/IRF/IRF_GITLAB/EPHEMERIS_FILES/de430.bsp'
+
+print(f'Using JPL kernel: {kernel}')
 
 states, massive_states, t = sorts.propagate_pre_encounter(
     state, 
@@ -59,6 +61,9 @@ orb.cartesian = states
 
 kep = orb.kepler
 
+print('Pre-encounter orbit:')
+print(orb[-1])
+
 plt.rc('text', usetex=True)
 
 axis_labels = ["$a$ [AU]","$e$ [1]","$i$ [deg]","$\\omega$ [deg]","$\\Omega$ [deg]", "$\\nu$ [deg]" ]
@@ -70,7 +75,7 @@ for i in range(6):
     ax.plot(t/3600.0, kep[i,:]*scale[i], "-b")
     ax.set_xlabel('Time [h]')
     ax.set_ylabel(axis_labels[i])
-fig.set_suptitle('Propagation to pre-encounter elements')
+fig.suptitle('Propagation to pre-encounter elements')
 
 dt_l = 3600.0*12
 
@@ -85,7 +90,7 @@ prop = sorts.propagator.Rebound(
     ),
 )
 
-t_l = -np.arange(0, 3600.0*24*365.25*6, dt_l)
+t_l = -np.arange(0, 3600.0*24*365.25*20, dt_l)
 states_l, massive_states_l = prop.propagate(
     t_l, 
     states[:,-1], 
@@ -108,7 +113,7 @@ for i in range(6):
     ax.plot(t_l/(3600.0*24*365.25), kep[i,:]*scale[i], "-b")
     ax.set_xlabel('Time [y]')
     ax.set_ylabel(axis_labels[i])
-fig.set_suptitle('Long term backwards elements')
+fig.suptitle('Long term backwards elements')
 
 fig = plt.figure(figsize=(15,15))
 axes = []
@@ -133,7 +138,7 @@ for i, key in enumerate(prop.settings['massive_objects']):
         ax.set_xlabel('Time [y]')
         ax.set_ylabel(axis_labels[i])
 
-fig.set_suptitle('Solarsystem elements')
+fig.suptitle('Solarsystem elements')
 
 axes[-1].legend()
 
