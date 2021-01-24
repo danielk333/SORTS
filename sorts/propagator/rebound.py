@@ -12,10 +12,8 @@ import pyorb
 
 try:
     import rebound
-    import spiceypy as spice
 except ImportError:
     rebound = None
-    spice = None
 
 from astropy.time import Time
 
@@ -28,46 +26,36 @@ from .. import frames
 class Rebound(Propagator):
     '''Propagator class implementing the REBOUND propagator.
     
-    Frame options are found in the `sorts.frames.convert` function. 
-    As the planetary/object positions not specified by adding objects or 
-    calling propagate are added by calling SPICE. The common frame chosen is the 
-    SPICE "ECLIPJ2000". This is equivalent to the Astropy HeliocentricMeanEcliptic frame.
-    As such, internally in the Rebound simulation inertial BarycentricMeanEclipticJ2000 is always used.
-
-    GeocentricMeanEcliptic includes the Earth velocity, so any manual transformation to HeliocentricMeanEcliptic
-    must also use the earth velocity.
-
-    If the output frame is geocentric, the states input to the termination check is in GeocentricMeanEcliptic, else they are in HeliocentricMeanEcliptic.
-
+    Internally in the Rebound simulation a ICRS equivalent is always used but output is generated in HCRS.
 
     #TODO: add to this documentation
     '''
 
-    MAIN_PLANETS = ['Mercury','Venus','Earth','Mars','Jupiter','Saturn','Uranus','Neptune']
+    DEFAULT_MASSIVE = ['Sun','Moon','Mercury','Venus','Earth','Mars','Jupiter','Saturn','Uranus','Neptune']
+    DEFAULT_MASSES = [1.98855e30, 7.34767309e22, 0.330104e24, 4.86732e24, 5.97219e24, 0.641693e24, 1898.13e24, 568.319e24, 86.8103e24, 102.410e24]
 
     DEFAULT_SETTINGS = copy.copy(Propagator.DEFAULT_SETTINGS)
     DEFAULT_SETTINGS.update(
         dict(
-            out_frame = 'HeliocentricMeanEcliptic',
-            in_frame = 'HeliocentricMeanEcliptic',
+            out_frame = 'HCRS',
+            in_frame = 'HCRS',
             integrator = 'IAS15',
             time_step = 60.0,
             termination_check = False,
             termination_check_interval = 1,
-            massive_objects = ['Moon'] + MAIN_PLANETS,
+            massive_objects = DEFAULT_MASSIVE,
             save_massive_states = False,
         )
     )
     
     def __init__(
             self, 
-            spice_meta,
+            kernel,
             settings=None, 
             **kwargs
         ):
         self.sim = None
         assert rebound is not None, 'Rebound python package not found'
-        assert spice is not None, 'spiceypy package not found'
 
         super(Rebound, self).__init__(settings=settings, **kwargs)
         if self.logger is not None:
@@ -75,21 +63,20 @@ class Rebound(Propagator):
 
         self.settings['massive_objects'] = [x.strip().capitalize() for x in self.settings['massive_objects']]
 
-        self.spice_meta = spice_meta
+        self.kernel_path = kernel
 
         self.planets_mass = {
             key:val for key,val in zip(
-                ['Moon','Mercury','Venus','Earth','Mars','Jupiter','Saturn','Uranus','Neptune'],
-                [7.34767309e22, 0.330104e24, 4.86732e24, 5.97219e24, 0.641693e24, 1898.13e24, 568.319e24, 86.8103e24, 102.410e24],
+                Rebound.DEFAULT_MASSIVE,
+                Rebound.DEFAULT_MASSES,
             )
         }
 
-        self.m_sun = 1.98855e30
-        self.spice_frame = 'ECLIPJ2000'
-        self.internal_frame = 'HeliocentricMeanEcliptic'
-        self.geo_internal_frame = 'GeocentricMeanEcliptic'
-        self._earth_ind = self.settings['massive_objects'].index('Earth')
-        self.N_massive = len(self.settings['massive_objects']) + 1;
+        self.internal_frame = 'HCRS'
+        self.geo_internal_frame = 'GCRS'
+        self._earth_ind = self.planet_index('Earth')
+        self._sun_ind = self.planet_index('Sun')
+        self.N_massive = len(self.settings['massive_objects']);
 
 
     def __str__(self):
@@ -108,58 +95,51 @@ class Rebound(Propagator):
 
 
     def planet_index(self, name):
-        return self.settings['massive_objects'].index(name)
+        return [x.lower().strip() for x in self.settings['massive_objects']].index(name.lower().strip())
 
 
     def _setup_sim(self, epoch, init_massive_states=None):
-        spice_meta_path = pathlib.Path(self.spice_meta)
+        kpath = pathlib.Path(self.kernel_path)
         if init_massive_states is None:
-            assert spice_meta_path.is_file(), f'Could not find {spice_meta} Meta-kernel file.'
-            spice.furnsh(str(spice_meta_path))
-            self._et = spice.utc2et(epoch.utc.isot)
+            assert kpath.is_file(), f'Could not find "{kpath}" kernel file.'
 
         self.sim = rebound.Simulation()
         self.sim.units = ('m', 's', 'kg')
         self.sim.integrator = self.settings['integrator']
         
         if init_massive_states is None:
-            self.sim.add(m=self.m_sun)
-        else:
-            state = init_massive_states[:,0]
-            self.sim.add(m=self.m_sun,
-                x=state[0],  y=state[1],  z=state[2],
-                vx=state[3], vy=state[4], vz=state[5],
+            bodies = self.settings['massive_objects']
+            if 'Sun' not in bodies: 
+                bodies += ['Sun']
+            states = frames.get_solarsystem_body_states(
+                bodies = bodies, 
+                epoch = epoch, 
+                kernel = str(kpath),
             )
 
-        for i in range(0,len(self.settings['massive_objects'])):
+            #Convert to HCRS
+            for key in states:
+                if key != 'Sun':
+                    states[key] -= states['Sun']
+            states['Sun'] -= states['Sun']
+        
+        for i in range(len(self.settings['massive_objects'])):
+            body = self.settings['massive_objects'][i]
+
             if init_massive_states is None:
-                if self.settings['massive_objects'][i] in self.MAIN_PLANETS:
-                    plt_str_ = self.settings['massive_objects'][i] + ' BARYCENTER'
-                else:
-                    plt_str_ = self.settings['massive_objects'][i]
-
-                #Units are always km and km/sec. 
-                state, lightTime = spice.spkezr(
-                    plt_str_,
-                    self._et,
-                    self.spice_frame,
-                    'NONE',
-                    'SUN',
-                )
+                state = states[body]
             else:
-                state = init_massive_states[:,i+1]*1e-3
+                state = init_massive_states[:,i]
 
-            self.sim.add(m=self.planets_mass[self.settings['massive_objects'][i]],
-                x=state[0]*1e3,  y=state[1]*1e3,  z=state[2]*1e3,
-                vx=state[3]*1e3, vy=state[4]*1e3, vz=state[5]*1e3,
-            )
+            self._add_state(state, self.planets_mass[body])
+
 
         self.sim.N_active = self.N_massive
         self.sim.dt = self.settings['time_step']
 
 
     def _add_state(self, state, m):
-        x, y, z, vx, vy, vz = state
+        x, y, z, vx, vy, vz = state.flatten()
         self.sim.add(
             x = x,
             y = y,
@@ -199,7 +179,7 @@ class Rebound(Propagator):
 
     def _get_helio_state(self):
         sun_state = np.zeros((6,), dtype=np.float64)
-        sun = self.sim.particles[0]
+        sun = self.sim.particles[self._sun_ind]
         sun_state[0] = sun.x
         sun_state[1] = sun.y
         sun_state[2] = sun.z
@@ -294,49 +274,13 @@ class Rebound(Propagator):
 
         init_massive_states = kwargs.get('massive_states', None)
 
+
         self._setup_sim(epoch, init_massive_states=init_massive_states)
 
 
         m = kwargs.get('m', np.zeros((N_testparticle,), dtype=np.float64))
         if isinstance(m, float) or isinstance(m, int):
             m = np.zeros((N_testparticle,), dtype=np.float64)*m
-
-
-        #DEBUG#
-        #it is on the other side of the solar system?????
-        earth_state = self._get_earth_state()
-
-        state0_cart0 = frames.convert(
-            epoch, 
-            state0_cart, 
-            in_frame = self.settings['in_frame'], 
-            out_frame = self.geo_internal_frame,
-            profiler = self.profiler,
-            logger = self.logger,
-        )
-
-        if len(state0_cart.shape) > 1:
-            state0_cart0 = state0_cart0 + earth_state[:,None]
-        else:
-            state0_cart0 = state0_cart0 + earth_state
-        #else:
-        state0_cart1 = frames.convert(
-            epoch, 
-            state0_cart, 
-            in_frame = self.settings['in_frame'], 
-            out_frame = self.internal_frame,
-            profiler = self.profiler,
-            logger = self.logger,
-        )
-        print(state0_cart)
-        print(f'- {state0_cart0}')
-        print(f'- {state0_cart1}')
-        print(state0_cart0 - state0_cart1)
-        print(state0_cart1 - earth_state)
-
-        assert 0, 'DEBUG'
-        #DEBUG#
-
 
         if frames.is_geocentric(self.settings['in_frame']):
             earth_state = self._get_earth_state()

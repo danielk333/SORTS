@@ -13,14 +13,14 @@ from astropy.time import Time, TimeDelta
 from sorts.propagator import Rebound
 import pyorb
 
-#This meta kernel lists de430.bsp and de431 kernels as well as others like the leapsecond kernel.
-spice_meta = '/home/danielk/IRF/IRF_GITLAB/EPHEMERIS_FILES/MetaK.txt'
+#This kernel de430.bsp contains solarsystem locations
+kernel = '/home/danielk/IRF/IRF_GITLAB/EPHEMERIS_FILES/de430.bsp'
 
 #We input in International Terrestrial Reference System coordinates
 #and output in International Celestial Reference System
 #going trough HeliocentricMeanEclipticJ2000 internally in Rebound
 prop = Rebound(
-    spice_meta = spice_meta, 
+    kernel = kernel, 
     settings=dict(
         in_frame='ITRS',
         out_frame='ICRS',
@@ -53,7 +53,7 @@ np.random.seed(293489776)
 #we can also propagate several test partcies at the same time
 state0_r = np.zeros((6, n_test))
 state0_r = state0_r + state0[:, None]
-state0_r[3:,:] += np.random.randn(3,n_test)*1e3 #1km/s std separation
+state0_r[3:,:] += np.random.randn(3,n_test)*0.5e3 #1km/s std separation
 
 #this is inefficient since we could have included the first particle
 #but for the exemplification sake we propagate again

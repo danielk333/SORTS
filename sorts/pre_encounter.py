@@ -27,7 +27,7 @@ def distance_termination(dAU):
     return distance_termination_method
 
 
-def propagate_pre_encounter(state, epoch, in_frame, out_frame, termination_check, spice_meta, dt = 1.0, max_t = 10*24*3600.0, settings = None):
+def propagate_pre_encounter(state, epoch, in_frame, out_frame, termination_check, kernel, dt = 10.0, max_t = 10*24*3600.0, settings = None):
     '''Propagates a state from the states backwards in time until the termination_check is true.
     '''
     t = -np.arange(0, max_t, dt, dtype=np.float64)
@@ -49,7 +49,7 @@ def propagate_pre_encounter(state, epoch, in_frame, out_frame, termination_check
         settings = reb_settings
 
     prop = TerminatedRebound(
-        spice_meta = spice_meta, 
+        kernel = kernel, 
         settings = settings,
     )
 
