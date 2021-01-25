@@ -48,8 +48,16 @@ ASTROPY_FRAMES = {
     'GeocentricMeanEcliptic'.upper(): 'GeocentricMeanEcliptic',
     'HeliocentricTrueEcliptic'.upper(): 'HeliocentricTrueEcliptic',
     'GeocentricTrueEcliptic'.upper(): 'GeocentricTrueEcliptic',
+    'BarycentricMeanEcliptic'.upper(): 'BarycentricMeanEcliptic',
+    'BarycentricTrueEcliptic'.upper(): 'BarycentricTrueEcliptic',
     'SPICEJ2000': 'ICRS',
 }
+
+ASTROPY_NOT_OBSTIME = [
+    'ICRS',
+    'BarycentricMeanEcliptic',
+    'BarycentricTrueEcliptic',
+]
 
 '''Mapping from body name to integer id's used by the kernels.
 
@@ -167,7 +175,7 @@ def convert(t, states, in_frame, out_frame, logger=None, profiler=None, **kwargs
     
     kw = {}
     kw.update(kwargs)
-    if in_frame_ != 'ICRS':
+    if in_frame_ not in ASTROPY_NOT_OBSTIME:
         kw['obstime'] = t
 
     astropy_states = _convert_to_astropy(states, in_frame_cls, **kw)
@@ -180,7 +188,7 @@ def convert(t, states, in_frame, out_frame, logger=None, profiler=None, **kwargs
 
     kw = {}
     kw.update(kwargs)
-    if out_frame_ != 'ICRS':
+    if out_frame_ not in ASTROPY_NOT_OBSTIME:
         kw['obstime'] = t
 
     out_states = astropy_states.transform_to(out_frame_cls(**kw))

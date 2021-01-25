@@ -29,6 +29,7 @@ state = np.zeros((6,), dtype=np.float64)
 with h5py.File(pth, 'r') as h:
     state[:3] = h['p0'][()]
     state[3:] = h['vel'][()]
+    vel_stds = h['vel_sigma'][()]
     epoch = Time(h['t0'][()], scale='tai', format='unix').utc
 
 print(f'Encounter Geocentric range (ITRS): {np.linalg.norm(state[:3])*1e-3} km')
@@ -50,6 +51,13 @@ states, massive_states, t = sorts.propagate_pre_encounter(
 
 print(f'Time to hill sphere exit: {t[-1]/3600.0:.2f} h')
 
+states_HMC = sorts.frames.convert(
+    epoch + TimeDelta(t, format='sec'),
+    states, 
+    in_frame = 'HCRS', 
+    out_frame = 'HeliocentricMeanEcliptic',
+)
+
 orb = pyorb.Orbit(
     M0 = pyorb.M_sol,
     direct_update=True,
@@ -57,7 +65,7 @@ orb = pyorb.Orbit(
     degrees = True,
     num = len(t),
 )
-orb.cartesian = states
+orb.cartesian = states_HMC
 
 kep = orb.kepler
 
@@ -98,6 +106,22 @@ states_l, massive_states_l = prop.propagate(
     massive_states = massive_states[:,-1,:],
 )
 
+states_l_HMC = sorts.frames.convert(
+    epoch + TimeDelta(t_l, format='sec') + TimeDelta(t[-1], format='sec'),
+    states_l, 
+    in_frame = 'HCRS', 
+    out_frame = 'HeliocentricMeanEcliptic',
+)
+
+massive_states_l_HMC = massive_states_l.copy()
+for i in range(massive_states_l_HMC.shape[2]):
+    massive_states_l_HMC[:,:,i] = sorts.frames.convert(
+        epoch + TimeDelta(t_l, format='sec') + TimeDelta(t[-1], format='sec'),
+        massive_states_l[:,:,i], 
+        in_frame = 'HCRS', 
+        out_frame = 'HeliocentricMeanEcliptic',
+    )
+
 orb = pyorb.Orbit(
     M0 = pyorb.M_sol,
     direct_update=True,
@@ -105,7 +129,7 @@ orb = pyorb.Orbit(
     degrees = True,
     num = len(t_l),
 )
-orb.cartesian = states_l
+orb.cartesian = states_l_HMC
 kep = orb.kepler
 fig = plt.figure(figsize=(15,15))
 for i in range(6):
@@ -130,7 +154,7 @@ for i, key in enumerate(prop.settings['massive_objects']):
         num = len(t_l),
         m = prop.planets_mass[key],
     )
-    orb.cartesian = massive_states_l[:,:,i]
+    orb.cartesian = massive_states_l_HMC[:,:,i]
     kep = orb.kepler
     for i in range(6):
         ax = axes[i]
@@ -145,13 +169,10 @@ axes[-1].legend()
 
 fig = plt.figure(figsize=(15,15))
 ax = fig.add_subplot(111, projection='3d')
-ax.plot(states[0,:], states[1,:], states[2,:], "-r")
-for ind in range(massive_states.shape[2]):
-    ax.plot(massive_states[0,:,ind], massive_states[1,:,ind], massive_states[2,:,ind], "-g")
 
-ax.plot(states_l[0,:], states_l[1,:], states_l[2,:], "-b")
-for ind in range(massive_states_l.shape[2]):
-    ax.plot(massive_states_l[0,:,ind], massive_states_l[1,:,ind], massive_states_l[2,:,ind], "-g")
+ax.plot(states_l_HMC[0,:], states_l_HMC[1,:], states_l_HMC[2,:], "-b")
+for ind in range(massive_states_l_HMC.shape[2]):
+    ax.plot(massive_states_l_HMC[0,:,ind], massive_states_l_HMC[1,:,ind], massive_states_l_HMC[2,:,ind], "-g")
 
 sorts.plotting.set_axes_equal(ax)
 
