@@ -20,6 +20,8 @@ def master_catalog(
     ):
     '''Return the master catalog specified in the input file as a population instance. The catalog only contains the master sampling objects and not an actual realization of the population using the factor.
 
+    **Note:** MASTER catalog files are usually (# TODO: confirm) in TEME frame
+
     The format of the input master files is:
 
         0. ID
