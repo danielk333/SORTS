@@ -8,20 +8,6 @@ import numpy as np
 import scipy.constants
 
 
-def add_zips(zip1, zip2):
-    '''Weaves two iterable of tuples together
-    '''
-    for tup1, tup2 in zip(zip1, zip2):
-        yield tup1 + tup2
-
-
-def add_zip(zip1, gen):
-    '''Weaves an iterable into a iterable of tuples
-    '''
-    for tup1, obj in zip(zip1, gen):
-        yield tup1 + (obj,)
-
-
 def signal_delay(st1, st2, ecef):
     '''Signal delay due to speed of light between station-1 to ecef position to station-2
     '''
