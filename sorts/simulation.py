@@ -14,6 +14,7 @@ import pickle
 import datetime
 from glob import glob
 import os
+import argparse
 
 #Third party import
 import h5py
@@ -27,6 +28,8 @@ except ImportError:
 
 #Local import
 from . import profiling
+
+
 
 def mpi_wrap_master_thread(func):
     '''Wrap function to only execute on thread rank=0
@@ -528,21 +531,32 @@ class Simulation:
     def __init__(self, scheduler, root, logger=True, profiler=True, **kwargs):
         self.steps = OrderedDict()
         self.scheduler = scheduler
-        if not isinstance(root, pathlib.Path):
-            root = pathlib.Path(root)
+
+        if root is None:
+            self.persistancy = False
+        else:
+            self.persistancy = True
 
         self.root = root
 
+        self.__user_args = []
+
+        if self.persistancy:
+            if not isinstance(self.root, pathlib.Path):
+                self.root = pathlib.Path(self.root)
+
+            if not self.root.is_dir():
+                mpi_mkdir(self.root)
+
+
         self.branch_name = 'master'
 
-        if not self.root.is_dir():
-            mpi_mkdir(self.root)
+        if self.persistancy:
+            _master = self.root / self.branch_name
+            if not _master.is_dir():
+                mpi_mkdir(_master)
 
-        _master = self.root / self.branch_name
-        if not _master.is_dir():
-            mpi_mkdir(_master)
-
-        self.make_paths()
+            self.make_paths()
 
         if logger:
             self.logger = profiling.get_logger(
@@ -551,13 +565,15 @@ class Simulation:
                 file_level = kwargs.get('file_level', logging.INFO),
                 term_level = kwargs.get('term_level', logging.INFO),
             )
-            self.scheduler.logger = self.logger
+            if self.scheduler is not None:
+                self.scheduler.logger = self.logger
         else:
             self.logger = None
 
         if profiler:
             self.profiler = profiling.Profiler()
-            self.scheduler.profiler = self.profiler
+            if self.scheduler is not None:
+                self.scheduler.profiler = self.profiler
         else:
             self.profiler = None
 
@@ -634,7 +650,10 @@ class Simulation:
     def log_path(self):
         '''Path to the current log-output folder
         '''
-        return self.root / self.branch_name / 'logs'
+        if self.persistancy:
+            return self.root / self.branch_name / 'logs'
+        else:
+            return None
 
 
 
@@ -665,6 +684,9 @@ class Simulation:
         :param list/bool linkfiles: If a list of paths that should be soft-linked rather then copied. If :code:`True`, soft-link all files.
         :return: None
         '''
+        if not self.persistancy:
+            raise ValueError('Cannot use branches if no root is given')
+
         if (self.root / name).is_dir():
             if self.logger is not None:
                 self.logger.info(f'Branch "{name}" already exists')
@@ -694,19 +716,26 @@ class Simulation:
         self.checkout(name)
 
 
+    def status(self):
+        '''Prints the status
+        '''
+        raise NotImplementedError('should contain branch-list, branch sizes, step lists and logs avalible')
+
 
     def checkout(self, branch):
         '''Change to branch.
         '''
         self.branch_name = branch
-        self.logger = profiling.change_logfile(self.logger, self.log_path)
+        if self.logger is not None and self.persistancy:
+            self.logger = profiling.change_logfile(self.logger, self.log_path)
 
 
     @log_exceptions
     def run(self, step = None, *args, **kwargs):
         '''Run specific step with the supplied arguments or run all steps'''
 
-        self.make_paths()
+        if self.persistancy:
+            self.make_paths()
 
         if step is None:
             for name, func in self.steps.items():
@@ -730,3 +759,101 @@ class Simulation:
             if self.profiler is not None: self.profiler.stop(f'Simulation:run:{step}')
             if self.logger is not None: self.logger.info(f'Simulation:run:{step} [completed]')
 
+
+    def add_cmd_argument(self, *args, **kwargs):
+        '''Takes same arguments and keyword arguments as `parser.add_argument` but does not add the argument to the parser until `parse_cmd` is called.
+
+        All arguments added here ends up as keyword arguments to the steps, the argument name used is always .
+        '''
+        self.__user_args.append((args, kwargs))
+
+
+
+    def parse_cmd(self):
+        '''Parses the arguments from a terminal command-line execution of the simulation and executes appropriately
+        '''
+        arg_parser = argparse.ArgumentParser(description='Simulation command-line interface')
+
+        subparsers = arg_parser.add_subparsers(dest='sim_action', help='Actions')
+
+        run_parser = subparsers.add_parser('run', help='Run simulation')
+        cmd_parser = subparsers.add_parser('cmd', help='Simulation command')
+        cmd_subparsers = cmd_parser.add_subparsers(dest='sim_cmd', help='Commands')
+
+        if self.persistancy:
+            run_parser.add_argument(
+                'branch', 
+                type=str, 
+                help='Name of the branch to operate on',
+            )
+            branch_parser = cmd_subparsers.add_parser('branch', help='Branch simulation')
+            branch_parser.add_argument(
+                'name', 
+                type=str, 
+                help='Name of new branch',
+            )
+            branch_parser.add_argument(
+                '--source', 
+                type=str, 
+                default='',
+                help='Name of branch to clone onto new branch',
+            )
+            branch_parser.add_argument(
+                '--link-branch', 
+                action='store_true',
+                help='Soft-link all current files towards [source] branch',
+            )
+            delete_parser = cmd_subparsers.add_parser('delete', help='Delete branch')
+            delete_parser.add_argument(
+                'name', 
+                type=str, 
+                help='Branch name to delete',
+            )
+
+        run_parser.add_argument(
+            'step',
+            type=str,
+            help='Name of the step to execute, if "all" executes all steps.',
+        )
+
+        dests = []
+        for args, kwargs in self.__user_args:
+            run_parser.add_argument(*args, **kwargs)
+            action = run_parser._actions[-1]
+            if hasattr(action, 'dest'):
+                dests.append(action.dest)
+
+        args = arg_parser.parse_args()
+
+        if args.sim_action == 'cmd':
+            if args.sim_cmd == 'branch':
+                if len(args.source) > 0:
+                    self.checkout(args.source)
+                    _empty = False
+                else:
+                    _empty = True
+
+                if args.link_branch:
+                    linkfiles = True
+                else:
+                    linkfiles = None
+
+                self.branch(name = args.name, empty = _empty, linkfiles = linkfiles)
+            elif args.sim_cmd == 'delete':
+                self.delete(args.name)
+
+        elif args.sim_action == 'run':
+
+            if args.step == 'all':
+                step = None
+            else:
+                step = args.step
+
+            if self.persistancy:
+                self.checkout(args.branch)
+
+            run_kwargs = dict()
+            for dest in dests:
+                run_kwargs[dest] = getattr(args, dest)
+
+            self.run(step=step, **run_kwargs)
