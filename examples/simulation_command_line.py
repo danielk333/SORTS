@@ -3,6 +3,8 @@
 '''
 Example of the Simulation command line usage
 ================================================
+
+Start by calling this file with --help
 '''
 import pathlib
 import sorts
@@ -31,7 +33,7 @@ class MySim(sorts.Simulation):
 
 #if thiis file is run as a script
 if __name__=='__main__':
-    
+
     #initialize the simulation
     sim = MySim(
         scheduler = None, 
