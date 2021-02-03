@@ -46,6 +46,11 @@ class Tracking(Scheduler):
         self.use_pass_states = use_pass_states
         self.calculate_max_snr = calculate_max_snr
 
+        self.reset_space_objects(space_objects)
+
+
+    def reset_space_objects(self, space_objects):
+        self.space_objects = space_objects
         self.states = [None]*len(space_objects)
         self.states_t = [None]*len(space_objects)
         self.passes = [None]*len(space_objects)
@@ -56,7 +61,18 @@ class Tracking(Scheduler):
             self.measurements = None
 
 
+    def add_space_object(self, space_object):
+        self.space_objects.append(space_object)
+        self.states.append(None)
+        self.states_t.append(None)
+        self.passes.append(None)
+
+        if self.use_pass_states:
+            self.measurements.append(None)
+
+
     def update(self):
+        self.reset_space_objects(self.space_objects)
         for ind in range(len(self.space_objects)):
             self.get_passes(ind)
 
@@ -199,6 +215,21 @@ class PriorityTracking(Tracking):
         if self.priority is None:
             self.priority = np.ones((len(self.space_objects),), dtype=np.float64)
         
+
+    def add_space_object(self, space_object, priority):
+        super().add_space_object(space_object)
+        self.priority.append(priority)
+
+
+    def update(self, space_objects=None, priority=None):
+        if space_objects is not None:
+            self.space_objects = space_objects
+        if priority is not None:
+            self.priority = priority
+        assert len(self.priority) == len(self.space_objects), 'Need a priority for each object'
+
+        super().update()
+
 
     def set_measurements(self):
         '''#TODO: Docstring
