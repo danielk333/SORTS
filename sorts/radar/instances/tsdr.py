@@ -65,7 +65,6 @@ def gen_tromso_space_debris_radar(fence=False, phased=False):
     tsdr_r = Radar(
         tx, 
         rx,
-        max_off_axis=120.0, 
         min_SNRdb=10.0,
     )
     return tsdr_r

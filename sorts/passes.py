@@ -276,11 +276,10 @@ def find_passes(t, states, station, cache_data=True):
 
     '''
     passes = []
-    zenith = np.array([0,0,1], dtype=np.float64)
 
     enu = station.enu(states[:3,:])
-    zenith_ang = pyant.coordinates.vector_angle(zenith, enu, radians=False)
-    check = zenith_ang < 90.0-station.min_elevation
+
+    check = station.field_of_view(states)
     inds = np.where(check)[0]
 
     dind = np.diff(inds)
@@ -298,7 +297,6 @@ def find_passes(t, states, station, cache_data=True):
                 inds=ps_inds, 
                 cache=True,
             )
-            ps._zang = zenith_ang[ps_inds]
         else:
             ps = Pass(
                 t=None, 
@@ -325,7 +323,6 @@ def find_simultaneous_passes(t, states, stations, cache_data=True):
 
     '''
     passes = []
-    zenith = np.array([0,0,1], dtype=np.float64)
 
     enu = []
     zenith_ang = []
@@ -335,10 +332,7 @@ def find_simultaneous_passes(t, states, stations, cache_data=True):
         enu_st = station.enu(states)
         enu.append(enu_st)
 
-        zenith_st_ang = pyant.coordinates.vector_angle(zenith, enu_st[:3,:], radians=False)
-        zenith_ang.append(zenith_st_ang)
-
-        check_st = zenith_st_ang < 90.0-station.min_elevation
+        check_st = station.field_of_view(states)
         check = np.logical_and(check, check_st)
 
     inds = np.where(check)[0]
@@ -363,7 +357,6 @@ def find_simultaneous_passes(t, states, stations, cache_data=True):
                 cache=True,
                 station_id=[None, None],
             )
-            ps._zang = [z[ps_inds] for z in zenith_ang]
         else:
             ps = Pass(
                 t=None, 

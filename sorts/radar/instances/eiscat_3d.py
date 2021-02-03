@@ -142,7 +142,6 @@ def gen_eiscat3d(beam='array', stage=1):
     eiscat3d = Radar(
         tx=tx, 
         rx=rx, 
-        max_off_axis=120.0, 
         min_SNRdb=10.0,
     )
     return eiscat3d
@@ -237,7 +236,6 @@ def gen_eiscat3d_demonstrator(beam='array'):
     eiscat3d_demonstartor = Radar(
         tx=tx, 
         rx=rx, 
-        max_off_axis=120.0, 
         min_SNRdb=10.0,
     )
     return eiscat3d_demonstartor

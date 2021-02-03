@@ -13,19 +13,16 @@ class Radar(object):
         
         :ivar list tx: List of transmitting sites, i.e. instances of :class:`sorts.radar.TX`
         :ivar list rx: List of receiving sites, i.e. instances of :class:`sorts.radar.RX`
-        :ivar float max_off_axis: Maximum angle between pointing direction and a received signal.
         :ivar float min_SNRdb: Minimum SNR detectable by radar system in dB (after coherent integration).
 
         :param list tx: List of transmitting sites, i.e. instances of :class:`sorts.radar.TX`
         :param list rx: List of receiving sites, i.e. instances of :class:`sorts.radar.RX`
-        :param float max_off_axis: Maximum angle between pointing direction and a received signal.
         :param float min_SNRdb: Minimum SNR detectable by radar system in dB (after coherent integration).
 
     '''
-    def __init__(self, tx, rx, max_off_axis=90.0, min_SNRdb=10.0):
+    def __init__(self, tx, rx, min_SNRdb=10.0):
         self.tx = tx
         self.rx = rx
-        self.max_off_axis = max_off_axis
         self.min_SNRdb = min_SNRdb
 
 
@@ -35,7 +32,6 @@ class Radar(object):
         ret = Radar(
             tx = [],
             rx = [],
-            max_off_axis = copy.deepcopy(self.max_off_axis),
             min_SNRdb = copy.deepcopy(self.min_SNRdb),
         )
         for tx in self.tx:
