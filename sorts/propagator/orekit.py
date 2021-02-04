@@ -84,6 +84,9 @@ def mjd2absdate(mjd, utc):
 class Orekit(Propagator):
     '''Propagator class implementing the Orekit propagator.
 
+    #TODO: Update docs according to new "settings dict" method.
+    #TODO: Valdiate Orekit v10 compatibility
+
     :ivar list solarsystem_perturbers: List of strings of names of objects in the solarsystem that should be used for third body perturbation calculations. All objects listed at `CelestialBodyFactory <https://www.orekit.org/static/apidocs/org/orekit/bodies/CelestialBodyFactory.html>`_ are available.
     :ivar str in_frame: String identifying the input frame to be used. All frames listed at `FramesFactory <https://www.orekit.org/static/apidocs/org/orekit/frames/FramesFactory.html>`_ are available.
     :ivar str out_frame: String identifying the output frame to be used. All frames listed at `FramesFactory <https://www.orekit.org/static/apidocs/org/orekit/frames/FramesFactory.html>`_ are available.
@@ -475,24 +478,12 @@ class Orekit(Propagator):
         '''
         **Implementation:**
     
-        Units are in meters and degrees.
-
         Keyword arguments are:
 
             * float A: Area in m^2
             * float C_D: Drag coefficient
             * float C_R: Radiation pressure coefficient
             * float m: Mass of object in kg
-
-        *NOTE:*
-            * If the eccentricity is below 1e-10 the eccentricity will be set to 1e-10 to prevent Keplerian Jacobian becoming singular.
-        
-
-        The implementation first checks if the input frame is Pseudo inertial, if this is true this is used as the propagation frame. If not it is automatically converted to EME (ECI-J2000).
-
-        Since there are forces that are dependent on the space-craft parameters, if these parameter has been changed since the last iteration the numerical integrator is re-initialized at every call of this method. The forces that can be initialized without spacecraft parameters (e.g. Earth gravitational field) are done at propagator construction.
-
-        See :func:`propagator_base.PropagatorBase.get_orbit`.
         '''
         if self.profiler is not None:
             self.profiler.start('Orekit:propagate')
@@ -534,8 +525,13 @@ class Orekit(Propagator):
         if self.settings['drag_force']:
             if 'C_D' not in kwargs:
                 raise Exception('Drag force enabled but no drag coefficient "C_D" given')
+            if 'A' not in kwargs:
+                raise Exception('Drag force enabled but no area "A" given')
         else:
-            kwargs['C_D'] = 1.0
+            if 'C_D' not in kwargs:
+                kwargs['C_D'] = 2.3
+            if 'A' not in kwargs:
+                kwargs['A'] = 1.0
 
         if 'm' not in kwargs:
             kwargs['m'] = 0.0
@@ -544,7 +540,7 @@ class Orekit(Propagator):
         times = epoch + t
 
         mjd0 = epoch.mjd
-        t = t.value
+        t = t.sec
         if not isinstance(t, np.ndarray):
             t = np.array([t])
 

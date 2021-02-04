@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''
+'''Radar configuration plot functions
 
 '''
 

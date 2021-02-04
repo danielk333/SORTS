@@ -35,8 +35,7 @@ class Scan(ABC):
     .. code-block:: python
 
         import numpy as np
-        
-
+        #TODO
 
     **Coordinate systems:**
 

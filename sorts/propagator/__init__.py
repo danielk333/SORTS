@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-'''
+'''Defines all the available propagators and the base-class that needs to be sub-classed to implement a custom propagator. 
+Such a subclass can then be used with every other functionality of SORTS.
 
 '''
 
@@ -22,3 +23,6 @@ try:
     __all__.append('SGP4')
 except ImportError:
     SGP4 = None
+
+from .kepler import Kepler
+__all__.append('Kepler')

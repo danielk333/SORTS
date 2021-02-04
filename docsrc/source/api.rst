@@ -92,6 +92,8 @@ errors
     sorts.errors.errors
     sorts.errors.ionospheric_ray_trace
     sorts.errors.linearized_coded
+    sorts.errors.atmospheric_drag
+    sorts.errors.linearized_orbit_determination
 
 
 io

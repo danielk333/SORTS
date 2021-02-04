@@ -27,6 +27,8 @@ class Propagator(ABC):
         heartbeat = False,
     )
 
+
+
     def __init__(self, settings=None, profiler=None, logger=None):
         self.settings = dict()
         self._check_args()
@@ -53,6 +55,36 @@ class Propagator(ABC):
             if type(self.DEFAULT_SETTINGS[key_s]) != type(val_s):
                 raise ValueError('Setting "{}" does not support "{}"'.format(key_s, type(val_s)))
 
+    @property
+    def out_frame(self):
+        if 'out_frame' in self.settings:
+            return self.settings['out_frame']
+        else:
+            raise AttributeError('No setting called "out_frame"')
+
+
+    @out_frame.setter
+    def out_frame(self, val):
+        if 'out_frame' in self.settings:
+            self.settings['out_frame'] = val
+        else:
+            raise AttributeError('No setting called "out_frame"')
+
+    @property
+    def in_frame(self):
+        if 'in_frame' in self.settings:
+            return self.settings['in_frame']
+        else:
+            raise AttributeError('No setting called "in_frame"')
+
+
+    @in_frame.setter
+    def in_frame(self, val):
+        if 'in_frame' in self.settings:
+            self.settings['in_frame'] = val
+        else:
+            raise AttributeError('No setting called "in_frame"')
+
 
     def _check_args(self):
         '''This method makes sure that the function signature of the implemented are correct.
@@ -78,7 +110,7 @@ class Propagator(ABC):
 
         if epoch is None:
             pass
-        elif isinstance(epoch, Time):
+        elif isinstance(epoch, Time) and not isinstance(epoch, TimeDelta):
             if epoch.format != self.settings['epoch_format']:
                 epoch.format = self.settings['epoch_format']
 
@@ -87,9 +119,17 @@ class Propagator(ABC):
         else:
             epoch = Time(epoch, format=self.settings['epoch_format'], scale=self.settings['epoch_scale'])
 
+        if len(epoch.shape) > 0:
+            if epoch.size > 1:
+                raise ValueError(f'Can only have one epoch, not "{epoch.size}"')
+            else:
+                epoch = epoch[0]
+
 
         if t is None:
             pass
+        elif isinstance(t, Time) and not isinstance(t, TimeDelta):
+            t = t - epoch
         elif isinstance(t, TimeDelta):
             if t.format != self.settings['time_format']:
                 t.format = self.settings['time_format']
@@ -97,7 +137,15 @@ class Propagator(ABC):
             if self.settings['time_scale'] is not None:
                 if t.scale != self.settings['time_scale']:
                     t = getattr(t,self.settings['time_scale'])
-
+        elif isinstance(t, np.ndarray):
+            if np.issubdtype(t.dtype, np.datetime64):
+                t = Time(t, scale=self.settings['time_scale'])
+                t = t - epoch
+            else:
+                t = TimeDelta(t, format=self.settings['time_format'], scale=self.settings['time_scale'])
+        elif isinstance(t, np.datetime64):
+            t = Time(t, scale=self.settings['time_scale'])
+            t = t - epoch
         else:
             t = TimeDelta(t, format=self.settings['time_format'], scale=self.settings['time_scale'])
 

@@ -9,6 +9,15 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 class Interpolator(ABC):
+    '''Base Interpolation class that mimics the behavior of :code:`SpaceObject` so that a `Interpolator` instance can be used instead.
+
+    To create a Interpolator one must define the :code:`get_state` method. to return interpolated
+    This method should return states based on the data contained in the instance.
+    This data is preferably internalized at instantiation.
+
+    :param numpy.ndarray states: (6,n) array of states to interpolate between.
+    :param numpy.ndarray t: (n,) vector of times corresponding to the states.
+    '''
 
     def __init__(self, states, t):
         self.states = states

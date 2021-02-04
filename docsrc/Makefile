@@ -19,17 +19,13 @@ help:
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-wipe:
-	@make clean
-	@rm source/auto_gallery -r
-	@rm source/_autodoc -r
+wipe: | clean
+	rm source/auto_gallery -r
+	rm source/_autodoc -r
 
 mv_github:
-	@rm -r ../docs
-	@mkdir ../docs
-	@cp -a build/html/. ../docs
+	rm -r ../docs
+	mkdir ../docs
+	cp -a build/html/. ../docs
 
-github:
-	@make wipe
-	@make html
-	@make mv_github
+github: | wipe html mv_github

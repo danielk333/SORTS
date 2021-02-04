@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''
+'''Defines function for reading the MASTER catalog files.
 
 '''
 
