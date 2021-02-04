@@ -11,40 +11,14 @@ import scipy
 import scipy.constants as consts
 
 import sgp4
-HEAD = False
 
-#<<<<<<< HEAD
-if HEAD:
-  if hasattr(sgp4, 'api'):
-      # version 2.0 of sgp4 or newer
-      from sgp4.api import Satrec
-      twoline2rv = Satrec.twoline2rv
-      def _propagate(rv, t, *a, **kw):
-          t = Time(t, *a, **kw)
-          e, p, v = rv.sgp4(t.jd1, t.jd2)
-          if e != 0: raise
-          return p, v
-      sgp4_v2 = True
-  else:
-      from sgp4.io import twoline2rv as _twoline
-      from sgp4.earth_gravity import wgs72
-      def twoline2rv(lin1, lin2):
-          return _twoline(lin1, lin2, wgs72)
-      def _propagate(rv, t):
-          dt = Time(t, format='datetime').value
-          return rv.propagate(dt.year, dt.month, dt.day,
-                      dt.hour, dt.minute, dt.second + 1e-6*dt.microsecond)
-      sgp4_v2 = False
-#=======
-else:
-  from sgp4.api import Satrec
+from sgp4.api import Satrec
 
-  twoline2rv = Satrec.twoline2rv
-  def _propagate(rv, t):
-      e, p, v = rv.sgp4(t.jd1, t.jd2)
-      if e != 0: raise
-      return p, v
-#>>>>>>> develop
+twoline2rv = Satrec.twoline2rv
+def _propagate(rv, t):
+    e, p, v = rv.sgp4(t.jd1, t.jd2)
+    if e != 0: raise
+    return p, v
 
 from sorts import frames, dates
 from sorts.propagator import SGP4
@@ -183,39 +157,20 @@ class TestFrames(unittest.TestCase):
 
         # epoch is in UTC or UT1 (not clear which). The difference is < 1 sec always.
         rv_ept = Time_from_rv(rv)
-#<<<<<<< HEAD
-        if HEAD:
-          # Extract TEME Cartesian state vector at epoch
-          if sgp4_v2:
-              err, po0, ve0 = rv.sgp4(rv_ept.jd1, rv_ept.jd2)
-              assert err == 0
-          else:
-              year, month, day, hour, minute, sec = rv_ept.ymdhms
-              po0, ve0 = rv.propagate(year, month, day, hour, minute, sec)
-#=======
-        else:
-          # Extract timetuple, using DK's methods
-          # tuple: year, month, day, hr, min, sec, microseconds
-          year, month, day, hour, minute, sec = rv_ept.ymdhms
+        # Extract timetuple, using DK's methods
+        # tuple: year, month, day, hr, min, sec, microseconds
+        year, month, day, hour, minute, sec = rv_ept.ymdhms
 
-          # Extract TEME Cartesian state vector at epoch
-          err, po0, ve0 = rv.sgp4(rv_ept.jd1, rv_ept.jd2)
-          assert err == 0
-          x0 = np.array([po0 + ve0])
-#>>>>>>> develop
+        # Extract TEME Cartesian state vector at epoch
+        err, po0, ve0 = rv.sgp4(rv_ept.jd1, rv_ept.jd2)
+        assert err == 0
+        x0 = np.array([po0 + ve0])
 
         # unified
         pos, vel = _propagate(rv, rv_ept)
         x = np.array([pos + vel])
 
-#<<<<<<< HEAD
-        if HEAD:
-          assert po0 == pos
-          assert ve0 == vel
-#=======
-        else:
-          np.testing.assert_array_equal(x0,x)
-#>>>>>>> develop
+        np.testing.assert_array_equal(x0,x)
 
 
     def test_tle_init(self):
@@ -238,31 +193,15 @@ class TestFrames(unittest.TestCase):
         svec = s1_res[ix]
 
         # Extract TEME statevector for initialization of SORTS propagation object
-#<<<<<<< HEAD
-        if HEAD:
-          svt = Time(svec.UTC, scale='utc')
-          pos, vel = _propagate(rv, svt)
-          state_eci = np.array(pos + vel) * 1e3   # pos and vel are tuples, so pos + vel is a concatenation
-          # epoch_mjd = dates.npdt_to_mjd(svec.UTC)
+        pos, vel = _propagate(rv, rv_ept)
 
+        state_eci = np.array(pos + vel) * 1e3
 
-          # SORTS-style SGP4 propagator
-          prp = SGP4(settings=dict(out_frame='ITRF'))
+        # SORTS-style SGP4 propagator
+        prp = SGP4(settings=dict(in_frame='TEME', out_frame='ITRS'))
 
-          # Should be Cartesian ITRF coordinates in SI units
-          posvel = prp.propagate(0., state_eci, svt)
-#=======
-        else:
-          pos, vel = _propagate(rv, rv_ept)
-
-          state_eci = np.array(pos + vel) * 1e3
-
-          # SORTS-style SGP4 propagator
-          prp = SGP4(settings=dict(in_frame='TEME', out_frame='ITRS'))
-
-          # Should be Cartesian ITRF coordinates in SI units
-          posvel = prp.propagate(Time(svec.UTC)-rv_ept, state_eci, rv_ept)
-#>>>>>>> develop
+        # Should be Cartesian ITRF coordinates in SI units
+        posvel = prp.propagate(Time(svec.UTC)-rv_ept, state_eci, rv_ept)
         ppos, pvel = posvel[:3], posvel[3:]
 
         assert vnorm2(svec.POS - ppos) < 800.0, 'Inaccurate position'
@@ -271,13 +210,7 @@ class TestFrames(unittest.TestCase):
         for ii in range(200):
             # dt between statevectors is 10.0 seconds
             svec = s1_res[ix+ii]
-#<<<<<<< HEAD
-            if HEAD:
-              posvel = prp.propagate(10.0*ii, state_eci, svt)
-#=======
-            else:
-              posvel = prp.propagate(Time(svec.UTC)-rv_ept, state_eci, rv_ept)
-#>>>>>>> develop
+            posvel = prp.propagate(Time(svec.UTC)-rv_ept, state_eci, rv_ept)
             ppos, pvel = posvel[:3], posvel[3:]
 
             assert vnorm2(svec.POS - ppos) < 800.0, f'Inaccurate position: {ii}'
@@ -307,37 +240,15 @@ class TestFrames(unittest.TestCase):
         svec = s1_res[ix]
         svt = Time(svec.UTC, scale='utc')                     # Astropy Time
 
-#<<<<<<< HEAD
-        if HEAD:
-          state_teme = frames.convert(
-              svt,
-              np.r_[svec.POS, svec.VEL],
-              in_frame='ITRS',
-              out_frame='TEME'
-          )
+        epoch0 = Time(svec.UTC, scale='utc')
 
-          # dt = (svt - rv_ept).replicate(format='sec').value
+        state_ecef = np.r_[svec.POS, svec.VEL]
 
-          # SORTS-style SGP4 propagator
-          prp = SGP4(settings=dict(out_frame='ITRF'))
+        # SORTS-style SGP4 propagator
+        prp = SGP4(settings=dict(in_frame='ITRS', out_frame='ITRS'))
 
-          # Find mean elements from osculating elements
-          state_tle = prp.TEME_to_TLE(state_teme, svt)
-
-          # Should be Cartesian ITRF coordinates in SI units
-          posvel = prp.propagate(0., state_teme, svt)
-#=======
-        else:
-          epoch0 = Time(svec.UTC, scale='utc')
-
-          state_ecef = np.r_[svec.POS, svec.VEL]
-
-          # SORTS-style SGP4 propagator
-          prp = SGP4(settings=dict(in_frame='ITRS', out_frame='ITRS'))
-
-          # Should be Cartesian ITRF coordinates in SI units
-          posvel = prp.propagate(0., state_ecef, epoch0)
-#>>>>>>> develop
+        # Should be Cartesian ITRF coordinates in SI units
+        posvel = prp.propagate(0., state_ecef, epoch0)
         ppos, pvel = posvel[:3], posvel[3:]
 
         assert vnorm2(svec.POS - ppos) < 800.0, 'Inaccurate position'
@@ -346,13 +257,7 @@ class TestFrames(unittest.TestCase):
         for ii in range(200):
             # dt between statevectors is 10.0 seconds
             svec = s1_res[ix+ii]
-#<<<<<<< HEAD
-            if HEAD:
-              posvel = prp.propagate(10.0*ii, state_teme, svt)
-#=======
-            else:
-              posvel = prp.propagate(10.0*ii, state_ecef, epoch0)
-#>>>>>>> develop
+            posvel = prp.propagate(10.0*ii, state_ecef, epoch0)
             ppos, pvel = posvel[:3], posvel[3:]
 
             assert vnorm2(svec.POS - ppos) < 800.0, 'Inaccurate position'
@@ -372,35 +277,14 @@ class TestFrames(unittest.TestCase):
         svec = s1_res[ix]
         svt = Time(svec.UTC, scale='utc')                     # Astropy Time
 
-#<<<<<<< HEAD
-        if HEAD:
-          state_teme = frames.convert(
-              svt,
-              np.r_[svec.POS, svec.VEL],
-              in_frame='ITRS',
-              out_frame='TEME'
-          )
+        state_ecef = np.r_[svec.POS, svec.VEL]
 
-          # SORTS-style SGP4 propagator
-          prp = SGP4(settings=dict(out_frame='ITRF'))
+        # SORTS-style SGP4 propagator
+        prp = SGP4(settings=dict(in_frame='ITRS', out_frame='ITRS'))
 
-          # Find mean elements from osculating elements
-          state_tle = prp.TEME_to_TLE(state_teme, svt)
+        ii = np.arange(nprop)
 
-          ii = np.arange(nprop)
-
-          pv_itrf = prp.propagate(10*ii, state_teme, svt)
-#=======
-        else:
-          state_ecef = np.r_[svec.POS, svec.VEL]
-
-          # SORTS-style SGP4 propagator
-          prp = SGP4(settings=dict(in_frame='ITRS', out_frame='ITRS'))
-
-          ii = np.arange(nprop)
-
-          pv_itrf = prp.propagate(10*ii, state_ecef, Time(svec.UTC))
-#>>>>>>> develop
+        pv_itrf = prp.propagate(10*ii, state_ecef, Time(svec.UTC))
         pos = pv_itrf[:3].T
         vel = pv_itrf[3:].T
 
@@ -410,28 +294,15 @@ class TestFrames(unittest.TestCase):
         return pos, vel, rpos, rvel
 
 
-    if not HEAD:
-      def test_propagate_from_RES(self, nprop=100):
-#<<<<<<< HEAD
-        if HEAD:
-          pos, vel, rpos, rvel = self.propagate_from_RES(nprop)
-#=======
-        else:
-          pos, vel, rpos, rvel = self.propagate_from_RES(nprop)
-#>>>>>>> develop
+    def test_propagate_from_RES(self, nprop=100):
+        pos, vel, rpos, rvel = self.propagate_from_RES(nprop)
 
 
-#<<<<<<< HEAD
-        if HEAD:
-          np.testing.assert_array_less(vnorm2(vel[:150]-rvel[:150]), 0.50), \
-              'Position errors too large'
-#=======
-        else:
-          np.testing.assert_array_less(vnorm2(pos[:nprop]-rpos[:nprop]), 100), \
+        np.testing.assert_array_less(vnorm2(pos[:nprop]-rpos[:nprop]), 100), \
+            'Position errors too large'
 
-          np.testing.assert_array_less(vnorm2(vel[:nprop]-rvel[:nprop]), 0.24), \
-              'Velocity errors too large'
-#>>>>>>> develop
+        np.testing.assert_array_less(vnorm2(vel[:nprop]-rvel[:nprop]), 0.24), \
+            'Velocity errors too large'
 
     def plot_propagation_errors(self, nprop=400):
         from matplotlib import pyplot as plt
@@ -456,12 +327,7 @@ class TestFrames(unittest.TestCase):
 
 
 
-
-
-
-#<<<<<<< HEAD
-    if HEAD:
-      def skip_test_TEME_to_ITRF(self):
+    def skip_test_TEME_to_ITRF(self):
 
         # First, try without polar motion
 
@@ -528,6 +394,4 @@ if __name__ == '__main__':
         svec = s1_res[ix]
 
         svt = Time(svec.UTC, scale='utc')
-#=======
-#>>>>>>> develop
 
