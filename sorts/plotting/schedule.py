@@ -19,6 +19,73 @@ from mpl_toolkits.mplot3d import Axes3D
 from . import general
 from ..controller import Tracker
 
+def observed_parameters(data_list, snrdb_lim = 10.0, axes=None, fontsize=18):
+    '''Observed parameters for one RX station.
+    '''
+
+    if ax is None:
+        fig = plt.figure(figsize=(15,15))
+        axes = np.array([
+            [
+                fig.add_subplot(221, projection='3d'),
+                fig.add_subplot(222),
+            ],
+            [
+                fig.add_subplot(223),
+                fig.add_subplot(224),
+            ],
+        ])
+    else:
+        fig = None
+
+    axes[0][0].plot([0],[0],[0],'og')
+
+    for pi, dat in enumerate(data_list):
+        if dat is None:
+            continue
+
+        axes[0][0].plot(dat['rx_k'][0,:], dat['rx_k'][1,:], dat['rx_k'][2,:], '-')
+
+        SNRdB = 10*np.log10(dat['snr'])
+        det_inds = SNRdB > snrdb_lim
+
+        axes[0][1].plot(dat['t']/3600.0, dat['range']*1e-3, '-', label=f'Pass{pi}')
+        axes[1][0].plot(dat['t']/3600.0, dat['range_rate']*1e-3, '-')
+        axes[1][1].plot(dat['t']/3600.0, SNRdB, '-')
+
+        axes[0][1].plot(dat['t'][det_inds]/3600.0, dat['range'][det_inds]*1e-3, '.r')
+        axes[1][0].plot(dat['t'][det_inds]/3600.0, dat['range_rate'][det_inds]*1e-3, '.r')
+        axes[1][1].plot(dat['t'][det_inds]/3600.0, SNRdB[det_inds], '.r')
+        axes[1][1].set_ylim([0, None])
+
+
+    axes[0][1].set_xlabel('Time [h]', fontsize=fontsize)
+    axes[1][0].set_xlabel('Time [h]', fontsize=fontsize)
+    axes[1][1].set_xlabel('Time [h]', fontsize=fontsize)
+
+    axes[0][1].set_ylabel('Two way range [km]', fontsize=fontsize)
+    axes[1][0].set_ylabel('Two way range rate [km/s]', fontsize=fontsize)
+    axes[1][1].set_ylabel('SNR [dB]', fontsize=fontsize)
+
+    axes[0][1].legend()
+
+    dr = 1
+    axes[0][0].set_xlim([-dr, dr])
+    axes[0][0].set_ylim([-dr, dr])
+    axes[0][0].set_zlim([-dr, dr])
+
+    axes[0][0].set_xlabel('East [k_x]')
+    axes[0][0].set_ylabel('North [k_y]')
+    axes[0][0].set_zlabel('Up [k_z]')
+
+    if fig is not None:
+        fig.tight_layout()
+
+    return fig, ax
+
+    
+
+
 
 def schedule_pointing(
         scheduler, 
