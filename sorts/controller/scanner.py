@@ -18,14 +18,30 @@ class Scanner(RadarController):
         'dwell',
     ]
 
-    def __init__(self, radar, scan, r=np.linspace(300e3,1000e3,num=10), profiler=None, logger=None, return_copy=False, meta=None, **kwargs):
-        super().__init__(radar, profiler=profiler, logger=logger, meta=meta)
+    def __init__(self, radar, scan, r=np.linspace(300e3,1000e3,num=10), as_altitude=False, profiler=None, logger=None, return_copy=False, meta=None, **kwargs):
+        super().__init__(radar, profiler=profiler, logger=logger, meta=meta, **kwargs)
         self.scan = scan
+        if self.t is not None:
+            self.dwell = self.scan.dwell(self.t)
+
         self.r = r
         self.return_copy = return_copy
+        self.as_altitude = as_altitude
 
         if self.logger is not None:
             self.logger.info(f'Scanner:init')
+
+    @property
+    def dwell(self):
+        if self.t_slice is None:
+            return self.scan.dwell(self.t)
+        else:
+            return self.t_slice
+
+    @dwell.setter
+    def dwell(self, val):
+        self.t_slice = val
+
 
     def default_meta(self):
         dic = super().default_meta()
@@ -45,19 +61,33 @@ class Scanner(RadarController):
 
         meta = self.default_meta()
         meta['dwell'] = self.scan.dwell(t)
+
+        RadarController.coh_integration(radar, meta['dwell'])
     
         point_rx_to_tx = []
         point_tx = []
         for tx in radar.tx:
             point = self.scan.ecef_pointing(t, tx)
 
-            if len(point.shape) > 1:
-                point_tx.append(point + tx.ecef[:,None])
-                __ptx = point[:,:,None]*self.r[None,None,:] + tx.ecef[:,None,None]
-                point_rx_to_tx.append(__ptx.reshape(3, __ptx.shape[1]*__ptx.shape[2]))
+            if self.as_altitude:
+
+                if len(point.shape) > 1:
+                    r = self.r[None,:]/point[2,:]
+                    point_tx.append(point + tx.ecef[:,None])
+                    __ptx = point[:,:,None]*r[None,:,:] + tx.ecef[:,None,None]
+                    point_rx_to_tx.append(__ptx.reshape(3, __ptx.shape[1]*__ptx.shape[2]))
+                else:
+                    r = self.r/point[2]
+                    point_tx.append(point + tx.ecef)
+                    point_rx_to_tx.append(point[:,None]*r[None,:] + tx.ecef[:,None])
             else:
-                point_tx.append(point + tx.ecef)
-                point_rx_to_tx.append(point[:,None]*self.r[None,:] + tx.ecef[:,None])
+                if len(point.shape) > 1:
+                    point_tx.append(point + tx.ecef[:,None])
+                    __ptx = point[:,:,None]*self.r[None,None,:] + tx.ecef[:,None,None]
+                    point_rx_to_tx.append(__ptx.reshape(3, __ptx.shape[1]*__ptx.shape[2]))
+                else:
+                    point_tx.append(point + tx.ecef)
+                    point_rx_to_tx.append(point[:,None]*self.r[None,:] + tx.ecef[:,None])
             
             if self.profiler is not None:
                 self.profiler.start('Scanner:generator:point_radar:_point_station[tx]')
@@ -85,8 +115,12 @@ class Scanner(RadarController):
             if self.profiler is not None:
                 self.profiler.stop('Scanner:generator:point_radar:_point_station[rx]')
 
+        #Make sure radar is on
+        RadarController.turn_on(radar)
+
         if self.profiler is not None:
                 self.profiler.stop('Scanner:generator:point_radar')
+
 
         return radar, meta
 

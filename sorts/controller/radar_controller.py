@@ -21,10 +21,11 @@ class RadarController(ABC):
         'controller_type',
     ]
 
-    def __init__(self, radar, t=None, t0=0.0, profiler=None, logger=None, meta=None):
+    def __init__(self, radar, t=None, t0=0.0, t_slice=None, profiler=None, logger=None, meta=None):
         self.radar = radar
         self.t = t
         self.t0 = t0
+        self.t_slice = t_slice
         self.logger = logger
         self.profiler = profiler
 
@@ -114,6 +115,15 @@ class RadarController(ABC):
         '''
         RadarController.point_tx_ecef(radar, ecef)
         RadarController.point_rx_ecef(radar, ecef)
+
+
+    @staticmethod
+    def coh_integration(radar, dwell):
+        '''Set the coherent integration settings based on the dwell time.
+        '''
+        for tx in radar.tx:
+            tx.n_ipp = int(dwell/tx.ipp)
+            tx.coh_int_bandwidth = 1.0/(tx.pulse_length*tx.n_ipp)
 
 
     @staticmethod

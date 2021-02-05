@@ -12,6 +12,7 @@ import copy
 #Third party import
 import numpy as np
 
+import pyant
 
 #Local import
 from .. import frames
@@ -45,6 +46,23 @@ class Station(object):
         self.beam = beam
         self.enabled = True
         self.pointing_range = None
+
+
+    def field_of_view(self, states):
+        '''Determines the field of view of the station. Should be vectorized over second dimension of states.
+        Needs to return a numpy boolean array with `True` when the state is inside the FOV.
+
+        Used to determine when a "pass" is occurring based on the input ECEF states and times. 
+        The default implementation is a minimum elevation check.
+        '''
+        zenith = np.array([0,0,1], dtype=np.float64)
+
+        enu = self.enu(states[:3,:])
+        
+        zenith_ang = pyant.coordinates.vector_angle(zenith, enu, radians=False)
+        check = zenith_ang < 90.0 - self.min_elevation
+
+        return check
 
 
     def rebase(self, lat, lon, alt):

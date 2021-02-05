@@ -82,6 +82,16 @@ def mjd_to_jd(mjd):
     return mjd + 2400000.5
 
 
+def mjd_to_j2000(mjd_tt):
+    '''Convert from Modified Julian Date to days past J2000.
+    
+    :param float/numpy.ndarray mjd_tt: MJD in TT
+    :return: Days past J2000
+    :rtype: float/numpy.ndarray
+    '''
+    return mjd_to_jd(mjd_tt) - 2451545.0
+
+
 def npdt_to_date(dt):
     '''Converts a numpy datetime64 value to a date tuple
 

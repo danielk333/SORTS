@@ -167,8 +167,10 @@ class ObservedParameters(Scheduler):
 
         if self.profiler is not None:
             self.profiler.start('Obs.Param.:calculate_observation:generator')
+        metas = []
         for ti, mrad in enumerate(generator):
             radar, meta = mrad
+            metas.append(meta)
             if self.profiler is not None:
                 self.profiler.start('Obs.Param.:calculate_observation:snr-step')
 
@@ -239,11 +241,15 @@ class ObservedParameters(Scheduler):
             tx_k = enus[0][:3,:]/ranges[0],
             rx_k = enus[1][:3,:]/ranges[1],
             rcs = rcs,
+            metas = metas,
         )
 
         if np.any(keep):
             for key in data:
-                data[key] = data[key][...,keep]
+                if isinstance(data[key], np.ndarray):
+                    data[key] = data[key][...,keep]
+                else:
+                    data[key] = [x for ind_, x in enumerate(data[key]) if keep[ind_]]
         else:
             data = None
 

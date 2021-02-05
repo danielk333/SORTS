@@ -103,7 +103,9 @@ scheduler.update()
 scheduler.set_measurements()
 
 
-sched_data = scheduler.schedule()
+sched_data = scheduler.schedule(start=3600*2.0, stop=3600*9.0)
+#Without start and stop argument entire schedule gets printed
+#sched_data = scheduler.schedule()
 rx_head = [f'rx{i} {co}' for i in range(len(scheduler.radar.rx)) for co in ['az', 'el']]
 sched_tab = tabulate(sched_data, headers=["t [s]"] + rx_head + ['Controller', 'Target'])
 

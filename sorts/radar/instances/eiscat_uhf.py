@@ -76,7 +76,6 @@ def gen_eiscat_uhf():
     uhf = Radar(
         tx, 
         rx,
-        max_off_axis=180.0, 
         min_SNRdb=10.0,
     )
     return uhf

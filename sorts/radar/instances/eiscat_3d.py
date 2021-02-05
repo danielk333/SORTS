@@ -142,7 +142,6 @@ def gen_eiscat3d(beam='array', stage=1):
     eiscat3d = Radar(
         tx=tx, 
         rx=rx, 
-        max_off_axis=120.0, 
         min_SNRdb=10.0,
     )
     return eiscat3d
@@ -222,7 +221,7 @@ def gen_eiscat3d_demonstrator(beam='array'):
         alt = kir_alt,
         min_elevation = 30.0,
         beam = tx_beam_kir,
-        power = 5e6/91.0, # 5 MW
+        power = 0.5e3*2*16, # 500W / antenna / pol (now 16 antennas)
         bandwidth = 100e3, # 100 kHz tx bandwidth
         duty_cycle = 0.25, # 25% duty-cycle
         pulse_length=1920e-6,
@@ -237,7 +236,6 @@ def gen_eiscat3d_demonstrator(beam='array'):
     eiscat3d_demonstartor = Radar(
         tx=tx, 
         rx=rx, 
-        max_off_axis=120.0, 
         min_SNRdb=10.0,
     )
     return eiscat3d_demonstartor

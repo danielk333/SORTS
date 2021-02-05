@@ -46,6 +46,31 @@ class Legendre8(Interpolator):
 
 
 
+class Linear(Interpolator):
+    '''Linear interpolation between states
+    '''
+
+    def __init__(self, states, t):
+        super().__init__(states, t)
+
+        self.t_diffs = np.diff(t)
+
+    def get_state(self, t):
+        st_t = self.t.flatten()
+        in_t = t.flatten()
+        t_mat = st_t[:,None] - in_t[None,:]
+
+        inds = np.argmax(t_mat > 0, axis=0) - 1
+
+        dts = -t_mat[inds,np.arange(len(t))]
+        frac = dts/self.t_diffs[inds]
+        
+        intep_states = self.states[:,inds]*(1 - frac) + self.states[:,inds+1]*frac
+        return intep_states
+
+
+
+
 
 def legendre8(table, t1, tN, t, ti=None):
     """Order-8 Legendre polynomial interpolation
