@@ -47,7 +47,7 @@ def gen_tromso_space_debris_radar(fence=False, phased=False):
         duty_cycle = 0.125, 
         pulse_length=1e-7*256.0,
         ipp=1e-7*256.0/0.125,
-        n_ipp=10.0,
+        n_ipp=100.0,
     )
 
     tsr_rx = RX(
