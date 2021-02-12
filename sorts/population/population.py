@@ -114,6 +114,10 @@ class Population:
         else:
             self.dtypes = dtypes
 
+        for dt in self.dtypes:
+            if np.dtype(dt).char == 'U':
+                raise TypeError('Population cannot be saved with Unicode [U] strings, try using ASCII [S] strings instead.')
+
         if state_fields is None:
             state_fields = []
             for key in Population._default_state_fields:
@@ -545,23 +549,14 @@ class Population:
         if isinstance(fname, str):
             fname = pathlib.Path(fname)
 
+
         with h5py.File(fname,"w") as hf:
             hf.create_dataset('data', data=self.data)
-            hf.create_dataset('fields',
-                data=np.array(self.fields),
-            )
-            hf.create_dataset('space_object_fields',
-                data=np.array(self.space_object_fields),
-            )
-            hf.create_dataset('dtypes',
-                data=np.array(self.dtypes),
-            )
-            hf.create_dataset('epoch_field',
-                data=np.array(self.epoch_field),
-            )
-            hf.create_dataset('state_fields',
-                data=np.array(self.state_fields),
-            )
+            hf.attrs['fields'] = self.fields
+            hf.attrs['space_object_fields'] = self.space_object_fields
+            hf.attrs['dtypes'] = self.dtypes
+            hf.attrs['epoch_field'] = [x for x in self.epoch_field.items()]
+            hf.attrs['state_fields'] = self.state_fields
 
 
     @classmethod
@@ -571,17 +566,17 @@ class Population:
 
         with h5py.File(fname,"r") as hf:
             pop = cls(
-                fields = hf['fields'].value[()],
-                dtypes = hf['dtypes'].value[()],
-                space_object_fields = hf['space_object_fields'].value[()],
-                state_fields = hf['state_fields'].value[()],
-                epoch_field = hf['epoch_field'].value[()],
+                fields = copy.deepcopy(hf.attrs['fields']),
+                dtypes = copy.deepcopy(hf.attrs['dtypes']),
+                space_object_fields = copy.deepcopy(hf.attrs['space_object_fields']),
+                state_fields = copy.deepcopy(hf.attrs['state_fields']),
+                epoch_field = {key:val for key, val in hf.attrs['epoch_field']},
                 propagator = propagator,
                 propagator_args = propagator_options,
                 propagator_options = propagator_args,
             )
         
-            pop.data = hf['data'].value[()]
+            pop.data = hf['data'][()]
 
         return pop
 
