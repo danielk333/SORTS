@@ -72,8 +72,10 @@ class ObservedParameters(Scheduler):
             snr_inds[snr_inds] = snr_db[snr_inds] > self.radar.min_SNRdb
 
         for key in data0:
-            data0[key] = data0[key][...,snr_inds]
-
+            if key == 'metas':
+                data0[key] = [x for i, x in enumerate(data0[key]) if snr_inds[i]]
+            else:
+                data0[key] = data0[key][...,snr_inds]
 
         if self.profiler is not None:
             self.profiler.stop('Obs.Param.:calculate_observation_jacobian:reference')
@@ -100,6 +102,9 @@ class ObservedParameters(Scheduler):
 
             ddata = self.calculate_observation(txrx_pass, t, generator, dso, **kwargs)
             for key in data0:
+                if key == 'metas':
+                    continue
+
                 ddata[key] = ddata[key][...,snr_inds]
 
             dr = (ddata['range'] - data0['range'])/deltas[ind]
@@ -117,7 +122,7 @@ class ObservedParameters(Scheduler):
         return data0, J
 
 
-    def calculate_observation(self, txrx_pass, t, generator, space_object, calculate_snr=True, interpolator=None, snr_limit=True):
+    def calculate_observation(self, txrx_pass, t, generator, space_object, calculate_snr=True, interpolator=None, snr_limit=True, save_states=False):
         '''Calculate the observation of a pass of a specific space object given the current state of the Scheduler.
 
         #TODO: Docstring
@@ -178,6 +183,8 @@ class ObservedParameters(Scheduler):
 
                 if self.profiler is not None:
                     self.profiler.start('Obs.Param.:calculate_observation:snr-step:gain')
+
+                #fix this shit
                 if len(radar.tx[txi].beam.pointing.shape) > 1:
                     tx_g = np.max([
                         radar.tx[txi].beam.gain(enus[0][:3,ti], ind={'pointing': pi})
@@ -243,6 +250,8 @@ class ObservedParameters(Scheduler):
             rcs = rcs,
             metas = metas,
         )
+        if save_states:
+            data['states'] = states
 
         if np.any(keep):
             for key in data:
