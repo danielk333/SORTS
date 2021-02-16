@@ -23,7 +23,7 @@ def observed_parameters(data_list, snrdb_lim = 10.0, axes=None, fontsize=18):
     '''Observed parameters for one RX station.
     '''
 
-    if ax is None:
+    if axes is None:
         fig = plt.figure(figsize=(15,15))
         axes = np.array([
             [
@@ -81,7 +81,7 @@ def observed_parameters(data_list, snrdb_lim = 10.0, axes=None, fontsize=18):
     if fig is not None:
         fig.tight_layout()
 
-    return fig, ax
+    return fig, axes
 
     
 

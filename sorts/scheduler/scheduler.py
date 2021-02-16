@@ -74,7 +74,7 @@ class Scheduler(ABC):
         ctrls = [c for c in ctrls if np.any(check_t(c))]
         
         if len(ctrls) == 0:
-            return None
+            return self.generate_schedule(np.empty((0,)), [], **kwargs)
 
         times = np.concatenate([c.t[check_t(c)] for c in ctrls], axis=0)
         sched = Scheduler.chain_generators([c(c.t[check_t(c)] - c.t0) for c in ctrls])

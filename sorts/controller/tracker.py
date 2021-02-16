@@ -66,7 +66,7 @@ class Tracker(RadarController):
                 radar = self.radar
 
             dt = t[ti] - self.t
-            check = np.logical_and(dt >= 0, dt <= self.dwell)
+            check = np.logical_and(dt >= 0, dt < self.dwell)
             meta = self.default_meta()
 
             if np.any(check):

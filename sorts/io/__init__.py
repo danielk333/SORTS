@@ -9,4 +9,4 @@ from .ccsds import write_xml_tdm, read_xml_tdm
 from .ccsds import write_txt_oem, read_txt_oem
 from .ccsds import write_xml_oem, read_xml_oem
 
-from .terminal import flush_table
+from .terminal import flush_table, step_flush_table

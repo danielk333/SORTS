@@ -72,8 +72,10 @@ class ObservedParameters(Scheduler):
             snr_inds[snr_inds] = snr_db[snr_inds] > self.radar.min_SNRdb
 
         for key in data0:
-            data0[key] = data0[key][...,snr_inds]
-
+            if key == 'metas':
+                data0[key] = [x for i, x in enumerate(data0[key]) if snr_inds[i]]
+            else:
+                data0[key] = data0[key][...,snr_inds]
 
         if self.profiler is not None:
             self.profiler.stop('Obs.Param.:calculate_observation_jacobian:reference')
@@ -100,6 +102,9 @@ class ObservedParameters(Scheduler):
 
             ddata = self.calculate_observation(txrx_pass, t, generator, dso, **kwargs)
             for key in data0:
+                if key == 'metas':
+                    continue
+
                 ddata[key] = ddata[key][...,snr_inds]
 
             dr = (ddata['range'] - data0['range'])/deltas[ind]
@@ -117,7 +122,24 @@ class ObservedParameters(Scheduler):
         return data0, J
 
 
-    def calculate_observation(self, txrx_pass, t, generator, space_object, calculate_snr=True, interpolator=None, snr_limit=True):
+    def get_beam_gain_wavelength(self, beam, enu, meta):
+        '''Given the input beam configured by the controller and the local (for that beam) coordinates of the observed object, get the correct gain and wavelength used for SNR calculation. 
+
+        The default is a maximum calculation based on pointing, this is used for e.g. RX digital beam-forming.
+        '''
+
+        if len(beam.pointing.shape) > 1:
+            g = np.max([
+                beam.gain(enu, ind={'pointing': pi})
+                for pi in range(beam.pointing.shape[1])
+            ])
+        else:
+            g = beam.gain(enu)
+
+        return g, beam.wavelength
+
+
+    def calculate_observation(self, txrx_pass, t, generator, space_object, calculate_snr=True, interpolator=None, snr_limit=True, save_states=False):
         '''Calculate the observation of a pass of a specific space object given the current state of the Scheduler.
 
         #TODO: Docstring
@@ -168,8 +190,8 @@ class ObservedParameters(Scheduler):
         if self.profiler is not None:
             self.profiler.start('Obs.Param.:calculate_observation:generator')
         metas = []
-        for ti, mrad in enumerate(generator):
-            radar, meta = mrad
+        for ti, (radar, meta) in enumerate(generator):
+
             metas.append(meta)
             if self.profiler is not None:
                 self.profiler.start('Obs.Param.:calculate_observation:snr-step')
@@ -178,22 +200,10 @@ class ObservedParameters(Scheduler):
 
                 if self.profiler is not None:
                     self.profiler.start('Obs.Param.:calculate_observation:snr-step:gain')
-                if len(radar.tx[txi].beam.pointing.shape) > 1:
-                    tx_g = np.max([
-                        radar.tx[txi].beam.gain(enus[0][:3,ti], ind={'pointing': pi})
-                        for pi in range(radar.tx[txi].beam.pointing.shape[1])
-                    ])
-                else:
-                    tx_g = radar.tx[txi].beam.gain(enus[0][:3,ti])
 
-                if len(radar.rx[rxi].beam.pointing.shape) > 1:
-                    rx_g = np.max([
-                        radar.rx[rxi].beam.gain(enus[1][:3,ti], ind={'pointing': pi})
-                        for pi in range(radar.rx[rxi].beam.pointing.shape[1])
-                    ])
-                else:
-                    rx_g = radar.rx[rxi].beam.gain(enus[1][:3,ti])
-
+                tx_g, tx_wavelength = self.get_beam_gain_wavelength(radar.tx[txi].beam, enus[0][:3,ti], meta)
+                rx_g, rx_wavelength = self.get_beam_gain_wavelength(radar.rx[rxi].beam, enus[1][:3,ti], meta)
+                
                 if self.profiler is not None:
                     self.profiler.stop('Obs.Param.:calculate_observation:snr-step:gain')
                     self.profiler.start('Obs.Param.:calculate_observation:snr-step:snr')
@@ -201,7 +211,7 @@ class ObservedParameters(Scheduler):
                 snr[ti] = hard_target_snr(
                     tx_g,
                     rx_g,
-                    radar.rx[rxi].wavelength,
+                    tx_wavelength,
                     radar.tx[txi].power,
                     ranges[0][ti],
                     ranges[1][ti],
@@ -213,7 +223,7 @@ class ObservedParameters(Scheduler):
                     self.profiler.stop('Obs.Param.:calculate_observation:snr-step:snr')
 
                 rcs[ti] = hard_target_rcs(
-                    wavelength=radar.rx[rxi].wavelength,
+                    wavelength=tx_wavelength,
                     diameter=diam,
                 )
                 if snr_limit:
@@ -243,6 +253,8 @@ class ObservedParameters(Scheduler):
             rcs = rcs,
             metas = metas,
         )
+        if save_states:
+            data['states'] = states
 
         if np.any(keep):
             for key in data:
