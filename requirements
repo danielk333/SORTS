@@ -5,5 +5,5 @@ scipy>=1.1.0
 sgp4>=2.7
 tabulate>=0.8.7
 tqdm>=4.46.0
-astropy==4.1rc1
+astropy>=4.1
 lxml>=4.5.2
