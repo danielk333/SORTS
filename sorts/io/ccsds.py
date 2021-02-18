@@ -10,24 +10,19 @@ import pkg_resources
 import pathlib
 import time
 import datetime
+import os
 
 from lxml import etree
+import xmlschema
+
 import numpy as np
 import scipy.constants as consts
 from astropy.time import TimeISO, Time
 
+
 from .. import dates
 from ..version import __version__
 
-def _get_tdm_schema():
-    tdm_xsd = pkg_resources.resource_stream('sorts.data', 'ndmxml-1.0-tdm-2.0.xsd')
-    tdm_schema = etree.XMLSchema(etree.parse(tdm_xsd))
-    return tdm_schema
-
-def _get_oem_schema():
-    oem_xsd = pkg_resources.resource_stream('sorts.data', 'ndmxml-1.0-oem-2.0.xsd')
-    oem_schema = etree.XMLSchema(etree.parse(oem_xsd))
-    return oem_schema
 
 
 class epochType(TimeISO):
@@ -46,7 +41,6 @@ def write_txt_tdm():
     raise NotImplementedError()
 def read_txt_tdm():
     raise NotImplementedError()
-
 def read_xml_tdm():
     raise NotImplementedError()
 def write_txt_oem():
@@ -59,102 +53,174 @@ def read_xml_oem():
     raise NotImplementedError()
 
 
-def xml_tdm_segmet(datas):
-    segments = []
 
-    inputs = datas.dtype.names
+# needs only to be unique - does not matter what it points to
+# blue book examples for both tdm versions 1 and version 2 have this,
+# (even though it points to what appears to be a version 1 specific resource)
+# either way, that uri does not resolve
 
-    for data in datas:
-        segment = etree.Element('segment', type='ndm:tdmSegment')
-
-        seg_meta = etree.Element('metadata', type='ndm:tdmMetadata')
-        if 'COMMENT' in inputs:
-            if len(datas.dtype['COMMENT'].shape) > 0:
-                for cmt in data['COMMENT'].flatten():
-                    seg_meta.append(etree.Element(
-                        'COMMENT', 
-                        type='xsd:string', 
-                        text=cmt,
-                    ))
-
-        seg_data = etree.Element('data', type='ndm:tdmData')
-
-        #epoch time scales are a problem, how are they nicly passed here?
-        #maybe we dont use numpy for epoch but pass astropy directly?
-        dte = etree.Element('EPOCH', type='ndm:epochType')
-        dte.text=Time(data['EPOCH'], scale='tai', format='datetime64').CCSDS_epoch
-        seg_data.append(dte)
-
-        #here data precession is a problem, how do we pick the print precision?
-        #maybe it should be chosen from the numpy datatype?
-        #is there a good convention from numpy to choose from?
-        dte = etree.Element('RANGE', type='xsd:double')
-        dte.text = data['RANGE'].astype('|S10')
-        seg_data.append(dte)
-        
-        segment.append(seg_meta)
-        segment.append(seg_data)
-
-        segments.append(segment)
-
-    return segments
+SCHEMA_URI = 'http://sanaregistry.org/r/ndmxml/ndmxml-1.0-master.xsd'
 
 
-def xml_tdm_tree(meta, segments):
+_TDM_SCHEMA = None
 
-    header = etree.Element('header', type='ndm:tdmHeader')
-    if 'COMMENT' in meta:
-        if isinstance(meta['COMMENT'], str):
-            comments = [meta['COMMENT']]
-        else:
-            comments = meta['COMMENT']
+def get_tdm_schema():
+    global _TDM_SCHEMA
+    if _TDM_SCHEMA is None:
+        data_path = pkg_resources.resource_filename('sorts', 'data')
+        xsd_path = os.path.join(data_path, 'ndmxml-2.0.0-master-2.0.xsd')
+        _TDM_SCHEMA = xmlschema.XMLSchema(xsd_path)
+    return _TDM_SCHEMA
 
-        for line in comments:
-            cmt = etree.Element('COMMENT')
-            cmt.text = line.strip()
-            header.append(cmt)
 
-    if 'CREATION_DATE' in meta:
-        el = etree.Element('CREATION_DATE', type='ndm:epochType')
-        el.text = meta['CREATION_DATE'].CCSDS_epoch
-    else:
-        el = etree.Element('CREATION_DATE', type='ndm:epochType')
-        el.text = Time.now().CCSDS_epoch
-    header.append(el)
+TDM_OBSERVATION_METADATA_FIELDS = [
+    "COMMENT",
+    "TRACK_ID",
+    "TRACK_ID",
+    "DATA_TYPES",
+    "TIME_SYSTEM",
+    "START_TIME",
+    "STOP_TIME",
+    'PARTICIPANT_1',
+    'PARTICIPANT_2',
+    'PARTICIPANT_3',
+    'PARTICIPANT_4',
+    'PARTICIPANT_5',
+    "MODE",
+    "PATH",
+    "EMPHEMERIS_NAME_1",
+    "EMPHEMERIS_NAME_2",
+    "EMPHEMERIS_NAME_3",
+    "EMPHEMERIS_NAME_4",
+    "EMPHEMERIS_NAME_5",
+    "TRANSMIT_BAND",
+    "RECEIVE_BAND",
+    "TURNAROUND_NUMENATOR",
+    "TURNAROUND_DENUMENATOR",
+    "TIMETAG_REF",
+    "INTEGRATION_INTERVAL",
+    "INTEGRATION_REF",
+    "FREQ_OFFSET",
+    "RANGE_MODE",
+    "RANGE_MODULUS",
+    "RANGE_UNITS",
+    "ANGLE_TYPE",
+    "REFERENCE_FRAME",
+    "INTERPOLATION",
+    "INTERPOLATION_DEGREE",
+    "DOPPLER_COUNT_BIAS",
+    "DOPPLER_COUNT_SCALE",
+    "DOPPLER_COUNT_ROLLOVER",
+    "TRANSMIT_DELAY_1",
+    "TRANSMIT_DELAY_2",
+    "TRANSMIT_DELAY_3",
+    "TRANSMIT_DELAY_4",
+    "TRANSMIT_DELAY_5",
+    "RECEIVE_DELAY_1",
+    "RECEIVE_DELAY_2",
+    "RECEIVE_DELAY_3",
+    "RECEIVE_DELAY_4",
+    "RECEIVE_DELAY_5",
+    "DATA_QUALITY",
+    "CORRECTION_ANGLE_1",
+    "CORRECTION_ANGLE_2",
+    "CORRECTION_DOPPLER",
+    "CORRECTION_MAG",
+    "CORRECTION_RANGE",
+    "CORRECTION_RCS",
+    "CORRECTION_RECEIVE",
+    "CORRECTION_TRANSMIT",
+    "CORRECTION_ABERRATION_YEARLY",
+    "CORRECTION_ABERRATION_DIURNAL",
+    "CORRECTIONS_APPLIED"
+]
 
-    if 'ORIGINATOR' in meta:
-        el = etree.Element('ORIGINATOR')
-        el.text = meta['ORIGINATOR']
-    else:
-        el = etree.Element('ORIGINATOR')
-        el.text = f'SORTS {__version__}'
-    header.append(el)
-
-    if 'MESSAGE_ID' in meta:
-        el = etree.Element('MESSAGE_ID')
-        el.text = meta['MESSAGE_ID']
-        header.append(el)
-    
-    body = etree.Element('body', type='ndm:tdmBody')
-
-    for segment in segments:
-        body.append(segment)
-
-    root = etree.Element('tdm', type='tdmType', id='CCSDS_TDM_VERS', version='2.0')
-    root.append(header)
-    root.append(body)
-
-    return root
 
 def write_xml_tdm(data, meta, file=None):
+
+    # originator
+    originator = meta.get("ORIGINATOR", f'SORTS {__version__}')
+
+    # creation data
+    creation_date = meta.get("CREATION_DATE", Time.now()).CCSDS_epoch
+
+    # tdm dictionary
+    d = {
+        '@id': 'CCSDS_TDM_VERS',
+        '@version': '2.0',
+        '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+        '@xsi:noNamespaceSchemaLocation': SCHEMA_URI,
+        'header': {
+            'CREATION_DATE': f'{creation_date}', 
+            'ORIGINATOR': f'{originator}'
+        },
+        'body': {
+            'segment': []
+        }
+    }
+
+    # add segments
+    d['body']['segment']
+
+    # ALTERNATIVES
+    # 
+    # 1) - make one segment per observation or
+    # 2) - one segment with multiple observations
+    #
+    # CHOOSE 2)
+    segment = {
+        "metadata": {},
+        "data": {}
+    }
+    d['body']['segment'].append(segment)    
+
+    ###########################################################################
+    # SEGMENT METADATA
+    ###########################################################################
+
+    _meta = segment["metadata"]
+
+    # mandatory
+    meta_defaults = {
+        "TIME_SYSTEM": "UTC",
+        "PARTICIPANT_1": "missing"
+    }
     
-    segments = xml_tdm_segmet(data)
-    root = xml_tdm_tree(meta, segments)
+    # add values from given meta - in correct order
+    for field in TDM_OBSERVATION_METADATA_FIELDS:
+        if field in meta:
+            _meta[field] = meta[field]
+        else:
+            if field in meta_defaults:
+                _meta[field] = meta_defaults[field]
 
+    ###########################################################################
+    # SEGMENT DATA
+    ###########################################################################
+
+    _data = segment["data"]
+    _data["COMMENT"] = 'DATA COMMENT'
+    _data["observation"] = []
+
+    for entry in data:
+        _data["observation"].append({
+            "EPOCH": Time(entry["EPOCH"], scale="tai", format="datetime64").CCSDS_epoch,
+            "RANGE": entry['RANGE'].item()
+        })
+
+    # serialize to xml
+    schema = get_tdm_schema()
+    xml_etree = schema.encode(d, path='/tdm')
+    
     if file is not None:
-        file.write(etree.tostring(root, encoding='unicode', method='xml', pretty_print=True))
+        file.write(xmlschema.etree_tostring(xml_etree, encoding='unicode', method='xml'))
 
-    return root
+    return xml_etree
+
+
+
+
+
 
 
 # def write_oem(t, state, meta, fname=None):
