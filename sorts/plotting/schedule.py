@@ -19,7 +19,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from . import general
 from ..controller import Tracker
 
-def observed_parameters(data_list, snrdb_lim = 10.0, axes=None, fontsize=18):
+def observed_parameters(data_list, snrdb_lim = 10.0, axes=None, sort=True, **kwargs):
     '''Observed parameters for one RX station.
     '''
 
@@ -40,22 +40,31 @@ def observed_parameters(data_list, snrdb_lim = 10.0, axes=None, fontsize=18):
 
     axes[0][0].plot([0],[0],[0],'og')
 
+    line_all = kwargs.get('linestyle_all', '-')
+    line_det = kwargs.get('linestyle_detect', '-.r')
+    fontsize = kwargs.get('fontsize', 16)
+
     for pi, dat in enumerate(data_list):
         if dat is None:
             continue
 
-        axes[0][0].plot(dat['rx_k'][0,:], dat['rx_k'][1,:], dat['rx_k'][2,:], '-')
+        if sort:
+            inds = np.argsort(dat['t'])
+        else:
+            inds = np.arange(len(dat['t']))
 
-        SNRdB = 10*np.log10(dat['snr'])
+        axes[0][0].plot(dat['rx_k'][0,inds], dat['rx_k'][1,inds], dat['rx_k'][2,inds], '-')
+
+        SNRdB = 10*np.log10(dat['snr'][inds])
         det_inds = SNRdB > snrdb_lim
 
-        axes[0][1].plot(dat['t']/3600.0, dat['range']*1e-3, '-', label=f'Pass{pi}')
-        axes[1][0].plot(dat['t']/3600.0, dat['range_rate']*1e-3, '-')
-        axes[1][1].plot(dat['t']/3600.0, SNRdB, '-')
+        axes[0][1].plot(dat['t'][inds]/3600.0, dat['range'][inds]*1e-3, line_all, label=f'Pass{pi}')
+        axes[1][0].plot(dat['t'][inds]/3600.0, dat['range_rate'][inds]*1e-3, line_all)
+        axes[1][1].plot(dat['t'][inds]/3600.0, SNRdB, line_all)
 
-        axes[0][1].plot(dat['t'][det_inds]/3600.0, dat['range'][det_inds]*1e-3, '.r')
-        axes[1][0].plot(dat['t'][det_inds]/3600.0, dat['range_rate'][det_inds]*1e-3, '.r')
-        axes[1][1].plot(dat['t'][det_inds]/3600.0, SNRdB[det_inds], '.r')
+        axes[0][1].plot(dat['t'][det_inds]/3600.0, dat['range'][det_inds]*1e-3, line_det)
+        axes[1][0].plot(dat['t'][det_inds]/3600.0, dat['range_rate'][det_inds]*1e-3, line_det)
+        axes[1][1].plot(dat['t'][det_inds]/3600.0, SNRdB[det_inds], line_det)
         axes[1][1].set_ylim([0, None])
 
 
