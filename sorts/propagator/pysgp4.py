@@ -65,6 +65,9 @@ class SGP4(Propagator):
 
     @staticmethod
     def get_TLE_parameters(line1, line2, gravity_model = 'WGS84'):
+
+        line1, line2 = SGP4.line_decode(line1), SGP4.line_decode(line2)
+
         grav_ind = getattr(sgp4.api, gravity_model.upper())
         satellite = Satrec.twoline2rv(line1, line2, grav_ind)
         ret = {}
@@ -73,9 +76,26 @@ class SGP4(Propagator):
         return ret
 
 
+    @staticmethod
+    def line_decode(line):
+
+        if isinstance(line, np.bytes_):
+            line = line.astype('U')
+        elif not isinstance(line, str):
+            try:
+                line = line.decode()
+            except (UnicodeDecodeError, AttributeError):
+                pass
+
+        return line
+
+
     def propagate_tle(self, t, line1, line2, **kwargs):
         '''Propagate a TLE pair
         '''
+
+        line1, line2 = SGP4.line_decode(line1), SGP4.line_decode(line2)
+
         satellite = Satrec.twoline2rv(line1, line2, self.grav_ind)
 
         epoch = Time(satellite.jdsatepoch + satellite.jdsatepochF, format='jd', scale='utc')
@@ -252,6 +272,8 @@ class SGP4(Propagator):
     def get_mean_elements(self, line1, line2, radians=False):
         '''Extract the mean elements in SI units (a [m], e [1], inc [deg], raan [deg], aop [deg], mu [deg]), B-parameter (not bstar) and epoch from a two line element pair.
         '''
+
+        line1, line2 = SGP4.line_decode(line1), SGP4.line_decode(line2)
 
         xpdotp = 1440.0/(2.0*np.pi)  # 229.1831180523293
 
