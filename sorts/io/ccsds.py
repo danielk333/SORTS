@@ -134,9 +134,6 @@ def write_xml_oem(data, meta, file=None):
         }
     }
 
-    # add segments
-    d['body']['segment']
-
     # ALTERNATIVES
     # 
     # 1) - make one segment per observation or
@@ -361,9 +358,6 @@ def write_xml_tdm(data, meta, file=None):
             'segment': []
         }
     }
-
-    # add segments
-    d['body']['segment']
 
     # ALTERNATIVES
     # 
