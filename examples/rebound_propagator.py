@@ -4,6 +4,8 @@
 REBOUND propagator usage
 ================================
 '''
+import pathlib
+import configparser
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,8 +15,19 @@ from astropy.time import Time, TimeDelta
 from sorts.propagator import Rebound
 import pyorb
 
-#This kernel de430.bsp contains solarsystem locations
-kernel = '/home/danielk/IRF/IRF_GITLAB/EPHEMERIS_FILES/de430.bsp'
+
+try:
+    base_pth = pathlib.Path(__file__).parents[1].resolve()
+except NameError:
+    base_pth = pathlib.Path('.').parents[1].resolve()
+
+config = configparser.ConfigParser(interpolation=None)
+config.read([base_pth / 'example_config.conf'])
+kernel = pathlib.Path(config.get('rebound_propagator.py', 'kernel'))
+
+if not kernel.is_absolute():
+    kernel = base_pth / kernel.relative_to('.')
+
 
 #We input in International Terrestrial Reference System coordinates
 #and output in International Celestial Reference System

@@ -23,8 +23,7 @@ radar = sorts.radars.eiscat3d
 try:
     pth = pathlib.Path(__file__).parent / 'data'
 except NameError:
-    import os
-    pth = 'data' + os.path.sep
+    pth = pathlib.Path('.').parent / 'data'
 
 dt = 10.0
 end_t = 3600.0*24.0
@@ -92,12 +91,6 @@ p.start('total')
 
 sched = Schedule(radar = radar, controllers=[track], profiler=p)
 
-
-try:
-    pth = pathlib.Path(__file__).parent / 'data'
-except NameError:
-    import os
-    pth = 'data' + os.path.sep
 
 #Now we load the error model
 print(f'\nUsing "{pth}" as cache for LinearizedCoded errors.')

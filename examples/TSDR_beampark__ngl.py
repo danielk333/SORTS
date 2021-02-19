@@ -4,6 +4,8 @@
 TSDR beam park simulation
 ===========================
 '''
+import pathlib
+import configparser
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -38,7 +40,17 @@ Prop_opts = dict(
 end_t = 600.0
 scan = Beampark(azimuth=radar.tx[0].beam.azimuth, elevation=radar.tx[0].beam.elevation)
 
-master_path = '/home/danielk/IRF/IRF_GITLAB/SORTSpp/master/celn_20090501_00.sim'
+try:
+    base_pth = pathlib.Path(__file__).parents[1].resolve()
+except NameError:
+    base_pth = pathlib.Path('.').parents[1].resolve()
+
+config = configparser.ConfigParser(interpolation=None)
+config.read([base_pth / 'example_config.conf'])
+master_path = pathlib.Path(config.get('TSDR_beampark__ngl.py', 'master_catalog'))
+
+if not master_path.is_absolute():
+    master_path = base_pth / master_path.relative_to('.')
 
 pop = master_catalog(
     master_path,

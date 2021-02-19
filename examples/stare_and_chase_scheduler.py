@@ -310,6 +310,11 @@ print(true_object)
 print('Init object')
 print(init_object)
 
+#explore the time lag parameter space: figure out at what time lags it stops working
+#- use first detection point vs use max detection point vs use all detection points
+#- pick a few objects (there is a reduced master file we used before)
+
+
 #introduce lag
 computation_time = 10 #seconds after last time
 

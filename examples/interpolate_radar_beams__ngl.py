@@ -20,8 +20,7 @@ for txi,tx in enumerate(radar.tx):
         frequency=tx.beam.frequency,
     )]
     tx_intp[-1].generate_interpolation(tx.beam, resolution=res)
-    # tx_intp[-1].save(f'./sorts/data/e3d_demo_tx{txi}_res{res}_interp')
-    # print('saved')
+
 
 rx_intp = []
 for rxi,rx in enumerate(radar.rx):
@@ -31,6 +30,4 @@ for rxi,rx in enumerate(radar.rx):
         frequency=rx.beam.frequency,
     )]
     rx_intp[-1].generate_interpolation(rx.beam, resolution=res)
-    # rx_intp[-1].save(f'./sorts/data/e3d_demo_rx{rxi}_res{res}_interp')
-    # print('saved')
 

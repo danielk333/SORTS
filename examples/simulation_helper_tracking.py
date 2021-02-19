@@ -4,6 +4,8 @@
 Simulate tracking with simulation helper
 ==========================================
 '''
+import pathlib
+import configparser
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -27,6 +29,20 @@ Prop_opts = dict(
         out_frame='ITRF',
     ),
 )
+
+
+try:
+    base_pth = pathlib.Path(__file__).parents[1].resolve()
+except NameError:
+    base_pth = pathlib.Path('.').parents[1].resolve()
+
+config = configparser.ConfigParser(interpolation=None)
+config.read([base_pth / 'example_config.conf'])
+simulation_root = pathlib.Path(config.get('simulation_helper_tracking.py', 'simulation_root'))
+
+if not simulation_root.is_absolute():
+    simulation_root = base_pth / simulation_root.relative_to('.')
+
 
 objs = [
     SpaceObject(
@@ -137,7 +153,7 @@ class Tracking(Simulation):
 
 sim = Tracking(
     scheduler = scheduler,
-    root = '/home/danielk/IRF/E3D_PA/sorts_v4_tests/sim2',
+    root = simulation_root,
 )
 # sim.delete('test')
 # sim.branch('test', empty=True)

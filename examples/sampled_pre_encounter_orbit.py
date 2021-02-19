@@ -25,8 +25,8 @@ num = 100
 try:
     pth = pathlib.Path(__file__).parent / 'data' / 'v_ecef.h5'
 except NameError:
-    import os
-    pth = 'data' + os.path.sep + 'v_ecef.h5'
+    pth = pathlib.Path('.').parent / 'data' / 'v_ecef.h5'
+
 
 state = np.zeros((6,), dtype=np.float64)
 with h5py.File(pth, 'r') as h:

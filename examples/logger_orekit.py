@@ -12,12 +12,13 @@ import sorts
 
 logger = sorts.profiling.get_logger('orekit')
 
+
 try:
-    pth = pathlib.Path(__file__).parent / 'data' / 'orekit-data-master.zip'
+    pth = pathlib.Path(__file__).parent.resolve()
 except NameError:
-    import os
-    pth = 'data' + os.path.sep + 'orekit-data-master.zip'
-    pth = pathlib.Path(pth)
+    pth = pathlib.Path('.').parent.resolve()
+pth = pth / 'data' / 'orekit-data-master.zip'
+
 
 if not pth.is_file():
     sorts.propagator.Orekit.download_quickstart_data(pth, verbose=True)
