@@ -56,8 +56,7 @@ for obj in objs: print(obj)
 class ObservedScanning(StaticList, ObservedParameters):
     pass
 
-scanner_ctrl = Scanner(eiscat3d, scan, profiler=p, logger=logger)
-scanner_ctrl.t = np.arange(0, end_t, scan.dwell())
+scanner_ctrl = Scanner(eiscat3d, scan, t = np.arange(0, end_t, scan.dwell()), profiler=p, logger=logger)
 
 p.start('total')
 scheduler = ObservedScanning(

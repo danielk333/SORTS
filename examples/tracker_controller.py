@@ -35,7 +35,11 @@ p.start('propagate')
 states = prop.propagate(t, orb.cartesian[:,0], mjd0, A=1.0, C_R = 1.0, C_D = 1.0)
 p.stop('propagate')
 
-e3d = Tracker(radar=eiscat3d, t=t, ecefs=states[:3,:], profiler=p)
+e3d = Tracker(radar=eiscat3d, t=t, ecefs=states[:3,:], dwell = 10.0, profiler=p)
+
+sorts.plotting.schedule.controller_slices([e3d])
+
+
 
 fig = plt.figure(figsize=(15,15))
 ax = fig.add_subplot(111, projection='3d')

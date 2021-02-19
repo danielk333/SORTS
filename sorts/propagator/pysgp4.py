@@ -57,7 +57,7 @@ class SGP4(Propagator):
             self.logger.debug(f'sorts.propagator.SGP4:init')
 
         self.sgp4_mjd0 = Time('1949-12-31 00:00:00', format='iso', scale='ut1').mjd
-        self.rho0 = 2.461e-8
+        self.rho0 = 2.461e-5/6378.135e3 #kg/m^2/m
 
         self.grav_ind = getattr(sgp4.api, self.settings['gravity_model'].upper())
         self.grav_model = getattr(sgp4.earth_gravity, self.settings['gravity_model'].lower())
