@@ -6,6 +6,7 @@ E3D Demonstrator SST planner
 
 '''
 import pathlib
+import configparser
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -16,6 +17,23 @@ from astropy.time import Time, TimeDelta
 import sorts
 
 from sorts.scheduler import Tracking, ObservedParameters
+
+try:
+    base_pth = pathlib.Path(__file__).parents[1].resolve()
+except NameError:
+    base_pth = pathlib.Path('.').parents[1].resolve()
+
+config = configparser.ConfigParser(interpolation=None)
+config.read([base_pth / 'example_config.conf'])
+tle_pth = pathlib.Path(config.get('e3d_demo_planner.py', 'tle_catalog'))
+
+if not tle_pth.is_absolute():
+    tle_pth = base_pth / tle_pth.relative_to('.')
+
+#Here we will get our object data from
+pop = tle_catalog(tle_pth, kepler=True)
+pop.propagator_options['settings']['out_frame'] = 'ITRS' #output states in ECEF
+
 
 
 # The Tracking scheduler takes in a series of SpaceObjects and finds all the passes of the objects 
@@ -169,16 +187,6 @@ dwell = 10.0 #the time between re-pointing beam, i.e. "radar actions" or "time s
 
 profiler = sorts.profiling.Profiler()
 logger = sorts.profiling.get_logger()
-
-try:
-    pth = pathlib.Path(__file__).parent / 'data' / 'tle.txt'
-except NameError:
-    import os
-    pth = 'data' + os.path.sep + 'tle.txt'
-
-pop = tle_catalog(pth, kepler=True)
-
-pop.propagator_options['settings']['out_frame'] = 'ITRS' #output states in ECEF
 
 #Get the space objects to track
 space_objects = []

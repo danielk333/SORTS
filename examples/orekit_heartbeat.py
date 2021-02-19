@@ -4,19 +4,28 @@
 Using the heartbeat for dynamics
 ========================================
 '''
+import pathlib
 
 import numpy as np
 import pyorb
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-
 from astropy.time import Time
 
 from sorts.propagator import Orekit
 from sorts.profiling import Profiler
 
-orekit_data = '/home/danielk/IRF/IRF_GITLAB/orekit_build/orekit-data-master.zip'
+try:
+    pth = pathlib.Path(__file__).parent.resolve()
+except NameError:
+    pth = pathlib.Path('.').parent.resolve()
+pth = pth / 'data' / 'orekit-data-master.zip'
+
+
+if not pth.is_file():
+    sorts.propagator.Orekit.download_quickstart_data(pth, verbose=True)
+
 
 class MyOrekit(Orekit):
     def heartbeat(self, t, state, interpolator):
@@ -29,7 +38,7 @@ class MyOrekit(Orekit):
 
 
 prop = MyOrekit(
-    orekit_data = orekit_data, 
+    orekit_data = pth, 
     settings = dict(
         heartbeat=True,
         drag_force=True,

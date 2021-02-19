@@ -5,17 +5,27 @@ Profiling components
 ======================
 
 '''
+import pathlib
 import numpy as np
 
 import sorts
 
 logger = sorts.profiling.get_logger('orekit')
 
-orekit_data = '/home/danielk/IRF/IRF_GITLAB/orekit_build/orekit-data-master.zip'
+
+try:
+    pth = pathlib.Path(__file__).parent.resolve()
+except NameError:
+    pth = pathlib.Path('.').parent.resolve()
+pth = pth / 'data' / 'orekit-data-master.zip'
+
+
+if not pth.is_file():
+    sorts.propagator.Orekit.download_quickstart_data(pth, verbose=True)
 
 def run_prop():
     prop = sorts.propagator.Orekit(
-        orekit_data = orekit_data, 
+        orekit_data = pth, 
         settings=dict(
             in_frame='Orekit-ITRF',
             out_frame='Orekit-EME',

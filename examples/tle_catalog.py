@@ -5,6 +5,7 @@ Loading a TLE catalog
 =============================================
 '''
 import pathlib
+import configparser
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -12,13 +13,20 @@ import sorts
 from sorts import plotting
 from sorts.population import tle_catalog
 
-try:
-    pth = pathlib.Path(__file__).parent / 'data' / 'tle.txt'
-except NameError:
-    import os
-    pth = 'data' + os.path.sep + 'tle.txt'
 
-pop = tle_catalog(pth, kepler=True)
+try:
+    base_pth = pathlib.Path(__file__).parents[1].resolve()
+except NameError:
+    base_pth = pathlib.Path('.').parents[1].resolve()
+
+config = configparser.ConfigParser(interpolation=None)
+config.read([base_pth / 'example_config.conf'])
+tle_pth = pathlib.Path(config.get('tle_catalog.py', 'tle_catalog'))
+
+if not tle_pth.is_absolute():
+    tle_pth = base_pth / tle_pth.relative_to('.')
+
+pop = tle_catalog(tle_pth, kepler=True)
 
 print(pop.print(n=slice(None,10), fields = ['oid','a','e','i','mjd0', 'm', 'd', 'BSTAR']))
 

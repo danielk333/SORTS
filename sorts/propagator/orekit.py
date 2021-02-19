@@ -25,6 +25,8 @@ Simple propagation showing time difference due to loading of model data.
 import os
 import time
 import copy
+import urllib.request
+import pathlib
 
 #Third party import
 import numpy as np
@@ -32,6 +34,11 @@ import scipy
 import scipy.constants
 import orekit
 import pyorb
+
+try:
+    from tqdm import tqdm
+except ImportError:
+    tqdm = None
 
 #Local import
 from .base import Propagator
@@ -214,6 +221,55 @@ class Orekit(Propagator):
     )
 
 
+    @staticmethod
+    def download_quickstart_data(path, url=None, headers=None, timeout=10.0, block_size=2048, verbose=True):
+        if url is None:
+            #Standard URL of the example data distributed on orekit.org
+            url = 'https://gitlab.orekit.org/orekit/orekit-data/-/archive/master/orekit-data-master.zip'
+        if headers is None:
+            headers = {}
+
+        pbar_str = f'Downloading from {url[:15]}...{url.split("/")[-1]} [kb]'
+
+        urlopener = urllib.request.build_opener()
+        request = urllib.request.Request(url, headers=headers)
+        with urlopener.open(request, timeout=timeout) as remote:
+            info = remote.info()
+            try:
+                size = int(info['Content-Length'])
+                size_kb = int(size//1024)
+            except (KeyError, ValueError, TypeError):
+                size = None
+                size_kb = None
+
+            if verbose:
+                pbar = tqdm(total=size_kb)
+
+            with open(path, 'wb') as f:
+                try:
+                    bytes_done = 0
+                    block = remote.read(block_size)
+                    while block:
+                        f.write(block)
+                        bytes_done += len(block)
+
+                        if verbose:
+                            pbar.set_description(pbar_str)
+                            pbar.update(int(len(block)//1024))
+
+                        block = remote.read(block_size)
+
+                    if size is not None and bytes_done != size:
+                        raise Exception(f'Content-Length {size} did not match download size {bytes_done}, aborting...')
+                except BaseException:
+                    if path.is_file():
+                        try:
+                            print('Attempting to remove failed partial download')
+                            path.unlink()
+                        except:
+                            pass
+                    raise
+
     def __init__(self,
                 orekit_data,
                 settings=None,
@@ -226,6 +282,9 @@ class Orekit(Propagator):
             self.logger.debug(f'sorts.propagator.Orekit:init')
         if self.profiler is not None:
             self.profiler.start('Orekit:init')
+
+        if isinstance(orekit_data, pathlib.Path):
+            orekit_data = str(orekit_data)
 
         setup_orekit_curdir(filename = orekit_data)
 

@@ -4,6 +4,8 @@
 Simulate scanning for objects with simulation class
 ======================================================
 '''
+import pathlib
+import configparser
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -26,6 +28,21 @@ Prop_opts = dict(
         out_frame='ITRF',
     ),
 )
+
+
+try:
+    base_pth = pathlib.Path(__file__).parents[1].resolve()
+except NameError:
+    base_pth = pathlib.Path('.').parents[1].resolve()
+
+config = configparser.ConfigParser(interpolation=None)
+config.read([base_pth / 'example_config.conf'])
+simulation_root = pathlib.Path(config.get('simulation_helper_scanning.py', 'simulation_root'))
+
+if not simulation_root.is_absolute():
+    simulation_root = base_pth / simulation_root.relative_to('.')
+
+
 
 end_t = 600.0
 scan = Fence(azimuth=90, num=40, dwell=0.1, min_elevation=30)
@@ -185,10 +202,10 @@ class Scanning(Simulation):
 sim = Scanning(
     objs = objs,
     scheduler = scheduler,
-    root = '/home/danielk/IRF/E3D_PA/sorts_v4_tests/sim1',
+    root = simulation_root,
 )
-# sim.delete('test')
-# sim.branch('test', empty=True)
+# sim.delete('test') #to delete the test branch
+# sim.branch('test', empty=True) #to create an empty branch
 sim.checkout('test')
 
 sim.profiler.start('total')

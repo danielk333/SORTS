@@ -4,8 +4,9 @@
 Correlating data with TLE catalog
 ===================================
 
-TO RUN THIS EXAMPLE, YOU NEED THE CELESTRACK CATALOG FROM 2018-01-01 in the 'data/uhf_correlation/tle-201801.txt' path
+TO RUN THIS EXAMPLE, YOU NEED THE CELESTRACK CATALOG FROM 2018-01-01 CONFIGURED IN "example_config.conf"
 '''
+import configparser
 import pathlib
 
 import matplotlib.pyplot as plt
@@ -17,16 +18,20 @@ import sorts
 
 radar = sorts.radars.eiscat_uhf
 
-#TO RUN THIS EXAMPLE, YOU NEED THE CELESTRACK CATALOG FROM 2018-01-01
-
-
 try:
-    tle_pth = pathlib.Path(__file__).parent / 'data' / 'tle-201801.txt'
-    obs_pth = pathlib.Path(__file__).parent / 'data' / 'uhf_correlation' / 'det-000000.h5'
+    base_pth = pathlib.Path(__file__).parents[1].resolve()
 except NameError:
-    import os
-    tle_pth = 'data' + os.path.sep + 'tle-201801.txt'
-    obs_pth = 'data' + os.path.sep + 'uhf_correlation' + os.path.sep + 'det-000000.h5'
+    base_pth = pathlib.Path('.').parents[1].resolve()
+
+config = configparser.ConfigParser(interpolation=None)
+config.read([base_pth / 'example_config.conf'])
+tle_pth = pathlib.Path(config.get('correlator_example.py', 'tle_catalog'))
+obs_pth = pathlib.Path(config.get('correlator_example.py', 'observation_data'))
+
+if not tle_pth.is_absolute():
+    tle_pth = base_pth / tle_pth.relative_to('.')
+if not obs_pth.is_absolute():
+    obs_pth = base_pth / obs_pth.relative_to('.')
 
 
 # Each entry in the input `measurements` list must be a dictionary that contains the following fields:

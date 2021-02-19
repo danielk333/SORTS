@@ -19,15 +19,18 @@ from mpl_toolkits.mplot3d import Axes3D
 from . import general
 from ..controller import Tracker
 
-def observed_parameters(data_list, snrdb_lim = 10.0, axes=None, fontsize=18):
+def observed_parameters(data_list, snrdb_lim = 10.0, axes=None, sort=True, **kwargs):
     '''Observed parameters for one RX station.
     '''
 
     if axes is None:
-        fig = plt.figure(figsize=(15,15))
+        if 'figsize' in kwargs:
+            fig = plt.figure(figsize = kwargs['figsize'])
+        else:
+            fig = plt.figure()
         axes = np.array([
             [
-                fig.add_subplot(221, projection='3d'),
+                fig.add_subplot(221),
                 fig.add_subplot(222),
             ],
             [
@@ -40,43 +43,72 @@ def observed_parameters(data_list, snrdb_lim = 10.0, axes=None, fontsize=18):
 
     axes[0][0].plot([0],[0],[0],'og')
 
+    line_all = kwargs.get('linestyle_all', '-')
+    line_det = kwargs.get('linestyle_detect', '.r')
+    fontsize = kwargs.get('fontsize', None)
+
+    text_spec = dict(fontsize = fontsize)
+    
+    text_spec = {key:val for key, val in text_spec.items() if val is not None}
+
+    time_unit = kwargs.get('time_unit', 'min').strip().lower()
+    if time_unit in ['s', 'sec', 'seconds']:
+        _tt = 1.0
+        t_label = '[s]'
+    elif time_unit in ['m', 'min', 'minutes']:
+        _tt = 60.0
+        t_label = '[min]'
+    elif time_unit in ['h', 'hour', 'hours']:
+        _tt = 3600.0
+        t_label = '[h]'
+    elif time_unit in ['d', 'days']:
+        _tt = 3600.0*24
+        t_label = '[d]'
+    else:
+        raise TypeError(f'time unit "{time_unit}" not found')
+
+
     for pi, dat in enumerate(data_list):
         if dat is None:
             continue
 
-        axes[0][0].plot(dat['rx_k'][0,:], dat['rx_k'][1,:], dat['rx_k'][2,:], '-')
+        if sort:
+            inds = np.argsort(dat['t'])
+        else:
+            inds = np.arange(len(dat['t']))
 
         SNRdB = 10*np.log10(dat['snr'])
-        det_inds = SNRdB > snrdb_lim
+        det_inds = inds[SNRdB[inds] > snrdb_lim]
 
-        axes[0][1].plot(dat['t']/3600.0, dat['range']*1e-3, '-', label=f'Pass{pi}')
-        axes[1][0].plot(dat['t']/3600.0, dat['range_rate']*1e-3, '-')
-        axes[1][1].plot(dat['t']/3600.0, SNRdB, '-')
+        axes[0][0].plot(dat['rx_k'][0,inds], dat['rx_k'][1,inds], line_all)
+        axes[0][0].plot(dat['rx_k'][0,det_inds], dat['rx_k'][1,det_inds], line_det)
 
-        axes[0][1].plot(dat['t'][det_inds]/3600.0, dat['range'][det_inds]*1e-3, '.r')
-        axes[1][0].plot(dat['t'][det_inds]/3600.0, dat['range_rate'][det_inds]*1e-3, '.r')
-        axes[1][1].plot(dat['t'][det_inds]/3600.0, SNRdB[det_inds], '.r')
+        axes[0][1].plot(dat['t'][inds]/_tt, dat['range'][inds]*1e-3, line_all, label=f'Pass{pi}')
+        axes[1][0].plot(dat['t'][inds]/_tt, dat['range_rate'][inds]*1e-3, line_all)
+        axes[1][1].plot(dat['t'][inds]/_tt, SNRdB[inds], line_all)
+
+        axes[0][1].plot(dat['t'][det_inds]/_tt, dat['range'][det_inds]*1e-3, line_det)
+        axes[1][0].plot(dat['t'][det_inds]/_tt, dat['range_rate'][det_inds]*1e-3, line_det)
+        axes[1][1].plot(dat['t'][det_inds]/_tt, SNRdB[det_inds], line_det)
         axes[1][1].set_ylim([0, None])
 
 
-    axes[0][1].set_xlabel('Time [h]', fontsize=fontsize)
-    axes[1][0].set_xlabel('Time [h]', fontsize=fontsize)
-    axes[1][1].set_xlabel('Time [h]', fontsize=fontsize)
+    axes[0][1].set_xlabel(f'Time {t_label}', **text_spec)
+    axes[1][0].set_xlabel(f'Time {t_label}', **text_spec)
+    axes[1][1].set_xlabel(f'Time {t_label}', **text_spec)
 
-    axes[0][1].set_ylabel('Two way range [km]', fontsize=fontsize)
-    axes[1][0].set_ylabel('Two way range rate [km/s]', fontsize=fontsize)
-    axes[1][1].set_ylabel('SNR [dB]', fontsize=fontsize)
+    axes[0][1].set_ylabel('Two way range [km]', **text_spec)
+    axes[1][0].set_ylabel('Two way range rate [km/s]', **text_spec)
+    axes[1][1].set_ylabel('SNR [dB]', **text_spec)
 
     axes[0][1].legend()
 
     dr = 1
     axes[0][0].set_xlim([-dr, dr])
     axes[0][0].set_ylim([-dr, dr])
-    axes[0][0].set_zlim([-dr, dr])
 
-    axes[0][0].set_xlabel('East [k_x]')
-    axes[0][0].set_ylabel('North [k_y]')
-    axes[0][0].set_zlabel('Up [k_z]')
+    axes[0][0].set_xlabel('East [k_x]', **text_spec)
+    axes[0][0].set_ylabel('North [k_y]', **text_spec)
 
     if fig is not None:
         fig.tight_layout()

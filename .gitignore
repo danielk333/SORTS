@@ -1,5 +1,11 @@
-# Compiled source #
-###################
+# Non distributed data #
+########################
+examples/data/profiler_data.txt
+examples/data/test_tdm.tdm
+examples/data/orekit-data-master.zip
+examples/data/tle.txt
+examples/data/tle-201801.txt
+
 
 # Compiled source #
 ###################

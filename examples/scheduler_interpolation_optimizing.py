@@ -4,6 +4,7 @@
 Optimizing with interpolation
 ======================================
 '''
+import pathlib
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -21,11 +22,19 @@ from sorts.interpolation import Legendre8
 
 from sorts.propagator import Orekit
 
-orekit_data = '/home/danielk/IRF/IRF_GITLAB/orekit_build/orekit-data-master.zip'
+try:
+    pth = pathlib.Path(__file__).parent.resolve()
+except NameError:
+    pth = pathlib.Path('.').parent.resolve()
+pth = pth / 'data' / 'orekit-data-master.zip'
+
+
+if not pth.is_file():
+    sorts.propagator.Orekit.download_quickstart_data(pth, verbose=True)
 
 Prop_cls = Orekit
 Prop_opts = dict(
-    orekit_data = orekit_data, 
+    orekit_data = pth, 
     settings = dict(
         in_frame='GCRS',
         out_frame='ITRS',

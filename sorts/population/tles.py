@@ -67,7 +67,7 @@ def tle_catalog(
 
     if sgp4_propagation:
         fields += ['line1', 'line2']
-        dtypes += ['U70']*2
+        dtypes += ['S70']*2
 
     if sgp4_propagation:
         pop = Population(

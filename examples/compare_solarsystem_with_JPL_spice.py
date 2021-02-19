@@ -4,16 +4,25 @@
 Compare solarsystem body state with the python JPL SPICE implementation
 =========================================================================
 '''
+import configparser
+import pathlib
 
 import numpy as np
 from astropy.time import Time, TimeDelta
-
 import spiceypy as spice
 
 import sorts
 
-#this kernel uses km and days
-kernel = '/home/danielk/IRF/IRF_GITLAB/EPHEMERIS_FILES/de430.bsp'
+
+try:
+    base_pth = pathlib.Path(__file__).parents[1].resolve()
+except NameError:
+    base_pth = pathlib.Path('.').parents[1].resolve()
+
+config = configparser.ConfigParser(interpolation=None)
+config.read([base_pth / 'example_config.conf'])
+kernel = config.get('compare_solarsystem_with_JPL_spice.py', 'kernel')
+
 
 epoch = Time(2001, scale='utc', format='jyear')
 

@@ -5,6 +5,8 @@ Profiling Orekit
 ======================
 
 '''
+import pathlib
+
 import numpy as np
 
 from sorts.profiling import Profiler
@@ -13,10 +15,18 @@ from sorts.propagator import Orekit
 p = Profiler()
 p.start('total')
 
-orekit_data = '/home/danielk/IRF/IRF_GITLAB/orekit_build/orekit-data-master.zip'
+try:
+    pth = pathlib.Path(__file__).parent.resolve()
+except NameError:
+    pth = pathlib.Path('.').parent.resolve()
+pth = pth / 'data' / 'orekit-data-master.zip'
+
+
+if not pth.is_file():
+    sorts.propagator.Orekit.download_quickstart_data(pth, verbose=True)
 
 prop = Orekit(
-    orekit_data = orekit_data, 
+    orekit_data = pth, 
     settings=dict(
         in_frame='ITRS',
         out_frame='GCRS',

@@ -116,7 +116,7 @@ class Population:
 
         for dt in self.dtypes:
             if np.dtype(dt).char == 'U':
-                raise TypeError('Population cannot be saved with Unicode [U] strings, try using ASCII [S] strings instead.')
+                raise TypeError('Initialized Population cannot use the save function with Unicode [U] numpy strings, try using ASCII [S] strings instead.')
 
         if state_fields is None:
             state_fields = []
