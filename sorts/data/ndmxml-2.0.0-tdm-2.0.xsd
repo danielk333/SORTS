@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-            xmlns:ndm="urn:ccsds:recommendation:navigation:schema:ndmxml"
-            targetNamespace="urn:ccsds:recommendation:navigation:schema:ndmxml"
+            xmlns:ndm="urn:ccsds:schema:ndmxml"
+            targetNamespace="urn:ccsds:schema:ndmxml"
             elementFormDefault="unqualified" 
             attributeFormDefault="unqualified">
 
 <!--********************************************************************-->
-<!-- NOTE: This is version 1.0, Rev D of the NDM/XML Schema (05/17/2020)-->
-<!-- If this schema changed in Rev D, it is noted below, else no change.-->
+<!-- NOTE: This is version 2.0, Rev 0 of the NDM/XML Schema (07/18/2020)-->
+<!-- If this schema changed in Rev 0, it is noted below, else no change.-->
 <!--********************************************************************-->
 
 
@@ -17,7 +17,7 @@
 <!-- (TDM).                                                             -->
 <!--                                                                    -->
 <!-- Compatible document versions are:                                  -->
-<!--    NDM/XML 505.0-B-1   Blue Book (12/2010)                         -->
+<!--    NDM/XML 505.0-P-1.0.3 Pink Book (07/2020)                       -->
 <!--    TDM     503.0-B-2   Blue Book (06/2020)                        -->
 <!--                                                                    -->
 <!--********************************************************************-->
@@ -28,15 +28,12 @@
 <!-- 08/29/2018: Rev B: Modified to remove revision version from file   -->
 <!--                    names, since file names on SANA were static     -->
 <!--                    and the schemas basically did not work.         -->
+<!-- 07/23/2020: 2.0.0: Updated for NDM/XML 2.0 changes (common, etc.)  -->
 <!--********************************************************************-->
-
+<!-- Include schema containing common data types, etc.                  -->
 <!--********************************************************************-->
-<!-- Include common schemas                                             -->
+<xsd:include schemaLocation="./ndmxml-2.0.0-common-2.0.xsd"/>
 <!--********************************************************************-->
-
-<xsd:include schemaLocation="./ndmxml-1.0-navwg-common.xsd"/>
-<xsd:include schemaLocation="./ndmxml-1.0-ccsds-common.xsd"/>
-
 
 <!--********************************************************************-->
 <!-- A TDM consists of a "header" and a "body".  The header is a        -->
