@@ -21,14 +21,8 @@ https://sanaregistry.org/files/ndmxml_qualified/*
 '''
 
 import pkg_resources
-# import time
-# import datetime
-import os
 import xmlschema
-# import numpy as np
-# import scipy.constants as consts
 from astropy.time import TimeISO, Time
-# from .. import dates
 from ..version import __version__
 
 
@@ -44,26 +38,24 @@ class epochType(TimeISO):
     )
 
 
+###############################################################################
+# NDM SCHEMA
+###############################################################################
+
 # needs only to be unique - does not matter what it points to
 # blue book examples for both tdm versions 1 and version 2 have this,
 # (even though it points to what appears to be a version 1 specific resource)
 # either way, that uri does not resolve
 
-SCHEMA_URI = 'http://sanaregistry.org/r/ndmxml/ndmxml-1.0-master.xsd'
+_SCHEMA_URI = 'http://sanaregistry.org/r/ndmxml/ndmxml-1.0-master.xsd'
 
-
-
-###############################################################################
-# NDM SCHEMA
-###############################################################################
 
 _SCHEMA = None
 
 def get_schema():
     global _SCHEMA
     if _SCHEMA is None:
-        data_path = pkg_resources.resource_filename('sorts', 'data')
-        xsd_path = os.path.join(data_path, 'ndmxml-2.0.0-master-2.0.xsd')
+        xsd_path = pkg_resources.resource_filename('sorts.data', 'ndmxml-2.0.0-master-2.0.xsd')
         _SCHEMA = xmlschema.XMLSchema(xsd_path)
     return _SCHEMA
 
@@ -71,7 +63,6 @@ def get_schema():
 ###############################################################################
 # OEM
 ###############################################################################
-
 
 _OEM_METADATA_FIELDS = [
     "COMMENT",
@@ -123,7 +114,7 @@ def write_xml_oem(data, meta, file=None):
         '@id': 'CCSDS_OEM_VERS',
         '@version': '2.0',
         '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-        '@xsi:noNamespaceSchemaLocation': SCHEMA_URI,
+        '@xsi:noNamespaceSchemaLocation': _SCHEMA_URI,
         'header': {
             'COMMENT': "HEADER COMMENT",
             'CREATION_DATE': f'{creation_date}', 
@@ -314,7 +305,6 @@ _TDM_METADATA_FIELDS = [
 # TDM READ
 ###############################################################################
 
-
 def read_xml_tdm(xml):
     """
     read xml TMD file resource, parse and validate according to schema,
@@ -348,7 +338,7 @@ def write_xml_tdm(data, meta, file=None):
         '@id': 'CCSDS_TDM_VERS',
         '@version': '2.0',
         '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-        '@xsi:noNamespaceSchemaLocation': SCHEMA_URI,
+        '@xsi:noNamespaceSchemaLocation': _SCHEMA_URI,
         'header': {
             'CREATION_DATE': f'{creation_date}', 
             'ORIGINATOR': f'{originator}',
