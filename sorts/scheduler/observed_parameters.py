@@ -139,8 +139,10 @@ class ObservedParameters(Scheduler):
         return g, beam.wavelength
 
 
-    def calculate_observation(self, txrx_pass, t, generator, space_object, calculate_snr=True, interpolator=None, snr_limit=True, save_states=False):
+    def calculate_observation(self, txrx_pass, t, generator, space_object, epoch=None, calculate_snr=True, interpolator=None, snr_limit=True, save_states=False):
         '''Calculate the observation of a pass of a specific space object given the current state of the Scheduler.
+
+        #ASSUMES INPUT t IS RELATIVE SPACE OBJECT EPOCH unless epoch is given
 
         #TODO: Docstring
         '''
@@ -161,10 +163,15 @@ class ObservedParameters(Scheduler):
         if self.profiler is not None:
             self.profiler.start('Obs.Param.:calculate_observation:get_state')
         
-        if interpolator is not None:
-            states = interpolator.get_state(t)
+        if epoch is None:
+            t_samp = t
         else:
-            states = space_object.get_state(t)
+            t_samp = t + (epoch - space_object.epoch).sec
+
+        if interpolator is not None:
+            states = interpolator.get_state(t_samp)
+        else:
+            states = space_object.get_state(t_samp)
 
         if self.profiler is not None:
             self.profiler.stop('Obs.Param.:calculate_observation:get_state')
