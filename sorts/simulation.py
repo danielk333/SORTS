@@ -455,6 +455,41 @@ def iterable_cache(steps, caches, MPI=False, log=False, reduce=None):
     return step_wrapping
 
 
+def pre_post_actions(pre=None, post=None):
+    '''Executes the methods given by name pre- and post-execution of the wrapped function. The methods all get the same input arguments as the wrapped function and their return is discarded.
+
+    :param str pre: A list of strings or a single string for the name(s) of the class method(s) to be executed before the wrapped method.
+    :param str post: A list of strings or a single string for the name(s) of the class method(s) to be executed after the wrapped method.
+    '''
+
+    if isinstance(pre, str):
+        pre = [pre]
+    if isinstance(post, str):
+        post = [post]
+
+    def step_wrapping(func):
+
+        def wrapped_step(self, *args, **kwargs):
+
+            if pre is not None:
+                for func_name in pre:
+                    pre_func = getattr(self, func_name)
+                    pre_func(*args, **kwargs)
+
+            ret = func(self, *args, **kwargs)
+
+            if post is not None:
+                for func_name in post:
+                    post_func = getattr(self, func_name)
+                    post_func(*args, **kwargs)
+
+            return ret
+
+        if hasattr(func, '_simulation_step'):
+            wrapped_step._simulation_step = func._simulation_step
+        return wrapped_step
+
+    return step_wrapping
 
 
 def cached_step(caches):
@@ -772,6 +807,11 @@ class Simulation:
     def parse_cmd(self):
         '''Parses the arguments from a terminal command-line execution of the simulation and executes appropriately
         '''
+
+        if self.logger is not None:
+            self.logger.always('Simulation:parse_cmd:parsing command')
+
+
         arg_parser = argparse.ArgumentParser(description='Simulation command-line interface')
 
         subparsers = arg_parser.add_subparsers(dest='sim_action', help='Actions')
@@ -824,6 +864,9 @@ class Simulation:
                 dests.append(action.dest)
 
         args = arg_parser.parse_args()
+
+        if self.logger is not None:
+            self.logger.debug(f'Simulation:parse_cmd:args = {args}')
 
         if args.sim_action == 'cmd':
             if args.sim_cmd == 'branch':

@@ -41,12 +41,12 @@ from . import errors
 from . import io
 from . import interpolation
 from .radar import instances as radars
-
+from . import simulation
 
 #Functions
 from .correlator import correlate
 from .passes import equidistant_sampling
 from .passes import find_passes, find_simultaneous_passes, group_passes
 from .signals import hard_target_snr
-from .simulation import MPI_single_process, MPI_action, iterable_step, store_step, cached_step, iterable_cache
+from .simulation import MPI_single_process, MPI_action, iterable_step, store_step, cached_step, iterable_cache, pre_post_actions
 from .pre_encounter import propagate_pre_encounter, distance_termination 
