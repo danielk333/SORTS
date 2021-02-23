@@ -30,39 +30,7 @@ except ImportError:
 from . import profiling
 
 
-
-def mpi_wrap_master_thread(func):
-    '''Wrap function to only execute on thread rank=0
-    '''
-    def master_th_func(*args, **kwargs):
-        if comm is not None:
-            if comm.rank == 0:
-                ret = func(*args, **kwargs)
-            else:
-                ret = None
-            comm.barrier()
-        else:
-            ret = func(*args, **kwargs)
-        return ret
-    return master_th_func
-
-
-@mpi_wrap_master_thread
-def mpi_mkdir(path):
-    '''Make directory on thread rank=0
-    '''
-    path.mkdir(exist_ok=True)
-
-
-@mpi_wrap_master_thread
-def mpi_rmdir(path):
-    '''Remove directory on thread rank=0 with :code:`shutil.rmtree`
-    '''
-    shutil.rmtree(path)
-
-
-@mpi_wrap_master_thread
-def mpi_copy(src, dst, linkfiles=False):
+def copy_tree(src, dst, linkfiles=False):
     '''Copy path on thread rank=0 with :code:`shutil.copytree` or :code:`copy2` for files. If :code:`linkfiles` is true, files are soft-linked rather then copied.
     '''
     if src.is_dir():
@@ -580,18 +548,33 @@ class Simulation:
             if not isinstance(self.root, pathlib.Path):
                 self.root = pathlib.Path(self.root)
 
-            if not self.root.is_dir():
-                mpi_mkdir(self.root)
-
+            if comm is not None:
+                if comm.rank == 0:
+                    if not self.root.is_dir():
+                        self.root.mkdir(exist_ok=True)
+                comm.barrier()
+            else:
+                if not self.root.is_dir():
+                    self.root.mkdir(exist_ok=True)
 
         self.branch_name = 'master'
 
         if self.persistancy:
             _master = self.root / self.branch_name
-            if not _master.is_dir():
-                mpi_mkdir(_master)
+
+            if comm is not None:
+                if comm.rank == 0:
+                    if not _master.is_dir():
+                        _master.mkdir(exist_ok=True)
+                comm.barrier()
+            else:
+                if not _master.is_dir():
+                    _master.mkdir(exist_ok=True)
 
             self.make_paths()
+
+            if comm is not None:
+                comm.barrier()
 
         if logger:
             self.logger = profiling.get_logger(
@@ -671,7 +654,18 @@ class Simulation:
         '''Make all the folder for the current branch according to :code:`self.paths`.
         '''
         for path in self.paths:
-            mpi_mkdir(self.get_path(path))
+
+            abs_path = self.get_path(path)
+
+            if comm is not None:
+                if comm.rank == 0:
+                    if not abs_path.is_dir():
+                        abs_path.mkdir(exist_ok=True)
+                comm.barrier()
+            else:
+                if not abs_path.is_dir():
+                    abs_path.mkdir(exist_ok=True)
+
 
 
     @property
@@ -704,14 +698,29 @@ class Simulation:
     def delete(self, branch):
         '''Delete branch.
         '''
-        if (self.root / branch).is_dir():
-            mpi_rmdir(self.root / branch)
+
+        if comm is not None:
+            if comm.rank == 0:
+                if (self.root / branch).is_dir():
+                    shutil.rmtree(self.root / branch)
+            comm.barrier()
+        else:
+            if (self.root / branch).is_dir():
+                shutil.rmtree(self.root / branch)
+
         if self.branch_name == branch:
-            mpi_mkdir(self.root / self.branch_name)
+            if comm is not None:
+                if comm.rank == 0:
+                    (self.root / self.branch_name).mkdir(exist_ok=True)
+                comm.barrier()
+            else:
+                (self.root / self.branch_name).mkdir(exist_ok=True)
+
             self.make_paths()
 
-
-    def branch(self, name, empty=False, linkfiles=None):
+    @MPI_action(action='barrier')
+    @MPI_single_process(process_id = 0)
+    def _make_branch(self, name, empty=False, linkfiles=None):
         '''Create branch by creating a copy of the current branch state and checkout that branch. If the branch exists, just checkout that branch.
 
         :param str name: Name of the new branch
@@ -727,27 +736,38 @@ class Simulation:
                 self.logger.info(f'Branch "{name}" already exists')
         else:
             if empty:
-                mpi_mkdir(self.root / name)
+                (self.root / name).mkdir(exist_ok=True)
                 for path in self.paths:
-                    mpi_mkdir(self.root / name / path)
+                    (self.root / name / path).mkdir(exist_ok=True)
+                
             else:
                 if linkfiles is None:
-                    mpi_copy(self.root / self.branch_name, self.root / name, linkfiles=False)
+                    copy_tree(self.root / self.branch_name, self.root / name, linkfiles=False)
                 elif isinstance(linkfiles, list):
                     listing = pathlib.Path(self.root / self.branch_name).glob('./*')
                     for pth in listing:
                         if pth.name in linkfiles:
-                            mpi_copy(pth, self.root / name / pth.name, linkfiles=True)
+                            copy_tree(pth, self.root / name / pth.name, linkfiles=True)
                         else:
-                            mpi_copy(pth, self.root / name / pth.name, linkfiles=False)
+                            copy_tree(pth, self.root / name / pth.name, linkfiles=False)
                 elif linkfiles:
-                    mpi_copy(self.root / self.branch_name, self.root / name, linkfiles=True)
+                    copy_tree(self.root / self.branch_name, self.root / name, linkfiles=True)
                 else:
                     raise TypeError(f'linkfiles type "{type(linkfiles)}" not supported')
 
         # Make sure log directory exists
-        mpi_mkdir(self.root / name / 'logs')
+        (self.root / name / 'logs').mkdir(exist_ok=True)
 
+
+    def branch(self, name, empty=False, linkfiles=None):
+        '''Create branch by creating a copy of the current branch state and checkout that branch. If the branch exists, just checkout that branch.
+
+        :param str name: Name of the new branch
+        :param bool empty: If :code:`True` do not copy the state of the current branch.
+        :param list/bool linkfiles: If a list of paths that should be soft-linked rather then copied. If :code:`True`, soft-link all files.
+        :return: None
+        '''
+        self._make_branch(name, empty=empty, linkfiles=linkfiles)
         self.checkout(name)
 
 
