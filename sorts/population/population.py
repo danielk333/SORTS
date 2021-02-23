@@ -566,10 +566,10 @@ class Population:
 
         with h5py.File(fname,"r") as hf:
             pop = cls(
-                fields = copy.deepcopy(hf.attrs['fields']),
-                dtypes = copy.deepcopy(hf.attrs['dtypes']),
-                space_object_fields = copy.deepcopy(hf.attrs['space_object_fields']),
-                state_fields = copy.deepcopy(hf.attrs['state_fields']),
+                fields = copy.deepcopy(hf.attrs['fields'].tolist()),
+                dtypes = copy.deepcopy(hf.attrs['dtypes'].tolist()),
+                space_object_fields = copy.deepcopy(hf.attrs['space_object_fields'].tolist()),
+                state_fields = copy.deepcopy(hf.attrs['state_fields'].tolist()),
                 epoch_field = {key:val for key, val in hf.attrs['epoch_field']},
                 propagator = propagator,
                 propagator_args = propagator_options,
