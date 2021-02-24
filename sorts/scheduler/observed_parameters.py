@@ -234,7 +234,11 @@ class ObservedParameters(Scheduler):
                     diameter=diam,
                 )
                 if snr_limit:
-                    snr_db = np.log10(snr[ti])*10.0
+                    if snr[ti] < 1e-9:
+                        snr_db = np.nan
+                    else:
+                        snr_db = np.log10(snr[ti])*10.0
+
                     if np.isnan(snr_db) or np.isinf(snr_db):
                         keep[ti] = False
                     else:
