@@ -55,7 +55,7 @@ if not master_path.is_absolute():
 pop = master_catalog(
     master_path,
     propagator = Prop_cls,
-    propagator_args = Prop_opts,
+    propagator_options = Prop_opts,
 )
 pop = master_catalog_factor(pop, treshhold = 0.1)
 
