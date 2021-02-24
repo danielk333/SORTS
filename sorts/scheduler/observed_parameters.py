@@ -139,6 +139,11 @@ class ObservedParameters(Scheduler):
         return g, beam.wavelength
 
 
+    def observable_filter(self, t, radar, meta, tx_enu, rx_enu):
+        return True
+
+
+
     def calculate_observation(self, txrx_pass, t, generator, space_object, epoch=None, calculate_snr=True, interpolator=None, snr_limit=True, save_states=False):
         '''Calculate the observation of a pass of a specific space object given the current state of the Scheduler.
 
@@ -200,10 +205,13 @@ class ObservedParameters(Scheduler):
         for ti, (radar, meta) in enumerate(generator):
 
             metas.append(meta)
+
+            observable = self.observable_filter(t[ti], radar, meta, enus[0][:3,ti], enus[1][:3,ti])
+
             if self.profiler is not None:
                 self.profiler.start('Obs.Param.:calculate_observation:snr-step')
 
-            if radar.tx[txi].enabled and radar.rx[rxi].enabled and calculate_snr:
+            if radar.tx[txi].enabled and radar.rx[rxi].enabled and calculate_snr and observable:
 
                 if self.profiler is not None:
                     self.profiler.start('Obs.Param.:calculate_observation:snr-step:gain')
