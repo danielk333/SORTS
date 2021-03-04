@@ -236,7 +236,10 @@ class Population:
 
         '''
         if col in self.fields:
-            ind = self.fields.index(col)
+            try:
+                ind = self.fields.index(col)
+            except AttributeError:      # when loading pop from file, self.fields is ndarray
+                ind = np.where(self.fields == col)[0][0]
             mask = np.full( (self.data.shape[0],), True, dtype=np.bool)
             for row in range(self.data.shape[0]):
                 mask[row] = fun(self.data[col][row])
