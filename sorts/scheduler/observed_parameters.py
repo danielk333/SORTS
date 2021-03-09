@@ -122,12 +122,11 @@ class ObservedParameters(Scheduler):
         return data0, J
 
 
-    def get_beam_gain_wavelength(self, beam, enu, meta):
+    def get_beam_gain_and_wavelength(self, beam, enu, meta):
         '''Given the input beam configured by the controller and the local (for that beam) coordinates of the observed object, get the correct gain and wavelength used for SNR calculation. 
 
         The default is a maximum calculation based on pointing, this is used for e.g. RX digital beam-forming.
         '''
-
         if len(beam.pointing.shape) > 1:
             g = np.max([
                 beam.gain(enu, ind={'pointing': pi})
@@ -139,8 +138,61 @@ class ObservedParameters(Scheduler):
         return g, beam.wavelength
 
 
-    def calculate_observation(self, txrx_pass, t, generator, space_object, calculate_snr=True, interpolator=None, snr_limit=True, save_states=False):
+    def observable_filter(self, t, radar, meta, tx_enu, rx_enu, tx_index, rx_index):
+        '''Determines if the object was observable or not by the radar system
+        '''
+        return True
+
+
+    def vectorized_get_beam_gain_and_wavelength(self, t, vectorized_data, tx_enus, rx_enus, tx_index, rx_index):
+        tx_g = self.radar.tx[tx_index].beam.gain(
+            tx_enus, 
+            pointing=vectorized_data[:,0:3].T, 
+            vectorized_parameters=True,
+        )
+        rx_g = self.radar.rx[rx_index].beam.gain(
+            rx_enus, 
+            pointing=vectorized_data[:,4:7].T, 
+            vectorized_parameters=True,
+        )
+
+        return tx_g, vectorized_data[:,3], rx_g, vectorized_data[:,7]
+
+
+    def vectorized_observable_filter(self, t, vectorized_data, tx_enus, rx_enus, tx_index, rx_index):
+        return np.full(t.shape, True, dtype=np.bool)
+
+
+    def get_vectorized_row(self, radar, meta, tx_index, rx_index):
+        '''Used to extract the used data from the `radar` instance when vectorizing `calculate_observation`. 
+        Input to `vectorized_observable_filter` and `vectorized_get_beam_gain_and_wavelength`.
+
+        Should return a numpy vector, will be stored as a row-vector in the matrix passed to the vectorized functions.
+        '''
+        row = np.empty((8,), dtype=np.float64)
+        row[0:3] = radar.tx[tx_index].beam.pointing[:]
+        row[3] = radar.tx[tx_index].beam.wavelength
+        row[4:7] = radar.rx[rx_index].beam.pointing[:]
+        row[7] = radar.rx[rx_index].beam.wavelength
+        return row
+
+
+    def calculate_observation(
+            self, 
+            txrx_pass, 
+            t, 
+            generator, 
+            space_object, 
+            epoch=None, 
+            calculate_snr=True, 
+            interpolator=None, 
+            snr_limit=True, 
+            save_states=False, 
+            vectorize=False,
+        ):
         '''Calculate the observation of a pass of a specific space object given the current state of the Scheduler.
+
+        #ASSUMES INPUT t IS RELATIVE SPACE OBJECT EPOCH unless epoch is given
 
         #TODO: Docstring
         '''
@@ -161,10 +213,15 @@ class ObservedParameters(Scheduler):
         if self.profiler is not None:
             self.profiler.start('Obs.Param.:calculate_observation:get_state')
         
-        if interpolator is not None:
-            states = interpolator.get_state(t)
+        if epoch is None:
+            t_samp = t
         else:
-            states = space_object.get_state(t)
+            t_samp = t + (epoch - space_object.epoch).sec
+
+        if interpolator is not None:
+            states = interpolator.get_state(t_samp)
+        else:
+            states = space_object.get_state(t_samp)
 
         if self.profiler is not None:
             self.profiler.stop('Obs.Param.:calculate_observation:get_state')
@@ -186,62 +243,181 @@ class ObservedParameters(Scheduler):
 
         if self.profiler is not None:
             self.profiler.stop('Obs.Param.:calculate_observation:enus,range,range_rate')
-
-        if self.profiler is not None:
             self.profiler.start('Obs.Param.:calculate_observation:generator')
-        metas = []
-        for ti, (radar, meta) in enumerate(generator):
 
-            metas.append(meta)
+        metas = []
+
+        if vectorize:
+
+            powers = np.empty((len(t),), dtype=np.float64)
+            bandwidths = np.empty((len(t),), dtype=np.float64)
+            rx_noise_temps = np.empty((len(t),), dtype=np.float64)
+            txrx_on = np.full((len(t),), False, dtype=np.bool)
+
+            vectorized_data = None
+            for ri, (radar, meta) in enumerate(generator):
+                vec_row = self.get_vectorized_row(radar, meta, txi, rxi)
+                if vectorized_data is None:
+                    vectorized_data = np.empty((len(t), len(vec_row)), dtype=vec_row.dtype)
+                
+                vectorized_data[ri,:] = vec_row
+
+                powers[ri] = radar.tx[txi].power
+                bandwidths[ri] = radar.tx[txi].coh_int_bandwidth
+                rx_noise_temps[ri] = radar.rx[rxi].noise
+
+                if radar.tx[txi].enabled and radar.rx[rxi].enabled:
+                    txrx_on[ri] = True
+
             if self.profiler is not None:
+                self.profiler.stop('Obs.Param.:calculate_observation:generator')
+                self.profiler.start('Obs.Param.:calculate_observation:vectorized_observable_filter,keep')
+
+            observable = self.vectorized_observable_filter(
+                t, 
+                vectorized_data,
+                enus[0][:3,:], 
+                enus[1][:3,:], 
+                txi, 
+                rxi,
+            )
+            keep = np.logical_and(observable, txrx_on)
+
+            if self.profiler is not None:
+                self.profiler.stop('Obs.Param.:calculate_observation:vectorized_observable_filter,keep')
                 self.profiler.start('Obs.Param.:calculate_observation:snr-step')
 
-            if radar.tx[txi].enabled and radar.rx[rxi].enabled and calculate_snr:
-
+            if calculate_snr:
                 if self.profiler is not None:
                     self.profiler.start('Obs.Param.:calculate_observation:snr-step:gain')
 
-                tx_g, tx_wavelength = self.get_beam_gain_wavelength(radar.tx[txi].beam, enus[0][:3,ti], meta)
-                rx_g, rx_wavelength = self.get_beam_gain_wavelength(radar.rx[rxi].beam, enus[1][:3,ti], meta)
+                tx_g, tx_wavelength, rx_g, rx_wavelength = self.vectorized_get_beam_gain_and_wavelength(
+                    t[keep], 
+                    vectorized_data[keep,:], 
+                    enus[0][:3,keep], 
+                    enus[1][:3,keep], 
+                    txi, 
+                    rxi,
+                )
                 
                 if self.profiler is not None:
                     self.profiler.stop('Obs.Param.:calculate_observation:snr-step:gain')
                     self.profiler.start('Obs.Param.:calculate_observation:snr-step:snr')
 
-                snr[ti] = hard_target_snr(
+                snr[keep] = hard_target_snr(
                     tx_g,
                     rx_g,
                     tx_wavelength,
-                    radar.tx[txi].power,
-                    ranges[0][ti],
-                    ranges[1][ti],
+                    powers[keep],
+                    ranges[0][keep],
+                    ranges[1][keep],
                     diameter=diam,
-                    bandwidth=radar.tx[txi].coh_int_bandwidth,
-                    rx_noise_temp=radar.rx[rxi].noise,
+                    bandwidth=bandwidths[keep],
+                    rx_noise_temp=rx_noise_temps[keep],
                 )
                 if self.profiler is not None:
                     self.profiler.stop('Obs.Param.:calculate_observation:snr-step:snr')
+                    self.profiler.start('Obs.Param.:calculate_observation:snr-step:rcs,filter')
 
-                rcs[ti] = hard_target_rcs(
+                rcs[keep] = hard_target_rcs(
                     wavelength=tx_wavelength,
                     diameter=diam,
                 )
                 if snr_limit:
-                    snr_db = np.log10(snr[ti])*10.0
-                    if np.isnan(snr_db) or np.isinf(snr_db):
+                    snr_db = np.empty(snr.shape, dtype=np.float64)
+                    snr_db[snr < 1e-9] = np.nan
+                    snr_db[snr >= 1e-9] = np.log10(snr[snr >= 1e-9])*10.0
+
+                    keep[np.logical_or(np.isnan(snr_db), np.isinf(snr_db))] = False
+                    keep[np.logical_and(snr_db <= radar.min_SNRdb, keep)] = False
+
+                if self.profiler is not None:
+                    self.profiler.stop('Obs.Param.:calculate_observation:snr-step:rcs,filter')
+
+        else:
+            for ti, (radar, meta) in enumerate(generator):
+
+                metas.append(meta)
+
+                if self.profiler is not None:
+                    self.profiler.start('Obs.Param.:calculate_observation:observable_filter')
+
+                observable = self.observable_filter(
+                    t[ti], 
+                    radar, 
+                    meta, 
+                    enus[0][:3,ti], 
+                    enus[1][:3,ti], 
+                    txi, 
+                    rxi,
+                )
+
+                if self.profiler is not None:
+                    self.profiler.stop('Obs.Param.:calculate_observation:observable_filter')
+                    self.profiler.start('Obs.Param.:calculate_observation:snr-step')
+
+                if radar.tx[txi].enabled and radar.rx[rxi].enabled and calculate_snr and observable:
+
+                    if self.profiler is not None:
+                        self.profiler.start('Obs.Param.:calculate_observation:snr-step:gain')
+
+                    tx_g, tx_wavelength = self.get_beam_gain_and_wavelength(
+                        radar.tx[txi].beam, 
+                        enus[0][:3,ti], 
+                        meta,
+                    )
+                    rx_g, rx_wavelength = self.get_beam_gain_and_wavelength(
+                        radar.rx[rxi].beam, 
+                        enus[1][:3,ti], 
+                        meta,
+                    )
+                    
+                    if self.profiler is not None:
+                        self.profiler.stop('Obs.Param.:calculate_observation:snr-step:gain')
+                        self.profiler.start('Obs.Param.:calculate_observation:snr-step:snr')
+
+                    snr[ti] = hard_target_snr(
+                        tx_g,
+                        rx_g,
+                        tx_wavelength,
+                        radar.tx[txi].power,
+                        ranges[0][ti],
+                        ranges[1][ti],
+                        diameter=diam,
+                        bandwidth=radar.tx[txi].coh_int_bandwidth,
+                        rx_noise_temp=radar.rx[rxi].noise,
+                    )
+                    if self.profiler is not None:
+                        self.profiler.stop('Obs.Param.:calculate_observation:snr-step:snr')
+                        self.profiler.start('Obs.Param.:calculate_observation:snr-step:rcs,filter')
+
+                    rcs[ti] = hard_target_rcs(
+                        wavelength=tx_wavelength,
+                        diameter=diam,
+                    )
+                    if snr_limit:
+                        if snr[ti] < 1e-9:
+                            snr_db = np.nan
+                        else:
+                            snr_db = np.log10(snr[ti])*10.0
+
+                        if np.isnan(snr_db) or np.isinf(snr_db):
+                            keep[ti] = False
+                        else:
+                            keep[ti] = snr_db > radar.min_SNRdb
+
+                    if self.profiler is not None:
+                        self.profiler.stop('Obs.Param.:calculate_observation:snr-step:rcs,filter')
+                else:
+                    snr[ti] = np.nan
+                    rcs[ti] = np.nan
+                    if calculate_snr:
                         keep[ti] = False
-                    else:
-                        keep[ti] = snr_db > radar.min_SNRdb
-            else:
-                snr[ti] = np.nan
-                rcs[ti] = np.nan
-                if calculate_snr:
-                    keep[ti] = False
-            
+                
+                if self.profiler is not None:
+                    self.profiler.stop('Obs.Param.:calculate_observation:snr-step')
             if self.profiler is not None:
-                self.profiler.stop('Obs.Param.:calculate_observation:snr-step')
-        if self.profiler is not None:
-            self.profiler.stop('Obs.Param.:calculate_observation:generator')
+                self.profiler.stop('Obs.Param.:calculate_observation:generator')
 
         data = dict(
             t = t,

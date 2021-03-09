@@ -106,6 +106,7 @@ def observed_parameters(data_list, snrdb_lim = 10.0, axes=None, sort=True, **kwa
     dr = 1
     axes[0][0].set_xlim([-dr, dr])
     axes[0][0].set_ylim([-dr, dr])
+    axes[0][0].set_aspect(1)
 
     axes[0][0].set_xlabel('East [k_x]', **text_spec)
     axes[0][0].set_ylabel('North [k_y]', **text_spec)

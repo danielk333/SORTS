@@ -66,7 +66,7 @@ print(f'G @ F_1 vs F_2 = {radar.tx[0].beam.gain(k, ind=dict(frequency=0))} vs {r
 
 class Tracking(sorts.scheduler.StaticList, sorts.scheduler.ObservedParameters):
 
-    def get_beam_gain_wavelength(self, beam, enu, meta):
+    def get_beam_gain_and_wavelength(self, beam, enu, meta):
         '''Now we have to define how to select the gain
         '''
         if 'frequency' in beam.parameters:
