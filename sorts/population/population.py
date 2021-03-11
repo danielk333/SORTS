@@ -572,8 +572,8 @@ class Population:
                 state_fields = copy.deepcopy(hf.attrs['state_fields'].tolist()),
                 epoch_field = {key:val for key, val in hf.attrs['epoch_field']},
                 propagator = propagator,
-                propagator_args = propagator_options,
-                propagator_options = propagator_args,
+                propagator_options = propagator_options,
+                propagator_args = propagator_args,
             )
         
             pop.data = hf['data'][()]
