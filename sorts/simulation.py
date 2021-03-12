@@ -780,6 +780,8 @@ class Simulation:
         '''
         self.branch_name = branch
         if self.logger is not None and self.persistancy:
+            if not self.log_path.is_dir():
+                self.log_path.mkdir(exist_ok=True)
             self.logger = profiling.change_logfile(self.logger, self.log_path)
 
 
