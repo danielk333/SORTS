@@ -33,15 +33,10 @@ def vdot(va, vb):
     """dot products between equal or shape-compatible arrays of N-vectors"""
     return np.sum(np.asarray(va) * np.asarray(vb), axis=-1)
 
+
 def vnorm2(vector):
     """L2-norm of array of N-vectors"""
     return np.sqrt(vdot(vector, vector))
-
-
-def Time_from_rv(rv):
-    # epoch is in UTC or UT1 (not clear which). The difference is < 1 sec always.
-    return Time(rv.jdsatepoch, rv.jdsatepochF, format='jd')
-
 
 
 def load_tle_table(fname):
@@ -57,6 +52,19 @@ def load_tle_table(fname):
         src.close()
         return tab
     raise
+
+
+def Time_from_rv(rv):
+    # epoch is in UTC or UT1 (not clear which). The difference is < 1 sec always.
+    try:
+        return Time(rv.epoch, scale='utc')
+    except AttributeError:
+        return Time(rv.jdsatepoch, rv.jdsatepochF, format='jd')
+
+
+def dt64_from_rv(rv):
+    return Time_from_rv(rv).replicate(format='datetime64').value
+
 
 # Descriptor for numpy dtype representing a state vector
 svec_d = [
@@ -138,17 +146,17 @@ class TestFrames(unittest.TestCase):
         # self.line1 = '1 25544U 98067A   08264.51782528 -.00002182  00000-0 -11606-4 0  2927'
         # self.line2 = '2 25544  51.6416 247.4627 0006703 130.5360 325.0288 15.72125391563537'
 
-        # "Earth Resources" TLE file downloaded as 'tests/eos_tle.txt'
+        # "Earth Resources" TLE file downloaded as 'eos_tle.txt'
         # from https://celestrak.com/NORAD/elements/ on 2020-07-21
-        self.tab = load_tle_table('tests/eos_tle.txt')
-        self.resorb = read_statevectors('tests/S1A_OPER_AUX_RESORB_OPOD_20200721T073339_V20200721T023852_20200721T055622.EOF')
+        self.tab = load_tle_table('eos_tle.txt')
+        self.resorb = read_statevectors('S1A_OPER_AUX_RESORB_OPOD_20200721T073339_V20200721T023852_20200721T055622.EOF')
 
 
     def test_sgp4_version_workaround(self):
         rv = self.tab['SENTINEL-1A']
 
+        # epoch is in UTC or UT1 (not clear which). The difference is < 1 sec always.
         rv_ept = Time_from_rv(rv)
-
         # Extract timetuple, using DK's methods
         # tuple: year, month, day, hr, min, sec, microseconds
         year, month, day, hour, minute, sec = rv_ept.ymdhms
@@ -162,8 +170,7 @@ class TestFrames(unittest.TestCase):
         pos, vel = _propagate(rv, rv_ept)
         x = np.array([pos + vel])
 
-
-        nt.assert_array_equal(x0,x)
+        np.testing.assert_array_equal(x0,x)
 
 
     def test_tle_init(self):
@@ -203,7 +210,6 @@ class TestFrames(unittest.TestCase):
         for ii in range(200):
             # dt between statevectors is 10.0 seconds
             svec = s1_res[ix+ii]
-
             posvel = prp.propagate(Time(svec.UTC)-rv_ept, state_eci, rv_ept)
             ppos, pvel = posvel[:3], posvel[3:]
 
@@ -227,12 +233,12 @@ class TestFrames(unittest.TestCase):
         rv = self.tab['SENTINEL-1A']
         s1_res = self.resorb
 
-
         rv_ept = Time_from_rv(rv)
 
         # Find first statevector past TLE epoch
         ix = np.where(s1_res.UTC > rv_ept.datetime64)[0][0]
         svec = s1_res[ix]
+        svt = Time(svec.UTC, scale='utc')                     # Astropy Time
 
         epoch0 = Time(svec.UTC, scale='utc')
 
@@ -258,7 +264,6 @@ class TestFrames(unittest.TestCase):
             assert vnorm2(svec.VEL - pvel) < 1.0,   'Inaccurate velocity'
 
 
-
     def propagate_from_RES(self, nprop=400):
         """
         Initialise SPG4 propagation from a RES statevector, and compare to
@@ -268,8 +273,9 @@ class TestFrames(unittest.TestCase):
         rv = self.tab['SENTINEL-1A']
         s1_res = self.resorb
 
-        ix = 50
+        ix = 550
         svec = s1_res[ix]
+        svt = Time(svec.UTC, scale='utc')                     # Astropy Time
 
         state_ecef = np.r_[svec.POS, svec.VEL]
 
@@ -289,8 +295,8 @@ class TestFrames(unittest.TestCase):
 
 
     def test_propagate_from_RES(self, nprop=100):
-
         pos, vel, rpos, rvel = self.propagate_from_RES(nprop)
+
 
         np.testing.assert_array_less(vnorm2(pos[:nprop]-rpos[:nprop]), 100), \
             'Position errors too large'
@@ -321,7 +327,71 @@ class TestFrames(unittest.TestCase):
 
 
 
+    def skip_test_TEME_to_ITRF(self):
+
+        # First, try without polar motion
+
+        # Extract one statevector for initialization
+        rv = self.tab['SENTINEL-1A']
+        s1_res = self.resorb
+
+        # rv_ept = Time(rv.epoch, scale='utc')                # Astropy Time object
+        rv_epd = dt64_from_rv(rv)                             # Numpy datetime64 value
+
+        # Find first statevector past TLE epoch
+        ix = np.where(s1_res.UTC > rv_epd)[0][0]
+        svec = s1_res[ix]
+
+        # def propagate(self, t, state0, mjd0, **kwargs):
+
+        # Extract TEME statevector for initialization of SORTS propagation object
+        yr, mth, day, hr, mn, sec, usec = dates.npdt_to_date(svec.UTC)
+        pos, vel = rv.propagate(yr, mth, day, hr, mn, second=sec+1e-6*usec)
+        state_eci = np.array(pos + vel) * 1e3
+        epoch_mjd = dates.npdt_to_mjd(svec.UTC)
+
+        # SORTS-style SGP4 propagator
+        prp = SGP4()
+
+        # Should be Cartesian TEME coordinates in SI units
+        prp.settings['out_frame'] = 'TEME'
+        pv_teme = prp.propagate(0., state_eci, epoch_mjd)[:,0]
+        prp.settings['out_frame'] = 'ITRF'
+        pv_itrf = prp.propagate(0., state_eci, epoch_mjd)[:,0]
+
+        # rotate          # def TEME_to_ITRF(TEME, jd_ut1, xp, yp)
+        # UT1 is close enough to UTC so as to make no difference here
+        pv_rot = frames.TEME_to_ITRF(pv_teme, dates.mjd_to_jd(epoch_mjd), 0, 0)
+
+        p_itrf, v_itrf = pv_itrf[:3], pv_itrf[3:]
+        p_rot, v_rot = pv_rot[:3], pv_rot[3:]
+
+        assert vnorm2(p_rot - p_itrf) < 800.0, 'Inaccurate position after rotation'
+        assert vnorm2(v_rot - v_itrf) < 1.0,   'Inaccurate velocity after rotation'
 
 
 
+
+
+if __name__ == '__main__':
+
+    import sys
+
+    print(sys.argv)
+
+    if len(sys.argv) > 1:
+        unittest.main()
+
+    else:
+
+        rv = load_tle_table('eos_tle.txt')['SENTINEL-1A']
+        s1_res = read_statevectors('S1A_OPER_AUX_RESORB_OPOD_20200721T073339_V20200721T023852_20200721T055622.EOF')
+
+        rv_epd = dt64_from_rv(rv)                             # Numpy datetime64 value
+
+        # Find first statevector past TLE epoch
+        ix = np.where(s1_res.UTC > rv_epd)[0][0]
+        svec = s1_res[ix]
+
+        svt = Time(svec.UTC, scale='utc')
 

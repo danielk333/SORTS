@@ -111,6 +111,7 @@ def orbits(o, **options):
         :save [string]: will not display figure and will instead save it to this path
         :show [bool]: if False will do draw() instead of show() allowing script to continue
         :tight_rect [list of 4 floats]: configuration for the tight_layout function
+        :usetex [bool]: whether to typeset labels using TeX syntax
 
 
     Example::
@@ -146,8 +147,10 @@ def orbits(o, **options):
     scale = options.get('scale', np.ones((o.shape[dim_axis],), dtype=o.dtype))
 
 
-    #turn on TeX interperter
-    plt.rc('text', usetex=True)
+    #turn on TeX interpreter (or not)
+    usetex = options['usetex'] if 'usetex' in options else True
+    print(f'usetex: {usetex}')
+    plt.rc('text', usetex=usetex)
 
     lis = list(range(o.shape[dim_axis]))
     axis_plot = list(combinations(lis, 2))

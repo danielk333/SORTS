@@ -49,6 +49,12 @@ config = configparser.ConfigParser(interpolation=None)
 config.read([base_pth / 'example_config.conf'])
 master_path = pathlib.Path(config.get('TSDR_beampark__ngl.py', 'master_catalog'))
 
+simulation_root = pathlib.Path(config.get('TSDR_beampark__ngl.py', 'simulation_root'))
+
+if not simulation_root.is_absolute():
+    simulation_root = base_pth / simulation_root.relative_to('.')
+
+
 if not master_path.is_absolute():
     master_path = base_pth / master_path.relative_to('.')
 
@@ -68,8 +74,8 @@ scan_sched = Scanner(radar, scan)
 scan_sched.t = np.arange(0, end_t, scan.dwell())
 
 scheduler = ObservedScanning(
-    radar = radar, 
-    controllers = [scan_sched], 
+    radar = radar,
+    controllers = [scan_sched],
 )
 
 
@@ -112,9 +118,9 @@ class Scanning(Simulation):
     def get_states(self, index, item):
         obj = self.population.get_object(item)
         t = sorts.equidistant_sampling(
-            orbit = obj.orbit, 
-            start_t = self.scheduler.controllers[0].t.min(), 
-            end_t = self.scheduler.controllers[0].t.max(), 
+            orbit = obj.orbit,
+            start_t = self.scheduler.controllers[0].t.min(),
+            end_t = self.scheduler.controllers[0].t.max(),
             max_dpos=1e3,
         )
         state = obj.get_state(t)
@@ -158,15 +164,15 @@ class Scanning(Simulation):
     def plot(self):
         pass
 
-        
+
 
 
 
 sim = Scanning(
     population = pop,
     scheduler = scheduler,
-    root = '/home/danielk/IRF/ESA_E3D/SORTS/tsdr_fence',
-    logger=True, 
+    root = simulation_root,
+    logger=True,
     profiler=True,
 )
 # sim.delete('debug')
@@ -188,3 +194,19 @@ print(f'Total detected: {sim.total_detected()}')
 sim.plot()
 
 plt.show()
+
+
+## EX
+
+# sim.run('propagate')
+# sim.run('passes')
+# for ind, freq in enumerate([1.2e6, 2.4e6]):
+#     sim.checkout('master')
+#     sim.branch(f'f{ind}')
+#     sim.scheduler.radar.tx[0].beam.frequency = freq
+#     sim.scheduler.radar.rx[0].beam.frequency = freq
+#     sim.run('observe')
+
+##
+
+
