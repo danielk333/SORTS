@@ -1,0 +1,22 @@
+name: sorts
+channels:
+  - defaults
+dependencies:
+  - ipython
+  - numpy
+  - scipy
+  - matplotlib
+  - tabulate
+  - lxml
+  - pyproj
+  - mpi4py
+  - mpich
+  - h5py
+  - astropy
+  - pip
+  - pip:
+    - xmlschema
+    - sgp4
+    - pyglow
+    - tqdm
+

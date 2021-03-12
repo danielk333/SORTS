@@ -6,12 +6,16 @@ examples/data/orekit-data-master.zip
 examples/data/tle.txt
 examples/data/tle-201801.txt
 
-
 # Compiled source #
 ###################
 
 #Sublime
 *.sublime*
+
+#vi/vim
+*~
+.*.swo
+.*.swp
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -106,6 +110,8 @@ logfile
 cache_error*
 *.log
 *.mp4
+*~
+.*.sw[op]
 
 #temporary test data
 tests/tmp_test_data/*

@@ -5,6 +5,7 @@
 '''
 
 #Python standard import
+import os
 import pathlib
 import shutil
 from collections import OrderedDict
@@ -494,7 +495,7 @@ def cached_step(caches):
                     try:
                         ret = lfunc(fname)
                         loaded_ = True
-                    except (OSError, EOFError, UnicodeError, ):
+                    except (OSError, EOFError, UnicodeError):
                         fname.unlink()
 
                 if loaded_:

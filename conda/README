@@ -1,0 +1,33 @@
+
+# Creating an environment for SORTS using conda and pip
+
+Dependencies are listed in the file 'sorts.yml'.  Creating a conda environment
+involves the following steps:
+
+1) Clone the git repositories for SORTS, pyorb and pyant.
+    In the below, we will use the paths ~/src/git/{SORTS,pyorb,pyant}.
+    Substitute your own locations as needed.
+
+2) Install conda, using e.g. 'miniconda' or 'anaconda':
+
+    https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html
+
+3) Create and activate the conda environment for SORTS.
+
+    cd ~/src/git/SORTS/conda
+    conda env create -f sorts.yml
+    conda activate sorts
+
+4) Install the 'pyorb' and 'pyant' dependencies, as well as SORTS itself:
+
+    cd ~/src/git/pyorb
+    pip install -e .
+    cd ~/src/git/pyant
+    pip install -e .
+    cd ~/src/git/SORTS
+    pip install -e .
+
+5) Verify that you can 'import sorts' in python:
+
+    python -c 'import sorts'
+
