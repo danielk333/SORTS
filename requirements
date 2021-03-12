@@ -1,10 +1,9 @@
-h5py>=2.7.1
+h5py>=3.2.1
 matplotlib>=2.2.2
 numpy>=1.14.3
 scipy>=1.1.0
 sgp4>=2.7
 tabulate>=0.8.7
 tqdm>=4.46.0
-astropy==4.1rc1
-lxml>=4.5.2
+astropy>=4.1
 xmlschema>=1.5.1

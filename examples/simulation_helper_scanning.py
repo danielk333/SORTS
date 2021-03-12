@@ -81,7 +81,8 @@ class Scanning(Simulation):
 
         super().__init__(*args, **kwargs)
 
-        self.steps['propagate'] = self.get_states
+        # These steps will be run at 'step.run()'
+        self.steps['propagate'] = self.get_states       # 'propagate' determines name of stored stage
         self.steps['passes'] = self.find_passes
         self.steps['observe'] = self.observe_passes
 
@@ -219,3 +220,17 @@ sim.logger.always('\n'+sim.profiler.fmt(normalize='total'))
 sim.plot()
 
 plt.show()
+
+
+######################
+
+# sim.run('propagate')
+# sim.run('passes')
+# for ind, freq in enumerate([1.2e6, 2.4e6]):
+#     sim.checkout('master')
+#     sim.branch(f'f{ind}')
+#     sim.scheduler.radar.tx[0].beam.frequency = freq
+#     sim.scheduler.radar.rx[0].beam.frequency = freq
+#     sim.run('observe')
+
+#################
