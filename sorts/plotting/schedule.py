@@ -67,7 +67,7 @@ def observed_parameters(data_list, snrdb_lim = 10.0, axes=None, sort=True, **kwa
     else:
         raise TypeError(f'time unit "{time_unit}" not found')
 
-
+    max_snr = [0]
     for pi, dat in enumerate(data_list):
         if dat is None:
             continue
@@ -90,7 +90,11 @@ def observed_parameters(data_list, snrdb_lim = 10.0, axes=None, sort=True, **kwa
         axes[0][1].plot(dat['t'][det_inds]/_tt, dat['range'][det_inds]*1e-3, line_det)
         axes[1][0].plot(dat['t'][det_inds]/_tt, dat['range_rate'][det_inds]*1e-3, line_det)
         axes[1][1].plot(dat['t'][det_inds]/_tt, SNRdB[det_inds], line_det)
-        axes[1][1].set_ylim([0, None])
+        max_snr.append(SNRdB.max())
+
+    if np.max(max_snr) < 10.0:
+        max_snr = [10]
+    axes[1][1].set_ylim([0, np.max(max_snr)])
 
 
     axes[0][1].set_xlabel(f'Time {t_label}', **text_spec)

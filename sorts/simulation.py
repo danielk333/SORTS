@@ -483,8 +483,6 @@ def cached_step(caches):
                 index_lst = [str(index)]
 
             dir_ = self.get_path(step)
-            if not dir_.is_dir():
-                mpi_mkdir(dir_)
 
             loaded_ = False
 

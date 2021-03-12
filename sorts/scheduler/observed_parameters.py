@@ -213,6 +213,9 @@ class ObservedParameters(Scheduler):
         if self.profiler is not None:
             self.profiler.start('Obs.Param.:calculate_observation:get_state')
         
+        #t is always in scheduler relative time
+        #t_samp is in space object relative time if there is a scheduler epoch, otherwise it is assumed that the epoch are the same
+        #if there is an interpolator it is assumed that interpolation is done in space object relative time
         if epoch is None:
             t_samp = t
         else:

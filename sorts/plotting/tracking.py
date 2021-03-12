@@ -32,6 +32,8 @@ def az_el_to_xy(az,el):
 
 def local_passes(passes, **kwargs):
     enu_ind = kwargs.pop('station_ind', 0)
+    fig = None
+    ax = None
 
     for ind, ps in enumerate(passes):
         
@@ -48,18 +50,22 @@ def local_passes(passes, **kwargs):
 
         azelr = frames.cart_to_sph(enu[:3,:], radians=kwargs.setdefault('radians', False))
 
-        ax = local_tracking(azelr[0,:], azelr[1,:], **kwargs)
+        _fig, ax = local_tracking(azelr[0,:], azelr[1,:], **kwargs)
+        if fig is None:
+            fig = _fig
 
         if 'ax' not in kwargs:
             kwargs['ax'] = ax
 
-    return ax
+    return fig, ax
 
 
 def local_tracking(azimuth, elevation, ax=None, t=None, add_track=False, node_times=False, radians=False):
     if ax is None:
         fig = plt.figure()
         ax = fig.add_subplot(111)
+    else:
+        fig = None
 
     x0,y0 = az_el_to_xy(azimuth,elevation)
     ax.plot( x0, y0 )
@@ -107,4 +113,4 @@ def local_tracking(azimuth, elevation, ax=None, t=None, add_track=False, node_ti
         ax.set_ylim([-1.1,1.1])
         ax.set_aspect('equal', 'datalim')
 
-    return ax
+    return fig, ax
