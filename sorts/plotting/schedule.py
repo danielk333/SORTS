@@ -19,7 +19,11 @@ from mpl_toolkits.mplot3d import Axes3D
 from . import general
 from ..controller import Tracker
 
-def observed_parameters(data_list, snrdb_lim = 10.0, axes=None, sort=True, **kwargs):
+
+def unit_vector(v):
+    return v / np.sqrt(np.sum(v * v, axis=-1))[:,None]
+
+def observed_parameters(data_list, passes=None, snrdb_lim = 10.0, axes=None, sort=True, **kwargs):
     '''Observed parameters for one RX station.
     '''
 
@@ -72,20 +76,36 @@ def observed_parameters(data_list, snrdb_lim = 10.0, axes=None, sort=True, **kwa
         if dat is None:
             continue
 
+        if passes[pi] is None:
+            tvec = dat['t']
+            rx_k = dat['rx_k']
+            rng = dat['range']
+            rrt = dat['range_rate']
+        else:   # If we have passes, use those for nice plotting
+            tvec = passes[pi].t
+            rx_k = unit_vector(passes[pi].enu[1][3:].T).T
+            rng = passes[pi].range()[1]
+            rrt = passes[pi].range_rate()[1]
+
         if sort:
-            inds = np.argsort(dat['t'])
+            inds = np.argsort(tvec)
+            t_ind = np.argsort(dat['t'])
         else:
-            inds = np.arange(len(dat['t']))
+            inds = np.arange(len(tvec))
+            t_ind = np.arange(len(dat['t']))
 
         SNRdB = 10*np.log10(dat['snr'])
-        det_inds = inds[SNRdB[inds] > snrdb_lim]
+        det_inds = SNRdB > snrdb_lim
 
-        axes[0][0].plot(dat['rx_k'][0,inds], dat['rx_k'][1,inds], line_all)
+        # axes[0][0].plot(dat['rx_k'][0,inds], dat['rx_k'][1,inds], line_all)
+        axes[0][0].plot(rx_k[0,inds], rx_k[1,inds], line_all)
         axes[0][0].plot(dat['rx_k'][0,det_inds], dat['rx_k'][1,det_inds], line_det)
 
-        axes[0][1].plot(dat['t'][inds]/_tt, dat['range'][inds]*1e-3, line_all, label=f'Pass{pi}')
-        axes[1][0].plot(dat['t'][inds]/_tt, dat['range_rate'][inds]*1e-3, line_all)
-        axes[1][1].plot(dat['t'][inds]/_tt, SNRdB[inds], line_all)
+        #axes[0][1].plot(dat['t'][inds]/_tt, dat['range'][inds]*1e-3, line_all, label=f'Pass{pi}')
+        #axes[1][0].plot(dat['t'][inds]/_tt, dat['range_rate'][inds]*1e-3, line_all)
+        axes[0][1].plot(tvec[inds]/_tt, rng[inds]*1e-3, line_all, label=f'Pass{pi}')
+        axes[1][0].plot(tvec[inds]/_tt, rrt[inds]*1e-3, line_all)
+        axes[1][1].plot(dat['t'][t_ind]/_tt, SNRdB[t_ind], line_all)
 
         axes[0][1].plot(dat['t'][det_inds]/_tt, dat['range'][det_inds]*1e-3, line_det)
         axes[1][0].plot(dat['t'][det_inds]/_tt, dat['range_rate'][det_inds]*1e-3, line_det)
