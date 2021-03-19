@@ -259,6 +259,7 @@ class ObservedParameters(Scheduler):
 
             vectorized_data = None
             for ri, (radar, meta) in enumerate(generator):
+                metas.append(meta)
                 vec_row = self.get_vectorized_row(radar, meta, txi, rxi)
                 if vectorized_data is None:
                     vectorized_data = np.empty((len(t), len(vec_row)), dtype=vec_row.dtype)

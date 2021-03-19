@@ -98,11 +98,23 @@ def read_xml_oem(xml):
 # OEM WRITE
 ###############################################################################
 
-def write_xml_oem(data, meta, file=None):    
+def write_xml_oem(state_data, cov_data=None, meta=None, file=None):    
     """
     creaate and validate xml for OEM message
     write xml file resource
+
+    #TODO: finish this docstring
+
+    assumes UTC input times
+
+    It is assumed that the covariance matrix reference frame is the same as the state vector reference frame, i.e. `COV_REF_FRAME = meta['REF_FRAME']`.
+
+    :param numpy.ndarray state_data: structured numpy array where each element in the array contains the data fields with the same name as those defined by the OEM XML for states.
+    :param numpy.ndarray cov_data: structured numpy array where each element in the array contains the data fields with the same name as those defined by the OEM XML for covariance matricies.
+    :param dict meta: .... Only exception is `DATA_COMMENT`, which is used as input for the `COMMENT` field for the data section rather then a `DATA_COMMENT` field in the meta data section.
     """
+    if meta is None:
+        meta = {}
     # originator
     originator = meta.get("ORIGINATOR", f'SORTS {__version__}')
 
@@ -158,6 +170,9 @@ def write_xml_oem(data, meta, file=None):
     for field in _OEM_METADATA_FIELDS:
         if field in meta:
             _meta[field] = meta[field]
+            #ensure correct CCSDS formatting of input astropy time object
+            if field.endswith('_TIME'):
+                _meta[field] = _meta[field].CCSDS_epoch
         else:
             if field in meta_defaults:
                 _meta[field] = meta_defaults[field]
@@ -167,63 +182,79 @@ def write_xml_oem(data, meta, file=None):
     ###########################################################################
 
     _data = segment["data"]
-    _data["COMMENT"] = 'DATA COMMENT'
+    if 'DATA_COMMENT' in meta:
+        _data["COMMENT"] = meta["DATA_COMMENT"]
+
     _data["stateVector"] = []
+    _data["covarianceMatrix"] = []
 
     mock_vectors = [
         [Time.now().CCSDS_epoch, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9],
         [Time.now().CCSDS_epoch, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9],
     ]
 
-    for v in mock_vectors:
-        _data["stateVector"].append(dict(
-            EPOCH = v[0],
-            X = v[1],
-            Y = v[2],
-            Z = v[3],
-            X_DOT = v[4],
-            Y_DOT = v[5],
-            Z_DOT = v[6],
-            X_DDOT = v[7],
-            Y_DDOT = v[8],
-            Z_DDOT = v[9]
-        ))
+
+    for v in state_data:
+        _dat = dict(
+            EPOCH = Time(v["EPOCH"], format="datetime64", scale="utc").CCSDS_epoch,
+            X = v["X"],
+            Y = v["Y"],
+            Z = v["Z"],
+            X_DOT = v["X_DOT"],
+            Y_DOT = v["Y_DOT"],
+            Z_DOT = v["Z_DOT"],
+        )
+        #optional
+        for key in ["X_DDOT", "Y_DDOT", "Z_DDOT"]:
+            if key in state_data.dtype.names:
+                _dat[key] = v[key]
+
+        _data["stateVector"].append(_dat)
 
 
-    mock_matrices = [
-        [1.1]*21,
-        [2.2]*21
-    ]
+    if cov_data is not None:
+        for v in cov_data:
+            _dat_cov = dict()
+            if "COMMENT" in cov_data.dtype.names:
+                try:
+                    _comment = v["COMMENT"].decode()
+                except AttributeError:
+                    _comment = v["COMMENT"]
 
-    _data["covarianceMatrix"] = []
-    for m in mock_matrices:
-        _data["covarianceMatrix"].append(dict(
-            COMMENT = "COMMENT",
-            EPOCH = Time.now().CCSDS_epoch,
-            COV_REF_FRAME= "missing",
-            CX_X = m[0],
-            CY_X = m[1],
-            CY_Y = m[2],
-            CZ_X = m[3],
-            CZ_Y = m[4],
-            CZ_Z = m[5],
-            CX_DOT_X = m[6],
-            CX_DOT_Y = m[7],
-            CX_DOT_Z = m[8],
-            CX_DOT_X_DOT = m[9],
-            CY_DOT_X = m[10],
-            CY_DOT_Y = m[11],
-            CY_DOT_Z = m[12],
-            CY_DOT_X_DOT = m[13],
-            CY_DOT_Y_DOT = m[14],
-            CZ_DOT_X = m[15],
-            CZ_DOT_Y = m[16],
-            CZ_DOT_Z = m[17],
-            CZ_DOT_X_DOT = m[18],
-            CZ_DOT_Y_DOT = m[19],
-            CZ_DOT_Z_DOT = m[20]
-        ))
-    
+                _dat_cov["COMMENT"] = _comment
+                #remove empty comments
+                if len(_dat_cov["COMMENT"]) == 0:
+                    del _dat_cov["COMMENT"]
+
+            _dat_cov.update(dict(
+                COMMENT = v["COMMENT"],
+                EPOCH = Time(v["EPOCH"], format="datetime64", scale="utc").CCSDS_epoch,
+                COV_REF_FRAME = _meta["REF_FRAME"],
+                CX_X = v["CX_X"],
+                CY_X = v["CY_X"],
+                CY_Y = v["CY_Y"],
+                CZ_X = v["CZ_X"],
+                CZ_Y = v["CZ_Y"],
+                CZ_Z = v["CZ_Z"],
+                CX_DOT_X = v["CX_DOT_X"],
+                CX_DOT_Y = v["CX_DOT_Y"],
+                CX_DOT_Z = v["CX_DOT_Z"],
+                CX_DOT_X_DOT = v["CX_DOT_X_DOT"],
+                CY_DOT_X = v["CY_DOT_X"],
+                CY_DOT_Y = v["CY_DOT_Y"],
+                CY_DOT_Z = v["CY_DOT_Z"],
+                CY_DOT_X_DOT = v["CY_DOT_X_DOT"],
+                CY_DOT_Y_DOT = v["CY_DOT_Y_DOT"],
+                CZ_DOT_X = v["CZ_DOT_X"],
+                CZ_DOT_Y = v["CZ_DOT_Y"],
+                CZ_DOT_Z = v["CZ_DOT_Z"],
+                CZ_DOT_X_DOT = v["CZ_DOT_X_DOT"],
+                CZ_DOT_Y_DOT = v["CZ_DOT_Y_DOT"],
+                CZ_DOT_Z_DOT = v["CZ_DOT_Z_DOT"]
+            ))
+
+            _data["covarianceMatrix"].append(_dat_cov)
+
     # serialize to xml
     schema = get_schema()
     xml_etree = schema.encode(d, path='/oem')
@@ -300,6 +331,56 @@ _TDM_METADATA_FIELDS = [
     "CORRECTIONS_APPLIED"
 ]
 
+_TDM_DATA_FIELDS = [
+    "ANGLE_1",
+    "ANGLE_2",
+    "CARRIER_POWER",
+    "CLOCK_BIAS",
+    "CLOCK_DRIFT",
+    "DOPPLER_COUNT",
+    "DOPPLER_INSTANTANEOUS",
+    "DOPPLER_INTEGRATED",
+    "DOR",
+    "MAG",
+    "PC_N0",
+    "PR_N0",
+    "PRESSURE",
+    "RANGE",
+    "RCS",
+    "RECEIVE_FREQ",
+    "RECEIVE_FREQ_1",
+    "RECEIVE_FREQ_2",
+    "RECEIVE_FREQ_3",
+    "RECEIVE_FREQ_4",
+    "RECEIVE_FREQ_5",
+    "RECEIVE_PHASE_CT_1",
+    "RECEIVE_PHASE_CT_2",
+    "RECEIVE_PHASE_CT_3",
+    "RECEIVE_PHASE_CT_4",
+    "RECEIVE_PHASE_CT_5",
+    "RHUMIDITY",
+    "STEC",
+    "TEMPERATURE",
+    "TRANSMIT_FREQ_1",
+    "TRANSMIT_FREQ_2",
+    "TRANSMIT_FREQ_3",
+    "TRANSMIT_FREQ_4",
+    "TRANSMIT_FREQ_5",
+    "TRANSMIT_FREQ_RATE_1",
+    "TRANSMIT_FREQ_RATE_2",
+    "TRANSMIT_FREQ_RATE_3",
+    "TRANSMIT_FREQ_RATE_4",
+    "TRANSMIT_FREQ_RATE_5",
+    "TRANSMIT_PHASE_CT_1",
+    "TRANSMIT_PHASE_CT_2",
+    "TRANSMIT_PHASE_CT_3",
+    "TRANSMIT_PHASE_CT_4",
+    "TRANSMIT_PHASE_CT_5",
+    "TROPO_DRY",
+    "TROPO_WET",
+    "VLBI_DELAY",
+]
+
 
 ###############################################################################
 # TDM READ
@@ -323,6 +404,8 @@ def write_xml_tdm(data, meta, file=None):
     """
     creaate and validate xml for TDM message
     write xml file resource
+
+    assumes tai input time.
     """
     # originator
     originator = meta.get("ORIGINATOR", f'SORTS {__version__}')
@@ -386,14 +469,19 @@ def write_xml_tdm(data, meta, file=None):
     ###########################################################################
 
     _data = segment["data"]
-    _data["COMMENT"] = 'DATA COMMENT'
+    if 'DATA_COMMENT' in meta:
+        _data["COMMENT"] = meta['DATA_COMMENT']
+
     _data["observation"] = []
 
     for entry in data:
-        _data["observation"].append({
-            "EPOCH": Time(entry["EPOCH"], scale="tai", format="datetime64").CCSDS_epoch,
-            "RANGE": entry['RANGE'].item()
-        })
+        for key in _TDM_DATA_FIELDS:
+            if key in data.dtype.names:
+                _dat = {
+                    "EPOCH": Time(entry["EPOCH"], scale="tai", format="datetime64").CCSDS_epoch,
+                }
+                _dat[key] = entry[key]
+                _data["observation"].append(_dat)
 
     # serialize to xml
     schema = get_schema()
