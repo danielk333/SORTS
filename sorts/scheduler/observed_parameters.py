@@ -176,6 +176,11 @@ class ObservedParameters(Scheduler):
         row[7] = radar.rx[rx_index].beam.wavelength
         return row
 
+    def extend_meta(self, t, txi, rxi, radar, meta):
+        meta['pulse_length'] = radar.tx[txi].pulse_length
+        meta['ipp'] = radar.tx[txi].ipp
+        meta['n_ipp'] = radar.tx[txi].n_ipp
+
 
     def calculate_observation(
             self, 
@@ -189,6 +194,7 @@ class ObservedParameters(Scheduler):
             snr_limit=True, 
             save_states=False, 
             vectorize=False,
+            extended_meta=True,
         ):
         '''Calculate the observation of a pass of a specific space object given the current state of the Scheduler.
 
@@ -259,6 +265,9 @@ class ObservedParameters(Scheduler):
 
             vectorized_data = None
             for ri, (radar, meta) in enumerate(generator):
+                if extended_meta:
+                    self.extend_meta(t[ti], txi, rxi, radar, meta)
+
                 metas.append(meta)
                 vec_row = self.get_vectorized_row(radar, meta, txi, rxi)
                 if vectorized_data is None:
@@ -333,6 +342,7 @@ class ObservedParameters(Scheduler):
                     snr_db[snr >= 1e-9] = np.log10(snr[snr >= 1e-9])*10.0
 
                     keep[np.logical_or(np.isnan(snr_db), np.isinf(snr_db))] = False
+                    #todo: fix this so it does not compare the already discarded values
                     keep[np.logical_and(snr_db <= radar.min_SNRdb, keep)] = False
 
                 if self.profiler is not None:
@@ -340,6 +350,8 @@ class ObservedParameters(Scheduler):
 
         else:
             for ti, (radar, meta) in enumerate(generator):
+                if extended_meta:
+                    self.extend_meta(t[ti], txi, rxi, radar, meta)
 
                 metas.append(meta)
 
