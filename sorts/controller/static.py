@@ -82,4 +82,5 @@ class Static(RadarController):
 
     def generator(self, t):
         for ti in range(len(t)):
+            self.toggle_stations(t[ti], self.radar)
             yield self.radar, self.meta

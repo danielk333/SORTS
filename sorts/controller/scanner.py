@@ -116,7 +116,7 @@ class Scanner(RadarController):
                 self.profiler.stop('Scanner:generator:point_radar:_point_station[rx]')
 
         #Make sure radar is on
-        RadarController.turn_on(radar)
+        self.toggle_stations(t, radar)
 
         if self.profiler is not None:
                 self.profiler.stop('Scanner:generator:point_radar')

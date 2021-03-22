@@ -67,16 +67,14 @@ class Tracker(RadarController):
 
             dt = t[ti] - self.t
             check = np.logical_and(dt >= 0, dt < self.dwell)
+            ind = np.argmax(check)
             meta = self.default_meta()
 
-            if np.any(check):
-                ind = np.argmax(check)
-                RadarController.turn_on(radar)
-                RadarController.coh_integration(radar, self.dwell)
-                self.point_radar(radar, ind)
-            else:
-                RadarController.turn_off(radar)
-
+            RadarController.coh_integration(radar, self.dwell)
+            
+            self.toggle_stations(t[ti], radar)
+            self.point_radar(radar, ind)
+            
             if self.profiler is not None:
                 self.profiler.stop('Tracker:generator:step')
             

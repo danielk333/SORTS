@@ -14,16 +14,21 @@ class Radar(object):
         :ivar list tx: List of transmitting sites, i.e. instances of :class:`sorts.radar.TX`
         :ivar list rx: List of receiving sites, i.e. instances of :class:`sorts.radar.RX`
         :ivar float min_SNRdb: Minimum SNR detectable by radar system in dB (after coherent integration).
+        :ivar list joint_stations: A list of (tx,rx) indecies of stations that share hardware. This can be used to e.g. turn of receivers when the same hardware is transmitting.
 
         :param list tx: List of transmitting sites, i.e. instances of :class:`sorts.radar.TX`
         :param list rx: List of receiving sites, i.e. instances of :class:`sorts.radar.RX`
         :param float min_SNRdb: Minimum SNR detectable by radar system in dB (after coherent integration).
 
     '''
-    def __init__(self, tx, rx, min_SNRdb=10.0):
+    def __init__(self, tx, rx, min_SNRdb=10.0, joint_stations=None):
         self.tx = tx
         self.rx = rx
         self.min_SNRdb = min_SNRdb
+        if joint_stations is None:
+            self.joint_stations = []
+        else:
+            self.joint_stations = joint_stations
 
 
     def copy(self):
@@ -33,6 +38,7 @@ class Radar(object):
             tx = [],
             rx = [],
             min_SNRdb = copy.deepcopy(self.min_SNRdb),
+            joint_stations = copy.deepcopy(self.joint_stations),
         )
         for tx in self.tx:
             ret.tx.append(tx.copy())

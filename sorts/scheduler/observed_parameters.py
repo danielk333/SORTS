@@ -5,6 +5,7 @@
 '''
 
 import numpy as np
+import scipy.constants
 
 from .scheduler import Scheduler
 
@@ -377,6 +378,21 @@ class ObservedParameters(Scheduler):
                     if self.profiler is not None:
                         self.profiler.start('Obs.Param.:calculate_observation:snr-step:gain')
 
+                    #check if target is in radars blind range
+                    #assume synchronized transmitting
+                    #assume decoding of partial pulses is possible and linearly decreases signal strength
+                    snr_modulation = 1.0
+                    for ch_txi, ch_rxi in radar.joint_stations:
+                        if ch_rxi == rxi:
+                            delay = (ranges[0][ti] + ranges[1][ti])/scipy.constants.c
+                            ipp_f = np.mod(delay, radar.tx[txi].ipp)
+
+                            if ipp_f <= radar.tx[txi].pulse_length:
+                                snr_modulation = ipp_f/radar.tx[txi].pulse_length
+                            elif ipp_f >= radar.tx[txi].ipp - radar.tx[txi].pulse_length:
+                                snr_modulation = (radar.tx[txi].ipp - ipp_f)/radar.tx[txi].pulse_length
+                            break
+
                     tx_g, tx_wavelength = self.get_beam_gain_and_wavelength(
                         radar.tx[txi].beam, 
                         enus[0][:3,ti], 
@@ -403,6 +419,7 @@ class ObservedParameters(Scheduler):
                         bandwidth=radar.tx[txi].coh_int_bandwidth,
                         rx_noise_temp=radar.rx[rxi].noise,
                     )
+                    snr[ti] *= snr_modulation
                     if self.profiler is not None:
                         self.profiler.stop('Obs.Param.:calculate_observation:snr-step:snr')
                         self.profiler.start('Obs.Param.:calculate_observation:snr-step:rcs,filter')

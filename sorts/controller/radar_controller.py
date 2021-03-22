@@ -40,6 +40,17 @@ class RadarController(ABC):
     def run(self):
         return self(self.t - self.t0)
 
+    def toggle_stations(self, t, radar):
+        if self.t is None:
+            RadarController.turn_on(radar)
+        else:
+            dt = t - self.t
+            check = np.logical_and(dt >= 0, dt < self.t_slice)
+            if np.any(check):
+                RadarController.turn_on(radar)
+            else:
+                RadarController.turn_off(radar)
+
 
     def default_meta(self):
         '''This is used to generate meta data on the fly, rather then the static data that can be set in the `self.meta`.
