@@ -267,7 +267,7 @@ class ObservedParameters(Scheduler):
             vectorized_data = None
             for ri, (radar, meta) in enumerate(generator):
                 if extended_meta:
-                    self.extend_meta(t[ti], txi, rxi, radar, meta)
+                    self.extend_meta(t[ri], txi, rxi, radar, meta)
 
                 metas.append(meta)
                 vec_row = self.get_vectorized_row(radar, meta, txi, rxi)
