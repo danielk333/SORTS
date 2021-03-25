@@ -21,8 +21,8 @@ class Scanner(RadarController):
     def __init__(self, radar, scan, r=np.linspace(300e3,1000e3,num=10), as_altitude=False, profiler=None, logger=None, return_copy=False, meta=None, **kwargs):
         super().__init__(radar, profiler=profiler, logger=logger, meta=meta, **kwargs)
         self.scan = scan
-        if self.t is not None:
-            self.dwell = self.scan.dwell(self.t)
+        if self.t is not None and self.t_slice is None:
+            self.dwell = np.max(self.scan.dwell(self.t))
 
         self.r = r
         self.return_copy = return_copy
