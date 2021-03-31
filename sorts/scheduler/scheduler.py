@@ -104,16 +104,29 @@ class Scheduler(ABC):
     def observe_passes(self, passes, **kwargs):
         '''#TODO: Docstring
         '''
+
+        linear_list = kwargs.pop('linear_list', False)
+
         data = []
-        for txi in range(len(passes)):
-            data.append([])
-            for rxi in range(len(passes[txi])):
-                data[-1].append([])
-                for ps in passes[txi][rxi]:
-                    t, generator = self(ps.start(), ps.end())
-                    if generator is not None:
-                        pass_data = self.calculate_observation(ps, t, generator, **kwargs)
-                    else:
-                        pass_data = None
-                    data[-1][-1].append(pass_data)
+
+        if linear_list:
+            for ps in passes:
+                t, generator = self(ps.start(), ps.end())
+                if generator is not None:
+                    pass_data = self.calculate_observation(ps, t, generator, **kwargs)
+                else:
+                    pass_data = None
+                data.append(pass_data)
+        else:
+            for txi in range(len(passes)):
+                data.append([])
+                for rxi in range(len(passes[txi])):
+                    data[-1].append([])
+                    for ps in passes[txi][rxi]:
+                        t, generator = self(ps.start(), ps.end())
+                        if generator is not None:
+                            pass_data = self.calculate_observation(ps, t, generator, **kwargs)
+                        else:
+                            pass_data = None
+                        data[-1][-1].append(pass_data)
         return data
