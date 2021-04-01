@@ -61,32 +61,27 @@ class ObservedParameters(Scheduler):
         if self.profiler is not None:
             self.profiler.start('Obs.Param.:calculate_observation_jacobian:reference')
         
-        snr_limit = kwargs.get('snr_limit', True)
-
-        kwargs['snr_limit'] = False
         data0 = self.calculate_observation(txrx_pass, t, generator, space_object, **kwargs)
 
-        snr_inds = np.full(data0['snr'].shape, True, dtype=np.bool)
-        if snr_limit:
-            snr_db = np.log10(data0['snr'])*10.0
-            snr_inds[np.logical_or(np.isnan(snr_db),np.isinf(snr_db))] = False
-            snr_inds[snr_inds] = snr_db[snr_inds] > self.radar.min_SNRdb
+        keep = np.full(t.shape, False, dtype=np.bool)
+        keep[data0['kept']] = True
 
-        for key in data0:
-            if key == 'metas':
-                data0[key] = [x for i, x in enumerate(data0[key]) if snr_inds[i]]
-            else:
-                data0[key] = data0[key][...,snr_inds]
+        r = np.empty((len(t),2), dtype=np.float64)
+        r_dot = np.empty((len(t),2), dtype=np.float64)
+        
+        r[keep,0] = data0['range']
+        r_dot[keep,0] = data0['range_rate']
 
+        
         if self.profiler is not None:
             self.profiler.stop('Obs.Param.:calculate_observation_jacobian:reference')
 
         if data0 is None:
             return None, None
 
-        t_filt = t[snr_inds]
-        J = np.zeros([len(t_filt)*2,len(variables)], dtype=np.float64)
+        J = np.zeros([len(t)*2,len(variables)], dtype=np.float64)
 
+        kwargs['snr_limit'] = False
         kwargs['calculate_snr'] = False
         for ind, var in enumerate(variables):
             if self.profiler is not None:
@@ -102,20 +97,37 @@ class ObservedParameters(Scheduler):
             dso.update(**{var: dx})
 
             ddata = self.calculate_observation(txrx_pass, t, generator, dso, **kwargs)
-            for key in data0:
-                if key == 'metas':
-                    continue
 
-                ddata[key] = ddata[key][...,snr_inds]
+            dkeep = np.full(t.shape, False, dtype=np.bool)
+            dkeep[ddata['kept']] = True
+            keep = np.logical_and(keep, dkeep)
 
-            dr = (ddata['range'] - data0['range'])/deltas[ind]
-            dv = (ddata['range_rate'] - data0['range_rate'])/deltas[ind]
+            r[dkeep,1] = ddata['range']
+            r_dot[dkeep,1] = ddata['range_rate']
 
-            J[:len(t_filt),ind]=dr
-            J[len(t_filt):,ind]=dv
+            dr = (r[:,1] - r[:,0])/deltas[ind]
+            dv = (r_dot[:,1] - r_dot[:,0])/deltas[ind]
+
+            J[:len(t),ind]=dr
+            J[len(t):,ind]=dv
 
             if self.profiler is not None:
                 self.profiler.stop(f'Obs.Param.:calculate_observation_jacobian:d_{var}')
+
+        for key in data0:
+            if key in ['kept']:
+                continue
+            elif isinstance(data0[key], np.ndarray):
+                data0[key] = data0[key][...,keep[data0['kept']]]
+            else:
+                data0[key] = [x for ind_, x in enumerate(data0[key]) if keep[data0['kept']][ind_]]
+        data0['kept'] = np.argwhere(keep).flatten()
+
+        Jkeep = np.full((len(t)*2,), False, dtype=np.bool)
+        Jkeep[:len(t)]=keep
+        Jkeep[len(t):]=keep
+
+        J = J[Jkeep,:]
 
         if self.profiler is not None:
             self.profiler.stop('Obs.Param.:calculate_observation_jacobian')
@@ -137,6 +149,12 @@ class ObservedParameters(Scheduler):
             g = beam.gain(enu)
 
         return g, beam.wavelength
+
+
+    def stop_condition(self, t, radar, meta, tx_enu, rx_enu, tx_index, rx_index):
+        '''Implement this function if there should be abort condition in the sequential generator. Work with both vectorization and linear iteration (as vectorization first caches the generator).
+        '''
+        return False
 
 
     def observable_filter(self, t, radar, meta, tx_enu, rx_enu, tx_index, rx_index):
@@ -269,6 +287,18 @@ class ObservedParameters(Scheduler):
                 if extended_meta:
                     self.extend_meta(t[ri], txi, rxi, radar, meta)
 
+                stop = self.stop_condition(
+                    t[ri], 
+                    radar, 
+                    meta, 
+                    enus[0][:3,ri], 
+                    enus[1][:3,ri], 
+                    txi, 
+                    rxi,
+                )
+                if stop:
+                    break
+
                 metas.append(meta)
                 vec_row = self.get_vectorized_row(radar, meta, txi, rxi)
                 if vectorized_data is None:
@@ -343,8 +373,7 @@ class ObservedParameters(Scheduler):
                     snr_db[snr >= 1e-9] = np.log10(snr[snr >= 1e-9])*10.0
 
                     keep[np.logical_or(np.isnan(snr_db), np.isinf(snr_db))] = False
-                    #todo: fix this so it does not compare the already discarded values
-                    keep[np.logical_and(snr_db <= radar.min_SNRdb, keep)] = False
+                    keep[keep] = snr_db[keep] > radar.min_SNRdb
 
                 if self.profiler is not None:
                     self.profiler.stop('Obs.Param.:calculate_observation:snr-step:rcs,filter')
@@ -353,6 +382,19 @@ class ObservedParameters(Scheduler):
             for ti, (radar, meta) in enumerate(generator):
                 if extended_meta:
                     self.extend_meta(t[ti], txi, rxi, radar, meta)
+
+                stop = self.stop_condition(
+                    t[ti], 
+                    radar, 
+                    meta, 
+                    enus[0][:3,ti], 
+                    enus[1][:3,ti], 
+                    txi, 
+                    rxi,
+                )
+                if stop:
+                    keep[ti:] = False
+                    break
 
                 metas.append(meta)
 
@@ -369,11 +411,15 @@ class ObservedParameters(Scheduler):
                     rxi,
                 )
 
+                if not (radar.tx[txi].enabled and radar.rx[rxi].enabled and observable):
+                    keep[ti] = False
+                    continue
+
                 if self.profiler is not None:
                     self.profiler.stop('Obs.Param.:calculate_observation:observable_filter')
                     self.profiler.start('Obs.Param.:calculate_observation:snr-step')
 
-                if radar.tx[txi].enabled and radar.rx[rxi].enabled and calculate_snr and observable:
+                if calculate_snr:
 
                     if self.profiler is not None:
                         self.profiler.start('Obs.Param.:calculate_observation:snr-step:gain')
@@ -444,8 +490,6 @@ class ObservedParameters(Scheduler):
                 else:
                     snr[ti] = np.nan
                     rcs[ti] = np.nan
-                    if calculate_snr:
-                        keep[ti] = False
                 
                 if self.profiler is not None:
                     self.profiler.stop('Obs.Param.:calculate_observation:snr-step')
@@ -471,6 +515,7 @@ class ObservedParameters(Scheduler):
                     data[key] = data[key][...,keep]
                 else:
                     data[key] = [x for ind_, x in enumerate(data[key]) if keep[ind_]]
+            data['kept'] = np.argwhere(keep).flatten()
         else:
             data = None
 
