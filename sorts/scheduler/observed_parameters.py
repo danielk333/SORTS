@@ -62,6 +62,9 @@ class ObservedParameters(Scheduler):
             self.profiler.start('Obs.Param.:calculate_observation_jacobian:reference')
         
         data0 = self.calculate_observation(txrx_pass, t, generator, space_object, **kwargs)
+        
+        if data0 is None:
+            return None, None
 
         keep = np.full(t.shape, False, dtype=np.bool)
         keep[data0['kept']] = True
@@ -75,9 +78,6 @@ class ObservedParameters(Scheduler):
         
         if self.profiler is not None:
             self.profiler.stop('Obs.Param.:calculate_observation_jacobian:reference')
-
-        if data0 is None:
-            return None, None
 
         J = np.zeros([len(t)*2,len(variables)], dtype=np.float64)
 
