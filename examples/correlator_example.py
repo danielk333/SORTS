@@ -57,9 +57,17 @@ with h5py.File(str(obs_pth),'r') as h_det:
     t = (t - epoch).sec
 
     dat = {
-        'r': r*2,
-        't': t,
-        'v': v*2,
+        'r': r[10:]*2,
+        't': t[10:],
+        'v': v[10:]*2,
+        'epoch': epoch,
+        'tx': radar.tx[0],
+        'rx': radar.rx[0],
+    }
+    dat2 = {
+        'r': r[0:10]*2,
+        't': t[0:10],
+        'v': v[0:10]*2,
         'epoch': epoch,
         'tx': radar.tx[0],
         'rx': radar.rx[0],
@@ -93,7 +101,7 @@ print('population size: {}'.format(len(pop)))
 
 print('Correlating data and population')
 indecies, metric, cdat = sorts.correlate(
-    measurements = [dat],
+    measurements = [dat,dat2],
     population = pop,
     n_closest = 4,
 )
@@ -102,6 +110,29 @@ print('Match metric:')
 for ind, dst in zip(indecies, metric):
     print(f'ind = {ind}: metric = {dst}')
     print(pop.print(n=ind, fields=['oid', 'mjd0', 'line1', 'line2']) + '\n')
+
+
+#
+# Lets try correlating on each individual measurement instead
+#
+
+
+def vector_diff_metric(t, r, v, r_ref, v_ref):
+    '''Return a vector of absolute differences
+    '''
+    return np.abs(r_ref - r) + np.abs(v_ref - v)
+
+indecies0, metric0, cdat0 = sorts.correlate(
+    measurements = [dat2],
+    population = pop,
+    n_closest = 3,
+    metric=vector_diff_metric, 
+    metric_reduce=None, #since we don't reduce, it assumes we are doing correlation measurement-wise
+)
+
+print('Individual measurement match metric:')
+for mind, (ind, dst) in enumerate(zip(indecies0.T, metric0.T)):
+    print(f'measurement = {mind} | object ind = {ind} | metric = {dst}')
 
 
 def plot_correlation(dat, cdat):
