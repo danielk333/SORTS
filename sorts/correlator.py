@@ -26,7 +26,7 @@ import scipy.constants as constants
 
 
 
-def residual_distribution_metric(t, r, v, r_ref, v_ref):
+def residual_distribution_metric(t, r, v, r_ref, v_ref, **kwargs):
     '''Using the simulated and the measured ranges and rage-rates calculate a de-correlation metric.
     
     :param numpy.ndarray t: Times in seconds corresponding to measurement and object simulated data.
@@ -69,6 +69,7 @@ def correlate(
         metric_reduce=lambda x,y: x+y,
         forward_model=generate_measurements,
         variables=['r','v'],
+        meta_variables=[],
         n_closest=1, 
         profiler=None, 
         logger=None, 
@@ -81,7 +82,8 @@ def correlate(
     :param function metric: Metric used to correlate measurement and simulated object measurement.
     :param function metric_reduce: Metric used to correlate measurement and simulated object measurement. Can be `None`, in which case each measurement is correlated individually, for this to work the metric also needs to be vectorized.
     :param function forward_model: A pointer to a function that takes in the ecef-state, the rx and tx station ecefs and calculates the observed variables return as a tuple.
-    :param list variables: The data variables recorded by the system.
+    :param list variables: The data variables recorded by the system. Theses should be in `measurements` and returned by the `forward_model`.
+    :param list meta_variables: The data meta variables recorded by the system. These are input as keyword arguments to the metric and does not need to be produced by any model.
     :param int n_closest: Number of closest matches to save.
     :param Profiler profiler: Profiler instance for checking function performance.
     :param logging.Logger logger: Logger instance for logging the execution of the function.
@@ -162,6 +164,13 @@ def correlate(
         #correlate with forward model
         for di, data in enumerate(measurements):
             var = tuple(data[x][t_sorts[di]] for x in variables)
+            kwvar = {}
+            for x in meta_variables:
+                try:
+                    kwvar[x] = data[x][t_sorts[di]]
+                except:
+                    kwvar[x] = data[x]
+
             t = (data['epoch'] - obj.epoch).sec + data['t'][t_sorts[di]]
             tx = data['tx']
             rx = data['rx']
@@ -175,7 +184,7 @@ def correlate(
 
             ref_var = forward_model(states_data, rx_ecef, tx_ecef)
 
-            match = metric(t, *(var + ref_var))
+            match = metric(t, *(var + ref_var), **kwvar)
 
             if metric_reduce is None:
                 match_pop[ind,t_selectors == di] = match

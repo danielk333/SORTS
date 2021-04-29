@@ -18,6 +18,53 @@ import sorts
 
 radar = sorts.radars.eiscat_uhf
 
+
+
+def plot_correlation(dat, cdat):
+    '''Plot the correlation between the measurement and simulated population object.
+    '''
+    t = dat['t']
+    r = dat['r']
+    v = dat['v']
+    r_ref = cdat['r_ref']
+    v_ref = cdat['v_ref']
+
+    fig = plt.figure(figsize=(15,15))
+    ax = fig.add_subplot(211)
+    ax.plot(t - t[0], r*1e-3, label='measurement')
+    ax.plot(t - t[0], r_ref*1e-3, label='simulation')
+    ax.set_ylabel('Range [km]')
+    ax.set_xlabel('Time [s]')
+
+    ax = fig.add_subplot(212)
+    ax.plot(t - t[0], v*1e-3, label='measurement')
+    ax.plot(t - t[0], v_ref*1e-3, label='simulation')
+    ax.set_ylabel('Velocity [km/s]')
+    ax.set_xlabel('Time [s]')
+
+    plt.legend()
+
+    fig = plt.figure(figsize=(15,15))
+    ax = fig.add_subplot(221)
+    ax.hist((r_ref - r)*1e-3)
+    ax.set_xlabel('Range residuals [km]')
+
+    ax = fig.add_subplot(222)
+    ax.hist((v_ref - v)*1e-3)
+    ax.set_xlabel('Velocity residuals [km/s]')
+    
+    ax = fig.add_subplot(223)
+    ax.plot(t - t[0], (r_ref - r)*1e-3)
+    ax.set_ylabel('Range residuals [km]')
+    ax.set_xlabel('Time [s]')
+
+    ax = fig.add_subplot(224)
+    ax.plot(t - t[0], (v_ref - v)*1e-3)
+    ax.set_ylabel('Velocity residuals [km/s]')
+    ax.set_xlabel('Time [s]')
+
+
+
 try:
     base_pth = pathlib.Path(__file__).parents[1].resolve()
 except NameError:
@@ -71,6 +118,8 @@ with h5py.File(str(obs_pth),'r') as h_det:
         'epoch': epoch,
         'tx': radar.tx[0],
         'rx': radar.rx[0],
+        'r_std': np.abs(r[0:10])*2*0.1, #for this example, assume 10% standard error
+        'v_std': np.abs(v[0:10])*2*0.1, #for this example, assume 10% standard error
     }
 
 print('Loading TLE population')
@@ -112,73 +161,40 @@ for ind, dst in zip(indecies, metric):
     print(pop.print(n=ind, fields=['oid', 'mjd0', 'line1', 'line2']) + '\n')
 
 
+plot_correlation(dat, cdat[0][0])
+plot_correlation(dat, cdat[3][0])
+
+
 #
-# Lets try correlating on each individual measurement instead
+# Lets try correlating on each individual measurement instead using some more advanced options
 #
 
 
-def vector_diff_metric(t, r, v, r_ref, v_ref):
-    '''Return a vector of absolute differences
+def vector_diff_metric(t, r, v, r_ref, v_ref, **kwargs):
+    '''Return a vector of negated log-probabilities (to avoid number precision problems and still find max probability by minimization) assuming uncorrelated range and range rate measurements with Normal errors.
     '''
-    return np.abs(r_ref - r) + np.abs(v_ref - v)
+    r_std = kwargs.get('r_std')
+    v_std = kwargs.get('v_std')
+
+    logA = np.log(1.0/(2*np.pi*r_std*v_std))#normalization constant
+    
+    dr = ((r_ref - r)/r_std)**2
+    dv = ((v_ref - v)/v_std)**2
+    
+    return -(logA - 0.5*(dr + dv))
 
 indecies0, metric0, cdat0 = sorts.correlate(
     measurements = [dat2],
     population = pop,
     n_closest = 3,
+    meta_variables=['r_std', 'v_std'],
     metric=vector_diff_metric, 
     metric_reduce=None, #since we don't reduce, it assumes we are doing correlation measurement-wise
 )
 
 print('Individual measurement match metric:')
 for mind, (ind, dst) in enumerate(zip(indecies0.T, metric0.T)):
-    print(f'measurement = {mind} | object ind = {ind} | metric = {dst}')
+    print(f'measurement = {mind} | object ind = {ind} | metric (prob) = {np.exp(-dst)}')
 
-
-def plot_correlation(dat, cdat):
-    '''Plot the correlation between the measurement and simulated population object.
-    '''
-    t = dat['t']
-    r = dat['r']
-    v = dat['v']
-    r_ref = cdat['r_ref']
-    v_ref = cdat['v_ref']
-
-    fig = plt.figure(figsize=(15,15))
-    ax = fig.add_subplot(211)
-    ax.plot(t - t[0], r*1e-3, label='measurement')
-    ax.plot(t - t[0], r_ref*1e-3, label='simulation')
-    ax.set_ylabel('Range [km]')
-    ax.set_xlabel('Time [s]')
-
-    ax = fig.add_subplot(212)
-    ax.plot(t - t[0], v*1e-3, label='measurement')
-    ax.plot(t - t[0], v_ref*1e-3, label='simulation')
-    ax.set_ylabel('Velocity [km/s]')
-    ax.set_xlabel('Time [s]')
-
-    plt.legend()
-
-    fig = plt.figure(figsize=(15,15))
-    ax = fig.add_subplot(221)
-    ax.hist((r_ref - r)*1e-3)
-    ax.set_xlabel('Range residuals [km]')
-
-    ax = fig.add_subplot(222)
-    ax.hist((v_ref - v)*1e-3)
-    ax.set_xlabel('Velocity residuals [km/s]')
-    
-    ax = fig.add_subplot(223)
-    ax.plot(t - t[0], (r_ref - r)*1e-3)
-    ax.set_ylabel('Range residuals [km]')
-    ax.set_xlabel('Time [s]')
-
-    ax = fig.add_subplot(224)
-    ax.plot(t - t[0], (v_ref - v)*1e-3)
-    ax.set_ylabel('Velocity residuals [km/s]')
-    ax.set_xlabel('Time [s]')
-
-plot_correlation(dat, cdat[0][0])
-plot_correlation(dat, cdat[3][0])
 
 plt.show()
