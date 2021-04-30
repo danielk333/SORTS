@@ -577,7 +577,7 @@ class Simulation:
 
         if logger:
             self.logger = profiling.get_logger(
-                'Simulation',
+                f'Simulation-{id(self)}',
                 path = self.log_path,
                 file_level = kwargs.get('file_level', logging.INFO),
                 term_level = kwargs.get('term_level', logging.INFO),
@@ -593,6 +593,13 @@ class Simulation:
                 self.scheduler.profiler = self.profiler
         else:
             self.profiler = None
+
+
+    def __del__(self):
+        if self.logger is not None:    
+            #clear handlers
+            for hdl in self.logger.handlers[:]:
+                logger.removeHandler(hdl)
 
 
     def save_pickle(self, path, data):
