@@ -599,7 +599,7 @@ class Simulation:
         if self.logger is not None:    
             #clear handlers
             for hdl in self.logger.handlers[:]:
-                logger.removeHandler(hdl)
+                self.logger.removeHandler(hdl)
 
 
     def save_pickle(self, path, data):
