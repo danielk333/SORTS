@@ -175,13 +175,25 @@ def vector_diff_metric(t, r, v, r_ref, v_ref, **kwargs):
     '''
     r_std = kwargs.get('r_std')
     v_std = kwargs.get('v_std')
-
-    logA = np.log(1.0/(2*np.pi*r_std*v_std))#normalization constant
     
     dr = ((r_ref - r)/r_std)**2
     dv = ((v_ref - v)/v_std)**2
     
-    return -(logA - 0.5*(dr + dv))
+    ret = np.empty((len(t),), dtype=[('dr',np.float64), ('dv',np.float64)])
+    ret['dr'] = dr
+    ret['dv'] = dv
+
+    return ret
+
+def sorting_function(metric):
+
+    #we omitt the normalization constant here
+    #logA = np.log(1.0/(2*np.pi*r_std*v_std))
+    
+    P = metric['dr'] + metric['dv']
+    return np.argsort(P, axis=0)
+
+
 
 indecies0, metric0, cdat0 = sorts.correlate(
     measurements = [dat2],
@@ -189,12 +201,14 @@ indecies0, metric0, cdat0 = sorts.correlate(
     n_closest = 3,
     meta_variables=['r_std', 'v_std'],
     metric=vector_diff_metric, 
+    sorting_function=sorting_function,
+    metric_dtype=[('dr',np.float64), ('dv',np.float64)],
     metric_reduce=None, #since we don't reduce, it assumes we are doing correlation measurement-wise
 )
 
 print('Individual measurement match metric:')
 for mind, (ind, dst) in enumerate(zip(indecies0.T, metric0.T)):
-    print(f'measurement = {mind} | object ind = {ind} | metric (prob) = {np.exp(-dst)}')
+    print(f'measurement = {mind} | object ind = {ind} | metric (log-prob) = {dst}')
 
 
 plt.show()

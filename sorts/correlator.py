@@ -68,6 +68,8 @@ def correlate(
         metric=residual_distribution_metric, 
         metric_reduce=lambda x,y: x+y,
         forward_model=generate_measurements,
+        sorting_function=lambda metric: np.argsort(metric, axis=0),
+        metric_dtype=np.float64,
         variables=['r','v'],
         meta_variables=[],
         n_closest=1, 
@@ -82,6 +84,8 @@ def correlate(
     :param function metric: Metric used to correlate measurement and simulated object measurement.
     :param function metric_reduce: Metric used to correlate measurement and simulated object measurement. Can be `None`, in which case each measurement is correlated individually, for this to work the metric also needs to be vectorized.
     :param function forward_model: A pointer to a function that takes in the ecef-state, the rx and tx station ecefs and calculates the observed variables return as a tuple.
+    :param function sorting_function: A pointer to a sorting function that takes in the metric result array and returns a list of indices indicating the sorting order.
+    :param numpy.dtype metric_dtype: A valid numpy dtype declaration for the metric output array. This allows complex structured results to be processed.
     :param list variables: The data variables recorded by the system. Theses should be in `measurements` and returned by the `forward_model`.
     :param list meta_variables: The data meta variables recorded by the system. These are input as keyword arguments to the metric and does not need to be produced by any model.
     :param int n_closest: Number of closest matches to save.
@@ -148,9 +152,9 @@ def correlate(
 
         if ind == 0:
             if metric_reduce is None:
-                match_pop = np.empty((len(population),len(t_prop0)), dtype=np.float64)
+                match_pop = np.empty((len(population),len(t_prop0)), dtype=metric_dtype)
             else:
-                match_pop = np.empty((len(population),), dtype=np.float64)
+                match_pop = np.empty((len(population),), dtype=metric_dtype)
 
         t_prop, t_prop_indices = np.unique(t_prop0, return_inverse=True)
         t_prop_args = np.argsort(t_prop)
@@ -225,12 +229,12 @@ def correlate(
 
     if MPI and comm is not None and step > 1:
         if comm.rank == 0:
-            best_matches = np.argsort(match_pop, axis=0)
+            best_matches = sorting_function(match_pop)
         else:
             best_matches = None
         best_matches = comm.bcast(best_matches, root=0)
     else:
-        best_matches = np.argsort(match_pop, axis=0)
+        best_matches = sorting_function(match_pop)
 
     if best_matches.shape[0] > n_closest:
         best_matches = best_matches[:n_closest,...]
@@ -261,7 +265,10 @@ def correlate(
                 best_cdata[cind] = correlation_data[best_matches[cind]]
 
     if metric_reduce is None:
-        best_metrics = np.empty_like(best_matches)
+        best_metrics = np.empty_like(match_pop)
+        if best_metrics.shape[0] > n_closest:
+            best_metrics = best_metrics[:n_closest,...]
+
         for mind in range(best_matches.shape[1]):
             best_metrics[:,mind] = match_pop[best_matches[:,mind],mind]
     else:
