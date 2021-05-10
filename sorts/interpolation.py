@@ -56,6 +56,7 @@ class Linear(Interpolator):
         self.t_diffs = np.diff(t)
 
     def get_state(self, t):
+        t = np.atleast_1d(t)
         st_t = self.t.flatten()
         in_t = t.flatten()
         t_mat = st_t[:,None] - in_t[None,:]
