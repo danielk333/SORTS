@@ -20,8 +20,6 @@ from . import general
 from ..controller import Tracker
 
 prop_cycle = plt.rcParams['axes.prop_cycle']
-color = cycle(prop_cycle.by_key()['color'])
-
 
 def unit_vector(v):
     return v / np.sqrt(np.sum(v * v, axis=-1))[:,None]
@@ -29,6 +27,8 @@ def unit_vector(v):
 def observed_parameters(data_list, passes=None, snrdb_lim = 10.0, axes=None, sort=True, **kwargs):
     '''Observed parameters for one RX station.
     '''
+
+    color = cycle(prop_cycle.by_key()['color'])
 
     if axes is None:
         if 'figsize' in kwargs:
@@ -48,7 +48,8 @@ def observed_parameters(data_list, passes=None, snrdb_lim = 10.0, axes=None, sor
     else:
         fig = None
 
-    axes[0][0].plot([0],[0],[0],'og')
+    if kwargs.get('plot_origin', True):
+        axes[0][0].plot([0],[0],[0],'.k')
 
     line_all = kwargs.get('linestyle_all', '-')
     line_det = kwargs.get('linestyle_detect', '.r')
@@ -105,14 +106,14 @@ def observed_parameters(data_list, passes=None, snrdb_lim = 10.0, axes=None, sor
         det_inds = SNRdB > snrdb_lim
 
         # axes[0][0].plot(dat['rx_k'][0,inds], dat['rx_k'][1,inds], line_all)
-        axes[0][0].plot(rx_k[0,inds], rx_k[1,inds], line_all, color=cc)
+        axes[0][0].plot(rx_k[0,inds], rx_k[1,inds], line_all, color=cc, label=f'Pass{pi}')
         axes[0][0].plot(dat['rx_k'][0,det_inds], dat['rx_k'][1,det_inds], line_det)
 
         #axes[0][1].plot(dat['t'][inds]/_tt, dat['range'][inds]*1e-3, line_all, label=f'Pass{pi}')
         #axes[1][0].plot(dat['t'][inds]/_tt, dat['range_rate'][inds]*1e-3, line_all)
         axes[0][1].plot(tvec[inds]/_tt, rng[inds]*1e-3, line_all, color=cc, label=f'Pass{pi}')
-        axes[1][0].plot(tvec[inds]/_tt, rrt[inds]*1e-3, line_all, color=cc)
-        axes[1][1].plot(dat['t'][t_ind]/_tt, SNRdB[t_ind], line_all, color=cc)
+        axes[1][0].plot(tvec[inds]/_tt, rrt[inds]*1e-3, line_all, color=cc, label=f'Pass{pi}')
+        axes[1][1].plot(dat['t'][t_ind]/_tt, SNRdB[t_ind], line_all, color=cc, label=f'Pass{pi}')
 
         axes[0][1].plot(dat['t'][det_inds]/_tt, dat['range'][det_inds]*1e-3, line_det)
         axes[1][0].plot(dat['t'][det_inds]/_tt, dat['range_rate'][det_inds]*1e-3, line_det)
