@@ -19,6 +19,7 @@ class RadarController(ABC):
 
     META_FIELDS = [
         'controller_type',
+        't_slice',
     ]
 
     def __init__(self, radar, t=None, t0=0.0, t_slice=None, profiler=None, logger=None, meta=None):
@@ -58,6 +59,7 @@ class RadarController(ABC):
         meta = dict()
         meta.update(self.meta)
         meta['controller_type'] = self.__class__
+        meta['t_slice'] = self.t_slice
         return meta
 
 
