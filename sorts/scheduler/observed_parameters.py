@@ -278,6 +278,8 @@ class ObservedParameters(Scheduler):
         if vectorize:
 
             powers = np.empty((len(t),), dtype=np.float64)
+            pulse_lengths = np.empty((len(t),), dtype=np.float64)
+            ipps = np.empty((len(t),), dtype=np.float64)
             bandwidths = np.empty((len(t),), dtype=np.float64)
             rx_noise_temps = np.empty((len(t),), dtype=np.float64)
             txrx_on = np.full((len(t),), False, dtype=np.bool)
@@ -306,6 +308,8 @@ class ObservedParameters(Scheduler):
                 
                 vectorized_data[ri,:] = vec_row
 
+                pulse_lengths[ri] = radar.tx[txi].pulse_length
+                ipps[ri] = radar.tx[txi].ipp
                 powers[ri] = radar.tx[txi].power
                 bandwidths[ri] = radar.tx[txi].coh_int_bandwidth
                 rx_noise_temps[ri] = radar.rx[rxi].noise
@@ -359,6 +363,20 @@ class ObservedParameters(Scheduler):
                     bandwidth=bandwidths[keep],
                     rx_noise_temp=rx_noise_temps[keep],
                 )
+                snr_modulation = np.ones((len(t),), dtype=np.float64)
+                for ch_txi, ch_rxi in self.radar.joint_stations:
+                    if ch_rxi == rxi:
+                        delay = (ranges[0][keep] + ranges[1][keep])/scipy.constants.c
+                        ipp_f = np.mod(delay, ipps[keep])
+
+                        inds = ipp_f <= pulse_lengths[keep]
+                        snr_modulation[keep][inds] = pulse_lengths[keep][inds]
+
+                        inds = ipp_f >= ipps[keep] - pulse_lengths[keep]:
+                        snr_modulation[keep][inds] = (ipps[keep][inds] - ipp_f[inds])/pulse_lengths[keep][inds]
+                        
+                        break
+                snr[keep] = snr[keep]*snr_modulation[keep]
                 if self.profiler is not None:
                     self.profiler.stop('Obs.Param.:calculate_observation:snr-step:snr')
                     self.profiler.start('Obs.Param.:calculate_observation:snr-step:rcs,filter')
