@@ -9,7 +9,7 @@ import scipy.constants
 
 from .scheduler import Scheduler
 
-from ..signals import hard_target_snr, hard_target_rcs
+from .. import signals
 from ..passes import Pass
 
 
@@ -209,6 +209,7 @@ class ObservedParameters(Scheduler):
             space_object, 
             epoch=None, 
             calculate_snr=True, 
+            doppler_spread_integrated_snr=False,
             interpolator=None, 
             snr_limit=True, 
             save_states=False, 
@@ -235,6 +236,9 @@ class ObservedParameters(Scheduler):
         else:
             diam = None
 
+        spin_period = space_object.parameters.get('spin_period', None)
+        radar_albedo = space_object.parameters.get('radar_albedo', 1.0)
+
         if self.profiler is not None:
             self.profiler.start('Obs.Param.:calculate_observation:get_state')
         
@@ -255,6 +259,7 @@ class ObservedParameters(Scheduler):
             self.profiler.stop('Obs.Param.:calculate_observation:get_state')
 
         snr = np.empty((len(t),), dtype=np.float64)
+        snr_inch = np.empty((len(t),), dtype=np.float64)
         rcs = np.empty((len(t),), dtype=np.float64)
         keep = np.full((len(t),), True, dtype=np.bool)
         
@@ -278,9 +283,11 @@ class ObservedParameters(Scheduler):
         if vectorize:
 
             powers = np.empty((len(t),), dtype=np.float64)
+            t_slices = np.empty((len(t),), dtype=np.float64)
             pulse_lengths = np.empty((len(t),), dtype=np.float64)
             ipps = np.empty((len(t),), dtype=np.float64)
             bandwidths = np.empty((len(t),), dtype=np.float64)
+            duty_cycles = np.empty((len(t),), dtype=np.float64)
             rx_noise_temps = np.empty((len(t),), dtype=np.float64)
             txrx_on = np.full((len(t),), False, dtype=np.bool)
 
@@ -308,10 +315,16 @@ class ObservedParameters(Scheduler):
                 
                 vectorized_data[ri,:] = vec_row
 
+                t_slice_ = meta.get('t_slice', None)
+                if t_slice_ is not None:
+                    t_slices[ri] = t_slice_
+                else:
+                    t_slices[ri] = np.nan
                 pulse_lengths[ri] = radar.tx[txi].pulse_length
                 ipps[ri] = radar.tx[txi].ipp
                 powers[ri] = radar.tx[txi].power
                 bandwidths[ri] = radar.tx[txi].coh_int_bandwidth
+                duty_cycles[ri] = radar.tx[txi].duty_cycle
                 rx_noise_temps[ri] = radar.rx[rxi].noise
 
                 if radar.tx[txi].enabled and radar.rx[rxi].enabled:
@@ -352,17 +365,36 @@ class ObservedParameters(Scheduler):
                     self.profiler.stop('Obs.Param.:calculate_observation:snr-step:gain')
                     self.profiler.start('Obs.Param.:calculate_observation:snr-step:snr')
 
-                snr[keep] = hard_target_snr(
-                    tx_g,
-                    rx_g,
-                    tx_wavelength,
-                    powers[keep],
-                    ranges[0][keep],
-                    ranges[1][keep],
-                    diameter=diam,
-                    bandwidth=bandwidths[keep],
-                    rx_noise_temp=rx_noise_temps[keep],
-                )
+                if doppler_spread_integrated_snr:
+                    snr[keep], snr_inch[keep] = signals.doppler_spread_hard_target_snr(
+                        t_slices[keep], 
+                        spin_period, 
+                        tx_g, 
+                        rx_g,
+                        tx_wavelength,
+                        powers[keep],
+                        ranges[0][keep], 
+                        ranges[1][keep],
+                        duty_cycle=duty_cycles[keep],
+                        diameter=diam, 
+                        bandwidth=bandwidths[keep],
+                        rx_noise_temp=rx_noise_temps[keep],
+                        radar_albedo=radar_albedo,
+                    )
+                else:
+                    snr[keep] = signals.hard_target_snr(
+                        tx_g,
+                        rx_g,
+                        tx_wavelength,
+                        powers[keep],
+                        ranges[0][keep],
+                        ranges[1][keep],
+                        diameter=diam,
+                        bandwidth=bandwidths[keep],
+                        rx_noise_temp=rx_noise_temps[keep],
+                        radar_albedo=radar_albedo,
+                    )
+
                 snr_modulation = np.ones((len(t),), dtype=np.float64)
                 for ch_txi, ch_rxi in self.radar.joint_stations:
                     if ch_rxi == rxi:
@@ -377,11 +409,12 @@ class ObservedParameters(Scheduler):
                         
                         break
                 snr[keep] = snr[keep]*snr_modulation[keep]
+
                 if self.profiler is not None:
                     self.profiler.stop('Obs.Param.:calculate_observation:snr-step:snr')
                     self.profiler.start('Obs.Param.:calculate_observation:snr-step:rcs,filter')
 
-                rcs[keep] = hard_target_rcs(
+                rcs[keep] = signals.hard_target_rcs(
                     wavelength=tx_wavelength,
                     diameter=diam,
                 )
@@ -472,23 +505,40 @@ class ObservedParameters(Scheduler):
                         self.profiler.stop('Obs.Param.:calculate_observation:snr-step:gain')
                         self.profiler.start('Obs.Param.:calculate_observation:snr-step:snr')
 
-                    snr[ti] = hard_target_snr(
-                        tx_g,
-                        rx_g,
-                        tx_wavelength,
-                        radar.tx[txi].power,
-                        ranges[0][ti],
-                        ranges[1][ti],
-                        diameter=diam,
-                        bandwidth=radar.tx[txi].coh_int_bandwidth,
-                        rx_noise_temp=radar.rx[rxi].noise,
-                    )
+                    if doppler_spread_integrated_snr:
+                        snr[keep], snr_inch[keep] = signals.doppler_spread_hard_target_snr(
+                            meta.get('t_slice', np.nan), 
+                            spin_period, 
+                            tx_g, 
+                            rx_g,
+                            tx_wavelength,
+                            radar.tx[txi].power,
+                            ranges[0][ti], 
+                            ranges[1][ti],
+                            duty_cycle=radar.tx[txi].duty_cycle,
+                            diameter=diam, 
+                            bandwidth=radar.tx[txi].coh_int_bandwidth,
+                            rx_noise_temp=radar.rx[rxi].noise,
+                            radar_albedo=radar_albedo,
+                        )
+                    else:
+                        snr[ti] = signals.hard_target_snr(
+                            tx_g,
+                            rx_g,
+                            tx_wavelength,
+                            radar.tx[txi].power,
+                            ranges[0][ti],
+                            ranges[1][ti],
+                            diameter=diam,
+                            bandwidth=radar.tx[txi].coh_int_bandwidth,
+                            rx_noise_temp=radar.rx[rxi].noise,
+                        )
                     snr[ti] *= snr_modulation
                     if self.profiler is not None:
                         self.profiler.stop('Obs.Param.:calculate_observation:snr-step:snr')
                         self.profiler.start('Obs.Param.:calculate_observation:snr-step:rcs,filter')
 
-                    rcs[ti] = hard_target_rcs(
+                    rcs[ti] = signals.hard_target_rcs(
                         wavelength=tx_wavelength,
                         diameter=diam,
                     )
