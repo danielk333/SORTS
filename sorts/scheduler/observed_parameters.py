@@ -404,9 +404,9 @@ class ObservedParameters(Scheduler):
                         inds = ipp_f <= pulse_lengths[keep]
                         snr_modulation[keep][inds] = pulse_lengths[keep][inds]
 
-                        inds = ipp_f >= ipps[keep] - pulse_lengths[keep]:
+                        inds = ipp_f >= ipps[keep] - pulse_lengths[keep]
                         snr_modulation[keep][inds] = (ipps[keep][inds] - ipp_f[inds])/pulse_lengths[keep][inds]
-                        
+
                         break
                 snr[keep] = snr[keep]*snr_modulation[keep]
 
