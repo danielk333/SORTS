@@ -42,8 +42,6 @@ axes[1,1].hist(ranges - perturbed_ranges, 100)
 
 print(f'Caching error calculation data to: {pth}')
 
-
-eiscat3d.tx[0].bandwidth = 10000.0
 err = errors.LinearizedCodedIonospheric(eiscat3d.tx[0], seed=123, cache_folder=pth)
 
 num2 = 400
@@ -68,4 +66,4 @@ axes[0].legend()
 axes[1].plot(snrs_db, v_std)
 
 
-plt.draw()
+plt.show()
