@@ -506,7 +506,7 @@ class ObservedParameters(Scheduler):
                         self.profiler.start('Obs.Param.:calculate_observation:snr-step:snr')
 
                     if doppler_spread_integrated_snr:
-                        snr[keep], snr_inch[keep] = signals.doppler_spread_hard_target_snr(
+                        snr[ti], snr_inch[ti] = signals.doppler_spread_hard_target_snr(
                             meta.get('t_slice', np.nan), 
                             spin_period, 
                             tx_g, 
@@ -574,6 +574,8 @@ class ObservedParameters(Scheduler):
             rcs = rcs,
             metas = metas,
         )
+        if doppler_spread_integrated_snr:
+            data['snr_inch'] = snr_inch
         if save_states:
             data['states'] = states
 
