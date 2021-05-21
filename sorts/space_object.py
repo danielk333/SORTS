@@ -408,16 +408,18 @@ class SpaceObject(object):
         kw.update(self.propagator_args)
         kw.update(self.parameters)
 
-        ecefs = self.propagator.propagate(
+        ret = self.propagator.propagate(
             t = t,
             state0 = self.state,
             epoch = self.epoch,
             **kw
         )
-        
-        #this ensures a 2d-object is returned
-        if len(ecefs.shape) == 1:
-            ecefs = ecefs.reshape((6,1))
 
-        return ecefs
+        #if propagator returns something non-standard, just return that
+        #Otherwise, ensures a 2d-object is returned
+        if isinstance(ret, np.ndarray):
+            if len(ret.shape) == 1:
+                ret = ret.reshape((6,1))
+
+        return ret
 
