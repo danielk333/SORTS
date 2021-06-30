@@ -22,13 +22,16 @@ from .propagator import Rebound
 
 def distance_termination(dAU):
     def distance_termination_method(self, t, step_index, massive_states, particle_states):
-        d_earth = np.linalg.norm(particle_states[:3,step_index,0] - massive_states[:3,step_index, self._earth_ind])/pyorb.AU
-        return d_earth > dAU
+        e_state = massive_states[:3,step_index,self._earth_ind]
+        d_earth = np.linalg.norm(particle_states[:3,step_index,:] - e_state[:,None], axis=0)/pyorb.AU
+        return np.all(d_earth > dAU)
     return distance_termination_method
 
 
 def propagate_pre_encounter(state, epoch, in_frame, out_frame, termination_check, kernel, dt = 10.0, max_t = 10*24*3600.0, settings = None):
     '''Propagates a state from the states backwards in time until the termination_check is true.
+
+    #TODO: implement no saving of intermediate states for large particle runs
     '''
     t = -np.arange(0, max_t, dt, dtype=np.float64)
 
