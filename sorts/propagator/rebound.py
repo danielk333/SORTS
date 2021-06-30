@@ -11,6 +11,12 @@ import scipy
 import pyorb
 
 try:
+    from tqdm import tqdm
+except ImportError:
+    tqdm = None
+
+
+try:
     import rebound
 except ImportError:
     rebound = None
@@ -45,6 +51,7 @@ class Rebound(Propagator):
             termination_check_interval = 1,
             massive_objects = DEFAULT_MASSIVE,
             save_massive_states = False,
+            tqdm = False,
         )
     )
     
@@ -331,9 +338,15 @@ class Rebound(Propagator):
         states = np.empty((6, len(t), N_testparticle), dtype=np.float64)
         end_ind = len(t)
 
+        if self.settings['tqdm']:
+            pbar = tqdm(total=len(t))
+
         for ti in range(len(t)):
 
             self.sim.integrate(t[ti].sec)
+
+            if self.settings['tqdm']:
+                pbar.update(1)
 
             massive_states, states = self._put_simulation_state(massive_states, states, ti)
 
@@ -356,6 +369,9 @@ class Rebound(Propagator):
                 if self.termination_check(t__, ti, massive_states, states):
                     end_ind = ti+1
                     break
+
+        if self.settings['tqdm']:
+            pbar.close()
 
         if backwards_integration:
             states[3:,:,:] = -states[3:,:,:]
