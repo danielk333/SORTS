@@ -568,6 +568,7 @@ class ObservedParameters(Scheduler):
             t = t,
             snr = snr,
             range = ranges[0] + ranges[1],
+            range_rx = ranges[1],
             range_rate = range_rates[0] + range_rates[1],
             tx_k = enus[0][:3,:]/ranges[0],
             rx_k = enus[1][:3,:]/ranges[1],
