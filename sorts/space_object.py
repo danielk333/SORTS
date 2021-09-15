@@ -73,12 +73,8 @@ from astropy.time import Time, TimeDelta
 class SpaceObject(object):
     '''Encapsulates a object in space who's dynamics is governed in time by a propagator.
 
-    The relation between the Cartesian and Kepler states are a direct transformation according to the below orientation rules.
-    If the Kepler elements are given in a Inertial system, to reference the Cartesian to a Earth-fixed system a earth rotation transformation
-    must be applied externally of the method.
-
-    #TODO: THIS DOC MUST BE UPDATED TOO
-
+    The state of the object is stored in a `pyorb.Orbit` instance. This instance contains direct transformations between
+    the Cartesian and Kepler states. The transformation follows the below the below orientation rules:
 
     **Orientation of the ellipse in the coordinate system:**
        * For zero inclination :math:`i`: the ellipse is located in the x-y plane.
@@ -93,41 +89,15 @@ class SpaceObject(object):
 
        *Reference:* "Orbital Motion" by A.E. Roy.
     
+    TODO: docs left
 
-    **Variables:**
-       * :math:`a`: Semi-major axis
-       * :math:`e`: Eccentricity
-       * :math:`i`: Inclination
-       * :math:`\omega`: Argument of perihelion
-       * :math:`\Omega`: Longitude of ascending node
-       * :math:`\\nu`: True anoamly
-
-
-    :ivar pyorb.Orbit orbit: Orbit instance
-    :ivar int oid: Identifying object ID
-    :ivar float C_D: Drag coefficient
-    :ivar float C_R: Radiation pressure coefficient
-    :ivar float A: Area [:math:`m^2`]
-    :ivar float m: Mass [kg]
-    :ivar float d: Diameter [m]
-    :ivar float mjd0: Epoch for state [BC-relative JD]
-    :ivar float prop: Propagator instance, child of :class:`~base_propagator.PropagatorBase`
-    :ivar dict propagator_options: Propagator initialization keyword arguments
-    :ivar dict propagator_args: Propagator call keyword arguments
-
-    The constructor creates a space object using Kepler elements.
-
-    :param float A: Area in square meters
-    :param float m: Mass in kg
-    :param float C_D: Drag coefficient
-    :param float C_R: Radiation pressure coefficient
-    :param float mjd0: Epoch for state
-    :param int oid: Identifying object ID
-    :param float d: Diameter in meters
-    :param PropagatorBase propagator: Propagator class pointer
+    :param Propagator propagator: Propagator class
     :param dict propagator_options: Propagator initialization keyword arguments
-    :param dict propagator_args: Keyword arguments to be passed to the propagator call
-    :param dict kwargs: All additional keywords are used to initialize the orbit
+    :param dict propagator_args: Keyword arguments to be passed to the propagator call    
+    :param dict parameters: Parameters for the space object. Some parameters are by default recognized by the `SpaceObject`.
+    :param float/astropy.time.Time epoch: Epoch for the state, if not an astropy `Time` is given, it is assumed the input float is `format='mjd', scale='utc'`.
+    :param int oid: Object ID
+    :param dict kwargs: All additional keywords are used to initialize the orbit. If the keyword `state` is given, that input variable is simply saved as the state. This is useful for e.g. `SGP4` that does not use regular cartesian states for propagation.
     
     :Keyword arguments:
         * *a* (``float``) -- Semi-major axis in meters
@@ -142,6 +112,23 @@ class SpaceObject(object):
         * *vx* (``float``) -- X-velocity
         * *vy* (``float``) -- Y-velocity
         * *vz* (``float``) -- Z-velocity
+
+
+    :ivar state: State instance, is an `pyorb.Orbit` unless the state keyword was used.
+    :ivar pyorb.Orbit orbit: Orbit instance if the `state` is an orbit.
+    :param dict parameters: Parameters for the space object.
+    :ivar int oid: Object ID
+    :ivar float C_D: Drag coefficient
+    :ivar float C_R: Radiation pressure coefficient
+    :ivar float A: Area [:math:`m^2`]
+    :ivar float m: Mass [kg]
+    :ivar float d: Diameter [m]
+    :ivar float mjd0: Epoch for state [BC-relative JD]
+    :ivar Propagator __propagator: Propagator class (used internally only)
+    :ivar Propagator propagator: Propagator instance
+    :ivar dict propagator_options: Propagator initialization keyword arguments
+    :ivar dict propagator_args: Propagator call keyword arguments
+
 
     '''
 
