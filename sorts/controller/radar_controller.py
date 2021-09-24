@@ -19,6 +19,7 @@ class RadarController(ABC):
 
     META_FIELDS = [
         'controller_type',
+        't_slice',
     ]
 
     def __init__(self, radar, t=None, t0=0.0, t_slice=None, profiler=None, logger=None, meta=None):
@@ -40,6 +41,17 @@ class RadarController(ABC):
     def run(self):
         return self(self.t - self.t0)
 
+    def toggle_stations(self, t, radar):
+        if self.t is None:
+            RadarController.turn_on(radar)
+        else:
+            dt = t - self.t
+            check = np.logical_and(dt >= 0, dt < self.t_slice)
+            if np.any(check):
+                RadarController.turn_on(radar)
+            else:
+                RadarController.turn_off(radar)
+
 
     def default_meta(self):
         '''This is used to generate meta data on the fly, rather then the static data that can be set in the `self.meta`.
@@ -47,6 +59,7 @@ class RadarController(ABC):
         meta = dict()
         meta.update(self.meta)
         meta['controller_type'] = self.__class__
+        meta['t_slice'] = self.t_slice
         return meta
 
 
