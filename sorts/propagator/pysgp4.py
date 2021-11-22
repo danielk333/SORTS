@@ -9,7 +9,7 @@ from copy import copy
 
 #Third party import
 import numpy as np
-from astropy.time import Time
+from astropy.time import Time, TimeDelta
 import scipy.optimize
 import pyorb
 
@@ -245,7 +245,12 @@ class SGP4(Propagator):
                     logger = self.logger,
                 )
 
-                mean_elements = self.TEME_to_TLE(state0_cart, epoch=epoch, B=B, kepler=False)
+                if state0_cart.size > 6:
+                    t_samps = kwargs.get('state_sample_times')
+                else:
+                    t_samps = None
+
+                mean_elements = self.TEME_to_TLE(state0_cart, t=t_samps, epoch=epoch, B=B, kepler=False)
 
                 if np.any(np.isnan(mean_elements)):
                     raise Exception('Could not compute SGP4 initial state: {}'.format(mean_elements))
@@ -376,8 +381,7 @@ class SGP4(Propagator):
         return states
 
 
-
-    def TEME_to_TLE_OPTIM(self, state, epoch, B=0.0, kepler=False, tol=1e-8, tol_v=1e-9):
+    def TEME_to_TLE_OPTIM(self, state, epoch, t=None, B=0.0, kepler=False, tol=1e-8, tol_v=1e-9):
         '''Convert osculating orbital elements in TEME
         to mean elements used in two line element sets (TLE's).
 
@@ -392,31 +396,47 @@ class SGP4(Propagator):
         if self.profiler is not None:
             self.profiler.start('SGP4:TEME_to_TLE_OPTIM')
         if self.logger is not None:
-            self.logger.info(f'SGP4:TEME_to_TLE_OPTIM')
+            self.logger.info('SGP4:TEME_to_TLE_OPTIM')
+
+        if len(state.shape) == 1:
+            state.shape = (state.size, 1)
+
+        if state.shape[1] > 1 and t is None:
+            raise ValueError('Cannot convert TEME sampling to TLE without sample times "state_sample_times"')
+        elif t is None:
+            t = np.array([0.0])
+
+        t_min = np.argmin(np.abs(t))
+        if t[t_min] > 1e-6:
+            raise ValueError('There is not sampling point at the epoch (t=0) to use as initial guess...')
 
         if kepler:
             state_cart = self._sgp4_elems2cart(state)
-            init_elements = state
+            init_elements = state[:, t_min]
         else:
             state_cart = state
-            init_elements = self._cart2sgp4_elems(state_cart)
+            init_elements = self._cart2sgp4_elems(state_cart[:, t_min])
+
+        tv = epoch + TimeDelta(t, format='sec')
 
         def find_mean_elems(mean_elements):
             # Mean elements and osculating state
-            state_osc = self.propagate_mean_elements(epoch.jd1, epoch.jd2, mean_elements, epoch.mjd - self.sgp4_mjd0, B=B, logger_profiler_on=False)
+            state_osc = self.propagate_mean_elements(
+                tv.jd1, 
+                tv.jd2, 
+                mean_elements, 
+                epoch.mjd - self.sgp4_mjd0, 
+                B=B, 
+                logger_profiler_on=False,
+            )
 
-            # Correction of mean state vector
             d = state_cart - state_osc
-            return np.linalg.norm(d)
+            return np.mean(np.linalg.norm(d, axis=0))
 
-        # bounds = [(None, None), (0.0, 0.999), (None, None)] + [(None, None)]*3
-        bounds = [(None, None), (0.0, 0.999), (0., np.pi)] + [(0., 2*np.pi)]*3
-
-        opt_res = scipy.optimize.minimize(find_mean_elems, init_elements,
-            #method='powell',
+        opt_res = scipy.optimize.minimize(
+            find_mean_elems, 
+            init_elements,
             method='Nelder-Mead',
-            # method='L-BFGS-B',
-            # bounds=bounds,
             options={'ftol': np.sqrt(tol**2 + tol_v**2)}
         )
         mean_elements = opt_res.x
@@ -429,7 +449,7 @@ class SGP4(Propagator):
         return mean_elements
 
 
-    def TEME_to_TLE(self, state, epoch, B=0.0, kepler=False, tol=1e-5, tol_v=1e-7):
+    def TEME_to_TLE(self, state, epoch, t=None, B=0.0, kepler=False, tol=1e-5, tol_v=1e-7):
         '''Convert osculating orbital elements in TEME
         to mean elements used in two line element sets (TLE's).
 
@@ -444,16 +464,37 @@ class SGP4(Propagator):
         if self.profiler is not None:
             self.profiler.start('SGP4:TEME_to_TLE')
         if self.logger is not None:
-            self.logger.info(f'SGP4:TEME_to_TLE')
+            self.logger.info('SGP4:TEME_to_TLE')
+
+        mean_elements = None
+
+        if len(state.shape) > 1:
+            if state.size > 6:
+                mean_elements = self.TEME_to_TLE_OPTIM(
+                    state, 
+                    epoch=epoch, 
+                    t=t,
+                    B=B, 
+                    kepler=kepler, 
+                    tol=tol, 
+                    tol_v=tol_v,
+                )
+
+                if self.profiler is not None:
+                    self.profiler.stop('SGP4:TEME_to_TLE')
+                if self.logger is not None:
+                    self.logger.info(f'SGP4:TEME_to_TLE:completed')
+
+                return mean_elements
+            else:
+                state.shape = (state.size, )
 
         if kepler:
             state_mean = self._sgp4_elems2cart(state)
-            state_kep = state
             state_cart = state_mean.copy()
         else:
             state_mean = state.copy()
             state_cart = state
-            state_kep = self._cart2sgp4_elems(state)
 
         iter_max = self.settings['TEME_to_TLE_max_iter']  # Maximum number of iterations
 
@@ -463,11 +504,25 @@ class SGP4(Propagator):
             mean_elements = self._cart2sgp4_elems(state_mean)
 
             if it > 0 and mean_elements[1] > 1:
-                #Assumptions of osculation within slope not working, go to general minimization algorithms
-                mean_elements = self.TEME_to_TLE_OPTIM(state_cart, epoch=epoch, B=B, kepler=False, tol=tol, tol_v=tol_v)
+                # Assumptions of osculation within slope not working, go to general minimization algorithms
+                mean_elements = self.TEME_to_TLE_OPTIM(
+                    state_cart, 
+                    epoch=epoch, 
+                    B=B, 
+                    kepler=False, 
+                    tol=tol, 
+                    tol_v=tol_v,
+                )
                 break
 
-            state_osc = self.propagate_mean_elements(epoch.jd1, epoch.jd2, mean_elements, epoch.mjd - self.sgp4_mjd0, B=B, logger_profiler_on=False)
+            state_osc = self.propagate_mean_elements(
+                epoch.jd1, 
+                epoch.jd2, 
+                mean_elements, 
+                epoch.mjd - self.sgp4_mjd0, 
+                B=B, 
+                logger_profiler_on=False,
+            )
 
             # Correction of mean state vector
             d = state_cart - state_osc
@@ -476,20 +531,34 @@ class SGP4(Propagator):
                 dr_old = dr
                 dv_old = dv
 
-            dr = np.linalg.norm(d[:3])  # Position change
-            dv = np.linalg.norm(d[3:])  # Velocity change
+            dr = np.linalg.norm(d[:3, ...], axis=0)  # Position change
+            dv = np.linalg.norm(d[3:, ...], axis=0)  # Velocity change
 
             if it > 0:
                 if dr_old < dr or dv_old < dv:
-                    #Assumptions of osculation within slope not working, go to general minimization algorithms
-                    mean_elements = self.TEME_to_TLE_OPTIM(state_cart, epoch=epoch, B=B, kepler=False, tol=tol, tol_v=tol_v)
+                    # Assumptions of osculation within slope not working, go to general minimization algorithms
+                    mean_elements = self.TEME_to_TLE_OPTIM(
+                        state_cart, 
+                        epoch=epoch, 
+                        B=B, 
+                        kepler=False, 
+                        tol=tol, 
+                        tol_v=tol_v,
+                    )
                     break
 
             if dr < tol and dv < tol_v:   # Iterate until position changes by less than eps
                 break
             if it == iter_max - 1:
-                #Iterative method not working, go to general minimization algorithms
-                mean_elements = self.TEME_to_TLE_OPTIM(state_cart, epoch=epoch, B=B, kepler=False, tol=tol, tol_v=tol_v)
+                # Iterative method not working, go to general minimization algorithms
+                mean_elements = self.TEME_to_TLE_OPTIM(
+                    state_cart, 
+                    epoch=epoch, 
+                    B=B, 
+                    kepler=False, 
+                    tol=tol, 
+                    tol_v=tol_v,
+                )
 
         if self.profiler is not None:
             self.profiler.stop('SGP4:TEME_to_TLE')
@@ -505,11 +574,11 @@ class SGP4(Propagator):
         Neglecting mass is sufficient for this calculation (the standard gravitational parameter is 24 orders larger then the change).
         '''
         _kep = kep.copy()
-        _kep[0] *= 1e3
-        tmp = _kep[4]
-        _kep[4] = _kep[3]
-        _kep[3] = tmp
-        _kep[5] = pyorb.mean_to_true(_kep[5], _kep[1], degrees=False)
+        _kep[0, ...] *= 1e3
+        tmp = _kep[4, ...]
+        _kep[4, ...] = _kep[3, ...]
+        _kep[3, ...] = tmp
+        _kep[5, ...] = pyorb.mean_to_true(_kep[5, ...], _kep[1, ...], degrees=False)
         cart = pyorb.kep_to_cart(kep, mu=self.grav_model.mu*1e9, degrees=False)
         return cart
 
@@ -519,11 +588,11 @@ class SGP4(Propagator):
         Neglecting mass is sufficient for this calculation (the standard gravitational parameter is 24 orders larger then the change).
         '''
         kep = pyorb.cart_to_kep(cart, mu=self.grav_model.mu*1e9, degrees=False)
-        kep[0] *= 1e-3
-        tmp = kep[4]
-        kep[4] = kep[3]
-        kep[3] = tmp
-        kep[5] = pyorb.true_to_mean(kep[5], kep[1], degrees=False)
+        kep[0, ...] *= 1e-3
+        tmp = kep[4, ...]
+        kep[4, ...] = kep[3, ...]
+        kep[3, ...] = tmp
+        kep[5, ...] = pyorb.true_to_mean(kep[5, ...], kep[1, ...], degrees=False)
         return kep
 
 
