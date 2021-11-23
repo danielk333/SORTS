@@ -346,7 +346,7 @@ class SGP4(Propagator):
 
             if logger_profiler_on:
                 if error != 0 and self.logger is not None:
-                    self.logger.error(f'SGP4:propagate:step-{ind}:{SGP4_ERRORS[error]}')
+                    self.logger.error(f'SGP4:propagate:step:{SGP4_ERRORS[error]}')
 
             states[:3] = r
             states[3:] = v
@@ -437,7 +437,7 @@ class SGP4(Propagator):
             find_mean_elems, 
             init_elements,
             method='Nelder-Mead',
-            options={'ftol': np.sqrt(tol**2 + tol_v**2)}
+            options={'ftol': np.sqrt(tol**2 + tol_v**2)},
         )
         mean_elements = opt_res.x
 
