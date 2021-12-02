@@ -18,11 +18,23 @@ class Scanner(RadarController):
         'dwell',
     ]
 
-    def __init__(self, radar, scan, r=np.linspace(300e3,1000e3,num=10), as_altitude=False, profiler=None, logger=None, return_copy=False, meta=None, **kwargs):
-        super().__init__(radar, profiler=profiler, logger=logger, meta=meta, **kwargs)
+    def __init__(
+                self, 
+                radar, 
+                scan, 
+                t0=0.0, 
+                r=np.linspace(300e3, 1000e3, num=10), 
+                as_altitude=False, 
+                profiler=None, 
+                logger=None, 
+                return_copy=False, 
+                meta=None, 
+                **kwargs
+            ):
+        super().__init__(radar, t0=t0, profiler=profiler, logger=logger, meta=meta, **kwargs)
         self.scan = scan
-        if self.t is not None:
-            self.dwell = self.scan.dwell(self.t)
+        if self.t is not None and self.t_slice is None:
+            self.dwell = np.max(self.scan.dwell(self.t))
 
         self.r = r
         self.return_copy = return_copy
@@ -42,7 +54,6 @@ class Scanner(RadarController):
     def dwell(self, val):
         self.t_slice = val
 
-
     def default_meta(self):
         dic = super().default_meta()
         dic['scan_type'] = self.scan.__class__
@@ -52,7 +63,7 @@ class Scanner(RadarController):
         '''Assumes t is not array
         '''
         if self.profiler is not None:
-                self.profiler.start('Scanner:generator:point_radar')
+            self.profiler.start('Scanner:generator:point_radar')
 
         if self.return_copy:
             radar = self.radar.copy()
@@ -72,22 +83,22 @@ class Scanner(RadarController):
             if self.as_altitude:
 
                 if len(point.shape) > 1:
-                    r = self.r[None,:]/point[2,:]
-                    point_tx.append(point + tx.ecef[:,None])
-                    __ptx = point[:,:,None]*r[None,:,:] + tx.ecef[:,None,None]
+                    r = self.r[None, :]/point[2, :]
+                    point_tx.append(point + tx.ecef[:, None])
+                    __ptx = point[:, :, None]*r[None, :, :] + tx.ecef[:, None, None]
                     point_rx_to_tx.append(__ptx.reshape(3, __ptx.shape[1]*__ptx.shape[2]))
                 else:
                     r = self.r/point[2]
                     point_tx.append(point + tx.ecef)
-                    point_rx_to_tx.append(point[:,None]*r[None,:] + tx.ecef[:,None])
+                    point_rx_to_tx.append(point[:, None]*r[None, :] + tx.ecef[:, None])
             else:
                 if len(point.shape) > 1:
-                    point_tx.append(point + tx.ecef[:,None])
-                    __ptx = point[:,:,None]*self.r[None,None,:] + tx.ecef[:,None,None]
+                    point_tx.append(point + tx.ecef[:, None])
+                    __ptx = point[:, :, None]*self.r[None, None, :] + tx.ecef[:, None, None]
                     point_rx_to_tx.append(__ptx.reshape(3, __ptx.shape[1]*__ptx.shape[2]))
                 else:
                     point_tx.append(point + tx.ecef)
-                    point_rx_to_tx.append(point[:,None]*self.r[None,:] + tx.ecef[:,None])
+                    point_rx_to_tx.append(point[:, None]*self.r[None, :] + tx.ecef[:, None])
             
             if self.profiler is not None:
                 self.profiler.start('Scanner:generator:point_radar:_point_station[tx]')
@@ -108,24 +119,23 @@ class Scanner(RadarController):
                     rx_point.append(point_rx_to_tx[txi])
             rx_point = np.concatenate(rx_point, axis=1)
 
-
+            if len(rx_point.shape) > 1 and rx_point.size == 3:
+                rx_point.shape = (3,)
+            
             if self.profiler is not None:
                 self.profiler.start('Scanner:generator:point_radar:_point_station[rx]')
             RadarController._point_station(rx, rx_point)
             if self.profiler is not None:
                 self.profiler.stop('Scanner:generator:point_radar:_point_station[rx]')
 
-        #Make sure radar is on
-        RadarController.turn_on(radar)
+        # Make sure radar is on
+        self.toggle_stations(t, radar)
 
         if self.profiler is not None:
-                self.profiler.stop('Scanner:generator:point_radar')
-
+            self.profiler.stop('Scanner:generator:point_radar')
 
         return radar, meta
 
     def generator(self, t):
         for ti in range(len(t)):
             yield self.point_radar(t[ti])
-
-

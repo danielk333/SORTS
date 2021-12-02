@@ -143,6 +143,7 @@ def gen_eiscat3d(beam='array', stage=1):
         tx=tx, 
         rx=rx, 
         min_SNRdb=10.0,
+        joint_stations = [(0,0)],
     )
     return eiscat3d
 
@@ -237,6 +238,7 @@ def gen_eiscat3d_demonstrator(beam='array'):
         tx=tx, 
         rx=rx, 
         min_SNRdb=10.0,
+        joint_stations = [(0,0)],
     )
     return eiscat3d_demonstartor
 
@@ -257,9 +259,7 @@ def eiscat_3d_module(beam = 'gauss'):
     
     radar = eiscat_3d(beam = 'gauss')
 
-    radar.name = 'EISCAT 3D module'
-
-
+    raise NotImplementedError()
 
     if beam == 'gauss':
         for tx in radar._tx:

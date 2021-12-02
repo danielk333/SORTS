@@ -97,11 +97,15 @@ def lin_error(enr=10.0, txlen=1000.0, n_ipp=10, ipp=20e-3, bw=1e6, dr=10.0, ddop
 def precalculate_dr(txlen, bw, ipp=20e-3, n_ipp=20, n_interp=20):
     enrs = 10.0**np.linspace(-3, 10, num=n_interp)
     drs = np.zeros(n_interp)
-    ddops = np.zeros(n_interp)    
-    for ei, s in tqdm(enumerate(enrs)):
+    ddops = np.zeros(n_interp)  
+    q = tqdm(total=n_interp)
+    for ei, s in enumerate(enrs):
         dr, ddop = lin_error(enr=s, txlen=txlen, bw=bw, ipp=ipp, n_ipp=n_ipp)
         drs[ei] = dr
         ddops[ei] = ddop
+        q.update(1)
+        q.set_description(f'Linear errors at SNR {10*np.log10(s)} dB')
+    q.close()
     return enrs, drs, ddops
 
 

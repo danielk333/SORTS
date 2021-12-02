@@ -5,7 +5,7 @@
 '''
 
 #Python standard import
-
+from itertools import cycle
 
 #Third party import
 import numpy as np
@@ -19,6 +19,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from . import general
 from ..controller import Tracker
 
+prop_cycle = plt.rcParams['axes.prop_cycle']
 
 def unit_vector(v):
     return v / np.sqrt(np.sum(v * v, axis=-1))[:,None]
@@ -26,6 +27,8 @@ def unit_vector(v):
 def observed_parameters(data_list, passes=None, snrdb_lim = 10.0, axes=None, sort=True, **kwargs):
     '''Observed parameters for one RX station.
     '''
+
+    color = cycle(prop_cycle.by_key()['color'])
 
     if axes is None:
         if 'figsize' in kwargs:
@@ -45,14 +48,15 @@ def observed_parameters(data_list, passes=None, snrdb_lim = 10.0, axes=None, sor
     else:
         fig = None
 
-    axes[0][0].plot([0],[0],[0],'og')
+    if kwargs.get('plot_origin', True):
+        axes[0][0].plot([0],[0],[0],'.k')
 
     line_all = kwargs.get('linestyle_all', '-')
     line_det = kwargs.get('linestyle_detect', '.r')
     fontsize = kwargs.get('fontsize', None)
 
     text_spec = dict(fontsize = fontsize)
-    
+
     text_spec = {key:val for key, val in text_spec.items() if val is not None}
 
     time_unit = kwargs.get('time_unit', 'min').strip().lower()
@@ -75,17 +79,21 @@ def observed_parameters(data_list, passes=None, snrdb_lim = 10.0, axes=None, sor
     for pi, dat in enumerate(data_list):
         if dat is None:
             continue
+        cc = next(color)
 
-        if passes[pi] is None:
+        if passes and passes[pi] is not None:
+            # If we have passes, use those for nice plotting
+            tvec = passes[pi].t
+            rx_k = unit_vector(passes[pi].enu[1][:3].T).T
+            rng = passes[pi].range()
+            rng = rng[0] + rng[1]
+            rrt = passes[pi].range_rate()
+            rrt = rrt[0] + rrt[1]
+        else:
             tvec = dat['t']
             rx_k = dat['rx_k']
             rng = dat['range']
             rrt = dat['range_rate']
-        else:   # If we have passes, use those for nice plotting
-            tvec = passes[pi].t
-            rx_k = unit_vector(passes[pi].enu[1][3:].T).T
-            rng = passes[pi].range()[1]
-            rrt = passes[pi].range_rate()[1]
 
         if sort:
             inds = np.argsort(tvec)
@@ -98,14 +106,14 @@ def observed_parameters(data_list, passes=None, snrdb_lim = 10.0, axes=None, sor
         det_inds = SNRdB > snrdb_lim
 
         # axes[0][0].plot(dat['rx_k'][0,inds], dat['rx_k'][1,inds], line_all)
-        axes[0][0].plot(rx_k[0,inds], rx_k[1,inds], line_all)
+        axes[0][0].plot(rx_k[0,inds], rx_k[1,inds], line_all, color=cc, label=f'Pass{pi}')
         axes[0][0].plot(dat['rx_k'][0,det_inds], dat['rx_k'][1,det_inds], line_det)
 
         #axes[0][1].plot(dat['t'][inds]/_tt, dat['range'][inds]*1e-3, line_all, label=f'Pass{pi}')
         #axes[1][0].plot(dat['t'][inds]/_tt, dat['range_rate'][inds]*1e-3, line_all)
-        axes[0][1].plot(tvec[inds]/_tt, rng[inds]*1e-3, line_all, label=f'Pass{pi}')
-        axes[1][0].plot(tvec[inds]/_tt, rrt[inds]*1e-3, line_all)
-        axes[1][1].plot(dat['t'][t_ind]/_tt, SNRdB[t_ind], line_all)
+        axes[0][1].plot(tvec[inds]/_tt, rng[inds]*1e-3, line_all, color=cc, label=f'Pass{pi}')
+        axes[1][0].plot(tvec[inds]/_tt, rrt[inds]*1e-3, line_all, color=cc, label=f'Pass{pi}')
+        axes[1][1].plot(dat['t'][t_ind]/_tt, SNRdB[t_ind], line_all, color=cc, label=f'Pass{pi}')
 
         axes[0][1].plot(dat['t'][det_inds]/_tt, dat['range'][det_inds]*1e-3, line_det)
         axes[1][0].plot(dat['t'][det_inds]/_tt, dat['range_rate'][det_inds]*1e-3, line_det)
@@ -125,7 +133,7 @@ def observed_parameters(data_list, passes=None, snrdb_lim = 10.0, axes=None, sor
     axes[1][0].set_ylabel('Two way range rate [km/s]', **text_spec)
     axes[1][1].set_ylabel('SNR [dB]', **text_spec)
 
-    axes[0][1].legend()
+    # axes[0][1].legend()
 
     dr = 1
     axes[0][0].set_xlim([-dr, dr])
@@ -140,12 +148,12 @@ def observed_parameters(data_list, passes=None, snrdb_lim = 10.0, axes=None, sor
 
     return fig, axes
 
-    
+
 
 
 
 def schedule_pointing(
-        scheduler, 
+        scheduler,
         t0, 
         t1, 
         earth=True, 

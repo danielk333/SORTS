@@ -77,6 +77,7 @@ def gen_eiscat_uhf():
         tx, 
         rx,
         min_SNRdb=10.0,
+        joint_stations = [(0,0)],
     )
     return uhf
     

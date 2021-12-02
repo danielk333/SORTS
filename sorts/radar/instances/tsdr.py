@@ -66,6 +66,7 @@ def gen_tromso_space_debris_radar(fence=False, phased=False):
         tx, 
         rx,
         min_SNRdb=10.0,
+        joint_stations = [(0,0)],
     )
     return tsdr_r
     
