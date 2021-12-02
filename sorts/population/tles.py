@@ -37,11 +37,18 @@ def tle_catalog(
     :rtype: sorts.Population
     '''
     if isinstance(tles, str) or isinstance(tles, pathlib.Path):
-        tle_raw = [line.rstrip('\n') for line in open(tles)]
-        if len(tle_raw) % 2 != 0:
+        # first character in a line is line number (1 or 2), so just ignore everything else
+        tle = { '1' : [], '2' : [] }
+        for line in open(tles):
+            num = line[0]
+            if num not in ['1', '2']:
+                continue
+            tle[num].append(line.rstrip('\n'))
+
+        if len(tle['1']) != len(tle['2']):
             raise Exception('Not even number of lines [not TLE compatible]')
 
-        tles = list(zip(tle_raw[0::2], tle_raw[1::2]))
+        tles = list(zip(tle['1'], tle['2']))
 
     tle_size = len(tles)
 
