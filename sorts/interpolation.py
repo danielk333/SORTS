@@ -21,7 +21,7 @@ class Interpolator(ABC):
 
     def __init__(self, states, t):
         self.states = states
-        self.t = t
+        self.t = np.atleast_1d(t)
 
 
     @abstractmethod
@@ -57,7 +57,7 @@ class Linear(Interpolator):
 
     def get_state(self, t):
         st_t = self.t.flatten()
-        in_t = t.flatten()
+        in_t = np.atleast_1d(t).flatten()
         t_mat = st_t[:,None] - in_t[None,:]
 
         inds = np.argmax(t_mat > 0, axis=0) - 1
