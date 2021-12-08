@@ -14,9 +14,26 @@ else
     TARGET_DIR=$2
 fi
 
-JDK_LOC=$(find /usr/lib/jvm/ -name "*8-openjdk*")
+if [ -z "$JDK_LOC" ]; then
+    echo "No custom JDK location path given: finding in /usr/lib/jvm/"
+    JDK_LOC=$(find /usr/lib/jvm/ -name "*8-openjdk*")
+fi
+
 
 case "$1" in
+jcc)
+    export JCC_JDK=${JDK_LOC}
+    pip install JCC
+    ;;
+req)
+    echo "The following packages needs to be installed before building"
+    echo "- openjdk-8"
+    echo "- maven"
+    echo "- JCC (pip install)"
+    echo ""
+    echo "For lazy install only the follow are required:"
+    echo "- openjdk-8"
+    ;;
 check)
     echo "Checking java"
     java -version
@@ -73,7 +90,6 @@ build)
 
     cd ..
     cp -rv python-wrapper/python_files/* build/
-
     ;;
 install)
 
@@ -173,14 +189,13 @@ install)
     --files 81 \
     --build \
     --install
-    
     ;;
 clean) 
-    rm -rv Orekit
-    rm -v hipparchus-1.8-bin.tar.bz2
-    rm -rv hipparchus-1.8-bin
-    rm -rv python-wrapper
-    rm -rv build
+    rm -rv $TARGET_DIR/Orekit
+    rm -v $TARGET_DIR/hipparchus-1.8-bin.tar.bz2
+    rm -rv $TARGET_DIR/hipparchus-1.8-bin
+    rm -rv $TARGET_DIR/python-wrapper
+    rm -rv $TARGET_DIR/build
     ;;
 lazy)
     base_url="https://anaconda.org/conda-forge/orekit/10.3/download"
