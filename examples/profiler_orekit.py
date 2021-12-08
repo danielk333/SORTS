@@ -11,6 +11,7 @@ import numpy as np
 
 from sorts.profiling import Profiler
 from sorts.propagator import Orekit
+import pyorb
 
 p = Profiler()
 p.start('total')
@@ -28,8 +29,8 @@ if not pth.is_file():
 prop = Orekit(
     orekit_data = pth, 
     settings=dict(
-        in_frame='ITRS',
-        out_frame='GCRS',
+        in_frame='GCRS',
+        out_frame='ITRS',
         drag_force = False,
         radiation_pressure = False,
     ),
@@ -38,8 +39,10 @@ prop = Orekit(
 
 print(prop)
 
-state0 = np.array([-7100297.113,-3897715.442,18568433.707,86.771,-3407.231,2961.571])
-t = np.linspace(0,3600*24.0*2,num=5000)
+orb0 = pyorb.Orbit(M0=pyorb.M_earth, a=7e6, e=0, i=0, omega=0, Omega=0, anom=0)
+print(orb0)
+state0 = orb0.cartesian.flatten()
+t = np.linspace(0,3600*24.0,num=5000)
 mjd0 = 53005
 
 states = prop.propagate(t, state0, mjd0, A=1.0, C_R = 1.0, C_D = 1.0)
@@ -51,16 +54,16 @@ print(p)
 print(p.fmt(timedelta=True))
 print(p.fmt(normalize='total'))
 
-print('\n Enable Drag Force \n')
+print('\nEnable Drag Force \n')
 
 p2 = Profiler()
 p2.start('total')
 
 prop = Orekit(
-    orekit_data = orekit_data, 
+    orekit_data = pth, 
     settings=dict(
-        in_frame='ITRS',
-        out_frame='GCRS',
+        in_frame='GCRS',
+        out_frame='ITRS',
         drag_force = True,
         radiation_pressure = False,
     ),

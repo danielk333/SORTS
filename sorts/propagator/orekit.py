@@ -120,7 +120,7 @@ class Orekit(Propagator):
     :ivar dict _forces: Dictionary of forces to include in the numerical integration. Contains instances of children of :class:`org.orekit.forces.AbstractForceModel`.
     :ivar list _tolerances: Contains the absolute and relative tolerances calculated by the `tolerances <https://www.orekit.org/static/apidocs/org/orekit/propagation/numerical/NumericalPropagator.html#tolerances(double,org.orekit.orbits.Orbit,org.orekit.orbits.OrbitType)>`_ function.
     :ivar org.orekit.propagation.numerical.NumericalPropagator propagator: The numerical propagator instance.
-    :ivar org.orekit.forces.drag.atmosphere.data.MarshallSolarActivityFutureEstimation.StrengthLevel SolarStrengthLevel: The strength of the solar activity. Options are 'AVRAGE', 'STRONG', 'WEAK'.
+    :ivar org.orekit.models.earth.atmosphere.data.MarshallSolarActivityFutureEstimation.StrengthLevel SolarStrengthLevel: The strength of the solar activity. Options are 'AVRAGE', 'STRONG', 'WEAK'.
 
     The constructor creates a propagator instance with supplied options.
 
@@ -294,7 +294,7 @@ class Orekit(Propagator):
         self.utc = TimeScalesFactory.getUTC()
 
         self.__settings = dict()
-        self.__settings['SolarStrengthLevel'] = getattr(org.orekit.forces.drag.atmosphere.data.MarshallSolarActivityFutureEstimation.StrengthLevel, self.settings['solar_activity_strength'])
+        self.__settings['SolarStrengthLevel'] = getattr(org.orekit.models.earth.atmosphere.data.MarshallSolarActivityFutureEstimation.StrengthLevel, self.settings['solar_activity_strength'])
         self._tolerances = None
         
         if self.settings['constants_source'] == 'JPL-IAU':
@@ -487,15 +487,15 @@ class Orekit(Propagator):
             self.force_params = {'A': A, 'C_D': cd, 'C_R': cr}
             if self.settings['drag_force']:
                 if self.settings['solar_activity'] == 'Marshall':
-                    msafe = org.orekit.forces.drag.atmosphere.data.MarshallSolarActivityFutureEstimation(
+                    msafe = org.orekit.models.earth.atmosphere.data.MarshallSolarActivityFutureEstimation(
                         "(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\p{Digit}\\p{Digit}\\p{Digit}\\p{Digit}F10\\.(?:txt|TXT)",
                         self.__settings['SolarStrengthLevel'],
                     )
-                    manager = org.orekit.data.DataProvidersManager.getInstance()
-                    manager.feed(msafe.getSupportedNames(), msafe)
+                    self._manager = org.orekit.data.DataProvidersManager.getInstance()
+                    self._manager.feed(msafe.getSupportedNames(), msafe)
 
                     if self.settings['atmosphere'] == 'DTM2000':
-                        self.atmosphere_instance = org.orekit.forces.drag.atmosphere.DTM2000(msafe, CelestialBodyFactory.getSun(), self.body)
+                        self.atmosphere_instance = org.orekit.models.earth.atmosphere.DTM2000(msafe, CelestialBodyFactory.getSun(), self.body)
                     else:
                         raise Exception('Atmosphere model not recognized')
 
