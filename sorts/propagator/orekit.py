@@ -21,14 +21,12 @@ Simple propagation showing time difference due to loading of model data.
  
 '''
 
-#Python standard import
-import os
-import time
+# Python standard import
 import copy
 import urllib.request
 import pathlib
 
-#Third party import
+# Third party import
 import numpy as np
 import scipy
 import scipy.constants
@@ -40,7 +38,7 @@ try:
 except ImportError:
     tqdm = None
 
-#Local import
+# Local import
 from .base import Propagator
 from .. import dates as dates
 from .. import frames
@@ -57,6 +55,7 @@ from org.orekit.orbits import KeplerianOrbit, EquinoctialOrbit, CartesianOrbit, 
 from org.orekit.utils import Constants, IERSConventions, PVCoordinates
 from org.orekit.bodies import CelestialBodyFactory, OneAxisEllipsoid
 from org.orekit.python import PythonOrekitStepHandler
+import org.orekit.models.earth.atmosphere as orekit_atm
 import org
 
 from orekit import JArray_double
@@ -85,7 +84,6 @@ def mjd2absdate(mjd, utc):
     '''
 
     return npdt2absdate(dates.mjd_to_npdt(mjd), utc)
-
 
 
 class Orekit(Propagator):
@@ -142,7 +140,6 @@ class Orekit(Propagator):
     :param str solar_activity_strength: The strength of the solar activity. Options are 'AVRAGE', 'STRONG', 'WEAK'.
     '''
 
-
     class OrekitVariableStep(PythonOrekitStepHandler):
         '''Class for handling the steps.
         '''
@@ -182,15 +179,15 @@ class Orekit(Propagator):
                 x_tmp = PVCoord.getPosition()
                 v_tmp = PVCoord.getVelocity()
 
-                self.states_pointer[0,ti] = x_tmp.getX()
-                self.states_pointer[1,ti] = x_tmp.getY()
-                self.states_pointer[2,ti] = x_tmp.getZ()
-                self.states_pointer[3,ti] = v_tmp.getX()
-                self.states_pointer[4,ti] = v_tmp.getY()
-                self.states_pointer[5,ti] = v_tmp.getZ()
+                self.states_pointer[0, ti] = x_tmp.getX()
+                self.states_pointer[1, ti] = x_tmp.getY()
+                self.states_pointer[2, ti] = x_tmp.getZ()
+                self.states_pointer[3, ti] = v_tmp.getX()
+                self.states_pointer[4, ti] = v_tmp.getY()
+                self.states_pointer[5, ti] = v_tmp.getZ()
 
                 if self.__heartbeat is not None:
-                    self.__heartbeat(float(t), self.states_pointer[:,ti], interpolator=interpolator)
+                    self.__heartbeat(float(t), self.states_pointer[:, ti], interpolator=interpolator)
 
                 if self.profiler is not None:
                     self.profiler.stop('Orekit:propagate:steps:step-handler:getState')
@@ -209,7 +206,7 @@ class Orekit(Propagator):
             max_step=120.0,
             position_tolerance=10.0,
             earth_gravity='HolmesFeatherstone',
-            gravity_order=(10,10),
+            gravity_order=(10, 10),
             solarsystem_perturbers=['Moon', 'Sun'],
             drag_force=True,
             atmosphere='DTM2000',
@@ -220,11 +217,10 @@ class Orekit(Propagator):
         )
     )
 
-
     @staticmethod
     def download_quickstart_data(path, url=None, headers=None, timeout=10.0, block_size=2048, verbose=True):
         if url is None:
-            #Standard URL of the example data distributed on orekit.org
+            # Standard URL of the example data distributed on orekit.org
             url = 'https://gitlab.orekit.org/orekit/orekit-data/-/archive/master/orekit-data-master.zip'
         if headers is None:
             headers = {}
@@ -270,7 +266,8 @@ class Orekit(Propagator):
                             pass
                     raise
 
-    def __init__(self,
+    def __init__(
+                self,
                 orekit_data,
                 settings=None,
                 **kwargs
@@ -294,13 +291,18 @@ class Orekit(Propagator):
         self.utc = TimeScalesFactory.getUTC()
 
         self.__settings = dict()
-        self.__settings['SolarStrengthLevel'] = getattr(org.orekit.models.earth.atmosphere.data.MarshallSolarActivityFutureEstimation.StrengthLevel, self.settings['solar_activity_strength'])
+        self.__settings['SolarStrengthLevel'] = getattr(
+            orekit_atm.data.MarshallSolarActivityFutureEstimation.StrengthLevel, 
+            self.settings['solar_activity_strength'],
+        )
         self._tolerances = None
         
         if self.settings['constants_source'] == 'JPL-IAU':
             self.mu = Constants.JPL_SSD_EARTH_GM
             self.R_earth = Constants.IAU_2015_NOMINAL_EARTH_EQUATORIAL_RADIUS
-            self.f_earth = (Constants.IAU_2015_NOMINAL_EARTH_EQUATORIAL_RADIUS - Constants.IAU_2015_NOMINAL_EARTH_POLAR_RADIUS)/Constants.IAU_2015_NOMINAL_EARTH_POLAR_RADIUS
+            R_diff = Constants.IAU_2015_NOMINAL_EARTH_EQUATORIAL_RADIUS \
+                - Constants.IAU_2015_NOMINAL_EARTH_POLAR_RADIUS
+            self.f_earth = R_diff/Constants.IAU_2015_NOMINAL_EARTH_POLAR_RADIUS
         else:
             self.mu = Constants.WGS84_EARTH_MU
             self.R_earth = Constants.WGS84_EARTH_EQUATORIAL_RADIUS
@@ -318,7 +320,10 @@ class Orekit(Propagator):
             self._forces['drag_force'] = None
 
         if self.settings['earth_gravity'] == 'HolmesFeatherstone':
-            provider = org.orekit.forces.gravity.potential.GravityFieldFactory.getNormalizedProvider(self.settings['gravity_order'][0], self.settings['gravity_order'][1])
+            provider = org.orekit.forces.gravity.potential.GravityFieldFactory.getNormalizedProvider(
+                self.settings['gravity_order'][0], 
+                self.settings['gravity_order'][1],
+            )
             holmesFeatherstone = org.orekit.forces.gravity.HolmesFeatherstoneAttractionModel(
                 FramesFactory.getITRF(IERSConventions.IERS_2010, True),
                 provider,
@@ -330,7 +335,7 @@ class Orekit(Propagator):
             self._forces['earth_gravity'] = Newtonian
 
         else:
-            raise Exception('Supplied Earth gravity model "{}" not recognized'.format(self.settings['earth_gravity']))
+            raise Exception(f'Supplied Earth gravity model "{self.settings["earth_gravity"]}" not recognized')
 
         if self.settings['solarsystem_perturbers'] is not None:
             for body in self.settings['solarsystem_perturbers']:
@@ -379,8 +384,6 @@ class Orekit(Propagator):
         
         return ret
 
-
-
     def _get_frame(self, name):
         '''Uses a string to identify which coordinate frame to initialize from Orekit package.
 
@@ -416,7 +419,8 @@ class Orekit(Propagator):
 
     def _construct_propagator(self, initialOrbit):
         '''
-        Get the specified integrator from hipparchus package. List available at: `nonstiff ode <https://www.hipparchus.org/apidocs/org/hipparchus/ode/nonstiff/package-summary.html>`_
+        Get the specified integrator from hipparchus package. List available at: 
+        `nonstiff ode <https://www.hipparchus.org/apidocs/org/hipparchus/ode/nonstiff/package-summary.html>`_
 
         Configure the integrator tolerances using the orbit.
         '''
@@ -425,10 +429,10 @@ class Orekit(Propagator):
             self.profiler.start('Orekit:propagate:construct_propagator')
 
         self._tolerances = NumericalPropagator.tolerances(
-                self.settings['position_tolerance'],
-                initialOrbit,
-                initialOrbit.getType()
-            )
+            self.settings['position_tolerance'],
+            initialOrbit,
+            initialOrbit.getType()
+        )
 
         integrator_constructor = getattr(
             org.hipparchus.ode.nonstiff,
@@ -449,7 +453,6 @@ class Orekit(Propagator):
 
         if self.profiler is not None:
             self.profiler.stop('Orekit:propagate:construct_propagator')
-
 
     def _set_forces(self, A, cd, cr):
         '''Using the spacecraft specific parameters, set the drag force and radiation pressure models.
@@ -487,15 +490,20 @@ class Orekit(Propagator):
             self.force_params = {'A': A, 'C_D': cd, 'C_R': cr}
             if self.settings['drag_force']:
                 if self.settings['solar_activity'] == 'Marshall':
-                    msafe = org.orekit.models.earth.atmosphere.data.MarshallSolarActivityFutureEstimation(
-                        "(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\p{Digit}\\p{Digit}\\p{Digit}\\p{Digit}F10\\.(?:txt|TXT)",
+                    self._msafe = orekit_atm.data.MarshallSolarActivityFutureEstimation(
+                        orekit_atm.data.MarshallSolarActivityFutureEstimation.DEFAULT_SUPPORTED_NAMES,
                         self.__settings['SolarStrengthLevel'],
                     )
                     self._manager = org.orekit.data.DataProvidersManager.getInstance()
-                    self._manager.feed(msafe.getSupportedNames(), msafe)
+                    self._manager.feed(self._msafe.getSupportedNames(), self._msafe)
 
                     if self.settings['atmosphere'] == 'DTM2000':
-                        self.atmosphere_instance = org.orekit.models.earth.atmosphere.DTM2000(msafe, CelestialBodyFactory.getSun(), self.body)
+                        self.atmosphere_instance = orekit_atm.DTM2000(
+                            self._msafe, 
+                            CelestialBodyFactory.getSun(), 
+                            self.body,
+                            self.utc,
+                        )
                     else:
                         raise Exception('Atmosphere model not recognized')
 
@@ -512,18 +520,16 @@ class Orekit(Propagator):
 
                 self._forces['radiation_pressure'] = radiation_pressure_model
 
-            #self.propagator.removeForceModels()
+            # self.propagator.removeForceModels()
 
             self.UpdateForces()
 
         if self.profiler is not None:
             self.profiler.stop('Orekit:propagate:set_forces')
         
-
     def UpdateForces(self):
         for force_name, force in self._forces.items():
             self.propagator.addForceModel(force)
-
 
     def GetIsotropicDragForce(self, A, cd):
         self.spacecraft_drag_model = org.orekit.forces.drag.IsotropicDrag(float(A), float(cd))
@@ -561,14 +567,12 @@ class Orekit(Propagator):
             self.outputFrame = self._get_frame('GCRF')
             orekit_out_frame = False
 
-
         if self.inputFrame.isPseudoInertial():
             self.inertialFrame = self.inputFrame
         else:
             self.inertialFrame = FramesFactory.getEME2000()
 
         self.body = OneAxisEllipsoid(self.R_earth, self.f_earth, self.outputFrame)
-
 
         if isinstance(state0, pyorb.Orbit):
             state0_cart = np.squeeze(state0.cartesian)
@@ -616,11 +620,18 @@ class Orekit(Propagator):
                 logger = self.logger,
             )
 
-
         initialDate = mjd2absdate(mjd0, self.utc)
 
-        pos = org.hipparchus.geometry.euclidean.threed.Vector3D(float(state0_cart[0]), float(state0_cart[1]), float(state0_cart[2]))
-        vel = org.hipparchus.geometry.euclidean.threed.Vector3D(float(state0_cart[3]), float(state0_cart[4]), float(state0_cart[5]))
+        pos = org.hipparchus.geometry.euclidean.threed.Vector3D(
+            float(state0_cart[0]), 
+            float(state0_cart[1]), 
+            float(state0_cart[2]),
+        )
+        vel = org.hipparchus.geometry.euclidean.threed.Vector3D(
+            float(state0_cart[3]), 
+            float(state0_cart[4]), 
+            float(state0_cart[5]),
+        )
         PV_state = PVCoordinates(pos, vel)
 
         if not self.inputFrame.isPseudoInertial():
@@ -671,13 +682,21 @@ class Orekit(Propagator):
             _t = _t[_t_order]
             _state = np.empty((6, len(_t)), dtype=np.float) 
 
-            step_handler.set_params(_t, initialDate, _state, self.outputFrame, __heartbeat, profiler = self.profiler)
+            step_handler.set_params(
+                _t, 
+                initialDate, 
+                _state, 
+                self.outputFrame, 
+                __heartbeat, 
+                profiler = self.profiler,
+            )
 
             self.propagator.setMasterMode(step_handler)
 
-            self.propagator.propagate(initialDate.shiftedBy(float(_t[-1])))
+            t_next = initialDate.shiftedBy(float(_t[-1]))
+            self.propagator.propagate(t_next)
             
-            #now _state is full and in the order of _t
+            # now _state is full and in the order of _t
             state[:, tb_inds] = _state[:, _t_res]
 
         if len(t_forward) > 0:
@@ -686,13 +705,21 @@ class Orekit(Propagator):
             _t_res = np.argsort(_t_order)
             _t = _t[_t_order]
             _state = np.empty((6, len(_t)), dtype=np.float) 
-            step_handler.set_params(_t, initialDate, _state, self.outputFrame, __heartbeat, profiler = self.profiler)
+            step_handler.set_params(
+                _t, 
+                initialDate, 
+                _state, 
+                self.outputFrame, 
+                __heartbeat, 
+                profiler = self.profiler,
+            )
 
             self.propagator.setMasterMode(step_handler)
 
-            self.propagator.propagate(initialDate.shiftedBy(float(_t[-1])))
+            t_next = initialDate.shiftedBy(float(_t[-1]))
+            self.propagator.propagate(t_next)
             
-            #now _state is full and in the order of _t
+            # now _state is full and in the order of _t
             state[:, tf_indst] = _state[:, _t_res]
 
         if not orekit_out_frame:

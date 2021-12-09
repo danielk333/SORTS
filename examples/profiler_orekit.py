@@ -24,7 +24,7 @@ pth = pth / 'data' / 'orekit-data-master.zip'
 
 
 if not pth.is_file():
-    sorts.propagator.Orekit.download_quickstart_data(pth, verbose=True)
+    Orekit.download_quickstart_data(pth, verbose=True)
 
 prop = Orekit(
     orekit_data = pth, 
@@ -42,7 +42,7 @@ print(prop)
 orb0 = pyorb.Orbit(M0=pyorb.M_earth, a=7e6, e=0, i=0, omega=0, Omega=0, anom=0)
 print(orb0)
 state0 = orb0.cartesian.flatten()
-t = np.linspace(0,3600*24.0,num=5000)
+t = np.linspace(0, 3600*24.0, num=5000)
 mjd0 = 53005
 
 states = prop.propagate(t, state0, mjd0, A=1.0, C_R = 1.0, C_D = 1.0)
