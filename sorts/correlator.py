@@ -118,7 +118,7 @@ def correlate(
 
     pbars = []
     for pbar_id in range(step):
-        pbars.append(tqdm(range(len(population)//step), ncols=100))
+        pbars.append(tqdm(range(len(population)//step), position=pbar_id))
     pbar = pbars[next_check]
 
     match_pop = None
