@@ -4,26 +4,22 @@
 
 Currently only works for Mono-static measurements.
 
-# TODO: Assume a uniform prior distribution over population index, posterior distribution is the probability of what object generated the data. Probability comes from measurement covariance.
+# TODO: Assume a uniform prior distribution over population index, posterior distribution is the probability 
+of what object generated the data. Probability comes from measurement covariance.
 '''
 
-import sys
-import os
-import time
-import glob
 from tqdm import tqdm
 
 try:
     from mpi4py import MPI
     comm = MPI.COMM_WORLD
 except ImportError:
-    comm = None
+    class COMM_WORLD:
+        rank = 0
+        size = 1
+    comm = COMM_WORLD()
 
 import numpy as np
-import scipy
-import h5py
-import scipy.constants as constants
-
 
 
 def residual_distribution_metric(t, r, v, r_ref, v_ref, **kwargs):
@@ -44,40 +40,55 @@ def residual_distribution_metric(t, r, v, r_ref, v_ref, **kwargs):
 
     return metric
 
+
 def generate_measurements(state_ecef, rx_ecef, tx_ecef):
 
-    r_tx = tx_ecef[:,None] - state_ecef[:3,:]
-    r_rx = rx_ecef[:,None] - state_ecef[:3,:]
+    r_tx = tx_ecef[:, None] - state_ecef[:3, :]
+    r_rx = rx_ecef[:, None] - state_ecef[:3, :]
 
     r_tx_n = np.linalg.norm(r_tx, axis=0)
     r_rx_n = np.linalg.norm(r_rx, axis=0)
     
     r_sim = r_tx_n + r_rx_n
     
-    v_tx = -np.sum(r_tx*state_ecef[3:,:], axis=0)/r_tx_n
-    v_rx = -np.sum(r_rx*state_ecef[3:,:], axis=0)/r_rx_n
+    v_tx = -np.sum(r_tx*state_ecef[3:, :], axis=0)/r_tx_n
+    v_rx = -np.sum(r_rx*state_ecef[3:, :], axis=0)/r_rx_n
 
     v_sim = v_tx + v_rx
 
     return r_sim, v_sim
 
 
+def mpi_broadcast_correlation_data(correlation_data, root):
+
+    for dat in correlation_data:
+        
+        ret = comm.bcast(
+            correlation_data, 
+            root=root,
+        )
+
+
 def correlate(
-        measurements, 
-        population, 
-        metric=residual_distribution_metric, 
-        metric_reduce=lambda x,y: x+y,
-        forward_model=generate_measurements,
-        sorting_function=lambda metric: np.argsort(metric, axis=0),
-        metric_dtype=np.float64,
-        variables=['r','v'],
-        meta_variables=[],
-        n_closest=1, 
-        profiler=None, 
-        logger=None, 
-        MPI=False, 
-    ):
+            measurements, 
+            population, 
+            metric=residual_distribution_metric, 
+            metric_reduce=lambda x, y: x+y,
+            forward_model=generate_measurements,
+            sorting_function=lambda metric: np.argsort(metric, axis=0),
+            metric_dtype=np.float64,
+            variables=['r', 'v'],
+            meta_variables=[],
+            n_closest=1, 
+            scalar_metric=True,
+            profiler=None, 
+            logger=None, 
+            MPI=False, 
+        ):
     '''Given a mono-static measurement of ranges and rage-rates, a radar model and a population: correlate measurements with population.
+
+    # TODO: Update docstring
+    # TODO: Add FOV check option
 
     :param list measurements: List of dictionaries that contains measurement data. Contents are described below.
     :param Population population: Population to correlate against.
@@ -89,6 +100,7 @@ def correlate(
     :param list variables: The data variables recorded by the system. Theses should be in `measurements` and returned by the `forward_model`.
     :param list meta_variables: The data meta variables recorded by the system. These are input as keyword arguments to the metric and does not need to be produced by any model.
     :param int n_closest: Number of closest matches to save.
+    :param bool scalar_metric: indicats if the metric returns a scalar or a vector. If `False` the `metric_reduce` is expected to only take one argument to reduce the vectorized results.
     :param Profiler profiler: Profiler instance for checking function performance.
     :param logging.Logger logger: Logger instance for logging the execution of the function.
     :param bool MPI: If True use internal parallelization with MPI to calculate correlation. Turn to False to externally parallelize with MPI.
@@ -107,26 +119,61 @@ def correlate(
 
     '''
     
-    correlation_data = [None]*len(population)
-    
-    if MPI and comm is not None:
-        step = comm.size
-        next_check = comm.rank
+    correlation_data = {}
+
+    if n_closest > len(population):
+        raise ValueError(f'Cannot generate n_closest={n_closest} greater than population size {len(population)}')
+
+    iters = []
+    for rank in range(comm.size):
+        iters.append(list(range(rank, len(population), comm.size)))
+    pbar = tqdm(total=len(iters[comm.rank]), position=comm.rank)
+
+    meas_num = 0
+    for data in measurements:
+        meas_num += len(data['t'])
+
+    if scalar_metric:
+        if metric_reduce is None:
+            match_pop = np.empty((n_closest + 1, len(measurements)), dtype=metric_dtype)
+            index_pop = np.empty((n_closest + 1, len(measurements)), dtype=np.int64)
+        else:
+            match_pop = np.empty((n_closest + 1,), dtype=metric_dtype)
+            index_pop = np.empty((n_closest + 1,), dtype=np.int64)
     else:
-        step = 1
-        next_check = 0
+        if metric_reduce is None:
+            match_pop = np.empty((n_closest + 1, meas_num), dtype=metric_dtype)
+            index_pop = np.empty((n_closest + 1, meas_num), dtype=np.int64)
+        else:
+            match_pop = np.empty((n_closest + 1,), dtype=metric_dtype)
+            index_pop = np.empty((n_closest + 1,), dtype=np.int64)
+            tmp_match_cache = np.empty((meas_num, ), dtype=metric_dtype)
 
-    pbars = []
-    for pbar_id in range(step):
-        pbars.append(tqdm(range(len(population)//step), position=pbar_id))
-    pbar = pbars[next_check]
+    # Just pick some reference epoch so we can shift time vectors
+    # Then we shift relative the object later when we propagate
+    ref_epoch = measurements[0]['epoch']
 
-    match_pop = None
+    # Build unique time vector from all input measurements
+    t_sorts = []
+    t_selectors = []
+    for di, data in enumerate(measurements):
+        t = (data['epoch'] - ref_epoch).sec + data['t']
+        t_sort = t.argsort()
+        t_sorts.append(t_sort)
+        if di == 0:
+            t_prop0 = t
+            t_selectors = np.full(t.shape, di, dtype=np.int)
+        else:
+            t_prop0 = np.append(t_prop0, t)
+            t_selectors = np.append(t_selectors, np.full(t.shape, di, dtype=np.int))
 
-    for ind, obj in enumerate(population):
-        if ind != next_check:
-            logger.debug('skipping {}/{}'.format(ind+1, len(population)))
-            continue
+    iteration_counter = 0
+
+    # Iterate trough population
+    for ind in iters[comm.rank]:
+        obj = population.get_object(ind)
+
+        t_shift = (ref_epoch - obj.epoch).sec
 
         pbar.set_description('Correlating object {} '.format(ind))
         pbar.update(1)
@@ -135,44 +182,25 @@ def correlate(
             logger.debug('correlating {}/{}'.format(ind+1, len(population)))
             logger.debug(obj)
 
-        correlation_data[ind] = []
-        t_sorts = []
-        t_selectors = []
-        #built unique time vector
-        for di, data in enumerate(measurements):
-            t = (data['epoch'] - obj.epoch).sec + data['t']
-            t_sort = t.argsort()
-            t_sorts.append(t_sort)
-            if di == 0:
-                t_prop0 = t
-                t_selectors = np.full(t.shape, di, dtype=np.int)
-            else:
-                t_prop0 = np.append(t_prop0, t)
-                t_selectors = np.append(t_selectors, np.full(t.shape, di, dtype=np.int))
+        object_correlation_data = []
 
-        if ind == 0:
-            if metric_reduce is None:
-                match_pop = np.empty((len(population),len(t_prop0)), dtype=metric_dtype)
-            else:
-                match_pop = np.empty((len(population),), dtype=metric_dtype)
-
-        t_prop, t_prop_indices = np.unique(t_prop0, return_inverse=True)
+        t_prop, t_prop_indices = np.unique(t_prop0 + t_shift, return_inverse=True)
         t_prop_args = np.argsort(t_prop)
         
         t_prop_args_i = np.empty_like(t_prop_args)
         t_prop_args_i[t_prop_args] = np.arange(t_prop_args.size)
 
-        #get all states in one go
+        # get all states in one go
         states = obj.get_state(t_prop[t_prop_args])
 
-        #correlate with forward model
+        # correlate with forward model
         for di, data in enumerate(measurements):
             var = tuple(data[x][t_sorts[di]] for x in variables)
             kwvar = {}
             for x in meta_variables:
                 try:
                     kwvar[x] = data[x][t_sorts[di]]
-                except:
+                except TypeError:
                     kwvar[x] = data[x]
 
             t = (data['epoch'] - obj.epoch).sec + data['t'][t_sorts[di]]
@@ -180,100 +208,119 @@ def correlate(
             rx = data['rx']
             
             tx_ecef = tx.ecef.copy()
-            tx_ecef_norm = tx_ecef/np.linalg.norm(tx_ecef)
+            # tx_ecef_norm = tx_ecef/np.linalg.norm(tx_ecef)
             rx_ecef = rx.ecef.copy()
-            rx_ecef_norm = rx_ecef/np.linalg.norm(rx_ecef)
+            # rx_ecef_norm = rx_ecef/np.linalg.norm(rx_ecef)
 
-            states_data = states[:,t_prop_args_i][:,t_prop_indices][:,t_selectors == di]
+            states_data = states[:, t_prop_args_i][:, t_prop_indices][:, t_selectors == di]
 
             ref_var = forward_model(states_data, rx_ecef, tx_ecef)
 
             match = metric(t, *(var + ref_var), **kwvar)
 
-            if metric_reduce is None:
-                match_pop[ind,t_selectors == di] = match
-            else:
-                if di == 0:
-                    match_pop[ind] = match
+            # Calculate the metric, scalar or vectorized and using reduction if defined
+            if scalar_metric:
+                if metric_reduce is None:
+                    match_pop[n_closest, di] = match
                 else:
-                    match_pop[ind] = metric_reduce(match_pop[ind], match)
-
-            cdat = {f'{x}_ref': ref_var[i].copy()  for i,x in enumerate(variables)}
+                    if di == 0:
+                        match_pop[n_closest] = match
+                    else:
+                        match_pop[n_closest] = metric_reduce(
+                            match_pop[n_closest], 
+                            match,
+                        )
+            else:
+                if metric_reduce is None:
+                    match_pop[n_closest, t_selectors == di] = match
+                else:
+                    tmp_match_cache[t_selectors == di] = match
+                    if di == len(measurements) - 1:
+                        match_pop[n_closest] = metric_reduce(tmp_match_cache)
+            
+            cdat = {f'{x}_ref': ref_var[i].copy() for i, x in enumerate(variables)}
             cdat['match'] = match
+            cdat['states'] = states_data
+            cdat['oid'] = ind
 
-            correlation_data[ind].append(cdat)
+            object_correlation_data.append(cdat)
 
-        next_check += step
+        # Set population index for current metric values
+        index_pop[n_closest, ...] = ind
 
-    if MPI and comm is not None and step > 1:
+        # Save current set of correlation data
+        correlation_data[ind] = object_correlation_data
+
+        # Get the current best matches for this rank
+        if iteration_counter < n_closest:
+            match_pop[iteration_counter, ...] = match_pop[n_closest, ...]
+            index_pop[iteration_counter, ...] = index_pop[n_closest, ...]
+        else:
+            sorting_results = sorting_function(match_pop)
+            match_pop = np.take_along_axis(match_pop, sorting_results, axis=0)
+            index_pop = np.take_along_axis(index_pop, sorting_results, axis=0)
+
+            # Walk trough saved correlation data and free unused
+            kept_index_pop = index_pop[:n_closest, ...]
+            for oid in list(correlation_data.keys()):
+                if not np.any(oid == kept_index_pop):
+                    del correlation_data[oid]
+
+        iteration_counter += 1
+
+    pbar.close()
+
+    # Remove the last row used as cache
+    match_pop = match_pop[:n_closest, ...]
+    index_pop = index_pop[:n_closest, ...]
+
+    # Communicate the best matches with root thread
+    #  to gather results and select the best ones
+    if MPI and comm.size > 1:
+
+        matches_pop = [None]*comm.size
+        indecies_pop = [None]*comm.size
+
+        matches_pop[comm.rank] = match_pop
+        indecies_pop[comm.rank] = index_pop
 
         if comm.rank == 0:
             if logger is not None:
                 logger.debug('Receiving all results <barrier>')
 
-            for T in range(1,comm.size):
-                for ID in range(T,len(population),comm.size):
-                    match_pop[ID,...] = comm.recv(source=T, tag=ID)
-                    if logger is not None:
-                        logger.debug('received packet {} from PID{}'.format(ID, T))
+            for T in range(1, comm.size):
+                matches_pop[T] = comm.recv(source=T, tag=T*10 + 1)
+                indecies_pop[T] = comm.recv(source=T, tag=T*10 + 2)
+                correlation_data.update(comm.recv(source=T, tag=T*10 + 3))
+                if logger is not None:
+                    logger.debug(f'Received data from PID{T}')
         else:
             if logger is not None:
-                logger.debug('Distributing all correlation results to process 0 <barrier>')
+                logger.debug('Distributing all results to process 0 <barrier>')
 
-            for ID in range(comm.rank,len(population),comm.size):
-                comm.send(match_pop[ID,...], dest=0, tag=ID)
+            comm.send(matches_pop[comm.rank], dest=0, tag=comm.rank*10 + 1)
+            comm.send(indecies_pop[comm.rank], dest=0, tag=comm.rank*10 + 2)
+            comm.send(correlation_data, dest=0, tag=comm.rank*10 + 3)
         
         if logger is not None:
             logger.debug('---> Distributing done </barrier>')
 
-
-    if MPI and comm is not None and step > 1:
         if comm.rank == 0:
-            best_matches = sorting_function(match_pop)
+            match_pop = np.concatenate(matches_pop)
+            index_pop = np.concatenate(indecies_pop)
+
+            # Resort and filter after reciving the other MPI data
+            sorting_results = sorting_function(match_pop)
+            match_pop = np.take_along_axis(match_pop, sorting_results[:n_closest, ...], axis=0)
+            index_pop = np.take_along_axis(index_pop, sorting_results[:n_closest, ...], axis=0)
+
+            for oid in list(correlation_data.keys()):
+                if not np.any(oid == index_pop):
+                    del correlation_data[oid]
         else:
-            best_matches = None
-        best_matches = comm.bcast(best_matches, root=0)
-    else:
-        best_matches = sorting_function(match_pop)
+            correlation_data = None
 
-    if best_matches.shape[0] > n_closest:
-        best_matches = best_matches[:n_closest,...]
+        match_pop = comm.bcast(match_pop, root=0)
+        index_pop = comm.bcast(index_pop, root=0)
 
-    for pbar in pbars:
-        pbar.close()
-
-    if metric_reduce is None:
-        best_cdata = [None]*best_matches.shape[0]
-
-        for cind in range(best_matches.shape[0]):
-            best_cdata[cind] = [None]*best_matches.shape[1]
-            for mind in range(best_matches.shape[1]):
-                if MPI and comm is not None and step > 1:
-                    source_rank = best_matches[cind] % comm.size
-                    best_cdata[cind][mind] = comm.bcast(correlation_data[best_matches[cind,mind]], root=source_rank)
-                else:
-                    best_cdata[cind][mind] = correlation_data[best_matches[cind,mind]]
-
-    else:
-        best_cdata = [None]*best_matches.shape[0]
-
-        for cind in range(len(best_cdata)):
-            if MPI and comm is not None and step > 1:
-                source_rank = best_matches[cind] % comm.size
-                best_cdata[cind] = comm.bcast(correlation_data[best_matches[cind]], root=source_rank)
-            else:
-                best_cdata[cind] = correlation_data[best_matches[cind]]
-
-    if metric_reduce is None:
-        best_metrics = np.empty_like(match_pop)
-        if best_metrics.shape[0] > n_closest:
-            best_metrics = best_metrics[:n_closest,...]
-
-        for mind in range(best_matches.shape[1]):
-            best_metrics[:,mind] = match_pop[best_matches[:,mind],mind]
-    else:
-        best_metrics = match_pop[best_matches]
-
-    return best_matches, best_metrics, best_cdata
-
-
+    return index_pop, match_pop, correlation_data
