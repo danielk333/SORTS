@@ -612,6 +612,13 @@ class Simulation:
                 ret = pickle.load(h)
             return ret
 
+    def save_numpy(self, path, data):
+        np.save(path, data)
+
+    def load_numpy(self, path):
+        if path.is_file():
+            return np.load(path)
+
     def save_h5(self, path, data):
         with h5py.File(path,'w') as h:
             if isinstance(data, dict):
