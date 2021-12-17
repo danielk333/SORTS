@@ -612,10 +612,10 @@ class Simulation:
                 ret = pickle.load(h)
             return ret
 
-    def save_numpy(self, path, data):
+    def save_npy(self, path, data):
         np.save(path, data)
 
-    def load_numpy(self, path):
+    def load_npy(self, path):
         if path.is_file():
             return np.load(path)
 
