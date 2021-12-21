@@ -619,6 +619,13 @@ class Simulation:
         if path.is_file():
             return np.load(path)
 
+    def save_npz(self, path, data):
+        np.savez(path, **data)
+
+    def load_npz(self, path):
+        if path.is_file():
+            return np.load(path)
+
     def save_h5(self, path, data):
         with h5py.File(path,'w') as h:
             if isinstance(data, dict):
