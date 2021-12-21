@@ -210,6 +210,7 @@ def correlate(
 
             var = tuple(data[x][t_sorts[di]][valid] for x in variables)
             ref_var = forward_model(states_data[:,valid], rx_ecef, tx_ecef)
+
             kwvar = {}
             for x in meta_variables:
                 try:
@@ -248,7 +249,12 @@ def correlate(
                     if di == len(measurements) - 1:
                         match_pop[n_closest] = metric_reduce(tmp_match_cache)
             
-            cdat = {f'{x}_ref': ref_var[i].copy() for i, x in enumerate(variables)}
+            cdat = {}
+            for i, x in enumerate(variables):
+                _xp = np.full(t.shape, np.nan, dtype=ref_var[i].dtype)
+                _xp[valid] = ref_var[i]
+                cdat[f'{x}_ref'] = _xp
+
             cdat['match'] = match
             cdat['valid'] = valid
             cdat['states'] = states_data
