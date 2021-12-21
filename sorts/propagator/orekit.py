@@ -227,6 +227,13 @@ class Orekit(Propagator):
 
         pbar_str = f'Downloading from {url[:15]}...{url.split("/")[-1]} [kb]'
 
+        if path.parent.exists():
+            if not path.parent.is_dir():
+                raise FileExistsError(f"{path.parent} exists and is not a directory")
+        else:
+            print(f"Creating directory {path.parent} for orekit data master")
+            path.parent.mkdir(parents=True)
+
         urlopener = urllib.request.build_opener()
         request = urllib.request.Request(url, headers=headers)
         with urlopener.open(request, timeout=timeout) as remote:
