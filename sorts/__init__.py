@@ -42,6 +42,7 @@ from . import io
 from . import interpolation
 from .radar import instances as radars
 from . import simulation
+from . import signals
 
 #Functions
 from .correlator import correlate

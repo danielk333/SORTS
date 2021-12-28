@@ -59,14 +59,11 @@ def generate_measurements(state_ecef, rx_ecef, tx_ecef):
     return r_sim, v_sim
 
 
-def mpi_broadcast_correlation_data(correlation_data, root):
-
-    for dat in correlation_data:
-        
-        ret = comm.bcast(
-            correlation_data, 
-            root=root,
-        )
+def within_fow(t, states, rx, tx):
+    return np.logical_and(
+        rx.field_of_view(states),
+        tx.field_of_view(states),
+    )
 
 
 def correlate(
@@ -76,7 +73,9 @@ def correlate(
             metric_reduce=lambda x, y: x+y,
             forward_model=generate_measurements,
             sorting_function=lambda metric: np.argsort(metric, axis=0),
+            valid_measurement_checker=within_fow,
             metric_dtype=np.float64,
+            metric_fail_value=np.nan,
             variables=['r', 'v'],
             meta_variables=[],
             n_closest=1, 
@@ -96,6 +95,7 @@ def correlate(
     :param function metric_reduce: Metric used to correlate measurement and simulated object measurement. Can be `None`, in which case each measurement is correlated individually, for this to work the metric also needs to be vectorized.
     :param function forward_model: A pointer to a function that takes in the ecef-state, the rx and tx station ecefs and calculates the observed variables return as a tuple.
     :param function sorting_function: A pointer to a sorting function that takes in the metric result array and returns a list of indices indicating the sorting order.
+    :param function valid_measurement_checker: A pointer to a function that checks if the measurnment to calculate a metric is valid or not. By default checks if the object is within both stations FOV. The function expects to take (time, states, rx station, tx station).
     :param numpy.dtype metric_dtype: A valid numpy dtype declaration for the metric output array. This allows complex structured results to be processed.
     :param list variables: The data variables recorded by the system. Theses should be in `measurements` and returned by the `forward_model`.
     :param list meta_variables: The data meta variables recorded by the system. These are input as keyword arguments to the metric and does not need to be produced by any model.
@@ -195,14 +195,6 @@ def correlate(
 
         # correlate with forward model
         for di, data in enumerate(measurements):
-            var = tuple(data[x][t_sorts[di]] for x in variables)
-            kwvar = {}
-            for x in meta_variables:
-                try:
-                    kwvar[x] = data[x][t_sorts[di]]
-                except TypeError:
-                    kwvar[x] = data[x]
-
             t = (data['epoch'] - obj.epoch).sec + data['t'][t_sorts[di]]
             tx = data['tx']
             rx = data['rx']
@@ -214,9 +206,28 @@ def correlate(
 
             states_data = states[:, t_prop_args_i][:, t_prop_indices][:, t_selectors == di]
 
-            ref_var = forward_model(states_data, rx_ecef, tx_ecef)
+            valid = valid_measurement_checker(t, states_data, rx, tx)
 
-            match = metric(t, *(var + ref_var), **kwvar)
+            var = tuple(data[x][t_sorts[di]][valid] for x in variables)
+            ref_var = forward_model(states_data[:,valid], rx_ecef, tx_ecef)
+
+            kwvar = {}
+            for x in meta_variables:
+                try:
+                    kwvar[x] = data[x][t_sorts[di]][valid]
+                except TypeError:
+                    kwvar[x] = data[x]
+
+            match = metric(t[valid], *(var + ref_var), **kwvar)
+
+            if scalar_metric:
+                if match.size == 0:
+                    match = metric_fail_value
+            else:
+                _match = np.empty((len(t), ), dtype=metric_dtype)
+                _match[valid] = match
+                _match[np.logical_not(valid)] = metric_fail_value
+                match = _match
 
             # Calculate the metric, scalar or vectorized and using reduction if defined
             if scalar_metric:
@@ -238,8 +249,14 @@ def correlate(
                     if di == len(measurements) - 1:
                         match_pop[n_closest] = metric_reduce(tmp_match_cache)
             
-            cdat = {f'{x}_ref': ref_var[i].copy() for i, x in enumerate(variables)}
+            cdat = {}
+            for i, x in enumerate(variables):
+                _xp = np.full(t.shape, np.nan, dtype=ref_var[i].dtype)
+                _xp[valid] = ref_var[i]
+                cdat[f'{x}_ref'] = _xp
+
             cdat['match'] = match
+            cdat['valid'] = valid
             cdat['states'] = states_data
             cdat['oid'] = ind
 

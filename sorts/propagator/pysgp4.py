@@ -47,6 +47,16 @@ class SGP4(Propagator):
             gravity_model = 'WGS84',
             TEME_to_TLE_max_iter = 300,
             tle_input = False,
+            TEME_TO_TLE_minimize_start_samples = 1,
+            TEME_TO_TLE_minimize_start_stds = np.array([10.0, 0.01, 1.0, 2.0, 2.0, 2.0]),
+            TEME_TO_TLE_minimize_bounds = [
+                (6371.0, np.inf),
+                (0, 1),
+                (0, np.pi),
+                (0, 2*np.pi),
+                (0, 2*np.pi),
+                (0, 2*np.pi),
+            ],
         )
     )
     
@@ -433,12 +443,36 @@ class SGP4(Propagator):
             d = state_cart - state_osc
             return np.mean(np.linalg.norm(d, axis=0))
 
-        opt_res = scipy.optimize.minimize(
-            find_mean_elems, 
-            init_elements,
-            method='Nelder-Mead',
-            options={'ftol': np.sqrt(tol**2 + tol_v**2)},
-        )
+        dx_std = self.settings['TEME_TO_TLE_minimize_start_stds']
+        samps = self.settings['TEME_TO_TLE_minimize_start_samples']
+        bounds = self.settings['TEME_TO_TLE_minimize_bounds']
+
+        for j in range(samps):
+            _init_elements = init_elements.copy()
+            if j > 0:
+                _init_elements += np.random.randn(6)*dx_std
+
+            for mni in range(6):
+                if _init_elements[mni] < bounds[mni][0]:
+                    _init_elements[mni] = bounds[mni][0]
+                elif _init_elements[mni] > bounds[mni][1]:
+                    _init_elements[mni] = bounds[mni][1]
+
+            _opt_res = scipy.optimize.minimize(
+                find_mean_elems, 
+                _init_elements,
+                method='Nelder-Mead',
+                bounds = bounds,
+                options={
+                    'fatol': np.sqrt(tol**2 + tol_v**2),
+                },
+            )
+            if j > 0:
+                if _opt_res.fun < opt_res.fun:
+                    opt_res = _opt_res
+            else:
+                opt_res = _opt_res
+
         mean_elements = opt_res.x
 
         if self.profiler is not None:
