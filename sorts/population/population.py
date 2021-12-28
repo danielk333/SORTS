@@ -7,6 +7,8 @@
 #Python standard import
 import copy
 import pathlib
+from collections import defaultdict
+from functools import reduce
 
 #Third party import
 import h5py
@@ -243,6 +245,42 @@ class Population:
             self.data=self.data[ mask ]
         else:
             raise Exception('No such column: {}'.format(col))
+
+
+    def unique(self, target_epoch=None, col='oid'):
+        '''Reduces a population by eliminating duplicates with same oid.
+
+        If target_epoch is not given, keep the latest instance found.
+        If target_epoch is given, the last instance earlier than the epoch
+        is kept, or the first after.
+        If col is given, this is the field that will have only unique values
+        '''
+        vmap = defaultdict(list)
+        for ii, val in enumerate(self.data[col]):
+            vmap[val].append(ii)
+
+        # vmap will become catalogue of entries to delete,
+        # so only pop()-ed itmes will remain
+        for val in vmap:
+            if len(vmap[val]) == 1:
+                # Already unique, delete nothing
+                vmap[val].pop(0)
+                continue
+
+            epochs = self.data['mjd0'][vmap[val]]
+            order = np.argsort(epochs)[::-1]        # vmap[val][order[0]] is latest
+            if target_epoch is None:
+                vmap[val].pop(order[0])
+                continue
+            if np.all(epochs > target_epoch):           # No earlier, pick earliest
+                vmap[val].pop(order[-1])
+                continue
+            ii = np.argmax(epochs[order] < target_epoch)        # Find latest epoch < target
+            vmap[val].pop(order[ii])
+
+        # Must delete all items in one swoop, or indices will change under our feet
+        deletions = reduce(lambda a, b: a+b, vmap.values())
+        self.delete(deletions)
 
 
     @property
