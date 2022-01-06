@@ -146,6 +146,15 @@ class Population:
     def __len__(self):
         return(self.data.shape[0])
 
+    def __iter__(self):
+        self._current = 0
+        return self
+
+    def __next__(self):
+        if self._current >= len(self):
+            raise StopIteration
+        obj = self.get_object(self._current)
+        self._current += 1
 
     @property
     def out_frame(self):
