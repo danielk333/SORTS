@@ -276,7 +276,7 @@ class Population:
                 vmap[val].pop(0)
                 continue
 
-            epochs = self.data['mjd0'][vmap[val]]
+            epochs = self.data[self.epoch_field][vmap[val]]
             order = np.argsort(epochs)[::-1]        # vmap[val][order[0]] is latest
             if target_epoch is None:
                 vmap[val].pop(order[0])
