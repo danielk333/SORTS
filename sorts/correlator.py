@@ -66,6 +66,10 @@ def within_fow(t, states, rx, tx):
     )
 
 
+def default_propagation_handling(obj, t, t_measurement_indices, measurements):
+    return obj.get_state(t)
+
+
 def correlate(
             measurements, 
             population, 
@@ -76,6 +80,7 @@ def correlate(
             valid_measurement_checker=within_fow,
             metric_dtype=np.float64,
             metric_fail_value=np.nan,
+            propagation_handling=default_propagation_handling,
             variables=['r', 'v'],
             meta_variables=[],
             n_closest=1, 
@@ -96,6 +101,7 @@ def correlate(
     :param function forward_model: A pointer to a function that takes in the ecef-state, the rx and tx station ecefs and calculates the observed variables return as a tuple.
     :param function sorting_function: A pointer to a sorting function that takes in the metric result array and returns a list of indices indicating the sorting order.
     :param function valid_measurement_checker: A pointer to a function that checks if the measurnment to calculate a metric is valid or not. By default checks if the object is within both stations FOV. The function expects to take (time, states, rx station, tx station).
+    :param function propagation_handling: A pointer to a function that handles the propagation of the object to the measurnment point. By defaults simple uses the space object `get_state` method. TODO: add doc reference here to the default function to use as template for modifications.
     :param numpy.dtype metric_dtype: A valid numpy dtype declaration for the metric output array. This allows complex structured results to be processed.
     :param list variables: The data variables recorded by the system. Theses should be in `measurements` and returned by the `forward_model`.
     :param list meta_variables: The data meta variables recorded by the system. These are input as keyword arguments to the metric and does not need to be produced by any model.
@@ -163,9 +169,24 @@ def correlate(
         if di == 0:
             t_prop0 = t
             t_selectors = np.full(t.shape, di, dtype=np.int)
+            t_m_index = np.arange(len(t))
         else:
             t_prop0 = np.append(t_prop0, t)
             t_selectors = np.append(t_selectors, np.full(t.shape, di, dtype=np.int))
+            t_m_index = np.append(t_m_index, np.arange(len(t)))
+
+    t_prop_base, t_prop_indices = np.unique(t_prop0, return_inverse=True)
+    t_prop_args = np.argsort(t_prop_base)
+    
+    t_prop_args_i = np.empty_like(t_prop_args)
+    t_prop_args_i[t_prop_args] = np.arange(t_prop_args.size)
+
+    t_indices = []
+    t_reverse_inds = np.arange(t_prop_args.size)
+    t_reverse_inds = t_reverse_inds[t_prop_args_i][t_prop_indices]
+    for tii in range(len(t_prop_base)):
+        tii_matches = np.argwhere(tii == t_reverse_inds).flatten()
+        t_indices.append([(t_selectors[x], t_m_index[x]) for x in tii_matches])
 
     iteration_counter = 0
 
@@ -174,6 +195,7 @@ def correlate(
         obj = population.get_object(ind)
 
         t_shift = (ref_epoch - obj.epoch).sec
+        t_prop = t_prop_base + t_shift
 
         pbar.set_description('Correlating object {} '.format(ind))
         pbar.update(1)
@@ -184,14 +206,9 @@ def correlate(
 
         object_correlation_data = []
 
-        t_prop, t_prop_indices = np.unique(t_prop0 + t_shift, return_inverse=True)
-        t_prop_args = np.argsort(t_prop)
-        
-        t_prop_args_i = np.empty_like(t_prop_args)
-        t_prop_args_i[t_prop_args] = np.arange(t_prop_args.size)
-
         # get all states in one go
-        states = obj.get_state(t_prop[t_prop_args])
+        # and mark which time corresponds to which measurnment set and which measurnment in that set
+        states = propagation_handling(obj, t_prop[t_prop_args], t_indices, measurements)
 
         # correlate with forward model
         for di, data in enumerate(measurements):
