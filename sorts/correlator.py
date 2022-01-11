@@ -50,7 +50,6 @@ def generate_measurements(state_ecef, rx_ecef, tx_ecef):
 
     r_tx_n = np.linalg.norm(r_tx, axis=0)
     r_rx_n = np.linalg.norm(r_rx, axis=0)
-    
     r_sim = r_tx_n + r_rx_n
     
     v_tx = -np.sum(r_tx*state_ecef[3:, :, ...], axis=0)/r_tx_n
@@ -75,7 +74,7 @@ def within_fow(t, states, rx, tx):
                 rx.field_of_view(states[:, :, j]),
                 tx.field_of_view(states[:, :, j]),
             )]
-        ok = np.vstack(ok)
+        ok = np.stack(ok, axis=1)
         states.shape = shape
         ok.shape = shape[1:]
     else:
