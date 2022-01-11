@@ -43,16 +43,18 @@ def residual_distribution_metric(t, r, v, r_ref, v_ref, **kwargs):
 
 def generate_measurements(state_ecef, rx_ecef, tx_ecef):
 
-    r_tx = tx_ecef[:, None] - state_ecef[:3, :]
-    r_rx = rx_ecef[:, None] - state_ecef[:3, :]
+    index_tuple = (slice(None), ) + tuple(None for x in range(len(state_ecef.shape) - 1))
+
+    r_tx = tx_ecef[index_tuple] - state_ecef[:3, :, ...]
+    r_rx = rx_ecef[index_tuple] - state_ecef[:3, :, ...]
 
     r_tx_n = np.linalg.norm(r_tx, axis=0)
     r_rx_n = np.linalg.norm(r_rx, axis=0)
     
     r_sim = r_tx_n + r_rx_n
     
-    v_tx = -np.sum(r_tx*state_ecef[3:, :], axis=0)/r_tx_n
-    v_rx = -np.sum(r_rx*state_ecef[3:, :], axis=0)/r_rx_n
+    v_tx = -np.sum(r_tx*state_ecef[3:, :, ...], axis=0)/r_tx_n
+    v_rx = -np.sum(r_rx*state_ecef[3:, :, ...], axis=0)/r_rx_n
 
     v_sim = v_tx + v_rx
 
@@ -60,10 +62,28 @@ def generate_measurements(state_ecef, rx_ecef, tx_ecef):
 
 
 def within_fow(t, states, rx, tx):
-    return np.logical_and(
-        rx.field_of_view(states),
-        tx.field_of_view(states),
-    )
+    if len(states.shape) > 2:
+        size = np.prod(states.shape[2:])
+        shape = states.shape
+        states.shape = states.shape[:2] + (size, )
+        ok = [np.logical_and(
+            rx.field_of_view(states[:, :, 0]),
+            tx.field_of_view(states[:, :, 0]),
+        )]
+        for j in range(1, size):
+            ok += [np.logical_and(
+                rx.field_of_view(states[:, :, j]),
+                tx.field_of_view(states[:, :, j]),
+            )]
+        ok = np.vstack(ok)
+        states.shape = shape
+        ok.shape = shape[1:]
+    else:
+        ok = np.logical_and(
+            rx.field_of_view(states),
+            tx.field_of_view(states),
+        )
+    return ok
 
 
 def default_propagation_handling(obj, t, t_measurement_indices, measurements):
@@ -221,12 +241,16 @@ def correlate(
             rx_ecef = rx.ecef.copy()
             # rx_ecef_norm = rx_ecef/np.linalg.norm(rx_ecef)
 
-            states_data = states[:, t_prop_args_i][:, t_prop_indices][:, t_selectors == di]
+            states_data = states[:, t_prop_args_i, ...][:, t_prop_indices, ...][:, t_selectors == di, ...]
 
-            valid = valid_measurement_checker(t, states_data, rx, tx)
+            base_valid = valid_measurement_checker(t, states_data, rx, tx)
+            if len(base_valid.shape) > 1:
+                valid = np.sum(base_valid, axis=tuple(range(1, len(base_valid.shape)))) > 0
+            else:
+                valid = base_valid
 
             var = tuple(data[x][t_sorts[di]][valid] for x in variables)
-            ref_var = forward_model(states_data[:,valid], rx_ecef, tx_ecef)
+            ref_var = forward_model(states_data[:, valid, ...], rx_ecef, tx_ecef)
 
             kwvar = {}
             for x in meta_variables:
@@ -241,7 +265,7 @@ def correlate(
                 if match.size == 0:
                     match = metric_fail_value
             else:
-                _match = np.empty((len(t), ), dtype=metric_dtype)
+                _match = np.empty(t.shape, dtype=metric_dtype)
                 _match[valid] = match
                 _match[np.logical_not(valid)] = metric_fail_value
                 match = _match
@@ -268,8 +292,8 @@ def correlate(
             
             cdat = {}
             for i, x in enumerate(variables):
-                _xp = np.full(t.shape, np.nan, dtype=ref_var[i].dtype)
-                _xp[valid] = ref_var[i]
+                _xp = np.full(base_valid.shape, np.nan, dtype=ref_var[i].dtype)
+                _xp[valid, ...] = ref_var[i]
                 cdat[f'{x}_ref'] = _xp
 
             cdat['match'] = match
