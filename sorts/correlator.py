@@ -240,6 +240,8 @@ def correlate(
             rx_ecef = rx.ecef.copy()
             # rx_ecef_norm = rx_ecef/np.linalg.norm(rx_ecef)
 
+            # Select from all propagated states the ones for this 
+            # measurnment block in the same order as the measurnments
             states_data = states[:, t_prop_args_i, ...][:, t_prop_indices, ...][:, t_selectors == di, ...]
 
             base_valid = valid_measurement_checker(t, states_data, rx, tx)
