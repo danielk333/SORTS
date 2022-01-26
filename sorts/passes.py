@@ -312,7 +312,7 @@ def find_passes(t, states, station, cache_data=True):
     return passes
 
 
-def find_simultaneous_passes(t, states, stations, cache_data=True):
+def find_simultaneous_passes(t, states, stations, cache_data=True, fov_kw=None):
     '''Finds all passes that are simultaneously inside a multiple stations FOV's.
     
     :param numpy.ndarray t: Vector of times in seconds to use as a base to find passes.
@@ -323,6 +323,8 @@ def find_simultaneous_passes(t, states, stations, cache_data=True):
 
     '''
     passes = []
+    if fov_kw is None:
+        fov_kw = {}
 
     enu = []
     zenith_ang = []
@@ -332,7 +334,7 @@ def find_simultaneous_passes(t, states, stations, cache_data=True):
         enu_st = station.enu(states)
         enu.append(enu_st)
 
-        check_st = station.field_of_view(states)
+        check_st = station.field_of_view(states, **fov_kw)
         check = np.logical_and(check, check_st)
 
     inds = np.where(check)[0]

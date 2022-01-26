@@ -48,7 +48,7 @@ class Station(object):
         self.pointing_range = None
 
 
-    def field_of_view(self, states):
+    def field_of_view(self, states, **kwargs):
         '''Determines the field of view of the station. Should be vectorized over second dimension of states.
         Needs to return a numpy boolean array with `True` when the state is inside the FOV.
 
