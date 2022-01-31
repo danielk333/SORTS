@@ -89,6 +89,56 @@ def hard_target_snr(
     return snr
 
 
+def hard_target_diameter(
+            gain_tx, 
+            gain_rx,
+            wavelength,
+            power_tx,
+            range_tx_m, 
+            range_rx_m,
+            snr, 
+            bandwidth=10,
+            rx_noise_temp=150.0,
+            radar_albedo=1.0,
+        ):
+    '''
+    Determine the diamtere for a hard target based on the signal-to-noise ratio (energy-to-noise).
+    Assume a smooth transition between Rayleigh and optical scattering. 
+    Ignore Mie regime and use either optical or Rayleigh scatter.
+
+    :param float/numpy.ndarray gain_tx: transmit antenna gain, linear
+    :param float/numpy.ndarray gain_rx: receiver antenna gain, linear
+    :param float wavelength: radar wavelength (meters)
+    :param float power_tx: transmit power (W)
+    :param float/numpy.ndarray range_tx_m: range from transmitter to target (meters)
+    :param float/numpy.ndarray range_rx_m: range from target to receiver (meters)
+    :param float snr: object signal to noise ratio (1)
+    :param float bandwidth: effective receiver noise bandwidth
+    :param float rx_noise_temp: receiver noise temperature (K)
+    :return: diameter (meters)
+    :rtype: float/numpy.ndarray
+
+
+    **Reference:** Markkanen et.al., 1999
+    
+    '''
+
+    rx_noise = scipy.constants.k*rx_noise_temp*bandwidth
+    power = snr*rx_noise/radar_albedo
+
+    diameter_rayleigh = (256.0*(wavelength**2.0)*(range_rx_m**2.0*range_tx_m**2.0)*power/(9.0*power_tx*(gain_tx*gain_rx)*(np.pi**2.0)))**(1.0/6.0)
+    diameter_optical = np.sqrt(256.0*(np.pi**2)*(range_rx_m**2.0*range_tx_m**2.0)*power/(power_tx*(gain_tx*gain_rx)*(wavelength**2.0)))
+
+    separatrix = wavelength/(np.pi*np.sqrt(3.0))
+
+    is_rayleigh = np.logical_and(diameter_rayleigh < separatrix, diameter_optical < separatrix)
+    is_optical = np.logical_and(diameter_rayleigh >= separatrix, diameter_optical >= separatrix)
+
+    diameter = (is_rayleigh)*diameter_rayleigh + (is_optical)*diameter_optical
+
+    return diameter
+
+
 def incoherent_snr(p_s, p_n, epsilon=0.05, B=10.0, t_incoh=3600.0):
     '''Calculate the incoherent SNR based on ????
 
