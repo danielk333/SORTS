@@ -107,6 +107,7 @@ def correlate(
             profiler=None, 
             logger=None, 
             MPI=False, 
+            save_states=False,
         ):
     '''Given a mono-static measurement of ranges and rage-rates, a radar model and a population: correlate measurements with population.
 
@@ -129,7 +130,9 @@ def correlate(
     :param Profiler profiler: Profiler instance for checking function performance.
     :param logging.Logger logger: Logger instance for logging the execution of the function.
     :param bool MPI: If True use internal parallelization with MPI to calculate correlation. Turn to False to externally parallelize with MPI.
+    :param bool save_states: If True use saves the propagated states in the output data.
     
+
     **Measurement data:**
 
       Each entry in the input :code:`measurements` list must be a dictionary that contains the following fields:
@@ -299,7 +302,8 @@ def correlate(
 
             cdat['match'] = match
             cdat['valid'] = valid
-            cdat['states'] = states_data
+            if save_states:
+                cdat['states'] = states_data
             cdat['oid'] = ind
 
             object_correlation_data.append(cdat)
