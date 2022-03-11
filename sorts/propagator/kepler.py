@@ -4,31 +4,22 @@
 
 '''
 
-#Python standard import
+# Python standard import
 from copy import copy
 
-#Third party import
+# Third party import
 import numpy as np
-from astropy.time import Time
-import scipy.optimize
 import pyorb
 
-import sgp4
-from sgp4.api import Satrec, SGP4_ERRORS
-import sgp4.earth_gravity
 
-#Local import
+# Local import
 from .base import Propagator
-from .. import dates
 from .. import frames
 
 
-
-
-
-
 class Kepler(Propagator):
-    '''Propagator class implementing the Kepler propagator, the propagation always occurs in GCRS frame.
+    '''Propagator class implementing the Kepler propagator, 
+    the propagation always occurs in GCRS frame.
 
     Frame options are found in the `sorts.frames.convert` function.
 
@@ -42,23 +33,21 @@ class Kepler(Propagator):
     DEFAULT_SETTINGS = copy(Propagator.DEFAULT_SETTINGS)
     DEFAULT_SETTINGS.update(
         dict(
-            out_frame = 'GCRS',
-            in_frame = 'GCRS',
+            out_frame='GCRS',
+            in_frame='GCRS',
         )
     )
-    
 
     def __init__(self, settings=None, **kwargs):
         super(Kepler, self).__init__(settings=settings, **kwargs)
         if self.logger is not None:
-            self.logger.debug(f'sorts.propagator.Kepler:init')
-
-
+            self.logger.debug('sorts.propagator.Kepler:init')
 
     def propagate(self, t, state0, epoch, **kwargs):
         '''Propagate a state
 
-        :param float/list/numpy.ndarray/astropy.time.TimeDelta t: Time to propagate relative the initial state epoch.
+        :param float/list/numpy.ndarray/astropy.time.TimeDelta t: Time to 
+            propagate relative the initial state epoch.
         :param float/astropy.time.Time epoch: The epoch of the initial state.
         :param numpy.ndarray state0: 6-D Cartesian state vector in SI-units.
         :param bool radians: If true, all angles are assumed to be in radians.
@@ -75,34 +64,35 @@ class Kepler(Propagator):
         tv = t.sec
         if not isinstance(tv, np.ndarray):
             tv = np.array([tv])
-        
+
         if self.profiler is not None:
             self.profiler.start('Kepler:propagate:in_frame')
         if isinstance(state0, pyorb.Orbit):
             orb = state0.copy()
         elif isinstance(state0, dict):
-            kw = copy.copy(state0)
+            kw = copy(state0)
             kw.update(kwargs)
             orb = pyorb.Orbit(**kw)
             cart0 = frames.convert(
-                epoch, 
-                orb.cartesian, 
-                in_frame=self.settings['in_frame'], 
+                epoch,
+                orb.cartesian,
+                in_frame=self.settings['in_frame'],
                 out_frame='GCRS',
-                profiler = self.profiler,
-                logger = self.logger,
+                profiler=self.profiler,
+                logger=self.logger,
             )
             orb.cartesian = cart0
         else:
             cart0 = frames.convert(
-                epoch, 
-                state0, 
-                in_frame=self.settings['in_frame'], 
+                epoch,
+                state0,
+                in_frame=self.settings['in_frame'],
                 out_frame='GCRS',
-                profiler = self.profiler,
-                logger = self.logger,
+                profiler=self.profiler,
+                logger=self.logger,
             )
-            kw = {key:val for key,val in zip(pyorb.Orbit.CARTESIAN, cart0.flatten())}
+            kw = {key: val for key, val in zip(
+                pyorb.Orbit.CARTESIAN, cart0.flatten())}
             kw.update(kwargs)
             orb = pyorb.Orbit(**kw)
         if self.profiler is not None:
@@ -114,7 +104,11 @@ class Kepler(Propagator):
         if self.profiler is not None:
             self.profiler.start('Kepler:propagate:mean_motion')
 
-        orb.add(num=len(tv), **{key:val for key,val in zip(pyorb.Orbit.KEPLER, orb.kepler.flatten())})
+        kw_in = {
+            key: val 
+            for key, val in zip(pyorb.Orbit.KEPLER, orb.kepler.flatten())
+        }
+        orb.add(num=len(tv), **kw_in)
         orb.delete(0)
         orb.propagate(tv)
         orb.calculate_cartesian()
@@ -125,12 +119,12 @@ class Kepler(Propagator):
             self.profiler.start('Kepler:propagate:out_frame')
 
         states = frames.convert(
-            times, 
-            orb._cart, 
+            times,
+            orb._cart,
             in_frame='GCRS',
             out_frame=self.settings['out_frame'],
-            profiler = self.profiler,
-            logger = self.logger,
+            profiler=self.profiler,
+            logger=self.logger,
         )
 
         if self.profiler is not None:
@@ -139,7 +133,6 @@ class Kepler(Propagator):
         if self.profiler is not None:
             self.profiler.stop('Kepler:propagate')
         if self.logger is not None:
-            self.logger.debug(f'Kepler:propagate:completed')
+            self.logger.debug('Kepler:propagate:completed')
 
         return states
-
