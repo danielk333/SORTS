@@ -3,10 +3,21 @@ import setuptools
 from setuptools.command.develop import develop
 from setuptools.command.install import install
 from setuptools.command.egg_info import egg_info
-import subprocess
 import pip
+import pathlib
+import codecs
 
-__version__ = '4.0.0-rc.2'
+HERE = pathlib.Path(__file__).resolve().parents[0]
+
+
+def get_version(path):
+    with codecs.open(path, 'r') as fp:
+        for line in fp.read().splitlines():
+            if line.startswith('__version__'):
+                delim = '"' if '"' in line else "'"
+                return line.split(delim)[1]
+        else:
+            raise RuntimeError("Unable to find version string.")
 
 
 with open('dependency-links', 'r') as fh:
@@ -45,9 +56,9 @@ class CustomEggCommand(egg_info):
 
 setuptools.setup(
     name='sorts',
-    version=__version__,
+    version=get_version(HERE / 'sorts' / 'version.py'),
     long_description=long_description,
-    url='https://gitlab.irf.se/danielk/SORTSpp',
+    url='https://gitlab.irf.se/danielk/SORTS',
     classifiers=[
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
@@ -63,7 +74,7 @@ setuptools.setup(
         'sorts': ['data/*'],
     },
     # metadata to display on PyPI
-    author='Daniel Kastinen, Juha Vierinen',
+    author='Daniel Kastinen, Juha Vierinen, Tom Grydeland',
     author_email='daniel.kastinen@irf.se',
     description='SORTS',
     license='MIT',
