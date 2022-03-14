@@ -102,10 +102,8 @@ def kepler_scatter(o, **options):
 
     scale = options.get('scale', np.ones((o.shape[dim_axis],), dtype=o.dtype))
 
-
     #turn on TeX interpreter (or not)
     usetex = options['usetex'] if 'usetex' in options else True
-    print(f'usetex: {usetex}')
     plt.rc('text', usetex=usetex)
 
     lis = list(range(o.shape[dim_axis]))
@@ -209,14 +207,5 @@ def kepler_scatter(o, **options):
         subplot_cnt_ind += 1
     
     plt.tight_layout(rect=options.setdefault('tight_rect',[0, 0.03, 1, 0.95]))
-
-
-    if 'save' in options:
-        fig.savefig(options['save'],bbox_inches='tight')
-    else:
-        if options.setdefault('show', False):
-            plt.show()
-        else:
-            plt.draw()
 
     return fig, axes
