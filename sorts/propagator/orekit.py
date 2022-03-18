@@ -43,9 +43,6 @@ from .base import Propagator
 from .. import dates as dates
 from .. import frames
 
-
-orekit.initVM()
-
 from orekit.pyhelpers import setup_orekit_curdir
 from org.orekit.propagation.numerical import NumericalPropagator
 from org.orekit.propagation import SpacecraftState
@@ -59,6 +56,15 @@ import org.orekit.models.earth.atmosphere as orekit_atm
 import org
 
 from orekit import JArray_double
+
+JAVA_VM = False
+
+
+def init_vm():
+    global JAVA_VM
+    if not JAVA_VM:
+        orekit.initVM()
+        JAVA_VM = True
 
 
 def npdt2absdate(dt, utc):
@@ -281,6 +287,7 @@ class Orekit(Propagator):
             ):
 
         super(Orekit, self).__init__(settings=settings, **kwargs)
+        init_vm()
 
         if self.logger is not None:
             self.logger.debug(f'sorts.propagator.Orekit:init')
