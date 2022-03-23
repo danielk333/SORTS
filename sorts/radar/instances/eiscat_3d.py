@@ -76,10 +76,10 @@ def gen_eiscat3d(beam='array', stage=1):
         raise NotImplementedError('Other E3D stages not IMPLEMENTED')
 
     if beam == 'array':
-        tx_beam_ski = pyant.beam_of_radar('eiscat_3d', 'array_stage1')
-        rx_beam_ski = pyant.beam_of_radar('eiscat_3d', 'array_stage2')
-        rx_beam_kar = pyant.beam_of_radar('eiscat_3d', 'array_stage2')
-        rx_beam_kai = pyant.beam_of_radar('eiscat_3d', 'array_stage2')
+        tx_beam_ski = pyant.beam_of_radar('ei3d_stage1', 'array')
+        rx_beam_ski = pyant.beam_of_radar('ei3d_stage2', 'array')
+        rx_beam_kar = pyant.beam_of_radar('ei3d_stage2', 'array')
+        rx_beam_kai = pyant.beam_of_radar('ei3d_stage2', 'array')
     elif beam == 'interp':
         tx_intp, rx_intp = eiscat3d_interp()
         tx_beam_ski, = tx_intp
@@ -196,8 +196,8 @@ def gen_eiscat3d_demonstrator(beam='array'):
     '''
 
     if beam == 'array':
-        tx_beam_kir = pyant.beam_of_radar('eiscat_3d', 'array_module')
-        rx_beam_kir = pyant.beam_of_radar('eiscat_3d', 'array_module')
+        tx_beam_kir = pyant.beam_of_radar('e3d_module', 'array')
+        rx_beam_kir = pyant.beam_of_radar('e3d_module', 'array')
     elif beam == 'interp':
         tx_intp, rx_intp = eiscat3d_demo_interp()
         tx_beam_kir = tx_intp

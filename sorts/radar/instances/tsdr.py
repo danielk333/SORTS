@@ -15,11 +15,11 @@ def gen_tromso_space_debris_radar(fence=False, phased=False):
     alt = 85.0
 
     if phased:
-        rx_beam = pyant.beam_of_radar('tsdr', 'phased')
-        tx_beam = pyant.beam_of_radar('tsdr', 'phased')
+        rx_beam = pyant.beam_of_radar('tsdr', 'phased_fcp')
+        tx_beam = pyant.beam_of_radar('tsdr', 'phased_fcp')
     else:
-        rx_beam = pyant.beam_of_radar('tsdr', 'monochannel')
-        tx_beam = pyant.beam_of_radar('tsdr', 'monochannel')
+        rx_beam = pyant.beam_of_radar('tsdr', 'fcp')
+        tx_beam = pyant.beam_of_radar('tsdr', 'fcp')
 
     if fence:
         rx_beam.sph_point(azimuth=0.0, elevation=[30.0, 60.0, 90.0, 100.0])
