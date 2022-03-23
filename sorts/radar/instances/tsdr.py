@@ -2,11 +2,7 @@
 
 '''
 '''
-#Python standard import
-import pkg_resources
 
-import numpy as np
-import pyant.instances as alib
 import pyant
 
 from ..radar import Radar
@@ -15,15 +11,15 @@ from ..tx_rx import TX, RX
 
 def gen_tromso_space_debris_radar(fence=False, phased=False):
     lat = 69.5866115
-    lon = 19.221555 
+    lon = 19.221555
     alt = 85.0
 
     if phased:
-        rx_beam = alib.tsdr_phased.copy()
-        tx_beam = alib.tsdr_phased.copy()
+        rx_beam = pyant.beam_of_radar('tsdr', 'phased')
+        tx_beam = pyant.beam_of_radar('tsdr', 'phased')
     else:
-        rx_beam = alib.tsdr.copy()
-        tx_beam = alib.tsdr.copy()
+        rx_beam = pyant.beam_of_radar('tsdr', 'monochannel')
+        tx_beam = pyant.beam_of_radar('tsdr', 'monochannel')
 
     if fence:
         rx_beam.sph_point(azimuth=0.0, elevation=[30.0, 60.0, 90.0, 100.0])
@@ -35,39 +31,36 @@ def gen_tromso_space_debris_radar(fence=False, phased=False):
         rx_beam.sph_point(azimuth=0.0, elevation=90.0)
         tx_beam.sph_point(azimuth=0.0, elevation=90.0)
 
-
     tsr_tx = TX(
-        lat = lat,
-        lon = lon,
-        alt = alt,
-        min_elevation = 0,
-        beam = tx_beam,
-        power = 500.0e3,
-        bandwidth = 1e7,
-        duty_cycle = 0.125, 
+        lat=lat,
+        lon=lon,
+        alt=alt,
+        min_elevation=0,
+        beam=tx_beam,
+        power=500.0e3,
+        bandwidth=1e7,
+        duty_cycle=0.125,
         pulse_length=0.0002,
         ipp=10e-3,
         n_ipp=10,
     )
 
     tsr_rx = RX(
-        lat = lat,
-        lon = lon,
-        alt = alt,
-        min_elevation = 0,
-        noise = 100,
-        beam = rx_beam,
+        lat=lat,
+        lon=lon,
+        alt=alt,
+        min_elevation=0,
+        noise=100,
+        beam=rx_beam,
     )
 
-    tx=[tsr_tx]
-    rx=[tsr_rx]
+    tx = [tsr_tx]
+    rx = [tsr_rx]
 
     tsdr_r = Radar(
-        tx, 
+        tx,
         rx,
         min_SNRdb=10.0,
-        joint_stations = [(0,0)],
+        joint_stations=[(0, 0)],
     )
     return tsdr_r
-    
-    

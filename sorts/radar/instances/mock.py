@@ -53,4 +53,3 @@ def gen_mock():
         min_SNRdb=10.0,
     )
     return mock
-    
