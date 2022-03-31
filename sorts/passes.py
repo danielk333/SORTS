@@ -282,18 +282,22 @@ def find_passes(t, states, station, cache_data=True):
     check = station.field_of_view(states)
     inds = np.where(check)[0]
 
+    if len(inds) == 0:
+        return passes
+
     dind = np.diff(inds)
     splits = np.where(dind > 1)[0]
 
-    splits = np.insert(splits, 0, inds[0])
-    splits = np.insert(splits, len(splits), inds[-1])
+    splits = np.insert(splits, 0, -1)
+    splits = np.insert(splits, len(splits), len(inds)-1)
+    splits += 1
     for si in range(len(splits)-1):
-        ps_inds = inds[(splits[si]+1):splits[si+1]]
+        ps_inds = inds[splits[si]:splits[si+1]]
 
         if cache_data:
             ps = Pass(
                 t=t[ps_inds], 
-                enu=enu[:,ps_inds], 
+                enu=enu[:, ps_inds], 
                 inds=ps_inds, 
                 cache=True,
             )
@@ -327,7 +331,6 @@ def find_simultaneous_passes(t, states, stations, cache_data=True, fov_kw=None):
         fov_kw = {}
 
     enu = []
-    zenith_ang = []
     check = np.full((len(t),), True, dtype=np.bool)
     for station in stations:
 
@@ -345,16 +348,17 @@ def find_simultaneous_passes(t, states, stations, cache_data=True, fov_kw=None):
     dind = np.diff(inds)
     splits = np.where(dind > 1)[0]
 
-    splits = np.insert(splits, 0, inds[0])
-    splits = np.insert(splits, len(splits), inds[-1])
+    splits = np.insert(splits, 0, -1)
+    splits = np.insert(splits, len(splits), len(inds)-1)
+    splits += 1
     for si in range(len(splits)-1):
-        ps_inds = inds[(splits[si]+1):splits[si+1]]
+        ps_inds = inds[splits[si]:splits[si+1]]
         if len(ps_inds) == 0:
             continue
         if cache_data:
             ps = Pass(
                 t=t[ps_inds], 
-                enu=[xv[:,ps_inds] for xv in enu], 
+                enu=[xv[:, ps_inds] for xv in enu], 
                 inds=ps_inds, 
                 cache=True,
                 station_id=[None, None],
