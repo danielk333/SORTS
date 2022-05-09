@@ -76,10 +76,10 @@ def gen_eiscat3d(beam='array', stage=1):
         raise NotImplementedError('Other E3D stages not IMPLEMENTED')
 
     if beam == 'array':
-        tx_beam_ski = pyant.beam_of_radar('ei3d_stage1', 'array')
-        rx_beam_ski = pyant.beam_of_radar('ei3d_stage2', 'array')
-        rx_beam_kar = pyant.beam_of_radar('ei3d_stage2', 'array')
-        rx_beam_kai = pyant.beam_of_radar('ei3d_stage2', 'array')
+        tx_beam_ski = pyant.beam_of_radar('e3d_stage1', 'array')
+        rx_beam_ski = pyant.beam_of_radar('e3d_stage2', 'array')
+        rx_beam_kar = pyant.beam_of_radar('e3d_stage2', 'array')
+        rx_beam_kai = pyant.beam_of_radar('e3d_stage2', 'array')
     elif beam == 'interp':
         tx_intp, rx_intp = eiscat3d_interp()
         tx_beam_ski, = tx_intp
