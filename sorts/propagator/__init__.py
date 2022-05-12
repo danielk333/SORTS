@@ -31,3 +31,9 @@ except ImportError:
 
 from .kepler import Kepler
 __all__.append('Kepler')
+
+try:
+    from .poliastro import TwoBody
+    __all__.append('TwoBody')
+except ImportError:
+    TwoBody = None
