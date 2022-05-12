@@ -80,6 +80,8 @@ class TwoBody(Propagator):
             state0_GCRS[3:]*units.m/units.s,
             epoch=epoch,
         )
+        if self.profiler is not None:
+            self.profiler.start('TwoBody:propagate:poliastro')
         astropy_state_GCRS = poliastro.twobody.propagation.propagate(
             poli_orb,
             t.sec*units.s, 
@@ -89,6 +91,8 @@ class TwoBody(Propagator):
         states_GCRS = np.empty((6, len(t)), dtype=np.float64)
         states_GCRS[:3, :] = astropy_state_GCRS.xyz.to(units.m).value
         states_GCRS[3:, :] = astropy_state_GCRS.differentials['s'].d_xyz.to(units.m/units.s).value
+        if self.profiler is not None:
+            self.profiler.stop('TwoBody:propagate:poliastro')
 
         if self.profiler is not None:
             self.profiler.start('TwoBody:propagate:out_frame')
