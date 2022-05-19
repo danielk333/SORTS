@@ -7,8 +7,8 @@ Profiling SGP4
 '''
 import numpy as np
 
-from sorts.profiling import Profiler
-from sorts.propagator import SGP4
+from sorts.common.profiling import Profiler
+from sorts.targets.propagator import SGP4
 
 p = Profiler()
 

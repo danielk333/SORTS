@@ -6,7 +6,7 @@ Profiling save and load
 
 '''
 import pathlib
-from sorts.profiling import Profiler
+from sorts.common.profiling import Profiler
 
 p = Profiler()
 p.start('program')

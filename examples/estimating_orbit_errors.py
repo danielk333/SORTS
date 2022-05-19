@@ -14,8 +14,8 @@ from tabulate import tabulate
 
 import pyorb
 
-import sorts.propagator as propagators
-import sorts.errors as errors
+from sorts.targets import propagator
+from sorts.radar import measurement_errors
 import sorts
 
 radar = sorts.radars.eiscat3d
@@ -41,7 +41,7 @@ orb = pyorb.Orbit(
     anom=72, 
 )
 obj = sorts.SpaceObject(
-    propagators.SGP4,
+    propagator.SGP4,
     propagator_options = dict(
         settings = dict(
             in_frame='TEME', 
@@ -77,7 +77,7 @@ ps = rx_passes[0]
 use_inds = np.arange(0,len(ps.inds),len(ps.inds)//10)
 
 #Create a radar controller to track the object
-track = sorts.controller.Tracker(radar = radar, t=t[ps.inds[use_inds]], ecefs=states[:3,ps.inds[use_inds]])
+track = sorts.controllers.Tracker(radar = radar, t=t[ps.inds[use_inds]], ecefs=states[:3,ps.inds[use_inds]])
 track.meta['target'] = 'Cool object 1'
 
 class Schedule(
@@ -94,7 +94,7 @@ sched = Schedule(radar = radar, controllers=[track], profiler=p)
 
 #Now we load the error model
 print(f'\nUsing "{pth}" as cache for LinearizedCoded errors.')
-err = errors.LinearizedCodedIonospheric(radar.tx[0], seed=123, cache_folder=pth)
+err = measurement_errors.LinearizedCodedIonospheric(radar.tx[0], seed=123, cache_folder=pth)
 
 
 variables = ['x','y','z','vx','vy','vz','A']

@@ -5,7 +5,7 @@ Profiling
 ==========
 
 '''
-from sorts.profiling import Profiler
+from sorts.common.profiling import Profiler
 
 p = Profiler()
 p.start('program')

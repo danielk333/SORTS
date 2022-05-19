@@ -20,8 +20,8 @@ def _propagate(rv, t):
     if e != 0: raise
     return p, v
 
-from sorts import frames, dates
-from sorts.propagator import SGP4
+from sorts.transformations import frames, dates
+from sorts.targets.propagator import SGP4
 
 from astropy.coordinates import CartesianRepresentation, CartesianDifferential
 import astropy.units as u
@@ -383,8 +383,9 @@ if __name__ == '__main__':
         unittest.main()
 
     else:
-
-        rv = load_tle_table('eos_tle.txt')['SENTINEL-1A']
+        filename = './eos_tle.txt'
+        
+        rv = load_tle_table(filename)['SENTINEL-1A']
         s1_res = read_statevectors('S1A_OPER_AUX_RESORB_OPOD_20200721T073339_V20200721T023852_20200721T055622.EOF')
 
         rv_epd = dt64_from_rv(rv)                             # Numpy datetime64 value

@@ -28,7 +28,7 @@ except ImportError:
     comm = None
 
 #Local import
-from . import profiling
+from .common import profiling
 
 
 def copy_tree(src, dst, linkfiles=False):

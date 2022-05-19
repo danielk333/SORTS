@@ -4,6 +4,8 @@
 Calculating pre-encounter orbits
 ==================================
 
+    Not working anymore : removed pre-encounter module
+
 '''
 
 import pathlib

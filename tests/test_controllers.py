@@ -9,11 +9,11 @@ import h5py
 import scipy.constants
 
 import sorts
-from sorts import controller as ctrl
+from sorts.radar import controllers as ctrl
+from sorts.radar import scans
 
 
 class TestTracker(unittest.TestCase):
-
 
     def test_init(self):
         radar = sorts.radars.mock
@@ -45,19 +45,16 @@ class TestTracker(unittest.TestCase):
                     assert not st.enabled
 
 
-
-
-
 class TestScanner(unittest.TestCase):
 
     def test_init(self):
 
-        class MyScan(sorts.radar.Scan):
+        class MyScan(scans.Scan):
             def __init__(self):
                 super().__init__(coordinates='azelr')
 
             def pointing(self, t):
-                sph = np.ones((3,tn), dtype=np.float64)
+                sph = np.ones((3,nt), dtype=np.float64)
                 sph[0,:] = 0.0
                 sph[1,:] = 90.0
 
@@ -73,7 +70,7 @@ class TestScanner(unittest.TestCase):
 
     def test_call(self):
 
-        class MyScan(sorts.radar.Scan):
+        class MyScan(scans.Scan):
             def __init__(self):
                 super().__init__(coordinates='azelr')
 
@@ -104,7 +101,6 @@ class TestScanner(unittest.TestCase):
                 nt.assert_almost_equal(radar.tx[0].beam.pointing, np.array([0,0,1], dtype=np.float64), decimal = 6)
             else:
                 nt.assert_almost_equal(radar.tx[0].beam.pointing, np.array([0,1,0], dtype=np.float64), decimal = 6)
-
 
 
 class TestStatic(unittest.TestCase):

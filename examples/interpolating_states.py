@@ -8,9 +8,9 @@ Interpolation
 import numpy as np
 import matplotlib.pyplot as plt
 
-from sorts.profiling import Profiler
-from sorts.propagator import SGP4
-from sorts import interpolation
+from sorts.common import Profiler, interpolation
+from sorts.targets.propagator.pysgp4 import SGP4
+from sorts.common import interpolation
 
 p = Profiler()
 
@@ -49,8 +49,6 @@ for ind in range(3):
     ax.plot(t_f, lin_states[ind+3,:],".g")
     ax.plot(t, states[ind+3,:],"xb")
     ax.set_title(f'V_{ind}')
-
-
 
 
 fig = plt.figure(figsize=(15,15))

@@ -14,9 +14,9 @@ import pyorb
 
 import sorts
 eiscat3d = sorts.radars.eiscat3d
-from sorts.controller import Tracker
-from sorts.propagator import SGP4
-from sorts.profiling import Profiler
+from sorts.radar.controllers import Tracker
+from sorts.targets.propagator import SGP4
+from sorts.common.profiling import Profiler
 
 p = Profiler()
 p.start('total')

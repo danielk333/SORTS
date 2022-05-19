@@ -15,8 +15,8 @@ from astropy.utils import iers
 from astropy.time import Time
 iers.conf.auto_download = False
 
-from sorts.propagator import SGP4
-from sorts import frames
+from sorts.targets.propagator import SGP4
+from sorts.transformations import frames
 
 prop = SGP4()
 orb = pyorb.Orbit(

@@ -11,7 +11,7 @@ import pathlib
 import matplotlib.pyplot as plt
 
 from sorts import plotting
-from sorts.population import master_catalog, master_catalog_factor
+from sorts.targets.population import master_catalog, master_catalog_factor
 
 
 try:

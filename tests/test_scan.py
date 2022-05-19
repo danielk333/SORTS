@@ -6,7 +6,7 @@ import unittest
 import numpy as np
 import numpy.testing as nt
 
-from sorts.radar import Scan
+from sorts.radar.scans import Scan
 import sorts
 
 class TestScan(unittest.TestCase):

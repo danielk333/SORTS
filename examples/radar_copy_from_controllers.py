@@ -13,8 +13,8 @@ import pyorb
 
 import sorts
 eiscat3d = sorts.radars.eiscat3d
-from sorts.controller import Tracker
-from sorts.propagator import SGP4
+from sorts.radar.controllers import Tracker
+from sorts.targets.propagator import SGP4
 
 prop = SGP4(
     settings = dict(

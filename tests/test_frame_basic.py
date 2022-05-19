@@ -2,8 +2,8 @@ import unittest
 import numpy as np
 import numpy.testing as nt
 
-from sorts import frames
-from sorts import constants
+from sorts.transformations import frames
+from sorts.common import constants
 
 
 class TestFrames(unittest.TestCase):

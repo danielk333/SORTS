@@ -13,7 +13,7 @@ from astropy.utils import iers
 from astropy.time import Time
 iers.conf.auto_download = False
 
-from sorts.propagator import SGP4
+from sorts.targets.propagator import SGP4
 from sorts import frames
 
 prop = SGP4(

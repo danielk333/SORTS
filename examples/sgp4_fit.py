@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 import pyorb
 
-from sorts.propagator import SGP4
+from sorts.targets.propagator import SGP4
 
 #reproducibility
 np.random.seed(324245)

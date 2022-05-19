@@ -15,10 +15,9 @@ import h5py
 from astropy.time import Time
 
 import sorts
+from sorts.targets import population
 
 radar = sorts.radars.eiscat_uhf
-
-
 
 def plot_correlation(dat, cdat):
     '''Plot the correlation between the measurement and simulated population object.
@@ -123,7 +122,7 @@ with h5py.File(str(obs_pth),'r') as h_det:
     }
 
 print('Loading TLE population')
-pop = sorts.population.tle_catalog(tle_pth, cartesian=False)
+pop = population.tle_catalog(tle_pth, cartesian=False)
 
 #correlate requires output in ECEF 
 pop.out_frame = 'ITRS'

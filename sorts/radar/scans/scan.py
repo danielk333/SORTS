@@ -12,7 +12,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 #Local import
-from ... import frames
+from ...transformations import frames
 
 
 class Scan(ABC):

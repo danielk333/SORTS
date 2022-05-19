@@ -6,7 +6,7 @@
 import matplotlib.pyplot as plt
 
 from sorts import plotting
-from sorts.population import master_catalog, master_catalog_factor
+from sorts.targets.population import master_catalog, master_catalog_factor
 
 #THIS NEEDS TO BE REPLACED WITH PATH TO _YOUR_ FILE
 path = '/homes/tom/Documents/NORCE/AO9884_RPPD/master/celn_20090501_00.sim'

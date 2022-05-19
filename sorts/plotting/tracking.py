@@ -16,10 +16,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 #Local import
-from .. import frames
-
-
-
+from ..transformations import frames
 
 def az_el_to_xy(az,el):
     az, el = np.radians(az), np.radians(el)

@@ -46,7 +46,7 @@ passes = radar.find_passes(t, states, cache_data = True)
 passes[0][0] = passes[0][0][:1]
 inds = passes[0][0][0].inds
 
-track = sorts.controller.Tracker(radar=radar, t0=0, t=t[inds], dwell=0.1, ecefs=states[:3,inds])
+track = sorts.controllers.Tracker(radar=radar, t0=0, t=t[inds], dwell=0.1, ecefs=states[:3,inds])
 
 
 #lets make the radar have multiple frequencies

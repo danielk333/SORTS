@@ -11,8 +11,9 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 import sorts
+from sorts.radar.scans import Scan
 
-class NEFence(sorts.radar.Scan):
+class NEFence(Scan):
     def __init__(self, min_elevation=30.0, dwell=0.2, resolution=20):
         super().__init__(coordinates='azelr')
         self._dwell = dwell
@@ -53,7 +54,7 @@ class NEFence(sorts.radar.Scan):
         azelr[2,...] = 1.0
         return azelr
 
-class RNG(sorts.radar.Scan):
+class RNG(Scan):
     def __init__(self, dwell=0.2):
         super().__init__(coordinates='enu')
         self._dwell = dwell

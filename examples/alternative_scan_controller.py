@@ -16,11 +16,11 @@ import pyant
 import sorts
 
 from sorts.radar.scans import Fence
-from sorts import RadarController
-from sorts.scheduler import StaticList, ObservedParameters
-from sorts import SpaceObject
-from sorts.profiling import Profiler
-from sorts.propagator import SGP4
+from sorts.radar import RadarController, StaticList, ObservedParameters
+from sorts.targets import SpaceObject
+from sorts.targets.propagator.pysgp4 import SGP4
+from sorts import Profiler
+
 
 Prop_cls = SGP4
 Prop_opts = dict(

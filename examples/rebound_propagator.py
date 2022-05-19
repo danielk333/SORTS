@@ -12,9 +12,8 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from astropy.time import Time, TimeDelta
 
-from sorts.propagator import Rebound
+from sorts.targets.propagator import Rebound
 import pyorb
-
 
 try:
     base_pth = pathlib.Path(__file__).parents[1].resolve()

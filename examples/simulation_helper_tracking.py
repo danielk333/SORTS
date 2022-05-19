@@ -16,13 +16,13 @@ from astropy.time import Time
 import sorts
 eiscat3d = sorts.radars.eiscat3d_interp
 
-from sorts.scheduler import PriorityTracking, ObservedParameters
-from sorts.controller import Scanner
+from sorts.radar.scheduler import PriorityTracking, ObservedParameters
+from sorts.radar.controllers import Scanner
 from sorts import SpaceObject, Simulation
 from sorts import MPI_single_process, MPI_action, iterable_step, store_step, cached_step
 from sorts.radar.scans import Fence
 
-from sorts.propagator import SGP4
+from sorts.targets.propagator import SGP4
 Prop_cls = SGP4
 Prop_opts = dict(
     settings = dict(

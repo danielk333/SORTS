@@ -13,7 +13,7 @@ import unittest
 import numpy as np
 import numpy.testing as nt
 
-from sorts.propagator import Orekit
+from sorts.targets.propagator import Orekit
 
 @pytest.mark.usefixtures("orekit_data")
 class TestOrekit(unittest.TestCase):

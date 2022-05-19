@@ -12,7 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import sorts
-from sorts.population import tle_catalog
+from sorts.targets import tle_catalog
 
 radar = sorts.radars.eiscat3d_demonstrator_interp
 

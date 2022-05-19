@@ -9,7 +9,7 @@ import h5py
 import scipy.constants
 
 import sorts
-from sorts.controller import RadarController
+from sorts.radar import RadarController
 
 
 class TestRadarController(unittest.TestCase):

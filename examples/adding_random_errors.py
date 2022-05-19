@@ -10,10 +10,9 @@ import pathlib
 import numpy as np
 import matplotlib.pyplot as plt
 
-import sorts.errors as errors
 import sorts
-eiscat3d = sorts.radars.eiscat3d
 
+eiscat3d = sorts.radars.eiscat3d
 
 try:
     pth = pathlib.Path(__file__).parent / 'data'
@@ -21,9 +20,8 @@ except NameError:
     pth = pathlib.Path('.').parent / 'data'
 
 
-
 print(f'Caching error calculation data to: {pth}')
-err = errors.LinearizedCoded(eiscat3d.tx[0], seed=123, cache_folder=pth)
+err = sorts.measurement_errors.LinearizedCoded(eiscat3d.tx[0], seed=123, cache_folder=pth)
 
 num = 1000
 
@@ -42,7 +40,7 @@ axes[1,1].hist(ranges - perturbed_ranges, 100)
 
 print(f'Caching error calculation data to: {pth}')
 
-err = errors.LinearizedCodedIonospheric(eiscat3d.tx[0], seed=123, cache_folder=pth)
+err = sorts.measurement_errors.LinearizedCodedIonospheric(eiscat3d.tx[0], seed=123, cache_folder=pth)
 
 num2 = 400
 

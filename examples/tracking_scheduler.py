@@ -12,10 +12,10 @@ from astropy.time import Time
 
 import sorts
 
-from sorts.scheduler import PriorityTracking, ObservedParameters
+from sorts.radar.scheduler import PriorityTracking, ObservedParameters
 from sorts import SpaceObject
-from sorts.profiling import Profiler
-from sorts.propagator import SGP4
+from sorts.common.profiling import Profiler
+from sorts.targets.propagator import SGP4
 
 
 eiscat3d = sorts.radars.eiscat3d

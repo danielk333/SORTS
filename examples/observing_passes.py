@@ -12,12 +12,12 @@ import matplotlib.pyplot as plt
 
 import sorts
 eiscat3d = sorts.radars.eiscat3d
-from sorts.controller import Tracker
-from sorts.scheduler import StaticList, ObservedParameters
-from sorts import SpaceObject
-from sorts.profiling import Profiler
+from sorts.radar.controllers import Tracker
+from sorts.radar.scheduler import StaticList, ObservedParameters
+from sorts.targets import SpaceObject
+from sorts.common.profiling import Profiler
 
-from sorts.propagator import SGP4
+from sorts.targets.propagator import SGP4
 Prop_cls = SGP4
 Prop_opts = dict(
     settings = dict(

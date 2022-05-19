@@ -11,12 +11,10 @@ from sgp4.io import twoline2rv
 import sgp4
 
 import sorts
-from sorts.propagator import SGP4
-from sorts import frames
+from sorts.targets.propagator import SGP4
+from sorts.transformations import frames
 
 from astropy.time import Time, TimeDelta
-
-
 
 class TestSGP4(unittest.TestCase):
 

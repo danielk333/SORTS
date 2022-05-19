@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from astropy.time import Time
 
-from sorts.propagator import Orekit
+from sorts.targets.propagator import Orekit
 from sorts import SpaceObject
 import sorts
 
@@ -25,7 +25,7 @@ pth = pth / 'data' / 'orekit-data-master.zip'
 
 
 if not pth.is_file():
-    sorts.propagator.Orekit.download_quickstart_data(pth, verbose=True)
+    sorts.targets.propagator.Orekit.download_quickstart_data(pth, verbose=True)
 
 
 orekit_options = dict(

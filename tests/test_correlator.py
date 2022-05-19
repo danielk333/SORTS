@@ -63,7 +63,7 @@ class TestCorrelator(unittest.TestCase):
             ('1 43075U 17083F   18004.50601262  .00000010  00000-0 -26700-5 0  9995',
             '2 43075  86.5273 171.5023 0000810  83.8359 276.2943 14.58677444  1820'),
         ]
-        pop = sorts.population.tle_catalog(tles, cartesian=False)
+        pop = sorts.targets.population.tle_catalog(tles, cartesian=False)
 
         #correlate requires output in ECEF 
         pop.out_frame = 'ITRS'

@@ -14,9 +14,10 @@ from tabulate import tabulate
 
 import pyorb
 
-import sorts.propagator as propagators
-import sorts.errors as errors
 import sorts
+from sorts.targets import propagator
+from sorts.radar import measurement_errors
+from sorts.radar.passes import group_passes
 
 radar = sorts.radars.eiscat3d
 
@@ -36,7 +37,7 @@ orb = pyorb.Orbit(
     anom=72, 
 )
 obj = sorts.SpaceObject(
-    propagators.SGP4,
+    propagator.SGP4,
     propagator_options = dict(
         settings = dict(
             in_frame='TEME', 
@@ -58,10 +59,10 @@ print(f'Temporal points: {len(t)}')
 
 states = obj.get_state(t)
 
-passes = radar.find_passes(t, states)
+passes = radar.find_passes(t, states, radar.rx)
 
 #re-arrange passes to a [tx][pass][rx] schema 
-passes = sorts.group_passes(passes)
+passes = group_passes(passes)
 
 #sort according to start time
 passes[0].sort(key=lambda psg: min([ps.start() for ps in psg]))
@@ -78,13 +79,13 @@ for ps_lst in passes[0]:
     use_inds = np.arange(0,len(ps.inds),len(ps.inds)//10)
 
     #Create a radar controller to track the object
-    track = sorts.controller.Tracker(radar = radar, t=t[ps.inds[use_inds]], ecefs=states[:3,ps.inds[use_inds]])
+    track = sorts.Tracker(radar = radar, t=t[ps.inds[use_inds]], ecefs=states[:3,ps.inds[use_inds]])
 
     controllers += [track]
 
 class Schedule(
-        sorts.scheduler.StaticList, 
-        sorts.scheduler.ObservedParameters,
+        sorts.StaticList, 
+        sorts.ObservedParameters,
     ):
     pass
 
@@ -124,7 +125,7 @@ for pgi, pass_group in enumerate(passes[0]):
     #     obj0.propagate(depoch)
 
     p.start('orbit_determination_covariance')
-    Sigma_orb, datas = errors.orbit_determination_covariance(
+    Sigma_orb, datas = sorts.linearized_orbit_determination.orbit_determination_covariance(
         pass_group,
         sched, 
         obj0,
@@ -141,7 +142,7 @@ for pgi, pass_group in enumerate(passes[0]):
     Sigma_p_inv = np.linalg.inv(Sigma_orb)
 
     p.start('covariance_propagation')
-    r_diff_stdev, _ = errors.covariance_propagation(
+    r_diff_stdev, _ = sorts.linearized_orbit_determination.covariance_propagation(
         obj0, 
         Sigma_orb, 
         t = t_, 
@@ -151,7 +152,7 @@ for pgi, pass_group in enumerate(passes[0]):
     p.stop('covariance_propagation')
 
     p.start('covariance_propagation+drag')
-    r_diff_stdev_drag, _ = errors.covariance_propagation(
+    r_diff_stdev_drag, _ = sorts.linearized_orbit_determination.covariance_propagation(
         obj0, 
         Sigma_orb, 
         t = t_, 
