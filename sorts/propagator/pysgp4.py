@@ -616,7 +616,7 @@ class SGP4(Propagator):
         '''
         _kep = kep.copy()
         _kep[0, ...] *= 1e3
-        tmp = _kep[4, ...]
+        tmp = _kep[4, ...].copy()
         _kep[4, ...] = _kep[3, ...]
         _kep[3, ...] = tmp
         _kep[5, ...] = pyorb.mean_to_true(_kep[5, ...], _kep[1, ...], degrees=False)
@@ -630,7 +630,7 @@ class SGP4(Propagator):
         '''
         kep = pyorb.cart_to_kep(cart, mu=self.grav_model.mu*1e9, degrees=False)
         kep[0, ...] *= 1e-3
-        tmp = kep[4, ...]
+        tmp = kep[4, ...].copy()
         kep[4, ...] = kep[3, ...]
         kep[3, ...] = tmp
         kep[5, ...] = pyorb.true_to_mean(kep[5, ...], kep[1, ...], degrees=False)
