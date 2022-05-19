@@ -446,8 +446,6 @@ class SGP4(Propagator):
         samps = self.settings['TEME_TO_TLE_minimize_start_samples']
         bounds = self.settings['TEME_TO_TLE_minimize_bounds']
 
-        opt_res = None
-
         for j in range(samps):
             _init_elements = init_elements.copy()
             if j > 0:
@@ -532,9 +530,6 @@ class SGP4(Propagator):
             state_cart = state
 
         iter_max = self.settings['TEME_to_TLE_max_iter']  # Maximum number of iterations
-
-        dr = 0
-        dv = 0
 
         # Iterative determination of mean elements
         for it in range(iter_max):

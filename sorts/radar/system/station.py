@@ -80,7 +80,7 @@ class Station(object):
         
         zenith_ang = pyant.coordinates.vector_angle(zenith, enu, radians=False)
         check = zenith_ang < (90.0 - self.min_elevation)
-        
+
         return check
 
 
