@@ -130,7 +130,7 @@ class SGP4(Propagator):
 
             if logger_profiler_on:
                 if error != 0 and self.logger is not None:
-                    self.logger.error(f'SGP4:propagate:step-{ind}:{SGP4_ERRORS[error]}')
+                    self.logger.error(f'SGP4:propagate:steps:{SGP4_ERRORS[error]}')
 
             states[:3] = r
             states[3:] = v
@@ -211,79 +211,83 @@ class SGP4(Propagator):
             line1, line2 = state0
             states = self.propagate_tle(t, line1, line2, **kwargs)
 
+            return states
+
+        if epoch is None:
+            raise ValueError('Need epoch when propagating state and not TLE')
+
+        t, epoch = self.convert_time(t, epoch)
+
+        epoch0 = epoch.mjd - self.sgp4_mjd0
+        times = epoch + t
+
+        if 'B' in kwargs:
+            B = kwargs.pop('B')
         else:
+            B = 0.5*kwargs.pop('C_D', 2.3)*kwargs.pop('A', 1.0)/kwargs.pop('m', 1.0)
 
-            if epoch is None:
-                raise ValueError('Need epoch when propagating state and not TLE')
+        if self.logger is not None:
+            self.logger.debug(f'SGP4:propagate:B = {B}')
 
-            t, epoch = self.convert_time(t, epoch)
+        input_mean = kwargs.get('SGP4_mean_elements', False)
+        input_mean_cart = kwargs.get('SGP4_mean_cartesian', False)
+        if input_mean_cart:
+            state0 = self._cart2sgp4_elems(state0)
+            state0[0, ...] *= 1e3  # km to m
+            kwargs['radians'] = True
+            input_mean = True
 
-            epoch0 = epoch.mjd - self.sgp4_mjd0
-            times = epoch + t
+        if input_mean:
+            if self.settings['in_frame'] != 'TEME':
+                raise Exception(f'Cannot input mean elements in other frame than TEME (currently set to "{self.settings["in_frame"]}")')
+            mean_elements = state0.copy()
+            if not kwargs.get('radians', False):
+                mean_elements[2:, ...] = np.radians(mean_elements[2:, ...])
+            mean_elements[0, ...] *= 1e-3  # m to km
 
-            if 'B' in kwargs:
-                B = kwargs.pop('B')
+        else:
+            if isinstance(state0, pyorb.Orbit):
+                state0_cart = np.squeeze(state0.cartesian)
             else:
-                B = 0.5*kwargs.pop('C_D',2.3)*kwargs.pop('A',1.0)/kwargs.pop('m',1.0)
+                state0_cart = state0
 
-            if self.logger is not None:
-                self.logger.debug(f'SGP4:propagate:B = {B}')
-
-            input_mean = kwargs.get('SGP4_mean_elements', False)
-
-            if input_mean:
-                if self.settings['in_frame'] != 'TEME':
-                    raise Exception(f'Cannot input mean elements in other frame than TEME (currently set to "{self.settings["in_frame"]}")')
-                mean_elements = state0.copy()
-                if not kwargs.get('radians', False):
-                    mean_elements[2:,...] = np.radians(mean_elements[2:,...])
-
-                mean_elements[0,...] *= 1e-3 #m to km
-
-            else:
-                if isinstance(state0, pyorb.Orbit):
-                    state0_cart = np.squeeze(state0.cartesian)
-                else:
-                    state0_cart = state0
-
-                state0_cart = frames.convert(
-                    epoch, 
-                    state0_cart, 
-                    in_frame=self.settings['in_frame'], 
-                    out_frame='TEME',
-                    profiler = self.profiler,
-                    logger = self.logger,
-                )
-
-                if state0_cart.size > 6:
-                    t_samps = kwargs.get('state_sample_times')
-                else:
-                    t_samps = None
-
-                mean_elements = self.TEME_to_TLE(state0_cart, t=t_samps, epoch=epoch, B=B, kepler=False)
-
-                if np.any(np.isnan(mean_elements)):
-                    raise Exception('Could not compute SGP4 initial state: {}'.format(mean_elements))
-
-            states = self.propagate_mean_elements(times.jd1, times.jd2, mean_elements, epoch0, B, **kwargs)
-
-            states = frames.convert(
-                times, 
-                states, 
-                in_frame='TEME',
-                out_frame=self.settings['out_frame'],
+            state0_cart = frames.convert(
+                epoch, 
+                state0_cart, 
+                in_frame=self.settings['in_frame'], 
+                out_frame='TEME',
                 profiler = self.profiler,
                 logger = self.logger,
             )
 
+            if state0_cart.size > 6:
+                t_samps = kwargs.get('state_sample_times')
+            else:
+                t_samps = None
+
+            mean_elements = self.TEME_to_TLE(state0_cart, t=t_samps, epoch=epoch, B=B, kepler=False)
+
+            if np.any(np.isnan(mean_elements)):
+                raise Exception('Could not compute SGP4 initial state: {}'.format(mean_elements))
+
+        states = self.propagate_mean_elements(times.jd1, times.jd2, mean_elements, epoch0, B, **kwargs)
+
+        states = frames.convert(
+            times, 
+            states, 
+            in_frame='TEME',
+            out_frame=self.settings['out_frame'],
+            profiler = self.profiler,
+            logger = self.logger,
+        )
+
         if self.profiler is not None:
             self.profiler.stop('SGP4:propagate')
         if self.logger is not None:
-            self.logger.debug(f'SGP4:propagate:completed')
+            self.logger.debug('SGP4:propagate:completed')
 
         return states
 
-    
     def get_mean_elements(self, line1, line2, radians=False):
         '''Extract the mean elements in SI units (a [m], e [1], inc [deg], raan [deg], aop [deg], mu [deg]), B-parameter (not bstar) and epoch from a two line element pair.
         '''
@@ -447,6 +451,7 @@ class SGP4(Propagator):
         samps = self.settings['TEME_TO_TLE_minimize_start_samples']
         bounds = self.settings['TEME_TO_TLE_minimize_bounds']
 
+        opt_res = None
         for j in range(samps):
             _init_elements = init_elements.copy()
             if j > 0:
@@ -532,6 +537,8 @@ class SGP4(Propagator):
 
         iter_max = self.settings['TEME_to_TLE_max_iter']  # Maximum number of iterations
 
+        dr = 0
+        dv = 0
         # Iterative determination of mean elements
         for it in range(iter_max):
             # Mean elements and osculating state
@@ -613,7 +620,7 @@ class SGP4(Propagator):
         _kep[4, ...] = _kep[3, ...]
         _kep[3, ...] = tmp
         _kep[5, ...] = pyorb.mean_to_true(_kep[5, ...], _kep[1, ...], degrees=False)
-        cart = pyorb.kep_to_cart(kep, mu=self.grav_model.mu*1e9, degrees=False)
+        cart = pyorb.kep_to_cart(_kep, mu=self.grav_model.mu*1e9, degrees=False)
         return cart
 
     def _cart2sgp4_elems(self, cart, degrees=False):
