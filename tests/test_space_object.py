@@ -9,7 +9,7 @@ import numpy.testing as nt
 
 import sorts
 import pyorb
-from sorts import SpaceObject
+from sorts.targets import SpaceObject
 
 from astropy.time import TimeDelta
 
@@ -307,8 +307,8 @@ class TestSpaceObject(unittest.TestCase):
         obj.update(XX=5.8)
         obj.update(C_D=0)
 
-        x = obj.a
-        x = obj.x
+        x = obj.orbit.a
+        x = obj.orbit.x
         x = obj.C_D
         x = obj.XX
 
@@ -349,7 +349,7 @@ class TestSpaceObject(unittest.TestCase):
             self.assertNotEqual(xv1[ind,0], xv0[ind,0])
 
     def test_propagate_epoch(self):
-        self.orb_init['propagator'] = sorts.propagator.Kepler
+        self.orb_init['propagator'] = sorts.targets.propagator.Kepler
         obj = SpaceObject(**self.orb_init)
         obj.out_frame = obj.in_frame
 

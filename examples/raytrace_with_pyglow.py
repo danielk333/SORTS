@@ -13,7 +13,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 import sorts
 
-results = sorts.errors.ray_trace(
+results = sorts.measurement_errors.ray_trace(
         time = Time('2004-6-21 12:00'),
         lat = 69.34023844,
         lon = 20.313166,

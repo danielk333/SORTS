@@ -12,7 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-from sorts.propagator import SGP4
+from sorts.targets.propagator import SGP4
 
 from sgp4.api import Satrec
 

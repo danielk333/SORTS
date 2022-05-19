@@ -12,9 +12,9 @@ import pyorb
 
 import sorts
 eiscat3d = sorts.radars.eiscat3d
-from sorts.profiling import Profiler
+from sorts.common.profiling import Profiler
 
-from sorts.propagator import SGP4
+from sorts.targets.propagator import SGP4
 Prop_cls = SGP4
 Prop_opts = dict(
     settings = dict(
@@ -64,9 +64,9 @@ p.stop('find_passes')
 
 p.start('sim_passes')
 #finding simultaneous passes
-chtx0 = np.full((len(t),), False, dtype=np.bool)
+chtx0 = np.full((len(t),), False, dtype=bool)
 chtx0[passes_tx0[0].inds] = True
-chrx1 = np.full((len(t),), False, dtype=np.bool)
+chrx1 = np.full((len(t),), False, dtype=bool)
 chrx1[passes_rx1[0].inds] = True
 
 inds = np.where(np.logical_and(chtx0, chrx1))[0]

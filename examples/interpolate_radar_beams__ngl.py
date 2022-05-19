@@ -6,7 +6,7 @@ Interpolated Antenna array gain
 import numpy as np
 
 import pyant
-import sorts.radar.instances as rlib
+from sorts.radar.system import instances as rlib
 
 radar = rlib.eiscat3d_demonstrator
 
@@ -31,3 +31,4 @@ for rxi,rx in enumerate(radar.rx):
     )]
     rx_intp[-1].generate_interpolation(rx.beam, resolution=res)
 
+print (rx_intp)

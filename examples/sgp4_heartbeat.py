@@ -9,7 +9,7 @@ import numpy as np
 import pyorb
 from astropy.time import Time
 
-from sorts.propagator import SGP4
+from sorts.targets.propagator import SGP4
 
 #it will run a bit slower since it cant use the "array" optimization of SGP4
 

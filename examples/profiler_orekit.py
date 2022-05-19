@@ -9,8 +9,8 @@ import pathlib
 
 import numpy as np
 
-from sorts.profiling import Profiler
-from sorts.propagator import Orekit
+from sorts.common.profiling import Profiler
+from sorts.targets.propagator import Orekit
 import pyorb
 
 p = Profiler()

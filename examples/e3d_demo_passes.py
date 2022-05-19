@@ -14,7 +14,7 @@ import pyorb
 from astropy.time import Time, TimeDelta
 
 import sorts
-from sorts.population import tle_catalog
+from sorts.targets.population import tle_catalog
 
 eiscat3d = sorts.radars.eiscat3d_demonstrator_interp
 

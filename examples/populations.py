@@ -8,8 +8,8 @@ Populations
 import numpy as np
 import matplotlib.pyplot as plt
 
-from sorts.propagator import SGP4
-from sorts import Population
+from sorts.targets.propagator import SGP4
+from sorts.targets import Population
 from sorts import plotting
 
 t = np.linspace(0,3600*10,num=2000)
@@ -52,7 +52,7 @@ pop['A'] = 1
 pop['C_R'] = 0.1
 pop['C_D'] = 2.7
 
-plotting.orbits(
+plotting.orbits.kepler_scatter(
     pop.get_states(named=False),
     title = "Orbit distribution of Population",
     axis_labels='earth-orbit',

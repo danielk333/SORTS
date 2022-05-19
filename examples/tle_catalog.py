@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sorts
 from sorts import plotting
-from sorts.population import tle_catalog
+from sorts.targets.population import tle_catalog
 
 
 try:

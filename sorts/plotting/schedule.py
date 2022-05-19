@@ -17,7 +17,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 #Local import
 from . import general
-from ..controller import Tracker
+from ..radar.controllers import Tracker
 
 prop_cycle = plt.rcParams['axes.prop_cycle']
 
@@ -147,10 +147,6 @@ def observed_parameters(data_list, passes=None, snrdb_lim = 10.0, axes=None, sor
         fig.tight_layout()
 
     return fig, axes
-
-
-
-
 
 def schedule_pointing(
         scheduler,

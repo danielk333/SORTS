@@ -84,7 +84,7 @@ class StareAndChase(sorts.scheduler.ObservedParameters):
 
             self.passes = self.radar.find_passes(self.states_t, self.states, cache_data = False)
 
-        self.scanner = sorts.controller.Scanner(
+        self.scanner = sorts.controllers.Scanner(
             self.radar,
             self.scan,
             t_slice = self.timeslice,
@@ -157,7 +157,7 @@ except NameError:
     pth = 'examples' + os.path.sep + 'data' + os.path.sep
 
 print(f'\nUsing "{pth}" as cache for LinearizedCoded errors.')
-err = sorts.errors.LinearizedCodedIonospheric(radar.tx[0], seed=123, cache_folder=pth)
+err = sorts.measurement_errors.LinearizedCodedIonospheric(radar.tx[0], seed=123, cache_folder=pth)
 
 variables = ['x','y','z','vx','vy','vz']
 deltas = [1e-4]*3 + [1e-6]*3 + [1e-2]
@@ -194,7 +194,9 @@ passes[0][0] = passes[0][0][:1]
 profiler.stop('ScanDetections:find_passes')
 
 #Create a list of the same pass at all rx stations
-rx_passes = [p_tx0_rx[0] for p_tx0_rx in passes[0]]
+rx_passes = []
+for p_tx0_rx in passes[0]:
+    if len(p_tx0_rx)>0: rx_passes.append(p_tx0_rx[0])
 
 datas = []
 
@@ -203,7 +205,6 @@ profiler.start('ScanDetections:observe_passes')
 
 #observe one pass from all rx stations, including measurement Jacobian
 for rxi in range(len(radar.rx)):
-
     #the Jacobean is stacked as [r_measurements, v_measurements]^T so we stack the measurement covariance equally
     data, J_rx = scheduler.calculate_observation_jacobian(
         rx_passes[rxi], 

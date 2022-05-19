@@ -23,8 +23,10 @@ https://sanaregistry.org/files/ndmxml_qualified/*
 import pkg_resources
 import xmlschema
 import numpy as np
+
 import scipy.constants as consts
 from astropy.time import TimeISO, Time
+
 from ..version import __version__
 
 
@@ -115,8 +117,10 @@ def write_xml_oem(state_data, cov_data=None, meta=None, file=None):
     :param numpy.ndarray cov_data: structured numpy array where each element in the array contains the data fields with the same name as those defined by the OEM XML for covariance matricies.
     :param dict meta: .... Only exception is `DATA_COMMENT`, which is used as input for the `COMMENT` field for the data section rather then a `DATA_COMMENT` field in the meta data section.
     """
+    
     if meta is None:
         meta = {}
+        
     # originator
     originator = meta.get("ORIGINATOR", f'SORTS {__version__}')
 
@@ -206,6 +210,7 @@ def write_xml_oem(state_data, cov_data=None, meta=None, file=None):
             Y_DOT = v["Y_DOT"],
             Z_DOT = v["Z_DOT"],
         )
+        
         #optional
         for key in ["X_DDOT", "Y_DDOT", "Z_DDOT"]:
             if key in state_data.dtype.names:
@@ -213,10 +218,10 @@ def write_xml_oem(state_data, cov_data=None, meta=None, file=None):
 
         _data["stateVector"].append(_dat)
 
-
     if cov_data is not None:
         for v in cov_data:
             _dat_cov = dict()
+            
             if "COMMENT" in cov_data.dtype.names:
                 try:
                     _comment = v["COMMENT"].decode()
@@ -224,6 +229,7 @@ def write_xml_oem(state_data, cov_data=None, meta=None, file=None):
                     _comment = v["COMMENT"]
 
                 _dat_cov["COMMENT"] = _comment
+                
                 #remove empty comments
                 if len(_dat_cov["COMMENT"]) == 0:
                     del _dat_cov["COMMENT"]

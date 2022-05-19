@@ -10,7 +10,7 @@ import numpy as np
 import pyorb
 
 import sorts
-from sorts.propagator import SGP4
+from sorts.targets.propagator import SGP4
 
 eiscat3d = sorts.radars.eiscat3d
 

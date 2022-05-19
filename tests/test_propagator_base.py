@@ -9,7 +9,7 @@ import numpy.testing as nt
 
 from astropy.time import TimeDelta, Time
 
-from sorts import Propagator
+from sorts.targets import Propagator
 
 
 

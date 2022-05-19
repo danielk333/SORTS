@@ -7,7 +7,7 @@ Profiling memory leaks
 '''
 import matplotlib.pyplot as plt
 
-from sorts.profiling import Profiler
+from sorts.common.profiling import Profiler
 
 p = Profiler(track_memory=True)
 

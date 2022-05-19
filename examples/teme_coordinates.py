@@ -10,7 +10,7 @@ import numpy as np
 from astropy.time import Time
 
 import sorts
-import sorts.frames as frames
+import sorts.transformations.frames as frames
 
 
 TEME0 = np.array([-7100297.113,-3897715.442,18568433.707,86.771,-3407.231,2961.571])

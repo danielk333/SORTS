@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import pyorb
 
 # Local import
-from .. import constants
+from ..common import constants
 
 
 def kepler_orbit(orb, res=100, ax=None, **kwargs):

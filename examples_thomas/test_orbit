@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed May 18 15:29:10 2022
+
+@author: thomas
+"""
+
+import numpy as np
+from sorts import plotting
+import matplotlib.pyplot as plt
+
+import pyorb
+
+# Object properties
+orbits_a = np.array([7200, 4500, 3000, 10000])*1e3 # km
+orbits_i = np.array([80, 0, 100, 85]) # deg
+orbits_omegq = np.array([86, 0, 80, 85]) # deg
+orbits_aop = np.array([10, 0, 170, 0]) # deg
+orbits_mu0 = np.array([60, 0, 60, 60]) # deg
+
+orb = pyorb.Orbit(
+    M0 = pyorb.M_earth,
+    direct_update=True,
+    auto_update=True,
+    degrees = True,
+    a=7000e3,
+    e=0,
+    i=69,
+    omega=0,
+    Omega=0,
+    anom=0,
+)
+
+fig = plt.figure(figsize=(15,15))
+
+ax = fig.add_subplot(111, projection='3d')
+plotting.general.grid_earth(ax)
+plotting.kepler_orbit(orb, ax=ax)

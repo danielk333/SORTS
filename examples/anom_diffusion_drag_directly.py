@@ -11,9 +11,12 @@ from mpl_toolkits.mplot3d import Axes3D
 import pyorb
 from astropy.time import Time
 
-from sorts.propagator import SGP4
-from sorts import SpaceObject
+from sorts.targets.propagator import SGP4
+from sorts.targets import SpaceObject
 from sorts.plotting import grid_earth
+
+# step number for the MC simulation
+MC_STEP = 100
 
 opts = dict(
     settings = dict(
@@ -43,7 +46,9 @@ dt = 600.0
 steps = int(24*3600.0/dt)
 states = []
 
-for mci in range(100):
+for mci in range(MC_STEP):
+    print(f'Step {mci}/{MC_STEP}')
+    
     mc_obj = obj.copy()
 
     state = np.empty((6, steps), dtype=np.float64)*np.nan

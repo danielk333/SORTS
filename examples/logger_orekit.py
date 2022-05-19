@@ -10,7 +10,7 @@ import numpy as np
 
 import sorts
 
-logger = sorts.profiling.get_logger('orekit')
+logger = sorts.common.profiling.get_logger('orekit')
 
 
 try:
@@ -24,7 +24,7 @@ if not pth.is_file():
     sorts.propagator.Orekit.download_quickstart_data(pth, verbose=True)
 
 def run_prop():
-    prop = sorts.propagator.Orekit(
+    prop = sorts.targets.propagator.Orekit(
         orekit_data = pth, 
         settings=dict(
             in_frame='Orekit-ITRF',

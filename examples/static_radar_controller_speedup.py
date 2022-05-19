@@ -16,13 +16,13 @@ import matplotlib.pyplot as plt
 import sorts
 eiscat3d = sorts.radars.eiscat3d_interp
 
-from sorts.scheduler import StaticList, ObservedParameters
-from sorts.controller import Static, Scanner
+from sorts.radar.scheduler import StaticList, ObservedParameters
+from sorts.radar.controllers import Static, Scanner
 from sorts import SpaceObject
-from sorts.profiling import Profiler
+from sorts.common.profiling import Profiler
 from sorts.radar.scans import Beampark
 
-from sorts.propagator import SGP4
+from sorts.targets.propagator import SGP4
 Prop_cls = SGP4
 Prop_opts = dict(
     settings = dict(

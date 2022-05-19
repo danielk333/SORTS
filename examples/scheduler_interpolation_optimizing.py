@@ -13,14 +13,14 @@ import matplotlib.pyplot as plt
 import sorts
 eiscat3d = sorts.radars.eiscat3d_interp
 
-from sorts.scheduler import StaticList, ObservedParameters
-from sorts.controller import Scanner
+from sorts.radar.scheduler import StaticList, ObservedParameters
+from sorts.radar.controllers import Scanner
 from sorts import SpaceObject
-from sorts.profiling import Profiler
+from sorts.common.profiling import Profiler
 from sorts.radar.scans import Fence
-from sorts.interpolation import Legendre8
+from sorts.common.interpolation import Legendre8
 
-from sorts.propagator import Orekit
+from sorts.targets.propagator import Orekit
 
 try:
     pth = pathlib.Path(__file__).parent.resolve()

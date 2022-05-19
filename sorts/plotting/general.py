@@ -9,7 +9,7 @@
 import numpy as np
 
 # Local import
-from .. import constants
+from ..common import constants
 
 
 def set_axes_equal(ax):

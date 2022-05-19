@@ -16,7 +16,7 @@ from astropy.time import Time, TimeDelta
 
 import sorts
 
-from sorts.scheduler import Tracking, ObservedParameters
+from sorts.radar import Tracking, ObservedParameters
 
 try:
     base_pth = pathlib.Path(__file__).parents[1].resolve()

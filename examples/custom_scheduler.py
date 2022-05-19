@@ -13,20 +13,21 @@ from matplotlib.animation import FuncAnimation
 import pyorb
 
 import sorts
-from sorts.controller import Tracker
-import sorts
+from sorts.radar.controllers import Tracker
+
 eiscat3d = sorts.radars.eiscat3d
 from sorts import Scheduler
 
-from sorts.propagator import SGP4
+from sorts.targets.propagator import SGP4
+
 Prop_cls = SGP4
 Prop_opts = dict(
     settings = dict(
         out_frame='ITRF',
     ),
 )
-prop = Prop_cls(**Prop_opts)
 
+prop = Prop_cls(**Prop_opts)
 
 class MyScheduler(Scheduler):
     '''

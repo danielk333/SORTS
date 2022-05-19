@@ -13,9 +13,8 @@ from astropy.time import Time
 
 import sorts
 
-
 obj = sorts.SpaceObject(
-    sorts.propagator.SGP4,
+    sorts.targets.propagator.SGP4,
     propagator_options = dict(
         settings=dict(
             in_frame='GCRS',
@@ -34,7 +33,7 @@ obj = sorts.SpaceObject(
     )
 )
 
-hour0, offset, t1, alpha = sorts.errors.atmospheric_drag.atmospheric_errors(obj, plot=True)
+hour0, offset, t1, alpha = sorts.propagation_errors.atmospheric_drag.atmospheric_errors(obj, plot=True)
 
 
 plt.show()

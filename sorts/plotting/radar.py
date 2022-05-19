@@ -5,25 +5,28 @@
 '''
 
 #Python standard import
-
-#Third party import
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
 
+import pandas as pd
+
+#Third party import
+
+
 #Local import
 
 from . import general
-from .. import frames
+from ..transformations import frames
 
 
 def radar_earth(ax, radar, **kwargs):
 
     tx_names = kwargs.pop('tx_names', None)
     rx_names = kwargs.pop('rx_names', None)
-    grid_earth(ax, **kwargs)
+    general.grid_earth(ax, **kwargs)
 
     for ind, tx in enumerate(radar.tx):
         if tx_names is None:
@@ -108,7 +111,7 @@ def radar_map(radar, ax=None):
     _font = 8
 
     df_sites_rx['Coordinates'] = list(zip(df_sites_rx.Longitude, df_sites_rx.Latitude))
-    df_sites_rx['Coordinates'] = df_sites_rx['Coordinates'].apply(Point)
+    df_sites_rx['Coordinates'] = df_sites_rx['Coordinates'].apply(frames.Point)
     gdf_rx = geopandas.GeoDataFrame(df_sites_rx, geometry='Coordinates')
     gdf_rx.plot(ax=ax, color='blue', alpha=0.3, marker='h', markersize=24)
     for ind in range(gdf_rx.shape[0]):
@@ -116,7 +119,7 @@ def radar_map(radar, ax=None):
 
 
     df_sites_tx['Coordinates'] = list(zip(df_sites_tx.Longitude, df_sites_tx.Latitude))
-    df_sites_tx['Coordinates'] = df_sites_tx['Coordinates'].apply(Point)
+    df_sites_tx['Coordinates'] = df_sites_tx['Coordinates'].apply(frames.Point)
     gdf = geopandas.GeoDataFrame(df_sites_tx, geometry='Coordinates')
     gdf.plot(ax=ax, color='red', alpha=0.7, marker='X', markersize=18)
     for ind in range(gdf.shape[0]):

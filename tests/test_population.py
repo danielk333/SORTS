@@ -8,8 +8,8 @@ import numpy.testing as nt
 
 import types
 
-from sorts import Population
-from sorts import SpaceObject
+from sorts.targets import Population
+from sorts.targets import SpaceObject
 
 class TestPopulation(unittest.TestCase):
 
@@ -108,6 +108,7 @@ class TestPopulation(unittest.TestCase):
 
         ref = ['x', 'y']
         keys = pop.data.dtype.fields.keys()
+        
         for ind in range(len(pop.fields)):
             assert pop.fields[ind] in keys
             assert pop.fields[ind] in ref
@@ -139,7 +140,7 @@ class TestPopulation(unittest.TestCase):
 
 
     def test_space_object(self):
-        from sorts.propagator import SGP4
+        from sorts.targets.propagator import SGP4
 
         pop = Population(propagator = SGP4)
         pop.allocate(1)
