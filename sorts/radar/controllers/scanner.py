@@ -32,7 +32,9 @@ class Scanner(RadarController):
                 **kwargs
             ):
         super().__init__(radar, t0=t0, profiler=profiler, logger=logger, meta=meta, **kwargs)
+        
         self.scan = scan
+        
         if self.t is not None and self.t_slice is None:
             self.dwell = np.max(self.scan.dwell(self.t))
 
@@ -57,6 +59,7 @@ class Scanner(RadarController):
     def default_meta(self):
         dic = super().default_meta()
         dic['scan_type'] = self.scan.__class__
+        
         return dic
 
     def point_radar(self, t):
@@ -81,7 +84,6 @@ class Scanner(RadarController):
             point = self.scan.ecef_pointing(t, tx)
 
             if self.as_altitude:
-
                 if len(point.shape) > 1:
                     r = self.r[None, :]/point[2, :]
                     point_tx.append(point + tx.ecef[:, None])

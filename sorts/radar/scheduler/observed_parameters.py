@@ -226,6 +226,9 @@ class ObservedParameters(Scheduler):
 
         txi, rxi = txrx_pass.station_id
 
+        print(f'measurement {rxi}/{txi}')
+
+
         if self.logger is not None:
             self.logger.debug(f'Obs.Param.:calculate_observation:(tx={txi}, rx={rxi}), len(t) = {len(t)}')
 
@@ -282,7 +285,6 @@ class ObservedParameters(Scheduler):
         metas = []
 
         if vectorize:
-
             powers = np.empty((len(t),), dtype=np.float64)
             t_slices = np.empty((len(t),), dtype=np.float64)
             pulse_lengths = np.empty((len(t),), dtype=np.float64)
@@ -293,6 +295,7 @@ class ObservedParameters(Scheduler):
             txrx_on = np.full((len(t),), False, dtype=np.bool)
 
             vectorized_data = None
+            
             for ri, (radar, meta) in enumerate(generator):
                 if extended_meta:
                     self.extend_meta(t[ri], txi, rxi, radar, meta)
@@ -431,7 +434,7 @@ class ObservedParameters(Scheduler):
                     self.profiler.stop('Obs.Param.:calculate_observation:snr-step:rcs,filter')
 
         else:
-            for ti, (radar, meta) in enumerate(generator):
+            for ti, (radar, meta) in enumerate(generator):                
                 if extended_meta:
                     self.extend_meta(t[ti], txi, rxi, radar, meta)
 
@@ -463,6 +466,7 @@ class ObservedParameters(Scheduler):
                     rxi,
                 )
 
+                # TODO : check if this code is valid
                 if not (radar.tx[txi].enabled and radar.rx[rxi].enabled and observable):
                     keep[ti] = False
                     continue
@@ -472,7 +476,6 @@ class ObservedParameters(Scheduler):
                     self.profiler.start('Obs.Param.:calculate_observation:snr-step')
 
                 if calculate_snr:
-
                     if self.profiler is not None:
                         self.profiler.start('Obs.Param.:calculate_observation:snr-step:gain')
 
@@ -480,10 +483,11 @@ class ObservedParameters(Scheduler):
                     #assume synchronized transmitting
                     #assume decoding of partial pulses is possible and linearly decreases signal strength
                     snr_modulation = 1.0
+                    
                     for ch_txi, ch_rxi in radar.joint_stations:
                         if ch_rxi == rxi:
-                            delay = (ranges[0][ti] + ranges[1][ti])/scipy.constants.c
-                            ipp_f = np.mod(delay, radar.tx[txi].ipp)
+                            delay = (ranges[0][ti] + ranges[1][ti])/scipy.constants.c # compute range delay with signal between tx/rx
+                            ipp_f = np.mod(delay, radar.tx[txi].ipp) 
 
                             if ipp_f <= radar.tx[txi].pulse_length:
                                 snr_modulation = ipp_f/radar.tx[txi].pulse_length

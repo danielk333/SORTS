@@ -11,7 +11,7 @@ from .scan import Scan
 class Fence(Scan):
     '''General fence scan.
     '''
-    def __init__(self, azimuth = 0.0, min_elevation=30.0, dwell=0.2, num=20):
+    def __init__(self, azimuth=0.0, min_elevation=30.0, dwell=0.2, num=20):
         super().__init__(coordinates='azelr')
         self._dwell = dwell
         self.num = num

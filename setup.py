@@ -31,29 +31,6 @@ with open('requirements', 'r') as fh:
     pip_req = fh.read().split('\n')
     pip_req = [x.strip() for x in pip_req if len(x.strip()) > 0]
 
-
-class CustomDevelopCommand(develop):
-    """Post-installation for development mode."""
-    def run(self):
-        for link in dep_links:
-            pip.main(['install', link])
-        develop.run(self)
-
-class CustomInstallCommand(install):
-    """Post-installation for installation mode."""
-    def run(self):
-        for link in dep_links:
-            pip.main(['install', link])
-        install.run(self)
-
-class CustomEggCommand(egg_info):
-    """Post-installation for installation mode."""
-    def run(self):
-        for link in dep_links:
-            pip.main(['install', link])
-        egg_info.run(self)
-
-
 setuptools.setup(
     name='sorts',
     version=get_version(HERE / 'sorts' / 'version.py'),
@@ -78,9 +55,5 @@ setuptools.setup(
     author_email='daniel.kastinen@irf.se',
     description='SORTS',
     license='MIT',
-    cmdclass={
-        'develop': CustomDevelopCommand,
-        'install': CustomInstallCommand,
-        'egg_info': CustomEggCommand,
-    },
+    cmdclass={},
 )
