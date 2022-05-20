@@ -139,21 +139,41 @@ def hard_target_diameter(
     return diameter
 
 
-def incoherent_snr(p_s, p_n, epsilon=0.05, B=10.0, t_incoh=3600.0):
-    '''Calculate the incoherent SNR based on ????
+def incoherent_snr(signal_power, noise_power, epsilon=0.05, bandwidth=10.0, incoherent_integration_time=3600.0):
+    ''' 
+    Computes the incoherent signal to noise ratio and the minimal observation time required
+    
+    :param float signal_power: signal power (W)
+    :param float noise_power: noise power (W)
+    :param float epsilon: statistical significance criterion for a detection (-)
+    :param float bandwidth: measurement bandwidth (Hz)
+    :param float incoherent_integration_time: range from transmitter to target (meters)
 
-    TODO: Finish docstring
+    :return: signal to noise ratio (-)
+    :return: incoherent signal to noise ratio (-)
+    :return: minimal observation time (s)
+    
+    :rtype: float
+    :rtype: float
+    :rtype: float
+
+    **Reference:** D. Kastinen et al.: Radar observability of near-Earth objects with EISCAT 3, 2020
+        
     TODO: generalize theory??
     TODO: Juha knows 
     '''
-    snr = p_s/p_n
-    t_epsilon = ((p_s + p_n)**2.0)/(epsilon**2.0*p_s**2.0*B)
-
-    K = t_incoh*B
-    delta_pn = p_n/np.sqrt(K)
-    snr_incoh = p_s/delta_pn
     
-    return snr, snr_incoh, t_epsilon
+    # Compute the signal to noise ratio
+    snr = signal_power/noise_power
+    
+    # compute the minimum required observation time needed to reduce the relative error to epsilon as follows
+    minimal_observation_time = ((signal_power + noise_power)**2.0)/(epsilon**2.0*signal_power**2.0*bandwidth)
+    
+    # Compute the incoherent signal to noise ratio
+    n_measurement = incoherent_integration_time * bandwidth
+    snr_incoh = snr*np.sqrt(n_measurement)
+    
+    return snr, snr_incoh, minimal_observation_time
 
 
 
@@ -172,38 +192,42 @@ def doppler_spread_hard_target_snr(
         rx_noise_temp=150.0,
         radar_albedo=0.1,
     ):
-    """
-    t_obs = observation duration
-
-    #TODO: Double check the "bandwidth" parameter to see that it is actually defined and used correctly
-
-    returns:
-    snr - signal to noise ratio using coherent integration, when doing object discovery with a 
-          limited coherent integration duration and no incoherent integration
-    snr_incoh - the signal to noise ratio using incoherent integration, when using a priori
-                orbital elements to assist in coherent integration and incoherent integration.
-                coherent integration length is determined by t_obs (seconds)
-    """
+    ''' 
+    Computes the coherent and incoherent signal to noise ratio for a spinning rigid object by taking into account the doppler shift
     
+    :param float t_obs: measurement duration (s)
+    :param float spin_period: rotation period of the object being observed (s)
+    :param float/numpy.ndarray gain_tx: transmit antenna gain, linear (-)
+    :param float/numpy.ndarray gain_rx: receiver antenna gain, linear (-)
+    :param float wavelength: radar wavelength (m)
+    :param float power_tx: transmit power (W)
+    :param float/numpy.ndarray range_tx_m: range from transmitter to target (m)
+    :param float/numpy.ndarray range_rx_m: range from target to receiver (m)
+    :param float duty_cycle: RADAR measurement duty cycle (-)
+    :param float diameter: object diameter (m)
+    :param float bandwidth: effective receiver noise bandwidth (Hz)
+    :param float rx_noise_temp: receiver noise temperature (K)
+    :param float radar_albedo: RADAR albedo of the object beaing observed (-)
+
+    :return: signal to noise ratio using coherent integration, when doing object discovery with a limited coherent integration duration and no incoherent integration
+    :return: the signal to noise ratio using incoherent integration, when using a priori orbital elements to assist in coherent integration and incoherent integration. Coherent integration length is determined by t_obs (seconds)
+    
+    :rtype: float
+    :rtype: float
+
+    **Reference:** D. Kastinen et al.: Radar observability of near-Earth objects with EISCAT 3, 2020
+    
+    '''
+    
+    # compute the bandwidth of the doppler shifted RADAR echo
     doppler_bandwidth = 4*np.pi*diameter/(wavelength*spin_period)
-
-    # for serendipitous discovery
-    detection_bandwidth = np.max([doppler_bandwidth, bandwidth*duty_cycle, 1.0/t_obs])
-
-    # for detection with a periori know orbit
-    # the bandwidth cannot be smaller than permitted by the observation duration.
-    base_int_bandwidth = np.max([doppler_bandwidth, (1.0/t_obs) ])
-
-    #standard one segment rx noise
-    rx_noise = scipy.constants.k*rx_noise_temp*bandwidth
-
-    # effective noise power when using just coherent integration 
-    p_n0 = scipy.constants.k*rx_noise_temp*detection_bandwidth/duty_cycle
-
-    # effective noise power when doing incoherent integration and using a good a priori orbital elements
-    p_n1 = scipy.constants.k*rx_noise_temp*base_int_bandwidth/duty_cycle
     
-    h_snr = hard_target_snr(
+    # compute the bandwidth for the coherently and incoherently integrated measurements
+    detection_bandwidth = np.max([doppler_bandwidth, bandwidth*duty_cycle, 1.0/t_obs]) # cohrent : for serendipitous discovery
+    base_int_bandwidth = np.max([doppler_bandwidth, 1.0/t_obs]) # incoherent : for detection with a periori know orbit the bandwidth cannot be smaller than permitted by the observation duration.
+    
+    # Compute signal properties
+    h_snr = hard_target_snr(    # compute standard hard target SNR
         gain_tx = gain_tx, 
         gain_rx = gain_rx,
         wavelength = wavelength,
@@ -215,10 +239,17 @@ def doppler_spread_hard_target_snr(
         rx_noise_temp = rx_noise_temp,
         radar_albedo = radar_albedo,
     )
-    p_s = h_snr*rx_noise
-
-
-    snr, snr_incoh, te = incoherent_snr(p_s, p_n1, B=base_int_bandwidth, t_incoh=t_obs)
     
-    snr_coh = p_s/p_n0
+    rx_noise = scipy.constants.k*bandwidth*rx_noise_temp # compute the noise measured by the receiver
+    signal_power = h_snr * rx_noise # compute the noised measured by the receiver
+    
+    # compute the SNR
+    # coherent : effective noise power when using just coherent integration
+    coh_noise_power = scipy.constants.k*rx_noise_temp*detection_bandwidth/duty_cycle
+    snr_coh = signal_power/coh_noise_power
+    
+    # incoherent : effective noise power when doing incoherent integration and using a good a priori orbital elements
+    incoh_noise_power = scipy.constants.k*rx_noise_temp*base_int_bandwidth/duty_cycle
+    snr, snr_incoh, te = incoherent_snr(signal_power, incoh_noise_power, B=base_int_bandwidth, t_incoh=t_obs)
+    
     return snr_coh, snr_incoh
