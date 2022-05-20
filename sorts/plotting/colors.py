@@ -324,9 +324,9 @@ def get_cset(colorset=None):
                     '#44BB99', '#BBCC33', '#AAAA00', '#DDDDDD', '#000000')
 
 
-def get_color_cycle(name):
+def get_cycle(name):
     return plt.cycler('color', list(get_cset(name)))
 
 
-def set_color_cycle(ax, name='vibrant'):
+def set_cycle(ax, name='vibrant'):
     ax.set_prop_cycle(get_color_cycle(name))
