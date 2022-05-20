@@ -22,10 +22,10 @@ from sorts import plotting
 import pyorb
 
 # Computation / test setup
-OBJECT_NUMBER = 3
+OBJECT_NUMBER = 1
 CONTROLLER_NUMBER = 1
 
-end_t = 600
+end_t = 10
 
 # Scan type definition
 scan = Fence(azimuth=90, min_elevation=30, dwell=0.1, num=40)
@@ -207,26 +207,6 @@ axes[0][0].set_ylim([eiscat3d.tx[0].ecef[1]-dr, eiscat3d.tx[0].ecef[1]+dr])
 axes[0][0].set_zlim([eiscat3d.tx[0].ecef[2]-dr, eiscat3d.tx[0].ecef[2]+dr])
 
 plt.show()
-    
-# Plots states
-fig = plt.figure(figsize=(15,15))
-ax = fig.add_subplot(111, projection='3d')
-
-plotting.grid_earth(ax)
-
-for obj_id in range(len(objects)):
-    ax.plot(states[obj_id][0,:], states[obj_id][1,:], states[obj_id][2,:])
-    
-for tx in eiscat3d.tx:
-    ax.plot([tx.ecef[0]],[tx.ecef[1]],[tx.ecef[2]],'or')
-for rx in eiscat3d.rx:
-    ax.plot([rx.ecef[0]],[rx.ecef[1]],[rx.ecef[2]],'og')
-    
-plt.show()
-
-print("Done")
-    
-    
     
     
     
