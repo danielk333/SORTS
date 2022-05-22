@@ -223,7 +223,7 @@ def doppler_spread_hard_target_snr(
     doppler_bandwidth = 4*np.pi*diameter/(wavelength*spin_period)
     
     # compute the bandwidth for the coherently and incoherently integrated measurements
-    detection_bandwidth = np.max([doppler_bandwidth, bandwidth*duty_cycle, 1.0/t_obs]) # cohrent : for serendipitous discovery
+    detection_bandwidth = np.max([doppler_bandwidth, bandwidth*duty_cycle, 1.0/t_obs]) # coherent : for serendipitous discovery
     base_int_bandwidth = np.max([doppler_bandwidth, 1.0/t_obs]) # incoherent : for detection with a periori know orbit the bandwidth cannot be smaller than permitted by the observation duration.
     
     # Compute signal properties
@@ -240,16 +240,16 @@ def doppler_spread_hard_target_snr(
         radar_albedo = radar_albedo,
     )
     
-    rx_noise = scipy.constants.k*bandwidth*rx_noise_temp # compute the noise measured by the receiver
+    rx_noise = scipy.constants.k * rx_noise_temp * bandwidth # compute the noise measured by the receiver
     signal_power = h_snr * rx_noise # compute the noised measured by the receiver
     
     # compute the SNR
     # coherent : effective noise power when using just coherent integration
-    coh_noise_power = scipy.constants.k*rx_noise_temp*detection_bandwidth/duty_cycle
+    coh_noise_power = scipy.constants.k * rx_noise_temp * detection_bandwidth/duty_cycle
     snr_coh = signal_power/coh_noise_power
     
     # incoherent : effective noise power when doing incoherent integration and using a good a priori orbital elements
-    incoh_noise_power = scipy.constants.k*rx_noise_temp*base_int_bandwidth/duty_cycle
+    incoh_noise_power = scipy.constants.k * rx_noise_temp * base_int_bandwidth/duty_cycle
     snr, snr_incoh, te = incoherent_snr(signal_power, incoh_noise_power, B=base_int_bandwidth, t_incoh=t_obs)
     
     return snr_coh, snr_incoh
