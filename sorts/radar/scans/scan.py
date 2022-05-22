@@ -16,35 +16,35 @@ from ...transformations import frames
 
 
 class Scan(ABC):
-    '''Encapsulates the observation schema of a radar system, i.e. its "scan".
-
-    :param str coordinates: The coordinate system used, can be :code:`'azelr'`, :code:`'ned'` or :code:`'enu'`. If `azelr` is used, degrees are assumed.
-
-    **Pointing function:**
-    
-    The pointing function must follow the following standard:
-
-     * Take in time in seconds past reference epoch in seconds as first argument.
-     * Take any number of keyword arguments.
-     * It must return the pointing coordinates as an `(3,)`, `(3,n)` or `(3,n,m)` numpy ndarray where `n` is the length of the input time vector and `m` is the number of simultaneous pointing directions.
-     * Units are in meters.
-     * Should be vectorized according to time as the second axis.
-     
-    Example pointing function:
-    
-    .. code-block:: python
-
-        import numpy as np
-        #TODO
-
-    **Coordinate systems:**
-
-     :azelr: Azimuth, Elevation, Range in degrees east of north and above horizon.
-     :ned: Cartesian coordinates in North, East, Down.
-     :enu: Cartesian coordinates in East, North, Up.
-
-
     '''
+        Encapsulates the observation schema of a radar system, i.e. its "scan".
+    
+        :param str coordinates: The coordinate system used, can be :code:`'azelr'`, :code:`'ned'` or :code:`'enu'`. If `azelr` is used, degrees are assumed.
+    
+        **Pointing function:**
+        
+        The pointing function must follow the following standard:
+    
+         * Take in time in seconds past reference epoch in seconds as first argument.
+         * Take any number of keyword arguments.
+         * It must return the pointing coordinates as an `(3,)`, `(3,n)` or `(3,n,m)` numpy ndarray where `n` is the length of the input time vector and `m` is the number of simultaneous pointing directions.
+         * Units are in meters.
+         * Should be vectorized according to time as the second axis.
+         
+        Example pointing function:
+        
+        .. code-block:: python
+    
+            import numpy as np
+            #TODO
+    
+        **Coordinate systems:**
+    
+         :azelr: Azimuth, Elevation, Range in degrees east of north and above horizon.
+         :ned: Cartesian coordinates in North, East, Down.
+         :enu: Cartesian coordinates in East, North, Up.
+    '''
+    
     def __init__(self, coordinates='enu'):
         self.coordinates = coordinates.lower()
 
@@ -56,25 +56,29 @@ class Scan(ABC):
 
 
     def min_dwell(self):
-        '''If there are dynamic dwell times, this is the minimum dwell time. Otherwise, returns same as :code:`dwell`.
+        '''
+            If there are dynamic dwell times, this is the minimum dwell time. Otherwise, returns same as :code:`dwell`.
         '''
         return None
 
 
     def cycle(self):
-        '''The cycle time of the scan if applicable.
+        '''
+            The cycle time of the scan if applicable.
         '''
         return None
 
 
     def copy(self):
-        '''Return a copy of the current instance.
+        '''
+            Return a copy of the current instance.
         '''
         raise NotImplementedError()
 
 
     def check_dwell_tx(self, tx):
-        '''Checks if the transmitting antenna pulse pattern and coherent integration schema is compatible with the observation schema. Raises an Exception if not.
+        '''
+            Checks if the transmitting antenna pulse pattern and coherent integration schema is compatible with the observation schema. Raises an Exception if not.
         
             :param sorts.radar.TX tx: The antenna that should perform this scan.
         '''
@@ -91,7 +95,8 @@ class Scan(ABC):
 
 
     def enu_pointing(self, t):
-        '''Returns the instantaneous pointing in East, North, Up (ENU) local coordinates.
+        '''
+            Returns the instantaneous pointing in East, North, Up (ENU) local coordinates.
         
             :param float/numpy.ndarray t: Seconds past a reference epoch to retrieve the pointing at.
         '''
@@ -136,7 +141,8 @@ class Scan(ABC):
 
 
     def ecef_pointing(self, t, station):
-        '''Returns the instantaneous WGS84 ECEF pointing direction and the radar geographical location in WGS84 ECEF coordinates.
+        '''
+            Returns the instantaneous WGS84 ECEF pointing direction and the radar geographical location in WGS84 ECEF coordinates.
         
             :param float t: Seconds past a reference epoch to retrieve the pointing at.
         '''
