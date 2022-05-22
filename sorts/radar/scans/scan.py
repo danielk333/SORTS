@@ -141,10 +141,11 @@ class Scan(ABC):
 
 
     def ecef_pointing(self, t, station):
-        '''
-            Returns the instantaneous WGS84 ECEF pointing direction and the radar geographical location in WGS84 ECEF coordinates.
+
+        '''Returns the instantaneous WGS84 ECEF pointing direction and the radar geographical location in WGS84 ECEF coordinates.
         
-            :param float t: Seconds past a reference epoch to retrieve the pointing at.
+            t : float
+                Seconds past a reference epoch to retrieve the pointing at.
         '''
         t = np.asarray(t)
         
