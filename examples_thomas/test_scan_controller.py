@@ -13,7 +13,6 @@ import logging
 from sorts.radar.scans import Fence
 from sorts.radar.system import instances
 from sorts.radar import controllers
-
 from sorts.common import profiling
 from sorts import plotting
 
@@ -64,5 +63,5 @@ p.stop("test_scan_controller:compute_sub_controls")
 p.stop("test_scan_controller:Total")
 
 plt.show()
-    
+
 print(p)
