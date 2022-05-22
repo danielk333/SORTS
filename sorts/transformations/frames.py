@@ -270,55 +270,74 @@ def enu_to_ecef(lat, lon, alt, enu, radians=False):
     :rtype: numpy.ndarray
     :return: (3,n) array x,y and z coordinates in ECEF.
     '''
+    lat = np.asarray(lat)
+    lon = np.asarray(lon)
+    alt = np.asarray(alt)
+    
+    if np.shape(lat) != np.shape(lon) or np.shape(lat) != np.shape(alt): raise ValueError("lat, lon and alt must be the same shape.")
+    
     if not radians:
         lat, lon = np.radians(lat), np.radians(lon)
 
     mx = np.array([[-np.sin(lon), -np.sin(lat) * np.cos(lon), np.cos(lat) * np.cos(lon)],
                 [np.cos(lon), -np.sin(lat) * np.sin(lon), np.cos(lat) * np.sin(lon)],
-                [0, np.cos(lat), np.sin(lat)]])
-    
-    ecef = np.dot(mx,enu)
+                [np.zeros(np.size(lat, axis=0)), np.cos(lat), np.sin(lat)]], dtype=np.float64).reshape(np.size(lat, axis=0), 3, 3)
+
+    ecef = np.tensordot(mx, enu, axes=([2],[0]))
     
     return ecef 
-
 
 def ned_to_ecef(lat, lon, alt, ned, radians=False):
     '''NED (north/east/down) to ECEF coordinate system conversion, not including translation.
 
-    :param float lat: Latitude on the ellipsoid
-    :param float lon: Longitude on the ellipsoid
-    :param float alt: Altitude above ellipsoid, **Unused in this implementation**.
+    :param float/ndarray lat: Latitude on the ellipsoid
+    :param float/ndarray lon: Longitude on the ellipsoid
+    :param float/ndarray alt: Altitude above ellipsoid, **Unused in this implementation**.
     :param numpy.ndarray ned: (3,n) input matrix of positions in the NED-convention.
     :param bool radians: If :code:`True` then all values are given in radians instead of degrees.
     :rtype: numpy.ndarray
     :return: (3,n) array x,y and z coordinates in ECEF.
     '''
-    enu = np.empty(ned.size, dtype=ned.dtype)
+    ned = np.asarray(ned)
+    
+    enu = np.empty([ned.size], dtype=ned.dtype)
+    
     enu[0,...] = ned[1,...]
     enu[1,...] = ned[0,...]
     enu[2,...] = -ned[2,...]
-    
+
     return enu_to_ecef(lat, lon, alt, enu, radians=radians)
 
 
 def ecef_to_enu(lat, lon, alt, ecef, radians=False):
     '''ECEF coordinate system to local ENU (east,north,up), not including translation.
 
-    :param float lat: Latitude on the ellipsoid
-    :param float lon: Longitude on the ellipsoid
-    :param float alt: Altitude above ellipsoid, **Unused in this implementation**.
+    :param float/ndarray lat: Latitude on the ellipsoid
+    :param float/ndarray lon: Longitude on the ellipsoid
+    :param float/ndarray alt: Altitude above ellipsoid, **Unused in this implementation**.
     :param numpy.ndarray ecef: (3,n) array x,y and z coordinates in ECEF.
     :param bool radians: If :code:`True` then all values are given in radians instead of degrees.
     :rtype: numpy.ndarray
     :return: (3,n) array x,y and z in local coordinates in the ENU-convention.
     '''
+    
+    ecef = np.asarray(ecef)
+    
+    lat = np.asarray(lat)
+    lon = np.asarray(lon)
+    alt = np.asarray(alt)
+    
+    if np.shape(lat) != np.shape(lon) or np.shape(lat) != np.shape(alt): raise ValueError("lat, lon and alt must be the same shape.")    
+    
     if not radians:
         lat, lon = np.radians(lat), np.radians(lon)
 
     mx = np.array([[-np.sin(lon), -np.sin(lat) * np.cos(lon), np.cos(lat) * np.cos(lon)],
                 [np.cos(lon), -np.sin(lat) * np.sin(lon), np.cos(lat) * np.sin(lon)],
-                [0, np.cos(lat), np.sin(lat)]])
-    enu = np.dot(np.linalg.inv(mx),ecef)
+                [np.zeros(np.size(lat, axis=0)), np.cos(lat), np.sin(lat)]]).reshape(np.size(lat, axis=0), 3, 3)
+    
+    
+    enu = np.tensordot(np.linalg.inv(mx), ecef, axes=([2],[0]))
     
     return enu
 
@@ -328,8 +347,13 @@ def azel_to_ecef(lat, lon, alt, az, el, radians=False):
 
     TODO: Docstring
     '''
-    shape = (3,)
-
+    az = np.asarray(az)
+    el = np.asarray(el)
+    
+    if np.shape(az) != np.shape(el): raise ValueError("az and el must be the same shape.")    
+    
+    shape = (3,1)
+    
     if isinstance(az,np.ndarray):
         if len(az.shape) == 0:
             az = float(az)
@@ -355,8 +379,6 @@ def azel_to_ecef(lat, lon, alt, az, el, radians=False):
     enu = sph_to_cart(sph, radians=radians)
     
     return enu_to_ecef(lat, lon, alt, enu, radians=radians)
-
-
 
 def vec_to_vec(vec_in, vec_out):
     '''Get the rotation matrix that rotates `vec_in` to `vec_out` along the plane containing both. Uses quaternion calculations.
