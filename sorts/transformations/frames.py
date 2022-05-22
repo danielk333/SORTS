@@ -284,7 +284,7 @@ def enu_to_ecef(lat, lon, alt, enu, radians=False):
                 [np.zeros(np.size(lat, axis=0)), np.cos(lat), np.sin(lat)]], dtype=np.float64).reshape(np.size(lat, axis=0), 3, 3)
 
     ecef = np.tensordot(mx, enu, axes=([2],[0]))
-
+    
     return ecef 
 
 def ned_to_ecef(lat, lon, alt, ned, radians=False):
