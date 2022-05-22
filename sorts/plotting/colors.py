@@ -14,6 +14,7 @@ License:  Standard 3-clause BSD
 """
 from collections import namedtuple
 import numpy as np
+import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap, to_rgba_array
 
 
