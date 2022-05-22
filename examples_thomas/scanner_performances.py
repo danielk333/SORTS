@@ -25,7 +25,7 @@ import pyorb
 OBJECT_NUMBER = 1
 CONTROLLER_NUMBER = 1
 
-end_t = 10
+end_t = 600
 
 # Scan type definition
 scan = Fence(azimuth=90, min_elevation=30, dwell=0.1, num=40)
