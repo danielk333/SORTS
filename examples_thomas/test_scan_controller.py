@@ -39,6 +39,7 @@ p.start("test_scan_controller:compute_controls")
 # instanciate the scanning controller 
 scanner_ctrl = controllers.Scanner(profiler=p, logger=logger)
 t = np.arange(0, end_t, scan.dwell())
+
 controls = scanner_ctrl.generate_controls(t, eiscat3d, scan, max_points=max_points)
 
 p.stop("test_scan_controller:compute_controls")
