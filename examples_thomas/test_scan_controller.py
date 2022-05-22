@@ -41,7 +41,7 @@ p.start("Total")
 scanner_ctrl = controllers.Scanner(profiler=p, logger=logger)
 print("Scanner init")
 t = np.arange(0, end_t, scan.dwell())
-controls = scanner_ctrl.generate_controls(t, eiscat3d, scan)
+controls = scanner_ctrl.generate_controls(t, eiscat3d, scan, priority=-2)
 print("Controls generated")
 
 
