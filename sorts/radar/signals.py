@@ -223,7 +223,6 @@ def doppler_spread_hard_target_snr(
     doppler_bandwidth = 4*np.pi*diameter/(wavelength*spin_period)
     
     # compute the bandwidth for the coherently and incoherently integrated measurements
-    
     detection_bandwidth = np.max([doppler_bandwidth, bandwidth*duty_cycle, 1.0/t_obs]) # coherent : for serendipitous discovery
     base_int_bandwidth = np.max([doppler_bandwidth, 1.0/t_obs]) # incoherent : for detection with a periori know orbit the bandwidth cannot be smaller than permitted by the observation duration.
     
