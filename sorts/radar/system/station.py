@@ -37,7 +37,7 @@ class Station(object):
         :ivar bool enabled: Indicates if this station is turned on or off.
 
     '''
-    def __init__(self, lat, lon, alt, min_elevation, beam):
+    def __init__(self, lat, lon, alt, min_elevation, beam, **kwargs):
         self.lat = lat
         self.lon = lon
         self.alt = alt
@@ -46,7 +46,26 @@ class Station(object):
         self.beam = beam
         self.enabled = True
         self.pointing_range = None
-
+        
+        # set the physical properties of the station 
+        self.max_angular_speed_theta = None
+        self.max_angular_speed_phi = None
+        self.max_power = None
+        self.max_duty_cycle = None
+        
+        # theta : angle between the radar beam and the local vertical axis
+        if "max_angular_speed_theta" in kwargs:
+            self.max_angular_speed_theta = kwargs["max_angular_speed_theta"]
+        else:
+            self.max_angular_speed_theta = None
+        
+        # phi : angle between the projection of radar beam direction on the (x,y) plane and the local horizontal axes
+        if "max_angular_speed_theta" in kwargs: 
+            self.max_angular_speed_phi = kwargs["max_angular_speed_phi"]
+        else:
+            self.max_angular_speed_phi = None
+        
+        
 
     def field_of_view(self, states, **kwargs):
         '''Determines the field of view of the station. Should be vectorized over second dimension of states.
@@ -191,7 +210,6 @@ class RX(Station):
         return st
 
 
-
 class TX(Station):
     '''A transmitting radar station
         
@@ -210,7 +228,19 @@ class TX(Station):
         :ivar int n_ipp: Number of pulses to coherently integrate.
         :ivar float coh_int_bandwidth: Effective bandwidth of receiver noise after coherent integration.
     '''
-    def __init__(self, lat, lon, alt, min_elevation, beam, power, bandwidth, duty_cycle, pulse_length=1e-3, ipp=10e-3, n_ipp=20):
+    def __init__(self, 
+                 lat, 
+                 lon, 
+                 alt, 
+                 min_elevation, 
+                 beam, 
+                 power, 
+                 bandwidth, 
+                 duty_cycle, 
+                 pulse_length=1e-3, 
+                 ipp=10e-3, 
+                 n_ipp=20, 
+                 **kwargs):
         super().__init__(lat, lon, alt, min_elevation, beam)
 
         self.bandwidth = bandwidth
@@ -220,7 +250,21 @@ class TX(Station):
         self.ipp = ipp
         self.n_ipp = n_ipp
         self.coh_int_bandwidth = 1.0/(pulse_length*n_ipp)
-
+        
+        # set max parameters
+        self.max_power = None
+        self.max_duty_cycle = None
+        self.max_bandwidth = None
+        self.min_bandwidth = None
+        
+        if "max_power" in kwargs:
+            self.max_power = kwargs["max_power"]
+        if "max_duty_cycle" in kwargs:
+            self.max_duty_cycle = kwargs["max_duty_cycle"]
+        if "max_bandwidth" in kwargs:
+            self.max_bandwidth = kwargs["max_bandwidth"]
+        if "min_bandwidth" in kwargs:
+            self.min_bandwidth = kwargs["min_bandwidth"]
 
     def copy(self):
         st = TX(
