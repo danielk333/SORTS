@@ -38,7 +38,7 @@ class Beampark(Scan):
         if isinstance(t, float) or isinstance(t, int):
             shape = (3, )
         else:
-            shape = (3, len(t))
+            shape = (3, np.size(t))
 
         if hasattr(self.elevation, '__len__'):
             shape += (len(self.elevation), )
