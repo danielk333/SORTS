@@ -114,27 +114,40 @@ class Scan(ABC):
         return point
     
 
-    def _transform_ecef(self, point, ant):
+    def _transform_ecef(self, point, station):
+        station = np.asarray(station)
+        
+        if len(np.shape(station)) == 1: # if ant is an array
+            pos = np.ndarray([3, len(station)])
+            
+            for station_ind, st in enumerate(station):
+                pos[:, station_ind] = [st.lat, st.lon, st.alt]
+        else:
+            pos = np.array([station.lat, station.lon, station.alt])
+        
         if self.coordinates == 'ned':
-            k0 = frames.ned_to_ecef(ant.lat, ant.lon, ant.alt, point, radians=False)
+            k0 = frames.ned_to_ecef(pos[0], pos[1], pos[2], point, radians=False)
         elif self.coordinates == 'enu':
-            k0 = frames.enu_to_ecef(ant.lat, ant.lon, ant.alt, point, radians=False)
+            k0 = frames.enu_to_ecef(pos[0], pos[1], pos[2], point, radians=False)
         elif self.coordinates == 'azelr':
-            k0 = frames.azel_to_ecef(ant.lat, ant.lon, ant.alt, point[0,...], point[1,...], radians=False)
+            k0 = frames.azel_to_ecef(pos[0], pos[1], pos[2], point[0,...], point[1,...], radians=False)
+            
         return k0
 
 
-    def ecef_pointing(self, t, ant):
+    def ecef_pointing(self, t, station):
         '''Returns the instantaneous WGS84 ECEF pointing direction and the radar geographical location in WGS84 ECEF coordinates.
         
             :param float t: Seconds past a reference epoch to retrieve the pointing at.
         '''
+        t = np.asarray(t)
+        
         point = self.pointing(t)
 
         if len(point.shape) == 3:
             k0 = np.zeros(point.shape, dtype=point.dtype)
             for ind in range(point.shape[2]):
-                k0[:,:,ind] = self._transform_ecef(point[:,:,ind], ant)
-        else:
-            k0 = self._transform_ecef(point, ant)
+                k0[:,:,ind] = self._transform_ecef(point[:,:,ind], station)
+        else:            
+            k0 = self._transform_ecef(point, station)
         return k0
