@@ -17,7 +17,7 @@ from sorts.common import profiling
 from sorts import plotting
 
 # Computation / test setup
-end_t = 60
+end_t = 10
 
 # Scan type definition
 scan = Fence(azimuth=90, min_elevation=30, dwell=0.1, num=50)
@@ -38,7 +38,7 @@ t = np.arange(0, end_t, scan.dwell())
 controls = scanner_ctrl.generate_controls(t, eiscat3d, scan, priority=-1)
 
 # plot the generated controls
-plotting.plot_beam_directions(controls, eiscat3d, logger=logger, profiler=p, zoom_level=1)
+plotting.plot_beam_directions(controls, eiscat3d, logger=logger, profiler=p, zoom_level=0.95)
 
 p.stop("Total")
 
