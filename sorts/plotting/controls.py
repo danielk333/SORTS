@@ -65,6 +65,7 @@ def plot_beam_directions(controls, radar, ax=None, logger=None, profiler=None, t
     Finally, the results can be plotted by calling :
     
     >>> plotting.plot_beam_directions(controls["beam_direction"], eiscat3d, logger=logger)
+
     
     '''
     # Validate inputs
@@ -106,7 +107,7 @@ def plot_beam_directions(controls, radar, ax=None, logger=None, profiler=None, t
     # compute point
     rx_directions = np.reshape(controls["rx"].transpose(0, 3, 1, 4, 2), (np.shape(rx_ecef)[0], 3, -1), 'C') # convert array to get [x, y, z] coordinates
     tx_directions = np.reshape(controls["tx"], (np.shape(tx_ecef)[0], 3, -1), 'C').repeat(np.shape(controls["rx"])[2], axis=2) # convert array to get [x, y, z] coordinates
-    
+
     # generate points (ecef frame)
     a = np.einsum('ijk,hjk->ihk', tx_directions, rx_directions)
     
