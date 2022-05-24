@@ -11,3 +11,4 @@ from .schedule import schedule_pointing, observed_parameters
 from .scan import scan, plot_radar_scan_movie
 
 from .orbits import kepler_scatter, kepler_orbit
+from .controls import plot_beam_directions
