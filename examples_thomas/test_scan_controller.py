@@ -13,6 +13,7 @@ import logging
 from sorts.radar.scans import Fence
 from sorts.radar.system import instances
 from sorts.radar import controllers
+
 from sorts.common import profiling
 from sorts import plotting
 
@@ -41,7 +42,6 @@ scanner_ctrl = controllers.Scanner(profiler=p, logger=logger)
 t = np.arange(0, end_t, scan.dwell())
 
 controls = scanner_ctrl.generate_controls(t, eiscat3d, scan, max_points=max_points)
-
 p.stop("test_scan_controller:compute_controls")
 
 plt_ids = np.linspace(0, int(end_t/t_slice/max_points)-1, nbplots, dtype=int)
