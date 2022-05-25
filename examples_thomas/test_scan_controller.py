@@ -8,7 +8,6 @@ Created on Wed May 18 14:15:39 2022
 
 import numpy as np
 import matplotlib.pyplot as plt
-import logging
 
 from sorts.radar.scans import Fence
 from sorts.radar.system import instances
@@ -22,9 +21,10 @@ end_t = 24*3600
 nbplots = 0
 t_slice = 0.1
 max_points = 100
+end_t = 60
 
 # Scan type definition
-scan = Fence(azimuth=90, min_elevation=30, dwell=t_slice, num=50)
+scan = Fence(azimuth=90, min_elevation=30, dwell=0.1, num=50)
 
 # RADAR definition
 eiscat3d = instances.eiscat3d
@@ -64,5 +64,5 @@ p.stop("test_scan_controller:compute_sub_controls")
 p.stop("test_scan_controller:Total")
 
 plt.show()
-    
+
 print(p)

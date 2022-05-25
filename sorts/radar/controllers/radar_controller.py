@@ -75,7 +75,7 @@ class RadarController(ABC):
                 t = t[None, :]
 
         return t, np.shape(t)[0] 
-    
+
     @abstractmethod
     def generate_controls(self, t, radar, **kwargs):
         '''

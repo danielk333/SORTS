@@ -445,9 +445,13 @@ class SGP4(Propagator):
         dx_std = self.settings['TEME_TO_TLE_minimize_start_stds']
         samps = self.settings['TEME_TO_TLE_minimize_start_samples']
         bounds = self.settings['TEME_TO_TLE_minimize_bounds']
+<<<<<<< HEAD:sorts/targets/propagator/pysgp4.py
 
         opt_res = None
 
+=======
+        
+>>>>>>> 520760a47279db00031585021a0556b4b25d0eda:sorts/propagator/pysgp4.py
         for j in range(samps):
             _init_elements = init_elements.copy()
             if j > 0:
@@ -532,10 +536,14 @@ class SGP4(Propagator):
             state_cart = state
 
         iter_max = self.settings['TEME_to_TLE_max_iter']  # Maximum number of iterations
+<<<<<<< HEAD:sorts/targets/propagator/pysgp4.py
 
         dr = 0
         dv = 0
 
+=======
+        
+>>>>>>> 520760a47279db00031585021a0556b4b25d0eda:sorts/propagator/pysgp4.py
         # Iterative determination of mean elements
         for it in range(iter_max):
             # Mean elements and osculating state

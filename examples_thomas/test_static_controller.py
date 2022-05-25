@@ -22,6 +22,9 @@ import pyorb
 end_t = 24*3600
 nbplots = 3
 
+end_t = 10
+
+
 # RADAR definition
 eiscat3d = instances.eiscat3d
     
@@ -58,3 +61,4 @@ p.stop("Total")
 print(p)
 
 plt.show()
+

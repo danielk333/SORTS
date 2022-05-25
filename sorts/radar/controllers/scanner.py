@@ -166,6 +166,11 @@ class Scanner(RadarController):
         :numpy.ndarray r (optional): Array of ranges from the transmitter where the receivers need to target simultaneously at a given time t [m]
         :int priority (optional): Priority of the generated controls, only used by the scheduler to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
         :int max_points (optional): 
+
+        Return value
+        ----------
+        
+        Dictionnary containing the controls to be applied to the radar to perform the required scanning scheme. In the case of the Scanner controller, the controls are the following.
     
         - "t"
             1D array of time points at which the controls need to be executed by the radar

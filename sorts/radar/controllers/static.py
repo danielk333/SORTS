@@ -10,9 +10,9 @@ from .radar_controller import RadarController
 from ..scans import Beampark
 from ..system import Radar
 
-
 class Static(RadarController):
     '''
+<<<<<<< HEAD
     Usage
     -----
     Creates a Static controller to generate radar scanning controls. Only one Static controller is needed to create multiple controls for different radars.
@@ -47,8 +47,7 @@ class Static(RadarController):
         
         if self.logger is not None:
             self.logger.info(f'Static:init')
-            
-            
+   
     def __compute_controls_subarray(self, 
                                     t,
                                     radar, 
@@ -204,7 +203,6 @@ class Static(RadarController):
         - "priority"
             Priority of the generated controls, only used by the scheduler to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
             
-            
         Examples 
         --------
         
@@ -230,8 +228,7 @@ class Static(RadarController):
             >>> ctrl = controls["beam_direction_rx"][1, 0, 4, 1, 79]
             
           '''
-       
-        # checks input values to make sure they are compatible with the implementation of the function
+	# checks input values to make sure they are compatible with the implementation of the function
         if priority is not None:
             if not isinstance(priority, int): raise TypeError("the priority must be an integer.")
             else:
