@@ -153,13 +153,15 @@ class ObservedParameters(Scheduler):
 
 
     def stop_condition(self, t, radar, meta, tx_enu, rx_enu, tx_index, rx_index):
-        '''Implement this function if there should be abort condition in the sequential generator. Work with both vectorization and linear iteration (as vectorization first caches the generator).
+        '''
+            Implement this function if there should be abort condition in the sequential generator. Work with both vectorization and linear iteration (as vectorization first caches the generator).
         '''
         return False
 
 
     def observable_filter(self, t, radar, meta, tx_enu, rx_enu, tx_index, rx_index):
-        '''Determines if the object was observable or not by the radar system
+        '''
+            Determines if the object was observable or not by the radar system
         '''
         return True
 
@@ -184,10 +186,11 @@ class ObservedParameters(Scheduler):
 
 
     def get_vectorized_row(self, radar, meta, tx_index, rx_index):
-        '''Used to extract the used data from the `radar` instance when vectorizing `calculate_observation`. 
-        Input to `vectorized_observable_filter` and `vectorized_get_beam_gain_and_wavelength`.
+        '''
+            Used to extract the used data from the `radar` instance when vectorizing `calculate_observation`. 
+            Input to `vectorized_observable_filter` and `vectorized_get_beam_gain_and_wavelength`.
 
-        Should return a numpy vector, will be stored as a row-vector in the matrix passed to the vectorized functions.
+            Should return a numpy vector, will be stored as a row-vector in the matrix passed to the vectorized functions.
         '''
         row = np.empty((8,), dtype=np.float64)
         row[0:3] = radar.tx[tx_index].beam.pointing[:]
@@ -217,11 +220,12 @@ class ObservedParameters(Scheduler):
             vectorize=False,
             extended_meta=True,
         ):
-        '''Calculate the observation of a pass of a specific space object given the current state of the Scheduler.
+        '''
+            Calculate the observation of a pass of a specific space object given the current state of the Scheduler.
 
-        #ASSUMES INPUT t IS RELATIVE SPACE OBJECT EPOCH unless epoch is given
+            #ASSUMES INPUT t IS RELATIVE SPACE OBJECT EPOCH unless epoch is given
 
-        #TODO: Docstring
+            #TODO: Docstring
         '''
 
         txi, rxi = txrx_pass.station_id

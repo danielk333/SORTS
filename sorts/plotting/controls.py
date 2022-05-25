@@ -64,7 +64,7 @@ def plot_beam_directions(controls, radar, ax=None, logger=None, profiler=None, t
         
     Finally, the results can be plotted by calling :
     
-    >>> plotting.plot_beam_directions(controls, eiscat3d, logger=logger)
+    >>> plotting.plot_beam_directions(controls["beam_direction"], eiscat3d, logger=logger)
     
     '''
     # Validate inputs
@@ -75,10 +75,10 @@ def plot_beam_directions(controls, radar, ax=None, logger=None, profiler=None, t
         fig = plt.figure(dpi=300, figsize=(5, 5))
         ax = fig.add_subplot(111, projection='3d')
         
-    if not "beam_direction_tx" in controls.keys():
+    if not "tx" in controls.keys():
         raise KeyError("No Tx beam direction controls found in the provided controls.")
     
-    if not "beam_direction_rx" in controls.keys():
+    if not "rx" in controls.keys():
         raise KeyError("No Rx beam direction controls found in the provided controls.")
     
     # Starting execution
@@ -104,8 +104,8 @@ def plot_beam_directions(controls, radar, ax=None, logger=None, profiler=None, t
     rx_ecef = np.array([rx.ecef for rx in radar.rx], dtype=float)
     
     # compute point
-    rx_directions = np.reshape(controls["beam_direction_rx"].transpose(0, 3, 1, 4, 2), (np.shape(rx_ecef)[0], 3, -1), 'C') # convert array to get [x, y, z] coordinates
-    tx_directions = np.reshape(controls["beam_direction_tx"], (np.shape(tx_ecef)[0], 3, -1), 'C').repeat(np.shape(controls["beam_direction_rx"])[2], axis=2) # convert array to get [x, y, z] coordinates
+    rx_directions = np.reshape(controls["rx"].transpose(0, 3, 1, 4, 2), (np.shape(rx_ecef)[0], 3, -1), 'C') # convert array to get [x, y, z] coordinates
+    tx_directions = np.reshape(controls["tx"], (np.shape(tx_ecef)[0], 3, -1), 'C').repeat(np.shape(controls["rx"])[2], axis=2) # convert array to get [x, y, z] coordinates
     
     # generate points (ecef frame)
     a = np.einsum('ijk,hjk->ihk', tx_directions, rx_directions)
@@ -180,7 +180,7 @@ def plot_beam_directions(controls, radar, ax=None, logger=None, profiler=None, t
             ax.set_ylim([radar.tx[0].ecef[1] - dr, radar.tx[0].ecef[1] + dr])
             ax.set_zlim([radar.tx[0].ecef[2] - dr, radar.tx[0].ecef[2] + dr])
     
-    if profiler is not None:
+    if profiler is not None:    
         profiler.stop("plotting:controls:plot_beam_directions")
     
     return ax # return instance of axis for further use if necessary

@@ -19,11 +19,56 @@ class Scheduler(ABC):
     #TODO: Docstring
     '''
 
-    def __init__(self, radar, profiler=None, logger=None):
+    def __init__(self, radar, t0, schedule_period=None, profiler=None, logger=None):
+        if self.logger is not None:
+            self.logger.info("scheduler:init")
+        
         self.radar = radar
         self.logger = logger
         self.profiler = profiler
+        
+        self._t0 = t0
+        self._schedule_period = schedule_period
+        
+        if self.logger is not None:
+            self.logger.info(f"scheduler:init -> setting scheduling start time t0={t0}")
+            
+            if schedule_period is not None:
+                self.logger.info(f"scheduler:init -> setting scheduling period : schedule_period={schedule_period}")        
+            else:
+                self.logger.info("scheduler:init -> ignoring scheduling period...")      
 
+    @property
+    def schedule_period(self):
+        return self._schedule_period
+    
+    @schedule_period.setter
+    def schedule_period(self, val):
+        try:
+            val = float(val)
+        except:
+            raise ValueError("The schedule period has to be a number (int/float)")
+        
+        self._schedule_period = val
+        
+        if self.logger is not None:
+            self.logger.info(f"scheduler:schedule_period:setter -> setting scheduling period : schedule_period={val}")        
+
+    @property
+    def t0(self):
+        return self._t0
+    
+    @t0.setter
+    def t0(self, val):
+        try:
+            val = float(val)
+        except:
+            raise ValueError("The scheduler start time has to be a number (int/float)")
+        
+        self._t0 = val
+        
+        if self.logger is not None:
+            self.logger.info(f"scheduler:t0:setter -> setting scheduling start time : t0={val}")        
 
     @abstractmethod
     def update(self, *args, **kwargs):

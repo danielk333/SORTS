@@ -11,7 +11,7 @@ import copy
 import numpy as np
 
 #Local import
-
+from ..scheduler import Scheduler
 
 class RadarController(ABC):
     '''
@@ -34,6 +34,47 @@ class RadarController(ABC):
         # set controller metadata        
         self.meta = dict()
         self.meta['controller_type'] = self.__class__
+        
+    def _split_time_array(self, t, scheduler, max_points):
+        '''
+        Usage
+        -----
+        
+        Split the controls time array according to the scheduler period and start time (if the scheduler is provided).       
+        If the scheduler is None, then the time array will be splitted to ensure that the number of time points in a given controls subarray does not exceed max_points
+        This function returns the splitted control time array as well as the number of time subarrays
+        '''
+        if scheduler is not None:
+            if self.logger is not None:
+                self.logger.info("radar_controller:_split_time_array -> using scheduler master clock")
+                self.logger.info("radar_controller:_split_time_array -> skipping max_points (max time points limit)")
+                
+            if not isinstance(scheduler, Scheduler):
+                raise ValueError(f"scheduler has to be an instance of {Scheduler}, not {scheduler}")
+            
+            # compute scheduler period incices
+            sch_period = scheduler.schedule_period
+            t0 = scheduler.t0
+            period_idx = (t - t0)//sch_period
+            
+            t_start_period_indices = np.array(np.where((period_idx[1:] - period_idx[:-1]) == 1)[0]) + 1
+            
+            del period_idx
+        else:
+            if self.logger is not None:
+                self.logger.info("radar_controller:_split_time_array -> No scheduler provided, skipping master clock splitting...")
+                self.logger.info("radar_controller:_split_time_array -> using max_points={max_points} (max time points limit)")
+                
+            # compute the number of iterations needed
+            if(np.size(t) > max_points):
+                sub_controls_count = int((len(t[0])-1)/max_points) + 1    
+                
+                t_start_subarray_indices = np.arange(0, np.size(t), max_points, dtype=int)
+                t = np.split(t, t_start_subarray_indices)
+            else:
+                t = t[None, :]
+
+        return t, np.shape(t)[0] 
     
     @abstractmethod
     def generate_controls(self, t, radar, **kwargs):
