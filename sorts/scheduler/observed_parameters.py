@@ -215,6 +215,7 @@ class ObservedParameters(Scheduler):
             save_states=False, 
             vectorize=False,
             extended_meta=True,
+            blind_ranges=True,
         ):
         '''Calculate the observation of a pass of a specific space object given the current state of the Scheduler.
 
@@ -395,20 +396,21 @@ class ObservedParameters(Scheduler):
                         radar_albedo=radar_albedo,
                     )
 
-                snr_modulation = np.ones((len(t),), dtype=np.float64)
-                for ch_txi, ch_rxi in self.radar.joint_stations:
-                    if ch_rxi == rxi:
-                        delay = (ranges[0][keep] + ranges[1][keep])/scipy.constants.c
-                        ipp_f = np.mod(delay, ipps[keep])
+                if blind_ranges:
+                    snr_modulation = np.ones((len(t),), dtype=np.float64)
+                    for ch_txi, ch_rxi in self.radar.joint_stations:
+                        if ch_rxi == rxi:
+                            delay = (ranges[0][keep] + ranges[1][keep])/scipy.constants.c
+                            ipp_f = np.mod(delay, ipps[keep])
 
-                        inds = ipp_f <= pulse_lengths[keep]
-                        snr_modulation[keep][inds] = pulse_lengths[keep][inds]
+                            inds = ipp_f <= pulse_lengths[keep]
+                            snr_modulation[keep][inds] = pulse_lengths[keep][inds]
 
-                        inds = ipp_f >= ipps[keep] - pulse_lengths[keep]
-                        snr_modulation[keep][inds] = (ipps[keep][inds] - ipp_f[inds])/pulse_lengths[keep][inds]
+                            inds = ipp_f >= ipps[keep] - pulse_lengths[keep]
+                            snr_modulation[keep][inds] = (ipps[keep][inds] - ipp_f[inds])/pulse_lengths[keep][inds]
 
-                        break
-                snr[keep] = snr[keep]*snr_modulation[keep]
+                            break
+                    snr[keep] = snr[keep]*snr_modulation[keep]
 
                 if self.profiler is not None:
                     self.profiler.stop('Obs.Param.:calculate_observation:snr-step:snr')
@@ -475,20 +477,21 @@ class ObservedParameters(Scheduler):
                     if self.profiler is not None:
                         self.profiler.start('Obs.Param.:calculate_observation:snr-step:gain')
 
-                    #check if target is in radars blind range
-                    #assume synchronized transmitting
-                    #assume decoding of partial pulses is possible and linearly decreases signal strength
                     snr_modulation = 1.0
-                    for ch_txi, ch_rxi in radar.joint_stations:
-                        if ch_rxi == rxi:
-                            delay = (ranges[0][ti] + ranges[1][ti])/scipy.constants.c
-                            ipp_f = np.mod(delay, radar.tx[txi].ipp)
+                    if blind_ranges:
+                        #check if target is in radars blind range
+                        #assume synchronized transmitting
+                        #assume decoding of partial pulses is possible and linearly decreases signal strength
+                        for ch_txi, ch_rxi in radar.joint_stations:
+                            if ch_rxi == rxi:
+                                delay = (ranges[0][ti] + ranges[1][ti])/scipy.constants.c
+                                ipp_f = np.mod(delay, radar.tx[txi].ipp)
 
-                            if ipp_f <= radar.tx[txi].pulse_length:
-                                snr_modulation = ipp_f/radar.tx[txi].pulse_length
-                            elif ipp_f >= radar.tx[txi].ipp - radar.tx[txi].pulse_length:
-                                snr_modulation = (radar.tx[txi].ipp - ipp_f)/radar.tx[txi].pulse_length
-                            break
+                                if ipp_f <= radar.tx[txi].pulse_length:
+                                    snr_modulation = ipp_f/radar.tx[txi].pulse_length
+                                elif ipp_f >= radar.tx[txi].ipp - radar.tx[txi].pulse_length:
+                                    snr_modulation = (radar.tx[txi].ipp - ipp_f)/radar.tx[txi].pulse_length
+                                break
 
                     tx_g, tx_wavelength = self.get_beam_gain_and_wavelength(
                         radar.tx[txi].beam, 
