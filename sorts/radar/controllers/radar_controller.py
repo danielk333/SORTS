@@ -76,7 +76,11 @@ class RadarController(ABC):
             else:
                 t = t[None, :]
 
+<<<<<<< HEAD
         return t, np.shape(t)[0]
+=======
+        return t, np.shape(t)[0] 
+>>>>>>> 4c93b2bf3f6732fff5f7eb58cfcbc81b5e79a6f4
 
     @abstractmethod
     def generate_controls(self, t, radar, **kwargs):
@@ -211,4 +215,11 @@ def normalize_direction_controls(directions):
                     
                     directions[station_id, associated_station_id, ti, t_slice_id] = direction
 
+<<<<<<< HEAD
     return directions
+=======
+                >>> controls_t = controls["t"]                           # get time array
+                >>> controls_dir_tx = controls["beam_direction_tx"]      # get controls for tx direction
+        '''
+        pass
+>>>>>>> 4c93b2bf3f6732fff5f7eb58cfcbc81b5e79a6f4

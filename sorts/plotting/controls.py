@@ -176,9 +176,10 @@ def plot_beam_directions(controls, radar, ax=None, logger=None, profiler=None, t
             ax.set_ylim([radar.tx[0].ecef[1] - dr, radar.tx[0].ecef[1] + dr])
             ax.set_zlim([radar.tx[0].ecef[2] - dr, radar.tx[0].ecef[2] + dr])
     
+
     if profiler is not None:    
         profiler.stop("plotting:controls:plot_beam_directions")
     
     ax.view_init(elevation, azimuth)
-    
+
     return ax # return instance of axis for further use if necessary

@@ -193,7 +193,21 @@ class Scanner(RadarController):
         Python dictionary 
             Controls to be applied to the radar to perform the required scanning scheme. 
         
+<<<<<<< HEAD
         In the case of the Scanner controller, the controls are the following :
+=======
+        :numpy.ndarray t: Time points at which the controls are to be generated [s]
+        :radar.system.Radar radar: Radar instance to be controlled
+        :scans.Scan scan: Scan instance used to generate the scanning controls
+        :numpy.ndarray r (optional): Array of ranges from the transmitter where the receivers need to target simultaneously at a given time t [m]
+        :int priority (optional): Priority of the generated controls, only used by the scheduler to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
+        :int max_points (optional): 
+
+        Return value
+        ----------
+        
+        Dictionnary containing the controls to be applied to the radar to perform the required scanning scheme. In the case of the Scanner controller, the controls are the following.
+>>>>>>> 4c93b2bf3f6732fff5f7eb58cfcbc81b5e79a6f4
     
         - "t"
             1D array of time points at which the controls need to be executed by the radar
@@ -388,6 +402,7 @@ class Scanner(RadarController):
         # get Rx pointing directions        
         point_rx = np.repeat(point_rx_to_tx[None, :], len(radar.rx), axis=0) 
         
+<<<<<<< HEAD
         # compute directions for stations where tx and rx < 200 meters apart => same location for pointing
         rx_close_to_tx = np.linalg.norm(tx_ecef - rx_ecef.transpose(), axis=1) < 200.0
         inds_rx_close_to_tx = np.array(np.where(rx_close_to_tx)) # [txinds, rxinds]
@@ -403,4 +418,6 @@ class Scanner(RadarController):
             self.profiler.stop('Scanner:generate_controls:compute_rx_beam_directions')
             self.profiler.stop('Scanner:generate_controls')
     
+=======
+>>>>>>> 4c93b2bf3f6732fff5f7eb58cfcbc81b5e79a6f4
         return controls

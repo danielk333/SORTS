@@ -445,12 +445,7 @@ class SGP4(Propagator):
         dx_std = self.settings['TEME_TO_TLE_minimize_start_stds']
         samps = self.settings['TEME_TO_TLE_minimize_start_samples']
         bounds = self.settings['TEME_TO_TLE_minimize_bounds']
-<<<<<<< HEAD
 
-=======
-        opt_res = None
-        
->>>>>>> 9f3cdf4 (Updated SORTS controller architecture)
         for j in range(samps):
             _init_elements = init_elements.copy()
             if j > 0:
@@ -535,7 +530,7 @@ class SGP4(Propagator):
             state_cart = state
 
         iter_max = self.settings['TEME_to_TLE_max_iter']  # Maximum number of iterations
-        
+
         # Iterative determination of mean elements
         for it in range(iter_max):
             # Mean elements and osculating state

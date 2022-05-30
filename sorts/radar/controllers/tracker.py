@@ -11,12 +11,11 @@ from ..system import Radar
 from ..scheduler import Scheduler
 
 
-
 class Tracker(radar_controller.RadarController):
     '''
     Takes in ECEF points and a time vector and creates a tracking control.
     '''
-    
+
 
     META_FIELDS = radar_controller.RadarController.META_FIELDS + [
         'scan_type',
@@ -51,7 +50,6 @@ class Tracker(radar_controller.RadarController):
 
         return t, target_states, target_group_transition_mask
     
-
     def __split_time_array(
             self, 
             t, 
@@ -73,7 +71,7 @@ class Tracker(radar_controller.RadarController):
             t_size = np.size(t_sub)
             
             split_indices = np.array(np.where(split_mask[t_split_index:t_split_index+t_size] == True)[0]) + 1
-            
+
             if ti < len(t) - 1:
                 split_indices = split_indices[0:-1]
             
