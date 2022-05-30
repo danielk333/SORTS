@@ -17,7 +17,7 @@ from .population import tles
 #classes
 from .space_object import SpaceObject
 from .population.base import Population
-from .propagator import Kepler, Propagator, Orekit, Rebound, SGP4
+from .propagator import Kepler, Propagator, Orekit, Rebound, SGP4, TwoBody
 
 from .propagation_errors import atmospheric_drag
 

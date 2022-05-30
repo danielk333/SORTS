@@ -328,13 +328,17 @@ def ecef_to_enu(lat, lon, alt, ecef, radians=False):
     alt = np.asarray(alt)
     
     if np.shape(lat) != np.shape(lon) or np.shape(lat) != np.shape(alt): raise ValueError("lat, lon and alt must be the same shape.")    
+    if len(lat.shape) == 0:
+        lat=lat[None]
+        lon=lon[None]
+        alt=alt[None]
     
     if not radians:
         lat, lon = np.radians(lat), np.radians(lon)
 
     mx = np.array([[-np.sin(lon), -np.sin(lat) * np.cos(lon), np.cos(lat) * np.cos(lon)],
                 [np.cos(lon), -np.sin(lat) * np.sin(lon), np.cos(lat) * np.sin(lon)],
-                [np.zeros(np.size(lat, axis=0)), np.cos(lat), np.sin(lat)]]).reshape(np.size(lat, axis=0), 3, 3)
+                [np.zeros(np.size(lat, axis=0)), np.cos(lat), np.sin(lat)]]).reshape(np.shape(lat)[0], 3, 3)
     
     
     enu = np.tensordot(np.linalg.inv(mx), ecef, axes=([2],[0]))
@@ -351,7 +355,7 @@ def azel_to_ecef(lat, lon, alt, az, el, radians=False):
     el = np.asarray(el)
     
     if np.shape(az) != np.shape(el): raise ValueError("az and el must be the same shape.")    
-    
+
     shape = (3,1)
     
     if isinstance(az,np.ndarray):

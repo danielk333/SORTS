@@ -14,7 +14,7 @@ import numpy as np
 from . import general
 from ..common import constants
     
-def plot_beam_directions(controls, radar, ax=None, logger=None, profiler=None, tx_beam=True, rx_beam=True, zoom_level=0.7):
+def plot_beam_directions(controls, radar, ax=None, logger=None, profiler=None, tx_beam=True, rx_beam=True, zoom_level=0.95, azimuth=45, elevation=45, alpha=1):
     '''
     Usage
     -----
@@ -87,15 +87,6 @@ def plot_beam_directions(controls, radar, ax=None, logger=None, profiler=None, t
         profiler.start("plotting:controls:plot_beam_directions")
         profiler.start("plotting:controls:plot_beam_directions:plot_stations")
     
-    # Plotting station ECEF positions
-    general.grid_earth(ax)
-    
-    # Plotting station ECEF positions
-    for tx in radar.tx:
-        ax.plot([tx.ecef[0]],[tx.ecef[1]],[tx.ecef[2]],'or')
-    for rx in radar.rx:
-        ax.plot([rx.ecef[0]],[rx.ecef[1]],[rx.ecef[2]],'og')
-    
     if profiler is not None:
         profiler.stop("plotting:controls:plot_beam_directions:plot_stations")
         profiler.start("plotting:controls:plot_beam_directions:plot_beams")
@@ -104,12 +95,14 @@ def plot_beam_directions(controls, radar, ax=None, logger=None, profiler=None, t
     tx_ecef = np.array([tx.ecef for tx in radar.tx], dtype=float)
     rx_ecef = np.array([rx.ecef for rx in radar.rx], dtype=float)
     
-    # compute point
-    rx_directions = np.reshape(controls["rx"].transpose(0, 3, 1, 4, 2), (np.shape(rx_ecef)[0], 3, -1), 'C') # convert array to get [x, y, z] coordinates
-    tx_directions = np.reshape(controls["tx"], (np.shape(tx_ecef)[0], 3, -1), 'C').repeat(np.shape(controls["rx"])[2], axis=2) # convert array to get [x, y, z] coordinates
-
-    # generate points (ecef frame)
-    a = np.einsum('ijk,hjk->ihk', tx_directions, rx_directions)
+    # compute point -> [rx, tx, time, t_slice, (x,y,z)] -
+    rx_directions = np.reshape(np.asfarray(controls["rx"].transpose(0, 1, 4, 2, 3)), (np.shape(rx_ecef)[0], np.shape(tx_ecef)[0], 3, -1), 'C') # convert array to get [x, y, z] coordinates
+    
+    n_repeats = int(np.shape(controls["rx"])[3]/np.shape(controls["tx"])[3])
+    tx_directions = np.reshape(np.asfarray(controls["tx"].transpose(0, 1, 4, 2, 3)), (np.shape(tx_ecef)[0], 1, 3, -1), 'C').repeat(n_repeats, axis=3) # convert array to get [x, y, z] coordinates
+    
+    # generate points (ecef frame) [tx, rx, points]
+    a = np.einsum('ijkl,hjkl->ihl', tx_directions, rx_directions)
     
     msk = np.abs(np.abs(a) - 1) > 0.0001
     
@@ -124,43 +117,45 @@ def plot_beam_directions(controls, radar, ax=None, logger=None, profiler=None, t
                 k_tx_rx = tx_ecef[None, txi, :] - rx_ecef[None, rxi, :]
                 k_tx_rx = k_tx_rx/np.linalg.norm(k_tx_rx)
                 
-                M = np.array([np.repeat(k_tx_rx, np.shape(tx_directions[txi, :, msk[txi, rxi, :]])[0], axis=0), tx_directions[txi, :, msk[txi, rxi, :]], rx_directions[rxi, :, msk[txi, rxi, :]]], dtype=float).transpose(1, 0, 2)
-                mask = np.abs(np.linalg.det(M)) < 1e-5
-                
+                M = np.array([np.repeat(k_tx_rx, np.shape(tx_directions[txi, 0, :, msk[txi, rxi, :]])[0], axis=0), tx_directions[txi, 0, :, msk[txi, rxi, :]], rx_directions[rxi, txi, :, msk[txi, rxi, :]]], dtype=float).transpose(1, 0, 2)
+                mask = np.abs(np.linalg.det(M)) < 1e-5 # if det = 0 then the directions are in the same plane
+
+                # TODO : repare this part
                 # computing intersection point between a given rx/tx station tuple beams
-                points = tx_ecef[None, txi, :].transpose() - np.einsum("ij,i->ji", tx_directions[txi, :, msk[txi, rxi, :]][mask], np.dot(rx_directions[rxi, :, msk[txi, rxi, :]][mask]*a[txi, rxi, :, None][mask] - tx_directions[txi, :, msk[txi, rxi, :]][mask], tx_ecef[txi, :] - rx_ecef[rxi, :])/(a[txi, rxi, :][mask]**2 - 1))
-                
-                if profiler is not None:
-                    profiler.stop("plotting:controls:plot_beam_directions:plot_beams:compute_intersection_points")
-                    profiler.start("plotting:controls:plot_beam_directions:plot_beams:plot_rx")
+                if np.size(np.where(mask == True)[0]) > 0: 
+                    points = tx_ecef[txi, None].reshape(3, 1) - np.einsum("ij,i->ji", tx_directions[txi, 0, :,  msk[txi, rxi, :]][mask], np.dot(rx_directions[rxi, txi, :, msk[txi, rxi, :]][mask]*a[txi, rxi, msk[txi, rxi, :], None][mask] - tx_directions[txi, 0, :, msk[txi, rxi, :]][mask], tx_ecef[txi, :] - rx_ecef[rxi, :])/(a[txi, rxi, msk[txi, rxi, :]][mask]**2 - 1))
                     
-                # plot Rx station beams
-                if rx_beam is True:
-                    points_rx = np.tile(points.repeat(2, axis=1), np.shape(rx_ecef)[0])
-                    points_rx[:, ::2] = np.repeat(rx_ecef.transpose().reshape(3, -1), points.shape[-1], axis=1)
+                    if profiler is not None:
+                        profiler.stop("plotting:controls:plot_beam_directions:plot_beams:compute_intersection_points")
+                        profiler.start("plotting:controls:plot_beam_directions:plot_beams:plot_rx")
+                        
+                    # plot Rx station beams
+                    if rx_beam is True:
+                        points_rx = np.tile(points.repeat(2, axis=1), np.shape(rx_ecef)[0])
+                        points_rx[:, ::2] = np.repeat(rx_ecef.transpose().reshape(3, -1), points.shape[-1], axis=1)
+                        
+                        ax.plot(points_rx[0], points_rx[1], points_rx[2], 'g-', alpha=0.5, linewidth=0.15)
+                    else:
+                        if logger is not None:
+                            logger.info("plotting:controls:plot_beam_directions:plot_station_controls:rx:{rxi} -> rx_beam is False, skipping rx controls plotting...")
                     
-                    ax.plot(points_rx[0], points_rx[1], points_rx[2], 'g-', alpha=0.5, linewidth=0.15)
-                else:
-                    if logger is not None:
-                        logger.info("plotting:controls:plot_beam_directions:plot_station_controls:rx:{rxi} -> rx_beam is False, skipping rx controls plotting...")
-                
-                if profiler is not None:
-                    profiler.stop("plotting:controls:plot_beam_directions:plot_beams:plot_rx")
-                    profiler.start("plotting:controls:plot_beam_directions:plot_beams:plot_tx")
+                    if profiler is not None:
+                        profiler.stop("plotting:controls:plot_beam_directions:plot_beams:plot_rx")
+                        profiler.start("plotting:controls:plot_beam_directions:plot_beams:plot_tx")
+                        
+                    # plot Tx station beams 
+                    if tx_beam is True:
+                        points_tx = points.repeat(2, axis=1)
+                        points_tx[:, ::2] = np.repeat(tx_ecef.transpose().reshape(3, -1), points.shape[-1], axis=1)
+                        
+                        ax.plot(points_tx[0], points_tx[1], points_tx[2], 'r-', alpha=alpha, linewidth=0.5)
+                    else:
+                        if logger is not None:
+                            logger.info("plotting:controls:plot_beam_directions:plot_station_controls:tx:{txi} -> x_beam is False, skipping tx controls plotting...")
                     
-                # plot Tx station beams 
-                if tx_beam is True:
-                    points_tx = points.repeat(2, axis=1)
-                    points_tx[:, ::2] = np.repeat(tx_ecef.transpose().reshape(3, -1), points.shape[-1], axis=1)
-                    
-                    ax.plot(points_tx[0], points_tx[1], points_tx[2], 'r-', alpha=0.5, linewidth=0.5)
-                else:
-                    if logger is not None:
-                        logger.info("plotting:controls:plot_beam_directions:plot_station_controls:tx:{txi} -> x_beam is False, skipping tx controls plotting...")
-                
-                if profiler is not None:
-                    profiler.stop("plotting:controls:plot_beam_directions:plot_beams:plot_tx")
-                    
+                    if profiler is not None:
+                        profiler.stop("plotting:controls:plot_beam_directions:plot_beams:plot_tx")
+                        
     # Zooming view on the stations performing the controls
     if zoom_level is not None: 
         if zoom_level > 1 or zoom_level < 0: 
@@ -183,5 +178,7 @@ def plot_beam_directions(controls, radar, ax=None, logger=None, profiler=None, t
     
     if profiler is not None:    
         profiler.stop("plotting:controls:plot_beam_directions")
+    
+    ax.view_init(elevation, azimuth)
     
     return ax # return instance of axis for further use if necessary

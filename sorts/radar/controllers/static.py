@@ -6,28 +6,23 @@
 
 import numpy as np
 
-from .radar_controller import RadarController
+from . import radar_controller
 from ..scans import Beampark
 
 
-class Static(RadarController):
+class Static(radar_controller.RadarController):
     '''
-    Purpose 
-    -------
+    Usage
+    -----
+    Creates a Static controller to generate radar scanning controls. Only one Static controller is needed to create multiple controls for different radars.
     
     This class can is used to create RADAR static controls. Once instanciated, the the class can be used multiple times to generate different static controls for different radar systems.
     
     Examples
     ----------
     
-    :numpy.ndarray t: Time points at which the controls are to be generated [s]
-    :radar.system.Radar radar: Radar instance to be controlled
-    :float azimuth: Azimuth of the target beam
-    :float azimuth: Elevation of the target beam
-    :scans.Scan scan: Scan instance used to generate the scanning controls
-    :float/numpy.ndarray dwell: Dwell time of the scan. The dwell time shall be smaller than the controller's time step.
-    :numpy.ndarray r (optional): Array of ranges from the transmitter where the receivers need to target simultaneously at a given time t [m]
-
+    :Profiler profiler: Profiler instance used to check the generate_controls method performance.
+    :logging.Logger logger: Logger instance used to log the execttion of the generate_controls method.
     
     Return value
     ----------
@@ -99,7 +94,7 @@ class Static(RadarController):
         
       '''
 
-    META_FIELDS = RadarController.META_FIELDS + [
+    META_FIELDS = radar_controller.RadarController.META_FIELDS + [
         'scan_type',
     ]
 
@@ -110,8 +105,84 @@ class Static(RadarController):
         
         if self.logger is not None:
             self.logger.info(f'Static:init')
+   
+    def __compute_beam_orientation(
+            self, 
+            t,
+            radar, 
+            scan,
+            r, 
+            ):
+        '''
+        Compute the beam orientation for sub-arrays of radar controls. This function returns a genereator which can be used to compute the sub controls.
+        '''
+        if self.profiler is not None:
+            self.profiler.start('Scanner:generate_controls:compute_controls_subarray:tx') 
+        
+        # initializing results
+        beam_controls = dict()
 
-    def generate_controls(self, t, radar, azimuth=0.0, elevation=90.0, dwell=0.1, r=np.linspace(300e3,1000e3,num=10), priority=-1):
+        # get the position of the Tx/Rx stations
+        tx_ecef = np.array([tx.ecef for tx in radar.tx], dtype=float) # get the position of each Tx station (ECEF frame)
+        rx_ecef = np.array([rx.ecef for rx in radar.rx], dtype=float) # get the position of each Rx station (ECEF frame)
+        
+        # compute directions for stations where tx and rx < 200 meters apart => same location for pointing
+        
+        rx_close_to_tx = np.linalg.norm(tx_ecef[:, None, :] - rx_ecef[None, :, :], axis=2) < 200.0
+        inds_rx_close_to_tx = np.array(np.where(rx_close_to_tx)) # [txinds, rxinds]
+        del rx_close_to_tx
+        
+        # get Tx pointing directions
+        # [ind_tx][x, y, z][t] ->[ind_tx][t][x, y, z]
+        points = scan.ecef_pointing(t, radar.tx).transpose(0, 2, 1)
+
+        # get Tx pointing directions and target points for Rx
+        # [txi, rxi, t, t_slice, (xyz)]
+        point_tx = points[:, None, :, None, :] + tx_ecef[:, None, None, None, :]
+ 
+        # Compute Tx pointing directions
+        beam_controls['tx'] = points[:, None, :, None, :]#super()._normalize(tx_dirs) # the beam directions are given as unit vectors in the ecef frame of reference
+        
+        if self.profiler is not None:
+            self.profiler.stop('Scanner:generate_controls:compute_controls_subarray:tx') 
+            self.profiler.start('Scanner:generate_controls:compute_controls_subarray:rx') 
+        
+        # get Rx target points on the Tx beam
+        point_rx_to_tx = points[:, :, None, :]*r[None, :, None] + tx_ecef[None, :, None, None, :] # compute the target points for the Rx stations
+        del tx_ecef, points
+        point_rx = np.repeat(point_rx_to_tx, len(radar.rx), axis=0) 
+        del point_rx_to_tx
+        
+        # correct pointing directions for stations too close to each other
+        # point_rx[inds_rx_close_to_tx[1], :, :, :, :] = point_tx[inds_rx_close_to_tx[0], :, :, :, :]
+        # del inds_rx_close_to_tx, point_tx
+        
+        # compute actual pointing direction
+        rx_dirs = point_rx - rx_ecef[:, None, None, None, :]
+        del point_rx
+        
+        # save computation results
+
+        beam_controls['rx'] = rx_dirs/np.linalg.norm(rx_dirs, axis=4)[:, :, :, :, None]#super()._normalize(rx_dirs) # the beam directions are given as unit vectors in the ecef frame of reference
+        del rx_ecef
+        
+        if self.profiler is not None:
+            self.profiler.stop('Scanner:generate_controls:compute_controls_subarray:rx')
+            
+        yield beam_controls
+
+    def generate_controls(
+            self, 
+            t, 
+            radar, 
+            azimuth=0.0, 
+            elevation=90.0, 
+            t_slice=0.1, 
+            r=np.linspace(300e3,1000e3,num=10), 
+            scheduler=None,
+            priority=None, 
+            max_points=100,
+            ):
         '''
         Purpose 
         -------
@@ -203,73 +274,54 @@ class Static(RadarController):
             >>> ctrl = controls["beam_direction_rx"][1, 0, 4, 1, 79]
             
           '''
-        # checks input values to make sure they are compatible with the implementation of the function
-        if not isinstance(priority, int): raise TypeError("the priority must be an integer.")
-        else:
-            if priority < -1: raise ValueError("the priority must be positive [0; +inf] or equal to -1.")
+        # add new profiler entry
+        if self.profiler is not None:
+            self.profiler.start('Static:generate_controls')
             
-        if not isinstance(radar, Radar): raise TypeError(f"the radar must be an instance of {Radar}.")
-        
+        # controls computation initialization
+        # checks input values to make sure they are compatible with the implementation of the function
+        if priority is not None:
+            if not isinstance(priority, int): raise TypeError("priority must be an integer.")
+            else: 
+                if priority < 0: raise ValueError("priority must be positive [0; +inf] or equal to -1.")
+             
+        if not isinstance(radar, Radar): 
+            raise TypeError(f"radar must be an instance of {Radar}.")
+
         # add support for both arrays and floats
         t = np.asarray(t)
         if len(np.shape(t)) > 1: raise TypeError("t must be a 1-dimensional array or a float")
         
-        # add new profiler entry
-        if self.profiler is not None:
-            self.profiler.start('Static:generate_controls')
+        # split time array into scheduler periods if a scheduler is attached to the controls
+        t, sub_controls_count = super()._split_time_array(t, scheduler, max_points)
         
         # generate the static beam with the required characteristics
-        scan = Beampark(azimuth = azimuth, elevation=elevation, dwell=dwell)
-
-        # generate controls structure
+        scan = Beampark(azimuth = azimuth, elevation=elevation, dwell=t_slice)
+        
+        # output data initialization
         controls = dict()  # the controls structure is defined as a dictionnary of subcontrols
-        
-        controls["t"] = t.copy() # save the time points of the controls
-        controls["dwell"] = np.ones(np.size(t))*dwell # save the dwell time of each time point
-        controls["on_state"] = np.ones(np.size(t)) # save on/off state of the radar for each time point (we assume that the radar is fully on at each control step)
+        controls["t"] = t  # save the time points of the controls
+        controls["t_slice"] = np.ones(np.size(t))*t_slice # save the dwell time of each time point
         controls["priority"] = priority # set the controls priority
-        
-        # get the coordinates of the Tx target points 
-        t = t*0.0 # set the time array to 0
-        points = scan.ecef_pointing(t, radar.tx)
-        
-        # get station positions
-        tx_ecef = np.array([tx.ecef for tx in radar.tx], dtype=float).reshape((len(radar.tx), 3, 1)) # get the position of each Tx station (ECEF frame)
-        rx_ecef = np.array([rx.ecef for rx in radar.rx], dtype=float) # get the position of each Rx station (ECEF frame)
-        
-        if self.profiler is not None:
-            self.profiler.start('Static:generate_controls:compute_tx_beam_directions')
+        controls["enabled"] = True # set the radar state (on/off)
 
-        # compute Tx pointing direction
-        point_tx = points + tx_ecef
-        point_rx_to_tx = points[:, None, :, :]*r[None, :, None, None] + tx_ecef
-        del points
-
-        tx_dirs = point_tx - tx_ecef
-        controls['beam_direction_tx'] = tx_dirs/np.linalg.norm(tx_dirs, axis=1) # the beam directions are given as unit vectors in the ecef frame of reference
-        del tx_dirs
+        # setting metadata
+        controls["meta"] = dict()
+        controls["meta"]["scan"] = scan
+        controls["meta"]["radar"] = radar
+        controls["meta"]["controller_type"] = "scanner"
+        controls["meta"]["scheduler"] = scheduler # set the radar state (on/off)
+        controls["meta"]["sub_controls_count"] = sub_controls_count
         
-        if self.profiler is not None:
-            self.profiler.stop('Static:generate_controls:compute_tx_beam_directions') 
-            self.profiler.start('Static:generate_controls:compute_rx_beam_directions')
+        # creating orientation controls generator array
+        controls["beam_orientation"] = []
         
-        # get Rx pointing directions        
-        point_rx = np.repeat(point_rx_to_tx[None, :], len(radar.rx), axis=0)
-        
-        # compute directions for stations where tx and rx < 200 meters apart => same location for pointing
-        rx_close_to_tx = np.linalg.norm(tx_ecef - rx_ecef.transpose(), axis=1) < 200.0
-        inds_rx_close_to_tx = np.array(np.where(rx_close_to_tx)) # [txinds, rxinds]
-        del rx_close_to_tx
-        
-        point_rx[inds_rx_close_to_tx[1], :, :, :] = point_tx[None, None, inds_rx_close_to_tx[0], :, :]
-        del inds_rx_close_to_tx
-        
-        rx_dirs = point_rx - rx_ecef[:, None, None, :, None]
-        controls['beam_direction_rx'] = rx_dirs/np.linalg.norm(rx_dirs, axis=3)[:, :, :, None] # the beam directions are given as unit vectors in the ecef frame of reference
-
-        # TODO : include this in radar -> RadarController.coh_integration(self.radar, self.meta['dwell'])
+        # Computations
+        # compute controls for each time sub array
+        for subcontrol_index in range(sub_controls_count):
+            controls["beam_orientation"].append(self.__compute_beam_orientation(t[subcontrol_index], radar, scan, r))
 
         if self.profiler is not None:
             self.profiler.stop('Static:generate_controls')
-            
+        
         return controls

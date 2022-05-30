@@ -351,6 +351,7 @@ def find_simultaneous_passes(t, states, stations, cache_data=True, fov_kw=None):
     splits = np.insert(splits, 0, -1)
     splits = np.insert(splits, len(splits), len(inds)-1)
     splits += 1
+    
     for si in range(len(splits)-1):
         ps_inds = inds[splits[si]:splits[si+1]]
         if len(ps_inds) == 0:
