@@ -147,7 +147,9 @@ class Scanner(RadarController):
             scan,
             r=np.linspace(300e3, 1000e3, num=10), 
             as_altitude=False, 
-            priority=-1, 
+            scheduler=None,
+            priority=None,
+            max_points=1000,
             ):
         '''Generates RADAR scanning controls for a given radar and sampling time. 
         This method can be called multiple times to generate different controls for different radar systems.
@@ -193,21 +195,7 @@ class Scanner(RadarController):
         Python dictionary 
             Controls to be applied to the radar to perform the required scanning scheme. 
         
-<<<<<<< HEAD
         In the case of the Scanner controller, the controls are the following :
-=======
-        :numpy.ndarray t: Time points at which the controls are to be generated [s]
-        :radar.system.Radar radar: Radar instance to be controlled
-        :scans.Scan scan: Scan instance used to generate the scanning controls
-        :numpy.ndarray r (optional): Array of ranges from the transmitter where the receivers need to target simultaneously at a given time t [m]
-        :int priority (optional): Priority of the generated controls, only used by the scheduler to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
-        :int max_points (optional): 
-
-        Return value
-        ----------
-        
-        Dictionnary containing the controls to be applied to the radar to perform the required scanning scheme. In the case of the Scanner controller, the controls are the following.
->>>>>>> 4c93b2bf3f6732fff5f7eb58cfcbc81b5e79a6f4
     
         - "t"
             1D array of time points at which the controls need to be executed by the radar
@@ -351,34 +339,34 @@ class Scanner(RadarController):
         
             >>> ctrl = controls["beam_direction_rx"][1, 0, 79, 4, 1]
       '''
+        # add new profiler entry
         if self.profiler is not None:
             self.profiler.start('Scanner:generate_controls')
-        
+            
+        # controls computation initialization
         # checks input values to make sure they are compatible with the implementation of the function
         if priority is not None:
             if not isinstance(priority, int): raise TypeError("priority must be an integer.")
             else: 
                 if priority < 0: raise ValueError("priority must be positive [0; +inf] or equal to -1.")
-            
-        if not isinstance(radar, Radar): raise TypeError(f"radar must be an instance of {Radar}.")
+             
+        if not isinstance(radar, Radar): 
+            raise TypeError(f"radar must be an instance of {Radar}.")
 
         # add support for both arrays and floats
         t = np.asarray(t)
         if len(np.shape(t)) > 1: raise TypeError("t must be a 1-dimensional array or a float")
         
-        N = np.size(t)
+        # split time array into scheduler periods if a scheduler is attached to the controls
+        t, sub_controls_count = super()._split_time_array(t, scheduler, max_points)
         
-        if self.profiler is not None:
-            self.profiler.start('Scanner:generate_controls:compute_tx_beam_directions')
-
-        # controls array initialization
+        # output data initialization
         controls = dict()  # the controls structure is defined as a dictionnary of subcontrols
-
         controls["t"] = t  # save the time points of the controls
-        controls["t_slice"] = scan.dwell(t) # save the dwell time of each time point
+        controls["t_slice"] = np.ones(np.size(t))*scan.dwell() # save the dwell time of each time point
         controls["priority"] = priority # set the controls priority
         controls["enabled"] = True # set the radar state (on/off)
-        
+
         # setting metadata
         controls["meta"] = dict()
         controls["meta"]["scan"] = scan
@@ -396,28 +384,6 @@ class Scanner(RadarController):
             controls["beam_orientation"].append(self.__compute_beam_orientation(t[subcontrol_index], radar, scan, r))
 
         if self.profiler is not None:
-            self.profiler.stop('Scanner:generate_controls:compute_tx_beam_directions') 
-            self.profiler.start('Scanner:generate_controls:compute_rx_beam_directions') 
-        
-        # get Rx pointing directions        
-        point_rx = np.repeat(point_rx_to_tx[None, :], len(radar.rx), axis=0) 
-        
-<<<<<<< HEAD
-        # compute directions for stations where tx and rx < 200 meters apart => same location for pointing
-        rx_close_to_tx = np.linalg.norm(tx_ecef - rx_ecef.transpose(), axis=1) < 200.0
-        inds_rx_close_to_tx = np.array(np.where(rx_close_to_tx)) # [txinds, rxinds]
-        del rx_close_to_tx
-        
-        point_rx[inds_rx_close_to_tx[1], :, :, :] = point_tx[None, None, inds_rx_close_to_tx[0], :, :]
-        del inds_rx_close_to_tx
-        
-        rx_dirs = point_rx - rx_ecef[:, None, None, :, None]
-        controls['beam_direction_rx'] = rx_dirs/np.linalg.norm(rx_dirs, axis=3)[:, :, :, None] # the beam directions are given as unit vectors in the ecef frame of reference
-        
-        if self.profiler is not None:
-            self.profiler.stop('Scanner:generate_controls:compute_rx_beam_directions')
             self.profiler.stop('Scanner:generate_controls')
-    
-=======
->>>>>>> 4c93b2bf3f6732fff5f7eb58cfcbc81b5e79a6f4
+        
         return controls

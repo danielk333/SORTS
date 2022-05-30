@@ -8,15 +8,11 @@ import numpy as np
 
 from . import radar_controller
 from ..scans import Beampark
+from ..system import Radar
 
-<<<<<<< HEAD
 
 class Static(radar_controller.RadarController):
-=======
-class Static(RadarController):
->>>>>>> 4c93b2bf3f6732fff5f7eb58cfcbc81b5e79a6f4
     '''
-<<<<<<< HEAD
     Usage
     -----
     Creates a Static controller to generate radar scanning controls. Only one Static controller is needed to create multiple controls for different radars.
@@ -111,7 +107,6 @@ class Static(RadarController):
         if self.logger is not None:
             self.logger.info(f'Static:init')
    
-<<<<<<< HEAD
     def __compute_beam_orientation(
             self, 
             t,
@@ -119,17 +114,6 @@ class Static(RadarController):
             scan,
             r, 
             ):
-=======
-    def __compute_controls_subarray(self, 
-                                    t,
-                                    radar, 
-                                    scan,
-                                    controls,
-                                    max_points,
-                                    r, 
-                                    priority, 
-                                    ):
->>>>>>> 4c93b2bf3f6732fff5f7eb58cfcbc81b5e79a6f4
         '''
         Compute the beam orientation for sub-arrays of radar controls. This function returns a genereator which can be used to compute the sub controls.
         '''
@@ -264,12 +248,7 @@ class Static(RadarController):
                 
         - "priority"
             Priority of the generated controls, only used by the scheduler to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
-<<<<<<< HEAD
-                    
-             
-=======
-            
->>>>>>> 4c93b2bf3f6732fff5f7eb58cfcbc81b5e79a6f4
+
         Examples 
         --------
         
@@ -295,16 +274,12 @@ class Static(RadarController):
             >>> ctrl = controls["beam_direction_rx"][1, 0, 4, 1, 79]
             
           '''
-<<<<<<< HEAD
         # add new profiler entry
         if self.profiler is not None:
             self.profiler.start('Static:generate_controls')
             
         # controls computation initialization
         # checks input values to make sure they are compatible with the implementation of the function
-=======
-	# checks input values to make sure they are compatible with the implementation of the function
->>>>>>> 4c93b2bf3f6732fff5f7eb58cfcbc81b5e79a6f4
         if priority is not None:
             if not isinstance(priority, int): raise TypeError("priority must be an integer.")
             else: 
@@ -334,7 +309,7 @@ class Static(RadarController):
         controls["meta"] = dict()
         controls["meta"]["scan"] = scan
         controls["meta"]["radar"] = radar
-        controls["meta"]["controller_type"] = "scanner"
+        controls["meta"]["controller_type"] = "static"
         controls["meta"]["scheduler"] = scheduler # set the radar state (on/off)
         controls["meta"]["sub_controls_count"] = sub_controls_count
         
@@ -348,10 +323,5 @@ class Static(RadarController):
 
         if self.profiler is not None:
             self.profiler.stop('Static:generate_controls')
-<<<<<<< HEAD
         
         return controls
-=======
-            
-        return controls
->>>>>>> 4c93b2bf3f6732fff5f7eb58cfcbc81b5e79a6f4
