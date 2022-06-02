@@ -128,12 +128,11 @@ class Scanner(radar_controller.RadarController):
         
         # compute actual pointing direction
         rx_dirs = point_rx - rx_ecef[:, None, None, None, :]
-        del point_rx
+        del point_rx, rx_ecef
         
         # save computation results
 
-        beam_controls['rx'] = radar_controller.normalize_direction_controls(rx_dirs, logger=self.logger) # the beam directions are given as unit vectors in the ecef frame of reference
-        del rx_ecef
+        beam_controls['rx'] = radar_controller.normalize_direction_controls(rx_dirs) # the beam directions are given as unit vectors in the ecef frame of reference
         
         if self.profiler is not None:
             self.profiler.stop('Scanner:generate_controls:compute_controls_subarray:rx')
@@ -151,44 +150,58 @@ class Scanner(radar_controller.RadarController):
             priority=None,
             max_points=1000,
             ):
-        '''Generates RADAR scanning controls for a given radar and sampling time. 
+        '''Generates RADAR scanning controls in a given direction. 
         This method can be called multiple times to generate different controls for different radar systems.
         
         Usage
         -----
         
-        One can generate scanning controls for a given scan as follows :
-            
+        One can generate scanning controls for a given target as follows :
 
-            >>> end_t = 24*3600 # defines the simulation time
-            >>> t_slice = 0.1 # defines the duration of a time slice
-            
-            >>> scan = Fence(azimuth=90, min_elevation=30, dwell=t_slice, num=50) # Scan type definition
-            >>> eiscat3d = instances.eiscat3d # RADAR definition
-            >>> scanner_ctrl = controllers.Scanner(profiler=p, logger=logger) # instanciates the scanning controller 
+        >>> logger = profiling.get_logger('static')
+        >>> p = profiling.Profiler() # Profiler
 
-            >>> t = np.arange(0, end_t, t_slice) # compute controller time steps
-            >>> controls = scanner_ctrl.generate_controls(t, eiscat3d, scan) # generate scanning controls
-        
+        >>> # Computation / test setup
+        >>> end_t = 24*3600
+        >>> nbplots = 1
+        >>> t_slice = 0.1
+        >>> max_points = 1000
+        >>> log_array_sizes = True
+
+        >>> eiscat3d = instances.eiscat3d # RADAR definition
+
+        >>> # create scan and controller
+        >>> scan = Fence(azimuth=90, min_elevation=30, dwell=t_slice, num=50)
+        >>> scanner_controller = controllers.Scanner(profiler=p, logger=logger)
+
+        >>> t = np.arange(0, end_t, t_slice)
+        >>> controls = scanner_controller.generate_controls(t, eiscat3d, scan, t_slice=t_slice, max_points=max_points)
+
+            
         Parameters
         ----------
-
+        
         t : numpy.ndarray 
             Time points at which the controls are to be generated [s]
         radar : radar.system.Radar 
             Radar instance to be controlled
-        scan : scans.Scan
-            Scan instance used to generate the scanning controls
-        r : numpy.ndarray r (optional)
-            Array of ranges from the transmitter where the receivers need to target simultaneously at a given time t [m]
+        scan : scans.Scan 
+            Instance of the scanning algorithm used to perform the RADAR scanning scheme
+        t_slice : float/numpy.ndarray 
+            Array of time slice durations. The duration of the time slice for a given control must be less than or equal to the time step
+        r : float/numpy.ndarray 
+            Array of ranges from the transmitter beam at which the receiver will perform scans during a given time slice 
+        scheduler : int priority (optional)
+            Scheduler instance used for scheduling time sunchromization between controls for tims slicing. 
+            Time slicing refers to the slicing of the time array into multiple subcontrol arrays (given as generator objects) to reduce memory (RAM) usage.
+            This parameter is only useful when multiple controls are sent to a given scheduler.
+            If the scheduler is not provided, the controller will slice the controls using the max_points parameter.
         priority : int priority (optional)
             Priority of the generated controls, only used by the scheduler to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
-        Scheduler : radar.scheduler.Schedumler (optional)
-            Scheduler instance used to synchronize controls with a master clock. 
         max_points : int (optional)
             Max number of points for a given control array computed simultaneously. This number is used to limit the impact of computations over RAM
             Note that lowering this number might increase computation time, while increasing this number might cause problems depending on the available RAM on your machine
-            This value is discarded if the scheduler is not None
+        
        
         Returns
         -------
@@ -269,15 +282,20 @@ class Scanner(radar_controller.RadarController):
                 divide the controls into subarrays of controls according to the scheduler scheduling period to 
                 reduce memory/computational overhead.
                 If the scheduler is not none, the value of the scheduling period will take over the max points parameter (see above)
-
+                
         - "priority"
             Priority of the generated controls, only used by the scheduler to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
         
         Examples
         --------
 
-        Suppose that there is a sinle Tx station performing a scan at 100 different time points. We alse suppose that the echos are gathered by two receiver stations Rx that will perform a scan at 10 different altitudes at each time slice.
-        Note that there will be only one control per time slice for the Tx controls since the role of Tx is to send a pulse in the direction of the target. In theory there would be multiple pulses per time slice, but since the direction would remain the same, we chose to only keep one direction control per time slice. Since the orientation for Tx remains the same for a given time slice, the discrepency between the number of controls between Rx/Tx can simply be solved by comparing the number of controls per time slice for Tx and Rx.
+        Suppose that there is a sinle Tx station performing a scan at 100 different time points. We alse suppose that 
+        the echos are gathered by two receiver stations Rx that will perform a scan at 10 different altitudes at each time slice.
+        Note that there will be only one control per time slice for the Tx controls since the role of Tx is to send a pulse 
+        in the direction of the target. In theory there would be multiple pulses per time slice, but since the direction 
+        would remain the same, we chose to only keep one direction control per time slice. Since the orientation for Tx 
+        remains the same for a given time slice, the discrepency between the number of controls between Rx/Tx can simply 
+        be solved by comparing the number of controls per time slice for Tx and Rx.
         
         The shape of the output "beam_direction_tx" array will be (1, 1, 100, 1, 3). 
         The shape of the output "beam_direction_rx" array will be (3, 1, 100, 10, 3). 
@@ -296,7 +314,7 @@ class Scanner(radar_controller.RadarController):
                 
             Yielding :
             
-            >>> ctrl = controls["beam_direction_tx"][0, 0, 2, 0, 2]
+            >>> ctrl = controls["beam_direction"]["tx"][0, 0, 2, 0, 2]
         
         - To get the x component of the beam direction of the Tx station at the 35th time step. 
         
@@ -313,7 +331,7 @@ class Scanner(radar_controller.RadarController):
             
             Yielding :
         
-            >>> ctrl = controls["beam_direction_tx"][0, 0, 34, :, 0]
+            >>> ctrl = controls["beam_direction"]["tx"][0, 0, 34, :, 0]
             
         - To get the z component of the beam direction of the first Rx station with respect to the 2nd scan at range r of the Tx beam at during the third time slice.
             
@@ -325,7 +343,7 @@ class Scanner(radar_controller.RadarController):
             - Dimension 3: Control point -> 1 : (we want to get the second orientation control for the given time slice)
             - Dimension 4: (x, y, z) -> 2 (we want to get the z coordinate)
             
-            >>> ctrl = controls["beam_direction_rx"][0, 0, 2, 1, 2]
+            >>> ctrl = controls["beam_direction"]["rx"][0, 0, 2, 1, 2]
          
         - To get the y component of the beam direction of the second Rx station with respect to the 5th scan at range r of the Tx beam at the 80th time slice.
             
@@ -337,7 +355,7 @@ class Scanner(radar_controller.RadarController):
             - Dimension 3: Control point -> 4 : (5th orientation control for the given time slice)
             - Dimension 4: (x, y, z) -> 1 (we want to get the y coordinate)
         
-            >>> ctrl = controls["beam_direction_rx"][1, 0, 79, 4, 1]
+            >>> ctrl = controls["beam_direction"]["rx"][1, 0, 79, 4, 1]
       '''
         # add new profiler entry
         if self.profiler is not None:
@@ -356,6 +374,13 @@ class Scanner(radar_controller.RadarController):
         # add support for both arrays and floats
         t = np.asarray(t)
         if len(np.shape(t)) > 1: raise TypeError("t must be a 1-dimensional array or a float")
+
+        # Check if time slices are overlapping
+        check_overlap_indices = radar_controller.check_time_slice_overlap(t, np.ones(np.size(t))*scan.dwell())
+        if np.size(check_overlap_indices) > 0:
+            if self.logger is not None:
+                self.logger.warning(f"Tracker:generate_controls -> control time slices are overlapping at indices {check_overlap_indices}")
+        del check_overlap_indices
         
         # split time array into scheduler periods if a scheduler is attached to the controls
         t, sub_controls_count = super()._split_time_array(t, scheduler, max_points)

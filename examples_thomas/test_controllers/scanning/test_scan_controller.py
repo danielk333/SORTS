@@ -25,7 +25,7 @@ logger.info("test_scan_controller -> Setting up variables :")
 end_t = 24*3600
 nbplots = 1
 t_slice = 0.1
-max_points = 100
+max_points = 1000
 log_array_sizes = True
 
 logger.info(f"test_scan_controller:computation_variables -> end_t = {end_t}")
@@ -101,6 +101,7 @@ p.stop("test_scan_controller:retreiving_control_values")
 p.stop("test_scan_controller:Total")
 
 logger.info("test_scan_controller -> execution finised !")
+print(p)
 
 plt.show()
-print(p)
+

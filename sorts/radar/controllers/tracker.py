@@ -9,7 +9,7 @@ import numpy as np
 from . import radar_controller
 from ..system import Radar
 from ..scheduler import Scheduler
-
+from sorts.common import interpolation
 
 class Tracker(radar_controller.RadarController):
     '''
@@ -30,7 +30,6 @@ class Tracker(radar_controller.RadarController):
         if self.logger is not None:
             self.logger.info(f'Tracker:init')
 
-    
 
     def __get_states_split_indices(self, t, t_slice, t_states, target_states):
         dt = t[:, None] - t_states[None, :]
@@ -53,42 +52,79 @@ class Tracker(radar_controller.RadarController):
 
     def __split_time_array(
             self, 
-            t, 
-            split_mask, 
-            target_states, 
-            scheduler, 
-            max_points
+            t_splitted, 
+            t_slice, 
+            t_states,
+            state_interpolator,
+            states_per_slice,
             ):
-        # get splitted time array (using scheduler and max_points)
-        t, sub_controls_count = super()._split_time_array(t, scheduler, max_points)
-        
-        # intitialize new states array
-        target_states_splitted = np.ndarray(np.size(t), dtype=object)
-        
-        t_split_index = 0
-        
-        # split states array according to the scheduler period and to the controller time slices
-        for ti, t_sub in enumerate(t):            
-            t_size = np.size(t_sub)
-            
-            split_indices = np.array(np.where(split_mask[t_split_index:t_split_index+t_size] == True)[0]) + 1
+        '''Retreives target's states given the time array and the state interpolator.
 
-            if ti < len(t) - 1:
-                split_indices = split_indices[0:-1]
-            
-            target_states_splitted[ti] = np.array(np.split(target_states[0:3, t_split_index:t_split_index+t_size], split_indices, axis=1), dtype=object).transpose(0, 2, 1)
-            del split_indices
-            
-            t_split_index += t_size
+        Parameters:
+        -----------
+            t_splitted : numpy.ndarray
+                splitted array of time points used to generate the controls. Each time point corresponds to the start of a time slice.
+            t_slice : float/numpy.ndarray
+                duration of a time slice.
+            state_interpolator : sorts.interpolation.Interpolator
+                class used to interpolate the states of the object (i.e. Legendre8, ...)
+            states_per_slice : int
+                number of target states per slice. This number can be used when multiple measurements are performed during a given time slice (i.e. for coherent integration)
+        '''
+        target_states = []
+        t_new = []
+        t_slice_new = []
         
-        del split_mask        
+        # find states within the control interval
+        states_msk = np.logical_and(t_states >= t_splitted[0][0], t_states <= t_splitted[-1][-1] - t_slice[-1])
         
-        return t, target_states_splitted, sub_controls_count
+        if np.size(np.where(states_msk)[0]) > 0:
+            if np.size(np.where(np.logical_and(t_states > t_splitted[-1][-1] - t_slice[-1], t_states <= t_splitted[-1][-1]))): 
+                if self.logger is not None:
+                    self.logger.warning(f"tracker:__retreive_target_states: some incomplete tracking control slices have been discarded between t={t_splitted[0][0]} and t={t_splitted[-1][-1]} seconds")
+            
+            t_shape = np.shape(t_splitted) #[scheduling slice/control subarray][time points]
+            
+            t_start = t_states[states_msk][0]
+            t_end = t_states[states_msk][-1]
+            del states_msk
+            
+            flag_found_pass = False
+            time_index = 0
+            
+            # get the states for each time sub-array
+            for ti, t_sub in enumerate(t_splitted):                
+                dt_states = t_slice[time_index:time_index+np.size(t_sub)]/float(states_per_slice)
+                pass_msk = np.logical_and(t_sub >= t_start, t_sub <= t_end)   
+
+                if np.size(np.where(pass_msk)[0]) > 0:                
+                    flag_found_pass = True      
+                    
+                    if np.size(np.where(t_sub > t_end - t_slice[time_index:time_index+np.size(t_sub)][-1])[0]) > 0:
+                        if self.logger is not None:
+                            self.logger.warning(f"tracker:__retreive_target_states: some incomplete tracking control slices have been discarded between t={t_sub[0]} and t={t_sub[-1]} seconds")
+                    
+                    t_states = np.repeat(t_sub[pass_msk], states_per_slice)
+    
+                    for ix in range(states_per_slice):
+                        t_states[ix::states_per_slice] = t_states[ix::states_per_slice] + ix*dt_states[pass_msk]
+                    
+                    target_states.append(np.reshape(np.transpose(state_interpolator.get_state(np.asfarray(t_states))), (np.shape(t_sub[pass_msk])[0], states_per_slice, 6))[:, :, 0:3]) #[scheduling slice/control subarray][time points][points per slice][xyz]
+                    t_new.append(t_sub[pass_msk])
+                    t_slice_new.append(t_slice[time_index:time_index+np.size(t_sub)][pass_msk])
+                else:                    
+                    if flag_found_pass is True:
+                        break
+                    
+            time_index += np.size(t_sub)
+        
+        return np.array(t_new, dtype=object), np.array(t_slice_new, dtype=object), np.array(target_states, dtype=object)
+
+
 
 
     def _compute_beam_orientation(
             self, 
-            t,
             radar, 
             target_ecef,
             ):
@@ -144,6 +180,8 @@ class Tracker(radar_controller.RadarController):
             t_states,
             target_states, 
             t_slice=0.1, 
+            states_per_slice=1,
+            interpolator=interpolation.Legendre8,
             scheduler=None,
             priority=None, 
             max_points=100,
@@ -201,6 +239,33 @@ class Tracker(radar_controller.RadarController):
         Parameters
         ----------
         
+         t : numpy.ndarray 
+            Time points at which the controls are to be generated [s]
+        radar : radar.system.Radar 
+            Radar instance to be controlled
+        t_states : numpy.ndarray 
+            time point of each target state vector 
+        target_states : numpy.ndarray 
+            State vectors [1x6] of the target to be tracked by the radar system (given in the ECEF frame)
+        t_slice : float/numpy.ndarray 
+            Array of time slice durations. The duration of the time slice for a given control must be less than or equal to the time step
+        state_per_slice (optional) : int
+            number of target points per time slice
+        interpolator (optional) : interpolation.Interpolator
+            interpolator algorithm instance used to reconstruct the states of the target at each needed time point
+        scheduler : int priority (optional)
+            Scheduler instance used for scheduling time sunchromization between controls for tims slicing. 
+            Time slicing refers to the slicing of the time array into multiple subcontrol arrays (given as generator objects) to reduce memory (RAM) usage.
+            This parameter is only useful when multiple controls are sent to a given scheduler.
+            If the scheduler is not provided, the controller will slice the controls using the max_points parameter.
+        priority : int priority (optional)
+            Priority of the generated controls, only used by the scheduler to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
+        max_points : int (optional)
+            Max number of points for a given control array computed simultaneously. This number is used to limit the impact of computations over RAM
+            Note that lowering this number might increase computation time, while increasing this number might cause problems depending on the available RAM on your machine
+        
+       
+
         t : numpy.ndarray 
             Time points at which the controls are to be generated [s]
         radar : radar.system.Radar 
@@ -390,19 +455,33 @@ class Tracker(radar_controller.RadarController):
              
         if not isinstance(radar, Radar): 
             raise TypeError(f"radar must be an instance of {Radar}.")
-    
+
         # add support for both arrays and floats
         t = np.asarray(t)
         if len(np.shape(t)) > 1: raise TypeError("t must be a 1-dimensional array or a float")
+
+        if not issubclass(interpolator, interpolation.Interpolator):
+            raise TypeError(f"interpolator must be an instance of {interpolation.Interpolator}.")
+        else:
+            state_interpolator = interpolator(target_states, t_states)
+            
+            if self.logger is not None:
+                self.logger.info(f"Tracker:generate_controls -> creating state interpolator {state_interpolator}")
+        
+        t_slice = np.asfarray(t_slice)
+        if (np.size(t_slice) != 1 and np.size(t_slice) != np.size(t_slice)):
+            raise TypeError(f"t_slice (size {np.size(t_slice)}) must be either a float or an array of the same size as t (size {np.size(t)})")
+        if np.size(t_slice) == 1:
+            t_slice = np.ones(np.size(t))*t_slice
         
         # split time array into scheduler periods and target states if a scheduler is attached to the controls
-        t, target_states, split_mask = self.__get_states_split_indices(t, t_slice, t_states, target_states)
-        t, target_states, sub_controls_count = self.__split_time_array(t, split_mask, target_states, scheduler, max_points)
-                
+        t, sub_controls_count = super()._split_time_array(t, scheduler, max_points)
+        t, t_slice, target_states_interp = self.__retreive_target_states(t, t_slice, t_states, state_interpolator, states_per_slice)
+
         # output data initialization
         controls = dict()  # the controls structure is defined as a dictionnary of subcontrols
         controls["t"] = t  # save the time points of the controls
-        controls["t_slice"] = np.ones(np.size(t))*t_slice # save the dwell time of each time point
+        controls["t_slice"] = t_slice # save the dwell time of each time point
         controls["priority"] = priority # set the controls priority
         controls["enabled"] = True # set the radar state (on/off)
         
@@ -412,18 +491,29 @@ class Tracker(radar_controller.RadarController):
         controls["meta"]["controller_type"] = "tracker"
         controls["meta"]["scheduler"] = scheduler # set the radar state (on/off)
         controls["meta"]["sub_controls_count"] = sub_controls_count
+        controls["meta"]["interpolator"] = state_interpolator
         
         # creating orientation controls generator array
         controls["beam_orientation"] = []
         
         # Computations
         # compute controls for each time sub array
-        for subcontrol_index in range(sub_controls_count):
-            t_sub = t[subcontrol_index]
-            target_ecef = target_states[subcontrol_index]
+        time_index = 0
+        
+        for subcontrol_index in range(len(t)):
+            check_overlap_indices = radar_controller.check_time_slice_overlap(t[subcontrol_index], t_slice[subcontrol_index])
+            time_index += np.size(t[subcontrol_index])
             
-            controls["beam_orientation"].append(self._compute_beam_orientation(t, radar, target_ecef))
-    
+            if np.size(check_overlap_indices) > 0:
+                if self.logger is not None:
+                    self.logger.warning(f"Tracker:generate_controls -> control time slices are overlapping at indices {check_overlap_indices}")
+            del check_overlap_indices
+            
+            target_ecef = target_states_interp[subcontrol_index]
+            
+            if target_ecef is not None:
+                controls["beam_orientation"].append(self._compute_beam_orientation(radar, target_ecef))
+                
         if self.profiler is not None:
             self.profiler.stop('Tracker:generate_controls')
         

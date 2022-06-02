@@ -120,7 +120,6 @@ p.stop("test_scan_controller_w_scheduler:retreiving_control_values")
 p.stop("test_scan_controller_w_scheduler:Total")
 
 logger.info("test_scan_controller_w_scheduler -> execution finised !")
+print(p)
 
 plt.show()
-    
-print(p)

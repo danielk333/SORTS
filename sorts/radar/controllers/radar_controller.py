@@ -6,7 +6,6 @@
 #Python standard import
 from abc import ABC, abstractmethod
 import copy
-import os
 import ctypes
 
 #Third party import
@@ -14,6 +13,7 @@ import numpy as np
 
 #Local import
 from ..scheduler import Scheduler
+from sorts import clibsorts
 
 pymodulepath = os.path.dirname(__file__)
 
@@ -201,18 +201,8 @@ def normalize_direction_controls(directions, logger=None):
             
     TODO -> implementation in C/C++
     TODO -> implement callback python functions to support non-homogeneous arrays of controls
-    '''    
-    print(len(np.shape(directions)))
-    if len(np.shape(directions)) == 5:
-        if logger is not None:
-            logger.info("radar_controller:normalize_direction_controls: array is homogeneous, normalizing using numpy on the whole array")
-
-        directions = directions/np.linalg.norm(directions, axis=4)[:, :, :, :, None]
-        
-    else:
-        if logger is not None:
-            logger.info("radar_controller:normalize_direction_controls: array is non-homogeneous, can't normalize using numpy on the whole array")
-
+    '''
+    if len(np.shape(directions)) < 5:
         n_stations = np.shape(directions)[0]
 
         for station_id in range(n_stations):
@@ -220,11 +210,248 @@ def normalize_direction_controls(directions, logger=None):
             
             for associated_station_id in range(n_associated_stations):
                 n_time_points = np.shape(directions[station_id, associated_station_id])[0]
-                
-                for ti in range(n_time_points):                    
-                    directions_t_slice = directions[station_id, associated_station_id, ti]
-                    directions_t_slice = directions_t_slice/np.linalg.norm(np.asfarray(directions_t_slice), axis=1)
 
-                    directions[station_id, associated_station_id, ti] = directions_t_slice
+                for ti in range(n_time_points):
+                    n_points_per_slice = np.shape(directions[station_id, associated_station_id, ti])[0]
+                    
+                    for t_slice_id in range(n_points_per_slice):
+                        direction = directions[station_id, associated_station_id, ti, t_slice_id]
+                        direction = direction/np.linalg.norm(direction)
+                        
+                        directions[station_id, associated_station_id, ti, t_slice_id] = direction
+    else:
+        directions = np.asfarray(directions)
+        directions = directions/np.linalg.norm(directions, axis=4)[:, :, :, :, None]
                         
     return directions
+
+
+def get_time_slice(t_controller, time_slice, t, flatten=True, logger=None, profiler=None):
+    '''
+    get the indices of the active time slices of a given controller array at time t.
+    
+    Parameters:
+    -----------
+    t_controller : numpy.ndarray
+        starting point of each controller time slice
+    time_slice : float/numpy.ndarray
+        time slice duration
+    t : float/numpy.ndarray
+        points at which to get the active time slices
+    falten (optional) : boolean
+        if true and if the time array of the controller is sliced, then the output array will be 1D and each index will correspond to the non-sliced time array
+    logger (optional) : logging.Logger
+        profiler instance used to monitor execution performances
+    profiler (optional) : profiling.Profiler
+        profiler instance used to monitor execution performances
+
+    Returns:
+    --------
+    t_in_slice_inds : numpy.ndarray
+        indices of the time slices for each time point given by t
+
+    '''
+    # convert input variables to float arrays for vectorized operations
+    t = np.asfarray(t)
+    time_slice = np.asfarray(time_slice)
+
+    # Logging execution status
+    if logger is not None:
+        logger.info(f"getting time slices at t={t}s")
+
+    if profiler is not None:
+        profiler.start(f"radar_controller:get_time_slice")
+
+    # if time_slice 
+    if(np.size(time_slice) == 1):
+        time_slice = np.ones(np.size(t_controller))*time_slice
+
+    # check if time array is multidimensional -> True : the time array has been splitted
+    if isinstance(t_controller[0], np.ndarray):
+        t_in_slice_inds_1 = []
+        t_in_slice_inds_2 = []
+        
+        time_index = 0
+
+        for ti, t_sub in enumerate(t_controller):
+            t_in_subarray_msk = np.logical_and(t >= t_sub[0], t <= t_sub[-1])
+            
+            dt = t_sub[:, None] - t[t_in_subarray_msk][None, :]
+            inds = np.asfarray(np.where(np.logical_and(dt <= time_slice[time_index:time_index+np.size(t_sub), None], dt >= 0))) #[t_ctrl, t]
+            
+            if flatten:
+                inds[0] = inds[0] + time_index
+
+            t_in_slice_inds_1.append(inds[0])
+            t_in_slice_inds_2.append(inds[1])
+            
+            time_index += np.size(t_sub)
+              
+        if flatten:
+            t_in_slice_inds_1 = np.array([item for sub in t_in_slice_inds_1 for item in sub], dtype=float)
+            t_in_slice_inds_2 = np.array([item for sub in t_in_slice_inds_2 for item in sub], dtype=float)
+            
+        t_in_slice_inds = np.array([t_in_slice_inds_1, t_in_slice_inds_2])
+    else:
+        t_in_slice_inds = np.where((t_controller[:, None] - t[None, :]) <= time_slice)[0]
+    if profiler is not None:
+        profiler.stop(f"radar_controller:get_time_slice")
+
+    return t_in_slice_inds
+
+def check_time_slice_overlap(t_controller, time_slice, logger=None, profiler=None):
+    '''
+    Checks wether or not time slices overlap within a given control array.
+    If two different time slices overlap, the function will return the indices of the time points which overlap.
+    
+    Parameters:
+    -----------
+    t_controller : numpy.ndarray
+        starting point of each controller time slice
+    time_slice : float/numpy.ndarray
+        time slice duration
+    logger (optional) : logging.Logger
+        profiler instance used to monitor execution performances
+    profiler (optional) : profiling.Profiler
+        profiler instance used to monitor execution performances
+
+    Returns:
+    --------
+    indices_1 : numpy.ndarray
+        first element of the tuple of overlaping indices
+    indices_2 : numpy.ndarray
+        second element of the tuple of overlaping indices
+
+    if the time slices 3 and 4 are overlapping, check_time_slice_overlap(...) will return :
+        - indices_1 = numpy.array([3])
+        - indices_2 = numpy.array([4])
+
+    '''
+    # convert input variables to float arrays for vectorized operations
+    t_controller = np.asarray(t_controller, dtype=np.float64)
+    time_slice = np.asarray(time_slice, dtype=np.float64)
+
+    # Logging execution status
+    if logger is not None:
+        logger.info(f"checking time slice overlap")
+
+    if profiler is not None:
+        profiler.start(f"radar_controller:get_time_slice")
+
+    indices = np.array([0], dtype=np.int32)
+
+    SAVE_ARRAY_FNC = ctypes.CFUNCTYPE(None, ctypes.POINTER(ctypes.c_int), ctypes.c_int)
+
+    def callback_save_array(array, size):
+        nonlocal indices
+
+        if size == 0:
+            indices = np.array([])
+        else:
+            buffer_from_memory = ctypes.pythonapi.PyMemoryView_FromMemory
+            buffer_from_memory.restype = ctypes.py_object
+            buffer = buffer_from_memory(array, np.dtype(np.int32).itemsize*size)
+
+            indices = np.frombuffer(buffer, np.int32)
+
+    callback_save_array_c = SAVE_ARRAY_FNC(callback_save_array)
+    
+    clibsorts.check_time_slice_overlap.argtypes = [
+                                            np.ctypeslib.ndpointer(dtype=ctypes.c_double, ndim=t_controller.ndim, shape=t_controller.shape),
+                                            np.ctypeslib.ndpointer(dtype=ctypes.c_double, ndim=time_slice.ndim, shape=time_slice.shape),
+                                            ctypes.c_int,
+                                            np.ctypeslib.ndpointer(dtype=ctypes.c_int, ndim=indices.ndim, shape=indices.shape) ,
+                                            SAVE_ARRAY_FNC]
+
+    clibsorts.check_time_slice_overlap(t_controller, time_slice, ctypes.c_int(len(t_controller)), indices, callback_save_array_c)
+    
+    print(indices)
+
+    if profiler is not None:
+        profiler.stop(f"radar_controller:get_time_slice")
+
+    return indices
+
+def check_controls_overlap(t_controller_1, time_slice_1, t_controller_2, time_slice_2, logger=None, profiler=None):
+    '''Checks wether or not time slices overlap between two controls (with the same time reference).
+    If two different time slices overlap, the function will return the indices of the time points which overlap.
+    
+    Parameters:
+    -----------
+    t_controller_1 : numpy.ndarray
+        starting point of each of the time slices of the first control array
+    time_slice_1 : float/numpy.ndarray
+        time slice duration of the first control array
+    t_controller_2 : numpy.ndarray
+        starting point of each of the time slices of the second control array
+    time_slice_2 : float/numpy.ndarray
+        time slice duration of the second control array
+    logger (optional) : logging.Logger
+        profiler instance used to monitor execution performances
+    profiler (optional) : profiling.Profiler
+        profiler instance used to monitor execution performances
+
+    Returns:
+    --------
+    indices_1 : numpy.ndarray
+        overlaping indices of the first control array
+    indices_2 : numpy.ndarray
+        overlaping indices of the second control array
+
+    if the time slices 15 of the first array and 4, 3 of the second array are overlapping, check_time_slice_overlap(...) will return :
+        - indices_1 = numpy.array([15, 15])
+        - indices_2 = numpy.array([3, 4])
+    '''
+
+    # convert input variables to float arrays for vectorized operations
+    # check time_slice_1 input data
+    if not isinstance(time_slice_1, np.ndarray):
+        time_slice_1 = np.asarray(time_slice_1)
+    if isinstance(time_slice_1[0], np.ndarray):
+        raise(ValueError("time_slice_1 array is sliced (more than one dimension). Please provide 1D time arrays"))
+        
+    # check time_slice_2 input data
+    if not isinstance(time_slice_2, np.ndarray): 
+        time_slice_2 = np.asarray(time_slice_2)
+    if isinstance(time_slice_2[0], np.ndarray): 
+        raise(ValueError("time_slice_2 array is sliced (more than one dimension). Please provide 1D time arrays"))
+    
+    # check t_controller_1 & t_controller_2 input data
+    if isinstance(t_controller_1[0], np.ndarray) or isinstance(t_controller_2[0], np.ndarray):
+        raise(ValueError("controller time arrays t_controller_1/t_controller_2 are sliced (more than one dimension). Please provide 1D time arrays"))
+
+    # Logging execution status
+    if logger is not None:
+        logger.info(f"radar_controller:check_controls_overlap: checking time slice overlap")
+
+    if profiler is not None:
+        profiler.start(f"radar_controller:check_controls_overlap")
+
+    # if time_slice are floats, convert to array
+    if(np.size(time_slice_1) == 1): 
+        time_slice_1 = np.ones(np.size(t_controller_1))*time_slice_1
+    if(np.size(time_slice_2) == 1): 
+        time_slice_2 = np.ones(np.size(t_controller_2))*time_slice_2
+
+    # find the common time points between the two controller time arrays
+    array_overlap_msk_1 = np.logical_and(t_controller_1 >= t_controller_2[0], t_controller_1 <= t_controller_2[-1] + time_slice_2[-1])
+    array_overlap_msk_2 = np.logical_and(t_controller_2 >= t_controller_1[0], t_controller_2 <= t_controller_1[-1] + time_slice_1[-1])
+
+    if np.size(np.where(array_overlap_msk_1)[0]) == 0 and np.size(np.where(array_overlap_msk_2)[0]) == 0:
+        if logger is not None:
+            logger.info(f"radar_controller:check_controls_overlap: controller time arrays are not on the same interval -> no overlap")
+        
+        indices_1 = np.array([])
+        indices_2 = np.array([])
+    else:
+        # find time points inside the other controller time slices 
+        tslice_overlap_msk_1 = t_controller_1[:, None] - t_controller_2[None, :] <= time_slice_1
+        tslice_overlap_msk_2 = t_controller_2[:, None] - t_controller_1[None, :] <= time_slice_2
+
+        indices_1 = np.where(np.logical_and(tslice_overlap_msk_1, array_overlap_msk_1))[0]
+        indices_2 = np.where(np.logical_and(tslice_overlap_msk_2, array_overlap_msk_2))[0]
+
+    if profiler is not None:
+        profiler.stop(f"radar_controller:check_controls_overlap")
+
+    return indices_1, indices_2

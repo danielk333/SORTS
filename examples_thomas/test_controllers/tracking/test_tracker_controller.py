@@ -13,13 +13,17 @@ from sorts import find_simultaneous_passes, equidistant_sampling
 from sorts import plotting
 
 from sorts.common import profiling
+from sorts.common import interpolation
 from sorts.targets.propagator import Kepler
 
 # Profiler
 p = profiling.Profiler()
 logger = profiling.get_logger('scanning')
 
+max_points = 20
 end_t = 3600*24
+t_slice = 7.5
+tracking_period = 10
 
 # RADAR definition
 eiscat3d = radars.eiscat3d
@@ -127,16 +131,15 @@ for pass_id in range(np.shape(eiscat_passes)[0]):
     t_states_i = t_states[eiscat_passes[pass_id].inds]
     
     p.start('intitialize_controller')
-    t_slice = 0.5
-    t_controller = np.arange(0, end_t, t_slice)
+    t_controller = np.arange(t_states_i[0], t_states_i[-1]+tracking_period, tracking_period)
     
     tracker_controller = controllers.Tracker(logger=logger, profiler=p)
     p.stop('intitialize_controller')
     
     p.start('generate_tracking_controls')
-    controls = tracker_controller.generate_controls(t_controller, eiscat3d, t_states_i, tracking_states, t_slice=t_slice, max_points=10)
+    controls = tracker_controller.generate_controls(t_controller, eiscat3d, t_states_i, tracking_states, t_slice=t_slice, max_points=max_points, states_per_slice=5, interpolator=interpolation.Legendre8)
     p.stop('generate_tracking_controls')
-
+    
     logger.info("test_tracker_controller -> Controls generated")
 
     for ctrl_id, ctrl in enumerate(controls["beam_orientation"]):
@@ -146,16 +149,16 @@ for pass_id in range(np.shape(eiscat_passes)[0]):
 
     ax.plot(tracking_states[0], tracking_states[1], tracking_states[2], "-", color="blue")
 
+p.stop('Total')
+print(p)
+
+logger.info("test_tracker_controller -> test script execution done !")
+logger.info("showing results :")
+
 plt.show()
 
 del tracking_states, object_states, eiscat_passes, t_states
 del ax, fig
 
-logger.info("test_tracker_controller -> test script execution done !")
-logger.info("showing results :")
-
-p.stop('Total')
-
-print(p)
 del p
 

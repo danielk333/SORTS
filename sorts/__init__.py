@@ -6,6 +6,14 @@
 
 from .version import __version__
 
+import os
+import ctypes
+
+__sortspath__ = os.path.dirname(__file__)
+__libpath__ = __sortspath__ + "/../libsorts.so"
+
+clibsorts = ctypes.cdll.LoadLibrary(__libpath__)
+
 # -----------------------------------------------------------------
 #                           Radar
 # -----------------------------------------------------------------
@@ -103,3 +111,4 @@ from .targets.population import tles
 #                            Others 
 # -----------------------------------------------------------------
 from . import linearized_orbit_determination
+
