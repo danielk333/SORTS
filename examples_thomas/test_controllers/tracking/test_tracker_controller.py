@@ -8,7 +8,6 @@ import pyorb
 
 from sorts import radars
 from sorts import controllers
-from sorts import scans
 from sorts import space_object
 from sorts import find_simultaneous_passes, equidistant_sampling
 from sorts import plotting
@@ -128,10 +127,10 @@ for pass_id in range(np.shape(eiscat_passes)[0]):
     t_states_i = t_states[eiscat_passes[pass_id].inds]
     
     p.start('intitialize_controller')
-    t_slice = 0.2
+    t_slice = 0.5
     t_controller = np.arange(0, end_t, t_slice)
     
-    tracker_controller = controllers.tracker.Tracker(logger=logger, profiler=p)
+    tracker_controller = controllers.Tracker(logger=logger, profiler=p)
     p.stop('intitialize_controller')
     
     p.start('generate_tracking_controls')

@@ -142,7 +142,7 @@ class Static(radar_controller.RadarController):
         point_tx = points[:, None, :, None, :] + tx_ecef[:, None, None, None, :]
  
         # Compute Tx pointing directions
-        beam_controls['tx'] = points[:, None, :, None, :]#super()._normalize(tx_dirs) # the beam directions are given as unit vectors in the ecef frame of reference
+        beam_controls['tx'] = points[:, None, :, None, :] # the beam directions are given as unit vectors in the ecef frame of reference
         
         if self.profiler is not None:
             self.profiler.stop('Scanner:generate_controls:compute_controls_subarray:tx') 
@@ -164,7 +164,7 @@ class Static(radar_controller.RadarController):
         
         # save computation results
 
-        beam_controls['rx'] = rx_dirs/np.linalg.norm(rx_dirs, axis=4)[:, :, :, :, None]#super()._normalize(rx_dirs) # the beam directions are given as unit vectors in the ecef frame of reference
+        beam_controls['rx'] = radar_controller.normalize_direction_controls(rx_dirs, logger=self.logger) # the beam directions are given as unit vectors in the ecef frame of reference
         del rx_ecef
         
         if self.profiler is not None:

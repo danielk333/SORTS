@@ -6,12 +6,21 @@
 #Python standard import
 from abc import ABC, abstractmethod
 import copy
+import os
+import ctypes
 
 #Third party import
 import numpy as np
 
 #Local import
 from ..scheduler import Scheduler
+
+pymodulepath = os.path.dirname(__file__)
+
+print(pymodulepath)
+lib_controllers_path = pymodulepath + "/src/controllers.so"
+
+lib_controllers = ctypes.cdll.LoadLibrary(lib_controllers_path)
 
 class RadarController(ABC):
     '''
@@ -178,7 +187,7 @@ class RadarController(ABC):
 
 
 
-def normalize_direction_controls(directions):
+def normalize_direction_controls(directions, logger=None):
     '''
     Compute the normalized beam direction vectors.
     
@@ -192,23 +201,30 @@ def normalize_direction_controls(directions):
             
     TODO -> implementation in C/C++
     TODO -> implement callback python functions to support non-homogeneous arrays of controls
-    '''
+    '''    
+    print(len(np.shape(directions)))
+    if len(np.shape(directions)) == 5:
+        if logger is not None:
+            logger.info("radar_controller:normalize_direction_controls: array is homogeneous, normalizing using numpy on the whole array")
 
-    n_stations = np.shape(directions)[0]
-
-    for station_id in range(n_stations):
-        n_associated_stations = np.shape(directions[station_id])[0]
+        directions = directions/np.linalg.norm(directions, axis=4)[:, :, :, :, None]
         
-        for associated_station_id in range(n_associated_stations):
-            n_time_points = np.shape(directions[station_id, associated_station_id])[0]
-            
-            for ti in range(n_time_points):
-                n_points_per_slice = np.shape(directions[station_id, associated_station_id, ti])[0]
-                
-                for t_slice_id in range(n_points_per_slice):
-                    direction = directions[station_id, associated_station_id, ti, t_slice_id]
-                    direction = direction/np.linalg.norm(direction)
-                    
-                    directions[station_id, associated_station_id, ti, t_slice_id] = direction
+    else:
+        if logger is not None:
+            logger.info("radar_controller:normalize_direction_controls: array is non-homogeneous, can't normalize using numpy on the whole array")
 
+        n_stations = np.shape(directions)[0]
+
+        for station_id in range(n_stations):
+            n_associated_stations = np.shape(directions[station_id])[0]
+            
+            for associated_station_id in range(n_associated_stations):
+                n_time_points = np.shape(directions[station_id, associated_station_id])[0]
+                
+                for ti in range(n_time_points):                    
+                    directions_t_slice = directions[station_id, associated_station_id, ti]
+                    directions_t_slice = directions_t_slice/np.linalg.norm(np.asfarray(directions_t_slice), axis=1)
+
+                    directions[station_id, associated_station_id, ti] = directions_t_slice
+                        
     return directions

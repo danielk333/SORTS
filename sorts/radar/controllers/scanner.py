@@ -10,10 +10,10 @@ This module defines the scanner controller class that can be used to create the 
 
 import numpy as np
 
-from .radar_controller import RadarController
+from . import radar_controller
 from sorts.radar.system.radar import Radar
 
-class Scanner(RadarController):
+class Scanner(radar_controller.RadarController):
     '''
     Usage
     -----
@@ -34,7 +34,7 @@ class Scanner(RadarController):
     Only one Scanner controller is needed to create multiple controls for multiple scan methods and radars.
     '''
 
-    META_FIELDS = RadarController.META_FIELDS + [
+    META_FIELDS = radar_controller.RadarController.META_FIELDS + [
         'scan_type',
     ]
 
@@ -132,7 +132,7 @@ class Scanner(RadarController):
         
         # save computation results
 
-        beam_controls['rx'] = rx_dirs/np.linalg.norm(rx_dirs, axis=4)[:, :, :, :, None]#super()._normalize(rx_dirs) # the beam directions are given as unit vectors in the ecef frame of reference
+        beam_controls['rx'] = radar_controller.normalize_direction_controls(rx_dirs, logger=self.logger) # the beam directions are given as unit vectors in the ecef frame of reference
         del rx_ecef
         
         if self.profiler is not None:

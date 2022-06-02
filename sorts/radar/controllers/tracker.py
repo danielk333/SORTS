@@ -50,6 +50,7 @@ class Tracker(radar_controller.RadarController):
 
         return t, target_states, target_group_transition_mask
     
+
     def __split_time_array(
             self, 
             t, 
@@ -84,6 +85,7 @@ class Tracker(radar_controller.RadarController):
         
         return t, target_states_splitted, sub_controls_count
 
+
     def _compute_beam_orientation(
             self, 
             t,
@@ -111,7 +113,7 @@ class Tracker(radar_controller.RadarController):
         tx_dirs = target_ecef[None, None, :, :, :] - tx_ecef[:, None, None, None, :]
         del tx_ecef
         
-        beam_controls['tx'] = radar_controller.normalize_direction_controls(tx_dirs) # the beam directions are given as unit vectors in the ecef frame of reference
+        beam_controls['tx'] = radar_controller.normalize_direction_controls(tx_dirs, logger=self.logger) # the beam directions are given as unit vectors in the ecef frame of reference
         del tx_dirs
         
         if self.profiler is not None:
@@ -123,7 +125,7 @@ class Tracker(radar_controller.RadarController):
         del rx_ecef
         
         # save computation results
-        beam_controls['rx'] = radar_controller.normalize_direction_controls(rx_dirs) # the beam directions are given as unit vectors in the ecef frame of reference
+        beam_controls['rx'] = radar_controller.normalize_direction_controls(rx_dirs, logger=self.logger) # the beam directions are given as unit vectors in the ecef frame of reference
         del rx_dirs
         
         if self.profiler is not None:
