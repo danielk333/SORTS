@@ -50,7 +50,7 @@ class Tracker(radar_controller.RadarController):
         return t, target_states, target_group_transition_mask
     
 
-    def __split_time_array(
+    def __retreive_target_states(
             self, 
             t_splitted, 
             t_slice, 

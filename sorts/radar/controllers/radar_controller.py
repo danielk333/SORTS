@@ -15,13 +15,6 @@ import numpy as np
 from ..scheduler import Scheduler
 from sorts import clibsorts
 
-pymodulepath = os.path.dirname(__file__)
-
-print(pymodulepath)
-lib_controllers_path = pymodulepath + "/src/controllers.so"
-
-lib_controllers = ctypes.cdll.LoadLibrary(lib_controllers_path)
-
 class RadarController(ABC):
     '''
         Implements the basic structure of a radar controller. The objective of the Radar controller is to generate the instructions for the Radar system (Tx/Rx) to follow (i.e. follow an object, scan a given area, ...).
