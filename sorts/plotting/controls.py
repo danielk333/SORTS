@@ -26,7 +26,7 @@ def plot_beam_directions(controls, radar, ax=None, logger=None, profiler=None, t
     Parameters
     ----------
     
-    :controls [python dictionnary]: Sets of controls applied to the radar system. The controls need to possess both the "beam_direction_tx" and "beam_direction_rx" control keys to work properly.
+    :controls [dict]: Sets of controls applied to the radar system. The controls need to possess both the "beam_direction_tx" and "beam_direction_rx" control keys to work properly.
     :radar [sorts.system.radar]: Radar instance to which the controls set is applied to
     :ax [matplotlib.pyplot.axis]: Axis insance on which the controls are plotted. If used, the axis need to be 2 dimensional. if not provided, the function will create the axis automatically.
     :logger [Logging.logger]: logger instance used to log the execution of the function
