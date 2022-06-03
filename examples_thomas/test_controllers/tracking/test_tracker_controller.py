@@ -122,7 +122,6 @@ for rx in eiscat3d.rx:
 # plotting object states
 ax.plot(object_states[0], object_states[1], object_states[2], "--b", alpha=0.2)
 
-
 # compute and plot controls for each pass
 for pass_id in range(np.shape(eiscat_passes)[0]):
     logger.info(f"test_tracker_controller -> Computing tracking controls for pass {pass_id}:")
@@ -135,15 +134,16 @@ for pass_id in range(np.shape(eiscat_passes)[0]):
     
     tracker_controller = controllers.Tracker(logger=logger, profiler=p)
     p.stop('intitialize_controller')
-    
+
     p.start('generate_tracking_controls')
     controls = tracker_controller.generate_controls(t_controller, eiscat3d, t_states_i, tracking_states, t_slice=t_slice, max_points=max_points, states_per_slice=5, interpolator=interpolation.Legendre8)
     p.stop('generate_tracking_controls')
     
     logger.info("test_tracker_controller -> Controls generated")
+    logger.info(f"test_tracker_controller -> Controls : {controls}")
 
-    for ctrl_id, ctrl in enumerate(controls["beam_orientation"]):
-        ctrl = next(ctrl)
+    for ctrl_id in range(len(controls["t"])):
+        ctrl = next(controls["pointing_direction"])
         plotting.plot_beam_directions(ctrl, eiscat3d, ax=ax, logger=logger, profiler=p, tx_beam=True, rx_beam=True, zoom_level=0.9, azimuth=10, elevation=10)
         logger.info(f"test_tracker_controller -> ploting data for sub control {ctrl_id}")
 

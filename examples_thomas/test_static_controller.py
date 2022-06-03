@@ -22,9 +22,6 @@ import pyorb
 end_t = 24*3600
 nbplots = 3
 
-end_t = 10
-
-
 # RADAR definition
 eiscat3d = instances.eiscat3d
     
@@ -49,37 +46,28 @@ ax = fig.add_subplot(111, projection='3d')
 plotting.grid_earth(ax)
 
 print("Plotting")
-
-for tx in eiscat3d.tx:
-    ax.plot([tx.ecef[0]],[tx.ecef[1]],[tx.ecef[2]],'or')
-for rx in eiscat3d.rx:
-    ax.plot([rx.ecef[0]],[rx.ecef[1]],[rx.ecef[2]],'og')
+for ctrl_i in range(len(controls["t"])):
+    ctrl = next(controls["pointing_direction"])
     
-for txi, tx in enumerate(eiscat3d.tx):
-    points_tx = controls["beam_direction_tx"][txi]
+    if log_array_sizes is True:
+        logger.info(f"test_scan_controller: controls {i} - size : {(ctrl['tx'].itemsize*np.size(ctrl['tx']) + ctrl['rx'].itemsize*np.size(ctrl['rx']))/1e6} Mb")
 
-    for rxi, rx in enumerate(eiscat3d.rx):
-        points_rx = controls["beam_direction_rx"][rxi][txi]
-        
-        for ir in range(len(points_rx)):
-            for j in range(len(points_rx[ir, 0])):
-                ktx = points_tx[:, j]
-                krx = points_rx[ir, :, j]
+    if nbplots > 0:
+        if i in plt_ids:
+            fig = plt.figure(figsize=(15,15))
+            ax = fig.add_subplot(111, projection='3d')
             
-                a=np.dot(ktx, krx)
+            # Plotting station ECEF positions
+            plotting.grid_earth(ax, num_lat=25, num_lon=50, alpha=0.1, res = 100, color='black', hide_ax=True)
                 
-                if abs(abs(a)-1) < 0.0001:
-                    ecef = points_rx[ir, :, j]
-                else:
-                    ecef = tx.ecef + np.dot(tx.ecef - rx.ecef, a*krx - ktx)/(1 - a**2)*ktx
-                
-                    ax.plot([tx.ecef[0], ecef[0]], [tx.ecef[1], ecef[1]], [tx.ecef[2], ecef[2]], 'r-', alpha=0.15)
-                    ax.plot([rx.ecef[0], ecef[0]], [rx.ecef[1], ecef[1]], [rx.ecef[2], ecef[2]], 'g-', alpha=0.15)
+            
+            # Plotting station ECEF positions
+            for tx in eiscat3d.tx:
+                ax.plot([tx.ecef[0]],[tx.ecef[1]],[tx.ecef[2]],'or')
+            for rx in eiscat3d.rx:
+                ax.plot([rx.ecef[0]],[rx.ecef[1]],[rx.ecef[2]],'og')
 
-dr = 600e3
-ax.set_xlim([eiscat3d.tx[0].ecef[0]-dr, eiscat3d.tx[0].ecef[0]+dr])
-ax.set_ylim([eiscat3d.tx[0].ecef[1]-dr, eiscat3d.tx[0].ecef[1]+dr])
-ax.set_zlim([eiscat3d.tx[0].ecef[2]-dr, eiscat3d.tx[0].ecef[2]+dr])
+            ax = plotting.plot_beam_directions(ctrl, eiscat3d, ax=ax, logger=logger, profiler=p, zoom_level=0.95, azimuth=10, elevation=10)
 
 plt.show()
 

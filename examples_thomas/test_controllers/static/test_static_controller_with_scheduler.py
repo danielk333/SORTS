@@ -83,14 +83,14 @@ else:
     plt_ids = None
 
 logger.info("test_static_controller_w_scheduler -> retreiving controls : ")
-for i in range(len(controls["beam_orientation"])):
-    ctrl = next(controls["beam_orientation"][i])
+for ctrl_id in range(len(controls["t"])):
+    ctrl = next(controls["pointing_direction"])
     
     if log_array_sizes is True:
-        logger.info(f"test_static_controller_w_scheduler: controls {i} - size : {(ctrl['tx'].itemsize*np.size(ctrl['tx']) + ctrl['rx'].itemsize*np.size(ctrl['rx']))/1e6} Mb")
+        logger.info(f"test_static_controller_w_scheduler: controls {ctrl_id} - size : {(ctrl['tx'].itemsize*np.size(ctrl['tx']) + ctrl['rx'].itemsize*np.size(ctrl['rx']))/1e6} Mb")
     
     if plt_ids is not None:
-        if i in plt_ids:
+        if ctrl_id in plt_ids:
             fig = plt.figure(figsize=(15,15))
             ax = fig.add_subplot(111, projection='3d')
             
