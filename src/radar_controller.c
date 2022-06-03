@@ -12,8 +12,6 @@ int check_time_slice_overlap(double* t_controller, double* time_slice, int n, in
             indices = (int*)realloc(indices, (n_indices+1) * sizeof(int));
             indices[n_indices] = index;
             n_indices++;
-
-            printf("%f-%f = %f < %f\n", t_controller[index+1], t_controller[index], t_controller[index+1] - t_controller[index], time_slice[index]);
         }
     }
 
