@@ -195,28 +195,8 @@ def normalize_direction_controls(directions, logger=None):
     TODO -> implementation in C/C++
     TODO -> implement callback python functions to support non-homogeneous arrays of controls
     '''
-    if len(np.shape(directions)) < 5:
-        n_stations = np.shape(directions)[0]
-
-        for station_id in range(n_stations):
-            n_associated_stations = np.shape(directions[station_id])[0]
-            
-            for associated_station_id in range(n_associated_stations):
-                n_time_points = np.shape(directions[station_id, associated_station_id])[0]
-
-                for ti in range(n_time_points):
-                    n_points_per_slice = np.shape(directions[station_id, associated_station_id, ti])[0]
-                    
-                    for t_slice_id in range(n_points_per_slice):
-                        direction = directions[station_id, associated_station_id, ti, t_slice_id]
-                        direction = direction/np.linalg.norm(direction)
-                        
-                        directions[station_id, associated_station_id, ti, t_slice_id] = direction
-    else:
-        directions = np.asfarray(directions)
-        directions = directions/np.linalg.norm(directions, axis=4)[:, :, :, :, None]
-                        
-    return directions
+    directions = np.asfarray(directions)                        
+    return directions/np.linalg.norm(directions, axis=4)[:, :, :, :, None]
 
 
 def get_time_slice(t_controller, time_slice, t, flatten=True, logger=None, profiler=None):

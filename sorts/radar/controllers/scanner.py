@@ -74,7 +74,7 @@ class Scanner(radar_controller.RadarController):
         if self.logger is not None:
             self.logger.info('Scanner:init')   
     
-    def __compute_beam_orientation(
+    def __compute_pointing_direction(
             self, 
             t,
             radar, 
@@ -85,59 +85,61 @@ class Scanner(radar_controller.RadarController):
         Computes the beam orientation controls assiciated with the controller. 
         This function returns a generator allowing the computation of the said subarray (containing a maximum of max_points time points)
         '''
-        if self.profiler is not None:
-            self.profiler.start('Scanner:generate_controls:compute_controls_subarray:tx') 
-        
-        # initializing results
-        beam_controls = dict()
 
-        # get the position of the Tx/Rx stations
-        tx_ecef = np.array([tx.ecef for tx in radar.tx], dtype=float) # get the position of each Tx station (ECEF frame)
-        rx_ecef = np.array([rx.ecef for rx in radar.rx], dtype=float) # get the position of each Rx station (ECEF frame)
-        
-        # compute directions for stations where tx and rx < 200 meters apart => same location for pointing
-        
-        rx_close_to_tx = np.linalg.norm(tx_ecef[:, None, :] - rx_ecef[None, :, :], axis=2) < 200.0
-        inds_rx_close_to_tx = np.array(np.where(rx_close_to_tx)) # [txinds, rxinds]
-        del rx_close_to_tx
-        
-        # get Tx pointing directions
-        # [ind_tx][x, y, z][t] ->[ind_tx][t][x, y, z]
-        points = scan.ecef_pointing(t, radar.tx).transpose(0, 2, 1)
-
-        # get Tx pointing directions and target points for Rx
-        # [txi, rxi, t, t_slice, (xyz)]
-        point_tx = points[:, None, :, None, :] + tx_ecef[:, None, None, None, :]
- 
-        # Compute Tx pointing directions
-        beam_controls['tx'] = points[:, None, :, None, :]#super()._normalize(tx_dirs) # the beam directions are given as unit vectors in the ecef frame of reference
-        
-        if self.profiler is not None:
-            self.profiler.stop('Scanner:generate_controls:compute_controls_subarray:tx') 
-            self.profiler.start('Scanner:generate_controls:compute_controls_subarray:rx') 
-        
-        # get Rx target points on the Tx beam
-        point_rx_to_tx = points[:, :, None, :]*r[None, :, None] + tx_ecef[None, :, None, None, :] # compute the target points for the Rx stations
-        del tx_ecef, points
-        point_rx = np.repeat(point_rx_to_tx, len(radar.rx), axis=0) 
-        del point_rx_to_tx
-        
-        # correct pointing directions for stations too close to each other
-        # point_rx[inds_rx_close_to_tx[1], :, :, :, :] = point_tx[inds_rx_close_to_tx[0], :, :, :, :]
-        # del inds_rx_close_to_tx, point_tx
-        
-        # compute actual pointing direction
-        rx_dirs = point_rx - rx_ecef[:, None, None, None, :]
-        del point_rx, rx_ecef
-        
-        # save computation results
-
-        beam_controls['rx'] = radar_controller.normalize_direction_controls(rx_dirs) # the beam directions are given as unit vectors in the ecef frame of reference
-        
-        if self.profiler is not None:
-            self.profiler.stop('Scanner:generate_controls:compute_controls_subarray:rx')
+        for ti, t_sub in enumerate(t):
+            if self.profiler is not None:
+                self.profiler.start('Scanner:generate_controls:pointing_direction:compute_controls_subarray:tx') 
             
-        yield beam_controls
+            # initializing results
+            pointing_direction = dict()
+
+            # get the position of the Tx/Rx stations
+            tx_ecef = np.array([tx.ecef for tx in radar.tx], dtype=float) # get the position of each Tx station (ECEF frame)
+            rx_ecef = np.array([rx.ecef for rx in radar.rx], dtype=float) # get the position of each Rx station (ECEF frame)
+            
+            # compute directions for stations where tx and rx < 200 meters apart => same location for pointing
+            
+            rx_close_to_tx = np.linalg.norm(tx_ecef[:, None, :] - rx_ecef[None, :, :], axis=2) < 200.0
+            inds_rx_close_to_tx = np.array(np.where(rx_close_to_tx)) # [txinds, rxinds]
+            del rx_close_to_tx
+            
+            # get Tx pointing directions
+            # [ind_tx][x, y, z][t_sub] ->[ind_tx][t_sub][x, y, z]
+            points = scan.ecef_pointing(t_sub, radar.tx).transpose(0, 2, 1)
+
+            # get Tx pointing directions and target points for Rx
+            # [txi, rxi, t_sub, t_slice, (xyz)]
+            point_tx = points[:, None, :, None, :] + tx_ecef[:, None, None, None, :]
+     
+            # Compute Tx pointing directions
+            pointing_direction['tx'] = points[:, None, :, None, :]#super()._normalize(tx_dirs) # the beam directions are given as unit vectors in the ecef frame of reference
+            
+            if self.profiler is not None:
+                self.profiler.stop('Scanner:generate_controls:pointing_direction:compute_controls_subarray:tx') 
+                self.profiler.start('Scanner:generate_controls:pointing_direction:compute_controls_subarray:rx') 
+            
+            # get Rx target points on the Tx beam
+            point_rx_to_tx = points[:, :, None, :]*r[None, :, None] + tx_ecef[None, :, None, None, :] # compute the target points for the Rx stations
+            del tx_ecef, points
+            point_rx = np.repeat(point_rx_to_tx, len(radar.rx), axis=0) 
+            del point_rx_to_tx
+            
+            # correct pointing directions for stations too close to each other
+            # point_rx[inds_rx_close_to_tx[1], :, :, :, :] = point_tx[inds_rx_close_to_tx[0], :, :, :, :]
+            # del inds_rx_close_to_tx, point_tx
+            
+            # compute actual pointing direction
+            rx_dirs = point_rx - rx_ecef[:, None, None, None, :]
+            del point_rx, rx_ecef
+            
+            # save computation results
+
+            pointing_direction['rx'] = radar_controller.normalize_direction_controls(rx_dirs) # the beam directions are given as unit vectors in the ecef frame of reference
+            
+            if self.profiler is not None:
+                self.profiler.stop('Scanner:generate_controls:pointing_direction:compute_controls_subarray:rx')
+                
+            yield pointing_direction
 
     def generate_controls(
             self, 
@@ -363,32 +365,44 @@ class Scanner(radar_controller.RadarController):
             
         # controls computation initialization
         # checks input values to make sure they are compatible with the implementation of the function
-        if priority is not None:
-            if not isinstance(priority, int): raise TypeError("priority must be an integer.")
-            else: 
-                if priority < 0: raise ValueError("priority must be positive [0; +inf] or equal to -1.")
-             
         if not isinstance(radar, Radar): 
             raise TypeError(f"radar must be an instance of {Radar}.")
 
-        # add support for both arrays and floats
+        # added support for both arrays and floats
         t = np.asarray(t)
         if len(np.shape(t)) > 1: raise TypeError("t must be a 1-dimensional array or a float")
 
+        if priority is not None:
+            if not isinstance(priority, int): 
+                priority = np.asarray(priority)
+
+                if not isinstance(priority, np.ndarray):
+                    raise TypeError("priority must be an integer or a numpy.ndarray.")
+                else:
+                    if len(np.where(priority < 0)[0]) > 0: raise ValueError("priority must be positive [0; +inf]")
+                    if len(priority) < len(t): raise TypeError(f"priority must be of the same late as t (size={len(t)})")
+            else:
+                if priority < 0: raise ValueError("priority must be positive [0; +inf]")
+                priority = np.repeat(priority, np.size(t)) 
+        else:
+            priority = np.repeat(None, np.size(t))
+
         # Check if time slices are overlapping
-        check_overlap_indices = radar_controller.check_time_slice_overlap(t, np.ones(np.size(t))*scan.dwell())
+        t_slice = np.ones(np.size(t))*scan.dwell()
+        check_overlap_indices = radar_controller.check_time_slice_overlap(t, t_slice)
+
         if np.size(check_overlap_indices) > 0:
             if self.logger is not None:
                 self.logger.warning(f"Tracker:generate_controls -> control time slices are overlapping at indices {check_overlap_indices}")
         del check_overlap_indices
         
         # split time array into scheduler periods if a scheduler is attached to the controls
-        t, sub_controls_count = super()._split_time_array(t, scheduler, max_points)
+        t, sub_controls_count = self._split_time_array(t, scheduler, max_points)
         
         # output data initialization
         controls = dict()  # the controls structure is defined as a dictionnary of subcontrols
         controls["t"] = t  # save the time points of the controls
-        controls["t_slice"] = np.ones(np.size(t))*scan.dwell() # save the dwell time of each time point
+        controls["t_slice"] = t_slice # save the dwell time of each time point
         controls["priority"] = priority # set the controls priority
         controls["enabled"] = True # set the radar state (on/off)
 
@@ -400,13 +414,9 @@ class Scanner(radar_controller.RadarController):
         controls["meta"]["scheduler"] = scheduler # set the radar state (on/off)
         controls["meta"]["sub_controls_count"] = sub_controls_count
         
-        # creating orientation controls generator array
-        controls["beam_orientation"] = []
-        
         # Computations
         # compute controls for each time sub array
-        for subcontrol_index in range(sub_controls_count):
-            controls["beam_orientation"].append(self.__compute_beam_orientation(t[subcontrol_index], radar, scan, r))
+        controls["pointing_direction"] = self.__compute_pointing_direction(t, radar, scan, r)
 
         if self.profiler is not None:
             self.profiler.stop('Scanner:generate_controls')

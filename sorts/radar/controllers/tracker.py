@@ -123,54 +123,67 @@ class Tracker(radar_controller.RadarController):
 
 
 
-    def _compute_beam_orientation(
+    def __compute_pointing_direction(
             self, 
+            t, 
+            t_slice, 
             radar, 
-            target_ecef,
+            interpolated_states,
             ):
         '''
         Compute the beam orientation for sub-arrays of radar controls. This function returns a genereator which can be used to compute the sub controls.
         '''
-        
-        if self.profiler is not None:
-            self.profiler.start('Static:generate_controls:compute_beam_orientation')
-        
-        # initializing results
-        beam_controls = dict()
-    
-        # get the position of the Tx/Rx stations
-        tx_ecef = np.array([tx.ecef for tx in radar.tx], dtype=float).reshape((len(radar.tx), 3)) # get the position of each Tx station (ECEF frame)
-        rx_ecef = np.array([rx.ecef for rx in radar.rx], dtype=float) # get the position of each Rx station (ECEF frame)
-        
-        if self.profiler is not None:
-            self.profiler.start('Static:generate_controls:compute_beam_orientation:tx')
-        
-        # Compute Tx pointing directions
-        tx_dirs = target_ecef[None, None, :, :, :] - tx_ecef[:, None, None, None, :]
-        del tx_ecef
-        
-        beam_controls['tx'] = radar_controller.normalize_direction_controls(tx_dirs, logger=self.logger) # the beam directions are given as unit vectors in the ecef frame of reference
-        del tx_dirs
-        
-        if self.profiler is not None:
-            self.profiler.stop('Static:generate_controls:compute_beam_orientation:tx') 
-            self.profiler.start('Static:generate_controls:compute_beam_orientation:rx') 
-        
-        # compute Rx pointing direction
-        rx_dirs = target_ecef[None, None, :, :, :]  - rx_ecef[:, None, None, None, :]     
-        del rx_ecef
-        
-        # save computation results
-        beam_controls['rx'] = radar_controller.normalize_direction_controls(rx_dirs, logger=self.logger) # the beam directions are given as unit vectors in the ecef frame of reference
-        del rx_dirs
-        
-        if self.profiler is not None:
-            self.profiler.stop('Static:generate_controls:compute_beam_orientation:rx')
-            self.profiler.stop('Static:generate_controls:compute_beam_orientation')
-        
-        # TODO : include this in radar -> RadarController.coh_integration(self.radar, self.meta['dwell'])
-        
-        yield beam_controls
+        time_index = 0
+
+        for ti, t_sub in enumerate(t):
+            check_overlap_indices = radar_controller.check_time_slice_overlap(t_sub, t_slice[ti])
+            time_index += np.size(t_sub)
+            
+            if np.size(check_overlap_indices) > 0:
+                if self.logger is not None:
+                    self.logger.warning(f"Tracker:generate_controls -> control time slices are overlapping at indices {check_overlap_indices}")
+            del check_overlap_indices
+                        
+            if interpolated_states[ti] is not None:
+                if self.profiler is not None:
+                    self.profiler.start('Static:generate_controls:compute_beam_orientation')
+                
+                # initializing results
+                pointing_direction = dict()
+            
+                # get the position of the Tx/Rx stations
+                tx_ecef = np.array([tx.ecef for tx in radar.tx], dtype=float).reshape((len(radar.tx), 3)) # get the position of each Tx station (ECEF frame)
+                rx_ecef = np.array([rx.ecef for rx in radar.rx], dtype=float) # get the position of each Rx station (ECEF frame)
+                
+                if self.profiler is not None:
+                    self.profiler.start('Static:generate_controls:compute_beam_orientation:tx')
+                
+                # Compute Tx pointing directions
+                tx_dirs = interpolated_states[ti][None, None, :, :, :] - tx_ecef[:, None, None, None, :]
+                del tx_ecef
+                
+                pointing_direction['tx'] = radar_controller.normalize_direction_controls(tx_dirs, logger=self.logger) # the beam directions are given as unit vectors in the ecef frame of reference
+                del tx_dirs
+                
+                if self.profiler is not None:
+                    self.profiler.stop('Static:generate_controls:compute_beam_orientation:tx') 
+                    self.profiler.start('Static:generate_controls:compute_beam_orientation:rx') 
+                
+                # compute Rx pointing direction
+                rx_dirs = interpolated_states[ti][None, None, :, :, :]  - rx_ecef[:, None, None, None, :]     
+                del rx_ecef
+                
+                # save computation results
+                pointing_direction['rx'] = radar_controller.normalize_direction_controls(rx_dirs, logger=self.logger) # the beam directions are given as unit vectors in the ecef frame of reference
+                del rx_dirs
+                
+                if self.profiler is not None:
+                    self.profiler.stop('Static:generate_controls:compute_beam_orientation:rx')
+                    self.profiler.stop('Static:generate_controls:compute_beam_orientation')
+                
+                # TODO : include this in radar -> RadarController.coh_integration(self.radar, self.meta['dwell'])
+                
+                yield pointing_direction
     
 
     def generate_controls(
@@ -445,20 +458,30 @@ class Tracker(radar_controller.RadarController):
         # add new profiler entry
         if self.profiler is not None:
             self.profiler.start('Tracker:generate_controls')
-            
+        
         # controls computation initialization
         # checks input values to make sure they are compatible with the implementation of the function
-        if priority is not None:
-            if not isinstance(priority, int): raise TypeError("priority must be an integer.")
-            else: 
-                if priority < 0: raise ValueError("priority must be positive [0; +inf] or equal to -1.")
-             
         if not isinstance(radar, Radar): 
             raise TypeError(f"radar must be an instance of {Radar}.")
 
-        # add support for both arrays and floats
+        # added support for both arrays and floats
         t = np.asarray(t)
         if len(np.shape(t)) > 1: raise TypeError("t must be a 1-dimensional array or a float")
+
+        if priority is not None:
+            if not isinstance(priority, int): 
+                priority = np.asarray(priority)
+
+                if not isinstance(priority, np.ndarray):
+                    raise TypeError("priority must be an integer or a numpy.ndarray.")
+                else:
+                    if len(np.where(priority < 0)[0]) > 0: raise ValueError("priority must be positive [0; +inf]")
+                    if len(priority) < len(t): raise TypeError(f"priority must be of the same late as t (size={len(t)})")
+            else: 
+                if priority < 0: raise ValueError("priority must be positive [0; +inf] or equal to -1.")
+                priority = np.repeat(priority, np.size(t)) 
+        else:
+            priority = np.repeat(None, np.size(t))
 
         if not issubclass(interpolator, interpolation.Interpolator):
             raise TypeError(f"interpolator must be an instance of {interpolation.Interpolator}.")
@@ -468,14 +491,21 @@ class Tracker(radar_controller.RadarController):
             if self.logger is not None:
                 self.logger.info(f"Tracker:generate_controls -> creating state interpolator {state_interpolator}")
         
-        t_slice = np.asfarray(t_slice)
-        if (np.size(t_slice) != 1 and np.size(t_slice) != np.size(t_slice)):
-            raise TypeError(f"t_slice (size {np.size(t_slice)}) must be either a float or an array of the same size as t (size {np.size(t)})")
-        if np.size(t_slice) == 1:
-            t_slice = np.ones(np.size(t))*t_slice
+        # time slice verifications
+        if not isinstance(t_slice, float) or not isinstance(t_slice, float): 
+            t_slice = np.asarray(t_slice)
+
+            if not isinstance(t_slice, np.ndarray):
+                raise TypeError("t_slice must be an real number or a numpy.ndarray.")
+            else:
+                if len(t_slice) < len(t):
+                    raise TypeError(f"t_slice (size={len(t_slice)}) must be of the same late as t (size={len(t)})")
+        else: 
+            if t_slice < 0: raise ValueError("t_slice must be positive [0; +inf]")
+            t_slice = np.repeat(t_slice, np.size(t)) 
         
         # split time array into scheduler periods and target states if a scheduler is attached to the controls
-        t, sub_controls_count = super()._split_time_array(t, scheduler, max_points)
+        t, sub_controls_count = self._split_time_array(t, scheduler, max_points)
         t, t_slice, target_states_interp = self.__retreive_target_states(t, t_slice, t_states, state_interpolator, states_per_slice)
 
         # output data initialization
@@ -493,27 +523,10 @@ class Tracker(radar_controller.RadarController):
         controls["meta"]["sub_controls_count"] = sub_controls_count
         controls["meta"]["interpolator"] = state_interpolator
         
-        # creating orientation controls generator array
-        controls["beam_orientation"] = []
-        
         # Computations
         # compute controls for each time sub array
-        time_index = 0
-        
-        for subcontrol_index in range(len(t)):
-            check_overlap_indices = radar_controller.check_time_slice_overlap(t[subcontrol_index], t_slice[subcontrol_index])
-            time_index += np.size(t[subcontrol_index])
-            
-            if np.size(check_overlap_indices) > 0:
-                if self.logger is not None:
-                    self.logger.warning(f"Tracker:generate_controls -> control time slices are overlapping at indices {check_overlap_indices}")
-            del check_overlap_indices
-            
-            target_ecef = target_states_interp[subcontrol_index]
-            
-            if target_ecef is not None:
-                controls["beam_orientation"].append(self._compute_beam_orientation(radar, target_ecef))
-                
+        controls["pointing_direction"] = self.__compute_pointing_direction(t, t_slice, radar, target_states_interp)
+                        
         if self.profiler is not None:
             self.profiler.stop('Tracker:generate_controls')
         
