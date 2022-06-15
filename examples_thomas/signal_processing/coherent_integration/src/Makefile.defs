@@ -1,0 +1,75 @@
+CC=g++
+OPT+= -Wpointer-arith -D_GNU_SOURCE -O3 
+
+# Removed -march=native for now
+ifndef OS
+	OS=$(shell uname)
+endif
+ifeq ($(OS), Linux)
+	OPT+= -Wall -g -Wno-unused-result
+	LIB+= -lm -lrt
+endif
+ifeq ($(OS), Darwin)
+	OPT+= -I/usr/local/include -Wall -g #-Wsign-compare
+	PREDEF+= -D_APPLE
+	LIB+= -L/usr/local/lib
+endif
+
+ifeq ($(MPI), 1)
+	ifeq ($(origin CC),default)
+		CC:=mpicc
+	else
+		CC?=mpicc
+	endif
+	PREDEF+= -DMPI
+else
+	CC?=g++
+endif
+
+ifeq ($(FFTW), 1)
+	PREDEF+= -DFFTW
+	LIB+= -lfftw3
+endif
+
+ifeq ($(OPENGL), 1)
+PREDEF+= -DOPENGL
+ifeq ($(OS), Darwin)
+	OPT+= -I/opt/homebrew/include
+	OPT+= -L/opt/homebrew/lib
+	LIB+= -lglfw -framework Cocoa -framework OpenGL -framework IOKit -framework CoreVideo
+else
+	LIB+= -lglfw
+endif
+endif
+
+ifeq ($(QUADRUPOLE), 1)
+	PREDEF+= -DQUADRUPOLE
+endif
+
+ifeq ($(PROFILING), 1)
+	PREDEF+= -DPROFILING
+endif
+
+ifeq ($(OPENMP), 1)
+	PREDEF+= -DOPENMP
+ifeq ($(CC), icc)
+	OPT+= -openmp
+	LIB+= -openmp
+else
+	OPT+= -fopenmp
+	LIB+= -fopenmp
+endif
+else
+ifeq ($(OPENMPCLANG), 1)
+	PREDEF+= -DOPENMP
+	OPT+= -I$(brew --prefix libomp)/include -Xpreprocessor -fopenmp
+	LIB+= -lomp
+else
+	OPT+= -Wno-unknown-pragmas
+endif
+endif
+
+ifndef GITHASH
+	GITHASH = $(shell git rev-parse HEAD || echo '0000000000gitnotfound0000000000000000000')
+	PREDEF+= -DGITHASH=$(GITHASH)
+endif
