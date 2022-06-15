@@ -8,7 +8,7 @@ import numpy as np
 
 from . import radar_controller
 from ..system import Radar
-from ..scheduler import Scheduler
+from ..controls_manager import RadarControlManagerBase
 from sorts.common import interpolation
 
 class Tracker(radar_controller.RadarController):
@@ -90,17 +90,16 @@ class Tracker(radar_controller.RadarController):
             del states_msk
             
             flag_found_pass = False
-            time_index = 0
             
             # get the states for each time sub-array
-            for ti, t_sub in enumerate(t_splitted):                
-                dt_states = t_slice[time_index:time_index+np.size(t_sub)]/float(states_per_slice)
+            for ti, t_sub in enumerate(t_splitted):   
+                dt_states = t_slice[ti]/float(states_per_slice)
                 pass_msk = np.logical_and(t_sub >= t_start, t_sub <= t_end)   
 
                 if np.size(np.where(pass_msk)[0]) > 0:                
                     flag_found_pass = True      
                     
-                    if np.size(np.where(t_sub > t_end - t_slice[time_index:time_index+np.size(t_sub)][-1])[0]) > 0:
+                    if np.size(np.where(t_sub > t_end - t_slice[ti][-1])[0]) > 0:
                         if self.logger is not None:
                             self.logger.warning(f"tracker:__retreive_target_states: some incomplete tracking control slices have been discarded between t={t_sub[0]} and t={t_sub[-1]} seconds")
                     
@@ -111,16 +110,12 @@ class Tracker(radar_controller.RadarController):
                     
                     target_states.append(np.reshape(np.transpose(state_interpolator.get_state(np.asfarray(t_states))), (np.shape(t_sub[pass_msk])[0], states_per_slice, 6))[:, :, 0:3]) #[scheduling slice/control subarray][time points][points per slice][xyz]
                     t_new.append(t_sub[pass_msk])
-                    t_slice_new.append(t_slice[time_index:time_index+np.size(t_sub)][pass_msk])
+                    t_slice_new.append(t_slice[ti][pass_msk])
                 else:                    
                     if flag_found_pass is True:
                         break
-                    
-            time_index += np.size(t_sub)
         
         return np.array(t_new, dtype=object), np.array(t_slice_new, dtype=object), np.array(target_states, dtype=object)
-
-
 
 
     def __compute_pointing_direction(
@@ -182,7 +177,7 @@ class Tracker(radar_controller.RadarController):
                     self.profiler.stop('Static:generate_controls:compute_beam_orientation')
                 
                 # TODO : include this in radar -> RadarController.coh_integration(self.radar, self.meta['dwell'])
-                
+
                 yield pointing_direction
     
 
@@ -194,10 +189,11 @@ class Tracker(radar_controller.RadarController):
             target_states, 
             t_slice=0.1, 
             states_per_slice=1,
-            interpolator=interpolation.Legendre8,
-            scheduler=None,
+            interpolator=interpolation.Linear,
+            manager=None,
             priority=None, 
             max_points=100,
+            beam_enabled=True,
             ):
         '''Generates RADAR tracking controls for a given radar and sampling time and target. 
         This method can be called multiple times to generate different controls for different radar systems.
@@ -266,13 +262,13 @@ class Tracker(radar_controller.RadarController):
             number of target points per time slice
         interpolator (optional) : interpolation.Interpolator
             interpolator algorithm instance used to reconstruct the states of the target at each needed time point
-        scheduler : int priority (optional)
-            Scheduler instance used for scheduling time sunchromization between controls for tims slicing. 
+        manager : int priority (optional)
+            manager instance used for scheduling time sunchromization between controls for tims slicing. 
             Time slicing refers to the slicing of the time array into multiple subcontrol arrays (given as generator objects) to reduce memory (RAM) usage.
-            This parameter is only useful when multiple controls are sent to a given scheduler.
-            If the scheduler is not provided, the controller will slice the controls using the max_points parameter.
+            This parameter is only useful when multiple controls are sent to a given manager.
+            If the manager is not provided, the controller will slice the controls using the max_points parameter.
         priority : int priority (optional)
-            Priority of the generated controls, only used by the scheduler to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
+            Priority of the generated controls, only used by the manager to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority management algorithms.
         max_points : int (optional)
             Max number of points for a given control array computed simultaneously. This number is used to limit the impact of computations over RAM
             Note that lowering this number might increase computation time, while increasing this number might cause problems depending on the available RAM on your machine
@@ -295,7 +291,7 @@ class Tracker(radar_controller.RadarController):
         t_slice : float/numpy.ndarray 
             Array of time slice durations. The duration of the time slice for a given control must be less than or equal to the time step
         priority : int priority (optional)
-            Priority of the generated controls, only used by the scheduler to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
+            Priority of the generated controls, only used by the manager to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority management algorithms.
         max_points : int (optional)
             Max number of points for a given control array computed simultaneously. This number is used to limit the impact of computations over RAM
             Note that lowering this number might increase computation time, while increasing this number might cause problems depending on the available RAM on your machine
@@ -315,7 +311,7 @@ class Tracker(radar_controller.RadarController):
             1D array containing the duration of a time slice. A time slice represent the elementary quanta which corresponds to a single measurement. Therefore, it also corresponds to the maximal time resolution achievable by our system.
         
         - "priority"
-            Priority of the generated controls, only used by the scheduler to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
+            Priority of the generated controls, only used by the manager to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority management algorithms.
             
         - "enabled"
            State of the radar (enabled/disabled). If this value is a single boolean, then radar measurements will be enabled at each time step. If the value is an array, then the state of the radar
@@ -326,7 +322,7 @@ class Tracker(radar_controller.RadarController):
             
             - "tx"
                 Array of unit vectors representing the target direction of the beam for a given Tx station at time t. 
-                To ensure that this controls can be understood by the radar and the scheduler, the orientation data is given in the following standard:
+                To ensure that this controls can be understood by the radar and the manager, the orientation data is given in the following standard:
                 
                 - Dimension 0 : 
                     Tx station index. In the case where there is only one Tx station considered, the value of this index will be 0.
@@ -345,7 +341,7 @@ class Tracker(radar_controller.RadarController):
 
             - "rx"
                 Array of unit vectors representing the target direction of the beam for a given Rx station at time t. 
-                To ensure that this controls can be understood by the radar and the scheduler, the orientation data is given in the following standard:
+                To ensure that this controls can be understood by the radar and the manager, the orientation data is given in the following standard:
             
                 - Dimension 0 : 
                     Rx station index. In the case where there is only one Rx station considered, the value of this index will be 0.
@@ -373,16 +369,16 @@ class Tracker(radar_controller.RadarController):
                 sorts.radar.system.Radar instance being controlled.
                 
             - "max_points" :
-                Number of time points per control subarray (this value is not used if the scheduler is not none)
+                Number of time points per control subarray (this value is not used if the manager is not none)
                 
-            - "scheduler" :
-                sorts.scheduler.Scheduler instance associated with the control array. This instance is used to 
-                divide the controls into subarrays of controls according to the scheduler scheduling period to 
+            - "manager" :
+                sorts.radar.controls_manager.RadarControlManagerBase instance associated with the control array. This instance is used to 
+                divide the controls into subarrays of controls according to the manager period to 
                 reduce memory/computational overhead.
-                If the scheduler is not none, the value of the scheduling period will take over the max points parameter (see above)
+                If the manager is not none, the value of the period will take over the max points parameter (see above)
                 
         - "priority"
-            Priority of the generated controls, only used by the scheduler to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
+            Priority of the generated controls, only used by the manager to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority management algorithms.
         
         Examples
         --------
@@ -468,6 +464,14 @@ class Tracker(radar_controller.RadarController):
         t = np.asarray(t)
         if len(np.shape(t)) > 1: raise TypeError("t must be a 1-dimensional array or a float")
 
+        # beam_enabled check
+        beam_enabled = np.asarray(beam_enabled, dtype=bool)
+        if np.size(beam_enabled) == 1:
+            beam_enabled = np.repeat(beam_enabled, len(t))
+        else:
+            if np.size(beam_enabled) < np.size(t): raise TypeError(f"beam_enabled (size={len(beam_enabled)}) must be of the same length as t (size={len(t)})")
+
+
         if priority is not None:
             if not isinstance(priority, int): 
                 priority = np.asarray(priority)
@@ -476,7 +480,7 @@ class Tracker(radar_controller.RadarController):
                     raise TypeError("priority must be an integer or a numpy.ndarray.")
                 else:
                     if len(np.where(priority < 0)[0]) > 0: raise ValueError("priority must be positive [0; +inf]")
-                    if len(priority) < len(t): raise TypeError(f"priority must be of the same late as t (size={len(t)})")
+                    if len(priority) < len(t): raise TypeError(f"priority must be of the same length as t (size={len(t)})")
             else: 
                 if priority < 0: raise ValueError("priority must be positive [0; +inf] or equal to -1.")
                 priority = np.repeat(priority, np.size(t)) 
@@ -492,20 +496,20 @@ class Tracker(radar_controller.RadarController):
                 self.logger.info(f"Tracker:generate_controls -> creating state interpolator {state_interpolator}")
         
         # time slice verifications
-        if not isinstance(t_slice, float) or not isinstance(t_slice, float): 
+        if not isinstance(t_slice, float) and not isinstance(t_slice, int): 
             t_slice = np.asarray(t_slice)
 
             if not isinstance(t_slice, np.ndarray):
                 raise TypeError("t_slice must be an real number or a numpy.ndarray.")
             else:
                 if len(t_slice) < len(t):
-                    raise TypeError(f"t_slice (size={len(t_slice)}) must be of the same late as t (size={len(t)})")
+                    raise TypeError(f"t_slice (size={len(t_slice)}) must be of the same length as t (size={len(t)})")
         else: 
             if t_slice < 0: raise ValueError("t_slice must be positive [0; +inf]")
             t_slice = np.repeat(t_slice, np.size(t)) 
         
-        # split time array into scheduler periods and target states if a scheduler is attached to the controls
-        t, sub_controls_count = self._split_time_array(t, scheduler, max_points)
+        # split time array into manager periods and target states if a manager is attached to the controls
+        t, t_slice, priority, sub_controls_count = self._split_time_array(t, t_slice, priority, manager, max_points)
         t, t_slice, target_states_interp = self.__retreive_target_states(t, t_slice, t_states, state_interpolator, states_per_slice)
 
         # output data initialization
@@ -513,13 +517,13 @@ class Tracker(radar_controller.RadarController):
         controls["t"] = t  # save the time points of the controls
         controls["t_slice"] = t_slice # save the dwell time of each time point
         controls["priority"] = priority # set the controls priority
-        controls["enabled"] = True # set the radar state (on/off)
+        controls["beam_enabled"] = beam_enabled # set the radar state (on/off)
         
         # setting metadata
         controls["meta"] = dict()
         controls["meta"]["radar"] = radar
         controls["meta"]["controller_type"] = "tracker"
-        controls["meta"]["scheduler"] = scheduler # set the radar state (on/off)
+        controls["meta"]["manager"] = manager # set the radar state (on/off)
         controls["meta"]["sub_controls_count"] = sub_controls_count
         controls["meta"]["interpolator"] = state_interpolator
         

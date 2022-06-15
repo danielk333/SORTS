@@ -18,10 +18,10 @@ clibsorts = ctypes.cdll.LoadLibrary(__libpath__)
 #                           Radar
 # -----------------------------------------------------------------
 # Schedule
-from .radar import scheduler
+from .radar import scheduler # TODO modify schedulers
 from .radar import controllers
 
-from .radar.scheduler import ObservedParameters, StaticList, Scheduler, PointingSchedule, Tracking, PriorityTracking
+from .radar.scheduler import Scheduler, TrackingScheduler
 from .radar.controllers import RadarController, Scanner, Static, Tracker
 
 # System
@@ -32,6 +32,13 @@ from .radar.system import Radar
 
 # Radar instances
 from .radar.system import instances as radars
+
+# Radar control manager
+from .radar.controls_manager import base
+from .radar.controls_manager import simple_manager
+
+from .radar.controls_manager.base import RadarControlManagerBase
+from .radar.controls_manager.simple_manager import SimpleRadarControl
 
 # Other radar imports
 from .radar import signals

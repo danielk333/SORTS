@@ -156,7 +156,7 @@ class SpaceObject(object):
         if not isinstance(epoch, Time):
             epoch = Time(epoch, format='mjd', scale='utc')
 
-        self.epoch = epoch
+        self._epoch = epoch
 
         if 'state' in kwargs:
             self.state = kwargs['state']
@@ -193,7 +193,7 @@ class SpaceObject(object):
             propagator = self.__propagator,
             propagator_options = copy.deepcopy(self.propagator_options),
             propagator_args = copy.deepcopy(self.propagator_args),
-            epoch=copy.deepcopy(self.epoch),
+            epoch=copy.deepcopy(self._epoch),
             oid=self.oid,
             state=copy.deepcopy(self.state),
             parameters = copy.deepcopy(self.parameters),
@@ -287,8 +287,9 @@ class SpaceObject(object):
         self.propagator_options['settings']['in_frame'] = val
         self.propagator.settings['in_frame'] = val
 
-
-
+    @property
+    def epoch(self):
+        return self._epoch 
 
     def propagate(self, dt):
         '''Propagate and change the epoch of this space object if the state is a `pyorb.Orbit`.
@@ -306,7 +307,7 @@ class SpaceObject(object):
             state = self.get_state(np.array([dt], dtype=np.float64))
 
 
-        self.epoch = self.epoch + TimeDelta(dt, format='sec')
+        self._epoch = self._epoch + TimeDelta(dt, format='sec')
 
         x, y, z, vx, vy, vz = state.flatten()
 
@@ -359,7 +360,7 @@ class SpaceObject(object):
 
 
     def __str__(self):
-        p = '\nSpace object {}: {}:\n'.format(self.oid,repr(self.epoch))
+        p = '\nSpace object {}: {}:\n'.format(self.oid,repr(self._epoch))
         
         p+= str(self.state) + '\n'
         p+= f'Parameters: ' + ', '.join([
@@ -409,7 +410,7 @@ class SpaceObject(object):
         ret = self.propagator.propagate(
             t = t,
             state0 = self.state,
-            epoch = self.epoch,
+            epoch = self._epoch,
             **kw
         )
 

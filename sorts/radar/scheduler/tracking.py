@@ -12,7 +12,7 @@ from ..controllers import Tracker
 from .scheduler import Scheduler
 from ..passes import equidistant_sampling
 
-class Tracking(Scheduler):
+class TrackingScheduler(Scheduler):
     '''#TODO: Docstring
     '''
 

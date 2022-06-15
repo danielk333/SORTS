@@ -11,8 +11,15 @@
 from . import scheduler
 from . import controllers
 
-from .scheduler import ObservedParameters, StaticList, Scheduler, PointingSchedule, Tracking, PriorityTracking
+from .scheduler import Scheduler, TrackingScheduler
 from .controllers import RadarController, Scanner, Static, Tracker
+
+# Control manager
+from .controls_manager import base
+from .controls_manager import simple_manager
+
+from .controls_manager.base import RadarControlManagerBase
+from .controls_manager.simple_manager import SimpleRadarControl
 
 # System
 from .system import RX, TX, Station

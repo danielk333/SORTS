@@ -148,9 +148,10 @@ class Scanner(radar_controller.RadarController):
             scan,
             r=np.linspace(300e3, 1000e3, num=10), 
             as_altitude=False, 
-            scheduler=None,
+            manager=None,
             priority=None,
             max_points=1000,
+            beam_enabled=True,
             ):
         '''Generates RADAR scanning controls in a given direction. 
         This method can be called multiple times to generate different controls for different radar systems.
@@ -193,13 +194,13 @@ class Scanner(radar_controller.RadarController):
             Array of time slice durations. The duration of the time slice for a given control must be less than or equal to the time step
         r : float/numpy.ndarray 
             Array of ranges from the transmitter beam at which the receiver will perform scans during a given time slice 
-        scheduler : int priority (optional)
-            Scheduler instance used for scheduling time sunchromization between controls for tims slicing. 
+        manager : int priority (optional)
+            RadarControlManagerBase instance used for scheduling time sunchromization between controls for tims slicing. 
             Time slicing refers to the slicing of the time array into multiple subcontrol arrays (given as generator objects) to reduce memory (RAM) usage.
-            This parameter is only useful when multiple controls are sent to a given scheduler.
-            If the scheduler is not provided, the controller will slice the controls using the max_points parameter.
+            This parameter is only useful when multiple controls are sent to a given manager.
+            If the manager is not provided, the controller will slice the controls using the max_points parameter.
         priority : int priority (optional)
-            Priority of the generated controls, only used by the scheduler to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
+            Priority of the generated controls, only used by the manager to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
         max_points : int (optional)
             Max number of points for a given control array computed simultaneously. This number is used to limit the impact of computations over RAM
             Note that lowering this number might increase computation time, while increasing this number might cause problems depending on the available RAM on your machine
@@ -219,7 +220,7 @@ class Scanner(radar_controller.RadarController):
             1D array containing the duration of a time slice. A time slice represent the elementary quanta which corresponds to a single measurement. Therefore, it also corresponds to the maximal time resolution achievable by our system.
         
         - "priority"
-            Priority of the generated controls, only used by the scheduler to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
+            Priority of the generated controls, only used by the manager to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
             
         - "enabled"
            State of the radar (enabled/disabled). If this value is a single boolean, then radar measurements will be enabled at each time step. If the value is an array, then the state of the radar
@@ -230,7 +231,7 @@ class Scanner(radar_controller.RadarController):
             
             - "tx"
                 Array of unit vectors representing the target direction of the beam for a given Tx station at time t. 
-                To ensure that this controls can be understood by the radar and the scheduler, the orientation data is given in the following standard:
+                To ensure that this controls can be understood by the radar and the manager, the orientation data is given in the following standard:
                 
                 - Dimension 0 : 
                     Tx station index. In the case where there is only one Tx station considered, the value of this index will be 0.
@@ -249,7 +250,7 @@ class Scanner(radar_controller.RadarController):
 
             - "rx"
                 Array of unit vectors representing the target direction of the beam for a given Rx station at time t. 
-                To ensure that this controls can be understood by the radar and the scheduler, the orientation data is given in the following standard:
+                To ensure that this controls can be understood by the radar and the manager, the orientation data is given in the following standard:
             
                 - Dimension 0 : 
                     Rx station index. In the case where there is only one Rx station considered, the value of this index will be 0.
@@ -277,16 +278,16 @@ class Scanner(radar_controller.RadarController):
                 sorts.radar.system.Radar instance being controlled.
                 
             - "max_points" :
-                Number of time points per control subarray (this value is not used if the scheduler is not none)
+                Number of time points per control subarray (this value is not used if the manager is not none)
                 
-            - "scheduler" :
-                sorts.scheduler.Scheduler instance associated with the control array. This instance is used to 
-                divide the controls into subarrays of controls according to the scheduler scheduling period to 
+            - "manager" :
+                sorts.controls_manager.RadarControlManagerBase instance associated with the control array. This instance is used to 
+                divide the controls into subarrays of controls according to the manager scheduling period to 
                 reduce memory/computational overhead.
-                If the scheduler is not none, the value of the scheduling period will take over the max points parameter (see above)
+                If the manager is not none, the value of the scheduling period will take over the max points parameter (see above)
                 
         - "priority"
-            Priority of the generated controls, only used by the scheduler to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
+            Priority of the generated controls, only used by the manager to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority manager algorithms.
         
         Examples
         --------
@@ -372,20 +373,24 @@ class Scanner(radar_controller.RadarController):
         t = np.asarray(t)
         if len(np.shape(t)) > 1: raise TypeError("t must be a 1-dimensional array or a float")
 
-        if priority is not None:
-            if not isinstance(priority, int): 
-                priority = np.asarray(priority)
-
-                if not isinstance(priority, np.ndarray):
-                    raise TypeError("priority must be an integer or a numpy.ndarray.")
-                else:
-                    if len(np.where(priority < 0)[0]) > 0: raise ValueError("priority must be positive [0; +inf]")
-                    if len(priority) < len(t): raise TypeError(f"priority must be of the same late as t (size={len(t)})")
-            else:
-                if priority < 0: raise ValueError("priority must be positive [0; +inf]")
-                priority = np.repeat(priority, np.size(t)) 
+        # beam_enabled check
+        beam_enabled = np.asarray(beam_enabled, dtype=bool)
+        if np.size(beam_enabled) == 1:
+            beam_enabled = np.repeat(beam_enabled, len(t))
         else:
-            priority = np.repeat(None, np.size(t))
+            if np.size(beam_enabled) < np.size(t): raise TypeError(f"beam_enabled (size={len(beam_enabled)}) must be of the same length as t (size={len(t)})")
+
+        # TODO : test
+        if priority is not None:
+            priority = np.asarray(priority, dtype=int)
+            
+            if np.size(priority)==1:
+                priority = np.repeat(priority, np.size(t))
+
+            if len(np.where(priority < 0)[0]) > 0: raise ValueError("priority must be positive [0; +inf]")
+            if len(priority) < len(t): raise TypeError(f"priority must be of the same length as t (size={len(t)})")
+        else:
+            priority = np.repeat(None, len(t))
 
         # Check if time slices are overlapping
         t_slice = np.ones(np.size(t))*scan.dwell()
@@ -396,22 +401,22 @@ class Scanner(radar_controller.RadarController):
                 self.logger.warning(f"Tracker:generate_controls -> control time slices are overlapping at indices {check_overlap_indices}")
         del check_overlap_indices
         
-        # split time array into scheduler periods if a scheduler is attached to the controls
-        t, sub_controls_count = self._split_time_array(t, scheduler, max_points)
+        # split time array into manager periods if a manager is attached to the controls
+        t, t_slice, priority, sub_controls_count = self._split_time_array(t, t_slice, priority, manager, max_points)
         
         # output data initialization
         controls = dict()  # the controls structure is defined as a dictionnary of subcontrols
         controls["t"] = t  # save the time points of the controls
         controls["t_slice"] = t_slice # save the dwell time of each time point
         controls["priority"] = priority # set the controls priority
-        controls["enabled"] = True # set the radar state (on/off)
+        controls["beam_enabled"] = beam_enabled # set the beam state (on/off)
 
         # setting metadata
         controls["meta"] = dict()
         controls["meta"]["scan"] = scan
         controls["meta"]["radar"] = radar
         controls["meta"]["controller_type"] = "scanner"
-        controls["meta"]["scheduler"] = scheduler # set the radar state (on/off)
+        controls["meta"]["manager"] = manager
         controls["meta"]["sub_controls_count"] = sub_controls_count
         
         # Computations

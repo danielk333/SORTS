@@ -12,8 +12,16 @@ import ctypes
 import numpy as np
 
 #Local import
-from ..scheduler import Scheduler
+from ..controls_manager import RadarControlManagerBase
 from sorts import clibsorts
+
+NON_CONTROL_FIELDS = [
+        "meta",
+        "t",
+        "t_slice",
+        "priority",
+        "beam_enabled"
+    ]
 
 class RadarController(ABC):
     '''
@@ -27,7 +35,7 @@ class RadarController(ABC):
     META_FIELDS = [
         'controller_type',
     ]
-    
+
     def __init__(self, profiler=None, logger=None):
         self.logger = logger
         self.profiler = profiler
@@ -36,49 +44,58 @@ class RadarController(ABC):
         self.meta = dict()
         self.meta['controller_type'] = self.__class__
 
-    def _split_time_array(self, t, scheduler, max_points):
+    def _split_time_array(self, t, t_slice, priority, manager, max_points):
         '''
         Usage
         -----
         
-        Split the controls time array according to the scheduler period and start time (if the scheduler is provided).       
-        If the scheduler is None, then the time array will be splitted to ensure that the number of time points in a given controls subarray does not exceed max_points
+        Split the controls time array according to the manager period and start time (if the manager is provided).       
+        If the manager is None, then the time array will be splitted to ensure that the number of time points in a given controls subarray does not exceed max_points
         This function returns the splitted control time array as well as the number of time subarrays
         '''
-        if scheduler is not None:
+        if manager is not None:
             if self.logger is not None:
-                self.logger.info("radar_controller:_split_time_array -> using scheduler master clock")
+                self.logger.info("radar_controller:_split_time_array -> using manager master clock")
                 self.logger.info("radar_controller:_split_time_array -> skipping max_points (max time points limit)")
                 
-            if not isinstance(scheduler, Scheduler):
-                raise ValueError(f"scheduler has to be an instance of {Scheduler}, not {scheduler}")
+            if not issubclass(manager.__class__, RadarControlManagerBase):
+                raise ValueError(f"manager has to be an instance of {RadarControlManagerBase}, not {manager}")
             
-            # compute scheduler period incices
-            sch_period = scheduler.scheduler_period
-            t0 = scheduler.t0
+            # compute manager period incices
+            sch_period = manager.manager_period
+            t0 = manager.t0
             
             period_idx = (t - t0)//sch_period
             t_start_subarray_indices = np.array(np.where((period_idx[1:] - period_idx[:-1]) == 1)[0]) + 1
             del period_idx
             
             t = np.array(np.split(t, t_start_subarray_indices), dtype=object)
+            t_slice = np.array(np.split(t_slice, t_start_subarray_indices), dtype=object)
+            priority = np.array(np.split(priority, t_start_subarray_indices), dtype=object)
+
             del t_start_subarray_indices
 
         else:
             if self.logger is not None:
-                self.logger.info("radar_controller:_split_time_array -> No scheduler provided, skipping master clock splitting...")
+                self.logger.info("radar_controller:_split_time_array -> No manager provided, skipping master clock splitting...")
                 self.logger.info(f"radar_controller:_split_time_array -> using max_points={max_points} (max time points limit)")
                 
             # compute the number of iterations needed
             if(np.size(t) > max_points):                
                 t_start_subarray_indices = np.arange(max_points, np.size(t), max_points, dtype=int)
+
                 t = np.array(np.split(t, t_start_subarray_indices), dtype=object)
+                t_slice = np.array(np.split(t_slice, t_start_subarray_indices), dtype=object)
+                priority = np.array(np.split(priority, t_start_subarray_indices), dtype=object)
+
                 del t_start_subarray_indices
                 
             else:
                 t = t[None, :]
+                t_slice = t_slice[None, :]
+                priority = priority[None, :]
 
-        return t, np.shape(t)[0]
+        return t, t_slice, priority, np.shape(t)[0]
 
     @abstractmethod
     def generate_controls(self, t, radar, **kwargs):
@@ -107,7 +124,7 @@ class RadarController(ABC):
             1D array containing the duration of a time slice. A time slice represent the elementary quanta which corresponds to a single measurement. Therefore, it also corresponds to the maximal time resolution achievable by our system.
         
         - "priority"
-            Priority of the generated controls, only used by the scheduler to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
+            Priority of the generated controls, only used by the manager to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority management algorithms.
             
         - "enabled"
            State of the radar (enabled/disabled). If this value is a single boolean, then radar measurements will be enabled at each time step. If the value is an array, then the state of the radar
@@ -118,7 +135,7 @@ class RadarController(ABC):
             
             - "tx"
                 Array of unit vectors representing the target direction of the beam for a given Tx station at time t. 
-                To ensure that this controls can be understood by the radar and the scheduler, the orientation data is given in the following standard:
+                To ensure that this controls can be understood by the radar and the manager, the orientation data is given in the following standard:
                 
                 - Dimension 0 : 
                     Tx station index. In the case where there is only one Tx station considered, the value of this index will be 0.
@@ -137,7 +154,7 @@ class RadarController(ABC):
 
             - "rx"
                 Array of unit vectors representing the target direction of the beam for a given Rx station at time t. 
-                To ensure that this controls can be understood by the radar and the scheduler, the orientation data is given in the following standard:
+                To ensure that this controls can be understood by the radar and the manager, the orientation data is given in the following standard:
             
                 - Dimension 0 : 
                     Rx station index. In the case where there is only one Rx station considered, the value of this index will be 0.
@@ -165,16 +182,16 @@ class RadarController(ABC):
                 sorts.radar.system.Radar instance being controlled.
                 
             - "max_points" :
-                Number of time points per control subarray (this value is not used if the scheduler is not none)
+                Number of time points per control subarray (this value is not used if the manager is not none)
                 
-            - "scheduler" :
-                sorts.scheduler.Scheduler instance associated with the control array. This instance is used to 
-                divide the controls into subarrays of controls according to the scheduler scheduling period to 
+            - "manager" :
+                sorts.radar.controls_manager.RadarControlsManagerBase instance associated with the control array. This instance is used to 
+                divide the controls into subarrays of controls according to the manager scheduling period to 
                 reduce memory/computational overhead.
-                If the scheduler is not none, the value of the scheduling period will take over the max points parameter (see above)
+                If the manager is not none, the value of the scheduling period will take over the max points parameter (see above)
                 
         - "priority"
-            Priority of the generated controls, only used by the scheduler to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
+            Priority of the generated controls, only used by the manager to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority management algorithms.
       '''
         pass
 
@@ -338,8 +355,6 @@ def check_time_slice_overlap(t_controller, time_slice, logger=None, profiler=Non
 
     clibsorts.check_time_slice_overlap(t_controller, time_slice, ctypes.c_int(len(t_controller)), indices, callback_save_array_c)
     
-    print(indices)
-
     if profiler is not None:
         profiler.stop(f"radar_controller:get_time_slice")
 

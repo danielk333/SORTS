@@ -12,3 +12,5 @@ from . import interpolation
 from . import profiling
 from .profiling import Profiler
 
+from . import multiprocessing_tools
+
