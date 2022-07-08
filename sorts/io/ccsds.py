@@ -210,6 +210,8 @@ def write_xml_oem(state_data, cov_data=None, meta=None, file=None):
             Y_DOT = v["Y_DOT"],
             Z_DOT = v["Z_DOT"],
         )
+
+        print(_dat)
         
         #optional
         for key in ["X_DDOT", "Y_DDOT", "Z_DDOT"]:

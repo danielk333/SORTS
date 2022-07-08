@@ -14,13 +14,30 @@ class CCSDSTest(unittest.TestCase):
             COMMENT = 'This is a test',
         )
 
-        sorts.io.ccsds.write_xml_oem(None, meta=meta, file=stream)
+        # test data
+        data = np.empty((1, ), dtype=_dtype)
+        _dtype = [
+            ('date', 'datetime64[us]'),
+            ('x', 'float64'),
+            ('y', 'float64'),
+            ('z', 'float64'),
+            ('vx', 'float64'),
+            ('vy', 'float64'),
+            ('vz', 'float64'),
+        ]
+
+        raw_data = np.linspace(1, 10, 10)
+        raw_data[0] = Time("J2000").datetime64()
+        ind = 0
+        for name_i, dtype_i in _dtype:
+            data[name_i][0] = raw_data[ind]
+            ind += 1
+
+        sorts.io.ccsds.write_xml_oem(data, meta=meta, file=stream)
         xml = stream.getvalue()
 
         self.assertTrue(isinstance(xml, str))
         self.assertTrue(xml)
-
-        # print(xml)
 
         stream.close()
 

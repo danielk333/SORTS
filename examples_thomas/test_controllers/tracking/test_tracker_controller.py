@@ -142,8 +142,8 @@ for pass_id in range(np.shape(eiscat_passes)[0]):
     logger.info("test_tracker_controller -> Controls generated")
     logger.info(f"test_tracker_controller -> Controls : {controls}")
 
-    for ctrl_id in range(len(controls["t"])):
-        ctrl = next(controls["pointing_direction"])
+    for period_id in range(controls.n_periods):
+        ctrl = controls.get_pdirs(period_id)
         plotting.plot_beam_directions(ctrl, eiscat3d, ax=ax, logger=logger, profiler=p, tx_beam=True, rx_beam=True, zoom_level=0.9, azimuth=10, elevation=10)
         logger.info(f"test_tracker_controller -> ploting data for sub control {ctrl_id}")
 

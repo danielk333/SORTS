@@ -93,7 +93,7 @@ def gen_eiscat3d(beam='array', stage=1):
         lon=ski_lon,
         alt=ski_alt,
         min_elevation=30.0,
-        noise=150,
+        noise_temperature=150,
         beam=rx_beam_ski,
     )
     dwell_time = 0.1
@@ -119,7 +119,7 @@ def gen_eiscat3d(beam='array', stage=1):
         lon=kar_lon,
         alt=kar_alt,
         min_elevation=30.0,
-        noise=150,
+        noise_temperature=150,
         beam=rx_beam_kar,
     )
 
@@ -131,7 +131,7 @@ def gen_eiscat3d(beam='array', stage=1):
         lon=kai_lon,
         alt=kai_alt,
         min_elevation=30.0,
-        noise=150,
+        noise_temperature=150,
         beam=rx_beam_kai,
     )
     # define transmit and receive antennas for a radar network.

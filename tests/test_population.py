@@ -236,7 +236,7 @@ class TestPopulation(unittest.TestCase):
 
         pop = Population(
             fields = Population._default_fields + ['m', 'color'],
-            dtypes = [Population._default_dtype]*len(Population._default_fields) + ['float64', 'U20'],
+            dtypes = [Population._default_dtype]*len(Population._default_fields) + ['float64', 'U3'],
         )
 
         pop0.allocate(2)
@@ -251,7 +251,7 @@ class TestPopulation(unittest.TestCase):
         pop[:,3] = np.ones((len(pop),1))*3
         pop[:,5:8] = np.ones((len(pop),3))*4
 
-        self.assertEqual(str(pop.data[1]['color']), 'WAT')
+        self.assertEqual(str(pop.data[1]['color']), "WAT")
         self.assertEqual(str(pop.data[0]['color']), '')
         nt.assert_almost_equal(pop.data[1][pop.fields[5]], 4)
         nt.assert_almost_equal(pop.data[1][pop.fields[3]], 3)

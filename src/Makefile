@@ -2,7 +2,7 @@ include Makefile.defs
 
 OPT+= -fPIC -DLIBSORTS
 
-SOURCES=radar_controller.c control_manager.c plotting_controls.c
+SOURCES=radar_controller.c static_priority_scheduler.c plotting_controls.c signals.c measurements.c radar.c
 OBJECTS=$(SOURCES:.c=.o)
 HEADERS=$(SOURCES:.c=.h)
 

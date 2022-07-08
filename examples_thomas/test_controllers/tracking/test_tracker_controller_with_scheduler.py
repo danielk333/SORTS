@@ -22,7 +22,7 @@ from sorts.targets.propagator import Kepler
 p = profiling.Profiler()
 logger = profiling.get_logger('scanning')
 
-end_t = 3600*24
+end_t = 24*3600*10
 t_slice = 7.5
 tracking_period = 10
 
@@ -46,7 +46,7 @@ t0 = 0
 scheduler_period = 120 # [s] -> 2 minutes - can go up to 10mins or more depending on the available RAM
 
 # create scheduler
-scheduler = scheduler.Scheduler(eiscat3d, t0, scheduler_period=scheduler_period)
+scheduler = scheduler.StaticPriorityScheduler(eiscat3d, t0, scheduler_period=scheduler_period)
 
 logger.info("test_scan_controller_w_scheduler -> scheduler initialized:")
 logger.info(f"test_scan_controller_w_scheduler:scheduler_variables -> t0 = {t0}")
@@ -72,7 +72,7 @@ space_object = space_object.SpaceObject(
         Prop_cls,
         propagator_options = Prop_opts,
         a = orbits_a[obj_id], 
-        e = 0.1,
+        e = 0.0,
         i = orbits_i[obj_id],
         raan = orbits_raan[obj_id],
         aop = orbits_aop[obj_id],
@@ -133,6 +133,8 @@ for rx in eiscat3d.rx:
 ax.plot(object_states[0], object_states[1], object_states[2], "--b", alpha=0.2)
 
 # compute and plot controls for each pass
+tracker_controller = controllers.tracker.Tracker(logger=logger, profiler=p)
+
 for pass_id in range(np.shape(eiscat_passes)[0]):
     logger.info(f"test_tracker_controller -> Computing tracking controls for pass {pass_id}:")
 
@@ -141,23 +143,21 @@ for pass_id in range(np.shape(eiscat_passes)[0]):
     
     p.start('intitialize_controller')
     t_controller = np.arange(t_states_i[0], t_states_i[-1]+tracking_period, tracking_period)
-    print(t_controller)
-    
-    tracker_controller = controllers.tracker.Tracker(logger=logger, profiler=p)
     p.stop('intitialize_controller')
     
     p.start('generate_tracking_controls')
-    controls = tracker_controller.generate_controls(t_controller, eiscat3d, t_states_i, tracking_states, t_slice=t_slice, scheduler=scheduler, states_per_slice=4, interpolator=interpolation.Legendre8)
+    controls = tracker_controller.generate_controls(t_controller, eiscat3d, t_states_i, tracking_states, t_slice=t_slice, scheduler=scheduler, states_per_slice=4, interpolator=interpolation.Linear)
     p.stop('generate_tracking_controls')
 
     logger.info("test_tracker_controller -> Controls generated")
 
-    for ctrl_id in range(len(controls["t"])):
-        ctrl = next(controls["pointing_direction"])
+    for period_id in range(controls.n_periods):
+        ctrl = controls.get_pdirs(period_id)
         plotting.plot_beam_directions(ctrl, eiscat3d, ax=ax, logger=logger, profiler=p, tx_beam=True, rx_beam=True, zoom_level=0.9, azimuth=10, elevation=10)
-        logger.info(f"test_tracker_controller -> ploting data for sub control {ctrl_id}")
+        
+        logger.info(f"test_tracker_controller -> ploting data for sub control {period_id}")
 
-    ax.plot(tracking_states[0], tracking_states[1], tracking_states[2], "-", color="blue")
+        ax.plot(tracking_states[0], tracking_states[1], tracking_states[2], "-", color="blue")
 
 plt.show()
 

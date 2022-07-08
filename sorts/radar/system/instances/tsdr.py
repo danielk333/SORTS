@@ -50,7 +50,7 @@ def gen_tromso_space_debris_radar(fence=False, phased=False):
         lon=lon,
         alt=alt,
         min_elevation=0,
-        noise=100,
+        noise_temperature=100,
         beam=rx_beam,
     )
 

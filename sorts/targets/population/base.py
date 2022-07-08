@@ -116,9 +116,9 @@ class Population:
         else:
             self.dtypes = dtypes
 
-        for dt in self.dtypes:
-            if np.dtype(dt).char == 'U':
-                raise TypeError('Initialized Population cannot use the save function with Unicode [U] numpy strings, try using ASCII [S] strings instead.')
+        # for dt in self.dtypes:
+        #     if np.dtype(dt).char == 'U':
+        #         raise TypeError('Initialized Population cannot use the save function with Unicode [U] numpy strings, try using ASCII [S] strings instead.')
 
         if state_fields is None:
             state_fields = []
@@ -519,7 +519,6 @@ class Population:
 
 
     def __setitem__(self, key, data):
-
         if isinstance(key, tuple):
             if len(key) == 2:
                 row_iter = list(range(len(self)))[key[0]]

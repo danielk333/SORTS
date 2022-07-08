@@ -48,7 +48,7 @@ def gen_eiscat_uhf():
         lon=lon_tro,
         alt=alt_tro,
         min_elevation=30,
-        noise=100,
+        noise_temperature=100,
         beam=rx_beam.copy(),
     )]
     rx += [RX(
@@ -56,7 +56,7 @@ def gen_eiscat_uhf():
         lon=lon_krn,
         alt=alt_krn,
         min_elevation=30,
-        noise=100,
+        noise_temperature=100,
         beam=rx_beam.copy(),
     )]
     rx += [RX(
@@ -64,7 +64,7 @@ def gen_eiscat_uhf():
         lon=lon_sod,
         alt=alt_sod,
         min_elevation=30,
-        noise=100,
+        noise_temperature=100,
         beam=rx_beam.copy(),
     )]
 

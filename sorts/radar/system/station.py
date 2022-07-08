@@ -37,6 +37,14 @@ class Station(object):
         :ivar bool enabled: Indicates if this station is turned on or off.
 
     '''
+    CONTROL_VARIABLES = [
+        "pointing_direction",
+        ]
+
+    PROPERTIES = [
+        "wavelength",
+    ]
+
     def __init__(self, lat, lon, alt, min_elevation, beam, **kwargs):
         self.lat = lat
         self.lon = lon
@@ -44,28 +52,53 @@ class Station(object):
         self.min_elevation = min_elevation
         self.ecef = frames.geodetic_to_ITRS(lat, lon, alt, radians = False)
         self.beam = beam
+
         self.enabled = True
         self.pointing_range = None
         
         # set the physical properties of the station 
-        self.max_angular_speed_theta = None
-        self.max_angular_speed_phi = None
-        self.max_power = None
-        self.max_duty_cycle = None
+        # self.max_angular_speed_theta = None
+        # self.max_angular_speed_phi = None
+        # self.max_power = None
+        # self.max_duty_cycle = None
         
-        # theta : angle between the radar beam and the local vertical axis
-        if "max_angular_speed_theta" in kwargs:
-            self.max_angular_speed_theta = kwargs["max_angular_speed_theta"]
-        else:
-            self.max_angular_speed_theta = None
+        # # theta : angle between the radar beam and the local vertical axis
+        # if "max_angular_speed_theta" in kwargs:
+        #     self.max_angular_speed_theta = kwargs["max_angular_speed_theta"]
+        # else:
+        #     self.max_angular_speed_theta = None
         
-        # phi : angle between the projection of radar beam direction on the (x,y) plane and the local horizontal axes
-        if "max_angular_speed_theta" in kwargs: 
-            self.max_angular_speed_phi = kwargs["max_angular_speed_phi"]
-        else:
-            self.max_angular_speed_phi = None
+        # # phi : angle between the projection of radar beam direction on the (x,y) plane and the local horizontal axes
+        # if "max_angular_speed_theta" in kwargs: 
+        #     self.max_angular_speed_phi = kwargs["max_angular_speed_phi"]
+        # else:
+        #     self.max_angular_speed_phi = None
         
-        
+
+    def add_property(self, name):
+        '''
+        Adds a new property to the station available for the given station
+        '''
+        if not hasattr(self, name):
+            setattr(self, name, None)
+
+            if not name in self.PROPERTIES:
+                self.PROPERTIES.append(name)
+
+
+    def get_properties(self):
+        '''
+        Returns all properties available for the given station
+        '''
+        return self.PROPERTIES
+
+
+    def has_property(self, name):
+        '''
+        Returns True is the station has a given property
+        '''
+        return name in self.PROPERTIES and hasattr(self, name)
+
 
     def field_of_view(self, states, **kwargs):
         '''Determines the field of view of the station. Should be vectorized over second dimension of states.
@@ -109,9 +142,18 @@ class Station(object):
     def frequency(self):
         return self.beam.frequency
 
+    @frequency.setter
+    def frequency(self, value):
+        self.beam.frequency = value
+
     @property
     def wavelength(self):
         return self.beam.wavelength
+
+
+    @wavelength.setter
+    def wavelength(self, value):
+        self.beam.wavelength = value
 
 
     def enu(self, ecefs):
@@ -119,6 +161,7 @@ class Station(object):
 
         '''
         rel_ = ecefs.copy()
+
         rel_[:3,:] = rel_[:3,:] - self.ecef[:,None]
         rel_[:3,:] = frames.ecef_to_enu(
             self.lat,
@@ -193,9 +236,12 @@ class RX(Station):
 
         :ivar float noise: Receiver noise in Kelvin, i.e. system temperature.
     '''
-    def __init__(self, lat, lon, alt, min_elevation, beam, noise):
+
+    PROPERTIES = Station.PROPERTIES + []
+
+    def __init__(self, lat, lon, alt, min_elevation, beam, noise_temperature):
         super().__init__(lat, lon, alt, min_elevation, beam)
-        self.noise = noise
+        self.noise_temperature = noise_temperature
 
     def copy(self):
         st = RX(
@@ -204,7 +250,7 @@ class RX(Station):
             alt = self.alt,
             min_elevation = self.min_elevation,
             beam = self.beam.copy(),
-            noise = self.noise,
+            noise_temperature = self.noise_temperature,
         )
         st.enabled = self.enabled
         return st
@@ -228,6 +274,16 @@ class TX(Station):
         :ivar int n_ipp: Number of pulses to coherently integrate.
         :ivar float coh_int_bandwidth: Effective bandwidth of receiver noise after coherent integration.
     '''
+
+    PROPERTIES = Station.PROPERTIES + [
+        "power",
+        "ipp",
+        "pulse_length",
+        "coh_int_bandwidth",
+        "duty_cycle",
+        "bandwidth",
+        ]
+
     def __init__(self, 
                  lat, 
                  lon, 
@@ -248,23 +304,9 @@ class TX(Station):
         self.power = power
         self.pulse_length = pulse_length
         self.ipp = ipp
+
         self.n_ipp = n_ipp
         self.coh_int_bandwidth = 1.0/(pulse_length*n_ipp)
-        
-        # set max parameters
-        self.max_power = None
-        self.max_duty_cycle = None
-        self.max_bandwidth = None
-        self.min_bandwidth = None
-        
-        if "max_power" in kwargs:
-            self.max_power = kwargs["max_power"]
-        if "max_duty_cycle" in kwargs:
-            self.max_duty_cycle = kwargs["max_duty_cycle"]
-        if "max_bandwidth" in kwargs:
-            self.max_bandwidth = kwargs["max_bandwidth"]
-        if "min_bandwidth" in kwargs:
-            self.min_bandwidth = kwargs["min_bandwidth"]
 
     def copy(self):
         st = TX(

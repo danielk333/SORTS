@@ -355,6 +355,18 @@ class SpaceObject(object):
             if key not in pyorb.Orbit.UPDATE_KW:
                 self.parameters[key] = kwargs[key]
 
+                # add property to class
+                @property
+                def prop(self):
+                    return self.parameters[key]
+
+                @prop.setter
+                def prop(self, value):
+                     self.parameters[key] = value
+
+                # add attribute to class to enable calls like space_object.X
+                setattr(self.__class__, key, prop)
+
         self.orbit.update(**kwargs)
 
 

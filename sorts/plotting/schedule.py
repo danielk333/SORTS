@@ -258,7 +258,6 @@ def schedule_pointing(
 
 
 def controller_slices(controllers, ax=None):
-
     if ax is None:
         fig = plt.figure()
         ax = fig.add_subplot(111)

@@ -59,8 +59,7 @@ logger.info(f"test_static_controller -> generating time points - size={len(t)}")
 logger.info("test_static_controller -> generating controls")
 controls = static_controller.generate_controls(t, eiscat3d, t_slice=t_slice, max_points=max_points)
 logger.info("test_static_controller -> controls generated ! ")
-logger.info(f"test_static_controller -> controls : {controls}")
-logger.info(f"test_static_controller -> size = {np.shape(controls['t'])[0]}")
+logger.info(f"test_static_controller -> size = {np.shape(controls.t)[0]}")
 
 # plot the generated controls
 p.stop("test_static_controller:computing_controls")
@@ -69,19 +68,19 @@ p.start("test_static_controller:retreiving_control_values")
 plt_ids = np.linspace(0, int(end_t/t_slice), nbplots, dtype=int)
 
 if nbplots > 0:
-    plt_ids = np.linspace(0, int(end_t/t_slice/len(controls["t"][0]))-1, nbplots, dtype=int)
+    plt_ids = np.linspace(0, int(end_t/t_slice/len(controls.t[0]))-1, nbplots, dtype=int)
 else:
     plt_ids = None
 
 logger.info("test_static_controller -> retreiving controls : ")
-for ctrl_id in range(len(controls["t"])):
-    ctrl = next(controls["pointing_direction"])
+for period_id in range(controls.n_periods):
+    ctrl = controls.get_pdirs(period_id)
     
     if log_array_sizes is True:
-        logger.info(f"test_static_controller: controls {ctrl_id} - size : {(ctrl['tx'].itemsize*np.size(ctrl['tx']) + ctrl['rx'].itemsize*np.size(ctrl['rx']))/1e6} Mb")
+        logger.info(f"test_static_controller: controls {period_id} - size : {(ctrl['tx'].itemsize*np.size(ctrl['tx']) + ctrl['rx'].itemsize*np.size(ctrl['rx']))/1e6} Mb")
     
     if plt_ids is not None:
-        if ctrl_id in plt_ids:
+        if period_id in plt_ids:
             fig = plt.figure(figsize=(15,15))
             ax = fig.add_subplot(111, projection='3d')
 

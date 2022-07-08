@@ -60,13 +60,13 @@ def grid_earth(ax, num_lat=25, num_lon=50, alpha=0.1, res = 100, color='black', 
         x = r_e*np.cos(lonsl)*np.cos(lat)
         y = r_e*np.sin(lonsl)*np.cos(lat)
         z = r_e*np.ones(np.size(lonsl))*np.sin(lat)
-        ax.plot(x,y,z,alpha=alpha,linestyle='-', marker='',color=color)
+        ax.plot(x,y,z,alpha=alpha,linestyle='-', marker='',color=color, linewidth=0.5)
 
     for lon in lons:
         x = r_e*np.cos(lon)*np.cos(latsl)
         y = r_e*np.sin(lon)*np.cos(latsl)
         z = r_e*np.sin(latsl)
-        ax.plot(x,y,z,alpha=alpha,color=color)
+        ax.plot(x,y,z,alpha=alpha,color=color, linewidth=0.5)
     
     if hide_ax:
         # Hide grid lines

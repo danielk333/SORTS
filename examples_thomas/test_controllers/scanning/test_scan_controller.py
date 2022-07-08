@@ -22,10 +22,10 @@ logger.info("test_scan_controller -> starting test/example script execution\n")
 logger.info("test_scan_controller -> Setting up variables :")
 
 # Computation / test setup
-end_t = 24*3600
+end_t = 1000
 nbplots = 1
-t_slice = 0.1
-max_points = 1000
+t_slice = 1
+max_points = 100
 log_array_sizes = True
 
 logger.info(f"test_scan_controller:computation_variables -> end_t = {end_t}")
@@ -35,7 +35,7 @@ logger.info(f"test_scan_controller:computation_variables -> max_points = {max_po
 logger.info(f"test_scan_controller:computation_variables -> log_array_sizes = {log_array_sizes}\n")
 
 # Scan type definition
-scan = Fence(azimuth=90, min_elevation=30, dwell=0.1, num=50)
+scan = Fence(azimuth=90, min_elevation=30, dwell=0.1, num=100)
 logger.info(f"test_scan_controller -> scan initialized (Fence scan) : {scan}")
 
 # RADAR definition
@@ -58,10 +58,9 @@ t = np.arange(0, end_t, scan.dwell())
 logger.info(f"test_scan_controller -> generating time points - size={len(t)}")
 
 logger.info("test_scan_controller -> generating controls")
-controls = scanner_ctrl.generate_controls(t, eiscat3d, scan, max_points=max_points)
+controls = scanner_ctrl.generate_controls(t, eiscat3d, scan, r=[1000e3], max_points=max_points)
 logger.info("test_scan_controller -> controls generated ! ")
-logger.info(f"test_scan_controller -> controls : {controls} ")
-logger.info(f"test_scan_controller -> size = {np.shape(controls['t'])[0]}")
+logger.info(f"test_scan_controller -> size = {controls.n_periods}")
 
 p.stop("test_scan_controller:compute_controls")
 
@@ -71,16 +70,15 @@ if nbplots > 0:
 
 # compute control values
 p.start("test_scan_controller:retreiving_control_values")
-
 logger.info("test_static_controller -> retreiving controls : ")
-for ctrl_id in range(len(controls["t"])):
-    ctrl = next(controls["pointing_direction"])
+for period_id in range(controls.n_periods):
+    pdirs = controls.get_pdirs(period_id)
     
     if log_array_sizes is True:
-        logger.info(f"test_scan_controller: controls {ctrl_id} - size : {(ctrl['tx'].itemsize*np.size(ctrl['tx']) + ctrl['rx'].itemsize*np.size(ctrl['rx']))/1e6} Mb")
+        logger.info(f"test_scan_controller: controls {period_id} - size : {(pdirs['tx'].itemsize*np.size(pdirs['tx']) + pdirs['rx'].itemsize*np.size(pdirs['rx']))/1e6} Mb")
     
     if nbplots > 0:
-        if ctrl_id in plt_ids:
+        if period_id in plt_ids:
             fig = plt.figure(figsize=(15,15))
             ax = fig.add_subplot(111, projection='3d')
             
@@ -93,9 +91,9 @@ for ctrl_id in range(len(controls["t"])):
             for rx in eiscat3d.rx:
                 ax.plot([rx.ecef[0]],[rx.ecef[1]],[rx.ecef[2]],'og')
 
-            ax = plotting.plot_beam_directions(ctrl, eiscat3d, ax=ax, logger=logger, profiler=p, zoom_level=0.95, azimuth=10, elevation=10)
+            ax = plotting.plot_beam_directions(pdirs, eiscat3d, ax=ax, logger=logger, profiler=p, zoom_level=0.95, azimuth=10, elevation=10)
 
-    del ctrl
+    del pdirs
 
 p.stop("test_scan_controller:retreiving_control_values")
 p.stop("test_scan_controller:Total")

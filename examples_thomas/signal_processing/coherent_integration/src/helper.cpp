@@ -184,8 +184,8 @@ void correlate(
 		{
 			for (int j = i; j < _N; j++)
 			{
-				std::complex<double> tmp = std::complex<double>(_measured_signal_r[j + ipp*_N_IPP], -_measured_signal_i[j + ipp*_N_IPP]) * std::complex<double>(_ref_signal_r[j - i + ipp*_N_IPP], _ref_signal_i[j - i + ipp*_N_IPP]);
-				if(j > i && tmp.real()==0 && tmp.imag()==0) break;
+				std::complex<double> tmp = std::complex<double>(_measured_signal_r[j + ipp*_N_IPP], -_measured_signal_i[j + ipp*_N_IPP]) * std::complex<double>(_ref_signal_r[j - i + ipp*_N_IPP], _ref_signal_i[j - i]);
+				if(j > i && tmp.real() == 0 && tmp.imag() == 0) break;
 
 				sum += tmp;
 			}

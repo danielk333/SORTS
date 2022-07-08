@@ -14,7 +14,6 @@ from sorts.targets import Propagator
 
 
 class TestBaseProp(unittest.TestCase):
-
     def test_base_prop_methods(self):
 
         class new_propagator(Propagator):
@@ -84,7 +83,6 @@ class TestBaseProp(unittest.TestCase):
 
 
     def test_base_frame_property(self):
-
         class new_propagator(Propagator):
 
             DEFAULT_SETTINGS = copy(Propagator.DEFAULT_SETTINGS)

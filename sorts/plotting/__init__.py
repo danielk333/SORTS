@@ -11,7 +11,7 @@ from .tracking import local_tracking, local_passes
 from .schedule import schedule_pointing, observed_parameters
 from .scan import scan, plot_radar_scan_movie
 
-from .controls import plot_beam_directions, plot_manager_control_sequence
+from .controls import plot_beam_directions, plot_scheduler_control_sequence
 from .orbits import kepler_scatter, kepler_orbit
 
 from . import colors

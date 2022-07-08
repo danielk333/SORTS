@@ -10,8 +10,9 @@ This module defines the scanner controller class that can be used to create the 
 
 import numpy as np
 
-from . import radar_controller
-from sorts.radar.system.radar import Radar
+from .                          import radar_controller
+from sorts.radar.system.radar   import Radar
+from ..                         import radar_controls
 
 class Scanner(radar_controller.RadarController):
     '''
@@ -74,72 +75,59 @@ class Scanner(radar_controller.RadarController):
         if self.logger is not None:
             self.logger.info('Scanner:init')   
     
-    def __compute_pointing_direction(
+    def compute_pointing_direction(
             self, 
-            t,
-            radar, 
-            scan,
-            r, 
+            controls,
+            period_id, 
+            args, 
             ):
         '''
         Computes the beam orientation controls assiciated with the controller. 
         This function returns a generator allowing the computation of the said subarray (containing a maximum of max_points time points)
         '''
+        r = args
 
-        for ti, t_sub in enumerate(t):
-            if self.profiler is not None:
-                self.profiler.start('Scanner:generate_controls:pointing_direction:compute_controls_subarray:tx') 
-            
-            # initializing results
-            pointing_direction = dict()
+        if self.profiler is not None:
+            self.profiler.start('Scanner:pointing_direction:compute_controls_subarray:tx') 
+    
+        # initializing results
+        pointing_direction = dict()
 
-            # get the position of the Tx/Rx stations
-            tx_ecef = np.array([tx.ecef for tx in radar.tx], dtype=float) # get the position of each Tx station (ECEF frame)
-            rx_ecef = np.array([rx.ecef for rx in radar.rx], dtype=float) # get the position of each Rx station (ECEF frame)
-            
-            # compute directions for stations where tx and rx < 200 meters apart => same location for pointing
-            
-            rx_close_to_tx = np.linalg.norm(tx_ecef[:, None, :] - rx_ecef[None, :, :], axis=2) < 200.0
-            inds_rx_close_to_tx = np.array(np.where(rx_close_to_tx)) # [txinds, rxinds]
-            del rx_close_to_tx
-            
-            # get Tx pointing directions
-            # [ind_tx][x, y, z][t_sub] ->[ind_tx][t_sub][x, y, z]
-            points = scan.ecef_pointing(t_sub, radar.tx).transpose(0, 2, 1)
+        # get the position of the Tx/Rx stations
+        tx_ecef = np.array([tx.ecef for tx in controls.radar.tx], dtype=np.float64) # get the position of each Tx station (ECEF frame)
+        rx_ecef = np.array([rx.ecef for rx in controls.radar.rx], dtype=np.float64) # get the position of each Rx station (ECEF frame)
+        
+        # get Tx pointing directions
+        # [ind_tx][x, y, z][t]
+        points = controls.scan.ecef_pointing(controls.t[period_id], controls.radar.tx).reshape((len(tx_ecef), 3, -1))
+ 
+        # Compute Tx pointing directions
+        pointing_direction['tx'] = np.repeat(points[:, None, :, :], len(r), axis=3) # the beam directions are given as unit vectors in the ecef frame of reference
+        
+        if self.profiler is not None:
+            self.profiler.stop('Scanner:pointing_direction:compute_controls_subarray:tx') 
+            self.profiler.start('Scanner:pointing_direction:compute_controls_subarray:rx') 
+        
+        # get Rx target points on the Tx beam        
+        point_rx_to_tx = np.repeat(points[None, :, :, :], len(r), axis=3)*np.tile(r, len(points[0, 0]))[None, None, None, :] + tx_ecef[None, :, :, None] # compute the target points for the Rx stations
+        del tx_ecef, points
 
-            # get Tx pointing directions and target points for Rx
-            # [txi, rxi, t_sub, t_slice, (xyz)]
-            point_tx = points[:, None, :, None, :] + tx_ecef[:, None, None, None, :]
-     
-            # Compute Tx pointing directions
-            pointing_direction['tx'] = points[:, None, :, None, :]#super()._normalize(tx_dirs) # the beam directions are given as unit vectors in the ecef frame of reference
-            
-            if self.profiler is not None:
-                self.profiler.stop('Scanner:generate_controls:pointing_direction:compute_controls_subarray:tx') 
-                self.profiler.start('Scanner:generate_controls:pointing_direction:compute_controls_subarray:rx') 
-            
-            # get Rx target points on the Tx beam
-            point_rx_to_tx = points[:, :, None, :]*r[None, :, None] + tx_ecef[None, :, None, None, :] # compute the target points for the Rx stations
-            del tx_ecef, points
-            point_rx = np.repeat(point_rx_to_tx, len(radar.rx), axis=0) 
-            del point_rx_to_tx
-            
-            # correct pointing directions for stations too close to each other
-            # point_rx[inds_rx_close_to_tx[1], :, :, :, :] = point_tx[inds_rx_close_to_tx[0], :, :, :, :]
-            # del inds_rx_close_to_tx, point_tx
-            
-            # compute actual pointing direction
-            rx_dirs = point_rx - rx_ecef[:, None, None, None, :]
-            del point_rx, rx_ecef
-            
-            # save computation results
+        
+        point_rx = np.repeat(point_rx_to_tx, len(controls.radar.rx), axis=0) 
+        del point_rx_to_tx
 
-            pointing_direction['rx'] = radar_controller.normalize_direction_controls(rx_dirs) # the beam directions are given as unit vectors in the ecef frame of reference
+        # compute actual pointing direction
+        rx_dirs = point_rx - rx_ecef[:, None, :, None]
+        del point_rx, rx_ecef
+    
+        # save computation results
+        pointing_direction['rx'] = rx_dirs/np.linalg.norm(rx_dirs, axis=2)[:, :, None, :] # the beam directions are given as unit vectors in the ecef frame of reference
+        pointing_direction['t'] = np.repeat(controls.t[period_id], len(r))
+        
+        if self.profiler is not None:
+            self.profiler.stop('Scanner:pointing_direction:compute_controls_subarray:rx')
             
-            if self.profiler is not None:
-                self.profiler.stop('Scanner:generate_controls:pointing_direction:compute_controls_subarray:rx')
-                
-            yield pointing_direction
+        return pointing_direction
 
     def generate_controls(
             self, 
@@ -148,10 +136,11 @@ class Scanner(radar_controller.RadarController):
             scan,
             r=np.linspace(300e3, 1000e3, num=10), 
             as_altitude=False, 
-            manager=None,
+            scheduler=None,
             priority=None,
             max_points=1000,
             beam_enabled=True,
+            cache_pdirs=False,
             ):
         '''Generates RADAR scanning controls in a given direction. 
         This method can be called multiple times to generate different controls for different radar systems.
@@ -194,13 +183,13 @@ class Scanner(radar_controller.RadarController):
             Array of time slice durations. The duration of the time slice for a given control must be less than or equal to the time step
         r : float/numpy.ndarray 
             Array of ranges from the transmitter beam at which the receiver will perform scans during a given time slice 
-        manager : int priority (optional)
-            RadarControlManagerBase instance used for scheduling time sunchromization between controls for tims slicing. 
+        scheduler : int priority (optional)
+            RadarControlschedulerBase instance used for scheduling time sunchromization between controls for tims slicing. 
             Time slicing refers to the slicing of the time array into multiple subcontrol arrays (given as generator objects) to reduce memory (RAM) usage.
-            This parameter is only useful when multiple controls are sent to a given manager.
-            If the manager is not provided, the controller will slice the controls using the max_points parameter.
+            This parameter is only useful when multiple controls are sent to a given scheduler.
+            If the scheduler is not provided, the controller will slice the controls using the max_points parameter.
         priority : int priority (optional)
-            Priority of the generated controls, only used by the manager to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
+            Priority of the generated controls, only used by the scheduler to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
         max_points : int (optional)
             Max number of points for a given control array computed simultaneously. This number is used to limit the impact of computations over RAM
             Note that lowering this number might increase computation time, while increasing this number might cause problems depending on the available RAM on your machine
@@ -220,7 +209,7 @@ class Scanner(radar_controller.RadarController):
             1D array containing the duration of a time slice. A time slice represent the elementary quanta which corresponds to a single measurement. Therefore, it also corresponds to the maximal time resolution achievable by our system.
         
         - "priority"
-            Priority of the generated controls, only used by the manager to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
+            Priority of the generated controls, only used by the scheduler to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
             
         - "enabled"
            State of the radar (enabled/disabled). If this value is a single boolean, then radar measurements will be enabled at each time step. If the value is an array, then the state of the radar
@@ -231,7 +220,7 @@ class Scanner(radar_controller.RadarController):
             
             - "tx"
                 Array of unit vectors representing the target direction of the beam for a given Tx station at time t. 
-                To ensure that this controls can be understood by the radar and the manager, the orientation data is given in the following standard:
+                To ensure that this controls can be understood by the radar and the scheduler, the orientation data is given in the following standard:
                 
                 - Dimension 0 : 
                     Tx station index. In the case where there is only one Tx station considered, the value of this index will be 0.
@@ -250,7 +239,7 @@ class Scanner(radar_controller.RadarController):
 
             - "rx"
                 Array of unit vectors representing the target direction of the beam for a given Rx station at time t. 
-                To ensure that this controls can be understood by the radar and the manager, the orientation data is given in the following standard:
+                To ensure that this controls can be understood by the radar and the scheduler, the orientation data is given in the following standard:
             
                 - Dimension 0 : 
                     Rx station index. In the case where there is only one Rx station considered, the value of this index will be 0.
@@ -278,16 +267,16 @@ class Scanner(radar_controller.RadarController):
                 sorts.radar.system.Radar instance being controlled.
                 
             - "max_points" :
-                Number of time points per control subarray (this value is not used if the manager is not none)
+                Number of time points per control subarray (this value is not used if the scheduler is not none)
                 
-            - "manager" :
-                sorts.controls_manager.RadarControlManagerBase instance associated with the control array. This instance is used to 
-                divide the controls into subarrays of controls according to the manager scheduling period to 
+            - "scheduler" :
+                sorts.controls_scheduler.RadarControlschedulerBase instance associated with the control array. This instance is used to 
+                divide the controls into subarrays of controls according to the scheduler scheduling period to 
                 reduce memory/computational overhead.
-                If the manager is not none, the value of the scheduling period will take over the max points parameter (see above)
+                If the scheduler is not none, the value of the scheduling period will take over the max points parameter (see above)
                 
         - "priority"
-            Priority of the generated controls, only used by the manager to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority manager algorithms.
+            Priority of the generated controls, only used by the scheduler to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
         
         Examples
         --------
@@ -363,65 +352,16 @@ class Scanner(radar_controller.RadarController):
         # add new profiler entry
         if self.profiler is not None:
             self.profiler.start('Scanner:generate_controls')
-            
-        # controls computation initialization
-        # checks input values to make sure they are compatible with the implementation of the function
-        if not isinstance(radar, Radar): 
-            raise TypeError(f"radar must be an instance of {Radar}.")
 
-        # added support for both arrays and floats
-        t = np.asarray(t)
-        if len(np.shape(t)) > 1: raise TypeError("t must be a 1-dimensional array or a float")
-
-        # beam_enabled check
-        beam_enabled = np.asarray(beam_enabled, dtype=bool)
-        if np.size(beam_enabled) == 1:
-            beam_enabled = np.repeat(beam_enabled, len(t))
-        else:
-            if np.size(beam_enabled) < np.size(t): raise TypeError(f"beam_enabled (size={len(beam_enabled)}) must be of the same length as t (size={len(t)})")
-
-        # TODO : test
-        if priority is not None:
-            priority = np.asarray(priority, dtype=int)
-            
-            if np.size(priority)==1:
-                priority = np.repeat(priority, np.size(t))
-
-            if len(np.where(priority < 0)[0]) > 0: raise ValueError("priority must be positive [0; +inf]")
-            if len(priority) < len(t): raise TypeError(f"priority must be of the same length as t (size={len(t)})")
-        else:
-            priority = np.repeat(None, len(t))
-
-        # Check if time slices are overlapping
-        t_slice = np.ones(np.size(t))*scan.dwell()
-        check_overlap_indices = radar_controller.check_time_slice_overlap(t, t_slice)
-
-        if np.size(check_overlap_indices) > 0:
-            if self.logger is not None:
-                self.logger.warning(f"Tracker:generate_controls -> control time slices are overlapping at indices {check_overlap_indices}")
-        del check_overlap_indices
-        
-        # split time array into manager periods if a manager is attached to the controls
-        t, t_slice, priority, sub_controls_count = self._split_time_array(t, t_slice, priority, manager, max_points)
-        
         # output data initialization
-        controls = dict()  # the controls structure is defined as a dictionnary of subcontrols
-        controls["t"] = t  # save the time points of the controls
-        controls["t_slice"] = t_slice # save the dwell time of each time point
-        controls["priority"] = priority # set the controls priority
-        controls["beam_enabled"] = beam_enabled # set the beam state (on/off)
+        controls = radar_controls.RadarControls(radar, self, scheduler=scheduler, priority=priority)  # the controls structure is defined as a dictionnary of subcontrols
+        controls.scan = scan
 
-        # setting metadata
-        controls["meta"] = dict()
-        controls["meta"]["scan"] = scan
-        controls["meta"]["radar"] = radar
-        controls["meta"]["controller_type"] = "scanner"
-        controls["meta"]["manager"] = manager
-        controls["meta"]["sub_controls_count"] = sub_controls_count
-        
-        # Computations
-        # compute controls for each time sub array
-        controls["pointing_direction"] = self.__compute_pointing_direction(t, radar, scan, r)
+        controls.set_time_slices(t, scan.dwell(), max_points=max_points)
+
+        # compute controls
+        pdir_args = r
+        controls.set_pdirs(pdir_args, cache_pdirs=cache_pdirs)
 
         if self.profiler is not None:
             self.profiler.stop('Scanner:generate_controls')

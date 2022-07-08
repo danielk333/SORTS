@@ -27,35 +27,35 @@ logger = profiling.get_logger('tracking_scheduler')
 
 logger.info("starting script")
 
-p.start("test_tracking_scheduler:Total")    
-p.start("test_tracking_scheduler:Initialization")  
+p.start("test_space_object_tracking_controller:Total")    
+p.start("test_space_object_tracking_controller:Initialization")  
 # RADAR definition
 eiscat3d = instances.eiscat3d
-logger.info(f"test_tracking_scheduler -> intialized radar instance : {eiscat3d}")
+logger.info(f"test_space_object_tracking_controller -> intialized radar instance : {eiscat3d}")
 
 # scheduler and controller definition
-tracking_period = 50
-t_slice = 2
+tracking_period = 25
+t_slice = 10
 t_start = 0
-t_end = 100000
+t_end = 3600*24*10
 
 epoch = 53005.0
 
-logger.info("test_tracking_scheduler -> controller/scheduler parameters :")
-logger.info(f"test_tracking_scheduler -> tracking_period={tracking_period}")
-logger.info(f"test_tracking_scheduler -> t_slice={t_slice}")
-logger.info(f"test_tracking_scheduler -> t_start={t_start}")
-logger.info(f"test_tracking_scheduler -> t_end={t_end}")
-logger.info(f"test_tracking_scheduler -> epoch={epoch}")
+logger.info("test_space_object_tracking_controller -> controller/scheduler parameters :")
+logger.info(f"test_space_object_tracking_controller -> tracking_period={tracking_period}")
+logger.info(f"test_space_object_tracking_controller -> t_slice={t_slice}")
+logger.info(f"test_space_object_tracking_controller -> t_start={t_start}")
+logger.info(f"test_space_object_tracking_controller -> t_end={t_end}")
+logger.info(f"test_space_object_tracking_controller -> epoch={epoch}")
 
 t_tracking = np.arange(t_start, t_end, tracking_period)
-logger.info(f"test_tracking_scheduler -> tracking time points created : {t_tracking}")
+logger.info(f"test_space_object_tracking_controller -> tracking time points created : {t_tracking}")
 
 tracker_controller = controllers.Tracker(logger=logger, profiler=p)
-logger.info(f"test_tracking_scheduler -> intialized tracking controller instance : {tracker_controller}")
+logger.info(f"test_space_object_tracking_controller -> intialized tracking controller instance : {tracker_controller}")
 
 tracking_scheduler = TrackingScheduler(logger=logger, profiler=p)
-logger.info(f"test_tracking_scheduler -> intialized tracking scheduler instance : {tracking_scheduler}")
+logger.info(f"test_space_object_tracking_controller -> intialized tracking scheduler instance : {tracking_scheduler}")
 
 # Propagator
 Prop_cls = Kepler
@@ -94,40 +94,40 @@ for so_id in range(len(orbits_a)):
                 d = 0.1,
             ),
         ))
-    logger.info(f"test_tracking_scheduler -> space object {so_id} create")
+    logger.info(f"test_space_object_tracking_controller -> space object {so_id} create")
 
-logger.info("test_tracking_scheduler -> Initialization done")
-p.stop("test_tracking_scheduler:Initialization")  
+logger.info("test_space_object_tracking_controller -> Initialization done")
+p.stop("test_space_object_tracking_controller:Initialization")  
 
-p.start("test_tracking_scheduler:Computations")  
-logger.info("test_tracking_scheduler -> Generating tracking schedule")
+p.start("test_space_object_tracking_controller:Computations")  
+logger.info("test_space_object_tracking_controller -> Generating tracking schedule")
 t_tracking, ecef_tracking, object_ids = tracking_scheduler.generate_schedule(t_tracking, space_objects, eiscat3d, epoch, priority=priority)
-logger.info(f"test_tracking_scheduler -> Tracking schedule generated")
+logger.info(f"test_space_object_tracking_controller -> Tracking schedule generated")
 
-logger.info("test_tracking_scheduler -> Generating tracking controls")
+logger.info("test_space_object_tracking_controller -> Generating tracking controls")
 controls = tracker_controller.generate_controls(t_tracking.copy(), eiscat3d, t_tracking, ecef_tracking, t_slice=t_slice, max_points=1000, priority=0, states_per_slice=10)
-logger.info(f"test_tracking_scheduler -> Tracking controls generated")
-p.stop("test_tracking_scheduler:Computations")  
+logger.info(f"test_space_object_tracking_controller -> Tracking controls generated")
+p.stop("test_space_object_tracking_controller:Computations")  
 
 # plotting results
-logger.info("test_tracking_scheduler -> plotting results")
-p.start("test_tracking_scheduler:Plotting")  
+logger.info("test_space_object_tracking_controller -> plotting results")
+p.start("test_space_object_tracking_controller:Plotting")  
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 
 # Plotting station ECEF positions
-logger.info("test_tracking_scheduler -> plotting earth grid")
+logger.info("test_space_object_tracking_controller -> plotting earth grid")
 plotting.grid_earth(ax, num_lat=25, num_lon=50, alpha=0.1, res = 100, color='black', hide_ax=True)
 
 # Plotting station ECEF positions
-logger.info("test_tracking_scheduler -> plotting radar stations")
+logger.info("test_space_object_tracking_controller -> plotting radar stations")
 for tx in eiscat3d.tx:
     ax.plot([tx.ecef[0]],[tx.ecef[1]],[tx.ecef[2]],'or')
 for rx in eiscat3d.rx:
     ax.plot([rx.ecef[0]],[rx.ecef[1]],[rx.ecef[2]],'og')       
 
-logger.info("test_tracking_scheduler -> plotting tracked object states")
+logger.info("test_space_object_tracking_controller -> plotting tracked object states")
 transition_ids = np.where(np.abs(object_ids[1:] - object_ids[:-1]) > 0)[0]+1
 states_split = []
 for i in range(len(transition_ids)+1):
@@ -145,13 +145,13 @@ for i in range(len(transition_ids)+1):
 
     ax.plot(ecef_tracking[:, i_start:i_end][0], ecef_tracking[:, i_start:i_end][1], ecef_tracking[:, i_start:i_end][2], '-b')
 
-logger.info("test_tracking_scheduler -> plotting radar pointing directions")
-for period_id in range(len(controls["t"])):
-    ax = plotting.plot_beam_directions(next(controls["pointing_direction"]), eiscat3d, ax=ax, zoom_level=0.6, azimuth=10, elevation=20)
+logger.info("test_space_object_tracking_controller -> plotting radar pointing directions")
+for period_id in range(controls.n_periods):
+    ax = plotting.plot_beam_directions(controls.get_pdirs(period_id), eiscat3d, ax=ax, zoom_level=0.6, azimuth=10, elevation=20)
 
-p.stop("test_tracking_scheduler:Plotting")  
-p.stop("test_tracking_scheduler:Total")    
-logger.info("test_tracking_scheduler -> execution finised !")
+p.stop("test_space_object_tracking_controller:Plotting")  
+p.stop("test_space_object_tracking_controller:Total")    
+logger.info("test_space_object_tracking_controller -> execution finised !")
 
 print(p)
 

@@ -63,14 +63,14 @@ def gen_eiscat_esr():
         lon=lon_esr32,
         alt=alt_esr,
         min_elevation=15,     # TODO: Check
-        noise=70,
+        noise_temperature=70,
         beam=rx_beam32,
     ), RX(
         lat=lat_esr42,
         lon=lon_esr42,
         alt=alt_esr,
         min_elevation=75,     # TODO: Fix az and el to narrow intervals
-        noise=70,
+        noise_temperature=70,
         beam=rx_beam42,
     )]
 

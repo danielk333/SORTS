@@ -270,20 +270,27 @@ def enu_to_ecef(lat, lon, alt, enu, radians=False):
     :rtype: numpy.ndarray
     :return: (3,n) array x,y and z coordinates in ECEF.
     '''
-    lat = np.asarray(lat)
-    lon = np.asarray(lon)
-    alt = np.asarray(alt)
+    enu = np.reshape(enu, (3, -1))
+
+    lat = np.atleast_1d(lat)
+    lon = np.atleast_1d(lon)
+    alt = np.atleast_1d(alt)
     
-    if np.shape(lat) != np.shape(lon) or np.shape(lat) != np.shape(alt): raise ValueError("lat, lon and alt must be the same shape.")
+    if np.size(lat) != np.size(lon) or np.size(lat) != np.size(alt): 
+        raise ValueError("lat, lon and alt must be the same size.")
     
-    if not radians:
+    if radians is False:
         lat, lon = np.radians(lat), np.radians(lon)
 
-    mx = np.array([[-np.sin(lon), -np.sin(lat) * np.cos(lon), np.cos(lat) * np.cos(lon)],
-                [np.cos(lon), -np.sin(lat) * np.sin(lon), np.cos(lat) * np.sin(lon)],
-                [np.zeros(np.size(lat, axis=0)), np.cos(lat), np.sin(lat)]], dtype=np.float64).reshape(np.size(lat, axis=0), 3, 3)
+    mx = np.array(  [[  -np.sin(lon),                       -np.sin(lat) * np.cos(lon),     np.cos(lat) * np.cos(lon)],
+                    [    np.cos(lon),                       -np.sin(lat) * np.sin(lon),     np.cos(lat) * np.sin(lon)],
+                    [    np.zeros(np.size(lat)),             np.cos(lat),                   np.sin(lat)]], dtype=np.float64)
 
-    ecef = np.tensordot(mx, enu, axes=([2],[0]))
+    ecef = np.einsum("ijk,jl->kil", mx, enu)
+    del mx
+
+    if np.size(ecef) == 3:
+        ecef = ecef.reshape((3,))
     
     return ecef 
 
@@ -298,10 +305,9 @@ def ned_to_ecef(lat, lon, alt, ned, radians=False):
     :rtype: numpy.ndarray
     :return: (3,n) array x,y and z coordinates in ECEF.
     '''
-    ned = np.asarray(ned)
-    
-    enu = np.empty([ned.size], dtype=ned.dtype)
-    
+    ned = np.reshape(ned, (3, -1))
+    enu = np.ndarray(ned.shape, dtype=ned.dtype)
+
     enu[0,...] = ned[1,...]
     enu[1,...] = ned[0,...]
     enu[2,...] = -ned[2,...]
@@ -320,69 +326,53 @@ def ecef_to_enu(lat, lon, alt, ecef, radians=False):
     :rtype: numpy.ndarray
     :return: (3,n) array x,y and z in local coordinates in the ENU-convention.
     '''
+    ecef = np.reshape(ecef, (3, -1))
+
+    lat = np.atleast_1d(lat)
+    lon = np.atleast_1d(lon)
+    alt = np.atleast_1d(alt)
     
-    ecef = np.asarray(ecef)
-    
-    lat = np.asarray(lat)
-    lon = np.asarray(lon)
-    alt = np.asarray(alt)
-    
-    if np.shape(lat) != np.shape(lon) or np.shape(lat) != np.shape(alt): raise ValueError("lat, lon and alt must be the same shape.")    
-    if len(lat.shape) == 0:
-        lat=lat[None]
-        lon=lon[None]
-        alt=alt[None]
-    
-    if not radians:
+    if np.size(lat) != np.size(lon) or np.size(lat) != np.size(alt): 
+        raise ValueError("lat, lon and alt must be the same size.")    
+
+    if radians is False:
         lat, lon = np.radians(lat), np.radians(lon)
 
-    mx = np.array([[-np.sin(lon), -np.sin(lat) * np.cos(lon), np.cos(lat) * np.cos(lon)],
-                [np.cos(lon), -np.sin(lat) * np.sin(lon), np.cos(lat) * np.sin(lon)],
-                [np.zeros(np.size(lat, axis=0)), np.cos(lat), np.sin(lat)]]).reshape(np.shape(lat)[0], 3, 3)
+    mx = np.array([ [-np.sin(lon),                   np.cos(lon),                    np.zeros(np.size(lat, axis=0))],
+                    [-np.sin(lat) * np.cos(lon),    -np.sin(lat) * np.sin(lon),      np.cos(lat)],
+                    [ np.cos(lat) * np.cos(lon),     np.cos(lat) * np.sin(lon),      np.sin(lat)]])
     
-    
-    enu = np.tensordot(np.linalg.inv(mx), ecef, axes=([2],[0]))
+    enu = np.einsum("ijk,jl->kil", mx, ecef)
+
+    if np.size(enu) == 3:
+        enu = enu.reshape((3,))
     
     return enu
 
 
 def azel_to_ecef(lat, lon, alt, az, el, radians=False):
-    '''Radar pointing (az,el) to unit vector in ECEF, not including translation.
+    '''
+    Radar pointing (az,el) to unit vector in ECEF, not including translation.
 
     TODO: Docstring
     '''
-    az = np.asarray(az)
-    el = np.asarray(el)
-    
+    az = np.atleast_1d(az)
+    el = np.atleast_1d(el)
+
     if np.shape(az) != np.shape(el): raise ValueError("az and el must be the same shape.")    
 
-    shape = (3,1)
-    
-    if isinstance(az,np.ndarray):
-        if len(az.shape) == 0:
-            az = float(az)
-        elif len(az) > 1:
-            shape = (3,len(az))
-            az = az.flatten()
-        else:
-            az = az[0]
-    
-    if isinstance(el,np.ndarray):
-        if len(el.shape) == 0:
-            el = float(el)
-        elif len(el) > 1:
-            shape = (3,len(el))
-            el = el.flatten()
-        else:
-            el = el[0]
+    if radians is True:
+        az = 180.0/np.pi*az
+        el = 180.0/np.pi*az
 
-    sph = np.empty(shape, dtype=np.float64)
+    sph = np.empty((3, len(el)), dtype=np.float64)
     sph[0,...] = az
     sph[1,...] = el
     sph[2,...] = 1.0
-    enu = sph_to_cart(sph, radians=radians)
-    
-    return enu_to_ecef(lat, lon, alt, enu, radians=radians)
+
+    enu = sph_to_cart(sph, radians=False)
+
+    return enu_to_ecef(lat, lon, alt, enu, radians=False)
 
 def vec_to_vec(vec_in, vec_out):
     '''Get the rotation matrix that rotates `vec_in` to `vec_out` along the plane containing both. Uses quaternion calculations.

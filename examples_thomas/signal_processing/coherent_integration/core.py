@@ -190,10 +190,10 @@ def create_echo(t, amplitude, f0, fmix, df, time_shift, pulse_duration, code=Fal
 
 
 def correlate(measured_signal, reference_signal, N_IPP, x_norm):
-    if np.size(measured_signal) != np.size(reference_signal):
+    if np.size(reference_signal) != int(np.size(measured_signal)/N_IPP):
         raise(ValueError(f"measured_signal (size {np.size(measured_signal)}) and reference_signal (size {np.size(reference_signal)}) must be of the sale size."))
 
-    N = int(np.size(reference_signal)/N_IPP)
+    N = len(reference_signal)
     correlated_signal = np.zeros(N, dtype=np.float64)
     
     clibcoh.correlate.argtypes = [

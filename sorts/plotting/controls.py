@@ -15,7 +15,7 @@ import numpy as np
 
 from . import general
 from ..common import constants
-from ..radar import controls_manager
+from ..radar.scheduler import RadarSchedulerBase
 
 from sorts import clibsorts
 
@@ -100,87 +100,59 @@ def plot_beam_directions(controls, radar, ax=None, logger=None, profiler=None, t
     tx_ecef = np.array([tx.ecef for tx in radar.tx], dtype=float)
     rx_ecef = np.array([rx.ecef for rx in radar.rx], dtype=float)
 
-    if not isinstance(controls["rx"], np.ndarray):
-        controls["rx"] = np.asarray(controls["rx"])
+    tx_directions = controls["tx"].astype(np.float64)
+    rx_directions = controls["rx"].astype(np.float64)
 
-    if not isinstance(controls["tx"], np.ndarray):
-        controls["tx"] = np.asarray(controls["tx"])
+    if(np.shape(tx_directions)[3] < np.shape(rx_directions)[3]):
+        n_reps = int(np.shape(rx_directions)[3]/np.shape(tx_directions)[3])
+        tx_directions = np.repeat(tx_directions, n_reps, axis=3)
 
-    if controls["rx"].dtype == object:
-        tx_directions, rx_directions = __flatten_orientation_array(controls)
-    else:
-        # compute point -> [rx, tx, time, t_slice, (x,y,z)] -
-        rx_directions = np.reshape(np.asfarray(controls["rx"].transpose(0, 1, 4, 2, 3)), (np.shape(rx_ecef)[0], np.shape(tx_ecef)[0], 3, -1), 'C') # convert array to get [x, y, z] coordinates
-        
-        n_repeats = int(np.shape(controls["rx"])[3]/np.shape(controls["tx"])[3])
-        tx_directions = np.reshape(np.asfarray(controls["tx"].transpose(0, 1, 4, 2, 3)), (np.shape(tx_ecef)[0], 1, 3, -1), 'C').repeat(n_repeats, axis=3) # convert array to get [x, y, z] coordinates  
+    # compute beam intersection points 
+    if profiler is not None: profiler.start("plotting:controls:plot_beam_directions:compute_intersection_points")
+    intersection_points = radar.compute_intersection_points(tx_directions, rx_directions) 
+    if profiler is not None: profiler.stop("plotting:controls:plot_beam_directions:compute_intersection_points")
 
-    # generate points (ecef frame) [tx, rx, points]
-    a = np.einsum('ijkl,hjkl->ihl', tx_directions, rx_directions)
-    
-    msk = np.abs(np.abs(a) - 1) > 0.0001
-    
-    # compute points for Tx stations [[x, y, z], station, points]
-    for txi in range(len(radar.tx)):
-        for rxi in range(len(radar.rx)):
-            if len(a[txi, rxi, msk[txi, rxi, :]]) > 0:
-                if profiler is not None:
-                    profiler.start("plotting:controls:plot_beam_directions:plot_beams:compute_intersection_points")
-                    
-                # check if vectors are in the same plane (i.e. if the radar beams intersect)
-                k_tx_rx = tx_ecef[None, txi, :] - rx_ecef[None, rxi, :]
-                k_norm = np.linalg.norm(k_tx_rx)
+    if np.size(intersection_points) == 0 and logger is not None:
+        logger.error("plotting:controls:plot_beam_directions -> No intersection points found")
                 
-                if k_norm > 0:
-                    k_tx_rx = k_tx_rx/k_norm
-                    
-                    M = np.array([np.repeat(k_tx_rx, np.shape(tx_directions[txi, 0, :, msk[txi, rxi, :]])[0], axis=0), tx_directions[txi, 0, :, msk[txi, rxi, :]], rx_directions[rxi, txi, :, msk[txi, rxi, :]]], dtype=float).transpose(1, 0, 2)
-                    mask = np.abs(np.linalg.det(M)) < 1e-5 # if det = 0 then the directions are in the same plane
-    
-                    # TODO : repare this part
-                    # computing intersection point between a given rx/tx station tuple beams
-                    if np.size(np.where(mask == True)[0]) > 0: 
-                        points = tx_ecef[txi, None].reshape(3, 1) - np.einsum("ij,i->ji", tx_directions[txi, 0, :,  msk[txi, rxi, :]][mask], np.dot(rx_directions[rxi, txi, :, msk[txi, rxi, :]][mask]*a[txi, rxi, msk[txi, rxi, :], None][mask] - tx_directions[txi, 0, :, msk[txi, rxi, :]][mask], tx_ecef[txi, :] - rx_ecef[rxi, :])/(a[txi, rxi, msk[txi, rxi, :]][mask]**2 - 1))
-                        
-                        if profiler is not None:
-                            profiler.stop("plotting:controls:plot_beam_directions:plot_beams:compute_intersection_points")
-                            profiler.start("plotting:controls:plot_beam_directions:plot_beams:plot_rx")
-                            
-                        # plot Rx station beams
-                        if rx_beam is True:
-                            points_rx = np.tile(points.repeat(2, axis=1), np.shape(rx_ecef)[0])
-                            points_rx[:, ::2] = np.repeat(rx_ecef.transpose().reshape(3, -1), points.shape[-1], axis=1)
-                            
-                            fmt_rx = "g-"
-                            if fmt is not None:
-                                fmt_rx = fmt
+    if profiler is not None:
+        profiler.start("plotting:controls:plot_beam_directions:plot_beams:plot_rx")
+        
+    # plot Rx station beams
+    if rx_beam is True:
+        points_rx = np.tile(intersection_points.repeat(2, axis=1), np.shape(rx_ecef)[0])
+        points_rx[:, ::2] = np.repeat(rx_ecef.transpose().reshape(3, -1), intersection_points.shape[-1], axis=1)
+        
+        fmt_rx = "g-"
+        if fmt is not None:
+            fmt_rx = fmt
 
-                            ax.plot(points_rx[0], points_rx[1], points_rx[2], fmt_rx, alpha=0.5, linewidth=linewidth_rx)
-                        else:
-                            if logger is not None:
-                                logger.info("plotting:controls:plot_beam_directions:plot_station_controls:rx:{rxi} -> rx_beam is False, skipping rx controls plotting...")
-                        
-                        if profiler is not None:
-                            profiler.stop("plotting:controls:plot_beam_directions:plot_beams:plot_rx")
-                            profiler.start("plotting:controls:plot_beam_directions:plot_beams:plot_tx")
-                            
-                        # plot Tx station beams 
-                        if tx_beam is True:
-                            points_tx = points.repeat(2, axis=1)
-                            points_tx[:, ::2] = np.repeat(tx_ecef.transpose().reshape(3, -1), points.shape[-1], axis=1)
-                            
-                            fmt_tx = "r-"
-                            if fmt is not None:
-                                fmt_tx = fmt
-                                
-                            ax.plot(points_tx[0], points_tx[1], points_tx[2], fmt_tx, alpha=alpha, linewidth=linewidth_tx)
-                        else:
-                            if logger is not None:
-                                logger.info("plotting:controls:plot_beam_directions:plot_station_controls:tx:{txi} -> x_beam is False, skipping tx controls plotting...")
-                        
-                        if profiler is not None:
-                            profiler.stop("plotting:controls:plot_beam_directions:plot_beams:plot_tx")
-                            
+        ax.plot(points_rx[0], points_rx[1], points_rx[2], fmt_rx, alpha=0.5, linewidth=linewidth_rx)
+    else:
+        if logger is not None:
+            logger.info("plotting:controls:plot_beam_directions:plot_station_controls:rx:{rxi} -> rx_beam is False, skipping rx controls plotting...")
+    
+    if profiler is not None:
+        profiler.stop("plotting:controls:plot_beam_directions:plot_beams:plot_rx")
+        profiler.start("plotting:controls:plot_beam_directions:plot_beams:plot_tx")
+        
+    # plot Tx station beams 
+    if tx_beam is True:
+        points_tx = intersection_points.repeat(2, axis=1)
+        points_tx[:, ::2] = np.repeat(tx_ecef.transpose().reshape(3, -1), intersection_points.shape[-1], axis=1)
+        
+        fmt_tx = "r-"
+        if fmt is not None:
+            fmt_tx = fmt
+            
+        ax.plot(points_tx[0], points_tx[1], points_tx[2], fmt_tx, alpha=alpha, linewidth=linewidth_tx)
+    else:
+        if logger is not None:
+            logger.info("plotting:controls:plot_beam_directions:plot_station_controls:tx:{txi} -> x_beam is False, skipping tx controls plotting...")
+    
+    if profiler is not None:
+        profiler.stop("plotting:controls:plot_beam_directions:plot_beams:plot_tx")
+        
     # Zooming view on the stations performing the controls
     if zoom_level is not None: 
         if zoom_level > 1 or zoom_level < 0: 
@@ -209,50 +181,49 @@ def plot_beam_directions(controls, radar, ax=None, logger=None, profiler=None, t
 
     return ax # return instance of axis for further use if necessary
 
-
-def plot_manager_control_sequence(controls, final_controls, period_indices, manager, logger=None, profiler=None):
+def plot_scheduler_control_sequence(controls, final_controls, scheduler, period_indices=None, logger=None, profiler=None):
     # Validate inputs
-    if not issubclass(manager.__class__, controls_manager.RadarControlManagerBase):
-        raise ValueError(f"manager must be a sub class of {controls_manager.RadarControlManagerBase}")
+    if not issubclass(scheduler.__class__, RadarSchedulerBase):
+        raise ValueError(f"scheduler must be a sub class of {RadarSchedulerBase}")
 
     if len(controls) > MAX_SUB_PLOTS:
         raise ValueError(f"too many controls to plot ({len(controls)} > {MAX_SUB_PLOTS})")
 
-    if np.size(period_indices) == 1:
-        period_indices = np.array([period_indices], dtype=np.int32)
+    if period_indices is None:
+        period_indices = np.arange(0, len(final_controls.t)) # plot all period indices
     else:
         period_indices = np.asarray(period_indices, dtype=np.int32)
 
     figs = []
     for period_index in period_indices:
-        t_start = manager.t0 + period_index * manager.manager_period
-        t_end = t_start + manager.manager_period
+        t_start = (final_controls.t[0][0]//scheduler.scheduler_period + period_index) * scheduler.scheduler_period
+        t_end = t_start + scheduler.scheduler_period
 
         control_indices = []
         control_period_indices = []
 
         for ctrl_id in range(len(controls)):
-            if not "t" in controls[ctrl_id].keys():
+            if not hasattr(controls[ctrl_id], "t"):
                 raise KeyError("No time array found in controls")
 
             if period_index == len(period_indices)-1:
-                real_control_end_time = controls[ctrl_id]["t"][-1][-1] + controls[ctrl_id]["t_slice"][-1][-1]
+                real_control_end_time = controls[ctrl_id].t[-1][-1] + controls[ctrl_id].t_slice[-1][-1]
 
                 if t_end < real_control_end_time:
                     t_end = real_control_end_time
 
-            if controls[ctrl_id]["t"][-1][-1] < t_start or controls[ctrl_id]["t"][0][0] >= t_start + manager.manager_period:
+            if controls[ctrl_id].t[-1][-1] < t_start or controls[ctrl_id].t[0][0] >= t_end:
                 if logger is not None:
-                    logger.info(f"plotting:controls:plot_manager_control_sequence -> controls id={ctrl_id} : no controls in manager period [{t_start}, {t_start+manager.manager_period}]")
+                    logger.info(f"plotting:controls:plot_scheduler_control_sequence -> controls id={ctrl_id} : no controls in scheduler period [{t_start}, {t_start+scheduler.scheduler_period}]")
             else:
-                for control_period_id in range(len(controls[ctrl_id]["t"])):
-                    if controls[ctrl_id]["t"][control_period_id][0] >= t_start and controls[ctrl_id]["t"][control_period_id][0] < t_start + manager.manager_period:
+                for control_period_id in range(len(controls[ctrl_id].t)):
+                    if controls[ctrl_id].t[control_period_id][0] >= t_start and controls[ctrl_id].t[control_period_id][-1] <= t_end:
                         control_indices.append(ctrl_id)
                         control_period_indices.append(control_period_id)
 
         if len(control_indices) == 0:
             if logger is not None:
-                logger.info(f"plotting:controls:plot_manager_control_sequence -> no controls found in manager period [{t_start}, {t_start+manager.manager_period}]")
+                logger.info(f"plotting:controls:plot_scheduler_control_sequence -> no controls found in scheduler period [{t_start}, {t_start+scheduler.scheduler_period}]")
         else:
             fig = plt.figure(figsize=(5, 5))
             axes = fig.subplots(len(controls)+1, 1, sharex=True)
@@ -281,7 +252,17 @@ def plot_manager_control_sequence(controls, final_controls, period_indices, mana
             __plot_active_control_uptime(final_controls, period_index, t_start, t_end, axes)
 
             for ax in axes:
-                ax.set_xlim([t_start, t_end])
+                if t_start < final_controls.t[0][0] and final_controls.t[0][0] < t_end:
+                    t_start_plot = final_controls.t[0][0] + final_controls.t_slice[0][0]
+                else:
+                    t_start_plot = t_start
+
+                if t_start < final_controls.t[-1][-1] and final_controls.t[-1][-1] + final_controls.t_slice[-1][-1] <= t_end:
+                    t_end_plot = final_controls.t[-1][-1] + final_controls.t_slice[-1][-1]
+                else:
+                    t_end_plot = t_end
+
+                ax.set_xlim([t_start_plot, t_end_plot])
                 ax.set_ylim([-0.5, 1.5])
 
     return figs
@@ -289,9 +270,9 @@ def plot_manager_control_sequence(controls, final_controls, period_indices, mana
 
 def __plot_control_uptime(control, control_period_id, t_start, t_end, ax):
     # transform the time array to plot the status of the control at a given time t
-    ctrl_t = np.repeat(control["t"][control_period_id], 4)
-    ctrl_t[2::4] = control["t_slice"][control_period_id] + control["t"][control_period_id]
-    ctrl_t[3::4] = control["t_slice"][control_period_id] + control["t"][control_period_id]
+    ctrl_t = np.repeat(control.t[control_period_id], 4)
+    ctrl_t[2::4] = control.t_slice[control_period_id] + control.t[control_period_id]
+    ctrl_t[3::4] = control.t_slice[control_period_id] + control.t[control_period_id]
 
     ctrl_status = np.tile(np.array([0, 1, 1, 0]), int(np.size(ctrl_t)/4))
 
@@ -304,7 +285,7 @@ def __plot_control_uptime(control, control_period_id, t_start, t_end, ax):
 def boundary(control, control_period_id, t_start, t_end, ctrl_t, ctrl_status):
     dt = 0
     if control_period_id > 0:
-        dt = control["t_slice"][control_period_id-1][-1] + control["t"][control_period_id-1][-1] - t_start
+        dt = control.t_slice[control_period_id-1][-1] + control.t[control_period_id-1][-1] - t_start
 
     if dt > 0:
         ctrl_t = np.append([t_start, t_start + dt, t_start + dt], ctrl_t)
@@ -320,108 +301,107 @@ def boundary(control, control_period_id, t_start, t_end, ctrl_t, ctrl_status):
 
 def __plot_active_control_uptime(final_control_sequence, period_index, t_start, t_end, axes):
     # transform the time array to plot the status of the control at a given time t
-    for i, ctrl_id in enumerate(final_control_sequence['active_control'][period_index]):
-        t = np.array([final_control_sequence['t'][period_index][i], final_control_sequence['t'][period_index][i] + final_control_sequence['t_slice'][period_index][i]]).repeat(2)
+    for i, ctrl_id in enumerate(final_control_sequence.active_control[period_index]):
+        t = np.array([final_control_sequence.t[period_index][i], final_control_sequence.t[period_index][i] + final_control_sequence.t_slice[period_index][i]]).repeat(2)
         ctrl = np.array([0, 1, 1, 0])
-
         axes[ctrl_id].plot(t, ctrl, "-r")
 
     if period_index > 0:
-        ctrl_id = final_control_sequence['active_control'][period_index-1][-1]
-        dt = final_control_sequence['t'][period_index-1][-1] + final_control_sequence['t_slice'][period_index-1][-1] - t_start
+        ctrl_id = final_control_sequence.active_control[period_index-1][-1]
+        dt = final_control_sequence.t[period_index-1][-1] + final_control_sequence.t_slice[period_index-1][-1] - t_start
 
         if dt > 0:
             axes[ctrl_id].plot([t_start, t_start + dt, t_start + dt], [1, 1, 0], "-r")
 
 
-def __flatten_orientation_array(controls):
-    tx_dirs = None
-    rx_dirs = None
+# def __flatten_orientation_array(controls):
+#     tx_dirs = None
+#     rx_dirs = None
 
-    n_tx = len(controls["tx"])
-    n_rx = len(controls["rx"])
+#     n_tx = len(controls["tx"])
+#     n_rx = len(controls["rx"])
 
-    n_time_points = len(controls["tx"][0][0])
+#     n_time_points = len(controls["tx"][0][0])
 
-    def get_pointing_direction(txi, rxi, ti, pdir, istx):
-        nonlocal controls
-        if istx == 1:
-            pointing_direction = controls["tx"][txi][0][ti]
-        else:
-            pointing_direction = controls["rx"][rxi][txi][ti]   
+#     def get_pointing_direction(txi, rxi, ti, pdir, istx):
+#         nonlocal controls
+#         if istx == 1:
+#             pointing_direction = controls["tx"][txi][0][ti]
+#         else:
+#             pointing_direction = controls["rx"][rxi][txi][ti]   
 
-        pdir_arr = np.ctypeslib.as_array(pdir, (len(pointing_direction), 3))
-        pdir_arr[:] = pointing_direction
+#         pdir_arr = np.ctypeslib.as_array(pdir, (len(pointing_direction), 3))
+#         pdir_arr[:] = pointing_direction
 
-        del pointing_direction
+#         del pointing_direction
 
-    def get_n_dirs_per_time_slice(txi, rxi, ti, istx):
-        nonlocal controls
-        if istx == 1:
-            return len(controls["tx"][txi][0][ti])
-        else:
-            return len(controls["rx"][rxi][txi][ti])
+#     def get_n_dirs_per_time_slice(txi, rxi, ti, istx):
+#         nonlocal controls
+#         if istx == 1:
+#             return len(controls["tx"][txi][0][ti])
+#         else:
+#             return len(controls["rx"][rxi][txi][ti])
 
-    def save_pointing_direction_arrays(tx_dirs_c, rx_dirs_c, n_dirs_tx, n_dirs_rx, dim_index):
-        nonlocal tx_dirs, rx_dirs, n_tx, n_rx
+#     def save_pointing_direction_arrays(tx_dirs_c, rx_dirs_c, n_dirs_tx, n_dirs_rx, dim_index):
+#         nonlocal tx_dirs, rx_dirs, n_tx, n_rx
 
-        n_sub_rx = int(n_dirs_rx/n_rx)
-        n_sub = int(n_sub_rx/n_tx)
+#         n_sub_rx = int(n_dirs_rx/n_rx)
+#         n_sub = int(n_sub_rx/n_tx)
         
-        if tx_dirs is None:
-            tx_dirs = np.ndarray((n_tx, 1, 3, n_dirs_tx), dtype=float)
-        if rx_dirs is None:
-            rx_dirs = np.ndarray((n_rx, n_tx, 3, n_sub), dtype=float)
+#         if tx_dirs is None:
+#             tx_dirs = np.ndarray((n_tx, 1, 3, n_dirs_tx), dtype=float)
+#         if rx_dirs is None:
+#             rx_dirs = np.ndarray((n_rx, n_tx, 3, n_sub), dtype=float)
 
-        if n_dirs_tx > 0:
-            # copy tx_dirs
-            buffer_from_memory = ctypes.pythonapi.PyMemoryView_FromMemory
-            buffer_from_memory.restype = ctypes.py_object
-            buffer = buffer_from_memory(tx_dirs_c, np.dtype(np.float64).itemsize*n_dirs_tx)
+#         if n_dirs_tx > 0:
+#             # copy tx_dirs
+#             buffer_from_memory = ctypes.pythonapi.PyMemoryView_FromMemory
+#             buffer_from_memory.restype = ctypes.py_object
+#             buffer = buffer_from_memory(tx_dirs_c, np.dtype(np.float64).itemsize*n_dirs_tx)
 
-            tmp = np.frombuffer(buffer, np.float64).astype(float)
-            for i in range(n_tx):
-                tx_dirs[i, 0, dim_index, :] = tmp[i*n_sub:(i+1)*n_sub]
+#             tmp = np.frombuffer(buffer, np.float64).astype(float)
+#             for i in range(n_tx):
+#                 tx_dirs[i, 0, dim_index, :] = tmp[i*n_sub:(i+1)*n_sub]
             
-        if n_dirs_rx > 0:
-            # copy tx_dirs
-            buffer_from_memory = ctypes.pythonapi.PyMemoryView_FromMemory
-            buffer_from_memory.restype = ctypes.py_object
-            buffer = buffer_from_memory(rx_dirs_c, np.dtype(np.float64).itemsize*n_dirs_rx)
+#         if n_dirs_rx > 0:
+#             # copy tx_dirs
+#             buffer_from_memory = ctypes.pythonapi.PyMemoryView_FromMemory
+#             buffer_from_memory.restype = ctypes.py_object
+#             buffer = buffer_from_memory(rx_dirs_c, np.dtype(np.float64).itemsize*n_dirs_rx)
 
-            tmp = np.frombuffer(buffer, np.float64).astype(float)
+#             tmp = np.frombuffer(buffer, np.float64).astype(float)
 
-            for i in range(n_rx):
-                i_start = n_sub_rx*i
-                for j in range(n_tx):
-                    j_start = i_start + n_sub*j
-                    rx_dirs[i, j, dim_index, :] = tmp[j_start:j_start+n_sub]
+#             for i in range(n_rx):
+#                 i_start = n_sub_rx*i
+#                 for j in range(n_tx):
+#                     j_start = i_start + n_sub*j
+#                     rx_dirs[i, j, dim_index, :] = tmp[j_start:j_start+n_sub]
 
 
-    GET_N_DIRS_PER_TIME_SLICE_FNC = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int)
-    GET_POINTING_DIRECTION_FNC = ctypes.CFUNCTYPE(None, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.c_int)
-    SAVE_POINTING_ARRAYS_FNC = ctypes.CFUNCTYPE(None, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.c_int, ctypes.c_int)
+#     GET_N_DIRS_PER_TIME_SLICE_FNC = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int)
+#     GET_POINTING_DIRECTION_FNC = ctypes.CFUNCTYPE(None, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.c_int)
+#     SAVE_POINTING_ARRAYS_FNC = ctypes.CFUNCTYPE(None, ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.c_int, ctypes.c_int)
     
-    get_n_dirs_per_time_slice_c = GET_N_DIRS_PER_TIME_SLICE_FNC(get_n_dirs_per_time_slice)
-    get_pointing_direction_c = GET_POINTING_DIRECTION_FNC(get_pointing_direction)
-    save_pointing_direction_arrays_c = SAVE_POINTING_ARRAYS_FNC(save_pointing_direction_arrays)
+#     get_n_dirs_per_time_slice_c = GET_N_DIRS_PER_TIME_SLICE_FNC(get_n_dirs_per_time_slice)
+#     get_pointing_direction_c = GET_POINTING_DIRECTION_FNC(get_pointing_direction)
+#     save_pointing_direction_arrays_c = SAVE_POINTING_ARRAYS_FNC(save_pointing_direction_arrays)
 
-    clibsorts.init_plotting_controls.argtypes = [
-        GET_POINTING_DIRECTION_FNC, 
-        GET_N_DIRS_PER_TIME_SLICE_FNC, 
-        SAVE_POINTING_ARRAYS_FNC,
-        ]
-    clibsorts.init_plotting_controls(
-        get_pointing_direction_c, 
-        get_n_dirs_per_time_slice_c, 
-        save_pointing_direction_arrays_c,
-        )
+#     clibsorts.init_plotting_controls.argtypes = [
+#         GET_POINTING_DIRECTION_FNC, 
+#         GET_N_DIRS_PER_TIME_SLICE_FNC, 
+#         SAVE_POINTING_ARRAYS_FNC,
+#         ]
+#     clibsorts.init_plotting_controls(
+#         get_pointing_direction_c, 
+#         get_n_dirs_per_time_slice_c, 
+#         save_pointing_direction_arrays_c,
+#         )
 
-    clibsorts.flatten_directions.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int]
-    clibsorts.flatten_directions(
-        ctypes.c_int(n_tx), 
-        ctypes.c_int(n_rx), 
-        ctypes.c_int(n_time_points),
-        )
+#     clibsorts.flatten_directions.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int]
+#     clibsorts.flatten_directions(
+#         ctypes.c_int(n_tx), 
+#         ctypes.c_int(n_rx), 
+#         ctypes.c_int(n_time_points),
+#         )
     
-    return tx_dirs, rx_dirs
+#     return tx_dirs, rx_dirs

@@ -11,7 +11,10 @@ import matplotlib as mpl
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
 
-import pandas as pd
+try:
+    import pandas as pd
+except ImportError:
+    pd = None
 
 #Third party import
 
@@ -132,4 +135,3 @@ def radar_map(radar, ax=None):
     ax.set_aspect('equal')
 
     return ax
-

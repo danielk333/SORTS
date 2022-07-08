@@ -1,8 +1,5 @@
-#!/usr/bin/env python
+from . import base
+from . import static_priority_scheduler
 
-'''Define the concept of a radar scheduler that handles the RadarControler's and determines the behavior of the radar.
-
-'''
-
-from .scheduler import Scheduler
-from .tracking_scheduler import TrackingScheduler
+from .base import RadarSchedulerBase
+from .static_priority_scheduler import StaticPriorityScheduler

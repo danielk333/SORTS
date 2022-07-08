@@ -363,6 +363,5 @@ class TestSpaceObject(unittest.TestCase):
         nt.assert_almost_equal(state2, state1, decimal=5)
 
 
-
 if __name__ == '__main__':
     unittest.main(verbosity=2)

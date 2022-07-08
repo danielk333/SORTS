@@ -20,7 +20,9 @@ class Fence(Scan):
 
         self._az = np.empty((num,), dtype=np.float64)
         self._el = np.linspace(min_elevation, 180-min_elevation, num=num, dtype=np.float64)
+
         inds_ = self._el > 90.0
+        
         self._az[inds_] = np.mod(self.azimuth + 180.0, 360.0)
         self._az[np.logical_not(inds_)] = self.azimuth
 
@@ -46,9 +48,12 @@ class Fence(Scan):
 
 
     def pointing(self, t):
-        ind = (np.mod(t/self.cycle(), 1)*self.num).astype(np.int)
-        
-        azelr = np.empty((3, np.size(t)), dtype=np.float64)
+        t = np.mod(t, self.cycle()-1e-8)
+
+        # we add 1e-10 to t/self._dwell to prevent rounding errors (for example, 0.99999999999999 will be rounded to 1, but 0.9999 will be rounded to 0
+        ind = np.floor(t/self._dwell + 1e-8).astype(int)
+
+        azelr = np.empty((3, np.size(ind)), dtype=np.float64)
         azelr[0,...] = self._az[ind]
         azelr[1,...] = self._el[ind]
         azelr[2,...] = 1.0

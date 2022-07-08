@@ -44,7 +44,7 @@ def gen_mock():
     rx = [RX(
         lat = 90, lon = 0, alt = 0,
         min_elevation = 0,
-        noise = 100,
+        noise_temperature = 100,
         beam = rx_beam,
     )]
     mock = Radar(

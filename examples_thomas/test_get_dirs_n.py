@@ -5,7 +5,7 @@ Created on Wed May 25 08:16:43 2022
 
 @author: thomas
 """
-
+import ctypes
 import numpy as np
 import matplotlib.pyplot as plt
 import logging
@@ -18,10 +18,47 @@ from sorts.common import profiling
 from sorts import plotting
 from sorts import space_object
 
-from sorts import SimpleRadarControl
+from sorts import StaticPriorityScheduler
 from sorts.common import interpolation
 from sorts.targets.propagator import Kepler
 from sorts import find_simultaneous_passes, equidistant_sampling
+
+from sorts import clibsorts
+
+def get_dir_count_loop(dir_array_txrx):
+    N = len(dir_array_txrx)
+    dir_count = np.empty((N,), dtype=int)
+
+    for ti in range(N):
+        dir_count[i] = np.shape(dir_array_txrx[ti])[0]
+
+    return dir_count
+
+@np.vectorize
+def get_dir_count_vec(dir_array_txrx):
+    return np.shape(dir_array_txrx)[0]
+
+def get_dir_count_c(dir_array_txrx):
+    N = len(dir_array_txrx)
+    dir_count = np.empty((N,), dtype=np.int32)
+
+    
+    def get_dir_count(ti):
+        nonlocal dir_array_txrx
+        return np.shape(dir_array_txrx[ti])[0]
+
+    get_dir_count_vec_t = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_int)
+    get_dir_count = get_dir_count_vec_t(get_dir_count)
+
+    clibsorts.get_dir_count_c.argtypes = [
+        get_dir_count_vec_t,
+        np.ctypeslib.ndpointer(dtype=ctypes.c_int, ndim=dir_count.ndim, shape=dir_count.shape),
+        ctypes.c_int,
+    ]
+
+    clibsorts.get_dir_count_c(get_dir_count, dir_count, ctypes.c_int(N))
+
+    return dir_count
 
 plt.rcParams['agg.path.chunksize'] = 100000000
 
@@ -41,13 +78,13 @@ end_t = 100
 nbplots = 1
 log_array_sizes = True
 
-# manager properties
+# scheduler properties
 t0 = 0
-manager_period = 50 # [s] -> 2 minutes - can go up to 10mins or more depending on the available RAM
+scheduler_period = 50 # [s] -> 2 minutes - can go up to 10mins or more depending on the available RAM
 
-logger.info("test_scan_controller_w_scheduler -> manager initialized:")
-logger.info(f"test_scan_controller_w_scheduler:manager_variables -> t0 = {t0}")
-logger.info(f"test_scan_controller_w_scheduler:manager_variables -> manager_period = {manager_period}\n")
+logger.info("test_scan_controller_w_scheduler -> scheduler initialized:")
+logger.info(f"test_scan_controller_w_scheduler:scheduler_variables -> t0 = {t0}")
+logger.info(f"test_scan_controller_w_scheduler:scheduler_variables -> scheduler_period = {scheduler_period}\n")
 
 # RADAR definition
 eiscat3d = instances.eiscat3d
@@ -55,14 +92,14 @@ eiscat3d = instances.eiscat3d
 logger.info("test_scan_controller_w_scheduler -> radar initialized : eiscat3D\n")
 
 # generate the beam orientation controls
-# create manager
-manager = SimpleRadarControl(eiscat3d, t0, manager_period, profiler=p, logger=logger)
+# create scheduler
+scheduler = StaticPriorityScheduler(eiscat3d, t0, scheduler_period, profiler=p, logger=logger)
 
 logger.info("test_scan_controller_w_scheduler -> profiler initialized")
 
 # instanciate the scanning controller 
 scanner_ctrl = controllers.Scanner(profiler=p, logger=logger)
-logger.info("test_scan_controller_w_scheduler -> controller & manager created")
+logger.info("test_scan_controller_w_scheduler -> controller & scheduler created")
 
 logger.info("test_scan_controller_w_scheduler -> generating controls")
 
@@ -74,8 +111,8 @@ p.start("test_scan_controller_w_scheduler:compute_controls")
 
 # SCANNER
 # controls parameters 
-controls_period = np.array([1, 5, 20])
-controls_t_slice = np.array([0.5, 2.5, 5])
+controls_period = np.array([1, 5, 20])*0.01
+controls_t_slice = np.array([0.5, 2.5, 5])*0.01
 
 controls_priority = np.array([2, 1, 0], dtype=int)+1
 controls_start = np.array([0, 4, 49.5], dtype=float)
@@ -104,8 +141,8 @@ controls_plt = []
 for i in range(len(controls_period)):
     t = np.arange(controls_start[i], controls_end[i], controls_period[i])
     logger.info(f"test_scan_controller_w_scheduler -> generating time points - size={len(t)}")
-    controls.append(scanner_ctrl.generate_controls(t, eiscat3d, scans[i], manager=manager, priority=controls_priority[i]))
-    controls_plt.append(scanner_ctrl.generate_controls(t, eiscat3d, scans[i], manager=manager, priority=controls_priority[i]))
+    controls.append(scanner_ctrl.generate_controls(t, eiscat3d, scans[i], scheduler=scheduler, priority=controls_priority[i]))
+    controls_plt.append(scanner_ctrl.generate_controls(t, eiscat3d, scans[i], scheduler=scheduler, priority=controls_priority[i]))
 
 
 
@@ -209,28 +246,36 @@ for pass_id in range(np.shape(eiscat_passes)[0]):
 
     p.stop('intitialize_controller')
 
-    controls.append(tracker_controller.generate_controls(t_controller, eiscat3d, t_states_i, tracking_states, t_slice=t_slice, manager=manager, priority=0, states_per_slice=20, interpolator=interpolation.Linear))
-    controls_plt.append(tracker_controller.generate_controls(t_controller, eiscat3d, t_states_i, tracking_states, t_slice=t_slice, manager=manager, priority=0, states_per_slice=20, interpolator=interpolation.Linear))
+    controls.append(tracker_controller.generate_controls(t_controller, eiscat3d, t_states_i, tracking_states, t_slice=t_slice, scheduler=scheduler, priority=0, states_per_slice=20, interpolator=interpolation.Linear))
+    controls_plt.append(tracker_controller.generate_controls(t_controller, eiscat3d, t_states_i, tracking_states, t_slice=t_slice, scheduler=scheduler, priority=0, states_per_slice=20, interpolator=interpolation.Linear))
     
     logger.info("test_tracker_controller -> Controls generated")
 p.stop('generate_tracking_controls')
 
 print("generate_tracking_controls")
 
-final_control_sequence = manager.run(controls)
-figs = plotting.plot_manager_control_sequence(controls, final_control_sequence, [0, 1], manager, logger=logger, profiler=p)
-
-fmts = ["b-", "m-", "k-", "-c"]
-
-for period_id in range(len(final_control_sequence["t"])):
-    for ctrl_i in range(len(controls_plt)):
-        ax = plotting.plot_beam_directions(next(controls_plt[ctrl_i]["pointing_direction"]), eiscat3d, ax=ax, fmt=fmts[ctrl_i], linewidth_rx=0.08, linewidth_tx=0.08, alpha=0.8)
-
-    ax = plotting.plot_beam_directions(next(final_control_sequence["controls"]["pointing_direction"]), eiscat3d, ax=ax)
+final_control_sequence = scheduler.run(controls)
 
 p.stop("test_scan_controller_w_scheduler:compute_controls")
 
-logger.info("test_scan_controller_w_scheduler -> execution finised !")
-print(p)
+p.start("test_scan_controller_w_scheduler:get_radar_states")
+radar_states = eiscat3d.control(final_control_sequence)
+p.stop("test_scan_controller_w_scheduler:get_radar_states")
 
-plt.show()
+
+for txi in range(len(eiscat3d.tx)):
+    for rxi in range(len(eiscat3d.rx)):
+        print(f"{txi}, {rxi}")
+        p.start("test_scan_controller_w_scheduler:get_dir_count:loop")
+        print("loop -> ", get_dir_count_loop(radar_states["pointing_direction"][0]["rx"][rxi, txi]))    
+        p.stop("test_scan_controller_w_scheduler:get_dir_count:loop")
+
+        p.start("test_scan_controller_w_scheduler:get_dir_count:vec")
+        print("vec -> ", get_dir_count_vec(radar_states["pointing_direction"][0]["rx"][rxi, txi]))
+        p.stop("test_scan_controller_w_scheduler:get_dir_count:vec")
+
+        p.start("test_scan_controller_w_scheduler:get_dir_count:c")
+        print("c -> ", get_dir_count_c(radar_states["pointing_direction"][0]["rx"][rxi, txi]))
+        p.stop("test_scan_controller_w_scheduler:get_dir_count:c")
+
+print(p)

@@ -28,6 +28,7 @@ import astropy.units as u
 from astropy.time import Time, TimeDelta
 from astropy.coordinates.builtin_frames import ITRS, TEME
 
+dir_path = os.path.dirname(os.path.abspath(__file__))
 
 def vdot(va, vb):
     """dot products between equal or shape-compatible arrays of N-vectors"""
@@ -148,8 +149,8 @@ class TestFrames(unittest.TestCase):
 
         # "Earth Resources" TLE file downloaded as 'eos_tle.txt'
         # from https://celestrak.com/NORAD/elements/ on 2020-07-21
-        self.tab = load_tle_table('eos_tle.txt')
-        self.resorb = read_statevectors('S1A_OPER_AUX_RESORB_OPOD_20200721T073339_V20200721T023852_20200721T055622.EOF')
+        self.tab = load_tle_table(dir_path + '//eos_tle.txt')
+        self.resorb = read_statevectors(dir_path + '//S1A_OPER_AUX_RESORB_OPOD_20200721T073339_V20200721T023852_20200721T055622.EOF')
 
 
     def test_sgp4_version_workaround(self):
@@ -383,10 +384,10 @@ if __name__ == '__main__':
         unittest.main()
 
     else:
-        filename = './eos_tle.txt'
+        filename = dir_path + '//eos_tle.txt'
         
         rv = load_tle_table(filename)['SENTINEL-1A']
-        s1_res = read_statevectors('S1A_OPER_AUX_RESORB_OPOD_20200721T073339_V20200721T023852_20200721T055622.EOF')
+        s1_res = read_statevectors(dir_path + '//S1A_OPER_AUX_RESORB_OPOD_20200721T073339_V20200721T023852_20200721T055622.EOF')
 
         rv_epd = dt64_from_rv(rv)                             # Numpy datetime64 value
 

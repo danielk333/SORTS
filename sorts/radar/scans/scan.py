@@ -120,15 +120,12 @@ class Scan(ABC):
     
 
     def _transform_ecef(self, point, station):
-        station = np.asarray(station)
+        station = np.atleast_1d(station)
+
+        pos = np.ndarray((3, len(station)))
         
-        if len(np.shape(station)) == 1: # if ant is an array
-            pos = np.ndarray([3, len(station)])
-            
-            for station_ind, st in enumerate(station):
-                pos[:, station_ind] = [st.lat, st.lon, st.alt]
-        else:
-            pos = np.array([station.lat, station.lon, station.alt])
+        for station_ind, st in enumerate(station):
+            pos[:, station_ind] = [st.lat, st.lon, st.alt]
         
         if self.coordinates == 'ned':
             k0 = frames.ned_to_ecef(pos[0], pos[1], pos[2], point, radians=False)
@@ -136,7 +133,7 @@ class Scan(ABC):
             k0 = frames.enu_to_ecef(pos[0], pos[1], pos[2], point, radians=False)
         elif self.coordinates == 'azelr':
             k0 = frames.azel_to_ecef(pos[0], pos[1], pos[2], point[0,...], point[1,...], radians=False)
-            
+        
         return k0
 
 
@@ -146,8 +143,7 @@ class Scan(ABC):
             t : float
                 Seconds past a reference epoch to retrieve the pointing at.
         '''
-        t = np.asarray(t)
-        
+        t = np.atleast_1d(t)
         point = self.pointing(t)
 
         if len(point.shape) == 3:

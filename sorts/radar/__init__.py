@@ -7,19 +7,19 @@
 # -----------------------------------------------------------------
 #                           Radar
 # -----------------------------------------------------------------
-# Schedule
-from . import scheduler
+# Controls
 from . import controllers
+from . import radar_controls
 
-from .scheduler import Scheduler, TrackingScheduler
-from .controllers import RadarController, Scanner, Static, Tracker
+from .radar_controls import RadarControls
+from .controllers import RadarController, Scanner, Static, Tracker, SpaceObjectTracker
 
 # Control manager
-from .controls_manager import base
-from .controls_manager import simple_manager
+from .scheduler import base
+from .scheduler import static_priority_scheduler
 
-from .controls_manager.base import RadarControlManagerBase
-from .controls_manager.simple_manager import SimpleRadarControl
+from .scheduler.base import RadarSchedulerBase
+from .scheduler.static_priority_scheduler import StaticPriorityScheduler
 
 # System
 from .system import RX, TX, Station
@@ -44,3 +44,7 @@ from .passes import Pass
 from .passes import equidistant_sampling
 from .passes import find_passes, find_simultaneous_passes
 from .signals import hard_target_snr
+
+# measurements
+from . import measurements 
+from .measurements import Measurement
