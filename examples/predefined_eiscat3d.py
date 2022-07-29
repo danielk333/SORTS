@@ -1,23 +1,29 @@
 #!/usr/bin/env python
 
 '''
+==========================
 Predefined EISCAT 3D Radar
-================================
+==========================
+
+This example plots the predifined EISCAT_3D interpolated radiation gain patterns.
 '''
 
 import matplotlib.pyplot as plt
 
 import sorts
 import pyant
+import numpy as np
 
 import sorts
 eiscat3d = sorts.radars.eiscat3d
 
-#dig trough the documentation to find how to generate alternative configurations of the predefined instances
+# dig trough the documentation to find how to generate alternative configurations of the predefined instances
 eiscat3d_interp = sorts.radars.eiscat3d_interp
 
+# plot gain heatmap
 pyant.plotting.gain_heatmap(eiscat3d_interp.tx[0].beam, resolution=100, min_elevation=80.0)
 
+pyant.plotting.show()
 fig = plt.figure(figsize=(15,15))
 axes = [
     [
@@ -30,9 +36,11 @@ axes = [
     ]
 ]
 
+# plot configuration and gain for tx antenna
 pyant.plotting.antenna_configuration(eiscat3d.tx[0].beam.antennas, ax=axes[0][0])
 pyant.plotting.gain_heatmap(eiscat3d.tx[0].beam, resolution=100, min_elevation=80.0, ax=axes[1][0])
 
+# plot configuration and gain for rx (id 0) antenna
 pyant.plotting.antenna_configuration(eiscat3d.rx[0].beam.antennas, ax=axes[0][1])
 pyant.plotting.gain_heatmap(eiscat3d.rx[0].beam, resolution=100, min_elevation=80.0, ax=axes[1][1])
 

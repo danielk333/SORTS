@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
 '''
+==============
 Animate tables
-===============
+==============
 
+This example shocases the use of the sorts.io module to create an animated table of 10 lines
+over an index range of 95.
 '''
 
 import numpy as np

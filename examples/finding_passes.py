@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 
 '''
+=========================
 Finding passes over sites
-================================
+=========================
 
+Showcases the use of the ``sorts.find_simultaneous_passes`` to find all states which are 
+simultaneously in the fov of the transmitting station and of the second receiving station
+of the EISCAT_3D radar. 
 '''
 
 import numpy as np
@@ -14,6 +18,7 @@ import sorts
 eiscat3d = sorts.radars.eiscat3d
 from sorts.common.profiling import Profiler
 
+# initializes propagator
 from sorts.targets.propagator import SGP4
 Prop_cls = SGP4
 Prop_opts = dict(
@@ -26,10 +31,11 @@ prop = Prop_cls(**Prop_opts)
 p = Profiler()
 p.start('total')
 
-
+# create initial space object orbit
 orb = pyorb.Orbit(M0 = pyorb.M_earth, direct_update=True, auto_update=True, degrees=True, a=7200e3, e=0.1, i=75, omega=0, Omega=79, anom=72, epoch=53005.0)
 print(orb)
 
+# create sampling time array over a time interval of one day
 p.start('equidistant_sampling')
 t = sorts.equidistant_sampling(
     orbit = orb, 
@@ -41,8 +47,8 @@ p.stop('equidistant_sampling')
 
 print(f'Temporal points: {len(t)}')
 
+# propagate space object states of orbit `orb`
 p.start('propagate')
-
 states = prop.propagate(t, orb.cartesian[:,0], orb.epoch, A=1.0, C_R = 1.0, C_D = 1.0)
 p.stop('propagate')
 
@@ -51,24 +57,25 @@ p.stop('propagate')
 # ax.plot(states[0,:], states[1,:], states[2,:],"-b")
 # plt.show()
 
-
+# find all passes within the eiscat3d.tx[0] station
 p.start('find_passes')
 passes_tx0 = sorts.find_passes(t, states, eiscat3d.tx[0])
 print(f'tx-0 passes: {len(passes_tx0)}')
 p.stop('find_passes')
 
+# find all passes within the eiscat3d.rx[1] station
 p.start('find_passes')
 passes_rx1 = sorts.find_passes(t, states, eiscat3d.rx[1])
 print(f'rx-1 passes: {len(passes_rx1)}')
 p.stop('find_passes')
 
+
+#finding simultaneous passes using previously found passes
 p.start('sim_passes')
-#finding simultaneous passes
 chtx0 = np.full((len(t),), False, dtype=bool)
 chtx0[passes_tx0[0].inds] = True
 chrx1 = np.full((len(t),), False, dtype=bool)
 chrx1[passes_rx1[0].inds] = True
-
 inds = np.where(np.logical_and(chtx0, chrx1))[0]
 p.stop('sim_passes')
 
@@ -76,15 +83,15 @@ print(f'Pass 0 length tx-0: {len(passes_tx0[0].inds)}')
 print(f'Pass 0 length rx-1: {len(passes_rx1[0].inds)}')
 print(f'Full tx-0 to rx-1 pass: {len(inds)}')
 
-print('Using the predefined paired passes function')
 
+#finding simultaneous passes using the already implemented function ``sorts.find_simultaneous_passes``
+print('Using the predefined paired passes function')
 p.start('find_simultaneous_passes')
 tx0rx1_passes = sorts.find_simultaneous_passes(t, states, [eiscat3d.tx[0], eiscat3d.rx[1]])
 p.stop('find_simultaneous_passes')
 
 print(f'tx-0 and rx-1 passes: {len(tx0rx1_passes)}')
 print(f'Full tx-0 to rx-1 pass: {len(tx0rx1_passes[0].inds)}')
-
 
 p.stop('total')
 print(p.fmt(normalize='total'))

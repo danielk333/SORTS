@@ -1,17 +1,22 @@
 '''
+===============================
 Interpolated Antenna array gain
-================================
+===============================
+
+This example showcases the use of the ``pyant`` interpolation features to create
+more efficient beam gain computations.
 '''
 
 import numpy as np
 
 import pyant
-from sorts.radar.system import instances as rlib
 
+from sorts.radar.system import instances as rlib
 radar = rlib.eiscat3d_demonstrator
 
 res = 500
 
+# intepolated tx beams
 tx_intp = []
 for txi,tx in enumerate(radar.tx):
     tx_intp += [pyant.PlaneArrayInterp(
@@ -21,7 +26,7 @@ for txi,tx in enumerate(radar.tx):
     )]
     tx_intp[-1].generate_interpolation(tx.beam, resolution=res)
 
-
+# intepolated rx beams
 rx_intp = []
 for rxi,rx in enumerate(radar.rx):
     rx_intp += [pyant.PlaneArrayInterp(
@@ -31,4 +36,9 @@ for rxi,rx in enumerate(radar.rx):
     )]
     rx_intp[-1].generate_interpolation(rx.beam, resolution=res)
 
-print (rx_intp)
+# plot antenna gain patterns
+pyant.plotting.gain_heatmap(tx_intp[-1], resolution=1000, min_elevation=80.0)
+pyant.plotting.gain_heatmap(rx_intp[-1], resolution=1000, min_elevation=80.0)
+pyant.plotting.show()
+
+print(rx_intp)

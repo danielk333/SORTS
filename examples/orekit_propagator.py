@@ -1,8 +1,14 @@
 #!/usr/bin/env python
 
 '''
+=======================
 Orekit propagator usage
-================================
+=======================
+
+This simple example showcases the ``Orekit`` propagator wrapper implemented in the SORTS Toolbox.
+
+After initializing the propagator, the script propagates the space object states over a time interval of 1 day and 
+plots the results. 
 '''
 import pathlib
 

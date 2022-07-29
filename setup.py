@@ -9,6 +9,7 @@ import codecs
 
 HERE = pathlib.Path(__file__).resolve().parents[0]
 
+sys.path.append("/home/me/docproj/ext/breathe/")
 
 def get_version(path):
     with codecs.open(path, 'r') as fp:
@@ -47,6 +48,7 @@ setuptools.setup(
     ],
     install_requires=pip_req,
     packages=setuptools.find_packages(),
+    extensions = ['sphinx.ext.pngmath', 'sphinx.ext.todo', 'breathe' ]
     package_data={
         'sorts': ['data/*'],
     },

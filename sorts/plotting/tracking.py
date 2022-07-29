@@ -74,17 +74,17 @@ def local_tracking(azimuth, elevation, ax=None, t=None, add_track=False, node_ti
         x,y=az_el_to_xy(np.linspace(0,360,num=360),np.repeat(30.0,360))
         x[np.logical_and(x > 0, abs(y) < 0.1)] = np.nan
         ax.plot( x, y ,color="black")
-        ax.text(np.cos(np.pi*30/180.0),0, r'$30\degree$', horizontalalignment='center', verticalalignment='center')
+        ax.text(np.cos(np.pi*30/180.0),0, r'$30^{\circ}$', horizontalalignment='center', verticalalignment='center')
 
         x,y=az_el_to_xy(np.linspace(0,360,num=360),np.repeat(60.0,360))
         x[np.logical_and(x > 0, abs(y) < 0.1)] = np.nan
         ax.plot( x, y ,color="black")
-        ax.text(np.cos(np.pi*60/180.0),0, r'$60\degree$', horizontalalignment='center', verticalalignment='center')
+        ax.text(np.cos(np.pi*60/180.0),0, r'$60^{\circ}$', horizontalalignment='center', verticalalignment='center')
 
         x,y=az_el_to_xy(np.linspace(0,360,num=360),np.repeat(80.0,360))
         x[np.logical_and(x > 0, abs(y) < 0.1)] = np.nan
         ax.plot( x, y ,color="black")
-        ax.text(np.cos(np.pi*80/180.0),0, r'$80\degree$', horizontalalignment='center', verticalalignment='center')
+        ax.text(np.cos(np.pi*80/180.0),0, r'$80^{\circ}$', horizontalalignment='center', verticalalignment='center')
 
     ax.plot( x0[0], y0[0] , 'o')
     ax.plot( x0[-1], y0[-1] , 'x')

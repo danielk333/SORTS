@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 
 '''
+===================================================
 Simulate scanning for objects with simulation class
-======================================================
+===================================================
+
+# TODO
 '''
 import pathlib
 import configparser

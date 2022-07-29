@@ -74,8 +74,8 @@ p.start("test_static_priority_scheduler:compute_controls")
 
 # SCANNER
 # controls parameters 
-controls_period = np.array([1, 5, 20])
-controls_t_slice = np.array([0.5, 2.5, 5])
+controls_period = np.array([1, 2, 2])
+controls_t_slice = np.array([0.5, 1, 1.5])
 
 controls_priority = np.array([2, 1, 0], dtype=int)+1
 controls_start = np.array([0, 4, 49.5], dtype=float)
@@ -205,7 +205,7 @@ for pass_id in range(np.shape(eiscat_passes)[0]):
     t_controller = np.arange(t_states_i[0], t_states_i[-1]+tracking_period, tracking_period)
     p.stop('test_static_priority_scheduler:intitialize_controller')
 
-    controls.append(tracker_controller.generate_controls(t_controller, eiscat3d, t_states_i, tracking_states, t_slice=t_slice, scheduler=scheduler, priority=0, states_per_slice=20, interpolator=interpolation.Linear))
+    controls.append(tracker_controller.generate_controls(t_controller, eiscat3d, t_states_i, tracking_states, t_slice=10, scheduler=scheduler, priority=0, states_per_slice=20, interpolator=interpolation.Linear))
     
     logger.info("test_static_priority_scheduler -> Controls generated")
 p.stop('test_static_priority_scheduler:generate_tracking_controls')
@@ -226,6 +226,14 @@ for period_id in range(final_control_sequence.n_periods):
 
     for ctrl_i in range(len(controls)):
         ax = plotting.plot_beam_directions(controls[ctrl_i].get_pdirs(period_id), eiscat3d, ax=ax, fmt=fmts[ctrl_i], linewidth_rx=0.08, linewidth_tx=0.08, alpha=0.8)
+
+    print("period ", period_id)
+    for station in eiscat3d.tx:
+        print("station  ", station.type)
+        print("uptime -> ", final_control_sequence.active_control)
+        print("control coh_int_bw -> ", final_control_sequence.get_property_control("coh_int_bandwidth", station, period_id))
+        print("control n_ipp -> ", final_control_sequence.get_property_control("n_ipp", station, period_id))
+
 
 p.stop("test_static_priority_scheduler:compute_controls")
 

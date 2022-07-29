@@ -43,6 +43,10 @@ class RadarSchedulerBase(ABC):
         pass
 
 
+    def exctract_scheduler_results(self, control_sequence):
+        ''' Exctracts the results of the scheduler from the generated control sequence. '''
+        pass
+
     @property
     def scheduler_period(self):
         return self._scheduler_period
@@ -85,59 +89,54 @@ class RadarSchedulerBase(ABC):
         '''
         # extract pointing directions (as splitted arrays)
         final_control_sequence.pdirs = self.get_pointing_direction_sequence(controls, final_control_sequence)
-
+        final_control_sequence.has_pdirs = True
 
         # extract all other control properties
         controlled_properties = dict()
-        controlled_properties["tx"] = []
-        controlled_properties["rx"] = []
+        controlled_properties["tx"] = [[] for rxi in range(len(controls[0].radar.tx))]
+        controlled_properties["rx"] = [[] for txi in range(len(controls[0].radar.rx))]
+
 
         # get all radar properties being controlled by the different controls
         for control in controls:
             for station_type in controlled_properties.keys():
                 stations = getattr(control.radar, station_type)
 
-                for station in stations:
+                for station_id, station in enumerate(stations):
                     station_controls = control.get_property_control_list(station)
 
                     for property_name in station.PROPERTIES:
-                        if property_name not in controlled_properties[station_type] and property_name in station_controls:
-                            controlled_properties[station_type].append(property_name)
+                        if property_name not in controlled_properties[station_type][station_id] and property_name in station_controls:
+                            controlled_properties[station_type][station_id].append(property_name)
 
-        
+
         # copy all controls to new control sequence
         for station_type in controlled_properties.keys():
             stations = getattr(control.radar, station_type) # get all the stations of type tx/rx in self.radar
 
-            # for each property being controlled by at least one control
-            for property_name in controlled_properties[station_type]:
-                final_control_sequence.property_controls[station_type][property_name] = np.ndarray((len(stations),), dtype=object)
-                
-                # copy the controls for each station
-                for sid, station in enumerate(stations):
-                    tmp_final_control_data = np.ndarray((final_control_sequence.n_control_points,), dtype=np.float64)
-                    tmp_final_control_data = final_control_sequence.split_array(tmp_final_control_data)
+            # copy the controls for each station
+            for sid, station in enumerate(stations):
+                # for each property being controlled by at least one control
+                for property_name in controlled_properties[station_type][sid]: 
+                    tmp_final_control_data = np.ndarray((final_control_sequence.n_periods,), dtype=object)
 
-                    # get control values for each controls
-                    for ctrl_id, control in enumerate(controls):   
-                        station_controls = control.get_property_control_list(station)
+                    for period_id in range(control.n_periods):
+                        tmp_final_control_data[period_id] = np.ndarray((len(final_control_sequence.t[period_id]),), dtype=control.property_controls[period_id][station_type][property_name][sid].dtype)
 
-                        for period_id in range(controls.n_periods):
+                        # get control values for each controls
+                        for ctrl_id, control in enumerate(controls):   
                             mask = (final_control_sequence.active_control[period_id] == ctrl_id)
-
-                            if property_name in station_controls:
+                            if property_name in control.get_property_control_list(station):
                                 inds = np.intersect1d(control.t[period_id], final_control_sequence.t[period_id][mask], return_indices=True)
                                 control_point_ids = inds[1]
                                 del inds
                             
-                                tmp_final_control_data[period_id][mask] = control.property_controls[station_type][property_name][sid][period_id][control_point_ids]
+                                tmp_final_control_data[period_id][mask] = control.property_controls[period_id][station_type][property_name][sid][control_point_ids]
                             else:
                                 # get default value
                                 tmp_final_control_data[period_id][mask] = getattr(station, property_name)
                 
-                    final_control_sequence.property_controls[station_type][property_name][sid] = tmp_final_control_data
-                    del tmp_final_control_data
-
+                    final_control_sequence.add_property_control(property_name, station, tmp_final_control_data)
 
         return final_control_sequence
 
@@ -199,52 +198,52 @@ class RadarSchedulerBase(ABC):
             
             # initializes the pointing direction arrays
             for ctrl_id, control in enumerate(controls):
-                # compute the corresponding control period
-                ctrl_period_id = control.get_control_period_id(period_id)
+                if control.has_pdirs is True:
+                    # compute the corresponding control period
+                    ctrl_period_id = control.get_control_period_id(period_id)
 
-                # if there is indeed a sliced control time array of index "ctrl_period_id"
-                if ctrl_period_id != -1:
-                    # get the pointing directions of the current control
-                    controls_pdirs.append(control.get_pdirs(ctrl_period_id))
-                    print("keys, ", controls_pdirs[-1].keys())
+                    # if there is indeed a sliced control time array of index "ctrl_period_id"
+                    if ctrl_period_id != -1:
+                        # get the pointing directions of the current control
+                        controls_pdirs.append(control.get_pdirs(ctrl_period_id))
 
-                    clibsorts.get_control_sequence_time_indices.argtypes = [
-                        np.ctypeslib.ndpointer(dtype=ctypes.c_double, ndim=final_control_sequence.t[period_id].ndim, shape=final_control_sequence.t[period_id].shape),
-                        np.ctypeslib.ndpointer(dtype=ctypes.c_double, ndim=final_control_sequence.t_slice[period_id].ndim, shape=final_control_sequence.t_slice[period_id].shape),
-                        np.ctypeslib.ndpointer(dtype=ctypes.c_double, ndim=pointing_direction[period_id]["t"].ndim, shape=pointing_direction[period_id]["t"].shape),
-                        np.ctypeslib.ndpointer(dtype=ctypes.c_double, ndim=control.t[ctrl_period_id].ndim, shape=control.t[ctrl_period_id].shape),
-                        np.ctypeslib.ndpointer(dtype=ctypes.c_double, ndim=controls_pdirs[-1]["t"].ndim, shape=controls_pdirs[-1]["t"].shape),
-                        np.ctypeslib.ndpointer(dtype=ctypes.c_int, ndim=control_ids.ndim, shape=control_ids.shape),
-                        np.ctypeslib.ndpointer(dtype=ctypes.c_int, ndim=control_t_ids.ndim, shape=control_t_ids.shape),
-                        np.ctypeslib.ndpointer(dtype=ctypes.c_int, ndim=final_control_sequence.active_control[period_id].ndim, shape=final_control_sequence.active_control[period_id].shape),
-                        ctypes.c_int,
-                        ctypes.c_int,
-                        ctypes.c_int,
-                        ctypes.c_int,
-                        ctypes.c_int,
-                        ctypes.c_int,
-                        SAVE_ARRAYS,
-                    ]
+                        clibsorts.get_control_sequence_time_indices.argtypes = [
+                            np.ctypeslib.ndpointer(dtype=ctypes.c_double, ndim=final_control_sequence.t[period_id].ndim, shape=final_control_sequence.t[period_id].shape),
+                            np.ctypeslib.ndpointer(dtype=ctypes.c_double, ndim=final_control_sequence.t_slice[period_id].ndim, shape=final_control_sequence.t_slice[period_id].shape),
+                            np.ctypeslib.ndpointer(dtype=ctypes.c_double, ndim=pointing_direction[period_id]["t"].ndim, shape=pointing_direction[period_id]["t"].shape),
+                            np.ctypeslib.ndpointer(dtype=ctypes.c_double, ndim=control.t[ctrl_period_id].ndim, shape=control.t[ctrl_period_id].shape),
+                            np.ctypeslib.ndpointer(dtype=ctypes.c_double, ndim=controls_pdirs[-1]["t"].ndim, shape=controls_pdirs[-1]["t"].shape),
+                            np.ctypeslib.ndpointer(dtype=ctypes.c_int, ndim=control_ids.ndim, shape=control_ids.shape),
+                            np.ctypeslib.ndpointer(dtype=ctypes.c_int, ndim=control_t_ids.ndim, shape=control_t_ids.shape),
+                            np.ctypeslib.ndpointer(dtype=ctypes.c_int, ndim=final_control_sequence.active_control[period_id].ndim, shape=final_control_sequence.active_control[period_id].shape),
+                            ctypes.c_int,
+                            ctypes.c_int,
+                            ctypes.c_int,
+                            ctypes.c_int,
+                            ctypes.c_int,
+                            ctypes.c_int,
+                            SAVE_ARRAYS,
+                        ]
 
-                    clibsorts.get_control_sequence_time_indices(
-                        final_control_sequence.t[period_id],
-                        final_control_sequence.t_slice[period_id],
-                        pointing_direction[period_id]["t"],
-                        control.t[ctrl_period_id].astype(float),
-                        controls_pdirs[-1]["t"].astype(float),
-                        control_ids,
-                        control_t_ids,
-                        final_control_sequence.active_control[period_id].astype(np.int32),
-                        ctypes.c_int(ctrl_id),
-                        ctypes.c_int(len(control.t[ctrl_period_id])),
-                        ctypes.c_int(len(controls_pdirs[-1]["t"])),
-                        ctypes.c_int(len(final_control_sequence.t[period_id])),
-                        ctypes.c_int(len(control_ids)),
-                        ctypes.c_int(first_iteration),
-                        save_arrays_c,
-                    )
+                        clibsorts.get_control_sequence_time_indices(
+                            final_control_sequence.t[period_id],
+                            final_control_sequence.t_slice[period_id],
+                            pointing_direction[period_id]["t"],
+                            control.t[ctrl_period_id].astype(float),
+                            controls_pdirs[-1]["t"].astype(float),
+                            control_ids,
+                            control_t_ids,
+                            final_control_sequence.active_control[period_id].astype(np.int32),
+                            ctypes.c_int(ctrl_id),
+                            ctypes.c_int(len(control.t[ctrl_period_id])),
+                            ctypes.c_int(len(controls_pdirs[-1]["t"])),
+                            ctypes.c_int(len(final_control_sequence.t[period_id])),
+                            ctypes.c_int(len(control_ids)),
+                            ctypes.c_int(first_iteration),
+                            save_arrays_c,
+                        )
 
-                    first_iteration = False
+                        first_iteration = False
 
             n_directions = len(pointing_direction[period_id]["t"])
             pointing_direction[period_id]['tx'] = np.ndarray((n_tx, 1, 3, n_directions), dtype=float)
@@ -253,14 +252,16 @@ class RadarSchedulerBase(ABC):
             # get directions from individual control arrays
             ctrl_id = 0
             while(len(controls_pdirs) > 0):
-                control_pdir = controls_pdirs.pop(0)
-                msk = control_ids == ctrl_id
-                ctrl_id += 1
+                if control.has_pdirs is True:
+                    msk = control_ids == ctrl_id
+                    control_pdir = controls_pdirs.pop(0)
 
-                for txi in range(n_tx):
-                    pointing_direction[period_id]['tx'][txi, 0, :, msk] = control_pdir["tx"][txi, 0, :, control_t_ids[msk]]
+                    for txi in range(n_tx):
+                        pointing_direction[period_id]['tx'][txi, 0, :, msk] = control_pdir["tx"][txi, 0, :, control_t_ids[msk]]
 
-                    for rxi in range(n_rx):
-                        pointing_direction[period_id]['rx'][rxi, txi, :, msk] = control_pdir["rx"][rxi, txi, :, control_t_ids[msk]]
+                        for rxi in range(n_rx):
+                            pointing_direction[period_id]['rx'][rxi, txi, :, msk] = control_pdir["rx"][rxi, txi, :, control_t_ids[msk]]
 
+                ctrl_id += 1  
+                
         return pointing_direction

@@ -50,6 +50,8 @@ logger.info(f"test_scan_controller_w_scheduler:scheduler_variables -> scheduler_
 
 # RADAR definition
 eiscat3d = instances.eiscat3d_interp
+eiscat3d.logger = logger
+eiscat3d.profiler = p
 
 logger.info("test_scan_controller_w_scheduler -> radar initialized : eiscat3D\n")
 
@@ -124,7 +126,7 @@ p.start("test_scan_controller_w_scheduler:get_radar_states")
 radar_states = eiscat3d.control(controls)
 p.stop("test_scan_controller_w_scheduler:get_radar_states")
 
-print("radar_states ", radar_states["t"][0])
+print("radar_states ", radar_states.t[0])
 logger.info("computing measurements")
 
 fig = plt.figure()

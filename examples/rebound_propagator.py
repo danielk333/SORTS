@@ -1,8 +1,13 @@
 #!/usr/bin/env python
 
 '''
+========================
 REBOUND propagator usage
-================================
+========================
+
+Showcases the use of the ``sorts.propagator.Rebound`` wrapper to propagate space object states in time.
+
+To run this example, you need to modify the path set in ``SORTS/example_config.conf`` corresponding to this example.
 '''
 import pathlib
 import configparser
@@ -15,6 +20,7 @@ from astropy.time import Time, TimeDelta
 from sorts.targets.propagator import Rebound
 import pyorb
 
+# get example config from 'example_config.conf'
 try:
     base_pth = pathlib.Path(__file__).parents[1].resolve()
 except NameError:
@@ -28,9 +34,9 @@ if not kernel.is_absolute():
     kernel = base_pth / kernel.relative_to('.')
 
 
-#We input in International Terrestrial Reference System coordinates
-#and output in International Celestial Reference System
-#going trough HeliocentricMeanEclipticJ2000 internally in Rebound
+# We input in International Terrestrial Reference System coordinates
+# and output in International Celestial Reference System
+# going trough HeliocentricMeanEclipticJ2000 internally in Rebound
 prop = Rebound(
     kernel = kernel, 
     settings=dict(
@@ -56,29 +62,29 @@ times = epoch0 + TimeDelta(t, format='sec')
 
 states, massive_states = prop.propagate(t, state0, epoch0)
 
-#the propagator remembers the latest propagation
+# the propagator remembers the latest propagation
 print(prop)
 
-#for reproducibility
+# for reproducibility
 np.random.seed(293489776)
 
-#we can also propagate several test partcies at the same time
+# we can also propagate several test partcies at the same time
 state0_r = np.zeros((6, n_test))
 state0_r = state0_r + state0[:, None]
 state0_r[3:,:] += np.random.randn(3,n_test)*0.5e3 #1km/s std separation
 
-#this is inefficient since we could have included the first particle
-#but for the exemplification sake we propagate again
+# this is inefficient since we could have included the first particle
+# but for the exemplification sake we propagate again
 states_r, _ = prop.propagate(t, state0_r, epoch0)
 
 
-#plot results
+# plot results
 fig = plt.figure(figsize=(15,15))
 ax = fig.add_subplot(121, projection='3d')
 ax.plot(states[0,:], states[1,:], states[2,:],"-r", label='Base test particle')
 
 
-#we get the index of the earth using the convenience function
+# we get the index of the earth using the convenience function
 E_ind = prop.planet_index('Earth')
 
 ax.plot(massive_states[0,:,E_ind], massive_states[1,:,E_ind], massive_states[2,:,E_ind],".g", label='Earth')
@@ -88,8 +94,8 @@ for i in range(1,n_test):
 
 ax.legend()
 
-#lets also plot it in geocentric for reference
-#by converting manually
+# lets also plot it in geocentric for reference
+# by converting manually
 earth_states = massive_states[:,:,E_ind]
 
 states_geo = states.copy() - earth_states

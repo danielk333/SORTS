@@ -1,9 +1,14 @@
 #!/usr/bin/env python
 
 '''
+==========================
 Fitting SGP4 mean elements
-============================
+==========================
 
+This example showcases the fitting of the SGP4 mean elements using least square optimization.
+
+The technique used in this example can be used to fit SGP4 mean elements to a set of measured space object states 
+to construct a space object tracking database.
 '''
 import numpy as np
 import scipy.optimize as sio
@@ -36,17 +41,16 @@ params = dict(A=1.0, C_R=1.0, C_D=2.3)
 states = prop.propagate(t, state0, mjd0, **params)
 noisy_pos = states[:3,:] + np.random.randn(3,len(t))*std_pos
 
-#now for the least squares function to minimize
+# now for the least squares function to minimize
 def lsq(mean_elements):
-
     states = prop.propagate(t, mean_elements, mjd0, SGP4_mean_elements=True, **params)
     rv_diff = np.linalg.norm(noisy_pos - states[:3,:], axis=0)
     return rv_diff.sum()
 
-#initial guess is just kepler elements
+# initial guess is just kepler elements
 mean0 = orb.kepler[:,0]
 
-#The order is different (and remember its mean anomaly), but we still use SI units
+# The order is different (and remember its mean anomaly), but we still use SI units
 tmp = mean0[4]
 mean0[4] = mean0[3]
 mean0[3] = tmp
@@ -72,7 +76,6 @@ for i in range(3):
     ax.plot(t/3600.0, states[i,:], '--g', label='True states')
     ax.plot(t/3600.0, initial_states[i,:], '-k', label='Initial guess states')
     
-
 ax.legend()
 
 fig = plt.figure(figsize=(15,15))

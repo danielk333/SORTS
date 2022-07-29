@@ -1,9 +1,14 @@
 #!/usr/bin/env python
 
 '''
+=========================
 Noise equivalent diameter
 =========================
 
+Compares the sensivity of different radar systems by computing the object diameter 
+required to get a SNR of 1.0 for each radar system.
+
+The smaller the diameter is, the greater is the sensitivity.
 '''
 import numpy as np
 import matplotlib.pyplot as plt
@@ -53,7 +58,7 @@ for tx, rx, label in data:
         ranges,
         snr, 
         bandwidth = tx.coh_int_bandwidth,
-        rx_noise_temp = rx.noise,
+        rx_noise_temp = rx.noise_temperature,
         radar_albedo = 1.0,
     )
 

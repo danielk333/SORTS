@@ -15,9 +15,7 @@ from sorts.radar.system.radar   import Radar
 from ..                         import radar_controls
 
 class Scanner(radar_controller.RadarController):
-    '''
-    Usage
-    -----
+    ''' Implements a Radar Scanning Controller
     
     This class is used to create scanning controls for a given radar system. To create a control, one instanciates the scanner class by giving a profiler and logger depending on the application. 
    
@@ -45,7 +43,10 @@ class Scanner(radar_controller.RadarController):
             logger=None, 
             **kwargs
             ):
-        ''' Creates a Scanner controller to generate radar scanning controls. Only one Scanner controller is needed to create multiple controls for differnet scan methods and radars.
+        ''' Creates a Scanner controller to generate radar scanning controls. 
+
+        This class creates a Scanner controller to generate radar scanning controls. Only one Scanner controller is needed to create multiple 
+        controls for differnet scan methods and radars.
         
         Parameters
         ----------
@@ -54,8 +55,8 @@ class Scanner(radar_controller.RadarController):
         logger : logging.Logger 
             Logger instance used to log the execttion of the generate_controls method.
         
-        Return value
-        ------------
+        Returns
+        -------
         
         The constructor returns an instance of controllers.Scanner that can be used to generate scanning controls.
         
@@ -81,8 +82,8 @@ class Scanner(radar_controller.RadarController):
             period_id, 
             args, 
             ):
-        '''
-        Computes the beam orientation controls assiciated with the controller. 
+        ''' Computes the beam orientation controls assiciated with the controller. 
+
         This function returns a generator allowing the computation of the said subarray (containing a maximum of max_points time points)
         '''
         r = args
@@ -99,7 +100,7 @@ class Scanner(radar_controller.RadarController):
         
         # get Tx pointing directions
         # [ind_tx][x, y, z][t]
-        points = controls.scan.ecef_pointing(controls.t[period_id], controls.radar.tx).reshape((len(tx_ecef), 3, -1))
+        points = controls.meta["scan"].ecef_pointing(controls.t[period_id], controls.radar.tx).reshape((len(tx_ecef), 3, -1))
  
         # Compute Tx pointing directions
         pointing_direction['tx'] = np.repeat(points[:, None, :, :], len(r), axis=3) # the beam directions are given as unit vectors in the ecef frame of reference
@@ -143,33 +144,9 @@ class Scanner(radar_controller.RadarController):
             cache_pdirs=False,
             ):
         '''Generates RADAR scanning controls in a given direction. 
+
         This method can be called multiple times to generate different controls for different radar systems.
-        
-        Usage
-        -----
-        
-        One can generate scanning controls for a given target as follows :
-
-        >>> logger = profiling.get_logger('static')
-        >>> p = profiling.Profiler() # Profiler
-
-        >>> # Computation / test setup
-        >>> end_t = 24*3600
-        >>> nbplots = 1
-        >>> t_slice = 0.1
-        >>> max_points = 1000
-        >>> log_array_sizes = True
-
-        >>> eiscat3d = instances.eiscat3d # RADAR definition
-
-        >>> # create scan and controller
-        >>> scan = Fence(azimuth=90, min_elevation=30, dwell=t_slice, num=50)
-        >>> scanner_controller = controllers.Scanner(profiler=p, logger=logger)
-
-        >>> t = np.arange(0, end_t, t_slice)
-        >>> controls = scanner_controller.generate_controls(t, eiscat3d, scan, t_slice=t_slice, max_points=max_points)
-
-            
+           
         Parameters
         ----------
         
@@ -348,6 +325,28 @@ class Scanner(radar_controller.RadarController):
             - Dimension 4: (x, y, z) -> 1 (we want to get the y coordinate)
         
             >>> ctrl = controls["beam_direction"]["rx"][1, 0, 79, 4, 1]
+
+        One can generate scanning controls for a given target as follows :
+
+        >>> logger = profiling.get_logger('static')
+        >>> p = profiling.Profiler() # Profiler
+
+        >>> # Computation / test setup
+        >>> end_t = 24*3600
+        >>> nbplots = 1
+        >>> t_slice = 0.1
+        >>> max_points = 1000
+        >>> log_array_sizes = True
+
+        >>> eiscat3d = instances.eiscat3d # RADAR definition
+
+        >>> # create scan and controller
+        >>> scan = Fence(azimuth=90, min_elevation=30, dwell=t_slice, num=50)
+        >>> scanner_controller = controllers.Scanner(profiler=p, logger=logger)
+
+        >>> t = np.arange(0, end_t, t_slice)
+        >>> controls = scanner_controller.generate_controls(t, eiscat3d, scan, t_slice=t_slice, max_points=max_points)
+        
       '''
         # add new profiler entry
         if self.profiler is not None:
@@ -355,13 +354,15 @@ class Scanner(radar_controller.RadarController):
 
         # output data initialization
         controls = radar_controls.RadarControls(radar, self, scheduler=scheduler, priority=priority)  # the controls structure is defined as a dictionnary of subcontrols
-        controls.scan = scan
+        controls.meta["scan"] = scan
 
         controls.set_time_slices(t, scan.dwell(), max_points=max_points)
 
         # compute controls
         pdir_args = r
         controls.set_pdirs(pdir_args, cache_pdirs=cache_pdirs)
+
+        radar_controller.RadarController.coh_integration(controls, radar, scan.dwell())
 
         if self.profiler is not None:
             self.profiler.stop('Scanner:generate_controls')

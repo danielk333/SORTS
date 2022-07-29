@@ -37,15 +37,16 @@ void hard_target_snr_vectorized(
 {   
     double power;
     double rx_noise;
-    double separatrix;
+    double separator;
 
+    separator = _wavelength/(M_PI*sqrt(3.0));
     rx_noise = BOLTZMAN_CONSTANT * _rx_noise_temp * _bandwidth;
 
     for(int ti = 0; ti < _N; ti++)
     {
-        separatrix = _wavelength/(M_PI*sqrt(3.0));
+        separator = _wavelength/(M_PI*sqrt(3.0));
 
-        if (_diameter < separatrix)
+        if (_diameter < separator)
         {
             power = _power_tx*_gain_tx[ti]*_gain_rx[ti]*pow(3.0*M_PI*pow(_diameter, 3.0)/(_wavelength*_range_rx_m[ti]*_range_tx_m[ti]), 2.0)/256.0;
         }
@@ -78,7 +79,7 @@ void hard_target_snr(
 
     :param float/numpy.ndarray gain_tx: transmit antenna gain, linear
     :param float/numpy.ndarray gain_rx: receiver antenna gain, linear
-    :param float wavelength: radar wavelength (meters)
+    :param float _wavelength: radar wavelength (meters)
     :param float power_tx: transmit power (W)
     :param float/numpy.ndarray range_tx_m: range from transmitter to target (meters)
     :param float/numpy.ndarray range_rx_m: range from target to receiver (meters)
@@ -94,18 +95,18 @@ void hard_target_snr(
 {   
     double power;
     double rx_noise;
-    double separatrix;
+    double separator;
 
     rx_noise = BOLTZMAN_CONSTANT * _rx_noise_temp * _bandwidth;
-    separatrix = _wavelength/(M_PI*sqrt(3.0));
+    separator = _wavelength/(M_PI*sqrt(3.0));
 
-    if (_diameter < separatrix)
+    if (_diameter < separator)
     {
-        power = _power_tx*_gain_tx*_gain_rx*pow(3.0*M_PI*pow(_diameter, 3.0)/(_wavelength*_range_rx_m*_range_tx_m), 2.0) / 256.0;
+        power = _power_tx*_gain_tx*_gain_rx*pow(3.0*M_PI/(_wavelength*_range_rx_m*_range_tx_m), 2.0)*pow(_diameter, 6.0) / 256.0;
     }
     else
     {
-        power = _power_tx*_gain_tx*_gain_rx*pow(_wavelength*_diameter/(M_PI*_range_tx_m*_range_rx_m), 2.0)/256.0;
+        power = _power_tx*_gain_tx*_gain_rx*pow(_wavelength*_diameter/(M_PI*_range_tx_m*_range_rx_m), 2.0) / 256.0;
     }
                 
     *_snr = power*_radar_albedo/rx_noise;
@@ -335,6 +336,7 @@ void doppler_spread_hard_target_snr(
     double signal_power;
     double rx_noise;
     double h_snr;
+    double snr;
 
     // Compute signal properties
     hard_target_snr(_gain_tx, _gain_rx, _wavelength, _power_tx, _range_tx_m, _range_rx_m, _diameter, _bandwidth, _rx_noise_temp, _radar_albedo, &h_snr);     
@@ -375,7 +377,7 @@ void doppler_spread_hard_target_snr(
     // incoherent : effective noise power when doing incoherent integration and using a good a priori orbital elements
     incoh_noise_power = BOLTZMAN_CONSTANT * _rx_noise_temp * base_int_bandwidth/_duty_cycle;
 
-    incoherent_snr(signal_power, incoh_noise_power, 0.05, base_int_bandwidth, _t_obs, _snr_coh, _snr_incoh, &minimal_observation_time);
+    incoherent_snr(signal_power, incoh_noise_power, 0.05, base_int_bandwidth, _t_obs, &snr, _snr_incoh, &minimal_observation_time);
 }
 
 
@@ -433,6 +435,7 @@ void doppler_spread_hard_target_snr_vectorized(
     double minimal_observation_time;
     double signal_power;
     double rx_noise;
+    double snr;
 
     double *h_snr;
     h_snr = (double*)malloc(_N*sizeof(double));
@@ -481,6 +484,6 @@ void doppler_spread_hard_target_snr_vectorized(
         // incoherent : effective noise power when doing incoherent integration and using a good a priori orbital elements
         incoh_noise_power = BOLTZMAN_CONSTANT * _rx_noise_temp * base_int_bandwidth/_duty_cycle;
 
-        incoherent_snr(signal_power, incoh_noise_power, 0.05, base_int_bandwidth, _t_obs, &_snr_coh[ti], &_snr_incoh[ti], &minimal_observation_time);
+        incoherent_snr(signal_power, incoh_noise_power, 0.05, base_int_bandwidth, _t_obs, &snr, &_snr_incoh[ti], &minimal_observation_time);
     }
 }

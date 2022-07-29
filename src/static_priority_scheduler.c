@@ -125,6 +125,8 @@ double run_static_priority_scheduler(
 		int found_new_point;
 		next_control_point.control_id = -1;
 
+		printf("\nIteration t=%f\n", t);
+
 		// gather all the closest next time points
 		static_priority_scheduler_get_next_time_points(t, _n_controls_in_period, &next_control_point, closest_control_points_indices, time_array, time_slices, priorities, control_array_sizes, &found_new_point);
 
@@ -242,8 +244,12 @@ void static_priority_scheduler_get_next_time_points(
 	{
 		if(_control_array_size[ctrl_id] > 0)
 		{
+			printf("ctrl_id = %d\n", ctrl_id);
+
 			// store next closest time point id for each time array
 			_closest_control_points_indices[ctrl_id] = static_priority_scheduler_get_next_control_point_id(_t, _time_array[ctrl_id], _control_array_size[ctrl_id]);
+
+			printf("new point = %d\n", _closest_control_points_indices[ctrl_id]);
 
 			if(point_counter == 0)
 			{
@@ -279,6 +285,8 @@ void static_priority_scheduler_get_next_time_points(
 		_next_control_point->t_slice = tmp_control_point.t_slice;
 		_next_control_point->priority = tmp_control_point.priority;
 		_next_control_point->control_id = tmp_control_point.control_id;
+
+		printf("keeping control %d\n", tmp_control_point.control_id);
 	}
 }
 

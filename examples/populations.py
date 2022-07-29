@@ -1,8 +1,15 @@
 #!/usr/bin/env python
 
 '''
+===========
 Populations
-================================
+===========
+
+This example shocases the ability of ``sorts`` to create and manage a population of space objects with
+different parameters.
+
+Here, we create a hundred objects with randomly distributed orbital parameters and we compare the resulting 
+Keplerian orbits.
 '''
 
 import numpy as np
@@ -12,8 +19,10 @@ from sorts.targets.propagator import SGP4
 from sorts.targets import Population
 from sorts import plotting
 
+# creates a time array of 10h 
 t = np.linspace(0,3600*10,num=2000)
 
+# intializes the population
 pop = Population(
     fields = ['oid','a','e','i','raan','aop','mu0','mjd0', 'm', 'A', 'C_R', 'C_D'],
     space_object_fields = ['oid', 'm', 'A', 'C_R', 'C_D'],
@@ -26,11 +35,12 @@ pop = Population(
         ),
     )
 )
-pop.allocate(100)
+pop.allocate(100) # allocate 100 space objects
 
-#for consistency
+# for consistency
 np.random.seed(120389)
 
+# create space objects
 # * 0: oid - Object ID
 # * 1: a - Semi-major axis in m
 # * 2: e - Eccentricity 
@@ -52,21 +62,22 @@ pop['A'] = 1
 pop['C_R'] = 0.1
 pop['C_D'] = 2.7
 
+# plot space object orbits
 plotting.orbits.kepler_scatter(
     pop.get_states(named=False),
     title = "Orbit distribution of Population",
     axis_labels='earth-orbit',
 )
 
-
+# plot orbital parameter distribution
 fig = plt.figure(figsize=(15,15))
 ax = fig.add_subplot(111, projection='3d')
-
 for obj in pop:
     states = obj.get_state(t)
     ax.plot(states[0,:], states[1,:], states[2,:],"-b", alpha=0.5)
 
+ax.set_xlabel("$x$ [$m$]")
+ax.set_ylabel("$y$ [$m$]")
+ax.set_zlabel("$z$ [$m$]")
 ax.view_init(-11,17)
-
 plt.show()
-    

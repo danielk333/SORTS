@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 '''
+==========================================
 Static radar controller and time sampling
 ==========================================
 
@@ -49,9 +50,7 @@ obj = SpaceObject(
     ),
 )
 
-
 print(obj)
-
 class ObservedScanning(StaticList, ObservedParameters):
     pass
 
@@ -66,7 +65,6 @@ scanner_ctrl = Scanner(eiscat3d.copy(), scan, logger=logger)
 scanner_ctrl.t = np.arange(0, end_t, scan.dwell())
 
 def run_scanning_simulation(radar_ctrl):
-
     p = Profiler()
     radar_ctrl.profiler = p
 
@@ -77,8 +75,6 @@ def run_scanning_simulation(radar_ctrl):
         logger = logger,
         profiler = p,
     )
-
-
 
     p.start('equidistant_sampling')
     t = sorts.equidistant_sampling(

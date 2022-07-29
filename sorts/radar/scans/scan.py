@@ -149,7 +149,7 @@ class Scan(ABC):
         if len(point.shape) == 3:
             k0 = np.zeros(point.shape, dtype=point.dtype)
             for ind in range(point.shape[2]):
-                k0[:,:,ind] = self._transform_ecef(point[:,:,ind], station)
+                k0[:,:,ind] = self._transform_ecef(point[:,:,ind], station).reshape(3, -1)
         else:            
-            k0 = self._transform_ecef(point, station)
+            k0 = self._transform_ecef(point, station).reshape(3, -1)
         return k0

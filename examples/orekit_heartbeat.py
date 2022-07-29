@@ -29,7 +29,6 @@ if not pth.is_file():
 
 class MyOrekit(Orekit):
     def heartbeat(self, t, state, interpolator):
-
         A = float(1.0 + 0.5*np.random.randn(1)[0])*self.force_params['A']
 
         self.propagator.removeForceModels()

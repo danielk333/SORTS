@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
 '''
+===================================
 Ray-trace radar signals with Pyglow
-=====================================
+===================================
 
+Showcases radar signal ionospheric error computation using ``pyglow`` raytracing features.
 '''
 
 import numpy as np
@@ -13,6 +15,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 import sorts
 
+# compute raytracing results usign pyglow
 results = sorts.measurement_errors.ray_trace(
         time = Time('2004-6-21 12:00'),
         lat = 69.34023844,
@@ -22,7 +25,7 @@ results = sorts.measurement_errors.ray_trace(
         azimuth=180.0,
 )
 
-
+# plot results
 fig=plt.figure(figsize=(14,8))
 plt.clf()
 plt.subplot(131)
@@ -56,7 +59,5 @@ plt.ylabel("Altitude km")
 plt.ylim([0,1900])
 
 plt.tight_layout()
-plt.show()
-
 plt.show()
 

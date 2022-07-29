@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
 '''
+=========================
 Misc functions for passes
-================================
+=========================
 
+This exampl showcases the use of ``sorts.equidistant_sampling`` function to create
+spacially equidistant sampling points for the states propagation.
 '''
 
 import numpy as np
@@ -12,6 +15,8 @@ from mpl_toolkits.mplot3d import Axes3D
 import pyorb
 
 import sorts
+
+# initializes the SGP4 propagator
 from sorts.targets.propagator import SGP4
 Prop_cls = SGP4
 Prop_opts = dict(
@@ -21,9 +26,11 @@ Prop_opts = dict(
 )
 prop = Prop_cls(**Prop_opts)
 
+# initializes the space object orbit
 orb = pyorb.Orbit(M0 = pyorb.M_earth, direct_update=True, auto_update=True, degrees=True, a=13000e3, e=0.8, i=75, omega=0, Omega=79, anom=72, epoch=53005.0)
 print(orb)
 
+# create spacially equidistant sampling time points for propagation
 t = sorts.equidistant_sampling(
     orbit = orb, 
     start_t = 0, 
@@ -32,19 +39,26 @@ t = sorts.equidistant_sampling(
 )
 print(f'Temporal points: {len(t)}')
 
+# plots sampling time point evolution to keep equidistant states 
 fig = plt.figure(figsize=(15,15))
 ax = fig.add_subplot(111)
 ax.plot(range(len(t)), t/3600.0,"-b")
+ax.set_ylabel("$t$ [$s$]")
+ax.set_xlabel("time point [$-$]")
 
-#For some reason there is something messed up with this SGP4 propagation
+# propagate states
+# For some reason there is something messed up with this SGP4 propagation
 # TODO: figure out what
-
 states0 = prop.propagate(np.linspace(0,3600*6,num=len(t)), orb.cartesian[:,0], orb.epoch, A=1.0, C_R = 1.0, C_D = 1.0)
 states = prop.propagate(t, orb.cartesian[:,0], orb.epoch, A=1.0, C_R = 1.0, C_D = 1.0)
 
+# plots propagation results
 fig = plt.figure(figsize=(15,15))
 ax = fig.add_subplot(111, projection='3d')
 ax.plot(states[0,:], states[1,:], states[2,:],"-b")
 ax.plot(states0[0,:], states0[1,:], states0[2,:],"-g")
+ax.set_xlabel("$x$ [$m$]")
+ax.set_ylabel("$y$ [$m$]")
+ax.set_zlabel("$z$ [$m$]")
 
 plt.show()

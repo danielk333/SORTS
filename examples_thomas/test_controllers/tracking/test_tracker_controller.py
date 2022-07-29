@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pyorb
 
+import sorts
 from sorts import radars
 from sorts import controllers
 from sorts import space_object
@@ -21,7 +22,7 @@ p = profiling.Profiler()
 logger = profiling.get_logger('scanning')
 
 max_points = 20
-end_t = 3600*24
+end_t = 3600*240
 t_slice = 7.5
 tracking_period = 10
 
@@ -97,14 +98,16 @@ p.start('get_state')
 object_states = space_object.get_state(t_states)
 p.stop('get_state')
 
+np.save("object_states.npy", object_states, )
+np.save("t_states.npy", t_states, )
+exit()
 logger.info(f"test_tracker_controller -> object states computation done ! ")
 logger.info(f"test_tracker_controller -> t_states -> {t_states.shape}")
 
-
-# reduce state array
 p.start('find_simultaneous_passes')
-eiscat_passes = find_simultaneous_passes(t_states, object_states, [*eiscat3d.tx, *eiscat3d.rx])
+eiscat_passes = find_simultaneous_passes(t_states, object_states, eiscat3d.tx + eiscat3d.rx)
 p.stop('find_simultaneous_passes')
+
 logger.info(f"test_tracker_controller -> Passes : eiscat_passes={eiscat_passes}")
 
 fig = plt.figure(figsize=(15,15))
@@ -145,7 +148,7 @@ for pass_id in range(np.shape(eiscat_passes)[0]):
     for period_id in range(controls.n_periods):
         ctrl = controls.get_pdirs(period_id)
         plotting.plot_beam_directions(ctrl, eiscat3d, ax=ax, logger=logger, profiler=p, tx_beam=True, rx_beam=True, zoom_level=0.9, azimuth=10, elevation=10)
-        logger.info(f"test_tracker_controller -> ploting data for sub control {ctrl_id}")
+        logger.info(f"test_tracker_controller -> ploting data for sub control {period_id}")
 
     ax.plot(tracking_states[0], tracking_states[1], tracking_states[2], "-", color="blue")
 

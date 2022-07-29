@@ -1,9 +1,15 @@
 #!/usr/bin/env python
 
 '''
+===================
 Writing CCSDS files
-================================
+===================
 
+Showcases the use of the ``sorts.io.ccsds`` to write data to an output file in the
+CCSDS data format.
+
+This example writes random range, doppler shift and state vector to an output xml
+file in the CCSDS format.
 '''
 import io
 
@@ -17,9 +23,12 @@ np.random.seed(0)
 
 rows = 10
 
+# create xml file metadata
 meta = dict(
     COMMENT = 'This is a test',
 )
+
+# range - epoch and doppler data
 data_tdm = np.empty(
     (rows,), 
     dtype=[
@@ -28,20 +37,20 @@ data_tdm = np.empty(
         ('DOPPLER_INSTANTANEOUS', 'f8'),
     ],
 )
-data_tdm['RANGE'] = np.random.randn(rows)
-data_tdm['DOPPLER_INSTANTANEOUS'] = np.random.randn(rows)
+# data
+data_tdm['RANGE'] = np.random.randn(rows) # random range
+data_tdm['DOPPLER_INSTANTANEOUS'] = np.random.randn(rows) # random doppler shift
 data_tdm['EPOCH'] = (Time('J2000') + TimeDelta(np.linspace(0,40,num=rows), format='sec')).datetime64
 
 stream = io.StringIO()
-
 sorts.io.ccsds.write_xml_tdm(data_tdm, meta, file=stream)
 
 print('XML output content:')
 print(stream.getvalue())
-
 stream.close()
 
 
+# space object state vector 
 data_oem = np.empty(
     (rows,), 
     dtype=[
@@ -54,12 +63,12 @@ data_oem = np.empty(
         ('Z_DOT', 'f8'),
     ],
 )
+# data
 data_oem['EPOCH'] = (Time('J2000') + TimeDelta(np.linspace(0,40,num=rows), format='sec')).datetime64
 for key in ['X','Y','Z','X_DOT','Y_DOT','Z_DOT']:
-    data_oem[key] = np.random.randn(rows)
+    data_oem[key] = np.random.randn(rows) # create random state vectors
 
-
-
+# data covariance matrix
 data_oem_cov = np.empty(
     (1,), 
     dtype=[
@@ -88,18 +97,14 @@ data_oem_cov = np.empty(
         ('CZ_DOT_Z_DOT', 'f8'),
     ],
 )
-
 data_oem_cov[0]['COMMENT'] = 'wow'
 for key in data_oem_cov.dtype.names:
     if key not in ['COMMENT', 'EPOCH']:
         data_oem_cov[key] = np.random.randn(1)
 data_oem_cov['EPOCH'] = Time('J2000').datetime64
-
 stream = io.StringIO()
-
 sorts.io.ccsds.write_xml_oem(data_oem, data_oem_cov, meta, file=stream)
 
 print('OEM output content:')
 print(stream.getvalue())
-
 stream.close()

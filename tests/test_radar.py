@@ -90,21 +90,31 @@ class TestRadar(unittest.TestCase):
 				x = self.radar.angular_velocity_tx
 
 	def test_get_station_id_and_type(self):
-		tx_stations = self.radar.tx
-		rx_stations = self.radar.rx
-
 		# test retreival of tx stations
-		for txi, tx in enumerate(tx_stations):
-			sid, stype = self.radar.get_station_id_and_type(tx)
+		for station_type in ("rx", "tx"):
+			stations = getattr(self.radar, station_type)
 
-			assert sid 		== txi
-			assert stype 	== "tx"
+			for station_id_ref, station in enumerate(stations):
+				sid = self.radar.get_station_id(station)
+				stype = station.type
 
-		# test retreival of rx stations
-		for rxi, rx in enumerate(rx_stations):
-			sid, stype = self.radar.get_station_id_and_type(rx)
-
-			assert sid 		== rxi
-			assert stype 	== "rx"
+				assert sid 		== station_id_ref
+				assert stype 	== station_type
 
 
+	def test_in_fov(self):
+		dir_1 = np.array([0.33087577, 0.12248111, 0.93569204, 0, 0, 0]) # 90 deg of elevation        
+        dir_2 = np.array([0.18286604, 0.28205454, 0.94180956, 0, 0, 0]) # 77.5 deg of elevation     
+        dir_3 = np.array([-0.1004115, 0.53090257, 0.84146301, 0, 0, 0]) # 55 deg of elevation       
+        dir_4 = np.array([-0.6476016, 0.75067923, 0.13073926, 0, 0, 0]) # 0 deg of elevation
+		dirs = np.asfarray([dir_1, dir_2, dir_3, dir_4]).T
+
+		ecef = dirs * np.array([[1550.0, 896.2, 1434.0, 4575.1]])*1e3
+		ecef[0:3] = ecef[0:3] + self.radar.tx[0].ecef[:, None]
+		is_in_fov = self.radar.field_of_view(ecef)
+
+		# check output
+		assert is_in_fov[0] == True
+		assert is_in_fov[1] == True
+		assert is_in_fov[2] == True
+		assert is_in_fov[3] == False

@@ -25,21 +25,7 @@ from sorts import MPI_single_process, MPI_action, iterable_step, store_step, cac
 from sorts.radar.scans import Beampark
 from sorts.targets.population import master_catalog, master_catalog_factor
 
-from sorts.targets.propagator import SGP4
-Prop_cls = SGP4
-Prop_opts = dict(
-    settings = dict(
-        out_frame='ITRF',
-    ),
-)
-
-# pyant.plotting.gain_heatmap(radar.tx[0].beam, resolution=300, min_elevation=80.0)
-# plt.show()
-
-
-end_t = 600.0
-scan = Beampark(azimuth=radar.tx[0].beam.azimuth, elevation=radar.tx[0].beam.elevation)
-
+# gets example config 
 try:
     base_pth = pathlib.Path(__file__).parents[1].resolve()
 except NameError:
@@ -48,36 +34,43 @@ except NameError:
 config = configparser.ConfigParser(interpolation=None)
 config.read([base_pth / 'example_config.conf'])
 master_path = pathlib.Path(config.get('TSDR_beampark__ngl.py', 'master_catalog'))
-
 simulation_root = pathlib.Path(config.get('TSDR_beampark__ngl.py', 'simulation_root'))
-
 if not simulation_root.is_absolute():
     simulation_root = base_pth / simulation_root.relative_to('.')
-
-
 if not master_path.is_absolute():
     master_path = base_pth / master_path.relative_to('.')
 
+# initializes the propagator
+from sorts.targets.propagator import SGP4
+Prop_cls = SGP4
+Prop_opts = dict(
+    settings = dict(
+        out_frame='ITRF',
+    ),
+)
+
+# simulation time
+end_t = 600.0
+
+# create Beampark scan 
+scan = Beampark(azimuth=radar.tx[0].beam.azimuth, elevation=radar.tx[0].beam.elevation)
+
+# initializes the simulation from the master catalog
 pop = master_catalog(
     master_path,
     propagator = Prop_cls,
     propagator_options = Prop_opts,
 )
 pop = master_catalog_factor(pop, treshhold = 0.1)
+pop.delete(slice(100, None, None)) #DELETE ALL BUT THE FIRST 100
 
-pop.delete(slice(100,None,None)) #DELETE ALL BUT THE FIRST 100
+# create scanner controller and generate radar controls
+scanner_controller = Scanner()
+t = np.arange(0, end_t, scan.dwell())
+controls = scanner_controller.generate_controls(t, radar, scan, max_points=1000)
 
-class ObservedScanning(StaticList, ObservedParameters):
-    pass
-
-scan_sched = Scanner(radar, scan)
-scan_sched.t = np.arange(0, end_t, scan.dwell())
-
-scheduler = ObservedScanning(
-    radar = radar,
-    controllers = [scan_sched],
-)
-
+# generate radar states from the radar controls
+radar_states = radar.control(controls)
 
 def count(result, item):
     if result is None:
@@ -117,10 +110,11 @@ class Scanning(Simulation):
     @cached_step(caches='h5')
     def get_states(self, index, item):
         obj = self.population.get_object(item)
+
         t = sorts.equidistant_sampling(
             orbit = obj.orbit,
-            start_t = self.scheduler.controllers[0].t.min(),
-            end_t = self.scheduler.controllers[0].t.max(),
+            start_t = self.controls.t[0][0],
+            end_t = self.controls.t[-1][-1] + (self.controls.t[-1][-1] - self.controls.t[-1][-2]),
             max_dpos=1e3,
         )
         state = obj.get_state(t)
@@ -131,14 +125,15 @@ class Scanning(Simulation):
     @cached_step(caches='pickle')
     def find_passes(self, index, item):
         state, t = item
-        passes = scheduler.radar.find_passes(t, state, cache_data = False)
+        passes = scheduler.radar.find_passes(t, state, cache_data=False)
         return passes
 
     @MPI_action(action='barrier')
     @iterable_cache(steps='passes', caches='pickle', MPI=True, log=True, reduce=lambda t,x: None)
     @cached_step(caches='pickle')
     def observe_passes(self, index, item):
-        data = scheduler.observe_passes(item, space_object = self.population.get_object(index), snr_limit=False)
+        # TODO understand role of item : t, x ? states
+        data = radar.compute_measurements(item, space_object=self.population.get_object(index), snr_limit=False, parallelization=False)
         return data
 
 
@@ -181,13 +176,12 @@ sim = Scanning(
 # sim.ipp_detection_lim = 10
 
 sim.profiler.start('total')
-
 sim.run()
 
 print(f'Propagations: {sim.object_prop}')
 
 sim.profiler.stop('total')
-sim.logger.always('\n'+sim.profiler.fmt(normalize='total'))
+sim.logger.always('\n' + sim.profiler.fmt(normalize='total'))
 
 print(f'Total detected: {sim.total_detected()}')
 

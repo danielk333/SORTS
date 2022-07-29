@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
 '''
+================================
 Calculating pre-encounter orbits
-==================================
+================================
 
     Not working anymore : removed pre-encounter module
 
@@ -19,7 +20,6 @@ from astropy.time import Time, TimeDelta
 
 import sorts
 import pyorb
-
 
 try:
     pth = pathlib.Path(__file__).parent / 'data' / 'v_ecef.h5'
@@ -177,5 +177,4 @@ for ind in range(massive_states_l_HMC.shape[2]):
     ax.plot(massive_states_l_HMC[0,:,ind], massive_states_l_HMC[1,:,ind], massive_states_l_HMC[2,:,ind], "-g")
 
 sorts.plotting.set_axes_equal(ax)
-
 plt.show()

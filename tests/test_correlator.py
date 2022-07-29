@@ -20,7 +20,6 @@ radar = sorts.radars.eiscat_uhf
 class TestCorrelator(unittest.TestCase):
 
     def test_correlator(self):
-
         try:
             obs_pth = pathlib.Path(__file__).parent.parent / 'examples' / 'data' / 'uhf_correlation' / 'det-000000.h5'
         except NameError:

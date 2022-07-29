@@ -137,10 +137,19 @@ class RadarController(ABC):
         self, 
         controls,
         period_id, 
-        args, ):
+        args):
         '''
         Computes the pointing directions of the radar given the controller type and the array of time slices
         '''
-        raise NotImplementedError("compute_pointing_direction() is not implemented")
+        raise Exception("No pointing directions set")
 
 
+    @staticmethod
+    def coh_integration(controls, radar, dwell):
+        '''Set the coherent integration settings based on the dwell time.
+        '''
+        dwell = np.atleast_1d(dwell)
+
+        for tx in radar.tx:
+            controls.add_property_control("n_ipp", tx, (dwell/tx.ipp).astype(int))
+            controls.add_property_control("coh_int_bandwidth", tx, 1.0/(tx.pulse_length*tx.n_ipp))

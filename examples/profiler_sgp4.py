@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 
 '''
+==============
 Profiling SGP4
-======================
+==============
 
+showcases the internal profiler of the ``sorts.SGP4`` propagator.
+
+The example prints the propagation performances for a propagation of 5000 states over a time period of 2 days.
 '''
 import numpy as np
 

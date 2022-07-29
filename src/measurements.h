@@ -33,27 +33,36 @@ void compute_measurement_snr(
 	double *_ranges_rx,
 	double *_duty_cycle,
 	double *_coh_int_bw,
-	double *_noise,
 	double *_snr,
 	double *_snr_inch,
-	int* _keep_data,
+	int* _detection,
+	double _noise,
 	double _object_diameter,
 	double _radar_albedo,
 	double _object_spin_period,
 	double _min_snr_db,
 	int _doppler_spread_integrated_snr,
 	int _snr_limit,
-	int _n_time_points);
+	int _n_time_points,
+	int _n_dirs,
+	int _ctrl_start_id,
+	int _pdirs_start_id);
 
 void compute_gain(
 	double *_t,
 	double *_t_dirs,
-	double *_gain_tx,
-	double *_gain_rx,
-	int *_msk,
-	int _n_time_points,
-	int _n_tx,
-	int _n_rx,
-	double(*_callback_compute_gain_tx)(int, int, int),
-	double(*_callback_compute_gain_rx)(int, int, int, int)
+	int _n_points,
+	int _n_dirs,
+	int _ctrl_start_id,
+	int _pdirs_start_id,
+	double(*_callback_compute_gain_tx)(int, int),
+	double(*_callback_compute_gain_rx)(int, int)
 	);
+
+void get_max_snr_measurements(
+	double *_t,
+	double *_t_meas,
+	double *_snr,
+	int* _inds,
+	int _n_time_points,
+	int _n_inds);

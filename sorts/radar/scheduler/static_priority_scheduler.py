@@ -49,16 +49,14 @@ class StaticPriorityScheduler(RadarSchedulerBase):
         # Check input values   
         controls=np.asarray(controls, dtype=object) # convert control list to an np.array of objects  
 
+        self.check_priority(controls)
+
         if t_end is None: # get the max end time of the controls if t_end is not given 
             t_end = 0
 
             for ctrl_id, ctrl in enumerate(controls):
                 t_last_i = controls[ctrl_id].t[-1][-1]
                 if t_last_i > t_end: t_end = t_last_i
-
-                if ctrl.priority is None:
-                    # TODO Modify FIFO priority allocation
-                    ctrl.priority = ctrl_id*np.ones(len(ctrl.t)) # FIFO used if no priority set
 
         if t_start is None: # get the max end time of the controls if t_end is not given 
             t_start = 0
@@ -123,7 +121,7 @@ class StaticPriorityScheduler(RadarSchedulerBase):
             np.asarray(final_t_slice, dtype=object),
             )
 
-        if log_performances is True and self.logger is not None:
+        if log_performances is True:
             self.log_scheduler_performances(controls, final_control_sequence)
 
         return self.extract_control_sequence(controls, final_control_sequence)
@@ -160,7 +158,7 @@ class StaticPriorityScheduler(RadarSchedulerBase):
                 # assigns the control parameters to the C pointers
                 t[0] = controls[control_id].t[control_period_id][index]
                 t_slice[0] = controls[control_id].t_slice[control_period_id][index]
-                priority[0] = controls[control_id].priority[control_period_id][index]
+                priority[0] = controls[control_id].priority
 
                 return 1
 
@@ -294,7 +292,6 @@ class StaticPriorityScheduler(RadarSchedulerBase):
         data = []
 
         print("")
-        self.logger.info("Logging scheduler performance analysis :")
 
         t_start = final_control_sequence.t[0][0]
         t_end = final_control_sequence.t[-1][-1]
@@ -303,6 +300,8 @@ class StaticPriorityScheduler(RadarSchedulerBase):
             control_uptime_th = 0.0
             control_time_point_ids = 0.0
             control_uptime_real = 0.0
+
+            controller_type = controls[ctrl_id].meta["controller_type"]
 
             for scheduler_period_id in range(len(final_control_sequence.t)):
                 control_period_id = controls[ctrl_id].get_control_period_id(scheduler_period_id)
@@ -315,9 +314,9 @@ class StaticPriorityScheduler(RadarSchedulerBase):
                     control_uptime_real += np.sum(final_control_sequence.t_slice[scheduler_period_id][control_time_point_ids])
 
             succes_rate = control_uptime_real/control_uptime_th*100
-            data.append([ctrl_id, controls[ctrl_id].priority[0][0], control_uptime_th, control_uptime_real, succes_rate])
+            data.append([ctrl_id, controller_type, controls[ctrl_id].priority[0][0], control_uptime_th, control_uptime_real, succes_rate])
             
-        header = ['Control index\n[-]', 'Priority\n[-]', 'Theoretical uptime\n[s]', 'Real uptime\n[s]', 'Success rate\n[%]']
+        header = ['Control index\n[-]', 'Controller type\n[-]', 'Priority\n[-]', 'Theoretical uptime\n[s]', 'Real uptime\n[s]', 'Success rate\n[%]']
         tab = str(tabulate(data, headers=header, tablefmt="presto", numalign="center", floatfmt="5.2f"))
 
         width = tab.find('\n', 0)
@@ -328,3 +327,28 @@ class StaticPriorityScheduler(RadarSchedulerBase):
 
         print(str_)
 
+
+    def check_priority(self, controls):
+        # convert priorities to arrays if not already done
+        for ctrl_id, control in enumerate(controls):
+            if control.priority is None:
+                control.priority = ctrl_id + len(controls) # put the control at the end in FIFO mode
+
+            if not isinstance(control.priority, int) and not isinstance(control.priority, np.ndarray):
+                raise ValueError("Control priorities must be arrays of shape (n_periods, n_points_per_periods) or integers.")
+
+            if isinstance(control.priority, np.ndarray):
+                error_flag = False
+                if len(control.priority) != control.n_periods and len(control.priority) != control.n_control_points: # not the 
+                    error_flag = True
+                elif len(control.priority) == control.n_control_points:
+                    control.priority = control.split_array(control.priority)
+                else:
+                    for period_id in range(control.n_periods):
+                        if np.size(control.priority[period_id]) != np.size(control.t[period_id]):
+                            error_flag = True
+                            break
+                if error_flag is True:
+                    raise ValueError("The control priority must be of the same shape as the time array.")
+            else:
+                control.priority = control.split_array(np.repeat(control.priority, control.n_control_points))

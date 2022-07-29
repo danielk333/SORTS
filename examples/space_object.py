@@ -2,8 +2,9 @@
 #!/usr/bin/env python
 
 '''
+=====================
 The SpaceObject class
-======================================
+=====================
 
 '''
 import pathlib

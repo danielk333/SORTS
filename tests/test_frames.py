@@ -31,7 +31,7 @@ from astropy.coordinates.builtin_frames import ITRS, TEME
 dir_path = os.path.dirname(os.path.abspath(__file__))
 
 def vdot(va, vb):
-    """dot products between equal or shape-compatible arrays of N-vectors"""
+    """ Dot products between equal or shape-compatible arrays of N-vectors"""
     return np.sum(np.asarray(va) * np.asarray(vb), axis=-1)
 
 

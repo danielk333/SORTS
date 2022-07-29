@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 
 '''
+=======================================================================
 Compare solarsystem body state with the python JPL SPICE implementation
-=========================================================================
+=======================================================================
+
+Compares the solar system body states computed with sorts to the states computed with the 
+JPL SPICE module. 
 '''
 import configparser
 import pathlib
@@ -13,7 +17,7 @@ import spiceypy as spice
 
 import sorts
 
-
+# loads config file 
 try:
     base_pth = pathlib.Path(__file__).parents[1].resolve()
 except NameError:
@@ -23,10 +27,12 @@ config = configparser.ConfigParser(interpolation=None)
 config.read([base_pth / 'example_config.conf'])
 kernel = config.get('compare_solarsystem_with_JPL_spice.py', 'kernel')
 
-
 epoch = Time(2001, scale='utc', format='jyear')
 
+# initializes spicey module
 spice.furnsh(kernel)
+
+# get solar system states from spicey
 state, lightTime = spice.spkezr(
     'EARTH',
     (epoch.tdb - Time('J2000', scale='tdb')).sec,
@@ -36,12 +42,13 @@ state, lightTime = spice.spkezr(
 )
 state *= 1e3
 
+# get solar system states from sorts
 states = sorts.frames.get_solarsystem_body_states(
     bodies = ['Sun', 'Earth'], 
     epoch = epoch, 
     kernel = kernel,
 )
-
+# compare sorts states to the spicey states
 print(f'Earth jplephem: {states["Earth"]}')
 print(f'Earth SPICE   : {state}')
 print(f'Diff pos      : {states["Earth"][:3]-state[:3]}')
@@ -50,6 +57,8 @@ print(f'Diff vel      : {states["Earth"][3:]-state[3:]}')
 print(f'Diff-vel-norm : {np.linalg.norm(states["Earth"][3:]-state[3:])}')
 print('\n')
 
+
+# get solar system states from spicey in the sun's reference frame
 state, lightTime = spice.spkezr(
     'EARTH',
     (epoch.tdb - Time('J2000', scale='tdb')).sec,
@@ -58,9 +67,9 @@ state, lightTime = spice.spkezr(
     'SUN',
 )
 state *= 1e3
-
 states['Earth'] -= states['Sun']
 
+# compare 
 print('-- HCRS --')
 print(f'Earth jplephem: {states["Earth"]}')
 print(f'Earth SPICE   : {state}')
@@ -70,7 +79,7 @@ print(f'Diff vel      : {states["Earth"][3:]-state[3:]}')
 print(f'Diff-vel-norm : {np.linalg.norm(states["Earth"][3:]-state[3:])}')
 print('\n')
 
-#compare manual transformation between GCRS and HCRS to astropy conversion
+# compare manual transformation between GCRS and HCRS to astropy conversion
 state0_GCRS = np.array([6300e3, 0, 0, 20e3, 0, 0])
 state0_HCRS = sorts.frames.convert(
     epoch, 

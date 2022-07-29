@@ -1,16 +1,19 @@
 #!/usr/bin/env python
 
 '''
+=======
 Logging
-==========
+=======
 
+Showcases the use of teh ``sorts.logger`` module to display internal status/messages on 
+the terminal.
 
-CRITICAL    50
-ERROR   40
-WARNING 30
-INFO    20
-DEBUG   10
-
+The different message levels are :
+     - CRITICAL     50
+     - ERROR        40
+     - WARNING      30
+     - INFO         20
+     - DEBUG        10
 '''
 
 import sorts

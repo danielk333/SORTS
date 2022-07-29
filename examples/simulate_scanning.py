@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
 '''
+=============================
 Simulate scanning for objects
-======================================
+=============================
 '''
 
 import numpy as np

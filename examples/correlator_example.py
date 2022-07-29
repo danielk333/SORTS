@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
 '''
+=================================
 Correlating data with TLE catalog
-===================================
+=================================
 
 TO RUN THIS EXAMPLE, YOU NEED THE CELESTRACK CATALOG FROM 2018-01-01 CONFIGURED IN "example_config.conf"
 '''

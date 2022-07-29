@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
 '''
+==========================
 Atmospheric drag variation
-================================
+==========================
 
+Showcases the use of the ``sorts.propagation_errors`` module to estimate propagation errors 
+due to atmospheric drag. 
 '''
 import pathlib
 
@@ -13,6 +16,7 @@ from astropy.time import Time
 
 import sorts
 
+# definition of the space object
 obj = sorts.SpaceObject(
     sorts.targets.propagator.SGP4,
     propagator_options = dict(
@@ -33,7 +37,6 @@ obj = sorts.SpaceObject(
     )
 )
 
+# compute and plot atmospheric drag errors
 hour0, offset, t1, alpha = sorts.propagation_errors.atmospheric_drag.atmospheric_errors(obj, plot=True)
-
-
 plt.show()

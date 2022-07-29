@@ -211,7 +211,7 @@ def gen_eiscat3d_demonstrator(beam='array'):
         lon=kir_lon,
         alt=kir_alt,
         min_elevation=30.0,
-        noise=150,
+        noise_temperature=150,
         beam=rx_beam_kir,
     )
     dwell_time = 0.1

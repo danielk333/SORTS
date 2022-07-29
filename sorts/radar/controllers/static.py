@@ -13,21 +13,12 @@ from .. import radar_controls
 
 
 class Static(radar_controller.RadarController):
-    '''
-    Usage
-    -----
-    Creates a Static controller to generate radar scanning controls. Only one Static controller is needed to create multiple controls for different radars.
+    ''' Creates a Static controller to generate radar scanning controls. Only one Static controller is needed to create multiple controls for different radars.
     
     This class can is used to create RADAR static controls. Once instanciated, the the class can be used multiple times to generate different static controls for different radar systems.
     
-    Examples
-    ----------
-    
-    :Profiler profiler: Profiler instance used to check the generate_controls method performance.
-    :logging.Logger logger: Logger instance used to log the execttion of the generate_controls method.
-    
-    Return value
-    ----------
+    Return
+    ------
     
     Dictionnary containing the controls to be applied to the radar to perform the required scanning scheme. In the case of the Scanner controller, the controls are the following.
 
@@ -96,15 +87,11 @@ class Static(radar_controller.RadarController):
         
       '''
 
-    META_FIELDS = radar_controller.RadarController.META_FIELDS + [
-        'scan_type',
-    ]
+    META_FIELDS = radar_controller.RadarController.META_FIELDS + []
 
     def __init__(self, profiler=None, logger=None, **kwargs):
         super().__init__(profiler=profiler, logger=logger, **kwargs)
-        
-        self.meta['scan_type'] = self.__class__
-        
+                
         if self.logger is not None:
             self.logger.info('Static:init')
    
@@ -131,7 +118,7 @@ class Static(radar_controller.RadarController):
         
         # get Tx pointing directions
         # [ind_tx][x, y, z][t]
-        points = controls.scan.ecef_pointing(controls.t[period_id], controls.radar.tx).reshape((len(tx_ecef), 3, -1))
+        points = controls.meta["scan"].ecef_pointing(controls.t[period_id], controls.radar.tx).reshape((len(tx_ecef), 3, -1))
  
         # Compute Tx pointing directions
         pointing_direction['tx'] = np.repeat(points[:, None, :, :], len(r), axis=3) # the beam directions are given as unit vectors in the ecef frame of reference
@@ -174,32 +161,9 @@ class Static(radar_controller.RadarController):
             beam_enabled=True,
             cache_pdirs=False,
             ):
-        '''Generates RADAR static controls in a given direction. 
-        This method can be called multiple times to generate different controls for different radar systems.
-        
-        Usage
-        -----
-        
-        One can generate static controls for a given target as follows :
+        ''' Generates RADAR static controls in a given direction. 
 
-        >>> logger = profiling.get_logger('static')
-        >>> p = profiling.Profiler() # Profiler
-
-        >>> # Computation / test setup
-        >>> end_t = 24*3600
-        >>> nbplots = 1
-        >>> t_slice = 0.1
-        >>> max_points = 1000
-        >>> log_array_sizes = True
-
-        >>> eiscat3d = instances.eiscat3d # RADAR definition
-
-        # create controller
-        >>> static_controller = controllers.Static(profiler=p, logger=logger)
-
-        >>> t = np.arange(0, end_t, t_slice)
-        >>> controls = static_controller.generate_controls(t, eiscat3d, t_slice=t_slice, max_points=max_points)
-
+        The method generate_controls is called after instantiating the Radar controller in  order to 
             
         Parameters
         ----------
@@ -381,6 +345,26 @@ class Static(radar_controller.RadarController):
             - Dimension 4: (x, y, z) -> 1 (we want to get the y coordinate)
         
             >>> ctrl = controls["beam_direction"]["rx"][1, 0, 79, 4, 1]
+
+        One can generate static controls for a given target as follows :
+
+        >>> logger = profiling.get_logger('static')
+        >>> p = profiling.Profiler() # Profiler
+
+        >>> # Computation / test setup
+        >>> end_t = 24*3600
+        >>> nbplots = 1
+        >>> t_slice = 0.1
+        >>> max_points = 1000
+        >>> log_array_sizes = True
+
+        >>> eiscat3d = instances.eiscat3d # RADAR definition
+
+        # create controller
+        >>> static_controller = controllers.Static(profiler=p, logger=logger)
+
+        >>> t = np.arange(0, end_t, t_slice)
+        >>> controls = static_controller.generate_controls(t, eiscat3d, t_slice=t_slice, max_points=max_points)
       '''
         # add new profiler entry
         if self.profiler is not None:
@@ -391,13 +375,15 @@ class Static(radar_controller.RadarController):
         
         # output data initialization
         controls = radar_controls.RadarControls(radar, self, scheduler=scheduler, priority=priority) 
-        controls.scan = scan
+        controls.meta["scan"] = scan
 
         controls.set_time_slices(t, t_slice, max_points=max_points)
 
         # compute controls
         pdir_args = r
         controls.set_pdirs(pdir_args, cache_pdirs=cache_pdirs)
+
+        radar_controller.RadarController.coh_integration(controls, radar, scan.dwell())
 
         if self.profiler is not None:
             self.profiler.stop('Static:generate_controls')

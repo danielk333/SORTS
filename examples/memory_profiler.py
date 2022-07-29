@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
 '''
+======================
 Profiling memory leaks
-=========================
+======================
 
+Shocases the use of the ``track_memory`` option implemented in the ``sorts.profiling`` module.
 '''
 import matplotlib.pyplot as plt
 

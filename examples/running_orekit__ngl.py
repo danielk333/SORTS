@@ -7,7 +7,6 @@ trying to see what it must look like to work with 10.x
 
 """
 
-
 ################################################################################
 # https://gitlab.orekit.org/orekit-labs/python-wrapper/-/blob/master/examples/The_Basics.ipynb
 

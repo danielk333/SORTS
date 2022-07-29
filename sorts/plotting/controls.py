@@ -230,7 +230,7 @@ def plot_scheduler_control_sequence(controls, final_controls, scheduler, period_
             figs.append(fig)
 
             for axi, ax in enumerate(axes):
-                ax.set_ylabel("Control #" + str(axi))
+                ax.set_ylabel("Control " + str(axi))
 
                 ax.tick_params(axis='both', which='both', direction='in', bottom=True, top=True, left=True, right=True)
                 ax.yaxis.set_minor_locator(AutoMinorLocator(n=10))

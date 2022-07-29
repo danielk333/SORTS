@@ -1,8 +1,14 @@
 #!/usr/bin/env python
 
 '''
+=================
 Kepler propagator
-==================
+=================
+
+Showcases the use of the ``pyorb.Kepler`` propagator wrapper implemented in the ``sorts`` toolbox.
+
+This example propagates space object states over a time period of 24h and plots the results in different 
+output reference frames.
 '''
 
 import numpy as np
@@ -16,8 +22,10 @@ from sorts.targets.propagator import Kepler
 p = Profiler()
 p.start('total')
 
+# initializes the Kepler propagator
 prop = Kepler(profiler=p)
 
+# space object orbit initialization
 orb = pyorb.Orbit(
     M0=pyorb.M_earth,
     direct_update=True,
@@ -28,6 +36,7 @@ orb = pyorb.Orbit(
 )
 print(orb)
 
+# propagation time array
 t = np.linspace(0, 3600*24.0, num=5000)
 mjd0 = Time(53005, format='mjd', scale='utc')
 
@@ -63,7 +72,7 @@ p.stop('total')
 
 print(p.fmt(normalize='total'))
 
-
+# plot propagated orbits
 fig = plt.figure(figsize=(15, 15))
 ax = fig.add_subplot(221, projection='3d')
 ax.plot(states_itrs[0, :], states_itrs[1, :], states_itrs[2, :], "-b")

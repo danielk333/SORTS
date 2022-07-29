@@ -70,25 +70,23 @@ class Tracker(radar_controller.RadarController):
         '''
         n_control_periods = controls.n_periods
         target_states   = np.empty((n_control_periods, ), dtype=object)
-
         t_states        = np.empty((n_control_periods, ), dtype=object)
         
         # find states within the control interval
         states_msk = np.logical_and(t_states_sub >= controls.t[0][0], t_states_sub <= controls.t[-1][-1] + controls.t_slice[-1][-1])
-        
+        keep = np.full((n_control_periods,), False, dtype=bool)
+            
         if np.size(np.where(states_msk)[0]) > 0:
             t_shape = np.shape(controls.t) #[scheduling slice/control subarray][time points]
             
             # get start and end points of the object pass
             t_start = t_states_sub[states_msk][0]
             t_end = t_states_sub[states_msk][-1]
-            del states_msk
             
             flag_found_pass = False
-            keep = np.full((n_control_periods,), False, dtype=bool)
             
             # get the states for each time sub-array
-            for period_id in range(len(controls.t)):   
+            for period_id in range(controls.n_periods):   
                 pass_msk = np.logical_and(controls.t[period_id] >= t_start, controls.t[period_id] + controls.t_slice[period_id] <= t_end) # get all time slices in the pass
 
                 if np.size(np.where(pass_msk)) < len(pass_msk): 
@@ -108,8 +106,6 @@ class Tracker(radar_controller.RadarController):
                         t_states_sub[ix::states_per_slice] = t_states_sub[ix::states_per_slice] + ix*dt_states
 
                     t_states[period_id]           = t_states_sub
-                    del t_states_sub
-
                     target_states[period_id]      = state_interpolator.get_state(t_states[period_id])[0:3, :].astype(np.float64) #[scheduling slice/control subarray][time points][xyz]
                 else:                    
                     if flag_found_pass is True:
@@ -173,8 +169,6 @@ class Tracker(radar_controller.RadarController):
             if self.profiler is not None:
                 self.profiler.stop('Static:generate_controls:compute_beam_orientation:rx')
                 self.profiler.stop('Static:generate_controls:compute_beam_orientation')
-            
-            # TODO : include this in radar -> RadarController.coh_integration(self.radar, self.meta['dwell'])
         else:
             pointing_direction = dict()
 
@@ -202,54 +196,7 @@ class Tracker(radar_controller.RadarController):
             ):
         '''Generates RADAR tracking controls for a given radar and sampling time and target. 
         This method can be called multiple times to generate different controls for different radar systems.
-        
-        Usage
-        -----
-        
-        One can generate tracking controls for a given target as follows :
 
-            >>> # Target properties
-            >>> orbit_a = 7200     # semi-major axis - km
-            >>> orbit_i = 80       # inclination - deg
-            >>> orbit_raan = 86    # longitude of the ascending node - deg
-            >>> orbit_aop = 0      # argument of perigee - deg
-            >>> orbit_mu0 = 50     # mean anomaly - deg
-
-            >>> # Target instanciation
-            >>> space_object = space_object.SpaceObject(
-            >>>         Prop_cls,
-            >>>         propagator_options = Prop_opts,
-            >>>         a = orbit_a, 
-            >>>         e = 0.1,
-            >>>         i = orbits_i,
-            >>>         raan = orbit_raan,
-            >>>         aop = orbit_aop,
-            >>>         mu0 = orbit_mu0,
-            >>>         
-            >>>         epoch = 53005.0,
-            >>>         parameters = dict(
-            >>>             d = 0.1,
-            >>>         ),
-            >>>     )
-            
-            >>> Compute target states
-            >>> t_states = equidistant_sampling(orbit = space_object.state, start_t = 0, end_t = end_t, max_dpos=50e3) # create state time array
-            >>> object_states = space_object.get_state(t_states) # computes object states in ECEF frame
-            >>> eiscat_passes = find_simultaneous_passes(t_states, object_states, [*eiscat3d.tx, *eiscat3d.rx]) # reduce state array
-            
-            >>> # create controller
-            >>> t_slice = 0.2
-            >>> t_controller = np.arange(0, end_t, t_slice)
-            >>> tracker_controller = controllers.tracker.Tracker(logger=logger, profiler=p) # instantiate controller
-            
-            >>> # compute and plot controls for each pass
-            >>> for pass_id in range(np.shape(eiscat_passes)[0]):
-            >>>     tracking_states = object_states[:, eiscat_passes[pass_id].inds]
-            >>>     t_states_i = t_states[eiscat_passes[pass_id].inds]
-            >>>    # generate controls 
-            >>>    controls = tracker_controller.generate_controls(t_controller, eiscat3d, t_states_i, tracking_states, t_slice=t_slice, max_points=10)
-
-            
         Parameters
         ----------
         
@@ -431,6 +378,49 @@ class Tracker(radar_controller.RadarController):
             - Dimension 4: (x, y, z) -> 1 (we want to get the y coordinate)
         
             >>> ctrl = controls["beam_direction_rx"][1, 0, 79, 4, 1]
+
+        One can generate tracking controls for a given target as follows :
+
+            >>> # Target properties
+            >>> orbit_a = 7200     # semi-major axis - km
+            >>> orbit_i = 80       # inclination - deg
+            >>> orbit_raan = 86    # longitude of the ascending node - deg
+            >>> orbit_aop = 0      # argument of perigee - deg
+            >>> orbit_mu0 = 50     # mean anomaly - deg
+
+            >>> # Target instanciation
+            >>> space_object = space_object.SpaceObject(
+            >>>         Prop_cls,
+            >>>         propagator_options = Prop_opts,
+            >>>         a = orbit_a, 
+            >>>         e = 0.1,
+            >>>         i = orbits_i,
+            >>>         raan = orbit_raan,
+            >>>         aop = orbit_aop,
+            >>>         mu0 = orbit_mu0,
+            >>>         
+            >>>         epoch = 53005.0,
+            >>>         parameters = dict(
+            >>>             d = 0.1,
+            >>>         ),
+            >>>     )
+            
+            >>> Compute target states
+            >>> t_states = equidistant_sampling(orbit = space_object.state, start_t = 0, end_t = end_t, max_dpos=50e3) # create state time array
+            >>> object_states = space_object.get_state(t_states) # computes object states in ECEF frame
+            >>> eiscat_passes = find_simultaneous_passes(t_states, object_states, [*eiscat3d.tx, *eiscat3d.rx]) # reduce state array
+            
+            >>> # create controller
+            >>> t_slice = 0.2
+            >>> t_controller = np.arange(0, end_t, t_slice)
+            >>> tracker_controller = controllers.tracker.Tracker(logger=logger, profiler=p) # instantiate controller
+            
+            >>> # compute and plot controls for each pass
+            >>> for pass_id in range(np.shape(eiscat_passes)[0]):
+            >>>     tracking_states = object_states[:, eiscat_passes[pass_id].inds]
+            >>>     t_states_i = t_states[eiscat_passes[pass_id].inds]
+            >>>    # generate controls 
+            >>>    controls = tracker_controller.generate_controls(t_controller, eiscat3d, t_states_i, tracking_states, t_slice=t_slice, max_points=10)
       '''
         # add new profiler entry
         if self.profiler is not None:
@@ -443,20 +433,23 @@ class Tracker(radar_controller.RadarController):
             
             if self.logger is not None:
                 self.logger.info(f"Tracker:generate_controls -> creating state interpolator {state_interpolator}")
-        
+
         # output data initialization
         controls = radar_controls.RadarControls(radar, self, scheduler=scheduler, priority=priority, logger=self.logger, profiler=self.profiler)  # the controls structure is defined as a dictionnary of subcontrols
-        controls.interpolator = interpolator
-        
+        controls.meta["interpolator"] = interpolator
+
         controls.set_time_slices(t, t_slice, max_points=max_points)
 
         # split time array into scheduler periods and target states if a scheduler is attached to the controls
-        # TODO move split time array to radar controls
         target_states_interp, t_states_interp = self.__retreive_target_states(controls, t_states, state_interpolator, states_per_slice)
-
+        
         # Compute controls
         pdir_args = (target_states_interp, t_states_interp)
         controls.set_pdirs(pdir_args, cache_pdirs=cache_pdirs)
+
+        radar_controller.RadarController.coh_integration(controls, radar, t_slice)
+
+        # TODO : include this in radar -> RadarController.coh_integration(self.radar, self.meta['dwell'])
 
         if self.profiler is not None:
             self.profiler.stop('Tracker:generate_controls')

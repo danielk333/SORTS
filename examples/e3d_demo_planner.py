@@ -53,9 +53,9 @@ class ObservedTracking(Tracking, ObservedParameters):
     def set_measurements(self):
         dw = self.controller_args['dwell']
 
-        #we probably need to make sure we do not have overlapping measurements
-        #this is a very "stupid" scheduler but we can do at least that!
-        #So create a vector of all scheduled measurements
+        # we probably need to make sure we do not have overlapping measurements
+        # this is a very "stupid" scheduler but we can do at least that!
+        # So create a vector of all scheduled measurements
         t_all = []
 
         for ind, so in enumerate(self.space_objects):

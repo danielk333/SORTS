@@ -1,16 +1,7 @@
 #!/usr/bin/env python
 
-'''Defines all the pre-configured radar instances available and provides a simple "getter" instance.
-
-
-    :eiscat3d:
-
-    TODO: Docstring
-
-    :eiscat3d_interp:
-
-    TODO: Docstring
-
+''' 
+test
 '''
 
 from .eiscat_3d import gen_eiscat3d, gen_eiscat3d_demonstrator
@@ -35,12 +26,31 @@ radar_instances = [
 
 
 class RadarSystemsGetter:
-    '''
+    ''' 
+
     '''
     instances = radar_instances
     __all__ = radar_instances
 
     def __getattr__(self, name):
+        ''' performs the standard ``__getattr__`` method.
+        
+        Parameters
+        ----------
+            name : str
+                name of the instance to import
+
+        Returns 
+        -------
+            sorts.Radar instance
+                Radar instance of name : ``name``
+        
+        Raises
+        ------
+            AttributeError
+                if ``name`` is not one of the predifined Radar instances
+
+        '''
         if name == 'eiscat3d':
             return gen_eiscat3d(beam='array')
         if name == 'mock':

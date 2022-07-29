@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 
 '''
+=================================
 Orekit propagator small time step
-====================================
+=================================
+
+Showcases the use of the ``Orekit`` propagator wrapper implementation in the ``sorts`` toolbox
+applied to small step-size propagation. 
 '''
 import pathlib
 
@@ -10,7 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-from sorts.propagator import Orekit
+from sorts.targets.propagator import Orekit
 
 try:
     pth = pathlib.Path(__file__).parent.resolve()

@@ -10,9 +10,9 @@ import matplotlib.pyplot as plt
 from astropy.time import Time
 
 import pyorb
-from sorts.profiling import Profiler
-from sorts.propagator import TwoBody
-from sorts.propagator import Kepler
+from sorts.common.profiling import Profiler
+from sorts.targets.propagator import TwoBody
+from sorts.targets.propagator import Kepler
 
 p = Profiler()
 p.start('total')
