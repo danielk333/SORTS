@@ -19,9 +19,53 @@ from mpl_toolkits.mplot3d import Axes3D
 
 #Local import
 from . import general
+from sorts.transformations import frames
 
 
-def scan(scan, earth=False, ax=None, max_range=4000e3):
+# def scan(scan, earth=False, ax=None, max_range=4000e3):
+#     '''Plot a full cycle of the scan pattern.
+    
+#         :param Scan scan: Scan to plot.
+#         :param bool earth: Plot the surface of the Earth.
+#         :param float max_range: The range of the pointing directions.
+#         :param matplotlib.axes ax: The ax to draw the scan on.
+#     '''
+#     raise NotImplementedError('')
+
+#     min_dwell = scan.min_dwell()
+#     cycle = scan.cycle()
+    
+#     t = np.arange(0.0, cycle, min_dwell)
+
+#     if ax is None:
+#         fig = plt.figure(figsize=(15, 15))
+#         ax = fig.add_subplot(111, projection='3d')
+#         ax.grid(False)
+#         ax.view_init(15, 5)
+#     else:
+#         fig = None
+
+#     if earth:
+#         general.grid_earth(ax)
+#     plothelp.draw_radar(ax, SC._lat, SC._lon)
+    
+#     for i in range(len(t)):
+#         p0, k0 = SC.antenna_pointing(t[i])
+        
+#         p1 = p0 + k0*max_range
+#         if k0[2] < 0:
+#             ax.plot([p0[0], p1[0]], [p0[1], p1[1]], [p0[2], p1[2]], alpha=0.5, color="red")
+#         else:
+#             ax.plot([p0[0], p1[0]], [p0[1], p1[1]], [p0[2], p1[2]], alpha=0.5, color="green")
+    
+#     if fig is not None:
+#         ax.set_xlim(p0[0] - max_range, p0[0] + max_range)
+#         ax.set_ylim(p0[1] - max_range, p0[1] + max_range)
+#         ax.set_zlim(p0[2] - max_range, p0[2] + max_range)
+
+#     return fig, ax
+
+def plot_scanning_sequence(scan, station=None, earth=False, ax=None, plot_local_normal=False, max_range=4000e3):
     '''Plot a full cycle of the scan pattern.
     
         :param Scan scan: Scan to plot.
@@ -29,38 +73,48 @@ def scan(scan, earth=False, ax=None, max_range=4000e3):
         :param float max_range: The range of the pointing directions.
         :param matplotlib.axes ax: The ax to draw the scan on.
     '''
-    raise NotImplementedError('')
-
     min_dwell = scan.min_dwell()
     cycle = scan.cycle()
     
-    t = np.arange(0.0, cycle, min_dwell)
+    if cycle is None:
+        t = np.zeros(1)
+    else:
+        t = np.arange(0.0, cycle, min_dwell)
 
     if ax is None:
-        fig = plt.figure(figsize=(15, 15))
+        fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         ax.grid(False)
-        ax.view_init(15, 5)
     else:
         fig = None
 
     if earth:
         general.grid_earth(ax)
-    plothelp.draw_radar(ax, SC._lat, SC._lon)
-    
-    for i in range(len(t)):
-        p0, k0 = SC.antenna_pointing(t[i])
-        
-        p1 = p0 + k0*max_range
-        if k0[2] < 0:
-            ax.plot([p0[0], p1[0]], [p0[1], p1[1]], [p0[2], p1[2]], alpha=0.5, color="red")
-        else:
-            ax.plot([p0[0], p1[0]], [p0[1], p1[1]], [p0[2], p1[2]], alpha=0.5, color="green")
-    
-    if fig is not None:
-        ax.set_xlim(p0[0] - max_range, p0[0] + max_range)
-        ax.set_ylim(p0[1] - max_range, p0[1] + max_range)
-        ax.set_zlim(p0[2] - max_range, p0[2] + max_range)
+
+    if station is not None: # if station is provided, plot in the ECEF frame
+        # plot station
+        ax.plot([station.ecef[0]],[station.ecef[1]],[station.ecef[2]],'og')
+
+        points = scan.ecef_pointing(t, station)*max_range
+        start_point = station.ecef
+        end_point = start_point[:, None] + points
+
+        # plot local vertical vector
+        if plot_local_normal is True:
+            normal = frames.enu_to_ecef(station.lat, station.lon, 0, [0, 0, 1])*max_range + start_point
+            ax.plot([start_point[0], normal[0]], [start_point[1], normal[1]], [start_point[2], normal[2]], "--b")
+
+        for i in range(len(t)):            
+            ax.plot([start_point[0], end_point[0, i]], [start_point[1], end_point[1, i]], [start_point[2], end_point[2, i]], "-r")
+    else: # if no station is provided, plot scan in local ENU coordinates
+        points = scan.enu_pointing(t, station)*max_range
+
+        # plot local vertical vector
+        if plot_local_normal is True:
+            ax.plot([0, 0], [0, 0], [0, max_range], "--b")
+
+        for i in range(len(t)):            
+            ax.plot([0, points[0, i]], [0, points[1, i]], [0, points[2, i]], "-r")
 
     return fig, ax
 

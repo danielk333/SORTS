@@ -1,1 +1,8 @@
+.. _plotting
 
+========
+Plotting
+========
+
+Description
+-----------

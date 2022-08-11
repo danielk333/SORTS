@@ -315,40 +315,60 @@ def ned_to_ecef(lat, lon, alt, ned, radians=False):
     return enu_to_ecef(lat, lon, alt, enu, radians=radians)
 
 
+# def ecef_to_enu(lat, lon, alt, ecef, radians=False):
+#     '''ECEF coordinate system to local ENU (east,north,up), not including translation.
+
+#     :param float/ndarray lat: Latitude on the ellipsoid
+#     :param float/ndarray lon: Longitude on the ellipsoid
+#     :param float/ndarray alt: Altitude above ellipsoid, **Unused in this implementation**.
+#     :param numpy.ndarray ecef: (3,n) array x,y and z coordinates in ECEF.
+#     :param bool radians: If :code:`True` then all values are given in radians instead of degrees.
+#     :rtype: numpy.ndarray
+#     :return: (3,n) array x,y and z in local coordinates in the ENU-convention.
+#     '''
+#     ecef = np.reshape(ecef, (3, -1))
+
+#     lat = np.atleast_1d(lat).astype(np.float64)
+#     lon = np.atleast_1d(lon).astype(np.float64)
+#     alt = np.atleast_1d(alt).astype(np.float64)
+    
+#     if np.size(lat) != np.size(lon) or np.size(lat) != np.size(alt): 
+#         raise ValueError("lat, lon and alt must be the same size.")    
+
+#     if radians is False:
+#         lat, lon = np.radians(lat), np.radians(lon)
+
+#     mx = np.array([ [-np.sin(lon),                   np.cos(lon),                    np.zeros(np.size(lat, axis=0), dtype=np.float64)],
+#                     [-np.sin(lat) * np.cos(lon),    -np.sin(lat) * np.sin(lon),      np.cos(lat)],
+#                     [ np.cos(lat) * np.cos(lon),     np.cos(lat) * np.sin(lon),      np.sin(lat)]])
+    
+#     enu = np.einsum("ijk,jl->kil", mx, ecef)
+
+#     if np.size(enu) == 3:
+#         enu = enu.reshape((3,))
+    
+#     return enu
+
 def ecef_to_enu(lat, lon, alt, ecef, radians=False):
     '''ECEF coordinate system to local ENU (east,north,up), not including translation.
 
-    :param float/ndarray lat: Latitude on the ellipsoid
-    :param float/ndarray lon: Longitude on the ellipsoid
-    :param float/ndarray alt: Altitude above ellipsoid, **Unused in this implementation**.
+    :param float lat: Latitude on the ellipsoid
+    :param float lon: Longitude on the ellipsoid
+    :param float alt: Altitude above ellipsoid, **Unused in this implementation**.
     :param numpy.ndarray ecef: (3,n) array x,y and z coordinates in ECEF.
     :param bool radians: If :code:`True` then all values are given in radians instead of degrees.
     :rtype: numpy.ndarray
     :return: (3,n) array x,y and z in local coordinates in the ENU-convention.
     '''
-    ecef = np.reshape(ecef, (3, -1))
-
-    lat = np.atleast_1d(lat)
-    lon = np.atleast_1d(lon)
-    alt = np.atleast_1d(alt)
-    
-    if np.size(lat) != np.size(lon) or np.size(lat) != np.size(alt): 
-        raise ValueError("lat, lon and alt must be the same size.")    
-
-    if radians is False:
+    if not radians:
         lat, lon = np.radians(lat), np.radians(lon)
 
-    mx = np.array([ [-np.sin(lon),                   np.cos(lon),                    np.zeros(np.size(lat, axis=0))],
-                    [-np.sin(lat) * np.cos(lon),    -np.sin(lat) * np.sin(lon),      np.cos(lat)],
-                    [ np.cos(lat) * np.cos(lon),     np.cos(lat) * np.sin(lon),      np.sin(lat)]])
-    
-    enu = np.einsum("ijk,jl->kil", mx, ecef)
+    mx = np.array([[-np.sin(lon), -np.sin(lat) * np.cos(lon), np.cos(lat) * np.cos(lon)],
+                [np.cos(lon), -np.sin(lat) * np.sin(lon), np.cos(lat) * np.sin(lon)],
+                [0.0, np.cos(lat), np.sin(lat)]])
+    enu = np.dot(np.linalg.inv(mx),ecef)
 
-    if np.size(enu) == 3:
-        enu = enu.reshape((3,))
-    
     return enu
-
 
 def azel_to_ecef(lat, lon, alt, az, el, radians=False):
     '''

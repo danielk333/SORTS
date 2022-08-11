@@ -18,13 +18,13 @@
       RX.beam
       RX.enabled
       RX.pointing_range
+      RX.BEAM_PROPERTIES
       RX.CONTROL_VARIABLES
       RX.PROPERTIES
-      RX.frequency
       RX.pointing
       RX.pointing_ecef
       RX.type
-      RX.wavelength
+      RX.noise_temperature
    
    
 
@@ -41,10 +41,12 @@
       RX.copy
       RX.enu
       RX.field_of_view
+      RX.get_local_vertical
       RX.get_properties
       RX.has_property
       RX.point
       RX.point_ecef
       RX.rebase
+      RX.to_ecef
    
    

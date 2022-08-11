@@ -10,8 +10,15 @@
    .. autosummary::
       :toctree: .
    
-      Radar.CONTROL_VARIABLES
       Radar.TIME_VARIABLES
+      Radar.tx
+      Radar.rx
+      Radar.logger
+      Radar.profiler
+      Radar.min_SNRdb
+      Radar.measurement_class
+      Radar.states
+      Radar.joint_stations
    
    
 
@@ -29,8 +36,10 @@
       Radar.compute_measurements
       Radar.control
       Radar.copy
+      Radar.field_of_view
       Radar.find_passes
       Radar.get_station_id
+      Radar.observe_passes
       Radar.set_beam
       Radar.set_rx_beam
       Radar.set_tx_beam

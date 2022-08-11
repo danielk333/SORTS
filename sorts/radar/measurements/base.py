@@ -11,10 +11,11 @@ from sorts import clibsorts
 
 from ...common import interpolation 
 
-class Measurement(object):
-    '''
-    This class handles the computation/simulation of Radar measurements.
-    Each radar system must be associated with a measurement unit to be able to simulate the observations resulting from given control sequence.
+class Measurement_old(object):
+    ''' Simulates radar measurements.
+
+    Each radar system must be associated with a measurement unit to be able to simulate the observations resulting 
+    from given control sequence.
     '''
     def __init__(self, logger=None, profiler=None):
         '''
@@ -571,7 +572,8 @@ class Measurement(object):
 
 
     def get_beam_gain(self, beam, enu):
-        '''Given the input beam configured by the controller and the local (for that beam) coordinates of the observed object, get the correct gain and wavelength used for SNR calculation. 
+        '''Given the input beam configured by the controller and the local (for that beam) coordinates of the observed object, 
+        get the correct gain and wavelength used for SNR calculation. 
 
         The default is a maximum calculation based on pointing, this is used for e.g. RX digital beam-forming.
         '''
@@ -602,7 +604,8 @@ class Measurement(object):
         profiler=None
         ):
         '''
-        Given the input beam configured by the controller and the local (for that beam) coordinates of the observed object, get the correct gain and wavelength used for SNR calculation. 
+        Given the input beam configured by the controller and the local (for that beam) coordinates of the observed object, 
+        get the correct gain and wavelength used for SNR calculation. 
 
         The default is a maximum calculation based on pointing, this is used for e.g. RX digital beam-forming.
         '''

@@ -5,6 +5,7 @@
 Using pyglow
 ============
 
+This example showcases the use of pyglow to compute Ionospheric errors. 
 '''
 
 from pyglow.pyglow import Point

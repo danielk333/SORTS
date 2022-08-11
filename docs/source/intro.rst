@@ -1,14 +1,18 @@
+.. _sorts_intro
+
+############
 Introduction
-=================
+############
 
-What is SORTS
------------------
-SORTS stands for Space Object Radar Tracking Simulator (SORTS). It is a collection of modules designed for research purposes concerning the tracking and detection of objects in space. Its ultimate goal is to simulate the tracking and discovery of objects in space using radar systems in a very general fashion. Therefor it can not only be used for simulating the performance of radar systems but be used to plan observations and schedule campagins.
+What is SORTS ?
+---------------
+The Space Object Radar Tracking Simulator (SORTS) toolbox is a collection of modules designed for research purposes concerning the tracking and detection of objects in space. Its ultimate goal is to simulate the tracking and discovery of space objects using radar systems in a very general fashion. Therefore, it can not only be used for simulating the performance of radar systems, but also for the plannning and scheduleing of observation campagins.
 
 
 
-Feature list
--------------
+Features
+--------
+SORTS includes the following set of features : 
 
 * Vast library of usage examples
 * Quick calculation of passes over a radar system
@@ -23,7 +27,7 @@ Feature list
 * Logging compatible with most base models
 * Frame transformations implemented trough Astropy
 * Time handling implemented trough Astropy
-* All time-critical calculations implemented using numpy to accelerate calculation
+* All time-critical calculations implemented using numpy & C to accelerate calculation
 * Predefined error models such as ionospheric ray bending and coded transmission matched filter errors
 * Ray-tracing simulation of radar signals trough the ionosphere using pyglow
 * Measurement Jacobian calculation and linearized orbit error calculation and propagation
@@ -37,9 +41,8 @@ Feature list
 
 
 Example
-----------
-
-Finding all passes of a space object over a radar system
+-------
+A simple application of SORTS consists in finding all passes of a space object over a radar system :
 
 .. code-block:: python
 

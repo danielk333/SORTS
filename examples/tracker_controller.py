@@ -27,50 +27,35 @@ prop = SGP4(
     ),
 )
 
-orb = pyorb.Orbit(M0 = pyorb.M_earth, direct_update=True, auto_update=True, degrees = True, a=6700e3, e=0, i=75, omega=0, Omega=80, anom=72)
-t = np.linspace(0,120,num=10)
+orb = pyorb.Orbit(M0=pyorb.M_earth, direct_update=True, auto_update=True, degrees=True, a=6700e3, e=0, i=75, omega=0, Omega=80, anom=72)
+t = np.linspace(0,132,num=11)
 mjd0 = 53005
 
 p.start('propagate')
 states = prop.propagate(t, orb.cartesian[:,0], mjd0, A=1.0, C_R = 1.0, C_D = 1.0)
 p.stop('propagate')
 
-e3d = Tracker(radar=eiscat3d, t=t, ecefs=states[:3,:], dwell = 10.0, profiler=p)
+e3d = Tracker(profiler=p)
+controls = e3d.generate_controls(t, eiscat3d, t, states[:3,:], t_slice=10.0)
 
-sorts.plotting.schedule.controller_slices([e3d])
-
-
+for period_id in range(controls.n_periods):
+    sorts.plotting.plot_control_sequence([controls], 0, 120, 60)
 
 fig = plt.figure(figsize=(15,15))
 ax = fig.add_subplot(111, projection='3d')
+ax.plot(states[0,:-1], states[1,:-1], states[2,:-1],"or")
 
-ax.plot(states[0,:], states[1,:], states[2,:],"or")
-
-for tx in e3d.radar.tx:
+for tx in controls.radar.tx:
     ax.plot([tx.ecef[0]],[tx.ecef[1]],[tx.ecef[2]],'or')
-for rx in e3d.radar.rx:
+for rx in controls.radar.rx:
     ax.plot([rx.ecef[0]],[rx.ecef[1]],[rx.ecef[2]],'og')
 
-for radm, ti in zip(e3d(t),range(len(t))):
-    radar, meta = radm
-
+for period_id in range(controls.n_periods):
     p.start('Tracker-plot')
-    for tx in radar.tx:
-        r = np.linalg.norm(states[:3,ti] - tx.ecef)*1.1
-        point = tx.pointing_ecef*r + tx.ecef
-        ax.plot([tx.ecef[0], point[0]], [tx.ecef[1], point[1]], [tx.ecef[2], point[2]], 'm-')
-
-    for rx in radar.rx:
-        r = np.linalg.norm(states[:3,ti] - rx.ecef)
-        point = rx.pointing_ecef*r + rx.ecef
-        ax.plot([rx.ecef[0], point[0]], [rx.ecef[1], point[1]], [rx.ecef[2], point[2]], 'g-')
+    sorts.plotting.plot_beam_directions(controls.get_pdirs(period_id), eiscat3d, ax=ax, profiler=p, tx_beam=True, rx_beam=True, zoom_level=0.9, azimuth=10, elevation=10)
     p.stop('Tracker-plot')
 
 sorts.plotting.grid_earth(ax)
-dx = 600e3
-ax.set_xlim([e3d.radar.tx[0].ecef[0]-dx, e3d.radar.tx[0].ecef[0]+dx])
-ax.set_ylim([e3d.radar.tx[0].ecef[1]-dx, e3d.radar.tx[0].ecef[1]+dx])
-ax.set_zlim([e3d.radar.tx[0].ecef[2]-dx, e3d.radar.tx[0].ecef[2]+dx])
 
 p.stop('total')
 print(p.fmt(normalize='total'))

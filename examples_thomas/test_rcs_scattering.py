@@ -5,6 +5,46 @@ import scipy.constants
 import sorts
 import numpy.testing as nt
 
+separator = 1/(np.pi*np.sqrt(3)) # = 0.236
+
+diameters = np.logspace(-3, 3, 10000)
+
+is_rayleigh = diameters < separator
+is_optical = diameters >= separator
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+
+optical_rcs = np.pi*diameters**2.0/4.0
+# ax.loglog(diameters, optical_rcs, "--b")
+
+optical_rcs = optical_rcs[is_optical]
+diameters_rcs = diameters[is_optical]
+
+
+rayleigh_rcs = 9*np.pi**5/4 * diameters**6.0
+# ax.loglog(diameters, rayleigh_rcs, "--r")
+
+rayleigh_rcs = rayleigh_rcs[is_rayleigh]
+diameters_ray = diameters[is_rayleigh]
+
+ax.loglog(diameters_rcs, optical_rcs, "-b")
+ax.loglog(diameters_ray, rayleigh_rcs, "-r")
+
+rcs_sep = np.pi*separator**2.0/4.0
+
+ax.plot([separator, 0], [rcs_sep, rcs_sep], "--k")
+ax.plot([separator, separator], [rcs_sep, 0], "--k")
+
+ax.grid()
+ax.set_xlim([0.009, 2])
+ax.set_ylim([9e-9, 2e1])
+
+ax.set_xlabel("$D/\\lambda$ [$-$]")
+ax.set_ylabel("$\\sigma/\\lambda^2$ [$-$]")
+
+plt.show()
+
 # RCS
 # wavelength = 1.287 # m
 # separator = wavelength/(np.pi*7.11**(1.0/4.0)) # = 0.236

@@ -431,6 +431,9 @@ class Station(object):
             radians=False,
         ).reshape(3, -1)
 
+        if np.size(k) == 3:
+            k = k.reshape(3,)
+
         self.beam.point(k)
 
     @property
@@ -605,8 +608,20 @@ class RX(Station):
         """
         super().__init__(lat, lon, alt, min_elevation, beam)
         self.noise_temperature = noise_temperature
+        ''' Receiver noise temperature.
+
+        It is possible to express the noise power density :math:`P_N` (in W/Hz) as an equivalent temperature  
+        :math:`T_n` (called *noise temperature*) that would produce the same **Johnson–Nyquist noise** as the 
+        receiver :
+
+        .. math::           P_N = k_B T_n b
+
+        with :math:`b` the bandwidth of the receiver and :math:`k_B = 1.381 \\times 10^{-23} J/K` the Boltzmann 
+        constant.
+        '''
 
         self._type = "rx"
+
 
     def copy(self):
         """ Performs a deep copy of the Radar station. 

@@ -16,9 +16,11 @@ print(r2_)
 station.point_ecef(dirs)
 print(dirs)
 
+print(station.beam.azimuth)
+
 
 station.wavelength = np.repeat(station.wavelength, 10)
 enu = dirs.repeat(N, axis = 1)
 
-g = station.beam.gain(station.to_ecef(enu))
+# g = station.beam.gain(station.to_ecef(enu))
 print(g)

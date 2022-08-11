@@ -59,7 +59,7 @@ class TestSpaceObject(unittest.TestCase):
         self.state_init = {
             'state': {
                 'sgfd': 'this is a state',
-                'sdf': 'even though it dsent look like it',
+                'sdf': 'even though it doesnt look like it',
                 'sss': 69,
                 'aaa': 0.0,
             },

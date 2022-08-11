@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
-'''Errors
+''' Defines the standard ``Errors`` class. '''
 
-'''
 #Python standard import
 from abc import ABC, abstractmethod
 import types
@@ -11,18 +10,15 @@ import pathlib
 #Third party import
 import numpy as np
 
-
-#Local import
-
-
 class Errors(ABC):
-    '''A standardized way for adding random errors to data
+    ''' Defines a standardized interface to add random errors to data.
 
     The methods corresponding to the variables should take the data and return
     '''
     VARIABLES = []
 
     def __init__(self, seed=None):
+        ''' Default class constructor. '''
         self.seed = seed
         self._check_methods()
 
@@ -42,6 +38,7 @@ class Errors(ABC):
 
     def _check_method(self, name):
         return hasattr(self, name) and type(getattr(self, name)) == types.MethodType
+
 
     def _check_methods(self):
         for var in self.VARIABLES:

@@ -18,13 +18,12 @@
       Station.beam
       Station.enabled
       Station.pointing_range
+      Station.BEAM_PROPERTIES
       Station.CONTROL_VARIABLES
       Station.PROPERTIES
-      Station.frequency
       Station.pointing
       Station.pointing_ecef
       Station.type
-      Station.wavelength
    
    
 
@@ -41,10 +40,12 @@
       Station.copy
       Station.enu
       Station.field_of_view
+      Station.get_local_vertical
       Station.get_properties
       Station.has_property
       Station.point
       Station.point_ecef
       Station.rebase
+      Station.to_ecef
    
    

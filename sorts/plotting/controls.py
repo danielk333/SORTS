@@ -267,6 +267,51 @@ def plot_scheduler_control_sequence(controls, final_controls, scheduler, period_
 
     return figs
 
+def plot_control_sequence(controls, t_start, t_end, period, logger=None, profiler=None):
+    # Validate inputs
+    if len(controls) > MAX_SUB_PLOTS:
+        raise ValueError(f"too many controls to plot ({len(controls)} > {MAX_SUB_PLOTS})")
+
+    figs = []
+    last_period_id = np.ndarray((len(controls),), dtype=np.int32)
+    for control_id in range(len(controls)):
+        for period_id in range(controls[control_id].n_periods):
+            if controls[control_id].t[period_id][-1] >= t_start:
+                last_period_id[control_id] = period_id
+                break
+
+    ts = t_start
+    while(ts <= t_end):
+        te = ts + period
+        
+        fig = plt.figure(figsize=(5, 5))
+        axes = np.atleast_1d(fig.subplots(len(controls), 1, sharex=True))
+        figs.append(fig)
+
+        for axi, ax in enumerate(axes):
+            ax.set_ylabel("Control " + str(axi))
+            ax.tick_params(axis='both', which='both', direction='in', bottom=True, top=True, left=True, right=True)
+            ax.yaxis.set_minor_locator(AutoMinorLocator(n=10))
+            ax.xaxis.set_minor_locator(AutoMinorLocator(n=10))
+            ax.grid(axis="x", which="both")
+            ax.set_xlim([ts, te])
+            ax.set_ylim([-0.5, 1.5])
+
+        axes[-1].set_xlabel("t [s]")
+
+        # plot all controls between ts and te
+        for ctrl_id in range(len(controls)):
+            for period_id in range(last_period_id[ctrl_id], controls[ctrl_id].n_periods):
+                __plot_control_uptime(controls[ctrl_id], period_id, ts, te, axes[ctrl_id])
+
+                if controls[ctrl_id].t[period_id][-1] >= te:
+                    last_period_id[ctrl_id] = period_id
+                    break
+
+        ts = te
+
+    return figs
+
 
 def __plot_control_uptime(control, control_period_id, t_start, t_end, ax):
     # transform the time array to plot the status of the control at a given time t

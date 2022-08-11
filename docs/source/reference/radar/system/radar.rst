@@ -1,12 +1,13 @@
 .. currentmodule:: sorts.radar.system
-.. _radar
+
+.. _radar:
 
 ================================
 Radar (sorts.radar.system.radar)
 ================================
 
-The Radar class
----------------
+Description
+-----------
 ``SORTS`` simulates the radar measurement process of the ``radial velocity`` and ``position`` of Near-Earth space Objects (NEOs) such as meteors and space debris. As such, the :class:`Radar<radar.Radar>` class not only defines the architecture of the radar system (i.e. network of :class:`Stations<station.Station>`), but it also implements a set of methods useful for handling low-level functions related to measurement and controlling of :class:`radar stations<station.Station>`). 
 
 .. autosummary::
@@ -14,6 +15,8 @@ The Radar class
 
    ~radar.Radar
 
+
+.. _predifined_radar_instances
 
 Predifined Radar systems
 ------------------------
@@ -23,55 +26,66 @@ SORTS implementation includes a set of predifined existing :class:`Radar` instan
 ````````````
 Thhe current implementation includes the following predifined Radar instances :
 
+.. _radar_eiscat3d:
+
 * sorts.radars.eiscat3d
-    EISCAT_3D [1]_ is an international research infrastructure performing radar measurements and incohere scatter technique for studies 
-    of the atmosphere and near-Earth space environment above the Fenno-Scandinavian Arctic as well as for support of the solar system 
-    and radio astronomy sciences.
+    EISCAT_3D [1]_ is an international research infrastructure performing radar measurements and incohere scatter technique for studies of the atmosphere and near-Earth space environment above the Fenno-Scandinavian Arctic as well as for support of the solar system and radio astronomy sciences.
 
     In its final configuration, the EISCAT_3D system will consist of a set multistatic phased-array antenna fields (5 in total) located in Finland, Norway and Sweden.
 
-    The ``eiscat3d`` instance uses an exact gain pattern computation which performs an ideal summation of the individual gain of each antenna
-    of the phased array (which in return has a strong impact on performances).
+    The ``eiscat3d`` instance uses an exact gain pattern computation which performs an ideal summation of the individual gain of each antenna of the phased array (which in return has a strong impact on performances).
+
+.. _radar_eiscat3d_interp:
 
 * sorts.radars.eiscat3d_interp
-    the ``eiscat3d_interp`` instance reduces computational overhead while computing the antenna gain in a certain direction. By taking advantage of 
-    the `far-field approximation` and by assuming the homogeneity of antenna properties within the phased array, the theoretical gain pattern can be
-    interpolated. By performing a change of coordinates, one is then able to compute the antenna gain in any direction.
+    the ``eiscat3d_interp`` instance reduces computational overhead while computing the antenna gain in a certain direction. By taking advantage of the `far-field approximation` and by assuming the homogeneity of antenna properties within the phased array, the theoretical gain pattern can beinterpolated. By performing a change of coordinates, one is then able to compute the antenna gain in any direction.
+
+.. _radar_eiscat3d_demonstrator:
 
 * sorts.radars.eiscat3d_demonstrator
-    The ``eiscat3d_demonstrator`` instance implements the current EISCAT_3D demonstrator located in Kiruna. The antenna gain is computed exactly
-    by summing the gains from all individual antenna in the phased-array.
+    The ``eiscat3d_demonstrator`` instance implements the current EISCAT_3D demonstrator located in Kiruna. The antenna gain is computed exactly by summing the gains from all individual antenna in the phased-array.
+
+.. _radar_eiscat3d_demonstrator_interp:
 
 * sorts.radars.eiscat3d_demonstrator_interp
-    The ``eiscat3d_demonstrator_interp`` instance implements the current EISCAT_3D demonstrator located in Kiruna. The beam pattern is computed by
-    performing a 2D interpolation of a pre-computed beam pattern.
+    The ``eiscat3d_demonstrator_interp`` instance implements the current EISCAT_3D demonstrator located in Kiruna. The beam pattern is computed by performing a 2D interpolation of a pre-computed beam pattern.
+
+.. _radar_eiscat_uhf:
 
 * sorts.radars.eiscat_uhf
-    The EISCAT UHF system [2]_ is a tristatic radar which stations are located in Finland (Sodankylä), Norway (Tromsø) and Sweden (Kiruna). This system has 
-    been used multiple times for the observation of space objects such as Space Debris, but also for incoherent radar measurements of electron 
-    density fluctuations (used for example for the characterization of auroras and meteors).
+    The EISCAT UHF system [2]_ is a tristatic radar which stations are located in Finland (Sodankylä), Norway (Tromsø) and Sweden (Kiruna). This system has been used multiple times for the observation of space objects such as Space Debris, but also for incoherent radar measurements of electron density fluctuations (used for example for the characterization of auroras and meteors).
 
-    The UHF system operates in the :math:`930 MHz` band with transmitter peak power :math:`2.0 MW`, :math:`12.5 %` duty cycle and :math:`1 µs – 10 ms` 
-    pulse length with frequency and phase modulation capability.
+    The UHF system operates in the :math:`930 MHz` band with transmitter peak power :math:`2.0 MW`, :math:`12.5 %` duty cycle and :math:`1 µs – 10 ms` pulse length with frequency and phase modulation capability.
+
+.. _radar_eiscat_esr:
 
 * sorts.radars.eiscat_esr
-    ESR is a bistatic antenna system located near Longyearbyen in Spitzbergen. ESR operates in the :math:`500 MHz` band with a transmitter peak power 
-    of :math:`1000 kW`, :math:`25 %` duty cycle and :math:`1 µs` – :math:`2 ms` pulse length with frequency and phase modulation capability. 
+    ESR is a bistatic antenna system located near Longyearbyen in Spitzbergen. ESR operates in the :math:`500 MHz` band with a transmitter peak power of :math:`1000 kW`, :math:`25 %` duty cycle and :math:`1 µs` – :math:`2 ms` pulse length with frequency and phase modulation capability. 
 
     Its main purpose being the study of Auroras, it can also be used for the characterization of space objects such as meteors and space debris.
+
+.. _radar_tsdr:
 
 * sorts.radars.tsdr
     The ``Tromsø Space Debris Radar`` (located 69.35° N, 19.13° E)
     #TODO 
 
+.. _radars_tsdr_fence:
+
 * sorts.radars.tsdr_fence
     #TODO 
+
+.. _radars_tsdr_phased:
 
 * sorts.radars.tsdr_phased
     #TODO 
 
+.. _radars_tsdr_phased_fence:
+
 * sorts.radars.tsdr_phased_fence
     #TODO 
+
+.. _radar_mock:
 
 * sorts.radars.mock
     The ``mock`` instance creates a monostatic radar operating in the :math:`100 MHz` band. The station (Rx/Tx) is located at the North pole 

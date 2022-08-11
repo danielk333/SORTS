@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
 '''
+================
 Custom Scheduler
-================================
+================
 
+This short example shows how to define a simple custom scheduler using the predifined :class:`sorts.RadarSchedulerBase` class.
+The scheduler implemented in this example generates tracking controls from an object's orbit.
 '''
 from tabulate import tabulate
 import numpy as np
@@ -13,13 +16,9 @@ from matplotlib.animation import FuncAnimation
 import pyorb
 
 import sorts
-from sorts.radar.controllers import Tracker
-
-eiscat3d = sorts.radars.eiscat3d
-from sorts import Scheduler
-
 from sorts.targets.propagator import SGP4
 
+eiscat3d = sorts.radars.eiscat3d
 Prop_cls = SGP4
 Prop_opts = dict(
     settings = dict(
@@ -29,97 +28,86 @@ Prop_opts = dict(
 
 prop = Prop_cls(**Prop_opts)
 
-class MyScheduler(Scheduler):
-    '''
-    '''
-
-    def __init__(self, radar, propagator):
-        super().__init__(radar)
+class MyScheduler(sorts.RadarSchedulerBase):
+    ''' Generates tracking controls from an orbit. '''
+    def __init__(self, radar, propagator, t0, scheduler_period):
+        super().__init__(radar, t0, scheduler_period)
         self.propagator = propagator
-        self.orbits = None
 
-
-    def update(self, orbits):
-        '''Update the scheduler information.
-        '''
-        self.orbits = orbits
-
-
-    def get_controllers(self):
-        '''This should init all controllers and return a list of them.
-        '''
-
-        tv = [np.linspace(x*20,x*20+10,num=5) for x in range(len(self.orbits))]
+    def run(self, orbits):
+        ''' Generation of the control sequence. '''
+        tv = [np.linspace(x*20,x*20+10,num=5) for x in range(len(orbits))]
 
         ctrls = []
-        for ind in range(len(self.orbits)):
-            states = self.propagator.propagate(tv[ind], self.orbits.cartesian[:,ind], orb.epoch, A=1.0, C_R = 1.0, C_D = 1.0)
+        for ind in range(len(orbits)):
+            states = self.propagator.propagate(tv[ind], orbits.cartesian[:,ind], orbits.epoch, A=1.0, C_R = 1.0, C_D = 1.0)
 
-            ctrl = Tracker(radar = self.radar, t=tv[ind], ecefs = states[:3,:])
-            ctrl.meta['target'] = f'Orbit {ind}'
-            ctrls.append(ctrl)
-        
-        return ctrls
+            ctrl = sorts.Tracker()
+
+            controls = ctrl.generate_controls(tv[ind], self.radar, tv[ind], states[:3,:], t_slice=0.1, scheduler=self)
+            controls.meta['target'] = f'Orbit {ind}'
+            controls.meta['controller_type'] = 'Tracker'
+            ctrls.append(controls)
+        return controls
 
 
-    def generate_schedule(self, t, generator):
-        data = np.empty((len(t),len(self.radar.rx)*2+1), dtype=np.float64)
-        data[:,0] = t
-        names = []
-        targets = []
-        for ind,mrad in enumerate(generator):
-            radar, meta = mrad
-            names.append(meta['controller_type'].__name__)
-            targets.append(meta['target'])
-            for ri, rx in enumerate(radar.rx):
-                data[ind,1+ri*2] = rx.beam.azimuth
-                data[ind,2+ri*2] = rx.beam.elevation
-        data = data.T.tolist() + [names, targets]
-        data = list(map(list, zip(*data)))
+    def generate_schedule(self, controls):
+        ''' Generate radar schedule. '''
+        # extract scheduler data
+        data = np.empty((controls.n_periods,), dtype=object)
+        for period_id in range(controls.n_periods):
+            n_points    = len(controls.t[period_id])
+
+            names = np.repeat(controls.meta['controller_type'], n_points)
+            targets = np.repeat(controls.meta['target'], n_points)
+            data_tmp    = np.ndarray((n_points, len(self.radar.rx)*2 + 1))
+            data_tmp[:,0] = controls.t[period_id]
+            
+            pdirs = controls.get_pdirs(period_id)
+            for ri, rx in enumerate(self.radar.rx):
+                rx.point_ecef(pdirs["rx"][ri, 0, :, :])
+                data_tmp[:,1+ri*2] = rx.beam.azimuth
+                data_tmp[:,2+ri*2] = rx.beam.elevation
+
+            data_tmp = data_tmp.T.tolist() + [names, targets]
+            data_tmp = list(map(list, zip(*data_tmp)))
+            data[period_id] = data_tmp
         return data
 
-
-orb = pyorb.Orbit(M0 = pyorb.M_earth, direct_update=True, auto_update=True, degrees=True, num=3, a=6700e3, e=0, i=75, omega=0, Omega=np.linspace(79,82,num=3), anom=72, epoch=53005)
+# define object orbit
+orb = pyorb.Orbit(M0=pyorb.M_earth, direct_update=True, auto_update=True, degrees=True, num=3, a=6700e3, e=0, i=75, omega=0, Omega=np.linspace(79,82,num=3), anom=72, epoch=53005)
 print(orb)
 
-e3d = MyScheduler(radar = eiscat3d, propagator=prop)
+# instanciation of the scheduler and generation of the controls
+e3d = MyScheduler(eiscat3d, prop, t0=0, scheduler_period=5)
+controls = e3d.run(orb)
+data = e3d.generate_schedule(controls)
 
-e3d.update(orb)
-data = e3d.schedule()
+# prints the schedule from the generated controls
+print("\nSchedule")
+for period_id in range(controls.n_periods):
+    print("Period index ", period_id)
+    rx_head = [f'rx{i} {co}' for i in range(len(eiscat3d.rx)) for co in ['az', 'el']]
+    sched_tab = tabulate(data[period_id], headers=["t [s]"] + rx_head + ['Controller', 'Target'])
+    print(sched_tab, "\n")
 
-rx_head = [f'rx{i} {co}' for i in range(len(eiscat3d.rx)) for co in ['az', 'el']]
-sched_tab = tabulate(data, headers=["t [s]"] + rx_head + ['Controller', 'Target'])
-
-print(sched_tab)
-
-
+# plots the azimuth and elevation of the radar as a function of time
 fig = plt.figure(figsize=(15,15))
-ax = fig.add_subplot(121)
-for i in range(3):
-    ax.plot([x[0] for x in data], [x[1+i*2] for x in data], '.', label=f'RX{i}')
-ax.legend()
-ax.set_ylabel('Azimuth')
+ax1 = fig.add_subplot(121)
+ax2 = fig.add_subplot(122)
 
-ax = fig.add_subplot(122)
-for i in range(3):
-    ax.plot([x[0] for x in data], [x[2+i*2] for x in data], '.', label=f'RX{i}')
-ax.legend()
-ax.set_ylabel('Elevation')
-
-
+for period_id in range(controls.n_periods):
+    for i in range(3):
+        ax1.plot([x[0] for x in data[period_id]], [x[1+i*2] for x in data[period_id]], '+', label=f'RX{i}')
+    for i in range(3):
+        ax2.plot([x[0] for x in data[period_id]], [x[2+i*2] for x in data[period_id]], '+', label=f'RX{i}')
+    
+ax1.legend()
+ax1.set_ylabel('Azimuth [$deg$]')
+ax1.set_xlabel('$t$ [$s$]')
+ax1.grid()
+ax2.legend()
+ax2.set_ylabel('Elevation [$deg$]')
+ax2.set_xlabel('$t$ [$s$]')
+ax2.grid()
 plt.show()
-
-
-
-# fig, ax =plt.subplots()
-# collabel=("Time [s]",)
-# for i in range(3):
-#     collabel += (f'RX{i} Az [deg]', f'RX{i} El [deg]')
-# collabel += ('Dwell [s]',)
-
-# ax.axis('tight')
-# ax.axis('off')
-# table = ax.table(cellText=data,colLabels=collabel,loc='center')
-# table.set_fontsize(22)
-
-# plt.show()

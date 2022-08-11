@@ -21,8 +21,8 @@ from sorts.targets.propagator import Kepler
 p = profiling.Profiler()
 logger = profiling.get_logger('scanning')
 
-max_points = 20
-end_t = 3600*240
+max_points = 100
+end_t = 3600
 t_slice = 7.5
 tracking_period = 10
 
@@ -98,9 +98,6 @@ p.start('get_state')
 object_states = space_object.get_state(t_states)
 p.stop('get_state')
 
-np.save("object_states.npy", object_states, )
-np.save("t_states.npy", t_states, )
-exit()
 logger.info(f"test_tracker_controller -> object states computation done ! ")
 logger.info(f"test_tracker_controller -> t_states -> {t_states.shape}")
 

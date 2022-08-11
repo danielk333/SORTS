@@ -44,17 +44,13 @@ void compute_measurement_snr(
 	int _doppler_spread_integrated_snr,
 	int _snr_limit,
 	int _n_time_points,
-	int _n_dirs,
-	int _ctrl_start_id,
-	int _pdirs_start_id);
+	int _n_dirs);
 
 void compute_gain(
 	double *_t,
 	double *_t_dirs,
 	int _n_points,
 	int _n_dirs,
-	int _ctrl_start_id,
-	int _pdirs_start_id,
 	double(*_callback_compute_gain_tx)(int, int),
 	double(*_callback_compute_gain_rx)(int, int)
 	);
@@ -66,3 +62,10 @@ void get_max_snr_measurements(
 	int* _inds,
 	int _n_time_points,
 	int _n_inds);
+
+int get_next_control_time_index(
+	double* _t,
+	double _t_dir,
+	int _ti,
+	int _N
+	);

@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 '''
-================================
+=========================
 Observing a set of passes
-================================
+=========================
 
 This example showcases the creation of a simple radar scheduler and observation of object passes using the 
 observation simulation feature of the SORTS Toolbox.
@@ -93,31 +93,30 @@ class MyScheduler(RadarSchedulerBase):
 
         control = controls[control_id] 
         final_control_sequence = control.copy()
+        return final_control_sequence
 
+    def generate_schedule(self, controls):
         # extract scheduler dara
-        data = np.empty((control.n_periods,), dtype=object)
-        for period_id in range(control.n_periods):
-            data_tmp = np.ndarray((len(final_control_sequence.t[period_id]), len(self.radar.rx)*2 + 1))
-            data_tmp[:,0] = final_control_sequence.t[period_id]
+        data = np.empty((controls.n_periods,), dtype=object)
+        for period_id in range(controls.n_periods):
+            n_points    = len(controls.t[period_id])
 
-            names = []
-            targets = []
-            pdirs = final_control_sequence.get_pdirs(period_id)
-            for ti in range(len(final_control_sequence.t[period_id])):
-                names.append(control.meta['controller_type'])
-                targets.append(control.meta['target'])
-
-                for ri, rx in enumerate(self.radar.rx):
-                    rx.point_ecef(pdirs["rx"][ri, 0, :, ti])
-                    data_tmp[ti,1+ri*2] = rx.beam.azimuth
-                    data_tmp[ti,2+ri*2] = rx.beam.elevation
+            names = np.repeat(controls.meta['controller_type'], n_points)
+            targets = np.repeat(controls.meta['target'], n_points)
+            data_tmp    = np.ndarray((n_points, len(self.radar.rx)*2 + 1))
+            data_tmp[:,0] = controls.t[period_id]
+            
+            pdirs = controls.get_pdirs(period_id)
+            for ri, rx in enumerate(self.radar.rx):
+                rx.point_ecef(pdirs["rx"][ri, 0, :, :])
+                data_tmp[:,1+ri*2] = rx.beam.azimuth
+                data_tmp[:,2+ri*2] = rx.beam.elevation
 
             data_tmp = data_tmp.T.tolist() + [names, targets]
             data_tmp = list(map(list, zip(*data_tmp)))
             data[period_id] = data_tmp
-
-        final_control_sequence.meta["scheduler_data"] = data
-        return final_control_sequence
+        return data
+        
 
 
 # create scheduler instance with a 10s schedule period
@@ -139,12 +138,13 @@ controls = e3d_tracker.generate_controls(
 controls.meta['target'] = 'Cool object 1'
 controls.meta['controller_type'] = 'Tracker'
 controls = scheduler.run([controls], 0)
+schedule = scheduler.generate_schedule(controls)
 
 # print schedule
 print("\n Scheduler results")
 for period_id in range(controls.n_periods):
     rx_head = [f'rx{i} {co}' for i in range(len(scheduler.radar.rx)) for co in ['az', 'el']]
-    sched_tab = tabulate(controls.meta["scheduler_data"][period_id], headers=["t [s]"] + rx_head + ['Controller', 'Target'])
+    sched_tab = tabulate(schedule[period_id], headers=["t [s]"] + rx_head + ['Controller', 'Target'])
     print("Scheduler results for scheduler period ", period_id)
     print(sched_tab)
     print("")
@@ -154,12 +154,15 @@ radar_states = eiscat3d.control(controls)
 
 # simulate radar observations
 p.start('parallelization')
-data0 = eiscat3d.observe_passes(passes0, radar_states, objs[0], snr_limit=False, parallelization=True, interpolator=interpolation.Linear)
+data0 = eiscat3d.observe_passes(passes0, radar_states, objs[0], snr_limit=False, parallelization=True, interpolator=interpolation.Linear, interrupt=True)
 p.stop('parallelization')
 
+print(data0)
+
 p.start('no parallelization')
-data1 = eiscat3d.observe_passes(passes1, radar_states, objs[1], snr_limit=False, parallelization=False, interpolator=interpolation.Linear)
+data1 = eiscat3d.observe_passes(passes1, radar_states, objs[1], snr_limit=False, parallelization=False, interpolator=interpolation.Linear, interrupt=True)
 p.stop('no parallelization')
+
 print(p)
 #create a tdm file example
 # pth = pathlib.Path(__file__).parent / 'data' / 'test_tdm.tdm'

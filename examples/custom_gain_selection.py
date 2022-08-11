@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 
 '''
-An example scheduler for tracking
-======================================
+===========================================
+An example custom gain computation function
+===========================================
+
+This example implements a custom gain function which computes the maximum SNR over two frequencies.  
 '''
 
 import numpy as np
@@ -46,12 +49,14 @@ passes = radar.find_passes(t, states, cache_data = True)
 passes[0][0] = passes[0][0][:1]
 inds = passes[0][0][0].inds
 
-track = sorts.controllers.Tracker(radar=radar, t0=0, t=t[inds], dwell=0.1, ecefs=states[:3,inds])
-
+# get radar states (tracking controls)
+tracker_controller = sorts.controllers.Tracker()
+controls = tracker_controller.generate_controls(t[inds], radar, t[inds], states[:3,inds], t_slice=0.1)
+radar_states = radar.control(controls)
 
 #lets make the radar have multiple frequencies
-for st in radar.tx + radar.rx:
-    st.beam.frequency = [233e6, 133e6]
+for station in radar.tx + radar.rx:
+    station.beam.frequency = [233e6, 133e6]
 
 #now if we look at the tx beam
 #This is the shape and names of the parameters
@@ -64,11 +69,13 @@ k = np.array([0,0,1], dtype=np.float64)
 print(f'G @ F_1 vs F_2 = {radar.tx[0].beam.gain(k, ind=(0,0))} vs {radar.tx[0].beam.gain(k, ind=(0,1))} ')
 print(f'G @ F_1 vs F_2 = {radar.tx[0].beam.gain(k, ind=dict(frequency=0))} vs {radar.tx[0].beam.gain(k, ind=dict(frequency=1))} ')
 
-class Tracking(sorts.scheduler.StaticList, sorts.scheduler.ObservedParameters):
-
-    def get_beam_gain_and_wavelength(self, beam, enu, meta):
+class MyMeasurementClass(sorts.radar.measurements.measurement.Measurement_new):
+    def get_beam_gain_and_wavelength(self, beam, enu):
         '''Now we have to define how to select the gain
         '''
+        # bypass frequency controls (radar_states)
+        beam.frequency = np.array([233e6, 133e6])
+
         if 'frequency' in beam.parameters:
             size = beam.shape[beam.parameters.index('frequency')]
             if size is not None:
@@ -81,15 +88,8 @@ class Tracking(sorts.scheduler.StaticList, sorts.scheduler.ObservedParameters):
 
         return beam.gain(enu), beam.wavelength
 
-
-scheduler = Tracking(
-    radar = radar, 
-    controllers = [track], 
-)
-
-
-data = scheduler.observe_passes(passes, space_object=obj, snr_limit=True)
-
+radar.measurement_class = MyMeasurementClass()
+data = radar.observe_passes(passes, radar_states, space_object=obj, snr_limit=True)
 
 fig = plt.figure(figsize=(15,15))
 axes = [
@@ -117,7 +117,7 @@ axes[1][0].plot((ps.t - ps.start())/3600.0, ps.range()[0]*1e-3, '-')
 axes[1][0].set_xlabel('Time past epoch [h]')
 axes[1][0].set_ylabel('Range from TX [km]')
 
-axes[1][1].plot((data[0][0][0]['t'] - ps.start())/3600.0, 10*np.log10(data[0][0][0]['snr']), '.', label='observed-pass')
+axes[1][1].plot((data[0][0][0]['measurements']['t'] - ps.start())/3600.0, 10*np.log10(data[0][0][0]["measurements"]['snr']), '.', label='observed-pass')
 axes[1][1].set_xlabel('Time past epoch [h]')
 axes[1][1].set_ylabel('SNR [dB]')
 

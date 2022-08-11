@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
 '''
+=====================================
 Estimating orbit determination errors
-======================================
+=====================================
 
+This example computes the measurement jacobian and propagates measurement errors
+to calculate orbit determination errors. 
 '''
 import pathlib
 
@@ -48,13 +51,12 @@ obj = sorts.SpaceObject(
             out_frame='ITRS',
         ),
     ),
-    state = orb,
+    state=orb,
     epoch=Time(53005.0, format='mjd', scale='utc'),
     parameters = dict(
         A = 1.0,
     )
 )
-
 
 t = np.arange(0.0, end_t, dt)
 
@@ -62,8 +64,7 @@ print(f'Orbit:\n{str(orb)}')
 print(f'Temporal points: {len(t)}')
 
 states = obj.get_state(t)
-
-passes = radar.find_passes(t, states)
+passes = radar.find_passes(t, states, cache_data=True)
 
 #Create a list the same pass at the other rx stations
 #in this example we know that its index 0 at all of them and that it was tri-static
@@ -77,46 +78,45 @@ ps = rx_passes[0]
 use_inds = np.arange(0,len(ps.inds),len(ps.inds)//10)
 
 #Create a radar controller to track the object
-track = sorts.controllers.Tracker(radar = radar, t=t[ps.inds[use_inds]], ecefs=states[:3,ps.inds[use_inds]])
+track = sorts.controllers.Tracker()
 track.meta['target'] = 'Cool object 1'
-
-class Schedule(
-        sorts.scheduler.StaticList, 
-        sorts.scheduler.ObservedParameters,
-    ):
-    pass
+controls = track.generate_controls(t[ps.inds[use_inds]], radar, t[ps.inds[use_inds]], states[:3,ps.inds[use_inds]], t_slice=dt)
+radar_states = radar.control(controls)
 
 p = sorts.Profiler()
 p.start('total')
 
-sched = Schedule(radar = radar, controllers=[track], profiler=p)
-
-
 #Now we load the error model
 print(f'\nUsing "{pth}" as cache for LinearizedCoded errors.')
 err = measurement_errors.LinearizedCodedIonospheric(radar.tx[0], seed=123, cache_folder=pth)
-
 
 variables = ['x','y','z','vx','vy','vz','A']
 deltas = [1e-4]*3 + [1e-6]*3 + [1e-2]
 
 #observe one pass from all rx stations, including measurement Jacobian
 for rxi in range(len(radar.rx)):
-    #the Jacobean is stacked as [r_measurements, v_measurements]^T so we stack the measurement covariance equally
-    data, J_rx = sched.calculate_observation_jacobian(
+
+    #the Jacobian is stacked as [r_measurements, v_measurements]^T so we stack the measurement covariance equally
+    data, J_rx = radar.measurement_class.compute_measurement_jacobian(
         rx_passes[rxi], 
-        space_object=obj, 
-        variables=variables, 
-        deltas=deltas, 
+        radar_states,
+        obj, 
+        radar,
+        variables, 
+        deltas, 
         snr_limit=True,
+        exact=True,
         transforms = {
             'A': (lambda A: np.log10(A), lambda Ainv: 10.0**Ainv),
         },
+        parallelization=False,
+        n_processes=16,
+        profiler=p,
     )
 
     #now we get the expected standard deviations
-    r_stds_tx = err.range_std(data['range'], data['snr'])
-    v_stds_tx = err.range_rate_std(data['snr'])
+    r_stds_tx = err.range_std(data["measurements"]['range'], data["measurements"]['snr'])
+    v_stds_tx = err.range_rate_std(data["measurements"]['snr'])
 
     #Assume uncorrelated errors = diagonal covariance matrix
     Sigma_m_diag_tx = np.r_[r_stds_tx**2, v_stds_tx**2]

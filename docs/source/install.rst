@@ -1,20 +1,20 @@
+.. _sorts_install
 
+############
 Installation
-===============
+############
 
 SORTS
--------
+-----
 
 System requirements
-~~~~~~~~~~~~~~~~~~~~~~
-
+~~~~~~~~~~~~~~~~~~~
 * Unix (tested on Ubuntu-16.04 LTS, Ubuntu-server-16.04 LTS)
 * Python > 3.6
 
 
-Install SORTS
------------------
-
+Installation
+~~~~~~~~~~~~
 **To install SORTS**
 
 .. code-block:: bash
@@ -30,9 +30,11 @@ The installation can be automatically tested if `pytest` is also installed
    pytest
 
 
-From scratch
----------------
+Dependencies
+------------
 
+Python
+~~~~~~
 To install Python 3.7 (from the deadsnakes ppa) on Ubuntu 16 (WARNING: This method differs on Ubuntu 18/20)
 
 .. code-block:: bash
@@ -105,9 +107,8 @@ If you have trouble getting plotts from the examples, you might need to install 
 and force matplotlib to use that backend by creating a matplotlibrc file ( https://matplotlib.org/tutorials/introductory/customizing.html ) and adding "backend : TkAgg" to it.
 
 
-Install MPI
---------------
-
+MPI
+~~~
 Open MPI on Ubuntu
 
 .. code-block:: bash
@@ -125,9 +126,9 @@ MPICH on Ubuntu
    sudo apt install mpich
    pip install mpi4py
 
-Install Orekit
-----------------
 
+Orekit
+~~~~~~
 Using install script while a virtual environment is active on Ubuntu (from inside the SORTS repository)
 
 .. code-block:: bash
@@ -137,9 +138,8 @@ Using install script while a virtual environment is active on Ubuntu (from insid
    ./install_orekit.sh
 
 
-Install Pyglow
----------------
-
+Pyglow
+~~~~~~
 Taken from "https://github.com/timduly4/pyglow/"
 
 .. code-block:: bash
@@ -154,8 +154,7 @@ Taken from "https://github.com/timduly4/pyglow/"
 
 
 For developers
------------------
-
+--------------
 To install developer dependencies 
 
 .. code-block:: bash
@@ -168,7 +167,6 @@ To test
 .. code-block:: bash
 
    pytest
-
 
 
 To make doc

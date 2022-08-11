@@ -15,22 +15,85 @@ from sorts.radar.system.radar   import Radar
 from ..                         import radar_controls
 
 class Scanner(radar_controller.RadarController):
-    ''' Implements a Radar Scanning Controller
-    
-    This class is used to create scanning controls for a given radar system. To create a control, one instanciates the scanner class by giving a profiler and logger depending on the application. 
-   
+    ''' Generates radar scanning controls. 
+
+    The :class:`Scanner` class is used to create **RADAR scanning controls**. Scanning radar controls 
+    point the beam of the transmitter stations set of predefined directions inside
+    the local reference frame of the station. 
+
+    If beam steering is allowed, receivers can then perform multiple scans of
+    the TX beam at multiple ranges from the TX stations per time slice
+    (see the :ref:`example below<scanner_controller_example>`). 
+
+    Once instanciated, the class can be used multiple times to generate different 
+    scanning controls for different radar systems, parameters and control intervals.
+
+    .. seealso::
+
+        * :class:`sorts.Radar<sorts.radar.system.radar.Radar>` : class encapsulating the radar system.
+        * :class:`sorts.RadarController<sorts.radar.controllers.radar_controller.RadarController>` : radar controller base class.
+        * :class:`sorts.RadarControls<sorts.radar.radar_controls.RadarControls>` : class encapsulating radar control sequences.
+        * :ref:`sorts.scans<scans>` : module implementing a set of predefined scanning schemes.
+
+    Parameters
+    ----------
+    profiler : :class:`sorts.Profiler<sorts.common.profing.Profiler>`, default=None
+        Profiler instance used to monitor the computation performances of the class methods. 
+    logger : :class:`logging.Logger`, default=None
+        Logger instance used to log the computation status of the class methods.
     
     Examples
     --------
-    
-    calling the function generate_controls() with the radar to be controlled and the scan algorithm to be executed will return the corresponding array of controls. This can be achieved in the following manner :
-        
-        >>> scanner_controller = controllers.Scanner()
-        
-        >>> controls_radar_1 = scanner_controller.generate_controls(t, radar_1) # radar_1 is an instance of radar.system.Radar
-        >>> controls_radar_2 = scanner_controller.generate_controls(t, radar_2) # radar_2 is an instance of radar.system.Radar
+    .. _scanner_controller_example:
+
+    This short example showcases the generation of a scanning radar control sequence based on 
+    the :class:`sorts.scans.Fence<sorts.radar.scans.fence.Fence>` scanning scheme.
+
+    .. code-block:: Python
+
+        import numpy as np
+        import matplotlib.pyplot as plt
+
+        import sorts
+
+        # RADAR definition
+        eiscat3d = sorts.radars.eiscat3d
+
+        # Controller parameters
+        end_t = 100.0
+        t_slice = 0.1
+        max_points = 100
+
+        scan = sorts.scans.Fence(azimuth=-45.0, min_elevation=30.0, dwell=t_slice, num=max_points)
+
+        # instanciate the scanning controller 
+        scanner_ctrl = sorts.Scanner()
+
+        # generate scanning controls
+        t = np.arange(0, end_t, scan.dwell())
+        controls = scanner_ctrl.generate_controls(t, eiscat3d, scan, r=[1000e3], max_points=max_points)
+
+        # plot the first control period
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        # Plotting station ECEF positions and earth grid
+        sorts.plotting.grid_earth(ax, num_lat=25, num_lon=50, alpha=0.1, res = 100, color='black', hide_ax=True)
+        for tx in eiscat3d.tx:
+            ax.plot([tx.ecef[0]],[tx.ecef[1]],[tx.ecef[2]],'or')
+
+        for rx in eiscat3d.rx:
+            ax.plot([rx.ecef[0]],[rx.ecef[1]],[rx.ecef[2]],'og')
+
+        # plot pointing directions
+        period_id = 0 # get results over 1st control period
+        ctrl = controls.get_pdirs(period_id)
+        ax = sorts.plotting.plot_beam_directions(ctrl, eiscat3d, ax=ax, zoom_level=0.95, azimuth=10, elevation=10)
             
-    Only one Scanner controller is needed to create multiple controls for multiple scan methods and radars.
+        plt.show()
+
+    .. figure:: ../../../../figures/example_scanner_controller.png
+
     '''
 
     META_FIELDS = radar_controller.RadarController.META_FIELDS + [
@@ -43,31 +106,7 @@ class Scanner(radar_controller.RadarController):
             logger=None, 
             **kwargs
             ):
-        ''' Creates a Scanner controller to generate radar scanning controls. 
-
-        This class creates a Scanner controller to generate radar scanning controls. Only one Scanner controller is needed to create multiple 
-        controls for differnet scan methods and radars.
-        
-        Parameters
-        ----------
-        profiler : Profiler
-            Profiler instance used to check the generate_controls method performance.
-        logger : logging.Logger 
-            Logger instance used to log the execttion of the generate_controls method.
-        
-        Returns
-        -------
-        
-        The constructor returns an instance of controllers.Scanner that can be used to generate scanning controls.
-        
-        Example
-        -------
-        
-        An instance of the Scanner controller can be created in the following manner :
-            
-            >>> scanner_controller = controllers.Scanner()
-        
-        '''
+        ''' Default class constructor. '''
         super().__init__(profiler=profiler, logger=logger, **kwargs) # call the constructor from RadaController (parent class)
         
          # defines the controller type in the meta data
@@ -76,15 +115,148 @@ class Scanner(radar_controller.RadarController):
         if self.logger is not None:
             self.logger.info('Scanner:init')   
     
-    def compute_pointing_direction(
+    def compute_pointing_directions(
             self, 
             controls,
             period_id, 
             args, 
             ):
-        ''' Computes the beam orientation controls assiciated with the controller. 
+        ''' Computes the radar pointing directions for each time slice over a given control
+        period.
 
-        This function returns a generator allowing the computation of the said subarray (containing a maximum of max_points time points)
+        This function computes the pointing directions associated with a given **radar scanning scheme** 
+        (the scan type is stored within the metadata of ``controls``).
+
+        The station pointing direction corresponds to the *normalized Poynting vector* of the transmitted 
+        signal (i.e. its direction of propagation / direction of the beam). It is possible to have multiple 
+        pointing direction vectors per time slice for a single station. This feature can therefore be used 
+        to model digital beam steering of phased array receiver antennas (see radar_eiscat3d).
+
+        .. seealso::
+            * :class:`sorts.RadarControls<sorts.radar.radar_controls.RadarControls>` : class encapsulating a radar control sequence.
+            * :attr:`sorts.RadarControls.get_pdirs<sorts.radar.radar_controls.RadarControls.get_pdirs>` : function used to compute the pointing directions associated with a given control sequence. 
+            * :ref:`sorts.scans<scans>` : module implementing a set of predifined radar scanning schemes. 
+
+        This function will be called by the :attr:`RadarControls.get_pdirs<sorts.radar.radar_controls.RadarControls.get_pdirs>` 
+        in order to generate the pointing direction controls over each control period. Therefore, 
+        this function is usually called after the generation of station property controls is completed. 
+    
+        .. note::
+            The choice of allowing the user to compute separatly the pointing directions from the property controls
+            can be justified by the fact that pointing direction arrays can easily reach millions of values and computing
+            them all at once can quickly **fill up the RAM** of desktop computers.
+
+        Parameters
+        ----------
+        controls : :class:`sorts.RadarControls<sorts.radar.radar_controls.RadarControls>`
+            RadarControls instance containing the current control sequence being generated.
+        period_id : int
+            Control period index.
+        args : variable or list of variables
+            Distance (or array of distances if beam-steering is used) from the transmitter stations which will be 
+            scanned by the receiver stations. 
+
+            >>> r = args 
+        
+        Returns 
+        -------
+        pdirs : dict
+            Pointing direction computation results. The data is organized as a dictionnary with 3 keys :
+
+            - "tx":
+                Contains the pointing directions of all radar :class:`sorts.TX<sorts.radar.system.station.TX>` stations.
+                The data within ``pdirs["tx"]`` is organized as follows :
+
+                >>> pdirs['tx'][txi, 0, i, j]
+
+                With :
+
+                - txi :
+                    Index of the :class:`sorts.TX<sorts.radar.system.station.TX>` station within the :attr:`Radar.tx<sorts.radar.system.radar.Radar.tx>` list.
+                - i :
+                    :math:`i^{th}` component of the pointing direction. :math:`i \\in [\\![ 0, 3 [\\![`
+                - j : 
+                    :math:`j^{th}` time point.
+                    Beware that since there can be multiple pointing directions per time slice, the number of pointing directions
+                    for a single station is greater or equal to the number of time slices of the control sequence.
+
+            - "rx":
+                Contains the pointing directions of all radar :class:`sorts.RX<sorts.radar.system.station.RX>` stations.
+                The data within ``pdirs["rx"]`` is organized as follows :
+
+                >>> pdirs['rx'][rxi, txi, i, j]
+
+                With :
+
+                - txi :
+                    Index of the :class:`sorts.RX<sorts.radar.system.station.RX>` station within the :attr:`Radar.rx<sorts.radar.system.radar.Radar.rx>` list.
+                - i :
+                    :math:`i^{th}` component of the pointing direction. :math:`i \\in [\\![ 0, 3 [\\![`
+                - j : 
+                    :math:`j^{th}` time point.
+                    Beware that since there can be multiple pointing directions per time slice, the number of pointing directions
+                    for a single station is greater or equal to the number of time slices of the control sequence.
+            
+            - "t": 
+                Contains the pointing direction time array. When there are more than one pointing direction per time slice, the
+                number of time points within the pointing direction time array will be greater than the number of time slices within the 
+                control sequence.
+
+        Examples
+        --------
+        Consider a control sequence ``controls`` generated by a radar controller performing a scan over 9 time slices. The
+        controller uses digital beam steering over the stations such that during each time slice, the receiver stations are 
+        able to target two points of the radar beam. The controlled radar system is the EISCAT_3D radar, **comprised of 3 
+        receiving stations and 1 transmitting station**.
+
+        The control period is set by a radar scheduler such that:
+
+            - :math:`t_0 = 0` seconds
+            - :math:`\\Delta t_{sched} = 5` seconds
+
+        This yields the following controller time slice arrays:
+        
+        >>> controls.t 
+        array([[0., 1., 2., 3., 4.], [5., 6., 7., 8.]])
+        >>> controls.t_slice
+        array([[0.1, 0.1, 0.1, 0.1, 0.1], [0.1, 0.1, 0.1, 0.1]])
+
+        Since digital beam steering allows for the simultaneous stanning of multiple points, the pointing direction time arrays
+        will be:
+
+        >>> controls.pdirs[0]["t"]
+        array([0., 0., 1., 1., 2., 2., 3., 3., 4., 4.])
+        >>> controls.pdirs[1]["t"]
+        array([5., 5., 6., 6., 7., 7., 8., 8.])
+
+        The shape of the pointing direction arrays will therefore be:
+
+        >>> controls.pdirs[0]["tx"].shape
+        (1, 1, 3, 10)
+        >>> controls.pdirs[1]["tx"].shape
+        (1, 1, 3, 8)
+        >>> controls.pdirs[0]["rx"].shape
+        (3, 1, 3, 10)
+        >>> controls.pdirs[1]["rx"].shape
+        (3, 1, 3, 8)
+
+        To get the pointing direction of the first scan of the 2nd RX station during the time slice t = 7 seconds, we need
+        to run:
+
+        >>> controls.get_pdirs(1)["rx"][1, 0, :, 4]
+        
+        And to get the second one:
+
+        >>> controls.get_pdirs(1)["rx"][1, 0, :, 5]
+
+        To get the pointing direction of the first scan of the only TX station during the time slice t = 3 seconds, we need
+        to run:
+
+        >>> controls.get_pdirs(0)["tx"][0, 0, :, 6]
+
+        and to get the second:
+
+        >>> controls.get_pdirs(0)["tx"][0, 0, :, 7]
         '''
         r = args
 
@@ -136,218 +308,125 @@ class Scanner(radar_controller.RadarController):
             radar, 
             scan,
             r=np.linspace(300e3, 1000e3, num=10), 
-            as_altitude=False, 
             scheduler=None,
             priority=None,
             max_points=1000,
-            beam_enabled=True,
             cache_pdirs=False,
             ):
-        '''Generates RADAR scanning controls in a given direction. 
+        ''' Generates RADAR scanning controls following a specific scanning scheme. 
 
-        This method can be called multiple times to generate different controls for different radar systems.
-           
+        This method is used to create **RADAR scanning controls**. Scanning radar controls 
+        point the beam of the transmitter stations set of predefined directions inside
+        the local reference frame of the station. 
+
+        If beam steering is enabled, receivers can then perform multiple scans of
+        the TX beam at multiple ranges from the TX stations (see the :ref:`example 
+        below<scanner_controller_generate_controls_example>`). 
+
+        Once instanciated, the the class can be used multiple times to generate different 
+        scanning controls for different radar systems, parameters and control intervals.
+        
+        .. seealso::
+            * :class:`sorts.Radar<sorts.radar.system.radar.Radar>` : class encapsulating a radar system.
+            * :ref:`sorts.scans<scans>` : module implementing a set of predefined scanning schemes.
+
         Parameters
         ----------
-        
-        t : numpy.ndarray 
-            Time points at which the controls are to be generated [s]
-        radar : radar.system.Radar 
-            Radar instance to be controlled
-        scan : scans.Scan 
-            Instance of the scanning algorithm used to perform the RADAR scanning scheme
-        t_slice : float/numpy.ndarray 
-            Array of time slice durations. The duration of the time slice for a given control must be less than or equal to the time step
-        r : float/numpy.ndarray 
-            Array of ranges from the transmitter beam at which the receiver will perform scans during a given time slice 
-        scheduler : int priority (optional)
-            RadarControlschedulerBase instance used for scheduling time sunchromization between controls for tims slicing. 
-            Time slicing refers to the slicing of the time array into multiple subcontrol arrays (given as generator objects) to reduce memory (RAM) usage.
-            This parameter is only useful when multiple controls are sent to a given scheduler.
-            If the scheduler is not provided, the controller will slice the controls using the max_points parameter.
-        priority : int priority (optional)
-            Priority of the generated controls, only used by the scheduler to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
-        max_points : int (optional)
-            Max number of points for a given control array computed simultaneously. This number is used to limit the impact of computations over RAM
-            Note that lowering this number might increase computation time, while increasing this number might cause problems depending on the available RAM on your machine
-        
-       
+        t : numpy.ndarray (N,)
+            Time points at which the controls are to be generated (in seconds).
+        radar : :class:`sorts.Radar<sorts.radar.system.radar.Radar>`
+            Radar instance to be controlled.
+        scan : :class:`sorts.Scan<sorts.radar.scans.scan.Scan>`
+            Scan instance defining the scanning scheme used to generate the radar control sequence.
+        r : float / numpy.ndarray (M,), default=np.linspace(300e3,1000e3,num=10)
+            Array of ranges from the transmitter beam at which the receiver will perform scans during a 
+            given time slice (in meters).
+        scheduler : :class:`sorts.RadarSchedulerBase<sorts.radar.scheduler.base.RadarSchedulerBase>`, default=None
+            RadarSchedulerBase instance used for time synchronization between control periods.
+            This parameter is useful when multiple controls are sent to a given scheduler.
+            If the scheduler is not provided, the control periods will be generated using the ``max_points``
+            parameter.
+        priority : int, default=None
+            Priority of the generated controls, only used by the static priority scheduler to choose between 
+            overlapping controls. 
+            Low numbers indicate a high control prioriy.
+        max_points : int, default=100
+            Max number of points for a given control array computed simultaneously. 
+            This number is used to limit the impact of computations over RAM.
+
+            .. note::
+                Lowering this number might increase computation time, while increasing this number might cause
+                memory problems depending on the available RAM on your machine.
+
+        cache_pdirs : bool, default=False
+            If ``True``, the pointing directions will be computed and stored. Calling the function 
+            :attr:`RadarControls.get_pdirs<sorts.radar.radar_controls.RadarControls.get_pdirs>` will return
+            the pre-computed pointing directions. 
+            If ``False``, the pointing directions will be computed at each :attr:`RadarControls.get_pdirs
+            <sorts.radar.radar_controls.RadarControls.get_pdirs>` call.
+            
+            .. note::
+                Enabling the option increases RAM usage, but decreases computation time. 
+
         Returns
         -------
-        Python dictionary 
-            Controls to be applied to the radar to perform the required scanning scheme. 
-        
-        In the case of the Scanner controller, the controls are the following :
-    
-        - "t"
-            1D array of time points at which the controls need to be executed by the radar
-        
-        - "t_slice"
-            1D array containing the duration of a time slice. A time slice represent the elementary quanta which corresponds to a single measurement. Therefore, it also corresponds to the maximal time resolution achievable by our system.
-        
-        - "priority"
-            Priority of the generated controls, only used by the scheduler to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
-            
-        - "enabled"
-           State of the radar (enabled/disabled). If this value is a single boolean, then radar measurements will be enabled at each time step. If the value is an array, then the state of the radar
-           at time t[k] will be enabled[k]=True/False
-       
-        - "beam_direction"
-            Python generator list of control subarrays (each comprised of max_points time_steps). The data from each subarray is stored in a python dictionary of keys :
-            
-            - "tx"
-                Array of unit vectors representing the target direction of the beam for a given Tx station at time t. 
-                To ensure that this controls can be understood by the radar and the scheduler, the orientation data is given in the following standard:
-                
-                - Dimension 0 : 
-                    Tx station index. In the case where there is only one Tx station considered, the value of this index will be 0.
-               
-                - Dimension 1 : 
-                    Rx station ID associated with Tx. When no stations is associated to Tx, the index is 0 (which is generally the case)   
-                    
-                - Dimension 2 : 
-                    Starting date of each control time slice.
-                    
-                - Dimension 3 : 
-                    Control points per time slice (each time slice can contain multiple orientation controls per time slice)
-                       
-                - Dimension 4 : 
-                    position index (0, 1, 2) = (x, y, z)
+        controls : :class:`sorts.RadarControls<sorts.radar.radar_controls.RadarControls>`
+            Radar control structure containing the list of instructions needed to perform the operation
+            defined by the type of radar controller.
 
-            - "rx"
-                Array of unit vectors representing the target direction of the beam for a given Rx station at time t. 
-                To ensure that this controls can be understood by the radar and the scheduler, the orientation data is given in the following standard:
-            
-                - Dimension 0 : 
-                    Rx station index. In the case where there is only one Rx station considered, the value of this index will be 0.
-               
-                - Dimension 1 : 
-                    Tx station ID associated with Rx. When there is one Tx stations is associated to Rx, 
-                    the controls for the (Rx, Tx) tuple can be accessed by setting this index to 0.
-                    
-                - Dimension 2 : 
-                    Starting date of each control time slice.
-                    
-                - Dimension 3 : 
-                    Control points per time slice (each time slice can contain multiple orientation controls per time slice)
-                       
-                - Dimension 4 : 
-                    position index (0, 1, 2) = (x, y, z)
-        
-        - "meta":
-            This field contains the controls metadata :
-                
-            - "scan" : 
-                sorts.radar.Scan instance used to generate the scan.
-                
-            - "radar" :
-                sorts.radar.system.Radar instance being controlled.
-                
-            - "max_points" :
-                Number of time points per control subarray (this value is not used if the scheduler is not none)
-                
-            - "scheduler" :
-                sorts.controls_scheduler.RadarControlschedulerBase instance associated with the control array. This instance is used to 
-                divide the controls into subarrays of controls according to the scheduler scheduling period to 
-                reduce memory/computational overhead.
-                If the scheduler is not none, the value of the scheduling period will take over the max points parameter (see above)
-                
-        - "priority"
-            Priority of the generated controls, only used by the scheduler to choose between overlapping controls. Low numbers indicate a high control prioriy. -1 is used for dynamic priority scheduler algorithms.
-        
         Examples
         --------
+        This short example showcases the generation of radar scanning controls using the :class:`Scanner` radar controller
+        class:
 
-        Suppose that there is a sinle Tx station performing a scan at 100 different time points. We alse suppose that 
-        the echos are gathered by two receiver stations Rx that will perform a scan at 10 different altitudes at each time slice.
-        Note that there will be only one control per time slice for the Tx controls since the role of Tx is to send a pulse 
-        in the direction of the target. In theory there would be multiple pulses per time slice, but since the direction 
-        would remain the same, we chose to only keep one direction control per time slice. Since the orientation for Tx 
-        remains the same for a given time slice, the discrepency between the number of controls between Rx/Tx can simply 
-        be solved by comparing the number of controls per time slice for Tx and Rx.
-        
-        The shape of the output "beam_direction_tx" array will be (1, 1, 100, 1, 3). 
-        The shape of the output "beam_direction_rx" array will be (3, 1, 100, 10, 3). 
-        
-        - To get the z component of the beam direction of the Tx station at the second time step. 
-            
-            We assume that there is no Rx station associated with the Tx station and that there is only one control per time slice. 
-            
-            Therefore, we have :
-            
-            - Dimension 0: Tx id -> 0 (only one station)
-            - Dimension 1: Rx id -> 0 (no Rx station associated with Tx)
-            - Dimension 2: Time slice -> 2 (second time step)
-            - Dimension 3: Control point -> 0 (only one control per time slice)
-            - Dimension 4: (x, y, z) -> 2 (we want to get the z coordinate)
+        .. _scanner_controller_generate_controls_example:
+
+        .. code-block:: Python
+
+            import numpy as np
+            import matplotlib.pyplot as plt
+
+            import sorts
+
+            # RADAR definition
+            eiscat3d = sorts.radars.eiscat3d
+
+            # Controller parameters
+            end_t = 100.0
+            t_slice = 0.1
+            max_points = 100
+
+            scan = sorts.scans.Fence(azimuth=-45.0, min_elevation=30.0, dwell=t_slice, num=max_points)
+
+            # instanciate the scanning controller 
+            scanner_ctrl = sorts.Scanner()
+
+            # generate scanning controls
+            t = np.arange(0, end_t, scan.dwell())
+            controls = scanner_ctrl.generate_controls(t, eiscat3d, scan, r=[1000e3], max_points=max_points)
+
+            # plot the first control period
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+
+            # Plotting station ECEF positions and earth grid
+            sorts.plotting.grid_earth(ax, num_lat=25, num_lon=50, alpha=0.1, res = 100, color='black', hide_ax=True)
+            for tx in eiscat3d.tx:
+                ax.plot([tx.ecef[0]],[tx.ecef[1]],[tx.ecef[2]],'or')
+
+            for rx in eiscat3d.rx:
+                ax.plot([rx.ecef[0]],[rx.ecef[1]],[rx.ecef[2]],'og')
+
+            # plot pointing directions
+            period_id = 0 # get results over 1st control period
+            ctrl = controls.get_pdirs(period_id)
+            ax = sorts.plotting.plot_beam_directions(ctrl, eiscat3d, ax=ax, zoom_level=0.95, azimuth=10, elevation=10)
                 
-            Yielding :
-            
-            >>> ctrl = controls["beam_direction"]["tx"][0, 0, 2, 0, 2]
-        
-        - To get the x component of the beam direction of the Tx station at the 35th time step. 
-        
-            We assume that there is only one Tx station and that we want to get every orientation control per time slice. 
-            There are no Rx stations associated with Tx.
-            
-            Therefore, we have :
-                
-            - Dimension 0: Tx id -> 0 (only one Tx station)
-            - Dimension 1: Rx id -> 0 (no Rx station associated with Tx)
-            - Dimension 2: Time slice -> 34 (second time step)
-            - Dimension 3: Control point -> : (we want to get every orientation control for the given time slice)
-            - Dimension 4: (x, y, z) -> 0 (we want to get the x coordinate)
-            
-            Yielding :
-        
-            >>> ctrl = controls["beam_direction"]["tx"][0, 0, 34, :, 0]
-            
-        - To get the z component of the beam direction of the first Rx station with respect to the 2nd scan at range r of the Tx beam at during the third time slice.
-            
-            Therefore, we have :
-                
-            - Dimension 0: Rx id -> 0 (first Rx station)
-            - Dimension 1: Tx id -> 0 (only one Tx station)
-            - Dimension 2: Time slice -> 2 (third time step)
-            - Dimension 3: Control point -> 1 : (we want to get the second orientation control for the given time slice)
-            - Dimension 4: (x, y, z) -> 2 (we want to get the z coordinate)
-            
-            >>> ctrl = controls["beam_direction"]["rx"][0, 0, 2, 1, 2]
-         
-        - To get the y component of the beam direction of the second Rx station with respect to the 5th scan at range r of the Tx beam at the 80th time slice.
-            
-            Therefore, we have :
-                
-            - Dimension 0: Rx id -> 1 (second Rx station)
-            - Dimension 1: Tx id -> 0 (only one Tx station)
-            - Dimension 2: Time slice -> 79 (80th time step)
-            - Dimension 3: Control point -> 4 : (5th orientation control for the given time slice)
-            - Dimension 4: (x, y, z) -> 1 (we want to get the y coordinate)
-        
-            >>> ctrl = controls["beam_direction"]["rx"][1, 0, 79, 4, 1]
+            plt.show()
 
-        One can generate scanning controls for a given target as follows :
+        .. figure:: ../../../../figures/example_scanner_controller.png
 
-        >>> logger = profiling.get_logger('static')
-        >>> p = profiling.Profiler() # Profiler
-
-        >>> # Computation / test setup
-        >>> end_t = 24*3600
-        >>> nbplots = 1
-        >>> t_slice = 0.1
-        >>> max_points = 1000
-        >>> log_array_sizes = True
-
-        >>> eiscat3d = instances.eiscat3d # RADAR definition
-
-        >>> # create scan and controller
-        >>> scan = Fence(azimuth=90, min_elevation=30, dwell=t_slice, num=50)
-        >>> scanner_controller = controllers.Scanner(profiler=p, logger=logger)
-
-        >>> t = np.arange(0, end_t, t_slice)
-        >>> controls = scanner_controller.generate_controls(t, eiscat3d, scan, t_slice=t_slice, max_points=max_points)
-        
-      '''
+        '''
         # add new profiler entry
         if self.profiler is not None:
             self.profiler.start('Scanner:generate_controls')

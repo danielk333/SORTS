@@ -152,21 +152,27 @@ intersphinx_mapping = {
 # -----------------------------------------------------------------------------
 # Breathe & Doxygen
 # -----------------------------------------------------------------------------
-breathe_projects = dict(sorts=os.path.join("..", "build", "doxygen", "xml"))
-breathe_default_project = "sorts"
+breathe_projects = dict(sorts=os.path.join("..", "build", "breathe", "doxygen",  "sorts","xml"))
+
+source_folder_path = "../../src"
+breathe_projects_source = {
+     "sorts" : ( source_folder_path, ["signals.h"])
+}
+
 breathe_default_members = ("members", "undoc-members", "protected-members")
+breathe_default_project = "sorts"
 
+# Autosummary short name
 from sphinx.ext.autosummary.generate import AutosummaryRenderer
-
 def shortname(fullname):
     parts = fullname.split(".")
     return ".".join(parts[-2:])
-
 
 def fixed_init(self, app, template_dir=None):
     AutosummaryRenderer.__old_init__(self, app, template_dir)
     self.env.filters["shortname"] = shortname
 
-
 AutosummaryRenderer.__old_init__ = AutosummaryRenderer.__init__
 AutosummaryRenderer.__init__ = fixed_init
+
+

@@ -1,5 +1,6 @@
 #include "signals.h"
 
+
 void hard_target_snr_vectorized(
         double *_gain_tx, 
         double *_gain_rx,
@@ -14,50 +15,28 @@ void hard_target_snr_vectorized(
         double *_snr,
         int _N
     )
-/*    
-    Determine the signal-to-noise ratio (energy-to-noise) ratio for a hard target.
-    Assume a smooth transition between Rayleigh and optical scattering. 
-    Ignore Mie regime and use either optical or Rayleigh scatter.
-
-    :param float/numpy.ndarray gain_tx: transmit antenna gain, linear
-    :param float/numpy.ndarray gain_rx: receiver antenna gain, linear
-    :param float wavelength: radar wavelength (meters)
-    :param float power_tx: transmit power (W)
-    :param float/numpy.ndarray range_tx_m: range from transmitter to target (meters)
-    :param float/numpy.ndarray range_rx_m: range from target to receiver (meters)
-    :param float diameter: object diameter (meters)
-    :param float bandwidth: effective receiver noise bandwidth
-    :param float rx_noise_temp: receiver noise temperature (K)
-    :return: signal-to-noise ratio
-    :rtype: float/numpy.ndarray
-
-
-    **Reference:** Markkanen et.al., 1999
-*/
 {   
     double power;
     double rx_noise;
     double separator;
 
+    // marks the separation between the Optical/Reighley regimes
     separator = _wavelength/(M_PI*sqrt(3.0));
     rx_noise = BOLTZMAN_CONSTANT * _rx_noise_temp * _bandwidth;
 
+    // compute for each points
     for(int ti = 0; ti < _N; ti++)
     {
-        separator = _wavelength/(M_PI*sqrt(3.0));
-
-        if (_diameter < separator)
-        {
+        if (_diameter < separator) // Reighley scattering regime
             power = _power_tx*_gain_tx[ti]*_gain_rx[ti]*pow(3.0*M_PI*pow(_diameter, 3.0)/(_wavelength*_range_rx_m[ti]*_range_tx_m[ti]), 2.0)/256.0;
-        }
-        else
-        {
+        else // Optical scattering regime
             power = _power_tx*_gain_tx[ti]*_gain_rx[ti]*pow(_wavelength * _diameter / (M_PI*_range_tx_m[ti]*_range_rx_m[ti]), 2.0)/256.0;
-        }
-                    
+        
+        // compute SNR 
         _snr[ti] = power*_radar_albedo/rx_noise;
     }
 }
+
 
 void hard_target_snr(
         double _gain_tx, 
@@ -72,43 +51,23 @@ void hard_target_snr(
         double _radar_albedo,
         double *_snr
     )
-/*    
-    Determine the signal-to-noise ratio (energy-to-noise) ratio for a hard target.
-    Assume a smooth transition between Rayleigh and optical scattering. 
-    Ignore Mie regime and use either optical or Rayleigh scatter.
-
-    :param float/numpy.ndarray gain_tx: transmit antenna gain, linear
-    :param float/numpy.ndarray gain_rx: receiver antenna gain, linear
-    :param float _wavelength: radar wavelength (meters)
-    :param float power_tx: transmit power (W)
-    :param float/numpy.ndarray range_tx_m: range from transmitter to target (meters)
-    :param float/numpy.ndarray range_rx_m: range from target to receiver (meters)
-    :param float diameter: object diameter (meters)
-    :param float bandwidth: effective receiver noise bandwidth
-    :param float rx_noise_temp: receiver noise temperature (K)
-    :return: signal-to-noise ratio
-    :rtype: float/numpy.ndarray
-
-
-    **Reference:** Markkanen et.al., 1999
-*/
 {   
     double power;
     double rx_noise;
     double separator;
 
+    // Rx noise power
     rx_noise = BOLTZMAN_CONSTANT * _rx_noise_temp * _bandwidth;
+
+    // marks the separation between the Optical/Reighley regimes
     separator = _wavelength/(M_PI*sqrt(3.0));
 
-    if (_diameter < separator)
-    {
+    if (_diameter < separator) // Reighley scattering regime
         power = _power_tx*_gain_tx*_gain_rx*pow(3.0*M_PI/(_wavelength*_range_rx_m*_range_tx_m), 2.0)*pow(_diameter, 6.0) / 256.0;
-    }
-    else
-    {
+    else // Optical scattering regime
         power = _power_tx*_gain_tx*_gain_rx*pow(_wavelength*_diameter/(M_PI*_range_tx_m*_range_rx_m), 2.0) / 256.0;
-    }
-                
+    
+    // compute SNR       
     *_snr = power*_radar_albedo/rx_noise;
 }
 
@@ -128,54 +87,36 @@ void hard_target_diameter_vectorized(
             int _N
         )
 {
-    /*
-    Determine the diamtere for a hard target based on the signal-to-noise ratio (energy-to-noise).
-    Assume a smooth transition between Rayleigh and optical scattering. 
-    Ignore Mie regime and use either optical or Rayleigh scatter.
-
-    :param float/numpy.ndarray gain_tx: transmit antenna gain, linear
-    :param float/numpy.ndarray gain_rx: receiver antenna gain, linear
-    :param float wavelength: radar wavelength (meters)
-    :param float power_tx: transmit power (W)
-    :param float/numpy.ndarray range_tx_m: range from transmitter to target (meters)
-    :param float/numpy.ndarray range_rx_m: range from target to receiver (meters)
-    :param float snr: object signal to noise ratio (1)
-    :param float bandwidth: effective receiver noise bandwidth
-    :param float rx_noise_temp: receiver noise temperature (K)
-    :return: diameter (meters)
-    :rtype: float/numpy.ndarray
-
-    **Reference:** Markkanen et.al., 1999
-    */
-
     double diameter_rayleigh;
     double diameter_optical;
     double separatrix;
-
     double rx_noise;
     double power;
 
+    // Rx noise power
     rx_noise = BOLTZMAN_CONSTANT * _rx_noise_temp * _bandwidth;
 
+    // compute for each time point
     for(int ti = 0; ti < _N; ti++)
-    {
+    {   
+        // Rx power of the signal
         power = _snr[ti]*rx_noise/_radar_albedo;
 
+        // compute diameters for each scattering regime
         diameter_rayleigh = pow(256.0* power / (9.0*_power_tx*_gain_tx[ti]*_gain_rx[ti]) * pow(_wavelength *_range_rx_m[ti]*_range_tx_m[ti]/M_PI, 2.0), 1.0/6.0);
         diameter_optical = sqrt(256.0 * pow(M_PI*_range_rx_m[ti]*_range_tx_m[ti]/_wavelength, 2.0) * power/(_power_tx*_gain_tx[ti]*_gain_rx[ti]));
 
+        // compute transition diameter (Rayleigh/Optical)
         separatrix = _wavelength / (M_PI * sqrt(3.0));
 
+        // compute real diameter
         if(diameter_rayleigh < separatrix)
-        {
             _diameter[ti] = diameter_rayleigh;
-        }
         else
-        {
             _diameter[ti] = diameter_optical;
-        }     
     }
 }
+
 
 void hard_target_diameter(
             double _gain_tx, 
@@ -191,51 +132,30 @@ void hard_target_diameter(
             double *_diameter
         )
 {
-    /*
-    Determine the diamtere for a hard target based on the signal-to-noise ratio (energy-to-noise).
-    Assume a smooth transition between Rayleigh and optical scattering. 
-    Ignore Mie regime and use either optical or Rayleigh scatter.
-
-    :param float/numpy.ndarray gain_tx: transmit antenna gain, linear
-    :param float/numpy.ndarray gain_rx: receiver antenna gain, linear
-    :param float wavelength: radar wavelength (meters)
-    :param float power_tx: transmit power (W)
-    :param float/numpy.ndarray range_tx_m: range from transmitter to target (meters)
-    :param float/numpy.ndarray range_rx_m: range from target to receiver (meters)
-    :param float snr: object signal to noise ratio (1)
-    :param float bandwidth: effective receiver noise bandwidth
-    :param float rx_noise_temp: receiver noise temperature (K)
-    :return: diameter (meters)
-    :rtype: float/numpy.ndarray
-
-
-    **Reference:** Markkanen et.al., 1999
-    */
-
     double diameter_rayleigh;
     double diameter_optical;
     double separatrix;
-
     double rx_noise;
     double power;
 
+    // noise power
     rx_noise = BOLTZMAN_CONSTANT * _rx_noise_temp * _bandwidth;
 
+    // received power
     power = _snr*rx_noise/_radar_albedo;
 
+    // compute diameters for each scattering mode
     diameter_rayleigh = pow(256.0*power*pow(_wavelength*_range_rx_m*_range_tx_m/M_PI, 2.0)/(9.0*_power_tx*_gain_tx*_gain_rx), 1.0/6.0);
     diameter_optical = sqrt(256.0*power*pow(M_PI*_range_rx_m*_range_tx_m/_wavelength, 2.0)/(_power_tx * _gain_tx * _gain_rx));
 
+    // compute transition diameter (Rayleigh/Optical)
     separatrix = _wavelength/(M_PI * sqrt(3.0));
 
+    // compute real diameter
     if(diameter_rayleigh < separatrix && diameter_optical < separatrix)
-    {
         *_diameter = diameter_rayleigh;
-    }
     if(diameter_rayleigh >= separatrix && diameter_optical >= separatrix)
-    {
         *_diameter = diameter_optical;
-    }     
 }
 
 
@@ -250,29 +170,8 @@ void incoherent_snr(
     double *_minimal_observation_time
     )
 { 
-    /*
-    Computes the incoherent signal to noise ratio and the minimal observation time required
-    
-    :param float signal_power: signal power (W)
-    :param float noise_power: noise power (W)
-    :param float epsilon: statistical significance criterion for a detection (-)
-    :param float bandwidth: measurement bandwidth (Hz)
-    :param float incoherent_integration_time: range from transmitter to target (meters)
-
-    :return: signal to noise ratio (-)
-    :return: incoherent signal to noise ratio (-)
-    :return: minimal observation time (s)
-    
-    :rtype: float
-    :rtype: float
-    :rtype: float
-
-    **Reference:** D. Kastinen et al.: Radar observability of near-Earth objects with EISCAT 3, 2020
-        
-    TODO: generalize theory??
-    TODO: Juha knows 
-    */
     int n_measurement;
+    // compute the number of measurements needed
     n_measurement = (int)(_incoherent_integration_time * _bandwidth);
 
     // results
@@ -280,6 +179,7 @@ void incoherent_snr(
     *_minimal_observation_time = pow((_signal_power + _noise_power)/(_epsilon*_signal_power), 2.0)/_bandwidth; // compute the minimum required observation time needed to reduce the relative error to epsilon as follows
     *_snr_incoh = (*_snr)*sqrt(n_measurement); // Compute the incoherent signal to noise ratio
 }
+
 
 void doppler_spread_hard_target_snr(
         double _t_obs, 
@@ -299,32 +199,6 @@ void doppler_spread_hard_target_snr(
         double *_snr_incoh
     )
 {   
-    /*
-    Computes the coherent and incoherent signal to noise ratio for a spinning rigid object by taking into account the doppler shift
-    
-    :param float _t_obs: measurement duration (s)
-    :param float _spin_period: rotation period of the object being observed (s)
-    :param float/numpy.ndarray gain_tx: transmit antenna gain, linear (-)
-    :param float/numpy.ndarray gain_rx: receiver antenna gain, linear (-)
-    :param float wavelength: radar wavelength (m)
-    :param float power_tx: transmit power (W)
-    :param float/numpy.ndarray range_tx_m: range from transmitter to target (m)
-    :param float/numpy.ndarray range_rx_m: range from target to receiver (m)
-    :param float duty_cycle: RADAR measurement duty cycle (-)
-    :param float diameter: object diameter (m)
-    :param float bandwidth: effective receiver noise bandwidth (Hz)
-    :param float rx_noise_temp: receiver noise temperature (K)
-    :param float radar_albedo: RADAR albedo of the object beaing observed (-)
-
-    :return: signal to noise ratio using coherent integration, when doing object discovery with a limited coherent integration duration and no incoherent integration
-    :return: the signal to noise ratio using incoherent integration, when using a priori orbital elements to assist in coherent integration and incoherent integration. Coherent integration length is determined by t_obs (seconds)
-    
-    :rtype: float
-    :rtype: float
-
-    **Reference:** D. Kastinen et al.: Radar observability of near-Earth objects with EISCAT 3, 2020
-    */
-
     double doppler_bandwidth;
     double detection_bandwidth;
     double base_int_bandwidth;
@@ -400,32 +274,6 @@ void doppler_spread_hard_target_snr_vectorized(
         int _N
     )
 {   
-    /*
-    Computes the coherent and incoherent signal to noise ratio for a spinning rigid object by taking into account the doppler shift
-    
-    :param float _t_obs: measurement duration (s)
-    :param float _spin_period: rotation period of the object being observed (s)
-    :param float/numpy.ndarray gain_tx: transmit antenna gain, linear (-)
-    :param float/numpy.ndarray gain_rx: receiver antenna gain, linear (-)
-    :param float wavelength: radar wavelength (m)
-    :param float power_tx: transmit power (W)
-    :param float/numpy.ndarray range_tx_m: range from transmitter to target (m)
-    :param float/numpy.ndarray range_rx_m: range from target to receiver (m)
-    :param float duty_cycle: RADAR measurement duty cycle (-)
-    :param float diameter: object diameter (m)
-    :param float bandwidth: effective receiver noise bandwidth (Hz)
-    :param float rx_noise_temp: receiver noise temperature (K)
-    :param float radar_albedo: RADAR albedo of the object beaing observed (-)
-
-    :return: signal to noise ratio using coherent integration, when doing object discovery with a limited coherent integration duration and no incoherent integration
-    :return: the signal to noise ratio using incoherent integration, when using a priori orbital elements to assist in coherent integration and incoherent integration. Coherent integration length is determined by t_obs (seconds)
-    
-    :rtype: float
-    :rtype: float
-
-    **Reference:** D. Kastinen et al.: Radar observability of near-Earth objects with EISCAT 3, 2020
-    */
-
     double doppler_bandwidth;
     double detection_bandwidth;
     double base_int_bandwidth;

@@ -2,6 +2,4 @@
 
 .. currentmodule:: {{ module }}
 
-.. rubric:: {{ objname }}
-
 .. autofunction:: {{ objname }}

@@ -9,8 +9,7 @@ import numpy as np
 from .fence import Fence
 
 class RandomFence(Fence):
-    '''General fence scan.
-    '''
+    ''' Random fence scan. Not implemented yet -> TODO '''
 
     def pointing(self, t):
         raise NotImplementedError()

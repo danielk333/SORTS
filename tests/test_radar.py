@@ -104,9 +104,9 @@ class TestRadar(unittest.TestCase):
 
 	def test_in_fov(self):
 		dir_1 = np.array([0.33087577, 0.12248111, 0.93569204, 0, 0, 0]) # 90 deg of elevation        
-        dir_2 = np.array([0.18286604, 0.28205454, 0.94180956, 0, 0, 0]) # 77.5 deg of elevation     
-        dir_3 = np.array([-0.1004115, 0.53090257, 0.84146301, 0, 0, 0]) # 55 deg of elevation       
-        dir_4 = np.array([-0.6476016, 0.75067923, 0.13073926, 0, 0, 0]) # 0 deg of elevation
+		dir_2 = np.array([0.18286604, 0.28205454, 0.94180956, 0, 0, 0]) # 77.5 deg of elevation     
+		dir_3 = np.array([-0.1004115, 0.53090257, 0.84146301, 0, 0, 0]) # 55 deg of elevation       
+		dir_4 = np.array([-0.6476016, 0.75067923, 0.13073926, 0, 0, 0]) # 0 deg of elevation
 		dirs = np.asfarray([dir_1, dir_2, dir_3, dir_4]).T
 
 		ecef = dirs * np.array([[1550.0, 896.2, 1434.0, 4575.1]])*1e3

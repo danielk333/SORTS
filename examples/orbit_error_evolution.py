@@ -59,19 +59,17 @@ print(f'Temporal points: {len(t)}')
 
 states = obj.get_state(t)
 
+# compute passes
 passes = radar.find_passes(t, states, radar.rx)
+passes = group_passes(passes) #re-arrange passes to a [tx][pass][rx] schema 
+passes[0].sort(key=lambda psg: min([ps.start() for ps in psg])) # sort according to start time
+print(passes)
 
-#re-arrange passes to a [tx][pass][rx] schema 
-passes = group_passes(passes)
-
-#sort according to start time
-passes[0].sort(key=lambda psg: min([ps.start() for ps in psg]))
-
-controllers = []
+# create list of radar controls for each pass group
+controls = []
 
 #lets observe all passes (we only have one tx)
 for ps_lst in passes[0]:
-
     #lets just take one of the rx stations to pick out points from, all win be pointed anyway using the Tracker controller
     ps = ps_lst[0]
 
@@ -79,20 +77,12 @@ for ps_lst in passes[0]:
     use_inds = np.arange(0,len(ps.inds),len(ps.inds)//10)
 
     #Create a radar controller to track the object
-    track = sorts.Tracker(radar = radar, t=t[ps.inds[use_inds]], ecefs=states[:3,ps.inds[use_inds]])
-
-    controllers += [track]
-
-class Schedule(
-        sorts.StaticList, 
-        sorts.ObservedParameters,
-    ):
-    pass
+    track = sorts.Tracker()
+    tracking_controls = track.generate_controls(t[ps.inds[use_inds]], radar, t[ps.inds[use_inds]], states[:3,ps.inds[use_inds]])
+    controls += [tracking_controls]
 
 p = sorts.Profiler()
 p.start('total')
-
-sched = Schedule(radar = radar, controllers=controllers, profiler=p)
 
 variables = ['x','y','z','vx','vy','vz','A']
 
@@ -106,7 +96,10 @@ all_datas = []
 
 obj0 = obj.copy()
 
-for pgi, pass_group in enumerate(passes[0]):
+for pgi in range(len(passes[0])):
+    pass_group = passes[0][pgi]
+    print(f"iteration {pgi}/{len(passes[0])}")
+
     if tc_start is None:
         tc_start = max([ps.start() for ps in pass_group])
 
@@ -116,6 +109,9 @@ for pgi, pass_group in enumerate(passes[0]):
         tc_end = end_t + 12*3600.0
 
     t_ = np.arange(tc_start, tc_end, 10.0)
+
+    # compute radar states over pass group
+    radar_states = radar.control(controls[pgi])
 
     #uncomment this to propagate epoch to the new measurement
     #This does not work with SGP4 as it does not have a stable input-state transformation
@@ -127,10 +123,11 @@ for pgi, pass_group in enumerate(passes[0]):
     p.start('orbit_determination_covariance')
     Sigma_orb, datas = sorts.linearized_orbit_determination.orbit_determination_covariance(
         pass_group,
-        sched, 
+        radar_states,
         obj0,
         variables = variables,
         prior_cov_inv = Sigma_p_inv,
+        parallelization=False,
     )
     p.stop('orbit_determination_covariance')
     #the passes were not observable
@@ -164,7 +161,6 @@ for pgi, pass_group in enumerate(passes[0]):
     p.stop('covariance_propagation+drag')
 
     tc_start = tc_end
-
     if r_diff_stdev_all is None:
         r_diff_stdev_all = r_diff_stdev
         r_diff_stdev_all_drag = r_diff_stdev_drag
@@ -184,7 +180,7 @@ fig = plt.figure()
 ax = fig.add_subplot(111)
 
 for datas in all_datas:
-    for t_m in datas[0]['t']:
+    for t_m in datas[0]['measurements']['t_measurements']:
         ax.axvline(t_m/3600.0,color="C3")
 
 ax.semilogy(t_diff/3600.0, r_diff_stdev_all*1e-3, label="Orbit Determination Covariance (ODC)", color="C2")

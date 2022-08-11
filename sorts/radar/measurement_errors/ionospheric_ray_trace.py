@@ -31,9 +31,35 @@ def calculate_delay(
         frequency,
         elevation,
     ):
-    '''TODO: Docstring
+    ''' Computes ionospheric delay.
+
+    At each time point t, the beam is modelled as a point moving through space at
+    velocity `c`. This algorithm computes the trajectory of this point from the
+    radar antenna and through the layers of the atmosphere up to an altitude of
+    1900 km.
+
+    Parameters
+    ----------
+    time : :class:`astropy.time.Time`
+        Simulation time.
+    lat : float
+        Latitude (in degrees).
+    lon : float
+        Latitude (in degrees).
+    frequency : float
+        Radar beam frequency.
+    elevation : float
+        Radar beam elevation (in degrees).
+
+    Returns
+    -------
+    dt2 : float
+        Time delay in seconds.
+    ne : numpy.ndarray (N,)
+        Electron density of the plasma.
+    distance : float
+        Distance travelled by the beam in meters.
     '''
-    
 
     if Point is None or gcoord is None:
         raise ImportError('pyglow must be installed to calculate delay')
@@ -80,10 +106,60 @@ def ray_trace(
         elevation,
         azimuth,
     ):
-    '''TODO: Docstring
+    ''' Computes ionospheric ray-tracing.
+
+    At each time point t, the beam is modelled as a point moving through space at
+    velocity `c`. This algorithm computes the trajectory of this point from the
+    radar antenna and through the layers of the atmosphere up to an altitude of
+    1900 km.
+
+    Parameters
+    ----------
+    time : :class:`astropy.time.Time`
+        Simulation time.
+    lat : float
+        Latitude (in degrees).
+    lon : float
+        Latitude (in degrees).
+    frequency : float
+        Radar beam frequency.
+    elevation : float
+        Radar beam elevation (in degrees).
+    azimuth : float
+        Radar beam elevation (in degrees).
+
+    Returns
+    -------
+    results : dict
+         * px : numpy.ndarray (N,)
+            X-coordinate of the point (with ionospheric errors) at time t (ITRS frame). 
+         * py : numpy.ndarray (N,)
+            Y-coordinate of the point (with ionospheric errors) at time t (ITRS frame). 
+         * pz : numpy.ndarray (N,)
+            Z-coordinate of the point (with ionospheric errors) at time t (ITRS frame). 
+         * p0x : numpy.ndarray (N,)
+            X-coordinate of the point (without ionospheric errors) at time t (ITRS frame). 
+         * p0y : numpy.ndarray (N,)
+            Y-coordinate of the point (without ionospheric errors) at time t (ITRS frame). 
+         * p0z : numpy.ndarray (N,)
+            Z-coordinate of the point (without ionospheric errors) at time t (ITRS frame). 
+         * ray_bending : numpy.ndarray (N,)
+            Local curvature of the beam at each time point.
+         * electron_density : numpy.ndarray (N,)
+            Plasma electron density.
+         * altitudes : numpy.ndarray (N,)
+            Altitude of the points forming the beam.
+         * altitude_errors : numpy.ndarray (N,)
+            Altitude errors of the points forming the beam when ionospheric perturbations are considered.
+         * excess_ionospheric_delay : numpy.ndarray (N,)
+            Delay caused by ionospheric perturbations.
+         * total_angle_error : float
+            Total angle error between true and apparent object position from the radar perspective.
+         * p_end : numpy.ndarray (N,)
+            End point of the beam with ionospheric perturbations considered.
+         * p0_end : numpy.ndarray (N,)
+            End point of the beam without ionospheric perturbations.
     '''
-    
-    
     if Point is None or gcoord is None:
         raise ImportError('pyglow must be installed to ray trace')
 
@@ -181,6 +257,7 @@ def ray_trace(
         p0z[ai]=p0[2]
 
         dk[ai]=np.arccos(np.dot(k0,k)/(np.sqrt(np.dot(k0,k0))*np.sqrt(np.dot(k,k))))
+
         # no bending if gradient too small
         if np.dot(grad,grad) > 100.0:
             grad1=grad/np.sqrt(np.dot(grad,grad))
@@ -258,7 +335,48 @@ def ray_trace_error(
         ionosphere=False,
         error_std=0.05,
     ):
-    '''TODO: Docstring
+    ''' Computes ionospheric ray-tracing errors.
+
+    At each time point t, the beam is modelled as a point moving through space at
+    velocity `c`. This algorithm computes the trajectory of this point from the
+    radar antenna and through the layers of the atmosphere up to an altitude of
+    2100 km.
+
+    Parameters
+    ----------
+    time : :class:`astropy.time.Time`
+        Simulation time.
+    lat : float
+        Latitude (in degrees).
+    lon : float
+        Latitude (in degrees).
+    frequency : float
+        Radar beam frequency.
+    elevation : float
+        Radar beam elevation (in degrees).
+    azimuth : float
+        Radar beam elevation (in degrees).
+    ionosphere=False : bool
+        If ``False``, the effects of the ionosphere over the radar signal will be ignored. 
+    error_std=0.05 : float
+        Electron density error standard deviation (used for error propagation). 
+
+    Returns
+    -------
+    t_vec : numpy.ndarray
+        Computation time steps.
+    px : numpy.ndarray (N,)
+        X-coordinate of the point at time t. 
+    py : numpy.ndarray (N,)
+        Y-coordinate of the point at time t. 
+    pz : numpy.ndarray (N,)
+        Z-coordinate of the point at time t. 
+    alts : numpy.ndarray (N,)
+        Altitudes over which ray-tracing computations have been performed.
+    ne : np.ndarray (N,)
+        Plasma electron density.
+    k_vecs : numpy.ndarray (3, N)
+        Direction of the beam at each time step.
     '''
     
     if Point is None or gcoord is None:
@@ -278,7 +396,8 @@ def ray_trace_error(
     dalt=np.zeros(num)        
     dnex=np.zeros(num)
     dney=np.zeros(num)
-    dnez=np.zeros(num)            
+    dnez=np.zeros(num)
+
     xyz_prev=0.0
     dk=np.zeros(num)        
     px=np.zeros(num)
@@ -287,6 +406,7 @@ def ray_trace_error(
     t_vec=np.zeros(num)
     t_i_vec=np.zeros(num)           
     k_vecs=[]
+
     # initial direction and position
     k=frames.azel_to_ecef(lat, lon, 10e3, az, elevation)
     k0=k
@@ -302,12 +422,14 @@ def ray_trace_error(
     p_orig=p
     ray_time=0.0
     v_c=constants.c
+
     for ai,a in enumerate(alts):
         # go forward in time
         dhp=v_c*dt
         p=p+k*dhp
         ray_time+=dt
         print(ray_time*1e6)
+
         t_vec[ai+1]=dt
         k_vecs.append(k)
         
@@ -323,11 +445,14 @@ def ray_trace_error(
         pt = Point(dn, llh[0], llh[1], llh[2]/1e3)
         pt.run_iri()
 
+        # if the electron density is non zero
         if pt.ne > 0.0:
             ne[ai]=pt.ne*(1.0+error_std*ne_errors_x[ai])*1e6
+
             if ionosphere:
                 f0=8.98*np.sqrt(ne[ai])            
                 f_p=8.98*np.sqrt(ne[ai])
+
                 # update group velocity
                 v_c=constants.c*np.sqrt(1.0-(f0/frequency)**2.0)            
         else:
@@ -367,6 +492,7 @@ def ray_trace_error(
         pz[ai]=p[2]
 
         dk[ai]=np.arccos(np.dot(k0,k)/(np.sqrt(np.dot(k0,k0))*np.sqrt(np.dot(k,k))))
+        
         # no bending if gradient too small
         if np.dot(grad,grad) > 100.0 and ionosphere:
             grad1=grad/np.sqrt(np.dot(grad,grad))
@@ -385,28 +511,72 @@ def ray_trace_error(
             n1=np.sqrt(1.0-(f1/frequency)**2.0)
 
             theta0=np.arccos(np.dot(grad,k)/(np.sqrt(np.dot(grad,grad))*np.sqrt(np.dot(k,k))))
+            
             # angle cannot be over 90
             if theta0 > np.pi/2.0:
                 theta0=np.pi-theta0
             sin_theta_1=(n0/n1)*np.sin(theta0)
             dtheta[ai]=180.0*np.arcsin(sin_theta_1)/np.pi-180.0*theta0/np.pi
-#            print("n0/n1 %1.10f theta0 %1.2f theta1-theta0 %1.10f"%(n0/n1,180.0*theta0/np.pi,dtheta[ai]))
+            
+            # print("n0/n1 %1.10f theta0 %1.2f theta1-theta0 %1.10f"%(n0/n1,180.0*theta0/np.pi,dtheta[ai]))
             cos_theta_1=np.sqrt(1.0-sin_theta_1**2.0)
             k_ref=(n0/n1)*k+((n0/n1)*np.cos(theta0)-cos_theta_1)*grad1
+            
             # normalize
             k_ref/np.sqrt(np.dot(k_ref,k_ref))
             k=k_ref
             
             angle=np.arccos(np.dot(grad,k)/np.sqrt(np.dot(grad,grad))*np.sqrt(np.dot(k,k)))
 
-    return t_vec,px,py,pz,alts,ne,k_vecs
+    return t_vec, px, py, pz, alts, ne, k_vecs
 
 
 
-def ionospheric_error(time, elevation=90.0,n_samp=20,frequency=233e6, error_std=0.05):
-    '''TODO: Docstring
+def ionospheric_error(
+    time, 
+    elevation=90.0,
+    n_samp=20,
+    frequency=233e6, 
+    error_std=0.05
+):
+    ''' Computes the ionospheric ray-tracing errors.
 
-    # estimate using sampling what the ray-tracing error is
+    This function computes the errors due to the propagation of the radar beam into
+    the ionized plasma present in the ionosphere by performing a direct Monte-Carlo 
+    simulation.
+
+    Parameters
+    ----------
+    time : :class:`astropy.time.Time`
+        Reference time of the simulation ().
+    elevation : float, default=90.0
+        Elevation of the radar beam (in degrees).
+    n_samp : int, default=20
+        Number of samples used to compute the ray-tracing errors.
+
+        .. note::
+            Higher values of ``n_samp`` will increase computation time.
+
+    frequency : float, default=233e6
+        Radar beam frequency (in Hertz).
+    error_std : float, default==0.05
+        Electron density error standard deviation.
+        
+    Returns
+    -------
+    prop_error_mean : numpy.ndarray (100,)
+        Ionospheric error mean.
+    prop_error_std : numpy.ndarray (100,)
+        Ionospheric standard deviation.
+    prop_alts : numpy.ndarray (100,)
+        Altitude over which the error propagation is interpolated : ``prop_alts=np.linspace(0,2000,num=100)``.
+    ne_i : numpy.ndarray (100,)
+        Electron density.
+    ne_e_i : numpy.ndarray (100,)
+        Perturbed electron density.
+    alts_i : numpy.ndarray (100,)
+        Altitudes used to compute ray-tracing errors.
+
     # return error in microseconds, round-trip time units.
     '''
     prop_errors=np.zeros([n_samp,100])
@@ -440,6 +610,7 @@ def ionospheric_error(time, elevation=90.0,n_samp=20,frequency=233e6, error_std=
             pe=np.array([px_e_i[ri],py_e_i[ri],pz_e_i[ri]])
 
             offsets[ri] = 1e6*2.0*np.abs(np.dot(p-pe,k_i[ri]/np.sqrt(np.dot(k_i[ri],k_i[ri]))))/constants.c
+
         pos_err_fun = interpolate.interp1d(alts_i[0:maxi],offsets)
         prop_errors[i,:]=pos_err_fun(prop_alts)
 

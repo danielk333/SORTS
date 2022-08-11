@@ -30,7 +30,6 @@ class SpaceObjectTracker(radar_controller.RadarController):
 		----------
 			logger (optional) : logging.logger
 				logger instance used to log comptutation status on the terminal
-
 			profiler (optional) : sorts.profiling.profiler
 				profiler instance used to monitor the computational performances of the class' functions
 
@@ -42,7 +41,7 @@ class SpaceObjectTracker(radar_controller.RadarController):
 		if self.logger is not None:
 		    self.logger.info(f'SpaceObjectTracker:Init')
 
-	def compute_pointing_direction(
+	def compute_pointing_directions(
 		self, 
 		controls,
 		period_id, 

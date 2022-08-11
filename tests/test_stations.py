@@ -6,7 +6,7 @@ import sorts
 
 class TestRadar(unittest.TestCase):
 	def setUp(self):
-		station = sorts.Station(10, 40, 0, 30, None)
+		self.station = sorts.Station(10, 40, 0, 30, None)
 
 	def test_to_ecef(self):
 		enus = np.array([
@@ -28,7 +28,7 @@ class TestRadar(unittest.TestCase):
 			 [      0.        ,       0.        ,       0.        ,       0.		,       0.        ,  984807.75301221,  173648.17766693],
 			 ])
 
-		nt.assert_almost_equal(ecefs_ref, station.to_ecef(enus))
+		nt.assert_almost_equal(ecefs_ref, self.station.to_ecef(enus))
 
 	def test_to_enu(self):
 		ecefs = np.array(
@@ -50,4 +50,4 @@ class TestRadar(unittest.TestCase):
 			[0, 0, 0, 0, 0, 1], 
 			], dtype=float).T*1000e3
 
-		nt.assert_almost_equal(enus_ref, station.enu(ecefs))
+		nt.assert_almost_equal(enus_ref, self.station.enu(ecefs))

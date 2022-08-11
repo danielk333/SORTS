@@ -71,7 +71,7 @@ from astropy.time import Time, TimeDelta
 
 
 class SpaceObject(object):
-    '''Encapsulates a object in space who's dynamics is governed in time by a propagator.
+    ''' Encapsulates a object in space who's dynamics is governed in time by a propagator.
 
     The state of the object is stored in a `pyorb.Orbit` instance. This instance contains direct transformations between
     the Cartesian and Kepler states. The transformation follows the below the below orientation rules:
@@ -128,8 +128,6 @@ class SpaceObject(object):
     :ivar Propagator propagator: Propagator instance
     :ivar dict propagator_options: Propagator initialization keyword arguments
     :ivar dict propagator_args: Propagator call keyword arguments
-
-
     '''
 
     default_parameters = dict(
@@ -150,8 +148,8 @@ class SpaceObject(object):
 
         self.oid = oid
         self.parameters = copy.copy(SpaceObject.default_parameters)
-        self.parameters.update(parameters)
-        
+        self.parameters.update(**parameters)
+                
         #assume MJD if not "Time" object
         if not isinstance(epoch, Time):
             epoch = Time(epoch, format='mjd', scale='utc')
@@ -179,10 +177,38 @@ class SpaceObject(object):
                 **kwargs
             )
 
+        # add orbit properties to class
+        for key in ['x', 'y', 'z', 'vx', 'vy', 'vz']:
+            property_code = f"""@property   
+            \ndef prop(self,):
+            \n    val = self.state.{key}
+            \n    return val
+
+            \n@prop.setter
+            \ndef prop(self, value):
+            \n    self.state.{key} = value
+
+            \nsetattr(self.__class__, '{key}', prop)
+            """
+            exec(property_code)
+
+        # add property to class
+        for key in parameters:
+            if key not in pyorb.Orbit.UPDATE_KW and not hasattr(self, key):
+                @property
+                def prop(self):
+                    return self.parameters[key]
+
+                @prop.setter
+                def prop(self, value):
+                    self.parameters[key] = value
+
+                # add attribute to class to enable calls like space_object.X
+                setattr(self.__class__, key, prop)
+
         self.__propagator = propagator
         self.propagator_options = propagator_options
         self.propagator_args = propagator_args
-
         self.propagator = propagator(**propagator_options)
 
 
@@ -234,14 +260,14 @@ class SpaceObject(object):
 
     @property
     def C_R(self):
-        '''Object mass, if changed the Kepler elements stays constant
+        ''' Object mass, if changed the Kepler elements stays constant
         '''
         return self.parameters['C_R']
 
 
     @property
     def C_D(self):
-        '''Object mass, if changed the Kepler elements stays constant
+        ''' Object mass, if changed the Kepler elements stays constant
         '''
         return self.parameters['C_D']
 
@@ -362,7 +388,7 @@ class SpaceObject(object):
 
                 @prop.setter
                 def prop(self, value):
-                     self.parameters[key] = value
+                    self.parameters[key] = value
 
                 # add attribute to class to enable calls like space_object.X
                 setattr(self.__class__, key, prop)
@@ -372,14 +398,13 @@ class SpaceObject(object):
 
 
     def __str__(self):
-        p = '\nSpace object {}: {}:\n'.format(self.oid,repr(self._epoch))
+        p = '\nSpace object {}: {}:\n'.format(self.oid, repr(self._epoch))
         
         p+= str(self.state) + '\n'
         p+= f'Parameters: ' + ', '.join([
             f'{key}={val}'
             for key,val in self.parameters.items()
         ])
-        
         return p
 
 

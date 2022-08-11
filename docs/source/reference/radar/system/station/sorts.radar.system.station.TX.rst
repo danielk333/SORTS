@@ -18,13 +18,12 @@
       TX.beam
       TX.enabled
       TX.pointing_range
+      TX.BEAM_PROPERTIES
       TX.CONTROL_VARIABLES
       TX.PROPERTIES
-      TX.frequency
       TX.pointing
       TX.pointing_ecef
       TX.type
-      TX.wavelength
       TX.bandwidth
       TX.duty_cycle
       TX.power
@@ -48,10 +47,12 @@
       TX.copy
       TX.enu
       TX.field_of_view
+      TX.get_local_vertical
       TX.get_properties
       TX.has_property
       TX.point
       TX.point_ecef
       TX.rebase
+      TX.to_ecef
    
    
