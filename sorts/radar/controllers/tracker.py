@@ -33,7 +33,7 @@ class Tracker(radar_controller.RadarController):
     .. seealso::
 
         * :class:`sorts.Radar<sorts.radar.system.radar.Radar>` : class encapsulating the radar system.
-        * :class:`sorts.RadarController<sorts.radar.controllers.radar_controller.RadarController>` : radar controller base class.
+        * :class:`sorts.RadarController<sorts.radar.controllers.radar_congirtroller.RadarController>` : radar controller base class.
         * :class:`sorts.RadarControls<sorts.radar.radar_controls.RadarControls>` : class encapsulating radar control sequences.
         * :class:`sorts.SpaceObject<sorts.targets.space_object.SpaceObject>` : class encapsulating a space object.
     

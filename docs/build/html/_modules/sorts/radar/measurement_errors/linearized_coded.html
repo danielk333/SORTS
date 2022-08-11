@@ -1,0 +1,655 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>sorts.radar.measurement_errors.linearized_coded &#8212; SORTS v4.0 Manual</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "dark";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="dark">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">SORTS v4.0 Manual</p>
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../intro.html">
+  Introduction
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../install.html">
+  Installation
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../usermanual.html">
+  SORTS Manual
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <form class="bd-search d-flex align-items-center" action="../../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/danielk333/sorts" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <h1>Source code for sorts.radar.measurement_errors.linearized_coded</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="sd">&#39;&#39;&#39;Errors</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="c1">#Python standard import</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+<span class="kn">import</span> <span class="nn">pkg_resources</span>
+
+<span class="c1">#Third party import</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">scipy.interpolate</span>
+<span class="kn">import</span> <span class="nn">scipy.constants</span>
+<span class="kn">import</span> <span class="nn">scipy.signal</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="c1">#Local import</span>
+<span class="kn">from</span> <span class="nn">.errors</span> <span class="kn">import</span> <span class="n">Errors</span>
+
+<div class="viewcode-block" id="simulate_echo"><a class="viewcode-back" href="../../../../reference/radar/measurement_errors/auto/sorts.radar.measurement_errors.linearized_coded.simulate_echo.html#sorts.radar.measurement_errors.linearized_coded.simulate_echo">[docs]</a><span class="k">def</span> <span class="nf">simulate_echo</span><span class="p">(</span><span class="n">codes</span><span class="p">,</span> <span class="n">t_vecs</span><span class="p">,</span> <span class="n">bw</span><span class="o">=</span><span class="mf">1e6</span><span class="p">,</span> <span class="n">dop_Hz</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">range_m</span><span class="o">=</span><span class="mf">1e3</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="mf">5e6</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Simulate a radar echo with range and Doppler.</span>
+<span class="sd">    </span>
+<span class="sd">    This function uses windowing to simulate a continuous finite bandwidth signal.</span>
+<span class="sd">    This is used for linearized error estimates of range and range-rate errors.</span>
+<span class="sd">    This function assumes a mono-static radar configuration. </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    codes : numpy.ndarray (M, N)</span>
+<span class="sd">        Sequence of encoded signals. </span>
+
+<span class="sd">        &gt;&gt;&gt;  codes : [[Pulse 1], [Pulse 2], .... , [Pulse 3]]</span>
+<span class="sd">    t_vecs : numpy.ndarray (M,)</span>
+<span class="sd">        Transmission start time (in seconds).</span>
+<span class="sd">    bw : float, default=1e6</span>
+<span class="sd">        Transmitted signal bandwidth (in Hertz).</span>
+<span class="sd">    dop_Hz : float, default=0.0</span>
+<span class="sd">        Echo Doppler shift due to the target velocity (in Hertz). </span>
+<span class="sd">    range_m : float, default=1e3</span>
+<span class="sd">        Target range (in meters).</span>
+<span class="sd">    sr : float, default=5e6</span>
+<span class="sd">        Sampling rate (in Hertz).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    z : numpy.ndarray of complex</span>
+<span class="sd">        Echo of the coded radar signal </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># init computations</span>
+    <span class="n">codelen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">codes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">n_codes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">codes</span><span class="p">)</span>
+    <span class="n">tvec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">codelen</span><span class="o">*</span><span class="n">n_codes</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">codelen</span><span class="o">*</span><span class="n">n_codes</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">)</span>
+
+    <span class="c1"># compute signal envelope</span>
+    <span class="k">for</span> <span class="n">ci</span><span class="p">,</span> <span class="n">code</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">codes</span><span class="p">):</span>
+        <span class="n">z</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">codelen</span><span class="p">)</span> <span class="o">+</span> <span class="n">ci</span><span class="o">*</span><span class="n">codelen</span><span class="p">]</span> <span class="o">=</span> <span class="n">code</span>
+        <span class="n">tvec</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">codelen</span><span class="p">)</span> <span class="o">+</span> <span class="n">ci</span><span class="o">*</span><span class="n">codelen</span><span class="p">]</span> <span class="o">=</span> <span class="n">t_vecs</span><span class="p">[</span><span class="n">ci</span><span class="p">]</span>
+
+    <span class="c1"># setup envelop interpolation function</span>
+    <span class="n">tvec_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">tvec</span><span class="p">)</span>
+    <span class="n">tvec_i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">tvec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">1e99</span>
+    <span class="n">tvec_i</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">tvec</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">tvec</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">tvec</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mf">1e99</span>
+    <span class="n">zfun</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span><span class="n">tvec_i</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">)</span>
+
+    <span class="c1"># compute time shift due to range</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="mf">2.0</span><span class="o">*</span><span class="n">range_m</span><span class="o">/</span><span class="n">scipy</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">c</span>
+
+    <span class="c1"># compute radar echo</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">zfun</span><span class="p">(</span><span class="n">tvec</span><span class="o">+</span><span class="n">dt</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="mf">2.0</span><span class="o">*</span><span class="n">dop_Hz</span><span class="o">*</span><span class="n">tvec</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">z</span></div>
+
+
+<div class="viewcode-block" id="lin_error"><a class="viewcode-back" href="../../../../reference/radar/measurement_errors/auto/sorts.radar.measurement_errors.linearized_coded.lin_error.html#sorts.radar.measurement_errors.linearized_coded.lin_error">[docs]</a><span class="k">def</span> <span class="nf">lin_error</span><span class="p">(</span><span class="n">enr</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">txlen</span><span class="o">=</span><span class="mf">1000.0</span><span class="p">,</span> <span class="n">n_ipp</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">ipp</span><span class="o">=</span><span class="mf">20e-3</span><span class="p">,</span> <span class="n">bw</span><span class="o">=</span><span class="mf">1e6</span><span class="p">,</span> <span class="n">dr</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">ddop</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="mf">100e6</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Determines linearized errors for range and range-rate error</span>
+<span class="sd">    for a psuedorandom binary phase coded radar transmit pulse</span>
+<span class="sd">    with a certain transmit bandwidth (inverse of bit length).</span>
+
+<span class="sd">    This function calculates the line of sight range and range-rate error,</span>
+<span class="sd">    given the ENR after coherent integration (pulse compression) and the</span>
+<span class="sd">    pulse length ``txlen`` in microseconds.</span>
+
+<span class="sd">    Finally, this function simulates a measurement and performs a linearized error estimate.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------  </span>
+<span class="sd">    enr : float, default=10.0</span>
+<span class="sd">        Signal Energy-to-Noise ratio.</span>
+<span class="sd">    txlen : float, default=1000.0</span>
+<span class="sd">        Transmitted pulse length (microseconds).</span>
+<span class="sd">    n_ipp : int, default=10</span>
+<span class="sd">        Number of pulses.</span>
+<span class="sd">    ipp : float, default=20e-3</span>
+<span class="sd">        Inter-Pulse Period (in seconds).</span>
+<span class="sd">    bw : float, default=1e6</span>
+<span class="sd">        Transmitted signal bandwidth (in hertz).</span>
+<span class="sd">    dr : float, default=10.0</span>
+<span class="sd">        Range step used for linearization (in meters).</span>
+<span class="sd">    ddop : float, default=1.0</span>
+<span class="sd">        Doppler frequency step used for linearization (in hertz).</span>
+<span class="sd">    sr : float, default=100e6</span>
+<span class="sd">        Sampling rate (in hertz).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    S : numpy.ndarray (2,)</span>
+<span class="sd">        Linearized error standard deviation (*range* and *range rate*).</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># setup computations</span>
+    <span class="n">codes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">t_vecs</span> <span class="o">=</span> <span class="p">[]</span>    
+    <span class="n">n_bits</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">bw</span><span class="o">*</span><span class="n">txlen</span><span class="o">/</span><span class="mf">1e6</span><span class="p">)</span>
+    <span class="n">oversample</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sr</span><span class="o">/</span><span class="n">bw</span><span class="p">)</span>
+    <span class="n">wfun</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">hamming</span><span class="p">(</span><span class="n">oversample</span><span class="p">)</span>
+    <span class="n">wfun</span> <span class="o">=</span> <span class="n">wfun</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">wfun</span><span class="p">)</span>
+
+    <span class="c1"># compute transmitted signal properties and enveloppe</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_ipp</span><span class="p">):</span>
+        <span class="n">bits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n_bits</span><span class="p">)),</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">)</span>
+        <span class="n">zcode</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_bits</span><span class="o">*</span><span class="n">oversample</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">oversample</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">oversample</span><span class="p">):</span>
+            <span class="n">zcode</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_bits</span><span class="p">)</span><span class="o">*</span><span class="n">oversample</span> <span class="o">+</span> <span class="n">j</span> <span class="o">+</span> <span class="n">oversample</span><span class="p">]</span> <span class="o">=</span> <span class="n">bits</span>
+
+        <span class="c1"># filter signal so that phase transitions are not too sharp</span>
+        <span class="n">zcode</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">wfun</span><span class="p">,</span> <span class="n">zcode</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">)</span>
+        <span class="n">codes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">zcode</span><span class="p">)</span>
+        <span class="n">tcode</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_bits</span><span class="o">*</span><span class="n">oversample</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">oversample</span><span class="p">)</span><span class="o">/</span><span class="n">sr</span> <span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">*</span><span class="n">ipp</span>
+        <span class="n">t_vecs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tcode</span><span class="p">)</span>
+
+    <span class="c1"># compute radar echo at the target</span>
+    <span class="n">z0</span> <span class="o">=</span> <span class="n">simulate_echo</span><span class="p">(</span><span class="n">codes</span><span class="p">,</span> <span class="n">t_vecs</span><span class="p">,</span> <span class="n">dop_Hz</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">range_m</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">bw</span><span class="o">=</span><span class="n">bw</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">sr</span><span class="p">)</span>
+    <span class="n">tau</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">n_ipp</span><span class="p">)</span><span class="o">*</span><span class="n">txlen</span><span class="o">/</span><span class="mf">1e6</span>
+    
+    <span class="c1"># convert coherently integrated ENR to SNR (variance of the measurement errors at receiver bandwidth)</span>
+    <span class="n">snr</span> <span class="o">=</span> <span class="n">enr</span><span class="o">/</span><span class="p">(</span><span class="n">tau</span><span class="o">*</span><span class="n">sr</span><span class="p">)</span>
+
+    <span class="c1"># compute signal partial derivatives (w.r.t. range and range rates) </span>
+    <span class="n">z_dr</span> <span class="o">=</span> <span class="n">simulate_echo</span><span class="p">(</span><span class="n">codes</span><span class="p">,</span> <span class="n">t_vecs</span><span class="p">,</span> <span class="n">dop_Hz</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">range_m</span><span class="o">=</span><span class="n">dr</span><span class="p">,</span> <span class="n">bw</span><span class="o">=</span><span class="n">bw</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">sr</span><span class="p">)</span>
+    <span class="n">z_diff_r</span> <span class="o">=</span> <span class="p">(</span><span class="n">z0</span> <span class="o">-</span> <span class="n">z_dr</span><span class="p">)</span><span class="o">/</span><span class="n">dr</span>    
+    <span class="n">z_ddop</span> <span class="o">=</span> <span class="n">simulate_echo</span><span class="p">(</span><span class="n">codes</span><span class="p">,</span> <span class="n">t_vecs</span><span class="p">,</span> <span class="n">dop_Hz</span><span class="o">=</span><span class="n">ddop</span><span class="p">,</span> <span class="n">range_m</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">bw</span><span class="o">=</span><span class="n">bw</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">sr</span><span class="p">)</span>
+    <span class="n">z_diff_dop</span> <span class="o">=</span> <span class="p">(</span><span class="n">z0</span> <span class="o">-</span> <span class="n">z_ddop</span><span class="p">)</span><span class="o">/</span><span class="n">ddop</span>
+    
+    <span class="c1"># compute linearized error covariance matrix</span>
+    <span class="n">t_l</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">z_dr</span><span class="p">)</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">t_l</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">)</span>
+    <span class="n">A</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">z_diff_r</span>
+    <span class="n">A</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">z_diff_dop</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">A</span><span class="p">)),</span><span class="n">A</span><span class="p">))</span><span class="o">/</span><span class="n">snr</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">S</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="precalculate_dr"><a class="viewcode-back" href="../../../../reference/radar/measurement_errors/auto/sorts.radar.measurement_errors.linearized_coded.precalculate_dr.html#sorts.radar.measurement_errors.linearized_coded.precalculate_dr">[docs]</a><span class="k">def</span> <span class="nf">precalculate_dr</span><span class="p">(</span><span class="n">txlen</span><span class="p">,</span> <span class="n">bw</span><span class="p">,</span> <span class="n">ipp</span><span class="o">=</span><span class="mf">20e-3</span><span class="p">,</span> <span class="n">n_ipp</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">n_interp</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Computes **range** and **range rate** linearized errors to perform an </span>
+<span class="sd">    interpolation over a set of Energy-to-Noise Ratios.</span>
+
+<span class="sd">    This function computes the linearized errors due to the propagation of </span>
+<span class="sd">    coded signals. It returns those errors over a set of points optimized </span>
+<span class="sd">    for interpolation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    txlen : float, default=1000.0</span>
+<span class="sd">        Transmitted pulse length (microseconds).</span>
+<span class="sd">    bw : float, default=1e6</span>
+<span class="sd">        Transmitted signal bandwidth (in hertz).</span>
+<span class="sd">    ipp : float, default=20e-3</span>
+<span class="sd">        Inter-Pulse Period (in seconds).</span>
+<span class="sd">    n_ipp : int, default=10</span>
+<span class="sd">        Number of pulses.</span>
+<span class="sd">    n_interp : int, default=20</span>
+<span class="sd">        Number of ENR values used to perform the computations.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    enrs</span>
+<span class="sd">        Energy-to-Noise Ratio.</span>
+<span class="sd">    drs</span>
+<span class="sd">        Range errors (in Hertz).</span>
+<span class="sd">    ddops</span>
+<span class="sd">        Doppler shift (range-rate) errors (in Hertz).</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># set up computations</span>
+    <span class="n">enrs</span> <span class="o">=</span> <span class="mf">10.0</span><span class="o">**</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">n_interp</span><span class="p">)</span>
+    <span class="n">drs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_interp</span><span class="p">)</span>
+    <span class="n">ddops</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_interp</span><span class="p">)</span>  
+
+    <span class="c1"># compute each range and Doppler errors.</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="n">n_interp</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ei</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">enrs</span><span class="p">):</span>
+        <span class="n">dr</span><span class="p">,</span> <span class="n">ddop</span> <span class="o">=</span> <span class="n">lin_error</span><span class="p">(</span><span class="n">enr</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">txlen</span><span class="o">=</span><span class="n">txlen</span><span class="p">,</span> <span class="n">bw</span><span class="o">=</span><span class="n">bw</span><span class="p">,</span> <span class="n">ipp</span><span class="o">=</span><span class="n">ipp</span><span class="p">,</span> <span class="n">n_ipp</span><span class="o">=</span><span class="n">n_ipp</span><span class="p">)</span>
+        <span class="n">drs</span><span class="p">[</span><span class="n">ei</span><span class="p">]</span> <span class="o">=</span> <span class="n">dr</span>
+        <span class="n">ddops</span><span class="p">[</span><span class="n">ei</span><span class="p">]</span> <span class="o">=</span> <span class="n">ddop</span>
+        <span class="n">q</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">q</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Linear errors at SNR </span><span class="si">{</span><span class="mi">10</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="si">}</span><span class="s1"> dB&#39;</span><span class="p">)</span>
+    <span class="n">q</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">enrs</span><span class="p">,</span> <span class="n">drs</span><span class="p">,</span> <span class="n">ddops</span></div>
+
+
+<div class="viewcode-block" id="LinearizedCoded"><a class="viewcode-back" href="../../../../reference/radar/measurement_errors/auto/sorts.radar.measurement_errors.linearized_coded.LinearizedCoded.html#sorts.radar.measurement_errors.linearized_coded.LinearizedCoded">[docs]</a><span class="k">class</span> <span class="nc">LinearizedCoded</span><span class="p">(</span><span class="n">Errors</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Standard encoded signal errors computation class.</span>
+<span class="sd">    </span>
+<span class="sd">    The :class:`LinearizedCoded` provides a standard interface</span>
+<span class="sd">    to compute linearized errors of encoded signals. More specifically,</span>
+<span class="sd">    it allows to compute the **range** and **range-rate** errors as a function</span>
+<span class="sd">    of the signal properties and signal to noise ratio by performing</span>
+<span class="sd">    an interpolation over a set of precalculated linearized errors.</span>
+
+<span class="sd">    Parameters </span>
+<span class="sd">    ----------</span>
+<span class="sd">    tx : :class:`sorts.station.TX&lt;sorts.radar.system.station.TX&gt;`</span>
+<span class="sd">        Transmitting station.</span>
+<span class="sd">    seed : int=None</span>
+<span class="sd">        Seed used to generate random number using numpy. </span>
+<span class="sd">    cache_folder : str or :class:`pathlib.Path`, default=None</span>
+<span class="sd">        Path of the folder where computations results of linearised errors are cached.</span>
+<span class="sd">    min_range_rate_std : float, default=0.1</span>
+<span class="sd">        Minimum range rate dopple measurement standard deviation (in hertz).</span>
+<span class="sd">    min_range_std : float, default=0.1</span>
+<span class="sd">        Minimum range measurement standard deviation (in meters).</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    This simple example showcases the use of the :class:`LinearizedCoded` class to compute the perturbations </span>
+<span class="sd">    in range measurements due to ``Signal-to-Noise Ratio`` fluctuations. </span>
+
+<span class="sd">    .. code-block:: Python</span>
+
+<span class="sd">        import sorts</span>
+<span class="sd">        import numpy as np</span>
+<span class="sd">        import matplotlib.pyplot as plt</span>
+
+<span class="sd">        radar = sorts.radars.eiscat3d</span>
+
+<span class="sd">        # initialization of the linearized errors for coded signals</span>
+<span class="sd">        err = sorts.measurement_errors.LinearizedCoded(radar.tx[0], seed=123)</span>
+
+<span class="sd">        # number of ranges</span>
+<span class="sd">        num = 1000</span>
+<span class="sd">        # number of range bins for posterior distribution estimate</span>
+<span class="sd">        n_bins = 50</span>
+
+<span class="sd">        # generate 100 range values and </span>
+<span class="sd">        ranges = np.linspace(300e3, 350e3, num=num)[::-1]</span>
+
+<span class="sd">        # generate random SNR values</span>
+<span class="sd">        snrs = np.random.randn(num)*15.0 + 20**1.0</span>
+<span class="sd">        snrs[snrs&lt;0.1] = 0.1</span>
+
+<span class="sd">        # compute perturbated range estimates due to SNR fluctuations</span>
+<span class="sd">        perturbed_ranges = err.range(ranges, snrs)</span>
+
+<span class="sd">        # plot results</span>
+<span class="sd">        fig, axes = plt.subplots(3, 1)</span>
+<span class="sd">        axes[0].plot(np.arange(0, num), ranges, &quot;--k&quot;) # initial range values</span>
+<span class="sd">        axes[0].plot(np.arange(0, num), perturbed_ranges, &quot;-r&quot;) # perturbed range values</span>
+<span class="sd">        axes[0].set_xlabel(&quot;$N$ [$-$]&quot;)</span>
+<span class="sd">        axes[0].set_ylabel(&quot;$r$ [$m$]&quot;)</span>
+
+<span class="sd">        axes[1].hist(10*np.log10(snrs), n_bins, color=&quot;blue&quot;) # snr distribution</span>
+<span class="sd">        axes[1].set_ylabel(&quot;$N$ [$-$]&quot;)</span>
+<span class="sd">        axes[1].set_xlabel(&quot;$SNR$ [$dB$]&quot;)</span>
+
+<span class="sd">        axes[2].hist(ranges - perturbed_ranges, n_bins, color=&quot;blue&quot;) # range error distribution </span>
+<span class="sd">        axes[2].set_ylabel(&quot;$N$ [$-$]&quot;)</span>
+<span class="sd">        axes[2].set_xlabel(&quot;$r-r_{est}$ [$m$]&quot;)</span>
+<span class="sd">        plt.show()</span>
+
+<span class="sd">    .. rubric:: results</span>
+
+<span class="sd">    .. figure:: ../../../../figures/errors_example_ranges.png</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">VARIABLES</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;range&#39;</span><span class="p">,</span> 
+        <span class="s1">&#39;doppler&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;range_rate&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="sd">&#39;&#39;&#39; Random variables used for error estimation. &#39;&#39;&#39;</span> 
+
+<div class="viewcode-block" id="LinearizedCoded.__init__"><a class="viewcode-back" href="../../../../reference/radar/measurement_errors/auto/sorts.radar.measurement_errors.linearized_coded.LinearizedCoded.__init__.html#sorts.radar.measurement_errors.linearized_coded.LinearizedCoded.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tx</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cache_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">min_range_rate_std</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">min_range_std</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_range_std</span> <span class="o">=</span> <span class="n">min_range_std</span>
+        <span class="sd">&#39;&#39;&#39; Random variables used for error estimation. &#39;&#39;&#39;</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_range_rate_std</span> <span class="o">=</span> <span class="n">min_range_rate_std</span>
+        <span class="sd">&#39;&#39;&#39; Random variables used for error estimation. &#39;&#39;&#39;</span> 
+
+        <span class="n">bw</span> <span class="o">=</span> <span class="n">tx</span><span class="o">.</span><span class="n">bandwidth</span>
+        <span class="n">txlen</span> <span class="o">=</span> <span class="n">tx</span><span class="o">.</span><span class="n">pulse_length</span><span class="o">*</span><span class="mf">1e6</span> <span class="c1"># pulse length in microseconds</span>
+        <span class="n">ipp</span> <span class="o">=</span> <span class="n">tx</span><span class="o">.</span><span class="n">ipp</span>
+        <span class="n">n_ipp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tx</span><span class="o">.</span><span class="n">n_ipp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">freq</span> <span class="o">=</span> <span class="n">tx</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">frequency</span>
+
+        <span class="n">fname</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;MCerr_n</span><span class="si">{</span><span class="n">n_ipp</span><span class="si">}</span><span class="s1">_tx</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">txlen</span><span class="p">)</span><span class="si">}</span><span class="s1">_ipp</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">ipp</span><span class="o">*</span><span class="mf">1e6</span><span class="p">)</span><span class="si">}</span><span class="s1">_bw</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">bw</span><span class="p">)</span><span class="si">}</span><span class="s1">.h5&#39;</span>
+        <span class="k">if</span> <span class="n">cache_folder</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">stream</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_stream</span><span class="p">(</span><span class="s1">&#39;sorts.data&#39;</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+                <span class="n">h</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+                <span class="n">enrs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">h</span><span class="p">[</span><span class="s1">&#39;enrs&#39;</span><span class="p">][()])</span>
+                <span class="n">drs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">h</span><span class="p">[</span><span class="s1">&#39;drs&#39;</span><span class="p">][()])</span>
+                <span class="n">ddops</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">h</span><span class="p">[</span><span class="s1">&#39;ddops&#39;</span><span class="p">][()])</span>
+                <span class="n">h</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="c1"># compute range/doppler errors by performing a direct monte carlo simulatio</span>
+                <span class="n">enrs</span><span class="p">,</span> <span class="n">drs</span><span class="p">,</span> <span class="n">ddops</span> <span class="o">=</span> <span class="n">precalculate_dr</span><span class="p">(</span><span class="n">txlen</span><span class="p">,</span> <span class="n">bw</span><span class="p">,</span> <span class="n">ipp</span><span class="o">=</span><span class="n">ipp</span><span class="p">,</span> <span class="n">n_ipp</span><span class="o">=</span><span class="n">n_ipp</span><span class="p">,</span> <span class="n">n_interp</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cache_folder</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">):</span>
+                <span class="n">cache_folder</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">cache_folder</span><span class="p">)</span>
+            <span class="n">pth</span> <span class="o">=</span> <span class="n">cache_folder</span> <span class="o">/</span> <span class="n">fname</span>
+
+            <span class="k">if</span> <span class="n">pth</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+                <span class="n">h</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">pth</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+                <span class="n">enrs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">h</span><span class="p">[</span><span class="s1">&#39;enrs&#39;</span><span class="p">][()])</span>
+                <span class="n">drs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">h</span><span class="p">[</span><span class="s1">&#39;drs&#39;</span><span class="p">][()])</span>
+                <span class="n">ddops</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">h</span><span class="p">[</span><span class="s1">&#39;ddops&#39;</span><span class="p">][()])</span>
+                <span class="n">h</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">enrs</span><span class="p">,</span> <span class="n">drs</span><span class="p">,</span> <span class="n">ddops</span> <span class="o">=</span> <span class="n">precalculate_dr</span><span class="p">(</span><span class="n">txlen</span><span class="p">,</span> <span class="n">bw</span><span class="p">,</span> <span class="n">ipp</span><span class="o">=</span><span class="n">ipp</span><span class="p">,</span> <span class="n">n_ipp</span><span class="o">=</span><span class="n">n_ipp</span><span class="p">,</span> <span class="n">n_interp</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+                <span class="n">ho</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">pth</span><span class="p">,</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
+                <span class="n">ho</span><span class="p">[</span><span class="s2">&quot;enrs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">enrs</span>
+                <span class="n">ho</span><span class="p">[</span><span class="s2">&quot;drs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">drs</span>
+                <span class="n">ho</span><span class="p">[</span><span class="s2">&quot;ddops&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ddops</span>
+                <span class="n">ho</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rfun</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">enrs</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">drs</span><span class="p">))</span>
+        <span class="sd">&#39;&#39;&#39; Linearized range error function ``error = f(enrs[dB])``. &#39;&#39;&#39;</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">dopfun</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">enrs</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">ddops</span><span class="p">))</span>
+        <span class="sd">&#39;&#39;&#39; Linearized range-rate Doppler error function ``error = f(enrs[dB])``. &#39;&#39;&#39;</span> </div>
+
+<div class="viewcode-block" id="LinearizedCoded.range"><a class="viewcode-back" href="../../../../reference/radar/measurement_errors/auto/sorts.radar.measurement_errors.linearized_coded.LinearizedCoded.range.html#sorts.radar.measurement_errors.linearized_coded.LinearizedCoded.range">[docs]</a>    <span class="k">def</span> <span class="nf">range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">snr</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Adds random gaussian errors to range data in meters. &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_numpy_seed</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">data</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="o">*</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">range_std</span><span class="p">(</span><span class="n">snr</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="LinearizedCoded.doppler"><a class="viewcode-back" href="../../../../reference/radar/measurement_errors/auto/sorts.radar.measurement_errors.linearized_coded.LinearizedCoded.doppler.html#sorts.radar.measurement_errors.linearized_coded.LinearizedCoded.doppler">[docs]</a>    <span class="k">def</span> <span class="nf">doppler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">snr</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Adds random gaussian errors to Doppler shift data in hertz. &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_numpy_seed</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">data</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="o">*</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">doppler_std</span><span class="p">(</span><span class="n">snr</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="LinearizedCoded.range_rate"><a class="viewcode-back" href="../../../../reference/radar/measurement_errors/auto/sorts.radar.measurement_errors.linearized_coded.LinearizedCoded.range_rate.html#sorts.radar.measurement_errors.linearized_coded.LinearizedCoded.range_rate">[docs]</a>    <span class="k">def</span> <span class="nf">range_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">snr</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Adds random gaussian errors to range-rate data in m/s. &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_numpy_seed</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">data</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="o">*</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">range_rate_std</span><span class="p">(</span><span class="n">snr</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="LinearizedCoded.range_std"><a class="viewcode-back" href="../../../../reference/radar/measurement_errors/auto/sorts.radar.measurement_errors.linearized_coded.LinearizedCoded.range_std.html#sorts.radar.measurement_errors.linearized_coded.LinearizedCoded.range_std">[docs]</a>    <span class="k">def</span> <span class="nf">range_std</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snr</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Computes the expected standard deviation of range measurements in meters. &#39;&#39;&#39;</span>
+        <span class="n">dr</span> <span class="o">=</span> <span class="mf">10.0</span><span class="o">**</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rfun</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">snr</span><span class="p">)))</span>
+
+        <span class="c1"># if object diameter is larger than range error, make it at least as big as target</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_range_std</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">dr</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_range_std</span><span class="p">:</span>
+                    <span class="n">dr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_range_std</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dr</span><span class="p">[</span><span class="n">dr</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_range_std</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_range_std</span>
+        <span class="k">return</span> <span class="n">dr</span></div>
+
+
+<div class="viewcode-block" id="LinearizedCoded.doppler_std"><a class="viewcode-back" href="../../../../reference/radar/measurement_errors/auto/sorts.radar.measurement_errors.linearized_coded.LinearizedCoded.doppler_std.html#sorts.radar.measurement_errors.linearized_coded.LinearizedCoded.doppler_std">[docs]</a>    <span class="k">def</span> <span class="nf">doppler_std</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snr</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Computes the expected standard deviation of Doppler measurements in Hertz. &#39;&#39;&#39;</span>
+        <span class="n">ddop</span> <span class="o">=</span> <span class="mf">10.0</span><span class="o">**</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dopfun</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">snr</span><span class="p">)))</span>
+
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ddop</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ddop</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_range_rate_std</span><span class="p">:</span>
+                <span class="n">ddop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_range_rate_std</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ddop</span><span class="p">[</span><span class="n">ddop</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_range_rate_std</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_range_rate_std</span>
+        <span class="k">return</span> <span class="n">ddop</span></div>
+
+
+<div class="viewcode-block" id="LinearizedCoded.range_rate_std"><a class="viewcode-back" href="../../../../reference/radar/measurement_errors/auto/sorts.radar.measurement_errors.linearized_coded.LinearizedCoded.range_rate_std.html#sorts.radar.measurement_errors.linearized_coded.LinearizedCoded.range_rate_std">[docs]</a>    <span class="k">def</span> <span class="nf">range_rate_std</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snr</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Computes the expected standard deviation of range-rate measurements in m/s. &#39;&#39;&#39;</span>
+        <span class="n">rr_std</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">c</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">doppler_std</span><span class="p">(</span><span class="n">snr</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">freq</span><span class="o">/</span><span class="mf">2.0</span>
+        <span class="k">return</span> <span class="n">rr_std</span></div></div>
+
+
+
+<div class="viewcode-block" id="LinearizedCodedIonospheric"><a class="viewcode-back" href="../../../../reference/radar/measurement_errors/auto/sorts.radar.measurement_errors.linearized_coded.LinearizedCodedIonospheric.html#sorts.radar.measurement_errors.linearized_coded.LinearizedCodedIonospheric">[docs]</a><span class="k">class</span> <span class="nc">LinearizedCodedIonospheric</span><span class="p">(</span><span class="n">LinearizedCoded</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Standard encoded signal errors computation class (with Ionospheric errors).</span>
+<span class="sd">    </span>
+<span class="sd">    The :class:`LinearizedCoded` provides a standard interface</span>
+<span class="sd">    to compute linearized errors of encoded signals. More specifically,</span>
+<span class="sd">    it allows to compute the **range** and **range-rate** errors as a function</span>
+<span class="sd">    of the signal properties and signal to noise ratio by performing</span>
+<span class="sd">    an interpolation over a set of precalculated linearized errors.</span>
+
+<span class="sd">    This class also estimates the range error due to signal propagation in the ionosphere.</span>
+<span class="sd">    Those errors are estimated by performing an interpolation within a table </span>
+<span class="sd">    of error values estimated at f=233MHz whith the radar pointing in the zenith direction</span>
+<span class="sd">    for different target ranges.</span>
+
+<span class="sd">    Parameters </span>
+<span class="sd">    ----------</span>
+<span class="sd">    tx : :class:`sorts.station.TX&lt;sorts.radar.system.station.TX&gt;`</span>
+<span class="sd">        Transmitting station.</span>
+<span class="sd">    seed : int=None</span>
+<span class="sd">        Seed used to generate random number using numpy. </span>
+<span class="sd">    cache_folder : str or :class:`pathlib.Path`, default=None</span>
+<span class="sd">        Path of the folder where computations results of linearised errors are cached.</span>
+<span class="sd">    min_range_rate_std : float, default=0.1</span>
+<span class="sd">        Minimum range rate dopple measurement standard deviation (in hertz).</span>
+<span class="sd">    min_range_std : float, default=0.1</span>
+<span class="sd">        Minimum range measurement standard deviation (in meters).</span>
+<span class="sd">    &#39;&#39;&#39;</span> 
+<div class="viewcode-block" id="LinearizedCodedIonospheric.__init__"><a class="viewcode-back" href="../../../../reference/radar/measurement_errors/auto/sorts.radar.measurement_errors.linearized_coded.LinearizedCodedIonospheric.__init__.html#sorts.radar.measurement_errors.linearized_coded.LinearizedCodedIonospheric.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Ionospheric range errors @ 233MHz (zenith)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">,</span> <span class="mf">1000000.0</span><span class="p">])</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">])</span><span class="o">*</span><span class="mf">150.0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">iono_errfun</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">e</span><span class="p">)</span>
+        <span class="sd">&#39;&#39;&#39; Ionospheric range error function ``error = f(range)``. &#39;&#39;&#39;</span></div>
+
+
+<div class="viewcode-block" id="LinearizedCodedIonospheric.range_std"><a class="viewcode-back" href="../../../../reference/radar/measurement_errors/auto/sorts.radar.measurement_errors.linearized_coded.LinearizedCodedIonospheric.range_std.html#sorts.radar.measurement_errors.linearized_coded.LinearizedCodedIonospheric.range_std">[docs]</a>    <span class="k">def</span> <span class="nf">range_std</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_range</span><span class="p">,</span> <span class="n">snr</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Computes the expected standard deviation of range measurements in meters. &#39;&#39;&#39;</span>
+        <span class="n">dr</span> <span class="o">=</span> <span class="mf">10.0</span><span class="o">**</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rfun</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">snr</span><span class="p">)))</span>
+
+        <span class="c1"># add ionospheric error</span>
+        <span class="n">dr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dr</span><span class="o">**</span><span class="mf">2.0</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">iono_errfun</span><span class="p">(</span><span class="n">path_range</span><span class="o">/</span><span class="mf">1e3</span><span class="p">)</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_range_std</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">dr</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_range_std</span><span class="p">:</span>
+                    <span class="n">dr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_range_std</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dr</span><span class="p">[</span><span class="n">dr</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_range_std</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_range_std</span>
+
+        <span class="k">return</span> <span class="n">dr</span></div>
+
+
+<div class="viewcode-block" id="LinearizedCodedIonospheric.range"><a class="viewcode-back" href="../../../../reference/radar/measurement_errors/auto/sorts.radar.measurement_errors.linearized_coded.LinearizedCodedIonospheric.range.html#sorts.radar.measurement_errors.linearized_coded.LinearizedCodedIonospheric.range">[docs]</a>    <span class="k">def</span> <span class="nf">range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">snr</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Adds random gaussian errors to range data in meters. &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_numpy_seed</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">data</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="o">*</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">range_std</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">snr</span><span class="p">)</span></div></div>
+
+</pre></div>
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright [2020-2022] Daniel Kastinen, Juha Vierinen, Thomas Maynadie.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

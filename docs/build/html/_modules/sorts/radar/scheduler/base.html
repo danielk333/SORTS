@@ -1,0 +1,478 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>sorts.radar.scheduler.base &#8212; SORTS v4.0 Manual</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "dark";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="dark">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">SORTS v4.0 Manual</p>
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../intro.html">
+  Introduction
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../install.html">
+  Installation
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../usermanual.html">
+  SORTS Manual
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <form class="bd-search d-flex align-items-center" action="../../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/danielk333/sorts" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <h1>Source code for sorts.radar.scheduler.base</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">ctypes</span>
+
+<span class="kn">from</span> <span class="nn">sorts</span> <span class="kn">import</span> <span class="n">clibsorts</span>
+
+<div class="viewcode-block" id="RadarSchedulerBase"><a class="viewcode-back" href="../../../../reference/scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.html#sorts.radar.scheduler.base.RadarSchedulerBase">[docs]</a><span class="k">class</span> <span class="nc">RadarSchedulerBase</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="RadarSchedulerBase.__init__"><a class="viewcode-back" href="../../../../reference/scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.__init__.html#sorts.radar.scheduler.base.RadarSchedulerBase.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radar</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">scheduler_period</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">profiler</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="o">=</span> <span class="n">profiler</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">radar</span> <span class="o">=</span> <span class="n">radar</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_t0</span> <span class="o">=</span> <span class="n">t0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scheduler_period</span> <span class="o">=</span> <span class="n">scheduler_period</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RadarSchedulerBase:init -&gt; setting scheduling start time t0=</span><span class="si">{</span><span class="n">t0</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scheduler_period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RadarSchedulerBase:init -&gt; setting scheduling period : scheduler_period=</span><span class="si">{</span><span class="n">scheduler_period</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>        
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;RadarSchedulerBase:init -&gt; ignoring scheduling period...&quot;</span><span class="p">)</span>   </div>
+
+
+<div class="viewcode-block" id="RadarSchedulerBase.run"><a class="viewcode-back" href="../../../../reference/scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.run.html#sorts.radar.scheduler.base.RadarSchedulerBase.run">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controls</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Runs the control scheduler algorithm to obtain the final RADAR control sequence sent to the RADAR.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        controls : np.ndarray/list</span>
+<span class="sd">        Array of RADAR controls to be managed. The algorithm will arrange the time slices from those controls to create a control sequence compatible with the RADAR system.</span>
+
+<span class="sd">        Return value</span>
+<span class="sd">        ------------</span>
+
+<span class="sd">        final_control_sequence : dict</span>
+<span class="sd">        Final RADAR control sequence compatible with the RADAR system</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="RadarSchedulerBase.exctract_scheduler_results"><a class="viewcode-back" href="../../../../reference/scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.exctract_scheduler_results.html#sorts.radar.scheduler.base.RadarSchedulerBase.exctract_scheduler_results">[docs]</a>    <span class="k">def</span> <span class="nf">exctract_scheduler_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control_sequence</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Exctracts the results of the scheduler from the generated control sequence. &#39;&#39;&#39;</span>
+        <span class="k">pass</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">scheduler_period</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scheduler_period</span>
+
+
+    <span class="nd">@scheduler_period</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">scheduler_period</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The scheduler period has to be a number (int/float)&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scheduler_period</span> <span class="o">=</span> <span class="n">val</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RadarSchedulerBase:scheduler_period:setter -&gt; setting scheduling period : scheduler_period=</span><span class="si">{</span><span class="n">val</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>        
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">t0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t0</span>
+    
+
+    <span class="nd">@t0</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">t0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The scheduler start time has to be a number (int/float)&quot;</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_t0</span> <span class="o">=</span> <span class="n">val</span>
+    
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RadarSchedulerBase:t0:setter -&gt; setting scheduling start time : t0=</span><span class="si">{</span><span class="n">val</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>     
+
+
+<div class="viewcode-block" id="RadarSchedulerBase.extract_control_sequence"><a class="viewcode-back" href="../../../../reference/scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.extract_control_sequence.html#sorts.radar.scheduler.base.RadarSchedulerBase.extract_control_sequence">[docs]</a>    <span class="k">def</span> <span class="nf">extract_control_sequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controls</span><span class="p">,</span> <span class="n">final_control_sequence</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">        Extracts the control data at the given time points and control ids</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># extract pointing directions (as splitted arrays)</span>
+        <span class="n">final_control_sequence</span><span class="o">.</span><span class="n">pdirs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_pointing_direction_sequence</span><span class="p">(</span><span class="n">controls</span><span class="p">,</span> <span class="n">final_control_sequence</span><span class="p">)</span>
+        <span class="n">final_control_sequence</span><span class="o">.</span><span class="n">has_pdirs</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># extract all other control properties</span>
+        <span class="n">controlled_properties</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">controlled_properties</span><span class="p">[</span><span class="s2">&quot;tx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">rxi</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">controls</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">tx</span><span class="p">))]</span>
+        <span class="n">controlled_properties</span><span class="p">[</span><span class="s2">&quot;rx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">txi</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">controls</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">rx</span><span class="p">))]</span>
+
+
+        <span class="c1"># get all radar properties being controlled by the different controls</span>
+        <span class="k">for</span> <span class="n">control</span> <span class="ow">in</span> <span class="n">controls</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">station_type</span> <span class="ow">in</span> <span class="n">controlled_properties</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">stations</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">radar</span><span class="p">,</span> <span class="n">station_type</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">station_id</span><span class="p">,</span> <span class="n">station</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">stations</span><span class="p">):</span>
+                    <span class="n">station_controls</span> <span class="o">=</span> <span class="n">control</span><span class="o">.</span><span class="n">get_property_control_list</span><span class="p">(</span><span class="n">station</span><span class="p">)</span>
+
+                    <span class="k">for</span> <span class="n">property_name</span> <span class="ow">in</span> <span class="n">station</span><span class="o">.</span><span class="n">PROPERTIES</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">property_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">controlled_properties</span><span class="p">[</span><span class="n">station_type</span><span class="p">][</span><span class="n">station_id</span><span class="p">]</span> <span class="ow">and</span> <span class="n">property_name</span> <span class="ow">in</span> <span class="n">station_controls</span><span class="p">:</span>
+                            <span class="n">controlled_properties</span><span class="p">[</span><span class="n">station_type</span><span class="p">][</span><span class="n">station_id</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">property_name</span><span class="p">)</span>
+
+
+        <span class="c1"># copy all controls to new control sequence</span>
+        <span class="k">for</span> <span class="n">station_type</span> <span class="ow">in</span> <span class="n">controlled_properties</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">stations</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">radar</span><span class="p">,</span> <span class="n">station_type</span><span class="p">)</span> <span class="c1"># get all the stations of type tx/rx in self.radar</span>
+
+            <span class="c1"># copy the controls for each station</span>
+            <span class="k">for</span> <span class="n">sid</span><span class="p">,</span> <span class="n">station</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">stations</span><span class="p">):</span>
+                <span class="c1"># for each property being controlled by at least one control</span>
+                <span class="k">for</span> <span class="n">property_name</span> <span class="ow">in</span> <span class="n">controlled_properties</span><span class="p">[</span><span class="n">station_type</span><span class="p">][</span><span class="n">sid</span><span class="p">]:</span> 
+                    <span class="n">tmp_final_control_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">((</span><span class="n">final_control_sequence</span><span class="o">.</span><span class="n">n_periods</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+
+                    <span class="k">for</span> <span class="n">period_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">n_periods</span><span class="p">):</span>
+                        <span class="n">tmp_final_control_data</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">final_control_sequence</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">period_id</span><span class="p">]),),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">control</span><span class="o">.</span><span class="n">property_controls</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="n">station_type</span><span class="p">][</span><span class="n">property_name</span><span class="p">][</span><span class="n">sid</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+                        <span class="c1"># get control values for each controls</span>
+                        <span class="k">for</span> <span class="n">ctrl_id</span><span class="p">,</span> <span class="n">control</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">controls</span><span class="p">):</span>   
+                            <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">final_control_sequence</span><span class="o">.</span><span class="n">active_control</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span> <span class="o">==</span> <span class="n">ctrl_id</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">property_name</span> <span class="ow">in</span> <span class="n">control</span><span class="o">.</span><span class="n">get_property_control_list</span><span class="p">(</span><span class="n">station</span><span class="p">):</span>
+                                <span class="n">inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">intersect1d</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">period_id</span><span class="p">],</span> <span class="n">final_control_sequence</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="n">mask</span><span class="p">],</span> <span class="n">return_indices</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                                <span class="n">control_point_ids</span> <span class="o">=</span> <span class="n">inds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                                <span class="k">del</span> <span class="n">inds</span>
+                            
+                                <span class="n">tmp_final_control_data</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">control</span><span class="o">.</span><span class="n">property_controls</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="n">station_type</span><span class="p">][</span><span class="n">property_name</span><span class="p">][</span><span class="n">sid</span><span class="p">][</span><span class="n">control_point_ids</span><span class="p">]</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="c1"># get default value</span>
+                                <span class="n">tmp_final_control_data</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">station</span><span class="p">,</span> <span class="n">property_name</span><span class="p">)</span>
+                
+                    <span class="n">final_control_sequence</span><span class="o">.</span><span class="n">add_property_control</span><span class="p">(</span><span class="n">property_name</span><span class="p">,</span> <span class="n">station</span><span class="p">,</span> <span class="n">tmp_final_control_data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">final_control_sequence</span></div>
+
+
+<div class="viewcode-block" id="RadarSchedulerBase.get_pointing_direction_sequence"><a class="viewcode-back" href="../../../../reference/scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.get_pointing_direction_sequence.html#sorts.radar.scheduler.base.RadarSchedulerBase.get_pointing_direction_sequence">[docs]</a>    <span class="k">def</span> <span class="nf">get_pointing_direction_sequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controls</span><span class="p">,</span> <span class="n">final_control_sequence</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">        Get the pointing directions at specific time points and control ids</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># get number of Rx/Tx stations</span>
+        <span class="n">n_tx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">controls</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">tx</span><span class="p">)</span>
+        <span class="n">n_rx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">controls</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">rx</span><span class="p">)</span>
+
+        <span class="n">pointing_direction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">((</span><span class="n">final_control_sequence</span><span class="o">.</span><span class="n">n_periods</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+
+        <span class="c1"># gather all pointing directions</span>
+        <span class="k">for</span> <span class="n">period_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">final_control_sequence</span><span class="o">.</span><span class="n">t</span><span class="p">)):</span>
+            <span class="c1"># intialization of the pointing direction sequence</span>
+
+            <span class="c1"># allocate memory</span>
+            <span class="n">pointing_direction</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="n">pointing_direction</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="s2">&quot;t&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+            <span class="n">control_t_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+            <span class="n">control_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+
+
+            <span class="c1"># callback function to save arrays</span>
+            <span class="k">def</span> <span class="nf">save_arrays</span><span class="p">(</span><span class="n">array_pdir_time_points_c</span><span class="p">,</span> <span class="n">arrays_control_ids_c</span><span class="p">,</span> <span class="n">arrays_control_t_ids_c</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+                <span class="k">nonlocal</span> <span class="n">pointing_direction</span><span class="p">,</span> <span class="n">control_ids</span><span class="p">,</span> <span class="n">control_t_ids</span><span class="p">,</span> <span class="n">period_id</span>
+
+                <span class="k">if</span> <span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">pointing_direction</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="s2">&quot;t&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">((</span><span class="n">size</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                    <span class="n">control_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">((</span><span class="n">size</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+                    <span class="n">control_t_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">((</span><span class="n">size</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+
+                    <span class="c1"># arrays control ids</span>
+                    <span class="n">buffer_from_memory</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pythonapi</span><span class="o">.</span><span class="n">PyMemoryView_FromMemory</span>
+                    <span class="n">buffer_from_memory</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">py_object</span>
+                    <span class="n">buffer</span> <span class="o">=</span> <span class="n">buffer_from_memory</span><span class="p">(</span><span class="n">arrays_control_ids_c</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span><span class="o">.</span><span class="n">itemsize</span><span class="o">*</span><span class="n">size</span><span class="p">)</span>
+                    <span class="n">control_ids</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+
+                    <span class="c1"># arrays time ids</span>
+                    <span class="n">buffer_from_memory</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pythonapi</span><span class="o">.</span><span class="n">PyMemoryView_FromMemory</span>
+                    <span class="n">buffer_from_memory</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">py_object</span>
+                    <span class="n">buffer</span> <span class="o">=</span> <span class="n">buffer_from_memory</span><span class="p">(</span><span class="n">arrays_control_t_ids_c</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span><span class="o">.</span><span class="n">itemsize</span><span class="o">*</span><span class="n">size</span><span class="p">)</span>
+                    <span class="n">control_t_ids</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+
+                    <span class="c1"># array time points</span>
+                    <span class="n">buffer_from_memory</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pythonapi</span><span class="o">.</span><span class="n">PyMemoryView_FromMemory</span>
+                    <span class="n">buffer_from_memory</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">py_object</span>
+                    <span class="n">buffer</span> <span class="o">=</span> <span class="n">buffer_from_memory</span><span class="p">(</span><span class="n">array_pdir_time_points_c</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">itemsize</span><span class="o">*</span><span class="n">size</span><span class="p">)</span>
+                    <span class="n">pointing_direction</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="s2">&quot;t&quot;</span><span class="p">][:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+            <span class="n">SAVE_ARRAYS</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">CFUNCTYPE</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">)</span>
+            <span class="n">save_arrays_c</span> <span class="o">=</span> <span class="n">SAVE_ARRAYS</span><span class="p">(</span><span class="n">save_arrays</span><span class="p">)</span>
+
+            <span class="n">first_iteration</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">controls_pdirs</span> <span class="o">=</span> <span class="p">[]</span>
+            
+            <span class="c1"># initializes the pointing direction arrays</span>
+            <span class="k">for</span> <span class="n">ctrl_id</span><span class="p">,</span> <span class="n">control</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">controls</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">control</span><span class="o">.</span><span class="n">has_pdirs</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                    <span class="c1"># compute the corresponding control period</span>
+                    <span class="n">ctrl_period_id</span> <span class="o">=</span> <span class="n">control</span><span class="o">.</span><span class="n">get_control_period_id</span><span class="p">(</span><span class="n">period_id</span><span class="p">)</span>
+
+                    <span class="c1"># if there is indeed a sliced control time array of index &quot;ctrl_period_id&quot;</span>
+                    <span class="k">if</span> <span class="n">ctrl_period_id</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                        <span class="c1"># get the pointing directions of the current control</span>
+                        <span class="n">controls_pdirs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">get_pdirs</span><span class="p">(</span><span class="n">ctrl_period_id</span><span class="p">))</span>
+
+                        <span class="n">clibsorts</span><span class="o">.</span><span class="n">get_control_sequence_time_indices</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">ctypeslib</span><span class="o">.</span><span class="n">ndpointer</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="n">final_control_sequence</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">final_control_sequence</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">ctypeslib</span><span class="o">.</span><span class="n">ndpointer</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="n">final_control_sequence</span><span class="o">.</span><span class="n">t_slice</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">final_control_sequence</span><span class="o">.</span><span class="n">t_slice</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">ctypeslib</span><span class="o">.</span><span class="n">ndpointer</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="n">pointing_direction</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="s2">&quot;t&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">pointing_direction</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="s2">&quot;t&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">ctypeslib</span><span class="o">.</span><span class="n">ndpointer</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="n">control</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">ctrl_period_id</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">control</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">ctrl_period_id</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">ctypeslib</span><span class="o">.</span><span class="n">ndpointer</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="n">controls_pdirs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;t&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">controls_pdirs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;t&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">ctypeslib</span><span class="o">.</span><span class="n">ndpointer</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="n">control_ids</span><span class="o">.</span><span class="n">ndim</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">control_ids</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">ctypeslib</span><span class="o">.</span><span class="n">ndpointer</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="n">control_t_ids</span><span class="o">.</span><span class="n">ndim</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">control_t_ids</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">ctypeslib</span><span class="o">.</span><span class="n">ndpointer</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="n">final_control_sequence</span><span class="o">.</span><span class="n">active_control</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">final_control_sequence</span><span class="o">.</span><span class="n">active_control</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
+                            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span>
+                            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span>
+                            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span>
+                            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span>
+                            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span>
+                            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span>
+                            <span class="n">SAVE_ARRAYS</span><span class="p">,</span>
+                        <span class="p">]</span>
+
+                        <span class="n">clibsorts</span><span class="o">.</span><span class="n">get_control_sequence_time_indices</span><span class="p">(</span>
+                            <span class="n">final_control_sequence</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">period_id</span><span class="p">],</span>
+                            <span class="n">final_control_sequence</span><span class="o">.</span><span class="n">t_slice</span><span class="p">[</span><span class="n">period_id</span><span class="p">],</span>
+                            <span class="n">pointing_direction</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="s2">&quot;t&quot;</span><span class="p">],</span>
+                            <span class="n">control</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">ctrl_period_id</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span>
+                            <span class="n">controls_pdirs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;t&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span>
+                            <span class="n">control_ids</span><span class="p">,</span>
+                            <span class="n">control_t_ids</span><span class="p">,</span>
+                            <span class="n">final_control_sequence</span><span class="o">.</span><span class="n">active_control</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span>
+                            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="n">ctrl_id</span><span class="p">),</span>
+                            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">ctrl_period_id</span><span class="p">])),</span>
+                            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">controls_pdirs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;t&quot;</span><span class="p">])),</span>
+                            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">final_control_sequence</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">period_id</span><span class="p">])),</span>
+                            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">control_ids</span><span class="p">)),</span>
+                            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="n">first_iteration</span><span class="p">),</span>
+                            <span class="n">save_arrays_c</span><span class="p">,</span>
+                        <span class="p">)</span>
+
+                        <span class="n">first_iteration</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="n">n_directions</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pointing_direction</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="s2">&quot;t&quot;</span><span class="p">])</span>
+            <span class="n">pointing_direction</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="s1">&#39;tx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">((</span><span class="n">n_tx</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">n_directions</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="n">pointing_direction</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="s1">&#39;rx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">((</span><span class="n">n_rx</span><span class="p">,</span> <span class="n">n_tx</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">n_directions</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+            <span class="c1"># get directions from individual control arrays</span>
+            <span class="n">ctrl_id</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">while</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">controls_pdirs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">control</span><span class="o">.</span><span class="n">has_pdirs</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                    <span class="n">msk</span> <span class="o">=</span> <span class="n">control_ids</span> <span class="o">==</span> <span class="n">ctrl_id</span>
+                    <span class="n">control_pdir</span> <span class="o">=</span> <span class="n">controls_pdirs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+                    <span class="k">for</span> <span class="n">txi</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_tx</span><span class="p">):</span>
+                        <span class="n">pointing_direction</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="s1">&#39;tx&#39;</span><span class="p">][</span><span class="n">txi</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="n">msk</span><span class="p">]</span> <span class="o">=</span> <span class="n">control_pdir</span><span class="p">[</span><span class="s2">&quot;tx&quot;</span><span class="p">][</span><span class="n">txi</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="n">control_t_ids</span><span class="p">[</span><span class="n">msk</span><span class="p">]]</span>
+
+                        <span class="k">for</span> <span class="n">rxi</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_rx</span><span class="p">):</span>
+                            <span class="n">pointing_direction</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="s1">&#39;rx&#39;</span><span class="p">][</span><span class="n">rxi</span><span class="p">,</span> <span class="n">txi</span><span class="p">,</span> <span class="p">:,</span> <span class="n">msk</span><span class="p">]</span> <span class="o">=</span> <span class="n">control_pdir</span><span class="p">[</span><span class="s2">&quot;rx&quot;</span><span class="p">][</span><span class="n">rxi</span><span class="p">,</span> <span class="n">txi</span><span class="p">,</span> <span class="p">:,</span> <span class="n">control_t_ids</span><span class="p">[</span><span class="n">msk</span><span class="p">]]</span>
+
+                <span class="n">ctrl_id</span> <span class="o">+=</span> <span class="mi">1</span>  
+                
+        <span class="k">return</span> <span class="n">pointing_direction</span></div></div>
+</pre></div>
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright [2020-2022] Daniel Kastinen, Juha Vierinen, Thomas Maynadie.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

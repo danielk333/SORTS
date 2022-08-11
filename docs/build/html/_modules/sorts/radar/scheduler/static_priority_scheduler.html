@@ -1,0 +1,565 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>sorts.radar.scheduler.static_priority_scheduler &#8212; SORTS v4.0 Manual</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "dark";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="dark">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">SORTS v4.0 Manual</p>
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../intro.html">
+  Introduction
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../install.html">
+  Installation
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../usermanual.html">
+  SORTS Manual
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <form class="bd-search d-flex align-items-center" action="../../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/danielk333/sorts" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <h1>Source code for sorts.radar.scheduler.static_priority_scheduler</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">tabulate</span> <span class="kn">import</span> <span class="n">tabulate</span>
+<span class="kn">import</span> <span class="nn">ctypes</span>
+
+<span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">RadarSchedulerBase</span>
+<span class="kn">from</span> <span class="nn">sorts</span> <span class="kn">import</span> <span class="n">clibsorts</span>
+
+<span class="kn">from</span> <span class="nn">..controllers</span> <span class="kn">import</span> <span class="n">radar_controller</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">radar_controls</span>
+
+
+<div class="viewcode-block" id="StaticPriorityScheduler"><a class="viewcode-back" href="../../../../reference/scheduler/auto/sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.html#sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler">[docs]</a><span class="k">class</span> <span class="nc">StaticPriorityScheduler</span><span class="p">(</span><span class="n">RadarSchedulerBase</span><span class="p">):</span>
+<div class="viewcode-block" id="StaticPriorityScheduler.__init__"><a class="viewcode-back" href="../../../../reference/scheduler/auto/sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.__init__.html#sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radar</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">scheduler_period</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">profiler</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">radar</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">scheduler_period</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span> <span class="n">profiler</span><span class="o">=</span><span class="n">profiler</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="StaticPriorityScheduler.run"><a class="viewcode-back" href="../../../../reference/scheduler/auto/sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.run.html#sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controls</span><span class="p">,</span> <span class="n">t_end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">t_start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log_performances</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">        This function is used to create a single radar control set from a set of multiple controls which is compatible with the control priorities, time points and time slices.</span>
+<span class="sd">        The final control set will be free of overlapping time slices. </span>
+
+<span class="sd">        As an example, if one wants to execute multiple control types at the same time (scanning, tracking, ...)</span>
+<span class="sd">        then one needs to generate all the wanted controls independantly, and then call the scheduler over the list of generated controls to get a new control set </span>
+<span class="sd">        which corresponds to the fusion (weighted with respect to the priority of each control subsets) of all the previous controls. </span>
+
+<span class="sd">        Parameters :</span>
+<span class="sd">        ------------</span>
+<span class="sd">            controls : list/numpy.ndarray</span>
+<span class="sd">                List or array of controls to be managed. Those controls can have been generated from different kinds of controllers.</span>
+<span class="sd">                The scheduler will extract the final controls and time points depending on the priority of each control. To do so, the scheduler will </span>
+<span class="sd">                discard any overlapping time slices and will only keep the time slice of highest priority.</span>
+<span class="sd">            t_end (optional) : int</span>
+<span class="sd">                end time of the scheduler. If not set, the end time will correspond to the lastest time point of the control time arrays </span>
+
+<span class="sd">        Return value :</span>
+<span class="sd">        --------------</span>
+<span class="sd">            As stated before, this function returns a single set of controls which can be executed by the radar. </span>
+
+<span class="sd">        Example :</span>
+<span class="sd">        ---------</span>
+<span class="sd">            Let us take the example of a RADAR measurement campain where multiple scientist want to use the same RADAR system to conduct different observations.</span>
+<span class="sd">            Each scientist will require a different set of controls, which aren&#39;t necessarily compatible with each other.</span>
+
+<span class="sd">            The sorts.scheduler moduler can be used to solve this problem :</span>
+<span class="sd">             - Each scientist can generate the controls he wants to perform with the radar (i.e. tracking of a meteoroid, a random scan each 10s, ...)</span>
+<span class="sd">             - A unique priority can be affected to each control</span>
+<span class="sd">             - The different controls are stacked into a single array</span>
+<span class="sd">             - Finally, one can call scheduler.run function to get a final control sequence which (hopefully) will satisfy the requirements of each scientist</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># Check input values   </span>
+        <span class="n">controls</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">controls</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span> <span class="c1"># convert control list to an np.array of objects  </span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_priority</span><span class="p">(</span><span class="n">controls</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">t_end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># get the max end time of the controls if t_end is not given </span>
+            <span class="n">t_end</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="k">for</span> <span class="n">ctrl_id</span><span class="p">,</span> <span class="n">ctrl</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">controls</span><span class="p">):</span>
+                <span class="n">t_last_i</span> <span class="o">=</span> <span class="n">controls</span><span class="p">[</span><span class="n">ctrl_id</span><span class="p">]</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">t_last_i</span> <span class="o">&gt;</span> <span class="n">t_end</span><span class="p">:</span> <span class="n">t_end</span> <span class="o">=</span> <span class="n">t_last_i</span>
+
+        <span class="k">if</span> <span class="n">t_start</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># get the max end time of the controls if t_end is not given </span>
+            <span class="n">t_start</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="k">for</span> <span class="n">ctrl_id</span><span class="p">,</span> <span class="n">ctrl</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">controls</span><span class="p">):</span>
+                <span class="n">t_last_i</span> <span class="o">=</span> <span class="n">controls</span><span class="p">[</span><span class="n">ctrl_id</span><span class="p">]</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">t_last_i</span> <span class="o">&lt;</span> <span class="n">t_start</span><span class="p">:</span> <span class="n">t_start</span> <span class="o">=</span> <span class="n">t_last_i</span>
+
+        <span class="n">new_time_array</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">new_ctrl_id_array</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># compute number of scheduler periods </span>
+        <span class="n">scheduler_period_start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">t_start</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">t0</span><span class="p">)</span><span class="o">//</span><span class="bp">self</span><span class="o">.</span><span class="n">_scheduler_period</span><span class="p">)</span>
+        <span class="n">scheduler_period_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="n">t_end</span> <span class="o">-</span> <span class="p">(</span><span class="n">t_start</span><span class="o">//</span><span class="bp">self</span><span class="o">.</span><span class="n">_scheduler_period</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_scheduler_period</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">_scheduler_period</span><span class="p">))</span>
+
+        <span class="c1"># Initialization</span>
+        <span class="n">c_fnc_pointers</span><span class="p">,</span> <span class="n">C_FNC_TYPES</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__setup_c_callback_functions</span><span class="p">(</span><span class="n">controls</span><span class="p">,</span> <span class="n">scheduler_period_count</span><span class="p">,</span> <span class="n">new_time_array</span><span class="p">,</span> <span class="n">new_ctrl_id_array</span><span class="p">)</span> <span class="c1"># intialize C callback functions </span>
+
+        <span class="c1"># save functions to a C library struct for easy access during schedule computations</span>
+        <span class="n">clibsorts</span><span class="o">.</span><span class="n">init_static_priority_scheduler</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="n">C_FNC_TYPES</span>
+        <span class="n">clibsorts</span><span class="o">.</span><span class="n">init_static_priority_scheduler</span><span class="p">(</span><span class="o">*</span><span class="n">c_fnc_pointers</span><span class="p">)</span>
+
+        <span class="n">t_start_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t0</span> <span class="o">+</span> <span class="n">t_start</span>
+
+        <span class="c1"># initializes results</span>
+        <span class="n">final_t</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">scheduler_period_count</span>
+        <span class="n">final_t_slice</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">scheduler_period_count</span>
+        <span class="n">final_active_control</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">scheduler_period_count</span>
+
+        <span class="c1"># manages the controls for each scheduler period </span>
+        <span class="k">for</span> <span class="n">scheduler_period_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">scheduler_period_count</span><span class="p">):</span>
+            <span class="n">abs_scheduler_period_id</span> <span class="o">=</span> <span class="n">scheduler_period_id</span> <span class="o">+</span> <span class="n">scheduler_period_start</span>
+            <span class="n">t_end_i</span> <span class="o">=</span> <span class="n">t_start_i</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scheduler_period</span> <span class="c1"># compute the end time of the scheduler period</span>
+
+            <span class="k">if</span> <span class="n">t_end_i</span> <span class="o">&gt;</span> <span class="n">t_end</span><span class="p">:</span>
+                <span class="n">t_end_i</span> <span class="o">=</span> <span class="n">t_end</span>
+
+            <span class="c1"># initialize library call funtion</span>
+            <span class="n">clibsorts</span><span class="o">.</span><span class="n">run_static_priority_scheduler</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">]</span>
+            <span class="n">clibsorts</span><span class="o">.</span><span class="n">run_static_priority_scheduler</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span>
+
+            <span class="c1"># run clib function -&gt; returns the position of the time cursor t_start_i</span>
+            <span class="n">t_start_i</span> <span class="o">=</span> <span class="n">clibsorts</span><span class="o">.</span><span class="n">run_static_priority_scheduler</span><span class="p">(</span>
+                <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="n">abs_scheduler_period_id</span><span class="p">),</span>
+                <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">controls</span><span class="p">)),</span>
+                <span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">(</span><span class="n">t_start_i</span><span class="p">),</span> 
+                <span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">(</span><span class="n">t_end_i</span><span class="p">))</span>
+
+            <span class="c1"># get scheduler arrays</span>
+            <span class="n">time_array</span><span class="p">,</span> <span class="n">time_slices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_control_sequence</span><span class="p">(</span><span class="n">controls</span><span class="p">,</span> <span class="n">abs_scheduler_period_id</span><span class="p">,</span> <span class="n">new_time_array</span><span class="p">,</span> <span class="n">new_ctrl_id_array</span><span class="p">)</span>
+            
+            <span class="c1"># save scheduler arrays</span>
+            <span class="n">final_t</span><span class="p">[</span><span class="n">scheduler_period_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_array</span>
+            <span class="n">final_t_slice</span><span class="p">[</span><span class="n">scheduler_period_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_slices</span>
+            <span class="n">final_active_control</span><span class="p">[</span><span class="n">scheduler_period_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">new_ctrl_id_array</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+
+        <span class="c1"># convert each output to a numpy array</span>
+        <span class="n">final_control_sequence</span> <span class="o">=</span> <span class="n">radar_controls</span><span class="o">.</span><span class="n">RadarControls</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radar</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">scheduler</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">final_control_sequence</span><span class="o">.</span><span class="n">active_control</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">final_active_control</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+        <span class="n">final_control_sequence</span><span class="o">.</span><span class="n">set_time_slices</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">final_t</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">),</span> 
+            <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">final_t_slice</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">),</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">log_performances</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log_scheduler_performances</span><span class="p">(</span><span class="n">controls</span><span class="p">,</span> <span class="n">final_control_sequence</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_control_sequence</span><span class="p">(</span><span class="n">controls</span><span class="p">,</span> <span class="n">final_control_sequence</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__setup_c_callback_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controls</span><span class="p">,</span> <span class="n">n_periods</span><span class="p">,</span> <span class="n">new_time_array</span><span class="p">,</span> <span class="n">new_ctrl_id_array</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">        Sets up all the callback functions needed to interact properly with the scheduler C library.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">ptr_time_array_c</span> <span class="o">=</span> <span class="p">[[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">controls</span><span class="p">)]</span><span class="o">*</span><span class="n">n_periods</span>
+        <span class="n">ptr_t_slice_c</span> <span class="o">=</span> <span class="p">[[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">controls</span><span class="p">)]</span><span class="o">*</span><span class="n">n_periods</span>
+        <span class="n">ptr_priority_c</span> <span class="o">=</span> <span class="p">[[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">controls</span><span class="p">)]</span><span class="o">*</span><span class="n">n_periods</span>
+
+        <span class="c1"># C CALLBACK FUNCTIONS</span>
+        <span class="k">def</span> <span class="nf">get_control_period_id_callback</span><span class="p">(</span><span class="n">control_id</span><span class="p">,</span> <span class="n">scheduler_period_id</span><span class="p">):</span>
+            <span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">            Gets the active time control subarray associated with a given scheduler period ID  </span>
+<span class="sd">            &#39;&#39;&#39;</span>
+            <span class="k">nonlocal</span> <span class="n">controls</span>
+            <span class="k">return</span> <span class="n">controls</span><span class="p">[</span><span class="n">control_id</span><span class="p">]</span><span class="o">.</span><span class="n">get_control_period_id</span><span class="p">(</span><span class="n">scheduler_period_id</span><span class="p">)</span>
+
+        <span class="n">GET_CONTROL_PERIOD_ID_FNC</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">CFUNCTYPE</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">)</span>
+        <span class="n">get_control_period_id_c</span> <span class="o">=</span> <span class="n">GET_CONTROL_PERIOD_ID_FNC</span><span class="p">(</span><span class="n">get_control_period_id_callback</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">get_control_parameters_callback</span><span class="p">(</span><span class="n">control_id</span><span class="p">,</span> <span class="n">control_period_id</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">t_slice</span><span class="p">,</span> <span class="n">priority</span><span class="p">):</span>
+            <span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">            Copies the priority, time and t_slice of a given control, time index and control period (which corresponds to a control sliced time subarray) from Python to C pointers.</span>
+<span class="sd">            This function is used to prevent sending the whole time data to the library at once.</span>
+<span class="sd">            &#39;&#39;&#39;</span>
+            <span class="k">nonlocal</span> <span class="n">controls</span>
+
+            <span class="k">if</span> <span class="n">control_period_id</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">controls</span><span class="p">[</span><span class="n">control_id</span><span class="p">]</span><span class="o">.</span><span class="n">t</span><span class="p">)</span> <span class="ow">or</span> <span class="n">control_period_id</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="c1"># no controls available in given control period</span>
+                <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># assigns the control parameters to the C pointers</span>
+                <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">controls</span><span class="p">[</span><span class="n">control_id</span><span class="p">]</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">control_period_id</span><span class="p">][</span><span class="n">index</span><span class="p">]</span>
+                <span class="n">t_slice</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">controls</span><span class="p">[</span><span class="n">control_id</span><span class="p">]</span><span class="o">.</span><span class="n">t_slice</span><span class="p">[</span><span class="n">control_period_id</span><span class="p">][</span><span class="n">index</span><span class="p">]</span>
+                <span class="n">priority</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">controls</span><span class="p">[</span><span class="n">control_id</span><span class="p">]</span><span class="o">.</span><span class="n">priority</span>
+
+                <span class="k">return</span> <span class="mi">1</span>
+
+        <span class="n">GET_CONTROL_PARAMETERS_FNC</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">CFUNCTYPE</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">))</span>
+        <span class="n">get_control_parameters_c</span> <span class="o">=</span> <span class="n">GET_CONTROL_PARAMETERS_FNC</span><span class="p">(</span><span class="n">get_control_parameters_callback</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">get_control_arrays_callback</span><span class="p">(</span><span class="n">period_id</span><span class="p">,</span> <span class="n">time_array_c</span><span class="p">,</span> <span class="n">t_slice_c</span><span class="p">,</span> <span class="n">priority_c</span><span class="p">,</span> <span class="n">size_c</span><span class="p">):</span>
+            <span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">            Copies the priority, time and t_slice arrays of a given control and control period (which corresponds to a control sliced time subarray) from Python to C allocated array.</span>
+<span class="sd">            This function is used to prevent sending the whole time data to the library at once.</span>
+<span class="sd">            &#39;&#39;&#39;</span>
+            <span class="k">nonlocal</span> <span class="n">controls</span>
+
+            <span class="n">c_double_p</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">)</span>
+            <span class="n">c_int_p</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">ctrl_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">controls</span><span class="p">)):</span>
+                <span class="n">ctrl_period_id</span> <span class="o">=</span> <span class="n">controls</span><span class="p">[</span><span class="n">ctrl_id</span><span class="p">]</span><span class="o">.</span><span class="n">get_control_period_id</span><span class="p">(</span><span class="n">period_id</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">ctrl_period_id</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>                    
+                    <span class="c1"># get array pointers</span>
+                    <span class="n">ptr_time_array_c</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="n">ctrl_id</span><span class="p">]</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">controls</span><span class="p">[</span><span class="n">ctrl_id</span><span class="p">]</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">ctrl_period_id</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">c_double_p</span><span class="p">)</span>
+                    <span class="n">ptr_t_slice_c</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="n">ctrl_id</span><span class="p">]</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">controls</span><span class="p">[</span><span class="n">ctrl_id</span><span class="p">]</span><span class="o">.</span><span class="n">t_slice</span><span class="p">[</span><span class="n">ctrl_period_id</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">c_double_p</span><span class="p">)</span>                    
+                    <span class="n">ptr_priority_c</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="n">ctrl_id</span><span class="p">]</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">controls</span><span class="p">[</span><span class="n">ctrl_id</span><span class="p">]</span><span class="o">.</span><span class="n">priority</span><span class="p">[</span><span class="n">ctrl_period_id</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">c_int_p</span><span class="p">)</span>
+                    
+                    <span class="n">time_array_c</span><span class="p">[</span><span class="n">ctrl_id</span><span class="p">]</span>       <span class="o">=</span> <span class="n">ptr_time_array_c</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="n">ctrl_id</span><span class="p">]</span>
+                    <span class="n">t_slice_c</span><span class="p">[</span><span class="n">ctrl_id</span><span class="p">]</span>          <span class="o">=</span> <span class="n">ptr_t_slice_c</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="n">ctrl_id</span><span class="p">]</span>
+                    <span class="n">priority_c</span><span class="p">[</span><span class="n">ctrl_id</span><span class="p">]</span>         <span class="o">=</span> <span class="n">ptr_priority_c</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="n">ctrl_id</span><span class="p">]</span>
+
+                    <span class="c1"># get new size</span>
+                    <span class="n">size_c</span><span class="p">[</span><span class="n">ctrl_id</span><span class="p">]</span>             <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">controls</span><span class="p">[</span><span class="n">ctrl_id</span><span class="p">]</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">ctrl_period_id</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">size_c</span><span class="p">[</span><span class="n">ctrl_id</span><span class="p">]</span>             <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="n">GET_CONTROL_ARRAYS_FNC</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">CFUNCTYPE</span><span class="p">(</span>
+            <span class="kc">None</span><span class="p">,</span> 
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> 
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">)),</span> 
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">)),</span> 
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">)),</span>
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">))</span>
+
+        <span class="n">get_control_arrays_c</span> <span class="o">=</span> <span class="n">GET_CONTROL_ARRAYS_FNC</span><span class="p">(</span><span class="n">get_control_arrays_callback</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">save_new_control_arrays_callback</span><span class="p">(</span><span class="n">new_time_array_c</span><span class="p">,</span> <span class="n">new_ctrl_id_array_c</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+            <span class="k">nonlocal</span> <span class="n">new_time_array</span><span class="p">,</span> <span class="n">new_ctrl_id_array</span>
+            <span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">            Allows Python to copy the control arrays :</span>
+<span class="sd">                - time_array</span>
+<span class="sd">                - ctrl_id_array</span>
+
+<span class="sd">            from the C arrays, created after running the scheduler over a given scheduler period, to the corresponding python arrays.</span>
+<span class="sd">            This function allows the use of temporary dynamically allocated arrays in C.</span>
+<span class="sd">            &#39;&#39;&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__save_new_control_arrays</span><span class="p">(</span><span class="n">new_time_array_c</span><span class="p">,</span> <span class="n">new_ctrl_id_array_c</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">new_time_array</span><span class="p">,</span> <span class="n">new_ctrl_id_array</span><span class="p">)</span>
+
+        <span class="n">SAVE_NEW_CTRL_ARRAY_FNC</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">CFUNCTYPE</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">)</span>
+        <span class="n">save_new_control_arrays_c</span> <span class="o">=</span> <span class="n">SAVE_NEW_CTRL_ARRAY_FNC</span><span class="p">(</span><span class="n">save_new_control_arrays_callback</span><span class="p">)</span>
+
+        <span class="n">C_FNC_TYPES</span> <span class="o">=</span> <span class="p">(</span><span class="n">GET_CONTROL_PERIOD_ID_FNC</span><span class="p">,</span> <span class="n">GET_CONTROL_PARAMETERS_FNC</span><span class="p">,</span> <span class="n">GET_CONTROL_ARRAYS_FNC</span><span class="p">,</span> <span class="n">SAVE_NEW_CTRL_ARRAY_FNC</span><span class="p">)</span>
+        <span class="n">c_fnc_pointers</span> <span class="o">=</span> <span class="p">(</span><span class="n">get_control_period_id_c</span><span class="p">,</span> <span class="n">get_control_parameters_c</span><span class="p">,</span> <span class="n">get_control_arrays_c</span><span class="p">,</span> <span class="n">save_new_control_arrays_c</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">c_fnc_pointers</span><span class="p">,</span> <span class="n">C_FNC_TYPES</span>
+
+
+    <span class="k">def</span> <span class="nf">__get_control_sequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controls</span><span class="p">,</span> <span class="n">period_id</span><span class="p">,</span> <span class="n">new_time_array</span><span class="p">,</span> <span class="n">new_ctrl_id_array</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">        Extract the control time and time_slice arrays from the glogal controls array.</span>
+
+<span class="sd">        This function is called after having conputed the active control and time point indices (arrays of int) over a given scheduler period to retreive</span>
+<span class="sd">        the actual time points and time slices.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># initializes the output arrays</span>
+        <span class="n">time_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">new_ctrl_id_array</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">time_slices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">new_ctrl_id_array</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">new_ctrl_id_array</span><span class="p">)):</span>
+            <span class="c1"># compute the sliced time array id for the given controller</span>
+            <span class="n">ctrl_period</span> <span class="o">=</span> <span class="n">period_id</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">controls</span><span class="p">[</span><span class="n">new_ctrl_id_array</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">_scheduler_period</span><span class="p">)</span>
+
+            <span class="c1"># copies the values contained inside the controls array to the new arrays</span>
+            <span class="n">time_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">controls</span><span class="p">[</span><span class="n">new_ctrl_id_array</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">ctrl_period</span><span class="p">][</span><span class="n">new_time_array</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+            <span class="n">time_slices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">controls</span><span class="p">[</span><span class="n">new_ctrl_id_array</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">.</span><span class="n">t_slice</span><span class="p">[</span><span class="n">ctrl_period</span><span class="p">][</span><span class="n">new_time_array</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+                                    
+        <span class="k">return</span> <span class="n">time_array</span><span class="p">,</span> <span class="n">time_slices</span>
+
+
+    <span class="k">def</span> <span class="nf">__get_control_array_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controls</span><span class="p">,</span> <span class="n">control_id</span><span class="p">,</span> <span class="n">control_period_id</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">        Gets the number of time points in a given control time subarray</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">control_period_id</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">time_array_size</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">time_array_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">controls</span><span class="p">[</span><span class="n">control_id</span><span class="p">]</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">control_period_id</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">time_array_size</span> 
+        
+
+    <span class="k">def</span> <span class="nf">__save_new_control_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_time_array_c</span><span class="p">,</span> <span class="n">new_ctrl_id_array_c</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">new_time_array</span><span class="p">,</span> <span class="n">new_ctrl_id_array</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">        Allows Python to copy the control arrays :</span>
+<span class="sd">            - time_array</span>
+<span class="sd">            - ctrl_id_array</span>
+
+<span class="sd">        from the C arrays, created after running the scheduler over a given scheduler period, to the corresponding python arrays.</span>
+<span class="sd">        This function allows the use of temporary dynamically allocated arrays in C.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">new_time_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">new_ctrl_id_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># copy new_time_array</span>
+            <span class="n">buffer_from_memory</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pythonapi</span><span class="o">.</span><span class="n">PyMemoryView_FromMemory</span>
+            <span class="n">buffer_from_memory</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">py_object</span>
+            <span class="n">buffer</span> <span class="o">=</span> <span class="n">buffer_from_memory</span><span class="p">(</span><span class="n">new_time_array_c</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span><span class="o">.</span><span class="n">itemsize</span><span class="o">*</span><span class="n">size</span><span class="p">)</span>
+
+            <span class="n">new_time_array</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+            <span class="c1"># copy new_ctrl_id_array</span>
+            <span class="n">buffer_from_memory</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pythonapi</span><span class="o">.</span><span class="n">PyMemoryView_FromMemory</span>
+            <span class="n">buffer_from_memory</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">py_object</span>
+            <span class="n">buffer</span> <span class="o">=</span> <span class="n">buffer_from_memory</span><span class="p">(</span><span class="n">new_ctrl_id_array_c</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span><span class="o">.</span><span class="n">itemsize</span><span class="o">*</span><span class="n">size</span><span class="p">)</span>
+
+            <span class="n">new_ctrl_id_array</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+
+
+<div class="viewcode-block" id="StaticPriorityScheduler.log_scheduler_performances"><a class="viewcode-back" href="../../../../reference/scheduler/auto/sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.log_scheduler_performances.html#sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.log_scheduler_performances">[docs]</a>    <span class="k">def</span> <span class="nf">log_scheduler_performances</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controls</span><span class="p">,</span> <span class="n">final_control_sequence</span><span class="p">):</span>        
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="n">t_start</span> <span class="o">=</span> <span class="n">final_control_sequence</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">t_end</span> <span class="o">=</span> <span class="n">final_control_sequence</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">ctrl_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">controls</span><span class="p">)):</span>
+            <span class="n">control_uptime_th</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="n">control_time_point_ids</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="n">control_uptime_real</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+            <span class="n">controller_type</span> <span class="o">=</span> <span class="n">controls</span><span class="p">[</span><span class="n">ctrl_id</span><span class="p">]</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;controller_type&quot;</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">scheduler_period_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">final_control_sequence</span><span class="o">.</span><span class="n">t</span><span class="p">)):</span>
+                <span class="n">control_period_id</span> <span class="o">=</span> <span class="n">controls</span><span class="p">[</span><span class="n">ctrl_id</span><span class="p">]</span><span class="o">.</span><span class="n">get_control_period_id</span><span class="p">(</span><span class="n">scheduler_period_id</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">control_period_id</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">msk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">controls</span><span class="p">[</span><span class="n">ctrl_id</span><span class="p">]</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">control_period_id</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">t_start</span><span class="p">,</span> <span class="n">controls</span><span class="p">[</span><span class="n">ctrl_id</span><span class="p">]</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">control_period_id</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">t_end</span><span class="p">)</span>
+                    <span class="n">control_uptime_th</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">controls</span><span class="p">[</span><span class="n">ctrl_id</span><span class="p">]</span><span class="o">.</span><span class="n">t_slice</span><span class="p">[</span><span class="n">control_period_id</span><span class="p">][</span><span class="n">msk</span><span class="p">])</span>
+
+                    <span class="n">control_time_point_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">final_control_sequence</span><span class="o">.</span><span class="n">active_control</span><span class="p">[</span><span class="n">scheduler_period_id</span><span class="p">]</span> <span class="o">==</span> <span class="n">ctrl_id</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">control_uptime_real</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">final_control_sequence</span><span class="o">.</span><span class="n">t_slice</span><span class="p">[</span><span class="n">scheduler_period_id</span><span class="p">][</span><span class="n">control_time_point_ids</span><span class="p">])</span>
+
+            <span class="n">succes_rate</span> <span class="o">=</span> <span class="n">control_uptime_real</span><span class="o">/</span><span class="n">control_uptime_th</span><span class="o">*</span><span class="mi">100</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ctrl_id</span><span class="p">,</span> <span class="n">controller_type</span><span class="p">,</span> <span class="n">controls</span><span class="p">[</span><span class="n">ctrl_id</span><span class="p">]</span><span class="o">.</span><span class="n">priority</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">control_uptime_th</span><span class="p">,</span> <span class="n">control_uptime_real</span><span class="p">,</span> <span class="n">succes_rate</span><span class="p">])</span>
+            
+        <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Control index</span><span class="se">\n</span><span class="s1">[-]&#39;</span><span class="p">,</span> <span class="s1">&#39;Controller type</span><span class="se">\n</span><span class="s1">[-]&#39;</span><span class="p">,</span> <span class="s1">&#39;Priority</span><span class="se">\n</span><span class="s1">[-]&#39;</span><span class="p">,</span> <span class="s1">&#39;Theoretical uptime</span><span class="se">\n</span><span class="s1">[s]&#39;</span><span class="p">,</span> <span class="s1">&#39;Real uptime</span><span class="se">\n</span><span class="s1">[s]&#39;</span><span class="p">,</span> <span class="s1">&#39;Success rate</span><span class="se">\n</span><span class="s1">[%]&#39;</span><span class="p">]</span>
+        <span class="n">tab</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">header</span><span class="p">,</span> <span class="n">tablefmt</span><span class="o">=</span><span class="s2">&quot;presto&quot;</span><span class="p">,</span> <span class="n">numalign</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">floatfmt</span><span class="o">=</span><span class="s2">&quot;5.2f&quot;</span><span class="p">))</span>
+
+        <span class="n">width</span> <span class="o">=</span> <span class="n">tab</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">str_</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="s2">&quot; scheduler performance analysis &quot;</span><span class="o">.</span><span class="n">center</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">str_</span> <span class="o">+=</span> <span class="n">tab</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">str_</span> <span class="o">+=</span> <span class="s1">&#39;-&#39;</span><span class="o">*</span><span class="n">width</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">str_</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="StaticPriorityScheduler.check_priority"><a class="viewcode-back" href="../../../../reference/scheduler/auto/sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.check_priority.html#sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.check_priority">[docs]</a>    <span class="k">def</span> <span class="nf">check_priority</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controls</span><span class="p">):</span>
+        <span class="c1"># convert priorities to arrays if not already done</span>
+        <span class="k">for</span> <span class="n">ctrl_id</span><span class="p">,</span> <span class="n">control</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">controls</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">control</span><span class="o">.</span><span class="n">priority</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">control</span><span class="o">.</span><span class="n">priority</span> <span class="o">=</span> <span class="n">ctrl_id</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">controls</span><span class="p">)</span> <span class="c1"># put the control at the end in FIFO mode</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Control priorities must be arrays of shape (n_periods, n_points_per_periods) or integers.&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                <span class="n">error_flag</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">priority</span><span class="p">)</span> <span class="o">!=</span> <span class="n">control</span><span class="o">.</span><span class="n">n_periods</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">priority</span><span class="p">)</span> <span class="o">!=</span> <span class="n">control</span><span class="o">.</span><span class="n">n_control_points</span><span class="p">:</span> <span class="c1"># not the </span>
+                    <span class="n">error_flag</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">priority</span><span class="p">)</span> <span class="o">==</span> <span class="n">control</span><span class="o">.</span><span class="n">n_control_points</span><span class="p">:</span>
+                    <span class="n">control</span><span class="o">.</span><span class="n">priority</span> <span class="o">=</span> <span class="n">control</span><span class="o">.</span><span class="n">split_array</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">priority</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">period_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">n_periods</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">priority</span><span class="p">[</span><span class="n">period_id</span><span class="p">])</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">period_id</span><span class="p">]):</span>
+                            <span class="n">error_flag</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">break</span>
+                <span class="k">if</span> <span class="n">error_flag</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The control priority must be of the same shape as the time array.&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">control</span><span class="o">.</span><span class="n">priority</span> <span class="o">=</span> <span class="n">control</span><span class="o">.</span><span class="n">split_array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">control</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span> <span class="n">control</span><span class="o">.</span><span class="n">n_control_points</span><span class="p">))</span></div></div>
+</pre></div>
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright [2020-2022] Daniel Kastinen, Juha Vierinen, Thomas Maynadie.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

@@ -1,0 +1,864 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>sorts.radar.controllers.tracker &#8212; SORTS v4.0 Manual</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "dark";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="dark">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">SORTS v4.0 Manual</p>
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../intro.html">
+  Introduction
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../install.html">
+  Installation
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../usermanual.html">
+  SORTS Manual
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <form class="bd-search d-flex align-items-center" action="../../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/danielk333/sorts" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <h1>Source code for sorts.radar.controllers.tracker</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="sd">&#39;&#39;&#39;#TODO</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">radar_controller</span>
+<span class="kn">from</span> <span class="nn">..system</span> <span class="kn">import</span> <span class="n">Radar</span>
+<span class="kn">from</span> <span class="nn">..scheduler</span> <span class="kn">import</span> <span class="n">RadarSchedulerBase</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">radar_controls</span>
+
+<span class="kn">from</span> <span class="nn">sorts.common</span> <span class="kn">import</span> <span class="n">interpolation</span>
+
+<div class="viewcode-block" id="Tracker"><a class="viewcode-back" href="../../../../reference/radar/controllers/auto/sorts.radar.controllers.tracker.Tracker.html#sorts.radar.controllers.tracker.Tracker">[docs]</a><span class="k">class</span> <span class="nc">Tracker</span><span class="p">(</span><span class="n">radar_controller</span><span class="o">.</span><span class="n">RadarController</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Generates a control sequence tracking a set of ECEF points.</span>
+
+<span class="sd">    The :class:`Tracker` controller generates a set of tracking controls allowing for </span>
+<span class="sd">    the tracking of a set of ECEF points in time. If the points correspond to the</span>
+<span class="sd">    consecutive states (in the ECEF frame) of a :class:`Space object&lt;sorts.targets.space_object.SpaceObject&gt;`,</span>
+<span class="sd">    the tracking controls will effectively allow the radar to track the space object in time</span>
+<span class="sd">    (see the :ref:`example below&lt;tracker_controller_example&gt;`).</span>
+
+<span class="sd">    .. note::</span>
+<span class="sd">        The tracking of a space object assumes that our knowledge of the object&#39;s orbit at time</span>
+<span class="sd">        :math:`t_0` is sufficient to propagate the orbit in time to determine the consecutive </span>
+<span class="sd">        ECEF points to be targetted by the radar system.</span>
+
+<span class="sd">    When coherent/incoherent integration is used, the implementation of the controller allows for</span>
+<span class="sd">    multiple pointing directions per time slice (but this number is set to be constant).</span>
+
+<span class="sd">    .. seealso::</span>
+
+<span class="sd">        * :class:`sorts.Radar&lt;sorts.radar.system.radar.Radar&gt;` : class encapsulating the radar system.</span>
+<span class="sd">        * :class:`sorts.RadarController&lt;sorts.radar.controllers.radar_controller.RadarController&gt;` : radar controller base class.</span>
+<span class="sd">        * :class:`sorts.RadarControls&lt;sorts.radar.radar_controls.RadarControls&gt;` : class encapsulating radar control sequences.</span>
+<span class="sd">        * :class:`sorts.SpaceObject&lt;sorts.targets.space_object.SpaceObject&gt;` : class encapsulating a space object.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    profiler : :class:`sorts.Profiler&lt;sorts.common.profing.Profiler&gt;`, default=None</span>
+<span class="sd">        Profiler instance used to monitor the computation performances of the class methods. </span>
+<span class="sd">    logger : :class:`logging.Logger`, default=None</span>
+<span class="sd">        Logger instance used to log the computation status of the class methods.</span>
+<span class="sd">    </span>
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    .. _tracker_controller_example:</span>
+
+<span class="sd">    This example showcases the generation of multiple controls sequences allowing to track a </span>
+<span class="sd">    :class:`Space object&lt;sorts.targets.space_object.SpaceObject&gt;` passing over the EISCAT_3D radar system:</span>
+
+<span class="sd">    .. code-block:: Python</span>
+
+<span class="sd">        import numpy as np</span>
+<span class="sd">        import matplotlib.pyplot as plt</span>
+
+<span class="sd">        import sorts</span>
+
+<span class="sd">        # RADAR system definition</span>
+<span class="sd">        eiscat3d = sorts.radars.eiscat3d</span>
+
+<span class="sd">        # controller and simulation parameters</span>
+<span class="sd">        max_points = 100</span>
+<span class="sd">        end_t = 3600*12</span>
+<span class="sd">        t_slice = 10</span>
+<span class="sd">        tracking_period = 20</span>
+<span class="sd">        states_per_slice = 10</span>
+
+<span class="sd">        # Propagator</span>
+<span class="sd">        Prop_cls = sorts.propagator.Kepler</span>
+<span class="sd">        Prop_opts = dict(</span>
+<span class="sd">            settings = dict(</span>
+<span class="sd">                out_frame=&#39;ITRS&#39;,</span>
+<span class="sd">                in_frame=&#39;TEME&#39;,</span>
+<span class="sd">            ),</span>
+<span class="sd">        )</span>
+<span class="sd">        # Object definition</span>
+<span class="sd">        space_object = sorts.SpaceObject(</span>
+<span class="sd">                Prop_cls,</span>
+<span class="sd">                propagator_options = Prop_opts,</span>
+<span class="sd">                a = 7200.0e3, </span>
+<span class="sd">                e = 0.1,</span>
+<span class="sd">                i = 80.0,</span>
+<span class="sd">                raan = 86.0,</span>
+<span class="sd">                aop = 0.0,</span>
+<span class="sd">                mu0 = 50.0,</span>
+<span class="sd">                epoch = 53005.0,</span>
+<span class="sd">                parameters = dict(</span>
+<span class="sd">                    d = 0.1,</span>
+<span class="sd">                ),</span>
+<span class="sd">            )</span>
+<span class="sd">        # create state time array</span>
+<span class="sd">        t_states = sorts.equidistant_sampling(</span>
+<span class="sd">            orbit = space_object.state, </span>
+<span class="sd">            start_t = 0, </span>
+<span class="sd">            end_t = end_t, </span>
+<span class="sd">            max_dpos=50e3,</span>
+<span class="sd">        )</span>
+
+<span class="sd">        # create tracking controller</span>
+<span class="sd">        tracker_controller = sorts.controllers.Tracker()</span>
+
+<span class="sd">        # get object states/passes in ECEF frame</span>
+<span class="sd">        object_states = space_object.get_state(t_states)</span>
+<span class="sd">        eiscat_passes = sorts.find_simultaneous_passes(t_states, object_states, eiscat3d.tx + eiscat3d.rx)</span>
+
+<span class="sd">        # plot results</span>
+<span class="sd">        fig = plt.figure()</span>
+<span class="sd">        ax = fig.add_subplot(111, projection=&#39;3d&#39;)</span>
+
+<span class="sd">        # Plotting station ECEF positions and earth grid</span>
+<span class="sd">        for tx in eiscat3d.tx:</span>
+<span class="sd">            ax.plot([tx.ecef[0]], [tx.ecef[1]], [tx.ecef[2]],&#39;or&#39;)</span>
+
+<span class="sd">        for rx in eiscat3d.rx:</span>
+<span class="sd">            ax.plot([rx.ecef[0]], [rx.ecef[1]], [rx.ecef[2]],&#39;og&#39;)</span>
+
+<span class="sd">        sorts.plotting.grid_earth(ax, num_lat=25, num_lon=50, alpha=0.1, res = 100, color=&#39;black&#39;, hide_ax=True)</span>
+
+<span class="sd">        # plotting object states</span>
+<span class="sd">        ax.plot(object_states[0], object_states[1], object_states[2], &quot;--b&quot;, alpha=0.2)</span>
+
+<span class="sd">        # compute and plot controls for each pass</span>
+<span class="sd">        for pass_id in range(np.shape(eiscat_passes)[0]):</span>
+<span class="sd">            # get states within pass to generate tracking controls</span>
+<span class="sd">            tracking_states = object_states[:, eiscat_passes[pass_id].inds]</span>
+<span class="sd">            t_states_i = t_states[eiscat_passes[pass_id].inds]</span>
+<span class="sd">            </span>
+<span class="sd">            # generate controls</span>
+<span class="sd">            t_controller = np.arange(t_states_i[0], t_states_i[-1] + tracking_period, tracking_period)</span>
+<span class="sd">            controls = tracker_controller.generate_controls(t_controller, eiscat3d, t_states_i, tracking_states, t_slice=t_slice, max_points=max_points, states_per_slice=states_per_slice)</span>
+<span class="sd">            </span>
+<span class="sd">            # plot states being tracked</span>
+<span class="sd">            ax.plot(tracking_states[0], tracking_states[1], tracking_states[2], &quot;-&quot;, color=&quot;blue&quot;)</span>
+<span class="sd">            </span>
+<span class="sd">            # plot beam directions over each control period</span>
+<span class="sd">            for period_id in range(controls.n_periods):</span>
+<span class="sd">                ctrl = controls.get_pdirs(period_id)</span>
+<span class="sd">                sorts.plotting.plot_beam_directions(ctrl, eiscat3d, ax=ax, tx_beam=True, rx_beam=True, zoom_level=0.9, azimuth=10, elevation=10)</span>
+
+<span class="sd">        plt.show()</span>
+
+<span class="sd">    .. figure:: ../../../../figures/example_tracker_controller.png</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">META_FIELDS</span> <span class="o">=</span> <span class="n">radar_controller</span><span class="o">.</span><span class="n">RadarController</span><span class="o">.</span><span class="n">META_FIELDS</span>
+
+<div class="viewcode-block" id="Tracker.__init__"><a class="viewcode-back" href="../../../../reference/radar/controllers/auto/sorts.radar.controllers.tracker.Tracker.__init__.html#sorts.radar.controllers.tracker.Tracker.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">profiler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Default class constructor. &#39;&#39;&#39;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">profiler</span><span class="o">=</span><span class="n">profiler</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;controller_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Tracker:init&#39;</span><span class="p">)</span></div>
+    
+
+<div class="viewcode-block" id="Tracker.retreive_target_states"><a class="viewcode-back" href="../../../../reference/radar/controllers/auto/sorts.radar.controllers.tracker.Tracker.retreive_target_states.html#sorts.radar.controllers.tracker.Tracker.retreive_target_states">[docs]</a>    <span class="k">def</span> <span class="nf">retreive_target_states</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> 
+            <span class="n">controls</span><span class="p">,</span> 
+            <span class="n">t_states</span><span class="p">,</span>
+            <span class="n">state_interpolator</span><span class="p">,</span>
+            <span class="n">states_per_slice</span><span class="p">,</span>
+            <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Retreives target&#39;s states given the time array and the state interpolator.</span>
+
+<span class="sd">        This function removes the control time slices and periods which are outside of the</span>
+<span class="sd">        field of view of the radar system. Then, it performs an interpolation to retrieve all</span>
+<span class="sd">        the intermediate states when ``t_states`` has less elements that there are pointing</span>
+<span class="sd">        directions.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        controls : :class:`sorts.RadarControls&lt;sorts.radar.radar_controls.RadarControls&gt;`</span>
+<span class="sd">            RadarControls instance containing the current control sequence being generated.</span>
+<span class="sd">        t_states : numpy.ndarray (N,)</span>
+<span class="sd">            State time points (in seconds).</span>
+<span class="sd">        state_interpolator : :class:`sorts.Interpolator&lt;sorts.common.interpolation.Interpolator&gt;`</span>
+<span class="sd">            Interpolation algorithm used to estimate the states of the object (i.e. Legendre8, ...)</span>
+<span class="sd">        states_per_slice : int</span>
+<span class="sd">            Number of target states per slice. </span>
+<span class="sd">            This number can be used when multiple measurements are performed during a given </span>
+<span class="sd">            time slice (i.e. for coherent integration)</span>
+<span class="sd">    </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        target_states : numpy.ndarray (n_periods, 6, ...)</span>
+<span class="sd">            Interpolated states targeted by the radar system.</span>
+<span class="sd">        t_states_final : numpy.ndarray (n_periods, 6, ...)</span>
+<span class="sd">            Final time array corresponding to the interpolated states.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">n_control_periods</span> <span class="o">=</span> <span class="n">controls</span><span class="o">.</span><span class="n">n_periods</span>
+        <span class="n">target_states</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_control_periods</span><span class="p">,</span> <span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+        <span class="n">t_states_final</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_control_periods</span><span class="p">,</span> <span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+        
+        <span class="c1"># find states within the control interval</span>
+        <span class="n">states_msk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">t_states</span> <span class="o">&gt;=</span> <span class="n">controls</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">t_states</span> <span class="o">&lt;=</span> <span class="n">controls</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">controls</span><span class="o">.</span><span class="n">t_slice</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">keep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">n_control_periods</span><span class="p">,),</span> <span class="kc">False</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">states_msk</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">t_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">controls</span><span class="o">.</span><span class="n">t</span><span class="p">)</span> <span class="c1"># [scheduling slice/control subarray][time points]</span>
+            
+            <span class="c1"># get start and end points of the object pass</span>
+            <span class="n">t_start</span> <span class="o">=</span> <span class="n">t_states</span><span class="p">[</span><span class="n">states_msk</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">t_end</span> <span class="o">=</span> <span class="n">t_states</span><span class="p">[</span><span class="n">states_msk</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="n">flag_found_pass</span> <span class="o">=</span> <span class="kc">False</span>
+            
+            <span class="c1"># get the states for each time sub-array</span>
+            <span class="k">for</span> <span class="n">period_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">controls</span><span class="o">.</span><span class="n">n_periods</span><span class="p">):</span>   
+                <span class="n">pass_msk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">controls</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">t_start</span><span class="p">,</span> <span class="n">controls</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">t_end</span><span class="p">)</span> <span class="c1"># get all time slices in the pass</span>
+
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">pass_msk</span><span class="p">))</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">pass_msk</span><span class="p">):</span> 
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;tracker:retreive_target_states: some incomplete tracking control slices have been discarded between t=</span><span class="si">{</span><span class="n">controls</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> and t=</span><span class="si">{</span><span class="n">controls</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> seconds (control sub array </span><span class="si">{</span><span class="n">period_id</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+                
+                <span class="c1"># if there are some time slices inside the pass</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">pass_msk</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">flag_found_pass</span> <span class="o">=</span> <span class="kc">True</span>      
+                    <span class="n">keep</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+                    <span class="n">dt_states</span> <span class="o">=</span> <span class="n">controls</span><span class="o">.</span><span class="n">t_slice</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="n">pass_msk</span><span class="p">]</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">states_per_slice</span><span class="p">)</span> <span class="c1"># time interval between states</span>
+                    <span class="n">t_states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">controls</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="n">pass_msk</span><span class="p">],</span> <span class="n">states_per_slice</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="c1"># initializes space object state sampling time array</span>
+                    
+                    <span class="c1"># add intermediate time points to sample space object states</span>
+                    <span class="k">for</span> <span class="n">ix</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">states_per_slice</span><span class="p">):</span>
+                        <span class="n">t_states</span><span class="p">[</span><span class="n">ix</span><span class="p">::</span><span class="n">states_per_slice</span><span class="p">]</span> <span class="o">=</span> <span class="n">t_states</span><span class="p">[</span><span class="n">ix</span><span class="p">::</span><span class="n">states_per_slice</span><span class="p">]</span> <span class="o">+</span> <span class="n">ix</span><span class="o">*</span><span class="n">dt_states</span>
+
+                    <span class="n">t_states_final</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span>     <span class="o">=</span> <span class="n">t_states</span>
+                    <span class="n">target_states</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span>      <span class="o">=</span> <span class="n">state_interpolator</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">t_states_final</span><span class="p">[</span><span class="n">period_id</span><span class="p">])[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="c1">#[scheduling slice/control subarray][time points][xyz]</span>
+                <span class="k">else</span><span class="p">:</span>                    
+                    <span class="k">if</span> <span class="n">flag_found_pass</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                        <span class="k">break</span>
+
+        <span class="c1"># remove control periods where no space object states are present</span>
+        <span class="n">controls</span><span class="o">.</span><span class="n">remove_periods</span><span class="p">(</span><span class="n">keep</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">target_states</span><span class="p">[</span><span class="n">keep</span><span class="p">],</span> <span class="n">t_states_final</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="Tracker.compute_pointing_directions"><a class="viewcode-back" href="../../../../reference/radar/controllers/auto/sorts.radar.controllers.tracker.Tracker.compute_pointing_directions.html#sorts.radar.controllers.tracker.Tracker.compute_pointing_directions">[docs]</a>    <span class="k">def</span> <span class="nf">compute_pointing_directions</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> 
+            <span class="n">controls</span><span class="p">,</span>
+            <span class="n">period_id</span><span class="p">,</span> 
+            <span class="n">args</span><span class="p">,</span> 
+            <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Computes the radar pointing directions for each time slice over a given control</span>
+<span class="sd">        period.</span>
+
+<span class="sd">        This function computes the pointing directions allowing the radar to track a set of ECEF points.</span>
+
+<span class="sd">        The station pointing direction corresponds to the normalized Poynting vector of the transmitted </span>
+<span class="sd">        signal (i.e. its direction of propagation / direction of the beam). It is possible to have multiple </span>
+<span class="sd">        pointing direction vectors for a sinle station per time slice. This feature can therefore be used </span>
+<span class="sd">        to model digital beam steering of phased array receiver antennas (see radar_eiscat3d).</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :class:`sorts.RadarControls&lt;sorts.radar.radar_controls.RadarControls&gt;` : class encapsulating a radar control sequence.</span>
+<span class="sd">            :attr:`sorts.RadarControls.get_pdirs&lt;sorts.radar.radar_controls.RadarControls.get_pdirs&gt;` : function used to compute the pointing directions associated with a given control sequence. </span>
+
+<span class="sd">        This function will be called by the :attr:`RadarControls.get_pdirs&lt;sorts.radar.radar_controls.RadarControls.get_pdirs&gt;` </span>
+<span class="sd">        in order to generate the pointing direction controls over each control period. Therefore, </span>
+<span class="sd">        this function is usually called after the generation of station property controls is completed. </span>
+<span class="sd">    </span>
+<span class="sd">        .. note::</span>
+<span class="sd">            The choice of allowing the user to compute separatly the pointing directions from the property controls</span>
+<span class="sd">            can be justified by the fact that pointing direction arrays can easily reach millions of values and computing</span>
+<span class="sd">            them all at once can quickly **fill up the RAM** of desktop computers.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        controls : :class:`sorts.RadarControls&lt;sorts.radar.radar_controls.RadarControls&gt;`</span>
+<span class="sd">            RadarControls instance containing the current control sequence being generated.</span>
+<span class="sd">        period_id : int</span>
+<span class="sd">            Control period index.</span>
+<span class="sd">        args : list of variables</span>
+<span class="sd">            The list of additional variables required by the function:</span>
+
+<span class="sd">            - interpolated_states : numpy.ndarray (n_periods, 6, n_dirs_per_period)</span>
+<span class="sd">                Set of interpolated states to be targetted by the radar.</span>
+<span class="sd">            - t_dirs : numpy.ndarray (n_periods, n_dirs_per_period)</span>
+<span class="sd">                Pointing direction time array.</span>
+
+<span class="sd">            &gt;&gt;&gt; interpolated_states, t_dirs = args</span>
+<span class="sd">        </span>
+<span class="sd">        Returns </span>
+<span class="sd">        -------</span>
+<span class="sd">        pdirs : dict</span>
+<span class="sd">            Pointing direction computation results. The data is organized as a dictionnary with 3 keys :</span>
+
+<span class="sd">            - &quot;tx&quot;:</span>
+<span class="sd">                Contains the pointing directions of all radar :class:`sorts.TX&lt;sorts.radar.system.station.TX&gt;` stations.</span>
+<span class="sd">                The data within ``pdirs[&quot;tx&quot;]`` is organized as follows :</span>
+
+<span class="sd">                &gt;&gt;&gt; pdirs[&#39;tx&#39;][txi, 0, i, j]</span>
+
+<span class="sd">                With :</span>
+
+<span class="sd">                - txi :</span>
+<span class="sd">                    Index of the :class:`sorts.TX&lt;sorts.radar.system.station.TX&gt;` station within the :attr:`Radar.tx&lt;sorts.radar.system.radar.Radar.tx&gt;` list.</span>
+<span class="sd">                - i :</span>
+<span class="sd">                    :math:`i^{th}` component of the pointing direction. :math:`i \\in [\\![ 0, 3 [\\![`</span>
+<span class="sd">                - j : </span>
+<span class="sd">                    :math:`j^{th}` time point.</span>
+<span class="sd">                    Beware that since there can be multiple pointing directions per time slice, the number of pointing directions</span>
+<span class="sd">                    for a single station is greater or equal to the number of time slices of the control sequence.</span>
+
+<span class="sd">            - &quot;rx&quot;:</span>
+<span class="sd">                Contains the pointing directions of all radar :class:`sorts.RX&lt;sorts.radar.system.station.RX&gt;` stations.</span>
+<span class="sd">                The data within ``pdirs[&quot;rx&quot;]`` is organized as follows :</span>
+
+<span class="sd">                &gt;&gt;&gt; pdirs[&#39;rx&#39;][rxi, txi, i, j]</span>
+
+<span class="sd">                With :</span>
+
+<span class="sd">                - txi :</span>
+<span class="sd">                    Index of the :class:`sorts.RX&lt;sorts.radar.system.station.RX&gt;` station within the :attr:`Radar.rx&lt;sorts.radar.system.radar.Radar.rx&gt;` list.</span>
+<span class="sd">                - i :</span>
+<span class="sd">                    :math:`i^{th}` component of the pointing direction. :math:`i \\in [\\![ 0, 3 [\\![`</span>
+<span class="sd">                - j : </span>
+<span class="sd">                    :math:`j^{th}` time point.</span>
+<span class="sd">                    Beware that since there can be multiple pointing directions per time slice, the number of pointing directions</span>
+<span class="sd">                    for a single station is greater or equal to the number of time slices of the control sequence.</span>
+<span class="sd">            </span>
+<span class="sd">            - &quot;t&quot;: </span>
+<span class="sd">                Contains the pointing direction time array. When there are more than one pointing direction per time slice, the</span>
+<span class="sd">                number of time points within the pointing direction time array will be greater than the number of time slices within the </span>
+<span class="sd">                control sequence.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        Consider a control sequence ``controls`` generated by a radar controller performing a scan over 9 time slices. </span>
+<span class="sd">        We will assume that the tracking controller performs 2 tracking updates per time slice (one at :math:`t=t^k` and</span>
+<span class="sd">        one at :math:`t=t^k+\\Delta t^k/2`). The tracking period will be assumed to be 1 second and the time slice 0.5 seconds.</span>
+<span class="sd">        The controlled radar system is the EISCAT_3D radar, **comprised of 3 receiving stations and 1 transmitting station**.</span>
+
+<span class="sd">        The control period is set by a radar scheduler such that:</span>
+
+<span class="sd">            - :math:`t_0 = 0` seconds</span>
+<span class="sd">            - :math:`\\Delta t_{sched} = 5` seconds</span>
+
+<span class="sd">        This yields the following controller time slice arrays:</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; controls.t </span>
+<span class="sd">        array([[0., 1., 2., 3., 4.], [5., 6., 7., 8.]])</span>
+<span class="sd">        &gt;&gt;&gt; controls.t_slice</span>
+<span class="sd">        array([[0.5, 0.5, 0.5, 0.5, 0.5], [0.5, 0.5, 0.5, 0.5]])</span>
+
+<span class="sd">        Since digital beam steering allows for the simultaneous stanning of multiple points, </span>
+<span class="sd">        the pointing direction time arrays will be:</span>
+
+<span class="sd">        &gt;&gt;&gt; controls.pdirs[0][&quot;t&quot;]</span>
+<span class="sd">        array([0., 0.25, 1., 1.25, 2., 2.25, 3., 3.25, 4., 4.25])</span>
+<span class="sd">        &gt;&gt;&gt; controls.pdirs[1][&quot;t&quot;]</span>
+<span class="sd">        array([5., 5.25, 6., 6.25, 7., 7.25, 8., 8.25])</span>
+
+<span class="sd">        The shape of the pointing direction arrays will therefore be:</span>
+
+<span class="sd">        &gt;&gt;&gt; controls.pdirs[0][&quot;tx&quot;].shape</span>
+<span class="sd">        (1, 1, 3, 10)</span>
+<span class="sd">        &gt;&gt;&gt; controls.pdirs[1][&quot;tx&quot;].shape</span>
+<span class="sd">        (1, 1, 3, 8)</span>
+<span class="sd">        &gt;&gt;&gt; controls.pdirs[0][&quot;rx&quot;].shape</span>
+<span class="sd">        (3, 1, 3, 10)</span>
+<span class="sd">        &gt;&gt;&gt; controls.pdirs[1][&quot;rx&quot;].shape</span>
+<span class="sd">        (3, 1, 3, 8)</span>
+
+<span class="sd">        To get the pointing direction of the first scan of the 2nd RX station during the time slice t = 7 seconds, we need</span>
+<span class="sd">        to run:</span>
+
+<span class="sd">        &gt;&gt;&gt; controls.get_pdirs(1)[&quot;rx&quot;][1, 0, :, 4]</span>
+<span class="sd">        </span>
+<span class="sd">        And to get the second one:</span>
+
+<span class="sd">        &gt;&gt;&gt; controls.get_pdirs(1)[&quot;rx&quot;][1, 0, :, 5]</span>
+
+<span class="sd">        To get the pointing direction of the first scan of the only TX station during the time slice t = 3 seconds, we need</span>
+<span class="sd">        to run:</span>
+
+<span class="sd">        &gt;&gt;&gt; controls.get_pdirs(0)[&quot;tx&quot;][0, 0, :, 6]</span>
+
+<span class="sd">        and to get the second:</span>
+
+<span class="sd">        &gt;&gt;&gt; controls.get_pdirs(0)[&quot;tx&quot;][0, 0, :, 7]</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">interpolated_states</span><span class="p">,</span> <span class="n">t_dirs</span> <span class="o">=</span> <span class="n">args</span>
+
+        <span class="c1"># compute pointing directions for each control sub time array      </span>
+        <span class="k">if</span> <span class="n">interpolated_states</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;Tracker:generate_controls:compute_beam_orientation&#39;</span><span class="p">)</span>
+            
+            <span class="c1"># initializing results</span>
+            <span class="n">pointing_direction</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        
+            <span class="c1"># get the position of the Tx/Rx stations</span>
+            <span class="n">tx_ecef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">tx</span><span class="o">.</span><span class="n">ecef</span> <span class="k">for</span> <span class="n">tx</span> <span class="ow">in</span> <span class="n">controls</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">tx</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="c1"># get the position of each Tx station (ECEF frame)</span>
+            <span class="n">rx_ecef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">rx</span><span class="o">.</span><span class="n">ecef</span> <span class="k">for</span> <span class="n">rx</span> <span class="ow">in</span> <span class="n">controls</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">rx</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="c1"># get the position of each Rx station (ECEF frame)</span>
+            
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;Tracker:generate_controls:compute_beam_orientation:tx&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Compute Tx pointing directions</span>
+            <span class="n">tx_dirs</span> <span class="o">=</span> <span class="n">interpolated_states</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">tx_ecef</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">tx_ecef</span>
+            
+            <span class="n">pointing_direction</span><span class="p">[</span><span class="s1">&#39;tx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tx_dirs</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">tx_dirs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="c1"># the beam directions are given as unit vectors in the ecef frame of reference</span>
+            <span class="k">del</span> <span class="n">tx_dirs</span>
+            
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;Tracker:generate_controls:compute_beam_orientation:tx&#39;</span><span class="p">)</span> 
+                <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;Tracker:generate_controls:compute_beam_orientation:rx&#39;</span><span class="p">)</span> 
+            
+            <span class="c1"># compute Rx pointing direction</span>
+            <span class="n">rx_dirs</span> <span class="o">=</span> <span class="n">interpolated_states</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>  <span class="o">-</span> <span class="n">rx_ecef</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">]</span>     
+            <span class="k">del</span> <span class="n">rx_ecef</span>
+
+            <span class="n">rx_dirs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">rx_dirs</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">controls</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">tx</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            
+            <span class="c1"># save computation results</span>
+            <span class="n">pointing_direction</span><span class="p">[</span><span class="s1">&#39;rx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rx_dirs</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">rx_dirs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="c1"># the beam directions are given as unit vectors in the ecef frame of reference</span>
+            <span class="k">del</span> <span class="n">rx_dirs</span>
+
+            <span class="n">pointing_direction</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">t_dirs</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;Tracker:generate_controls:compute_beam_orientation:rx&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;Tracker:generate_controls:compute_beam_orientation&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pointing_direction</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+            <span class="n">pointing_direction</span><span class="p">[</span><span class="s1">&#39;rx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">pointing_direction</span><span class="p">[</span><span class="s1">&#39;tx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">pointing_direction</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">return</span> <span class="n">pointing_direction</span></div>
+
+
+<div class="viewcode-block" id="Tracker.generate_controls"><a class="viewcode-back" href="../../../../reference/radar/controllers/auto/sorts.radar.controllers.tracker.Tracker.generate_controls.html#sorts.radar.controllers.tracker.Tracker.generate_controls">[docs]</a>    <span class="k">def</span> <span class="nf">generate_controls</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> 
+            <span class="n">t</span><span class="p">,</span> 
+            <span class="n">radar</span><span class="p">,</span> 
+            <span class="n">t_states</span><span class="p">,</span>
+            <span class="n">target_states</span><span class="p">,</span> 
+            <span class="n">t_slice</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> 
+            <span class="n">states_per_slice</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">interpolator</span><span class="o">=</span><span class="n">interpolation</span><span class="o">.</span><span class="n">Linear</span><span class="p">,</span>
+            <span class="n">scheduler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">priority</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+            <span class="n">max_points</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+            <span class="n">beam_enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">cache_pdirs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Generates RADAR tracking controls for a given radar and sampling time and target. </span>
+<span class="sd">        This method can be called multiple times to generate different controls for different radar systems.</span>
+<span class="sd">        </span>
+<span class="sd">        Once instanciated, the the class can be used multiple times to generate different </span>
+<span class="sd">        static controls for different radar systems, parameters and control intervals </span>
+<span class="sd">        (see the :ref:`example below&lt;tracker_controller_generate_controls_example&gt;`).</span>
+<span class="sd">        </span>
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :class:`sorts.Radar&lt;sorts.radar.system.radar.Radar&gt;` : class encapsulating a radar system.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        t : numpy.ndarray </span>
+<span class="sd">            Time slice start time (in seconds).</span>
+<span class="sd">        radar : :class:`sorts.Radar&lt;sorts.radar.system.radar.Radar&gt;`</span>
+<span class="sd">            Radar instance to be controlled.</span>
+<span class="sd">        t_states : numpy.ndarray (6, M)</span>
+<span class="sd">            Time points :math:`t_i` where the target states have been propagated (in seconds).</span>
+<span class="sd">        target_states : numpy.ndarray (M,)</span>
+<span class="sd">            ECEF points to be tracked by the radar system (given in the ECEF frame):</span>
+
+<span class="sd">            .. math::   \\mathbf{x}^i = [x^i, y^i, z^i, v_x^i, v_y^i, v_z^i]^T</span>
+
+<span class="sd">        t_slice : float / numpy.ndarray, default=0.1 </span>
+<span class="sd">            Time slice durations. The duration of the time slice for a given control must be less than or equal </span>
+<span class="sd">            to the time step between two consecutive time slices.</span>
+<span class="sd">        state_per_slice : int, default=1</span>
+<span class="sd">            Number of target points per time slice. Numbers greated than unity can for example be used to model </span>
+<span class="sd">            incoherently/coherently integrated measurements.</span>
+<span class="sd">        interpolator : interpolation.Interpolator, default=:class:`interpolation.Linear&lt;sorts.common.interpolation.Linear&gt;`</span>
+<span class="sd">            Interpolation algorithm instance used to reconstruct the states of the target at each needed time point.</span>
+<span class="sd">        scheduler : :class:`sorts.RadarSchedulerBase&lt;sorts.radar.scheduler.base.RadarSchedulerBase&gt;`, default=None</span>
+<span class="sd">            RadarSchedulerBase instance used for time synchronization between control periods.</span>
+<span class="sd">            This parameter is useful when multiple controls are sent to a given scheduler.</span>
+<span class="sd">            If the scheduler is not provided, the control periods will be generated using the ``max_points``</span>
+<span class="sd">            parameter.</span>
+<span class="sd">        priority : int, default=None</span>
+<span class="sd">            Priority of the generated controls, only used by the static priority scheduler to choose between </span>
+<span class="sd">            overlapping controls. </span>
+<span class="sd">            Low numbers indicate a high control prioriy.</span>
+<span class="sd">        max_points : int, default=100</span>
+<span class="sd">            Max number of points for a given control array computed simultaneously. </span>
+<span class="sd">            This number is used to limit the impact of computations over RAM.</span>
+
+<span class="sd">            .. note::</span>
+<span class="sd">                Lowering this number might increase computation time, while increasing this number might cause</span>
+<span class="sd">                memory problems depending on the available RAM on your machine.</span>
+
+<span class="sd">        cache_pdirs : bool, default=False</span>
+<span class="sd">            If ``True``, the pointing directions will be computed and stored. Calling the function </span>
+<span class="sd">            :attr:`RadarControls.get_pdirs&lt;sorts.radar.radar_controls.RadarControls.get_pdirs&gt;` will return</span>
+<span class="sd">            the pre-computed pointing directions. </span>
+<span class="sd">            If ``False``, the pointing directions will be computed at each :attr:`RadarControls.get_pdirs</span>
+<span class="sd">            &lt;sorts.radar.radar_controls.RadarControls.get_pdirs&gt;` call.</span>
+<span class="sd">            </span>
+<span class="sd">            .. note::</span>
+<span class="sd">                Enabling the option increases RAM usage, but decreases computation time. </span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        controls : :class:`sorts.RadarControls&lt;sorts.radar.radar_controls.RadarControls&gt;`</span>
+<span class="sd">            Radar control structure containing the list of instructions needed to perform the operation</span>
+<span class="sd">            defined by the type of radar controller.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        .. _tracker_controller_generate_controls_example:</span>
+
+<span class="sd">        This example showcases the generation of multiple controls sequences allowing to track a </span>
+<span class="sd">        :class:`Space object&lt;sorts.targets.space_object.SpaceObject&gt;` passing over the EISCAT_3D radar system:</span>
+
+<span class="sd">        .. code-block:: Python</span>
+
+<span class="sd">            import numpy as np</span>
+<span class="sd">            import matplotlib.pyplot as plt</span>
+
+<span class="sd">            import sorts</span>
+
+<span class="sd">            # RADAR system definition</span>
+<span class="sd">            eiscat3d = sorts.radars.eiscat3d</span>
+
+<span class="sd">            # controller and simulation parameters</span>
+<span class="sd">            max_points = 100</span>
+<span class="sd">            end_t = 3600*12</span>
+<span class="sd">            t_slice = 10</span>
+<span class="sd">            tracking_period = 20</span>
+<span class="sd">            states_per_slice = 10</span>
+
+<span class="sd">            # Propagator</span>
+<span class="sd">            Prop_cls = sorts.propagator.Kepler</span>
+<span class="sd">            Prop_opts = dict(</span>
+<span class="sd">                settings = dict(</span>
+<span class="sd">                    out_frame=&#39;ITRS&#39;,</span>
+<span class="sd">                    in_frame=&#39;TEME&#39;,</span>
+<span class="sd">                ),</span>
+<span class="sd">            )</span>
+<span class="sd">            # Object definition</span>
+<span class="sd">            space_object = sorts.SpaceObject(</span>
+<span class="sd">                    Prop_cls,</span>
+<span class="sd">                    propagator_options = Prop_opts,</span>
+<span class="sd">                    a = 7200.0e3, </span>
+<span class="sd">                    e = 0.1,</span>
+<span class="sd">                    i = 80.0,</span>
+<span class="sd">                    raan = 86.0,</span>
+<span class="sd">                    aop = 0.0,</span>
+<span class="sd">                    mu0 = 50.0,</span>
+<span class="sd">                    epoch = 53005.0,</span>
+<span class="sd">                    parameters = dict(</span>
+<span class="sd">                        d = 0.1,</span>
+<span class="sd">                    ),</span>
+<span class="sd">                )</span>
+<span class="sd">            # create state time array</span>
+<span class="sd">            t_states = sorts.equidistant_sampling(</span>
+<span class="sd">                orbit = space_object.state, </span>
+<span class="sd">                start_t = 0, </span>
+<span class="sd">                end_t = end_t, </span>
+<span class="sd">                max_dpos=50e3,</span>
+<span class="sd">            )</span>
+
+<span class="sd">            # create tracking controller</span>
+<span class="sd">            tracker_controller = sorts.controllers.Tracker()</span>
+
+<span class="sd">            # get object states/passes in ECEF frame</span>
+<span class="sd">            object_states = space_object.get_state(t_states)</span>
+<span class="sd">            eiscat_passes = sorts.find_simultaneous_passes(t_states, object_states, eiscat3d.tx + eiscat3d.rx)</span>
+
+<span class="sd">            # plot results</span>
+<span class="sd">            fig = plt.figure()</span>
+<span class="sd">            ax = fig.add_subplot(111, projection=&#39;3d&#39;)</span>
+
+<span class="sd">            # Plotting station ECEF positions and earth grid</span>
+<span class="sd">            for tx in eiscat3d.tx:</span>
+<span class="sd">                ax.plot([tx.ecef[0]], [tx.ecef[1]], [tx.ecef[2]],&#39;or&#39;)</span>
+
+<span class="sd">            for rx in eiscat3d.rx:</span>
+<span class="sd">                ax.plot([rx.ecef[0]], [rx.ecef[1]], [rx.ecef[2]],&#39;og&#39;)</span>
+
+<span class="sd">            sorts.plotting.grid_earth(ax, num_lat=25, num_lon=50, alpha=0.1, res = 100, color=&#39;black&#39;, hide_ax=True)</span>
+
+<span class="sd">            # plotting object states</span>
+<span class="sd">            ax.plot(object_states[0], object_states[1], object_states[2], &quot;--b&quot;, alpha=0.2)</span>
+
+<span class="sd">            # compute and plot controls for each pass</span>
+<span class="sd">            for pass_id in range(np.shape(eiscat_passes)[0]):</span>
+<span class="sd">                # get states within pass to generate tracking controls</span>
+<span class="sd">                tracking_states = object_states[:, eiscat_passes[pass_id].inds]</span>
+<span class="sd">                t_states_i = t_states[eiscat_passes[pass_id].inds]</span>
+<span class="sd">                </span>
+<span class="sd">                # generate controls</span>
+<span class="sd">                t_controller = np.arange(t_states_i[0], t_states_i[-1] + tracking_period, tracking_period)</span>
+<span class="sd">                controls = tracker_controller.generate_controls(t_controller, eiscat3d, t_states_i, tracking_states, t_slice=t_slice, max_points=max_points, states_per_slice=states_per_slice)</span>
+<span class="sd">                </span>
+<span class="sd">                # plot states being tracked</span>
+<span class="sd">                ax.plot(tracking_states[0], tracking_states[1], tracking_states[2], &quot;-&quot;, color=&quot;blue&quot;)</span>
+<span class="sd">                </span>
+<span class="sd">                # plot beam directions over each control period</span>
+<span class="sd">                for period_id in range(controls.n_periods):</span>
+<span class="sd">                    ctrl = controls.get_pdirs(period_id)</span>
+<span class="sd">                    sorts.plotting.plot_beam_directions(ctrl, eiscat3d, ax=ax, tx_beam=True, rx_beam=True, zoom_level=0.9, azimuth=10, elevation=10)</span>
+
+<span class="sd">            plt.show()</span>
+
+<span class="sd">        .. figure:: ../../../../figures/example_tracker_controller.png</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># add new profiler entry</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s1">&#39;Tracker:generate_controls&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">interpolator</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">.</span><span class="n">Interpolator</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;interpolator must be an instance of </span><span class="si">{</span><span class="n">interpolation</span><span class="o">.</span><span class="n">Interpolator</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">state_interpolator</span> <span class="o">=</span> <span class="n">interpolator</span><span class="p">(</span><span class="n">target_states</span><span class="p">,</span> <span class="n">t_states</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Tracker:generate_controls -&gt; creating state interpolator </span><span class="si">{</span><span class="n">state_interpolator</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># output data initialization</span>
+        <span class="n">controls</span> <span class="o">=</span> <span class="n">radar_controls</span><span class="o">.</span><span class="n">RadarControls</span><span class="p">(</span><span class="n">radar</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">scheduler</span><span class="o">=</span><span class="n">scheduler</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="n">priority</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span> <span class="n">profiler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="p">)</span>  <span class="c1"># the controls structure is defined as a dictionnary of subcontrols</span>
+        <span class="n">controls</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;interpolator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interpolator</span>
+
+        <span class="n">controls</span><span class="o">.</span><span class="n">set_time_slices</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">t_slice</span><span class="p">,</span> <span class="n">max_points</span><span class="o">=</span><span class="n">max_points</span><span class="p">)</span>
+
+        <span class="c1"># split time array into scheduler periods and target states if a scheduler is attached to the controls</span>
+        <span class="n">target_states_interp</span><span class="p">,</span> <span class="n">t_states_interp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">retreive_target_states</span><span class="p">(</span><span class="n">controls</span><span class="p">,</span> <span class="n">t_states</span><span class="p">,</span> <span class="n">state_interpolator</span><span class="p">,</span> <span class="n">states_per_slice</span><span class="p">)</span>
+        
+        <span class="c1"># Compute controls</span>
+        <span class="n">pdir_args</span> <span class="o">=</span> <span class="p">(</span><span class="n">target_states_interp</span><span class="p">,</span> <span class="n">t_states_interp</span><span class="p">)</span>
+        <span class="n">controls</span><span class="o">.</span><span class="n">set_pdirs</span><span class="p">(</span><span class="n">pdir_args</span><span class="p">,</span> <span class="n">cache_pdirs</span><span class="o">=</span><span class="n">cache_pdirs</span><span class="p">)</span>
+
+        <span class="n">radar_controller</span><span class="o">.</span><span class="n">RadarController</span><span class="o">.</span><span class="n">coh_integration</span><span class="p">(</span><span class="n">controls</span><span class="p">,</span> <span class="n">radar</span><span class="p">,</span> <span class="n">t_slice</span><span class="p">)</span>
+
+        <span class="c1"># TODO : include this in radar -&gt; RadarController.coh_integration(self.radar, self.meta[&#39;dwell&#39;])</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s1">&#39;Tracker:generate_controls&#39;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">controls</span></div></div>
+</pre></div>
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright [2020-2022] Daniel Kastinen, Juha Vierinen, Thomas Maynadie.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

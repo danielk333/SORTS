@@ -1,0 +1,8 @@
+RadarController.compute\_pointing\_direction
+============================================
+
+.. currentmodule:: sorts.radar.controllers.radar_controller
+
+.. rubric:: RadarController.compute_pointing_direction
+
+.. automethod:: RadarController.compute_pointing_direction

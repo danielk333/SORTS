@@ -1,0 +1,33 @@
+﻿Tracker
+=======
+
+.. currentmodule:: sorts.radar.controllers.tracker
+
+.. autoclass:: Tracker
+   
+   
+   .. rubric:: Attributes
+   .. autosummary::
+      :toctree: .
+   
+      Tracker.META_FIELDS
+      Tracker.logger
+      Tracker.profiler
+      Tracker.meta
+   
+   
+
+
+   
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree: .
+   
+      Tracker.__init__
+      Tracker.coh_integration
+      Tracker.compute_pointing_directions
+      Tracker.generate_controls
+   
+   

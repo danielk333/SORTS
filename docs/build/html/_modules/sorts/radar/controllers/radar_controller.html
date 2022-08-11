@@ -1,0 +1,451 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>sorts.radar.controllers.radar_controller &#8212; SORTS v4.0 Manual</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "dark";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="dark">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">SORTS v4.0 Manual</p>
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../intro.html">
+  Introduction
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../install.html">
+  Installation
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../usermanual.html">
+  SORTS Manual
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <form class="bd-search d-flex align-items-center" action="../../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/danielk333/sorts" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <h1>Source code for sorts.radar.controllers.radar_controller</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="sd">&#39;&#39;&#39;This module is used to define the radar controller</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="c1">#Python standard import</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">ctypes</span>
+
+<span class="c1">#Third party import</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1">#Local import</span>
+<span class="kn">from</span> <span class="nn">..scheduler</span> <span class="kn">import</span> <span class="n">RadarSchedulerBase</span>
+<span class="kn">from</span> <span class="nn">sorts</span> <span class="kn">import</span> <span class="n">clibsorts</span>
+
+<div class="viewcode-block" id="RadarController"><a class="viewcode-back" href="../../../../reference/radar/controllers/auto/sorts.radar.controllers.radar_controller.RadarController.html#sorts.radar.controllers.radar_controller.RadarController">[docs]</a><span class="k">class</span> <span class="nc">RadarController</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Defines the fundamental structure of a radar controller. </span>
+
+<span class="sd">    The objective of the Radar controller is to generate a sequence of instructions to be followed by the </span>
+<span class="sd">    :class:`Radar system&lt;sorts.radar.system.radar.Radar&gt;` stations (Tx/Rx) in order to accomplish a given</span>
+<span class="sd">    objective (i.e. track an object, scan a given area, ...). The **controller type** is defined by the</span>
+<span class="sd">    type of action performed by the radar system when the radar controls are used (scanning, tracking, ...). </span>
+<span class="sd">    </span>
+<span class="sd">    The controller generates a :class:`radar controls structure &lt;sorts.radar.radar_controls.RadarControls&gt;` </span>
+<span class="sd">    which is interpretable by the :class:`Radar&lt;sorts.radar.system.radar.Radar&gt;` system.</span>
+
+<span class="sd">    The implementation of the :class:`RadarController` class allows one controller instance to generate multiple </span>
+<span class="sd">    controls over different control intervals, radar systems, controller parameters, ... As such, the role of </span>
+<span class="sd">    the radar controller is to define how the controls will be generated according to a set of input arguments.</span>
+<span class="sd">    </span>
+<span class="sd">    .. seealso::</span>
+<span class="sd">        :class:`sorts.Radar&lt;sorts.radar.system.radar.Radar&gt;` : class encapsulating a radar system.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    profiler : :class:`sorts.Profiler&lt;sorts.common.profing.Profiler&gt;`, default=None</span>
+<span class="sd">        Profiler instance used to monitor the computation performances of the class methods. </span>
+<span class="sd">    logger : :class:`logging.Logger`, default=None</span>
+<span class="sd">        Logger instance used to log the computation status of the class methods.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="n">META_FIELDS</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;controller_type&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="sd">&#39;&#39;&#39; Radar controller metadata entries. &#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="RadarController.__init__"><a class="viewcode-back" href="../../../../reference/radar/controllers/auto/sorts.radar.controllers.radar_controller.RadarController.__init__.html#sorts.radar.controllers.radar_controller.RadarController.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">profiler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Default class constructor. &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span>
+        <span class="sd">&#39;&#39;&#39; Logger instance used to log the computation status of the class methods. &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="o">=</span> <span class="n">profiler</span>
+        <span class="sd">&#39;&#39;&#39; Profiler instance used to monitor the computation performances of the class methods. &#39;&#39;&#39;</span>
+
+        <span class="c1"># set controller metadata        </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="sd">&#39;&#39;&#39; Radar controller metadata. </span>
+<span class="sd">        </span>
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :attr:`RadarController.META_FIELDS` : Radar controller metadata entries.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;controller_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span></div>
+
+<div class="viewcode-block" id="RadarController.generate_controls"><a class="viewcode-back" href="../../../../reference/radar/controllers/auto/sorts.radar.controllers.radar_controller.RadarController.generate_controls.html#sorts.radar.controllers.radar_controller.RadarController.generate_controls">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">generate_controls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">radar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Generates the radar control sequence. </span>
+
+<span class="sd">        This method is used to generate the radar control sequence needed to achieve the objective set </span>
+<span class="sd">        by the type of radar controller (tracking, scanning, ...). </span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        t : numpy.ndarray (N,)</span>
+<span class="sd">            Time points at which the controls are to be generated (in seconds).</span>
+<span class="sd">        radar : :class:`sorts.Radar&lt;sorts.radar.system.radar.Radar&gt;` </span>
+<span class="sd">            Radar instance to be controlled.</span>
+<span class="sd">       </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        controls : :class:`sorts.RadarControls&lt;sorts.radar.radar_controls.RadarControls&gt;`</span>
+<span class="sd">            Radar control structure containing the list of instructions needed to perform the operation</span>
+<span class="sd">            defined by the type of radar controller.</span>
+
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :class:`sorts.Radar&lt;sorts.radar.system.radar.Radar&gt;` : class encapsulating a radar system.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="RadarController.compute_pointing_directions"><a class="viewcode-back" href="../../../../reference/radar/controllers/auto/sorts.radar.controllers.radar_controller.RadarController.compute_pointing_directions.html#sorts.radar.controllers.radar_controller.RadarController.compute_pointing_directions">[docs]</a>    <span class="k">def</span> <span class="nf">compute_pointing_directions</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> 
+        <span class="n">controls</span><span class="p">,</span>
+        <span class="n">period_id</span><span class="p">,</span> 
+        <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Computes the radar pointing directions for each time slice over a given control</span>
+<span class="sd">        period.</span>
+
+<span class="sd">        The station pointing direction corresponds to the normalized Poynting vector of the transmitted </span>
+<span class="sd">        signal (i.e. its direction of propagation / direction of the beam). It is possible to have multiple </span>
+<span class="sd">        pointing direction vectors for a sinle station per time slice. This feature can therefore be used </span>
+<span class="sd">        to model digital beam steering of phased array receiver antennas (see radar_eiscat3d).</span>
+
+<span class="sd">        This function will be called by the </span>
+<span class="sd">        :attr:`RadarControls.get_pdirs&lt;sorts.radar.radar_controls.RadarControls.get_pdirs&gt;` </span>
+<span class="sd">        in order to generate the pointing direction controls over each control period. Therefore, </span>
+<span class="sd">        this function is usually called after the generation of station property controls is completed. </span>
+<span class="sd">    </span>
+<span class="sd">        .. note::</span>
+<span class="sd">            The choice of allowing the user to compute separatly the pointing directions from the property controls</span>
+<span class="sd">            can be justified by the fact that pointing direction arrays can easily reach millions of values and computing</span>
+<span class="sd">            them all at once can cause RAM problems.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        controls : :class:`sorts.RadarControls&lt;sorts.radar.radar_controls.RadarControls&gt;`</span>
+<span class="sd">            Radar controls instance generated by the :attr:`RadarController.generate_controls` method.</span>
+<span class="sd">        period_id : int</span>
+<span class="sd">            Control period index.</span>
+<span class="sd">        args : variable or list of variables</span>
+<span class="sd">            Variable or list of aditional variables needed by the custom implementation of the </span>
+<span class="sd">            :attr:`RadarController.compute_pointing_directions` method.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns </span>
+<span class="sd">        -------</span>
+<span class="sd">        pdirs : dict</span>
+<span class="sd">            Pointing direction computation results. The data is organized as a dictionnary with 3 keys :</span>
+
+<span class="sd">            - &quot;tx&quot;:</span>
+<span class="sd">                Contains the pointing directions of all radar :class:`sorts.TX&lt;sorts.radar.system.station.TX&gt;` stations.</span>
+<span class="sd">                The data within ``pdirs[&quot;tx&quot;]`` is organized as follows :</span>
+
+<span class="sd">                &gt;&gt;&gt; pdirs[&#39;tx&#39;][txi, 0, i, j]</span>
+
+<span class="sd">                With :</span>
+
+<span class="sd">                - txi :</span>
+<span class="sd">                    Index of the :class:`sorts.TX&lt;sorts.radar.system.station.TX&gt;` station within the :attr:`Radar.tx&lt;sorts.</span>
+<span class="sd">                    radar.system.radar.Radar.tx&gt;` list.</span>
+<span class="sd">                - i :</span>
+<span class="sd">                    :math:`i^{th}` component of the pointing direction. :math:`i \\in [\\![ 0, 3 [\\![`</span>
+<span class="sd">                - j : </span>
+<span class="sd">                    :math:`j^{th}` time point.</span>
+<span class="sd">                    Beware that since there can be multiple pointing directions per time slice, the number of pointing directions</span>
+<span class="sd">                    for a single station is greater or equal to the number of time slices of the control sequence.</span>
+
+<span class="sd">            - &quot;rx&quot;:</span>
+<span class="sd">                Contains the pointing directions of all radar :class:`sorts.RX&lt;sorts.radar.system.station.RX&gt;` stations.</span>
+<span class="sd">                The data within ``pdirs[&quot;rx&quot;]`` is organized as follows :</span>
+
+<span class="sd">                &gt;&gt;&gt; pdirs[&#39;rx&#39;][rxi, txi, i, j]</span>
+
+<span class="sd">                With :</span>
+
+<span class="sd">                - txi :</span>
+<span class="sd">                    Index of the :class:`sorts.RX&lt;sorts.radar.system.station.RX&gt;` station within the :attr:`Radar.rx&lt;sorts.</span>
+<span class="sd">                    radar.system.radar.Radar.rx&gt;` list.</span>
+<span class="sd">                - i :</span>
+<span class="sd">                    :math:`i^{th}` component of the pointing direction. :math:`i \\in [\\![ 0, 3 [\\![`</span>
+<span class="sd">                - j : </span>
+<span class="sd">                    :math:`j^{th}` time point.</span>
+<span class="sd">                    Beware that since there can be multiple pointing directions per time slice, the number of pointing directions</span>
+<span class="sd">                    for a single station is greater or equal to the number of time slices of the control sequence.</span>
+<span class="sd">            </span>
+<span class="sd">            - &quot;t&quot;: </span>
+<span class="sd">                Contains the pointing direction time array. When there are more than one pointing direction per time slice, the</span>
+<span class="sd">                number of time points within the pointing direction time array will be greater than the number of time slices within the </span>
+<span class="sd">                control sequence.</span>
+<span class="sd">        </span>
+<span class="sd">        .. seealso::</span>
+<span class="sd">            :class:`sorts.RadarControls&lt;sorts.radar.radar_controls.RadarControls&gt;` : class encapsulating a radar control sequence.</span>
+<span class="sd">            :attr:`sorts.RadarControls.get_pdirs&lt;sorts.radar.radar_controls.RadarControls.get_pdirs&gt;` : function used to compute the pointing directions associated with a given control sequence. </span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        Consider a control sequence ``controls`` generated by a radar controller performing a scan over 9 time slices. The</span>
+<span class="sd">        controller uses digital beam steering over the stations such that during each time slice, the receiver stations are </span>
+<span class="sd">        able to target two points of the radar beam. The controlled radar system is the EISCAT_3D radar, **comprised of 3 </span>
+<span class="sd">        receiving stations and 1 transmitting station**.</span>
+
+<span class="sd">        The control period is set by a radar scheduler such that:</span>
+
+<span class="sd">            - :math:`t_0 = 0` seconds</span>
+<span class="sd">            - :math:`\\Delta t_{sched} = 5` seconds</span>
+
+<span class="sd">        This yields the following controller time slice arrays:</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; controls.t </span>
+<span class="sd">        array([[0., 1., 2., 3., 4.], [5., 6., 7., 8.]])</span>
+<span class="sd">        &gt;&gt;&gt; controls.t_slice</span>
+<span class="sd">        array([[0.1, 0.1, 0.1, 0.1, 0.1], [0.1, 0.1, 0.1, 0.1]])</span>
+
+<span class="sd">        Since digital beam steering allows for the simultaneous stanning of multiple points, the pointing direction time arrays</span>
+<span class="sd">        will be:</span>
+
+<span class="sd">        &gt;&gt;&gt; controls.pdirs[0][&quot;t&quot;]</span>
+<span class="sd">        array([0., 0., 1., 1., 2., 2., 3., 3., 4., 4.])</span>
+<span class="sd">        &gt;&gt;&gt; controls.pdirs[1][&quot;t&quot;]</span>
+<span class="sd">        array([5., 5., 6., 6., 7., 7., 8., 8.])</span>
+
+<span class="sd">        The shape of the pointing direction arrays will therefore be:</span>
+
+<span class="sd">        &gt;&gt;&gt; controls.pdirs[0][&quot;tx&quot;].shape</span>
+<span class="sd">        (1, 1, 3, 10)</span>
+<span class="sd">        &gt;&gt;&gt; controls.pdirs[1][&quot;tx&quot;].shape</span>
+<span class="sd">        (1, 1, 3, 8)</span>
+<span class="sd">        &gt;&gt;&gt; controls.pdirs[0][&quot;rx&quot;].shape</span>
+<span class="sd">        (3, 1, 3, 10)</span>
+<span class="sd">        &gt;&gt;&gt; controls.pdirs[1][&quot;rx&quot;].shape</span>
+<span class="sd">        (3, 1, 3, 8)</span>
+
+<span class="sd">        To get the pointing direction of the first scan of the 2nd RX station during the time slice t = 7 seconds, we need</span>
+<span class="sd">        to run:</span>
+
+<span class="sd">        &gt;&gt;&gt; controls.get_pdirs(1)[&quot;rx&quot;][1, 0, :, 4]</span>
+<span class="sd">        </span>
+<span class="sd">        And to get the second one:</span>
+
+<span class="sd">        &gt;&gt;&gt; controls.get_pdirs(1)[&quot;rx&quot;][1, 0, :, 5]</span>
+
+<span class="sd">        To get the pointing direction of the first scan of the only TX station during the time slice t = 3 seconds, we need</span>
+<span class="sd">        to run:</span>
+
+<span class="sd">        &gt;&gt;&gt; controls.get_pdirs(0)[&quot;tx&quot;][0, 0, :, 6]</span>
+
+<span class="sd">        and to get the second:</span>
+
+<span class="sd">        &gt;&gt;&gt; controls.get_pdirs(0)[&quot;tx&quot;][0, 0, :, 7]</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No pointing directions generation function defined.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RadarController.coh_integration"><a class="viewcode-back" href="../../../../reference/radar/controllers/auto/sorts.radar.controllers.radar_controller.RadarController.coh_integration.html#sorts.radar.controllers.radar_controller.RadarController.coh_integration">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">coh_integration</span><span class="p">(</span><span class="n">controls</span><span class="p">,</span> <span class="n">radar</span><span class="p">,</span> <span class="n">dwell</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Sets the coherent integration settings based on the time slice duration (dwell time). &#39;&#39;&#39;</span>
+        <span class="n">dwell</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">dwell</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">tx</span> <span class="ow">in</span> <span class="n">radar</span><span class="o">.</span><span class="n">tx</span><span class="p">:</span>
+            <span class="n">controls</span><span class="o">.</span><span class="n">add_property_control</span><span class="p">(</span><span class="s2">&quot;n_ipp&quot;</span><span class="p">,</span> <span class="n">tx</span><span class="p">,</span> <span class="p">(</span><span class="n">dwell</span><span class="o">/</span><span class="n">tx</span><span class="o">.</span><span class="n">ipp</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span>
+            <span class="n">controls</span><span class="o">.</span><span class="n">add_property_control</span><span class="p">(</span><span class="s2">&quot;coh_int_bandwidth&quot;</span><span class="p">,</span> <span class="n">tx</span><span class="p">,</span> <span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="n">tx</span><span class="o">.</span><span class="n">pulse_length</span><span class="o">*</span><span class="n">tx</span><span class="o">.</span><span class="n">n_ipp</span><span class="p">))</span></div></div>
+</pre></div>
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright [2020-2022] Daniel Kastinen, Juha Vierinen, Thomas Maynadie.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

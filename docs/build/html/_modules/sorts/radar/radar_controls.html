@@ -1,0 +1,1231 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>sorts.radar.radar_controls &#8212; SORTS v4.0 Manual</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "dark";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="dark">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">SORTS v4.0 Manual</p>
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../intro.html">
+  Introduction
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../install.html">
+  Installation
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../usermanual.html">
+  SORTS Manual
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/danielk333/sorts" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <h1>Source code for sorts.radar.radar_controls</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">scheduler</span>
+<span class="kn">from</span> <span class="nn">.system.radar</span> <span class="kn">import</span> <span class="n">Radar</span>
+
+<span class="k">class</span> <span class="nc">TimeSliceOverlapError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39; Raised when two control time slices are overlapping.</span>
+
+<span class="sd">	This Error is raised when two time slices are overlapping, i.e. when the end point </span>
+<span class="sd">	of a time slice is greater that the starting point of the following time slice within</span>
+<span class="sd">	the same control sequence. </span>
+<span class="sd">	&#39;&#39;&#39;</span>
+	<span class="k">pass</span>
+
+<span class="k">class</span> <span class="nc">NegativePriorityError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39; Raised when a priority is negative. &#39;&#39;&#39;</span>
+	<span class="k">pass</span>
+
+<span class="k">class</span> <span class="nc">ControlFieldError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39; Errors related to property controls. &#39;&#39;&#39;</span>
+	<span class="k">pass</span>
+
+
+<div class="viewcode-block" id="RadarControls"><a class="viewcode-back" href="../../../reference/radar/radar_controls/auto/sorts.radar.radar_controls.RadarControls.html#sorts.radar.radar_controls.RadarControls">[docs]</a><span class="k">class</span> <span class="nc">RadarControls</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39; Encapsulates a radar control sequence.</span>
+
+<span class="sd">	Radar controls are used to modify the **pointing directions** and **properties** of a station </span>
+<span class="sd">	(such as wavelength, power, ...) in time. This class provide a standard data structure which</span>
+<span class="sd">	allows for the easy creation, storage and manipulation of radar control sequences.</span>
+
+<span class="sd">	.. seealso ::</span>
+<span class="sd">		:ref:`radar_controls` : radar controls module definitions</span>
+
+<span class="sd">	Parameters</span>
+<span class="sd">	----------</span>
+<span class="sd">	radar : :class:`sorts.Radar&lt;sorts.radar.system.radar.Radar&gt;`</span>
+<span class="sd">		:class:`sorts.Radar&lt;sorts.radar.system.radar.Radar&gt;` instance being controlled.</span>
+<span class="sd">	controller : :class:`sorts.RadarController&lt;sorts.radar.controllers.radar_controller.RadarController&gt;`</span>
+<span class="sd">		:class:`sorts.RadarController&lt;sorts.radar.controllers.radar_controller.RadarController&gt;` instance </span>
+<span class="sd">		handling the generation of the control instance.</span>
+<span class="sd">	scheduler : :class:`sorts.RadarSchedulerBase&lt;sorts.radar.scheduler.base.RadarSchedulerBase&gt;`, default=None</span>
+<span class="sd">		:class:`sorts.RadarSchedulerBase&lt;sorts.radar.scheduler.base.RadarSchedulerBase&gt;` instance handling the </span>
+<span class="sd">		generation of the control schedule for the current radar system. </span>
+<span class="sd">		In this class, the scheduler is used for time synchronization between multiple radar controls.</span>
+<span class="sd">	priority : int, default=None</span>
+<span class="sd">		Radar control priority. Used by the static priority scheduler to determine which control time slice will </span>
+<span class="sd">		be executed at a given time (see :class:`sorts.StaticPriorityScheduler&lt;sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler&gt;` for additional information). </span>
+<span class="sd">		Priority must be a positive integer.</span>
+<span class="sd">	logger : :class:`logging.Logger`, default=None</span>
+<span class="sd">		logging.Logger instance used to log the main execution steps of class methods</span>
+<span class="sd">	profiler : :class:`logging.Profiler&lt;sorts.common.profiling.Profiler&gt;`, default=None</span>
+<span class="sd">		Profiler instance used to measure the execution performances of class methods.		</span>
+
+<span class="sd">	Raises</span>
+<span class="sd">	------</span>
+<span class="sd">	TypeError</span>
+<span class="sd">		If ``radar`` is not an instance of :class:`sorts.Radar&lt;sorts.radar.system.radar.Radar&gt;`.</span>
+<span class="sd">	:class:`NegativePriorityError`</span>
+<span class="sd">		If ``priority`` is negative.</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+<div class="viewcode-block" id="RadarControls.__init__"><a class="viewcode-back" href="../../../reference/radar/radar_controls/auto/sorts.radar.radar_controls.RadarControls.__init__.html#sorts.radar.radar_controls.RadarControls.__init__">[docs]</a>	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radar</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">scheduler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">profiler</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39; Default class constructor. &#39;&#39;&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span>
+		<span class="sd">&#39;&#39;&#39; Logger instance used to log the computation status within the class. &#39;&#39;&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="o">=</span> <span class="n">profiler</span>
+		<span class="sd">&#39;&#39;&#39; Profiler instance used to monitor the computation performances within the class. &#39;&#39;&#39;</span>
+
+		<span class="c1"># check radar</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">radar</span><span class="p">,</span> <span class="n">Radar</span><span class="p">):</span> 
+			<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;radar must be an instance of </span><span class="si">{</span><span class="n">Radar</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">radar</span> <span class="o">=</span> <span class="n">radar</span>
+		<span class="sd">&#39;&#39;&#39; :class:`sorts.Radar&lt;sorts.radar.system.radar.Radar&gt;` instance being controlled by the control sequence. &#39;&#39;&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">controller</span> <span class="o">=</span> <span class="n">controller</span> 
+		<span class="sd">&#39;&#39;&#39; :class:`sorts.RadarController&lt;sorts.radar.controllers.radar_controller.RadarController&gt;` instance </span>
+<span class="sd">		which generated the control sequence. </span>
+<span class="sd">		&#39;&#39;&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="o">=</span> <span class="n">scheduler</span>
+		<span class="sd">&#39;&#39;&#39; :class:`sorts.RadarSchedulerBase&lt;sorts.radar.scheduler.base.RadarSchedulerBase&gt;` instance which </span>
+<span class="sd">		generated the control sequence. </span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">_priority</span> <span class="o">=</span> <span class="n">priority</span>
+		<span class="sd">&#39;&#39;&#39; Control sequence priority. </span>
+
+<span class="sd">		.. note:: priority must be a positive integer.</span>
+<span class="sd">		&#39;&#39;&#39;</span> 
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_priority</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_priority</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_priority</span><span class="p">)</span>
+
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_priority</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="n">NegativePriorityError</span><span class="p">(</span><span class="s2">&quot;priority must be positive [0; +inf]&quot;</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">_t</span> <span class="o">=</span> <span class="kc">None</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_t_slice</span> <span class="o">=</span> <span class="kc">None</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">pdirs</span> <span class="o">=</span> <span class="kc">None</span>
+		<span class="sd">&#39;&#39;&#39; Control pointing directions. </span>
+
+<span class="sd">		The station **pointing direction** corresponds to the *normalized Poynting vector* of the transmitted signal </span>
+<span class="sd">		(i.e. its direction of propagation / direction of the beam). It is possible to have multiple pointing </span>
+<span class="sd">		direction vectors for a sinle station per time slice. This feature can therefore be used to model digital </span>
+<span class="sd">		beam steering of phased array receiver antennas (see radar_eiscat3d).</span>
+<span class="sd">		&#39;&#39;&#39;</span> 
+		<span class="bp">self</span><span class="o">.</span><span class="n">pdir_args</span> <span class="o">=</span> <span class="kc">None</span>
+		<span class="sd">&#39;&#39;&#39; :attr:`compute_pointing_directions&lt;sorts.radar.controllers.radar_controller.RadarController.compute_pointing_directions&gt;`</span>
+<span class="sd">		method arguments used to generate the pointing direction sequence.</span>
+
+<span class="sd">		.. seealso::</span>
+<span class="sd">			:attr:`compute_pointing_directions&lt;sorts.radar.controllers.radar_controller.RadarController.compute_pointing_directions&gt;`</span>
+<span class="sd">		&#39;&#39;&#39;</span> 
+		<span class="bp">self</span><span class="o">.</span><span class="n">has_pdirs</span> <span class="o">=</span> <span class="kc">False</span>
+		<span class="sd">&#39;&#39;&#39; If ``True``, the current :class:`RadarControls` instance has cached pointing direction values. </span>
+
+<span class="sd">		Therefore, :attr:`RadarControls.get_pdirs` will return the cached pointing directions corresponding to the </span>
+<span class="sd">		given period index.</span>
+<span class="sd">		&#39;&#39;&#39;</span> 
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">n_control_points</span> <span class="o">=</span> <span class="kc">None</span>
+		<span class="sd">&#39;&#39;&#39; Total number of control time slices. &#39;&#39;&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">n_periods</span> <span class="o">=</span> <span class="kc">None</span>
+		<span class="sd">&#39;&#39;&#39; Total number of control periods. &#39;&#39;&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">max_points</span> <span class="o">=</span> <span class="kc">None</span>
+		<span class="sd">&#39;&#39;&#39; Maximum number of control time slices per control period. &#39;&#39;&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">splitting_indices</span> <span class="o">=</span> <span class="kc">None</span>
+		<span class="sd">&#39;&#39;&#39; List of indices corresponding to the transition between two consecuticve control periods. </span>
+
+<span class="sd">		This array is used to split property control arrays (1D arrays of length ``n_control_points``)</span>
+<span class="sd">		into arrays of the same shape as :attr:`RadarControls.t` : (number of periods, number of time slices</span>
+<span class="sd">		per period).</span>
+<span class="sd">	</span>
+<span class="sd">		Examples </span>
+<span class="sd">		--------</span>
+<span class="sd">		&gt;&gt;&gt; controls.t</span>
+<span class="sd">		array([[0., 1.], [2., 3., 4.], [5.]])</span>
+<span class="sd">		&gt;&gt;&gt; control.splitting_indices</span>
+<span class="sd">		array([[2, 5])</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="c1"># keep track of the parameters being contolled</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">property_controls</span> <span class="o">=</span> <span class="kc">None</span>
+		<span class="sd">&#39;&#39;&#39; Radar properties controls. </span>
+<span class="sd">		</span>
+<span class="sd">		This structure contains all the property controls for each radar</span>
+<span class="sd">		station of the network. All the controls are splitted according to </span>
+<span class="sd">		the control periods and can be accessed as follow:</span>
+
+<span class="sd">		&gt;&gt;&gt; controls.property_controls[period_id][station_type][name][station_id]</span>
+<span class="sd">		&gt;&gt;&gt; # types :                numpy.ndarray    dict      dict numpy.ndarray</span>
+
+<span class="sd">		Where:</span>
+<span class="sd">		 * period_id : int</span>
+<span class="sd">		 	index of the control period considered.</span>
+<span class="sd">		 * station_type : str, &quot;tx&quot; / &quot;rx&quot; </span>
+<span class="sd">		 	Type of the station being controlled.</span>
+<span class="sd">		 * name : str</span>
+<span class="sd">		 	Name of the property being controlled (i.e. &quot;wavelength&quot;, &quot;n_ipp&quot;, ...).</span>
+
+<span class="sd">		 	.. seealso::</span>
+<span class="sd">		 		Refer to :attr:`TX.PROPERTIES&lt;sorts.radar.system.station.TX.PROPERTIES&gt;` </span>
+<span class="sd">		 		or :attr:`RX.PROPERTIES&lt;sorts.radar.system.station.RX.PROPERTIES&gt;` for more information</span>
+<span class="sd">		 		about the radar station properties which can be controlled.</span>
+
+<span class="sd">		 * station_id : int</span>
+<span class="sd">		 	Index of the station considered. The index will correspond to the index of the</span>
+<span class="sd">		 	TX station in the list :attr:`radar.tx&lt;sorts.radar.system.radar.Radar.tx&gt;` if  ``station_type==&#39;tx&#39;`` </span>
+<span class="sd">		 	and to the index of the RX station in the list :attr:`radar.rx&lt;sorts.radar.system.radar.Radar.rx&gt;` </span>
+<span class="sd">		 	if  ``station_type==&#39;rx&#39;``. </span>
+<span class="sd">		&#39;&#39;&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">controlled_properties</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+		<span class="sd">&#39;&#39;&#39; List of radar properties being controlled. </span>
+
+<span class="sd">		Contains a list of the controlled properties for each stations, which can be accessed </span>
+<span class="sd">		as follows :</span>
+
+<span class="sd">		&gt;&gt;&gt; controls.property_controls[station_type][station_id]</span>
+<span class="sd">		&gt;&gt;&gt; # types :                      dict     numpy.ndarray</span>
+
+<span class="sd">		Where:</span>
+<span class="sd">		 * station_type : str, &quot;tx&quot; / &quot;rx&quot; </span>
+<span class="sd">		 	Type of the station being controlled.</span>
+<span class="sd">		 * station_id : int</span>
+<span class="sd">		 	Index of the station considered. The index will correspond to the index of the</span>
+<span class="sd">		 	TX station in the list :attr:`radar.tx&lt;sorts.radar.system.radar.Radar.tx&gt;` if  ``station_type==&#39;tx&#39;`` </span>
+<span class="sd">		 	and to the index of the RX station in the list :attr:`radar.rx&lt;sorts.radar.system.radar.Radar.rx&gt;` </span>
+<span class="sd">		 	if  ``station_type==&#39;rx&#39;``. </span>
+<span class="sd">		&#39;&#39;&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">controlled_properties</span><span class="p">[</span><span class="s2">&quot;tx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">tx</span><span class="p">,)),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">controlled_properties</span><span class="p">[</span><span class="s2">&quot;rx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">rx</span><span class="p">,)),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+
+		<span class="k">for</span> <span class="n">station_type</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;tx&quot;</span><span class="p">,</span> <span class="s2">&quot;rx&quot;</span><span class="p">):</span>
+			<span class="k">for</span> <span class="n">station_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radar</span><span class="p">,</span> <span class="n">station_type</span><span class="p">))):</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">controlled_properties</span><span class="p">[</span><span class="n">station_type</span><span class="p">][</span><span class="n">station_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+		<span class="sd">&#39;&#39;&#39; Control structure metadata. &#39;&#39;&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;controller_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="vm">__class__</span></div>
+
+
+<div class="viewcode-block" id="RadarControls.copy"><a class="viewcode-back" href="../../../reference/radar/radar_controls/auto/sorts.radar.radar_controls.RadarControls.copy.html#sorts.radar.radar_controls.RadarControls.copy">[docs]</a>	<span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">		Performs a deepcopy of the radar control structure.</span>
+
+<span class="sd">		Examples</span>
+<span class="sd">		--------</span>
+<span class="sd">		A deepcopy of a radar control structure ``controls`` can be achieved by </span>
+<span class="sd">		calling:</span>
+
+<span class="sd">		&gt;&gt;&gt; controls_copy = controls.copy()</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+		<span class="n">ret</span> <span class="o">=</span> <span class="n">RadarControls</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radar</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="p">,</span> <span class="n">scheduler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span> <span class="n">profiler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="p">)</span>
+		<span class="n">ret</span><span class="o">.</span><span class="n">_t</span> 				<span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_t</span><span class="p">)</span>
+		<span class="n">ret</span><span class="o">.</span><span class="n">_t_slice</span> 		<span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_t_slice</span><span class="p">)</span>
+		<span class="n">ret</span><span class="o">.</span><span class="n">pdir_args</span> 		<span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdir_args</span><span class="p">)</span>
+		<span class="n">ret</span><span class="o">.</span><span class="n">has_pdirs</span> 		<span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">has_pdirs</span><span class="p">)</span>
+		<span class="n">ret</span><span class="o">.</span><span class="n">_priority</span> 		<span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">priority</span><span class="p">)</span>
+		<span class="n">ret</span><span class="o">.</span><span class="n">pdirs</span> 			<span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdirs</span><span class="p">)</span>
+
+		<span class="n">ret</span><span class="o">.</span><span class="n">n_control_points</span> 		<span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_control_points</span>
+		<span class="n">ret</span><span class="o">.</span><span class="n">n_periods</span> 					<span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_periods</span>
+		<span class="n">ret</span><span class="o">.</span><span class="n">max_points</span> 				<span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_points</span>
+		<span class="n">ret</span><span class="o">.</span><span class="n">splitting_indices</span> 		<span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitting_indices</span>
+
+		<span class="c1"># setup controls</span>
+		<span class="n">ret</span><span class="o">.</span><span class="n">controlled_properties</span> 	<span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">controlled_properties</span><span class="p">)</span>
+		<span class="n">ret</span><span class="o">.</span><span class="n">property_controls</span> 		<span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">property_controls</span><span class="p">)</span>
+
+		<span class="n">ret</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">ret</span></div>
+
+
+<div class="viewcode-block" id="RadarControls.set_time_slices"><a class="viewcode-back" href="../../../reference/radar/radar_controls/auto/sorts.radar.radar_controls.RadarControls.set_time_slices.html#sorts.radar.radar_controls.RadarControls.set_time_slices">[docs]</a>	<span class="k">def</span> <span class="nf">set_time_slices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">max_points</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">		Sets control time slice properties.</span>
+
+<span class="sd">		This function is used to set the properties of a control time slice. Time slices are the</span>
+<span class="sd">		most basic building bloc used for the definition of radar controls : it is an indivisible</span>
+<span class="sd">		time interval during which a controller controls a given Radar system. In SORTS, time is</span>
+<span class="sd">		continuous and the start time and duration of a time slice can take any values possible.</span>
+
+<span class="sd">		A time slice can be defined a follow :</span>
+<span class="sd">		</span>
+<span class="sd">		.. math::	t_{i}^k = t_{start}^k \\\\</span>
+<span class="sd">		.. math::	t_{f}^k = t_{start}^k + \\Delta t^k</span>
+<span class="sd">		</span>
+<span class="sd">		with :math:`\\Delta t^k` the duration of the time slice.</span>
+
+<span class="sd">		The :attr:`set_time_slices&lt;RadarControls.set_time_slices&gt;` function will verify the validity </span>
+<span class="sd">		of the control time slices and separate the duration and starting points arrays into multiple </span>
+<span class="sd">		sub-arrays according to the scheduler period if provided, or according to the max_points criterion </span>
+<span class="sd">		(see :ref:`radar_controls` for more information).</span>
+
+<span class="sd">		The control period can be defined in two different ways :</span>
+
+<span class="sd">      - max_points :</span>
+<span class="sd">	      By setting the maximum number of points max_points within each control period, </span>
+<span class="sd">	      the controls will be generated such that each control period contains max_points </span>
+<span class="sd">	      time points for period_id&lt;n_periods-1 and less than max_points time points for </span>
+<span class="sd">	      period_id == n_periods-1.</span>
+
+<span class="sd">      - scheduler :</span>
+<span class="sd">      	The scheduler period (defined by the scheduler start time ``t0`` and the duration </span>
+<span class="sd">      	scheduler_period), all the will be generated such that all control periods coincide </span>
+<span class="sd">      	with the scheduler periods. Beware that while the controller and scheduler periods </span>
+<span class="sd">      	will correspond to the sime time intervals, the index of the controller period in </span>
+<span class="sd">      	the control arrays will be different from the corresponding scheduler period if </span>
+<span class="sd">      	the start time of the scheduler t0 is different from the start time of the controller</span>
+
+<span class="sd">      .. note::</span>
+<span class="sd">      	When using multiple radar controls, the control periods must be generated using the second </span>
+<span class="sd">      	method (scheduler) to ensure time synchronization between each the periods of different </span>
+<span class="sd">      	controls.</span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		t : 1D ndarray of floats</span>
+<span class="sd">			start time of each control time slice. </span>
+<span class="sd">		duration : 1D ndarray of floats / float</span>
+<span class="sd">			Duration of each time slice. </span>
+<span class="sd">			If duration is a float, each time slice will have the same duration. </span>
+<span class="sd">			For varying time slice durations, a 1D np.ndarray of the same size and shape as</span>
+<span class="sd">			t must be provided</span>
+<span class="sd">			Must positive a positive float.</span>
+<span class="sd">		max_points : int, default=100</span>
+<span class="sd">			Maximum number of control points (time slices) per time slice sub-array (used for the</span>
+<span class="sd">			splitting of time arrays into multiple control periods).</span>
+
+<span class="sd">			.. note::</span>
+<span class="sd">				High values of ``max_points`` increase RAM usage.</span>
+
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+<span class="sd">		None</span>
+
+<span class="sd">		Raises</span>
+<span class="sd">		------</span>
+<span class="sd">		:class:`TimeSliceOverlap`</span>
+<span class="sd">			If two time slices are overlapping.</span>
+<span class="sd">		ValueError</span>
+<span class="sd">			- If the duration of a time slice is negative.</span>
+<span class="sd">			- If the time slice duration and start point arrays are not of the same size.</span>
+<span class="sd">		TypeError</span>
+<span class="sd">			If t is not a one dimensional array of floats.</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+		<span class="k">if</span> <span class="n">max_points</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">max_points</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;max_points must be a positive integer&quot;</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+			<span class="c1"># both the time slice and the time arrays are protected to ensure that they are the same size and add verification</span>
+			<span class="n">t</span> 				<span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+			<span class="n">duration</span> 	<span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+			<span class="c1"># check time array  </span>
+			<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">t</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> 
+				<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;t must be a 1-dimensional array or a float&quot;</span><span class="p">)</span>
+
+			<span class="bp">self</span><span class="o">.</span><span class="n">n_control_points</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+			<span class="c1"># check time slice array</span>
+			<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">duration</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> 
+				<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;duration must be positive [0; +inf]&quot;</span><span class="p">)</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+					<span class="n">duration</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">t</span><span class="p">))</span> 
+
+			<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_control_points</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;t and duration must be the same size (size </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_control_points</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span><span class="si">}</span><span class="s2">).&quot;</span><span class="p">)</span>
+
+			<span class="c1"># check if time slices are overlapping</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_time_slice_overlap</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">duration</span><span class="p">):</span>
+				<span class="k">raise</span> <span class="n">TimeSliceOverlapError</span><span class="p">(</span><span class="s2">&quot;Time slices are overlapping&quot;</span><span class="p">)</span>
+
+			<span class="bp">self</span><span class="o">.</span><span class="n">_t</span> <span class="o">=</span> <span class="n">t</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_t_slice</span> <span class="o">=</span> <span class="n">duration</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_priority</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_priority</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_control_points</span><span class="p">)</span>
+			
+			<span class="c1"># split time slices according to scheduler periods or max points for performance</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">max_points</span> <span class="o">=</span> <span class="n">max_points</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">get_splitting_indices</span><span class="p">()</span>
+
+			<span class="c1"># slice arrays according to scheduler period  or max_points requirements</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_t</span> 			<span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_t</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_t_slice</span> 	<span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_t_slice</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_priority</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_priority</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">duration</span><span class="p">):</span>
+				<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;t must be the same length as the duration array&quot;</span><span class="p">)</span>
+
+			<span class="bp">self</span><span class="o">.</span><span class="n">splitting_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+			<span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+			<span class="k">for</span> <span class="n">period_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)):</span>
+				<span class="k">if</span> <span class="n">period_id</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+					<span class="n">index</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">period_id</span><span class="p">])</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">splitting_indices</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">index</span>
+
+				<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+					<span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">t0</span> <span class="o">+</span> <span class="p">(</span><span class="n">period_id</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">scheduler_period</span> <span class="ow">or</span> <span class="n">t</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">t0</span> <span class="o">+</span> <span class="n">period_id</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">scheduler_period</span><span class="p">:</span>
+						<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;t is not synchronized with the scheduler period. Please provide a valid splitted time array t or use the automatic splitting feature by calling set_time_slices with flat time arrays&quot;</span><span class="p">)</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">period_id</span><span class="p">])</span> <span class="o">&gt;</span> <span class="n">max_points</span><span class="p">:</span>
+						<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;time subarrays have more elements than max_points (max_points=</span><span class="si">{</span><span class="n">max_points</span><span class="si">}</span><span class="s2">). Please provide a valid splitted time array t or use the automatic splitting feature by calling set_time_slices with flat time arrays &quot;</span><span class="p">)</span>
+
+				<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">period_id</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">duration</span><span class="p">[</span><span class="n">period_id</span><span class="p">]):</span>
+					<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;t must be the same length as the duration array for each period index&quot;</span><span class="p">)</span>
+
+			<span class="bp">self</span><span class="o">.</span><span class="n">_t</span> <span class="o">=</span> <span class="n">t</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_t_slice</span> <span class="o">=</span> <span class="n">duration</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">n_control_points</span> <span class="o">=</span> <span class="mi">0</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">n_periods</span> 	<span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_t</span><span class="p">)</span>
+
+			<span class="n">tmp_priority</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_priority</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">_priority</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">),),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+
+			<span class="k">for</span> <span class="n">period_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)):</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">n_control_points</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">period_id</span><span class="p">])</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">_priority</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">tmp_priority</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">period_id</span><span class="p">]))</span>
+
+		<span class="c1"># set array of property controls		</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">property_controls</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_periods</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+		<span class="k">for</span> <span class="n">period_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_periods</span><span class="p">):</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">property_controls</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> <span class="c1"># station types</span>
+
+			<span class="k">for</span> <span class="n">station_type</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;tx&quot;</span><span class="p">,</span> <span class="s2">&quot;rx&quot;</span><span class="p">):</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">property_controls</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="n">station_type</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> <span class="c1"># property names</span></div>
+
+
+<div class="viewcode-block" id="RadarControls.remove_periods"><a class="viewcode-back" href="../../../reference/radar/radar_controls/auto/sorts.radar.radar_controls.RadarControls.remove_periods.html#sorts.radar.radar_controls.RadarControls.remove_periods">[docs]</a>	<span class="k">def</span> <span class="nf">remove_periods</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39; Removes specific control periods.</span>
+
+<span class="sd">		This function deletes specific contol periods and updates the control</span>
+<span class="sd">		structure after removal. </span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		mask : numpy.array of bool (``n_periods``)</span>
+<span class="sd">			Mask used to remove specific control periods. If ``mask[i]`` is ``True``, then the </span>
+<span class="sd">			control period of index ``i`` will be removed. </span>
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+<span class="sd">		None</span>
+
+<span class="sd">		Raises</span>
+<span class="sd">		------</span>
+<span class="sd">		Exception :</span>
+<span class="sd">			If time slices are not set (i.e., the method :attr:`RadarControls.set_time_slices` hasn&#39;t been called).</span>
+<span class="sd">		ValueError :</span>
+<span class="sd">			If the length of the removal mask is not equal to the number of control periods. </span>
+
+<span class="sd">		Examples</span>
+<span class="sd">		--------</span>
+<span class="sd">		Consider a radar control sequence ``controls`` containing 3 control periods such that :</span>
+
+<span class="sd">		&gt;&gt;&gt; controls.t</span>
+<span class="sd">		array([[0.1, 0.2], [0.3, 0.4], [0.5, 0.6]])</span>
+
+<span class="sd">		To remove all but the second period:</span>
+
+<span class="sd">		&gt;&gt;&gt; controls.remove_periods([True, False, True])</span>
+<span class="sd">		&gt;&gt;&gt; controls.t</span>
+<span class="sd">		array([[0.3, 0.4]])</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;no time slice parameters set, please call set_time_slices() instead&quot;</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_periods</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;the length of the removal mask must be the same length as the number of control periods&quot;</span><span class="p">)</span>
+
+		<span class="c1"># the number of points is the same for all periods but the last, so treat the last separatly to get total number of points remaining</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">n_control_points</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="k">for</span> <span class="n">period_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_periods</span><span class="p">):</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">n_control_points</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_t</span><span class="p">[</span><span class="n">period_id</span><span class="p">])</span><span class="o">*</span><span class="n">mask</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span>
+
+		<span class="c1"># update time slices and priority</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_t</span> 						<span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_t_slice</span> 				<span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t_slice</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_priority</span> 			<span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_priority</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+
+		<span class="c1"># update property controls</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">property_controls</span> 	<span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">property_controls</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">n_periods</span> 			<span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_t</span><span class="p">)</span>
+
+		<span class="c1"># updates pointing directions</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdirs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">pdirs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdirs</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span></div>
+
+
+	<span class="nd">@property</span>
+	<span class="k">def</span> <span class="nf">t</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39; Time slice start time. &#39;&#39;&#39;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t</span>
+
+	<span class="nd">@property</span>
+	<span class="k">def</span> <span class="nf">t_slice</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39; Time slice duration. &#39;&#39;&#39;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t_slice</span>
+
+	<span class="nd">@property</span>
+	<span class="k">def</span> <span class="nf">priority</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39; Time slice priority. &#39;&#39;&#39;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_priority</span>
+
+
+<div class="viewcode-block" id="RadarControls.set_pdirs"><a class="viewcode-back" href="../../../reference/radar/radar_controls/auto/sorts.radar.radar_controls.RadarControls.set_pdirs.html#sorts.radar.radar_controls.RadarControls.set_pdirs">[docs]</a>	<span class="k">def</span> <span class="nf">set_pdirs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pdir_args</span><span class="p">,</span> <span class="n">cache_pdirs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39; Sets the needed arguments to generate radar pointing directions.</span>
+
+<span class="sd">		This function performs an initialization of the pointing direction </span>
+<span class="sd">		computations. If the ``cache_pdirs`` option is True, then the </span>
+<span class="sd">		pointing direction values are stored within the RAM and are returned</span>
+<span class="sd">		when calling </span>
+
+<span class="sd">		&gt;&gt;&gt; controls.get_pdirs(period_id)</span>
+
+<span class="sd">		Or,</span>
+
+<span class="sd">		&gt;&gt;&gt; controls.pdirs</span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		pdir_args : list</span>
+<span class="sd">			List of arguments required by the function :attr:`sorts.RadarController.compute_pointing_directions</span>
+<span class="sd">			&lt;sorts.radar.radar_controller.RadarController.compute_pointing_directions&gt;`.</span>
+
+<span class="sd">			.. seealso::</span>
+<span class="sd">				Refer to List of arguments required by the function :attr:`sorts.RadarController.compute_pointing_directions</span>
+<span class="sd">				&lt;sorts.radar.controllers.radar_controller.RadarController.compute_pointing_directions&gt;` to get more information about</span>
+<span class="sd">				the way pointing directions must be generated.</span>
+
+<span class="sd">		cache_pdirs : bool, default=False</span>
+<span class="sd">			Wether the pointing directions are stored within RAM or calculated at each call of </span>
+<span class="sd">			:attr:`sorts.RadarControls.get_pdirs&lt;sorts.radar.radar_controls.RadarControls.get_pdirs&gt;`</span>
+
+<span class="sd">		Returns </span>
+<span class="sd">		-------</span>
+<span class="sd">		None</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">pdir_args</span> <span class="o">=</span> <span class="n">pdir_args</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">has_pdirs</span> <span class="o">=</span> <span class="kc">True</span>
+
+		<span class="c1"># if pdir arrays are cached as numerical values</span>
+		<span class="k">if</span> <span class="n">cache_pdirs</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">pdirs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_periods</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+
+			<span class="k">for</span> <span class="n">period_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_periods</span><span class="p">):</span>
+				<span class="c1"># the function compute_pointing_directions is called by passing the arguments specific to the current controller and a reference to the </span>
+				<span class="c1"># controls instance</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">pdirs</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">compute_pointing_directions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdir_args</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RadarControls.get_pdirs"><a class="viewcode-back" href="../../../reference/radar/radar_controls/auto/sorts.radar.radar_controls.RadarControls.get_pdirs.html#sorts.radar.radar_controls.RadarControls.get_pdirs">[docs]</a>	<span class="k">def</span> <span class="nf">get_pdirs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period_id</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39; Computes the pointing direction over a single period.</span>
+
+<span class="sd">		This function computes (if :attr:`RadarControls.has_pdirs&lt;sorts.radar.radar_controls.RadarControls.has_pdirs&gt;` </span>
+<span class="sd">		is ``False``) returns the radar pointing directions over a single control </span>
+<span class="sd">		period.</span>
+
+<span class="sd">		.. note::</span>
+<span class="sd">			Before calling this function, it is necessary to make sure that the function :attr:`RadarControls.set_pdirs</span>
+<span class="sd">			&lt;sorts.radar.radar_controls.RadarControls.set_pdirs&gt;` has already been called and that the controller (if </span>
+<span class="sd">			:attr:`RadarControls.has_pdirs&lt;sorts.radar.radar_controls.RadarControls.has_pdirs&gt;` is ``False``) associated with the</span>
+<span class="sd">			current radar controls structure is correctly defined.  </span>
+<span class="sd">		</span>
+<span class="sd">		The computation of the pointing directions is achieved by calling the function </span>
+<span class="sd">		:attr:`compute_pointing_directions&lt;sorts.radar.controllers.radar_controller.RadarController.compute_pointing_directions&gt;` </span>
+<span class="sd">		of the controller which has generated the current :class:`RadarControls` structure. </span>
+
+<span class="sd">		.. seealso::</span>
+<span class="sd">			:class:`RadarController&lt;sorts.radar.controllers.radar_controller.RadarController&gt;` : class encapsulating the radar controller which is responsible for generating radar control sequences.</span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		period_id : int</span>
+<span class="sd">			Index of the period over which the pointing directions are to be computed.</span>
+
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+<span class="sd">		pdirs : dict</span>
+<span class="sd">			Pointing direction computation results. The data is organized as a dictionnary with 3 keys :</span>
+
+<span class="sd">			- &quot;tx&quot;:</span>
+<span class="sd">				Contains the pointing directions of all radar :class:`sorts.TX&lt;sorts.radar.system.station.TX&gt;` stations.</span>
+<span class="sd">				The data within ``pdirs[&quot;tx&quot;]`` is organized as follows :</span>
+
+<span class="sd">				&gt;&gt;&gt; pdirs[&#39;tx&#39;][txi, 0, i, j]</span>
+
+<span class="sd">				With :</span>
+<span class="sd">				- txi :</span>
+<span class="sd">					Index of the :class:`sorts.TX&lt;sorts.radar.system.station.TX&gt;` station within the :attr:`Radar.tx&lt;sorts.radar.system.radar.Radar.tx&gt;` list.</span>
+<span class="sd">				- i :</span>
+<span class="sd">					:math:`i^{th}` component of the pointing direction. :math:`i \\in [\\![ 0, 3 [\\![`</span>
+<span class="sd">				- j : </span>
+<span class="sd">					:math:`j^{th}` time point.</span>
+<span class="sd">					Beware that since there can be multiple pointing directions per time slice, the number of pointing directions</span>
+<span class="sd">					for a single station is greater or equal to the number of time slices of the control sequence.</span>
+
+<span class="sd">			- &quot;rx&quot;:</span>
+<span class="sd">				Contains the pointing directions of all radar :class:`sorts.RX&lt;sorts.radar.system.station.RX&gt;` stations.</span>
+<span class="sd">				The data within ``pdirs[&quot;rx&quot;]`` is organized as follows :</span>
+
+<span class="sd">				&gt;&gt;&gt; pdirs[&#39;rx&#39;][rxi, txi, i, j]</span>
+
+<span class="sd">				With :</span>
+<span class="sd">				- txi :</span>
+<span class="sd">					Index of the :class:`sorts.RX&lt;sorts.radar.system.station.RX&gt;` station within the :attr:`Radar.rx&lt;sorts.radar.system.radar.Radar.rx&gt;` list.</span>
+<span class="sd">				- i :</span>
+<span class="sd">					:math:`i^{th}` component of the pointing direction. :math:`i \\in [\\![ 0, 3 [\\![`</span>
+<span class="sd">				- j : </span>
+<span class="sd">					:math:`j^{th}` time point.</span>
+<span class="sd">					Beware that since there can be multiple pointing directions per time slice, the number of pointing directions</span>
+<span class="sd">					for a single station is greater or equal to the number of time slices of the control sequence.</span>
+<span class="sd">			</span>
+<span class="sd">			- &quot;t&quot;: </span>
+<span class="sd">				Contains the pointing direction time array. When there are more than one pointing direction per time slice, the</span>
+<span class="sd">				number of time points within the pointing direction time array will be greater than the number of time slices within the </span>
+<span class="sd">				control sequence.</span>
+
+<span class="sd">		Examples</span>
+<span class="sd">		--------</span>
+<span class="sd">		Refer to the examples within the documentation of the :attr:`compute_pointing_directions&lt;sorts.radar.controllers.radar_controller.RadarController.compute_pointing_directions&gt;` </span>
+<span class="sd">		method of each one of the controller types (scanner, tracker, ...).</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_pdirs</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdirs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+				<span class="n">pointing_direction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdirs</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="c1"># the function compute_pointing_directions is called by passing the arguments specific to the current controller and a reference to the </span>
+				<span class="c1"># controls instance</span>
+				<span class="n">pointing_direction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">controller</span><span class="o">.</span><span class="n">compute_pointing_directions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdir_args</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">pointing_direction</span> <span class="o">=</span> <span class="kc">None</span>
+
+		<span class="k">return</span> <span class="n">pointing_direction</span></div>
+
+
+<div class="viewcode-block" id="RadarControls.add_property_control"><a class="viewcode-back" href="../../../reference/radar/radar_controls/auto/sorts.radar.radar_controls.RadarControls.add_property_control.html#sorts.radar.radar_controls.RadarControls.add_property_control">[docs]</a>	<span class="k">def</span> <span class="nf">add_property_control</span><span class="p">(</span>
+		<span class="bp">self</span><span class="p">,</span> 
+		<span class="n">name</span><span class="p">,</span> 
+		<span class="n">station</span><span class="p">,</span> 
+		<span class="n">data</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Sets the control data corresponding to the specified property and station.</span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		name : str</span>
+<span class="sd">			Name of the station property to be controlled. </span>
+
+<span class="sd">			.. note:: </span>
+<span class="sd">				The property must be a controlled property of the station to be controlled. Refer to </span>
+<span class="sd">				:attr:`TX.PROPERTIES&lt;sorts.radar.system.station.TX.PROPERTIES&gt;` </span>
+<span class="sd">		 		or :attr:`RX.PROPERTIES&lt;sorts.radar.system.station.RX.PROPERTIES&gt;` for more information</span>
+<span class="sd">		 		about the radar station properties which can be controlled.</span>
+
+<span class="sd">		station : :class:`sorts.Station&lt;sorts.radar.system.station.Station&gt;`</span>
+<span class="sd">			Station instance to be controlled.</span>
+<span class="sd">		data : float / numpy.ndarray</span>
+<span class="sd">			Property values for each time slice. The array must have the same shape as :attr:`RadarControls.t`</span>
+<span class="sd">			or the shape (:attr:`RadarControls.n_control_points`).</span>
+
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+<span class="sd">		None</span>
+
+<span class="sd">		Raises</span>
+<span class="sd">		------</span>
+<span class="sd">		ValueError :</span>
+<span class="sd">		 	If the name of the property is not a string.</span>
+<span class="sd">		Exception :</span>
+<span class="sd">			If the size of ``data`` is not the same as the one described in the **Parameters** section.</span>
+<span class="sd">		ControlFieldError :</span>
+<span class="sd">			if the station has no controllable property named ``name``.</span>
+
+<span class="sd">		See Also</span>
+<span class="sd">		--------</span>
+<span class="sd">		:attr:`RadarControls.create_new_property_control_field`</span>
+<span class="sd">		</span>
+<span class="sd">		:attr:`RadarControls.split_array`</span>
+
+<span class="sd">		Examples</span>
+<span class="sd">		--------</span>
+<span class="sd">		Consider a control structure with the following time slice start time array :</span>
+
+<span class="sd">		&gt;&gt;&gt; controls.t</span>
+<span class="sd">		array([[0.1, 0.2], [0.3, 0.4], [0.5]])</span>
+
+<span class="sd">		If we want to add a new entry to control the wavelength (0.6) of the first TX radar station, we need to run :</span>
+
+<span class="sd">		&gt;&gt;&gt; add_property_control(&quot;wavelength&quot;, controls.radar.tx[0], 0.6)</span>
+<span class="sd">		&gt;&gt;&gt; controls.get_property_control(&quot;wavelength&quot;, controls.radar.tx[0], period_id=0)</span>
+<span class="sd">		array([0.6, 0.6])</span>
+<span class="sd">		&gt;&gt;&gt; controls.get_property_control(&quot;wavelength&quot;, controls.radar.tx[0], period_id=1)</span>
+<span class="sd">		array([0.6, 0.6])</span>
+<span class="sd">		&gt;&gt;&gt; controls.get_property_control(&quot;wavelength&quot;, controls.radar.tx[0], period_id=2)</span>
+<span class="sd">		array([0.6])</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;name must be a string&quot;</span><span class="p">)</span>
+
+		<span class="n">station</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">station</span><span class="p">)</span>
+		
+		<span class="c1"># check array size (if not already splitted : split data array)</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+			<span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_control_points</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_periods</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+			<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_control_points</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;the control data shall either be of the shape (n_control_points,), where n_control_points is the total number of time points inside the time slice array, or (n_periods,...) where n_periods is the number of control periods&quot;</span><span class="p">)</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+		<span class="c1"># create new control field if doesn&#39;t already exist</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">create_new_property_control_field</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">station</span><span class="p">)</span>		
+
+		<span class="c1"># add control for each station</span>
+		<span class="k">for</span> <span class="n">station_</span> <span class="ow">in</span> <span class="n">station</span><span class="p">:</span>
+			<span class="c1"># get type and id of station</span>
+			<span class="n">station_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">get_station_id</span><span class="p">(</span><span class="n">station_</span><span class="p">)</span>
+			<span class="n">station_type</span> <span class="o">=</span> <span class="n">station_</span><span class="o">.</span><span class="n">type</span>
+			
+			<span class="k">for</span> <span class="n">period_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_periods</span><span class="p">):</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">property_controls</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="n">station_type</span><span class="p">][</span><span class="n">name</span><span class="p">][</span><span class="n">station_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="RadarControls.create_new_property_control_field"><a class="viewcode-back" href="../../../reference/radar/radar_controls/auto/sorts.radar.radar_controls.RadarControls.create_new_property_control_field.html#sorts.radar.radar_controls.RadarControls.create_new_property_control_field">[docs]</a>	<span class="k">def</span> <span class="nf">create_new_property_control_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">stations</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39; Adds a new empty property control field to the :class:`radar controls&lt;RadarControls&gt;` for </span>
+<span class="sd">		all stations in ``stations``.</span>
+
+<span class="sd">		.. warning::</span>
+<span class="sd">			One must set the time slices before creating new radar control entries (since they are created </span>
+<span class="sd">			over each control period).</span>
+<span class="sd">		</span>
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		name : str</span>
+<span class="sd">			Name of the property field to be created. </span>
+<span class="sd">			The function will create a new property control for each control period.</span>
+
+<span class="sd">			.. note::</span>
+<span class="sd">				The property must be a controllable property of the station (see Refer to </span>
+<span class="sd">				:attr:`TX.PROPERTIES&lt;sorts.radar.system.station.TX.PROPERTIES&gt;` or :attr:</span>
+<span class="sd">				`RX.PROPERTIES&lt;sorts.radar.system.station.RX.PROPERTIES&gt;` for more information</span>
+<span class="sd">		 		about the radar station properties which can be controlled.)</span>
+
+<span class="sd">		stations : list of :class:`sorts.Station&lt;sorts.radar.system.station.Station&gt;`</span>
+<span class="sd">			List of stations which property will be controlled. The new control field will be created over all stations </span>
+<span class="sd">			present in ``stations``.</span>
+
+<span class="sd">		Returns </span>
+<span class="sd">		-------</span>
+<span class="sd">		None</span>
+
+<span class="sd">		Raises</span>
+<span class="sd">		------</span>
+<span class="sd">		ControlFieldError :</span>
+<span class="sd">			if the station has no controllable property named ``name``.</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+		<span class="k">for</span> <span class="n">station_</span> <span class="ow">in</span> <span class="n">stations</span><span class="p">:</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">station_</span><span class="o">.</span><span class="n">PROPERTIES</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="n">ControlFieldError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;station </span><span class="si">{</span><span class="n">station_</span><span class="si">}</span><span class="s2"> has no control variable named </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">. Available controls are : </span><span class="si">{</span><span class="n">station_</span><span class="o">.</span><span class="n">get_properties</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">station_type</span> <span class="o">=</span> <span class="n">station_</span><span class="o">.</span><span class="n">type</span>
+				<span class="n">station_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">get_station_id</span><span class="p">(</span><span class="n">station_</span><span class="p">)</span>
+
+				<span class="c1"># if there is no control field of name ``name``, add new field and create new control arrays at each period id</span>
+				<span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">controlled_properties</span><span class="p">[</span><span class="n">station_type</span><span class="p">][</span><span class="n">station_id</span><span class="p">]:</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">controlled_properties</span><span class="p">[</span><span class="n">station_type</span><span class="p">][</span><span class="n">station_id</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+					<span class="c1"># create new field for each period</span>
+					<span class="k">for</span> <span class="n">period_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_periods</span><span class="p">):</span>
+						<span class="k">if</span> <span class="ow">not</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">property_controls</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="n">station_type</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+							<span class="bp">self</span><span class="o">.</span><span class="n">property_controls</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="n">station_type</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radar</span><span class="p">,</span> <span class="n">station_type</span><span class="p">)),),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span></div>
+				
+<div class="viewcode-block" id="RadarControls.get_property_control"><a class="viewcode-back" href="../../../reference/radar/radar_controls/auto/sorts.radar.radar_controls.RadarControls.get_property_control.html#sorts.radar.radar_controls.RadarControls.get_property_control">[docs]</a>	<span class="k">def</span> <span class="nf">get_property_control</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">station</span><span class="p">,</span> <span class="n">period_id</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39; Gets the control data corresponding to the specified control period id.</span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		name : str</span>
+<span class="sd">			Name of the station property to be controlled. </span>
+
+<span class="sd">			.. note:: </span>
+<span class="sd">				The property must be a controlled property of the station to be controlled. Refer to </span>
+<span class="sd">				:attr:`TX.PROPERTIES&lt;sorts.radar.system.station.TX.PROPERTIES&gt;` </span>
+<span class="sd">		 		or :attr:`RX.PROPERTIES&lt;sorts.radar.system.station.RX.PROPERTIES&gt;` for more information</span>
+<span class="sd">		 		about the radar station properties which can be controlled.</span>
+
+<span class="sd">		station : :class:`sorts.Station&lt;sorts.radar.system.station.Station&gt;`</span>
+<span class="sd">			Station instance to be controlled.</span>
+<span class="sd">		period_id : int</span>
+<span class="sd">			Control period index which controls we want to extract.</span>
+
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+<span class="sd">		property_controls : ndarray (n_periods, ...)</span>
+<span class="sd">			Array of controls for the control_variable. if ``period_id`` is provided then ``n_periods=1``, else n_periods will be the </span>
+<span class="sd">			total number of periods :attr:`RadarControls.n_periods`.</span>
+
+<span class="sd">		Raises</span>
+<span class="sd">		------</span>
+<span class="sd">		ControlFieldError :</span>
+<span class="sd">			If the station has no controllable property named ``name``.</span>
+<span class="sd">		ValueError :</span>
+<span class="sd">			If ``name`` is not a string.</span>
+
+<span class="sd">		Examples</span>
+<span class="sd">		--------</span>
+<span class="sd">		Consider a control structure with the following time slice start time array :</span>
+
+<span class="sd">		&gt;&gt;&gt; controls.t</span>
+<span class="sd">		array([[0.1, 0.2], [0.3, 0.4], [0.5]])</span>
+
+<span class="sd">		If we want to add a new entry to control the wavelength (0.6) of the first TX radar station, we need to run :</span>
+
+<span class="sd">		&gt;&gt;&gt; add_property_control(&quot;wavelength&quot;, controls.radar.tx[0], 0.6)</span>
+
+<span class="sd">		To get the corresponding controls, we need to run:</span>
+<span class="sd">		</span>
+<span class="sd">		&gt;&gt;&gt; controls.get_property_control(&quot;wavelength&quot;, controls.radar.tx[0], period_id=0)</span>
+<span class="sd">		array([0.6, 0.6])</span>
+<span class="sd">		&gt;&gt;&gt; controls.get_property_control(&quot;wavelength&quot;, controls.radar.tx[0], period_id=1)</span>
+<span class="sd">		array([0.6, 0.6])</span>
+<span class="sd">		&gt;&gt;&gt; controls.get_property_control(&quot;wavelength&quot;, controls.radar.tx[0], period_id=2)</span>
+<span class="sd">		array([0.6])</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;name must be a string&quot;</span><span class="p">)</span>
+
+		<span class="c1"># get type and id of station</span>
+		<span class="n">station_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">get_station_id</span><span class="p">(</span><span class="n">station</span><span class="p">)</span>
+		<span class="n">station_type</span> <span class="o">=</span> <span class="n">station</span><span class="o">.</span><span class="n">type</span>
+		
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">station</span><span class="o">.</span><span class="n">PROPERTIES</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="n">ControlFieldError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;station </span><span class="si">{</span><span class="n">station</span><span class="si">}</span><span class="s2"> has no control variable named </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">. Available controls are : </span><span class="si">{</span><span class="n">station</span><span class="o">.</span><span class="n">get_properties</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">property_controls</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="n">station_type</span><span class="p">][</span><span class="n">name</span><span class="p">][</span><span class="n">station_id</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="RadarControls.get_property_control_list"><a class="viewcode-back" href="../../../reference/radar/radar_controls/auto/sorts.radar.radar_controls.RadarControls.get_property_control_list.html#sorts.radar.radar_controls.RadarControls.get_property_control_list">[docs]</a>	<span class="k">def</span> <span class="nf">get_property_control_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">station</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39; Returns the list of controlled properties of a station.</span>
+
+<span class="sd">		This function returns the list of properties being controlled in the current control structure  </span>
+<span class="sd">		for a given station.</span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		station : :class:`sorts.Station&lt;sorts.radar.system.station.Station&gt;`</span>
+<span class="sd">			Station instance which list of controlled properties we want to get.</span>
+
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+<span class="sd">		properties : list of str</span>
+<span class="sd">			List of ``station`` properties being controlled by the controls structure.</span>
+
+<span class="sd">		Examples</span>
+<span class="sd">		--------</span>
+<span class="sd">		Consider a control structure named ``controls`` controlling the properties &quot;wavelength&quot; and &quot;n_ipp&quot; of a Station </span>
+<span class="sd">		instance named ``station``. To get the list of controlled properties, one can run:</span>
+
+<span class="sd">		&gt;&gt;&gt; controls.get_property_control_list(station)</span>
+<span class="sd">		[&quot;wavelength&quot;, &quot;n_ipp&quot;]</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+		<span class="c1"># get type and id of station</span>
+		<span class="n">station_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">get_station_id</span><span class="p">(</span><span class="n">station</span><span class="p">)</span>
+		<span class="n">station_type</span> <span class="o">=</span> <span class="n">station</span><span class="o">.</span><span class="n">type</span>
+
+		<span class="n">properties</span> <span class="o">=</span> <span class="p">[]</span>
+
+		<span class="k">for</span> <span class="n">period_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_periods</span><span class="p">):</span>
+			<span class="k">for</span> <span class="n">property_name</span> <span class="ow">in</span> <span class="n">station</span><span class="o">.</span><span class="n">PROPERTIES</span><span class="p">:</span>
+				<span class="k">if</span> <span class="n">property_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">property_controls</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="n">station_type</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="n">property_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+					<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">property_controls</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="n">station_type</span><span class="p">][</span><span class="n">property_name</span><span class="p">][</span><span class="n">station_id</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+						<span class="n">properties</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">property_name</span><span class="p">)</span>
+
+		<span class="k">return</span> <span class="n">properties</span></div>
+
+
+<div class="viewcode-block" id="RadarControls.get_control_period_id"><a class="viewcode-back" href="../../../reference/radar/radar_controls/auto/sorts.radar.radar_controls.RadarControls.get_control_period_id.html#sorts.radar.radar_controls.RadarControls.get_control_period_id">[docs]</a>	<span class="k">def</span> <span class="nf">get_control_period_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scheduler_period_id</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39; Computes the control period associated with a given scheduler period.</span>
+
+<span class="sd">		This function computes the control period corresponding to a given scheduler period index.</span>
+<span class="sd">		If there is no control if index &#39;control_id&#39; at the given control period, then the function </span>
+<span class="sd">		will return -1, and if there is no scheduler associated with the control structure, the function</span>
+<span class="sd">		will return ``scheduler_period_id``.</span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		scheduler_period_id : int</span>
+<span class="sd">			Index of the scheduler period.</span>
+
+<span class="sd">		Returns </span>
+<span class="sd">		-------</span>
+<span class="sd">		ctrl_period_id : int</span>
+<span class="sd">			Index of the control period corresponding to the given scheduler period.</span>
+
+<span class="sd">		Examples</span>
+<span class="sd">		--------</span>
+<span class="sd">		Consider the scheduler and control sequence given by the following figure :</span>
+
+<span class="sd">		.. figure:: ../../../figures/example_control_period.png</span>
+
+<span class="sd">		The control period corresponding to ``scheduler_period_id=1`` is ``ctrl_period_id=0``, and the one corresponding to the	</span>
+<span class="sd">		``scheduler_period_id=4`` is ``ctrl_period_id=3``.</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> 
+			<span class="n">ctrl_period_id</span> <span class="o">=</span> <span class="n">scheduler_period_id</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">ctrl_period_id</span> <span class="o">=</span> <span class="n">scheduler_period_id</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_t</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">//</span><span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">scheduler_period</span><span class="p">)</span>  <span class="c1"># computes the time subarray id</span>
+
+			<span class="c1"># the time subarray id is bigger than the number of time subarrays in the given control structure</span>
+			<span class="k">if</span> <span class="n">ctrl_period_id</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">ctrl_period_id</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_t</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span> 
+				<span class="n">ctrl_period_id</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+		<span class="k">return</span> <span class="n">ctrl_period_id</span></div>
+
+
+<div class="viewcode-block" id="RadarControls.check_time_slice_overlap"><a class="viewcode-back" href="../../../reference/radar/radar_controls/auto/sorts.radar.radar_controls.RadarControls.check_time_slice_overlap.html#sorts.radar.radar_controls.RadarControls.check_time_slice_overlap">[docs]</a>	<span class="k">def</span> <span class="nf">check_time_slice_overlap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">duration</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39; Checks wether or not time slices overlap within a given control array.</span>
+
+<span class="sd">		If two different time slices overlap, the function will return the indices </span>
+<span class="sd">		of the time points which overlap.</span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		t : numpy.ndarray (N,)</span>
+<span class="sd">			Time slice start time (in seconds).</span>
+<span class="sd">		duration : numpy.ndarray (N,)</span>
+<span class="sd">			Time slice duration (in seconds).</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+		<span class="c1"># Logging execution status</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
+			<span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;checking time slice overlap&quot;</span><span class="p">)</span>
+
+		<span class="n">overlap</span> <span class="o">=</span> <span class="kc">False</span>
+		
+		<span class="c1"># compute time interval between start time and previous time slice end time</span>
+		<span class="n">dt</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="p">(</span><span class="n">t</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">duration</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+		<span class="c1"># get indices where the difference is negative (i.e. a time slice has started </span>
+		<span class="c1"># before the previous one ended).</span>
+		<span class="n">superposition_mask_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dt</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">1e-10</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">superposition_mask_ids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
+				<span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Time slices overlapping at transition indices </span><span class="si">{</span><span class="n">superposition_mask_ids</span><span class="si">}</span><span class="s2">. Stopping&quot;</span><span class="p">)</span>
+			
+			<span class="n">overlap</span> <span class="o">=</span> <span class="kc">True</span>
+
+		<span class="k">return</span> <span class="n">overlap</span></div>
+
+
+<div class="viewcode-block" id="RadarControls.split_array"><a class="viewcode-back" href="../../../reference/radar/radar_controls/auto/sorts.radar.radar_controls.RadarControls.split_array.html#sorts.radar.radar_controls.RadarControls.split_array">[docs]</a>	<span class="k">def</span> <span class="nf">split_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39; Split an array according to the scheduler period and start time (if the scheduler is provided).       </span>
+<span class="sd">		</span>
+<span class="sd">		If the scheduler is None, then the time array will be splitted to ensure that the number of time </span>
+<span class="sd">		points in a given controls subarray does not exceed max_points.</span>
+
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		array : numpy.ndarray (N,)</span>
+<span class="sd">			Array to be splitted.</span>
+
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+<span class="sd">		splitted_array : numpy.ndarray (:attr:`RadarControls.n_periods`, ``n_points_per_period[i]``)</span>
+<span class="sd">			Array splitted according to the control periods. ``n_points_per_period[i]`` corresponds to </span>
+<span class="sd">			the number of time slices inside the :math:`i^{th}` control period. </span>
+<span class="sd">		&#39;&#39;&#39;</span>
+		<span class="c1"># if the splitting indices have not been computed, run computation first</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_periods</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitting_indices</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">splitting_indices</span> 	<span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_splitting_indices</span><span class="p">()</span>
+
+		<span class="c1"># Split arrays according to transition indices</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitting_indices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">splitted_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_periods</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+
+			<span class="n">id_start</span> <span class="o">=</span> <span class="mi">0</span>
+			<span class="k">for</span> <span class="n">period_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_periods</span><span class="p">):</span>
+				<span class="c1"># get end index of the control period in the linear array</span>
+				<span class="k">if</span> <span class="n">period_id</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_periods</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+					<span class="n">id_end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitting_indices</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="n">id_end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_control_points</span>
+
+				<span class="c1"># copy values from the array in the corresponding control period</span>
+				<span class="n">splitted_array</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="n">id_start</span><span class="p">:</span><span class="n">id_end</span><span class="p">]</span>
+				<span class="n">id_start</span> <span class="o">=</span> <span class="n">id_end</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">splitted_array</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+
+		<span class="k">return</span> <span class="n">splitted_array</span></div>
+
+
+<div class="viewcode-block" id="RadarControls.get_splitting_indices"><a class="viewcode-back" href="../../../reference/radar/radar_controls/auto/sorts.radar.radar_controls.RadarControls.get_splitting_indices.html#sorts.radar.radar_controls.RadarControls.get_splitting_indices">[docs]</a>	<span class="k">def</span> <span class="nf">get_splitting_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39; Computes the indices at which the time and control arrays must be </span>
+<span class="sd">		sliced to meet the scheduler/max_points requirements.</span>
+<span class="sd">		</span>
+<span class="sd">		.. note::</span>
+<span class="sd">			Control time slices must have been set before calling this function. </span>
+<span class="sd">			To set the control time slices, call the function :attr:`RadarControls.set_time_slices`.</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">splitting_indices</span> <span class="o">=</span> <span class="kc">None</span>
+
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t_slice</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;time slices must be set before computing splitting_indices. please set time slices by calling : set_time_slices(t, duration)&quot;</span><span class="p">)</span>
+		
+		<span class="c1"># get period transition indices</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;radar_controls:get_splitting_indices -&gt; using scheduler master clock&quot;</span><span class="p">)</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;radar_controls:get_splitting_indices -&gt; skipping max_points (max time points limit)&quot;</span><span class="p">)</span>
+
+			<span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">RadarSchedulerBase</span><span class="p">):</span>
+				<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;scheduler has to be an instance of </span><span class="si">{</span><span class="n">RadarSchedulerBase</span><span class="si">}</span><span class="s2">, not </span><span class="si">{</span><span class="n">scheduler</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+			<span class="n">period_idx</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_t</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">t0</span><span class="p">)</span><span class="o">//</span><span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">scheduler_period</span>
+
+			<span class="bp">self</span><span class="o">.</span><span class="n">splitting_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">period_idx</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">period_idx</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">n_periods</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">splitting_indices</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+			<span class="k">del</span> <span class="n">period_idx</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;radar_controls:get_splitting_indices -&gt; No scheduler provided, skipping master clock splitting...&quot;</span><span class="p">)</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;radar_controls:get_splitting_indices -&gt; using max_points=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_points</span><span class="si">}</span><span class="s2"> (max time points limit)&quot;</span><span class="p">)</span>
+
+			<span class="k">if</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_t</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_points</span><span class="p">):</span>                
+				<span class="bp">self</span><span class="o">.</span><span class="n">splitting_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_points</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_t</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_points</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">n_periods</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">splitting_indices</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">n_periods</span> <span class="o">=</span> <span class="mi">1</span> </div>
+
+
+	<span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39; Overloaded __str__ method. &#39;&#39;&#39;</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RADAR Controls structure : &quot;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_periods</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Pointing direction controls (RadarControls.get_pdirs(period_id)) :&quot;</span><span class="p">)</span>
+			<span class="k">for</span> <span class="n">period_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_periods</span><span class="p">):</span>
+				<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Period &quot;</span><span class="p">,</span> <span class="n">period_id</span><span class="p">,</span> <span class="s2">&quot; : &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_pdirs</span><span class="p">(</span><span class="n">period_id</span><span class="p">))</span>
+
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">-------------- Optional/Property controls --------------&quot;</span><span class="p">)</span>
+
+			<span class="k">for</span> <span class="n">station</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">tx</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">rx</span><span class="p">:</span>
+				<span class="n">station_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">get_station_id</span><span class="p">(</span><span class="n">station</span><span class="p">)</span>
+				<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Station (type </span><span class="si">{</span><span class="n">station</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">, id </span><span class="si">{</span><span class="n">station_id</span><span class="si">}</span><span class="s2"> property controls : &quot;</span><span class="p">)</span>
+
+				<span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">controlled_properties</span><span class="p">[</span><span class="n">station</span><span class="o">.</span><span class="n">type</span><span class="p">][</span><span class="n">station_id</span><span class="p">]:</span>
+					<span class="n">periods</span> <span class="o">=</span> <span class="p">[]</span>
+					<span class="k">for</span> <span class="n">period_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_periods</span><span class="p">):</span>
+						<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">property_controls</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="n">station</span><span class="o">.</span><span class="n">type</span><span class="p">][</span><span class="n">name</span><span class="p">][</span><span class="n">station_id</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+							<span class="n">periods</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">period_id</span><span class="p">)</span>
+
+					<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    - </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> -&gt; (periods </span><span class="si">{</span><span class="n">periods</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+								
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">-------------------------------------------------------&quot;</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;time and time slice arrays not set.&quot;</span><span class="p">)</span>
+
+		<span class="k">return</span> <span class="s2">&quot;&quot;</span></div>
+</pre></div>
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright [2020-2022] Daniel Kastinen, Juha Vierinen, Thomas Maynadie.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

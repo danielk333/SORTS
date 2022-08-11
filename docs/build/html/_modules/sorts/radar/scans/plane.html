@@ -1,0 +1,408 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>sorts.radar.scans.plane &#8212; SORTS v4.0 Manual</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "dark";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="dark">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">SORTS v4.0 Manual</p>
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../intro.html">
+  Introduction
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../install.html">
+  Installation
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../usermanual.html">
+  SORTS Manual
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <form class="bd-search d-flex align-items-center" action="../../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/danielk333/sorts" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <h1>Source code for sorts.radar.scans.plane</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">.scan</span> <span class="kn">import</span> <span class="n">Scan</span>
+
+<div class="viewcode-block" id="Plane"><a class="viewcode-back" href="../../../../reference/radar/scans/auto/sorts.radar.scans.plane.Plane.html#sorts.radar.scans.plane.Plane">[docs]</a><span class="k">class</span> <span class="nc">Plane</span><span class="p">(</span><span class="n">Scan</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; A uniform sampling of a horizontal plane. </span>
+
+<span class="sd">    The :class:`Plane` scanning scheme performs a *uniform sampling* of a plane with normal the local vertical</span>
+<span class="sd">    vector of the station. </span>
+
+<span class="sd">    .. rubric:: Scan parametrization :</span>
+
+<span class="sd">    The pointing directions of the scan are outputted in the **ENU** coordinate frame of the station, meaning that the </span>
+<span class="sd">    ith pointing direction can be represented as :math:`p_i = [x_i, y_i, z]^T`</span>
+
+<span class="sd">    .. note:: </span>
+<span class="sd">        Since the plane is locally tangent to the surface of the earth, :math:`z` will be constant for all pointing directions</span>
+<span class="sd">        of the scan.</span>
+
+<span class="sd">    The :math:`x` and :math:`y` coordinates of the pointing direction vector in the ENU frame can be expressed as:</span>
+
+<span class="sd">    .. math::       x_i = = \\Delta x \\cdot t_i - \\frac{L_x}{2} + x_{offset}\\text{  , } t_i \\in [0, t_{cycle}]</span>
+
+<span class="sd">    .. math::       y_i = = \\Delta y \\cdot t_i - \\frac{L_y}{2} + y_{offset} \\text{  , } t_i \\in [0, t_{cycle}]</span>
+
+<span class="sd">    and :math:`\\Delta x = L_x/N_x`, :math:`\\Delta y = L_y/N_y`, with :math:`L_x` and :math:`L_y` respectively the size</span>
+<span class="sd">    of the scanning surface along the x and y directions, :math:`N_x` and :math:`N_y` the number of points on the surface along</span>
+<span class="sd">    the x and y directions, :math:`x_{offset}` and :math:`y_{offset}` the offsets along x and y with respect to the normal</span>
+<span class="sd">    vertical vector of the station.</span>
+
+<span class="sd">    .. note::</span>
+<span class="sd">        Since the FOV of the station is limited, all the points which elevation is lower than the minimum elevation of the </span>
+<span class="sd">        station will be discarded.</span>
+
+<span class="sd">    .. rubric:: Constructor :</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    min_elevation : float, default=30.0</span>
+<span class="sd">        Minimum elevation of the beam. ``min_elevation`` also usually defines the Field of view of</span>
+<span class="sd">        the station (in degrees). </span>
+<span class="sd">    altitude : float, default=200e3</span>
+<span class="sd">        Altitude of the plane defining the scanning surface (in meters).</span>
+<span class="sd">    x_size : float, default=50e3</span>
+<span class="sd">        Size along the local x direction (*East*) of the plane defining the scanning surface (in meters).</span>
+<span class="sd">    y_size : float, default=50e3</span>
+<span class="sd">        Size along the local y direction (*North*) of the plane defining the scanning surface (in meters).</span>
+<span class="sd">    x_num : int, default=20</span>
+<span class="sd">        Number of scanning points along the local x direction (*East*) of the plane defining the scanning surface.</span>
+<span class="sd">    y_num : int, default=20</span>
+<span class="sd">        Number of scanning points along the local y direction (*North*) of the plane defining the scanning surface.</span>
+<span class="sd">    dwell : float, default=0.1</span>
+<span class="sd">        Dwell time of the scan (in seconds).</span>
+<span class="sd">    x_offset : float, default=0.0</span>
+<span class="sd">        Offset from the local vertical vector of the station along the local x direction (*East*) of the plane defining </span>
+<span class="sd">        the scanning surface (in meters).</span>
+<span class="sd">    y_offset : float, default=0.0</span>
+<span class="sd">        ffset from the local vertical vector of the station along the local y direction (*North*) of the plane defining </span>
+<span class="sd">        the scanning surface (in meters).</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    As a simple example, consider a :class:`Plane` scan performing the uniform scanning of </span>
+<span class="sd">    a 1000x1000km plane at altitude 1000km. The scan is defined such that there are 5 possible coordinates </span>
+<span class="sd">    for each pointing direction along x and  along y. The x and y offsets are set to 0 to ensure that the plane center</span>
+<span class="sd">    is directly over the station. Finally the dwell time is set to 1 second, meaning that the whole scanning scheme </span>
+<span class="sd">    lasts for 25 seconds.</span>
+
+<span class="sd">    &gt;&gt;&gt; import sorts</span>
+<span class="sd">    &gt;&gt;&gt; plane = sorts.scans.Plane(min_elevation=30.0, altitude=1000e3, x_size=1000e3, y_size=1000e3, x_num=5, y_num=5, dwell=1.0, x_offset=0.0, y_offset=0.0)</span>
+
+<span class="sd">    To evaluate the result of the ``pointing`` function, we create a time array of 25 elements :</span>
+<span class="sd">    </span>
+<span class="sd">    &gt;&gt;&gt; t = np.arange(0.0, 24.0)</span>
+<span class="sd">    &gt;&gt;&gt; plane.pointing(t)</span>
+<span class="sd">    array([[-0.40824829 -0.43643578 -0.4472136  -0.43643578 -0.40824829 -0.21821789</span>
+<span class="sd">          -0.23570226 -0.24253563 -0.23570226 -0.21821789  0.          0.</span>
+<span class="sd">           0.          0.          0.          0.21821789  0.23570226  0.24253563</span>
+<span class="sd">           0.23570226  0.21821789  0.40824829  0.43643578  0.4472136   0.43643578</span>
+<span class="sd">           0.40824829]</span>
+<span class="sd">         [-0.40824829 -0.21821789  0.          0.21821789  0.40824829 -0.43643578</span>
+<span class="sd">          -0.23570226  0.          0.23570226  0.43643578 -0.4472136  -0.24253563</span>
+<span class="sd">           0.          0.24253563  0.4472136  -0.43643578 -0.23570226  0.</span>
+<span class="sd">           0.23570226  0.43643578 -0.40824829 -0.21821789  0.          0.21821789</span>
+<span class="sd">           0.40824829]</span>
+<span class="sd">         [ 0.81649658  0.87287156  0.89442719  0.87287156  0.81649658  0.87287156</span>
+<span class="sd">           0.94280904  0.9701425   0.94280904  0.87287156  0.89442719  0.9701425</span>
+<span class="sd">           1.          0.9701425   0.89442719  0.87287156  0.94280904  0.9701425</span>
+<span class="sd">           0.94280904  0.87287156  0.81649658  0.87287156  0.89442719  0.87287156</span>
+<span class="sd">           0.81649658]])</span>
+
+<span class="sd">    </span>
+<span class="sd">    To plot the results of the ``pointing`` function, we can use the :ref:`plotting` module implemented</span>
+<span class="sd">    in sorts:</span>
+
+<span class="sd">    &gt;&gt;&gt; radar = sorts.radars.eiscat3d</span>
+<span class="sd">    &gt;&gt;&gt; sorts.plotting.plot_scanning_sequence(plane, station=radar.tx[0], earth=True, ax=None, plot_local_normal=True, max_range=1000e3)</span>
+
+<span class="sd">    .. figure:: ../../../../figures/scans_plane.png</span>
+
+<span class="sd">        Example :class:`Plane` scanning scheme. In *blue*, the local vertical vector/in *red*, </span>
+<span class="sd">        the pointing direction vector of the tx station of the **EISCAT_3D radar**.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+<div class="viewcode-block" id="Plane.__init__"><a class="viewcode-back" href="../../../../reference/radar/scans/auto/sorts.radar.scans.plane.Plane.__init__.html#sorts.radar.scans.plane.Plane.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_elevation</span><span class="o">=</span><span class="mf">30.0</span><span class="p">,</span> <span class="n">altitude</span><span class="o">=</span><span class="mf">200e3</span><span class="p">,</span> <span class="n">x_size</span><span class="o">=</span><span class="mf">50e3</span><span class="p">,</span> <span class="n">y_size</span><span class="o">=</span><span class="mf">50e3</span><span class="p">,</span> <span class="n">x_num</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">y_num</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">dwell</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">x_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y_offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">coordinates</span><span class="o">=</span><span class="s1">&#39;enu&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dwell</span> <span class="o">=</span> <span class="n">dwell</span>
+        <span class="sd">&#39;&#39;&#39; Dwell time of the scan (in seconds). &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_elevation</span> <span class="o">=</span> <span class="n">min_elevation</span>
+        <span class="sd">&#39;&#39;&#39; Minimum elevation of the beam. ``min_elevation`` also usually defines the Field of view of the station (in degrees).&#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">altitude</span> <span class="o">=</span> <span class="n">altitude</span>
+        <span class="sd">&#39;&#39;&#39; Altitude of the plane defining the scanning surface (in meters). &#39;&#39;&#39;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_size</span> <span class="o">=</span> <span class="n">x_size</span>
+        <span class="sd">&#39;&#39;&#39; Size along the local x direction (*East*) of the plane defining the scanning surface (in meters). &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_size</span> <span class="o">=</span> <span class="n">y_size</span>
+        <span class="sd">&#39;&#39;&#39; Size along the local y direction (*North*) of the plane defining the scanning surface (in meters). &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_num</span> <span class="o">=</span> <span class="n">x_num</span>
+        <span class="sd">&#39;&#39;&#39; Number of scanning points along the local x direction (*East*) of the plane defining the scanning surface. &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_num</span> <span class="o">=</span> <span class="n">y_num</span>
+        <span class="sd">&#39;&#39;&#39; Number of scanning points along the local y direction (*North*) of the plane defining the scanning surface. &#39;&#39;&#39;</span>
+
+        <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="n">x_num</span><span class="o">*</span><span class="n">y_num</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="c1"># create the mesh grid for the pointing directions</span>
+        <span class="n">xv</span><span class="p">,</span> <span class="n">yv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">x_size</span><span class="o">*</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">x_size</span><span class="o">*</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_num</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="n">x_offset</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">y_size</span><span class="o">*</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">y_size</span><span class="o">*</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_num</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="n">y_offset</span><span class="p">,</span>
+            <span class="n">sparse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+            <span class="n">indexing</span><span class="o">=</span><span class="s1">&#39;ij&#39;</span><span class="p">,</span>
+         <span class="p">)</span>
+
+        <span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">xv</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">k</span><span class="p">[</span><span class="mi">1</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">yv</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">k</span><span class="p">[</span><span class="mi">2</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">altitude</span>
+
+        <span class="c1"># normalize each pointing direction</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># remove all points outside of the FOV</span>
+        <span class="n">min_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">min_elevation</span><span class="p">))</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="p">[:,</span> <span class="n">k</span><span class="p">[</span><span class="mi">2</span><span class="p">,:]</span> <span class="o">&gt;=</span> <span class="n">min_z</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">num</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="sd">&#39;&#39;&#39; Number of pointing directions. &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pointings</span> <span class="o">=</span> <span class="n">k</span>
+        <span class="sd">&#39;&#39;&#39; Pointing directions in the ENU frame of reference of the station. &#39;&#39;&#39;</span></div>
+
+
+<div class="viewcode-block" id="Plane.dwell"><a class="viewcode-back" href="../../../../reference/radar/scans/auto/sorts.radar.scans.plane.Plane.dwell.html#sorts.radar.scans.plane.Plane.dwell">[docs]</a>    <span class="k">def</span> <span class="nf">dwell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">t</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dwell</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dwell</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">t</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_dwell</span></div>
+
+
+<div class="viewcode-block" id="Plane.min_dwell"><a class="viewcode-back" href="../../../../reference/radar/scans/auto/sorts.radar.scans.plane.Plane.min_dwell.html#sorts.radar.scans.plane.Plane.min_dwell">[docs]</a>    <span class="k">def</span> <span class="nf">min_dwell</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dwell</span></div>
+
+
+<div class="viewcode-block" id="Plane.cycle"><a class="viewcode-back" href="../../../../reference/radar/scans/auto/sorts.radar.scans.plane.Plane.cycle.html#sorts.radar.scans.plane.Plane.cycle">[docs]</a>    <span class="k">def</span> <span class="nf">cycle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_dwell</span></div>
+
+
+<div class="viewcode-block" id="Plane.pointing"><a class="viewcode-back" href="../../../../reference/radar/scans/auto/sorts.radar.scans.plane.Plane.pointing.html#sorts.radar.scans.plane.Plane.pointing">[docs]</a>    <span class="k">def</span> <span class="nf">pointing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Returns the sequence of radar pointing directions at each given time points.</span>
+
+<span class="sd">        The ``pointing`` function of the :class:`Plane` class returns a set of static pointing</span>
+<span class="sd">        directions in the ENU coordinate frame *uniformly sampled* from a horizontal plane at altitude</span>
+<span class="sd">        z. </span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        t : float / numpy.ndarray (N,)</span>
+<span class="sd">            Time point(s) (relative to the reference epoch) where the pointing directions are computed.</span>
+<span class="sd">            The epoch of reference is relative to the definition of the pointing function.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pointing : numpy.ndarray (3, N)</span>
+<span class="sd">            pointing directions programmed by the scanning scheme at each time point in the `ENU` coordinate</span>
+<span class="sd">            frame.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        See :class:`Plane` for an in-depth example on how to generate a :class:`Plane` scanning scheme.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">t</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">cycle</span><span class="p">(),</span> <span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">num</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pointings</span><span class="p">[:,</span><span class="n">ind</span><span class="p">]</span></div></div>
+</pre></div>
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright [2020-2022] Daniel Kastinen, Juha Vierinen, Thomas Maynadie.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

@@ -1,0 +1,8 @@
+Static.compute\_pointing\_direction
+===================================
+
+.. currentmodule:: sorts.radar.controllers.static
+
+.. rubric:: Static.compute_pointing_direction
+
+.. automethod:: Static.compute_pointing_direction

@@ -1,0 +1,1398 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.17">
+  <compounddef id="signals_8h" kind="file" language="C++">
+    <compoundname>signals.h</compoundname>
+    <includes local="no">stdio.h</includes>
+    <includes local="no">stdlib.h</includes>
+    <includes local="no">math.h</includes>
+    <incdepgraph>
+      <node id="3">
+        <label>stdlib.h</label>
+      </node>
+      <node id="4">
+        <label>math.h</label>
+      </node>
+      <node id="1">
+        <label>/home/thomas/venvs/sorts/SORTS/src/signals.h</label>
+        <link refid="signals_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>stdio.h</label>
+      </node>
+    </incdepgraph>
+      <sectiondef kind="define">
+      <memberdef kind="define" id="signals_8h_1a961be4eceff5348ca7de42d8873b977e" prot="public" static="no">
+        <name>BOLTZMAN_CONSTANT</name>
+        <initializer>1.380649e-23</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Boltzman constant : <formula id="0">$ k_B=1.380649 \cdot 10^{-23} J $</formula> </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/thomas/venvs/sorts/SORTS/src/signals.h" line="7" column="9" bodyfile="/home/thomas/venvs/sorts/SORTS/src/signals.h" bodystart="7" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="signals_8h_1a3a006ed13c7b50b3e0f63be480ab7aaf" prot="public" static="no">
+        <name>C_VACUUM</name>
+        <initializer>299792458</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Speed of light in vacuum : <formula id="1">$ c=299 792 458 m/s $</formula> </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/thomas/venvs/sorts/SORTS/src/signals.h" line="11" column="9" bodyfile="/home/thomas/venvs/sorts/SORTS/src/signals.h" bodystart="11" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="signals_8h_1ac16cec4783edd40f7ca586be25efbc5d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void doppler_spread_hard_target_snr_vectorized</definition>
+        <argsstring>(double _t_obs, double _spin_period, double *_gain_tx, double *_gain_rx, double _wavelength, double _power_tx, double *_range_tx_m, double *_range_rx_m, double _duty_cycle, double _diameter, double _bandwidth, double _rx_noise_temp, double _radar_albedo, double *_snr_coh, double *_snr_incoh, int _N)</argsstring>
+        <name>doppler_spread_hard_target_snr_vectorized</name>
+        <param>
+          <type>double</type>
+          <declname>_t_obs</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_spin_period</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>_gain_tx</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>_gain_rx</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_wavelength</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_power_tx</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>_range_tx_m</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>_range_rx_m</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_duty_cycle</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_diameter</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_bandwidth</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_rx_noise_temp</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_radar_albedo</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>_snr_coh</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>_snr_incoh</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>_N</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<sect1 id="signals_8h_1desc">
+<title>Description</title>
+<para>This function computes the coherent and incoherent signal-to-noise (SNR) ratios for a spinning rigid target by taking into account the doppler shift.</para>
+<para><verbatim>embed:rst:leading-asterisk
+* .. note::
+*       The current implementation of the function does not support array inputs over
+*       all parameters 
+* </verbatim></para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>_t_obs</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> measurement duration (s) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_spin_period</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> rotation period of the object being observed (s) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_gain_tx</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double*)</computeroutput> transmit antenna gain, linear (-) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_gain_rx</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double*)</computeroutput> receiver antenna gain, linear (-) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_wavelength</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> radar wavelength (m) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_power_tx</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> transmit power (W) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_range_tx_m</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double*)</computeroutput> range from transmitter to target (m) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_range_rx_m</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double*)</computeroutput> range from target to receiver (m) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_duty_cycle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> radar measurement duty cycle (-) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_diameter</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> object diameter (m) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_bandwidth</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> effective receiver noise bandwidth (Hz) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_rx_noise_temp</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> eceiver noise temperature (K) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_radar_albedo</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> radar albedo of the object beaing observed (-) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_snr_coh</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double*)</computeroutput> coherent signal-to-noise ration computation results (-) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_snr_incoh</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double*)</computeroutput> incoherent signal-to-noise ration computation results (-) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_N</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(int)</computeroutput> incoherent signal-to-noise ration computation results (-)</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+</sect1>
+<sect1 id="signals_8h_1ressources">
+<title>External resources</title>
+<para><itemizedlist>
+<listitem><para><emphasis>D. Kastinen et al., Radar observability of near-Earth objects with EISCAT 3D, 2020,</emphasis> </para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/thomas/venvs/sorts/SORTS/src/signals.h" line="48" column="6" declfile="/home/thomas/venvs/sorts/SORTS/src/signals.h" declline="48" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="signals_8h_1a7c4f4b37a3a283c28863c5748f508d24" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void doppler_spread_hard_target_snr</definition>
+        <argsstring>(double _t_obs, double _spin_period, double _gain_tx, double _gain_rx, double _wavelength, double _power_tx, double _range_tx_m, double _range_rx_m, double _duty_cycle, double _diameter, double _bandwidth, double _rx_noise_temp, double _radar_albedo, double *_snr_coh, double *_snr_incoh)</argsstring>
+        <name>doppler_spread_hard_target_snr</name>
+        <param>
+          <type>double</type>
+          <declname>_t_obs</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_spin_period</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_gain_tx</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_gain_rx</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_wavelength</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_power_tx</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_range_tx_m</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_range_rx_m</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_duty_cycle</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_diameter</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_bandwidth</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_rx_noise_temp</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_radar_albedo</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>_snr_coh</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>_snr_incoh</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<sect1 id="signals_8h_1desc">
+<title>Description</title>
+<para>This function computes the coherent and incoherent signal-to-noise (SNR) ratios for a spinning rigid target by taking into account the doppler shift.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>_t_obs</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> measurement duration (s) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_spin_period</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> rotation period of the object being observed (s) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_gain_tx</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> transmit antenna gain, linear (-) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_gain_rx</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> receiver antenna gain, linear (-) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_wavelength</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> radar wavelength (m) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_power_tx</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> transmit power (W) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_range_tx_m</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> range from transmitter to target (m) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_range_rx_m</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> range from target to receiver (m) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_duty_cycle</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> radar measurement duty cycle (-) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_diameter</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> object diameter (m) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_bandwidth</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> effective receiver noise bandwidth (Hz) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_rx_noise_temp</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> receiver noise temperature (K) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_radar_albedo</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> radar albedo of the object beaing observed (-) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_snr_coh</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double*)</computeroutput> coherent signal-to-noise ration computation results (-) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_snr_incoh</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double*)</computeroutput> incoherent signal-to-noise ration computation results (-)</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>: <computeroutput>(void)</computeroutput></para>
+</simplesect>
+</para>
+<sect2 id="signals_8h_1ressources">
+<title>External resources</title>
+<para><itemizedlist>
+<listitem><para>D. Kastinen et al., Radar observability of near-Earth objects with EISCAT 3D, 2020, </para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/thomas/venvs/sorts/SORTS/src/signals.h" line="96" column="6" declfile="/home/thomas/venvs/sorts/SORTS/src/signals.h" declline="96" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="signals_8h_1a2fbc39a8b18df4c27e2183fe90ab0e55" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void incoherent_snr</definition>
+        <argsstring>(double _signal_power, double _noise_power, double _epsilon, double _bandwidth, double _incoherent_integration_time, double *_snr, double *_snr_incoh, double *_minimal_observation_time)</argsstring>
+        <name>incoherent_snr</name>
+        <param>
+          <type>double</type>
+          <declname>_signal_power</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_noise_power</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_epsilon</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_bandwidth</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_incoherent_integration_time</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>_snr</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>_snr_incoh</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>_minimal_observation_time</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<sect1 id="signals_8h_1desc">
+<title>Description</title>
+<para>Computes the incoherent signal to noise ratio and the minimal observation time required</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>_signal_power</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> signal power (W) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_noise_power</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> noise power (W) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_epsilon</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> statistical significance criterion used for a detection (-) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_bandwidth</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> measurement bandwidth (Hz) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_incoherent_integration_time</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> incoherent integration time of the measurements (s) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_snr</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double*)</computeroutput> SNR of coherently integrated measurement (-) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_snr_incoh</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double*)</computeroutput> SNR of incoherently integrated measurement (-) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_minimal_observation_time</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double*)</computeroutput> minimal observation time required (s)</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>: <computeroutput>(void)</computeroutput></para>
+</simplesect>
+</para>
+<sect2 id="signals_8h_1ressources">
+<title>External resources</title>
+<para><itemizedlist>
+<listitem><para>D. Kastinen et al.: Radar observability of near-Earth objects with EISCAT 3D, 2020 </para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/thomas/venvs/sorts/SORTS/src/signals.h" line="135" column="6" declfile="/home/thomas/venvs/sorts/SORTS/src/signals.h" declline="135" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="signals_8h_1a19816f8dc6d7f95f9c6939d832394831" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void hard_target_diameter_vectorized</definition>
+        <argsstring>(double *_gain_tx, double *_gain_rx, double _wavelength, double _power_tx, double *_range_tx_m, double *_range_rx_m, double *_snr, double _bandwidth, double _rx_noise_temp, double _radar_albedo, double *_diameter, int _N)</argsstring>
+        <name>hard_target_diameter_vectorized</name>
+        <param>
+          <type>double *</type>
+          <declname>_gain_tx</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>_gain_rx</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_wavelength</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_power_tx</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>_range_tx_m</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>_range_rx_m</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>_snr</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_bandwidth</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_rx_noise_temp</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_radar_albedo</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>_diameter</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>_N</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<sect1 id="signals_8h_1desc">
+<title>Description</title>
+<para>This function estimates the diamter of a hard target based on the signal-to-noise ratio (energy-to-noise). Assume a smooth transition between Rayleigh and optical scattering. Ignore Mie regime and use either optical or Rayleigh scatter.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>_gain_tx</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> transmit antenna gain, linear (-) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_gain_rx</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> receiver antenna gain, linear (-) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_wavelength</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> radar wavelength (m) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_power_tx</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> transmit power (W) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_range_tx_m</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> range from transmitter to target (m) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_range_rx_m</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> range from target to receiver (m) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_snr</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> object signal to noise ratio (-) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_bandwidth</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> effective receiver noise bandwidth (Hz) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_rx_noise_temp</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> receiver noise temperature (K) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_radar_albedo</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> radar albedo (-) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_diameter</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double*)</computeroutput> diameter (m) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_N</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(int)</computeroutput> array sizes</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para><computeroutput>(void)</computeroutput></para>
+</simplesect>
+</para>
+<sect2 id="signals_8h_1ressources">
+<title>External resources</title>
+<para><itemizedlist>
+<listitem><para>Markkanen et.al., 1999 </para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/thomas/venvs/sorts/SORTS/src/signals.h" line="173" column="6" declfile="/home/thomas/venvs/sorts/SORTS/src/signals.h" declline="173" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="signals_8h_1a495cff0d53d6ddf100f27e884afab4f4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void hard_target_diameter</definition>
+        <argsstring>(double _gain_tx, double _gain_rx, double _wavelength, double _power_tx, double _range_tx_m, double _range_rx_m, double _snr, double _bandwidth, double _rx_noise_temp, double _radar_albedo, double *_diameter)</argsstring>
+        <name>hard_target_diameter</name>
+        <param>
+          <type>double</type>
+          <declname>_gain_tx</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_gain_rx</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_wavelength</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_power_tx</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_range_tx_m</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_range_rx_m</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_snr</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_bandwidth</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_rx_noise_temp</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_radar_albedo</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>_diameter</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<sect1 id="signals_8h_1desc">
+<title>Description</title>
+<para>This function estimates the diamter of a hard target based on the signal-to-noise ratio (energy-to-noise). Assume a smooth transition between Rayleigh and optical scattering. Ignore Mie regime and use either optical or Rayleigh scatter.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>_gain_tx</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> transmit antenna gain, linear (-) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_gain_rx</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> receiver antenna gain, linear (-) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_wavelength</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> radar wavelength (m) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_power_tx</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> transmit power (W) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_range_tx_m</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> range from transmitter to target (m) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_range_rx_m</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> range from target to receiver (m) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_snr</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> object signal to noise ratio (-) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_bandwidth</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> effective receiver noise bandwidth (Hz) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_rx_noise_temp</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> receiver noise temperature (K) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_radar_albedo</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> radar albedo (-) </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_diameter</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> target diameter (m)</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para><computeroutput>void</computeroutput></para>
+</simplesect>
+</para>
+<sect2 id="signals_8h_1ressources">
+<title>External resources</title>
+<para><itemizedlist>
+<listitem><para>Markkanen et.al., 1999 </para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/thomas/venvs/sorts/SORTS/src/signals.h" line="213" column="6" declfile="/home/thomas/venvs/sorts/SORTS/src/signals.h" declline="213" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="signals_8h_1a1f0d0169539b2330434dbeb4a448d134" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void hard_target_snr_vectorized</definition>
+        <argsstring>(double *_gain_tx, double *_gain_rx, double _wavelength, double _power_tx, double *_range_tx_m, double *_range_rx_m, double _diameter, double _bandwidth, double _rx_noise_temp, double _radar_albedo, double *_snr, int _N)</argsstring>
+        <name>hard_target_snr_vectorized</name>
+        <param>
+          <type>double *</type>
+          <declname>_gain_tx</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>_gain_rx</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_wavelength</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_power_tx</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>_range_tx_m</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>_range_rx_m</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_diameter</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_bandwidth</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_rx_noise_temp</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_radar_albedo</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>_snr</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>_N</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<sect1 id="signals_8h_1desc">
+<title>Description</title>
+<para>This function determines the <emphasis>Signal-to-Noise Ratio</emphasis> SNR (or energy-to-noise ratio) of a <bold>hard target</bold>. It assumes a smooth transition between the Rayleigh and optical scattering regimes. The Mie regime is ignored.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>_gain_tx</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> transmit antenna gain (-). </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_gain_rx</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> receiver antenna gain (-). </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_wavelength</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> radar wavelength (m). </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_power_tx</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> transmit power (W). </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_range_tx_m</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> range from transmitter to target (m). </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_range_rx_m</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> range from target to receiver (m). </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_diameter</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> object diameter (m). </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_bandwidth</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> effective receiver noise bandwidth (Hz). </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_rx_noise_temp</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> receiver noise temperature (K). </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_radar_albedo</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> radar albedo (-). </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_snr</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double*)</computeroutput> target SNR computation results (-). </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_N</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(int)</computeroutput> size of the arrays.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para><computeroutput>void</computeroutput></para>
+</simplesect>
+</para>
+<sect2 id="signals_8h_1ressources">
+<title>External resources</title>
+<para><itemizedlist>
+<listitem><para>Markkanen et.al., 1999 </para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/thomas/venvs/sorts/SORTS/src/signals.h" line="253" column="6" declfile="/home/thomas/venvs/sorts/SORTS/src/signals.h" declline="253" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="signals_8h_1a39208efd6d00be258758c0d041ec9796" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void hard_target_snr</definition>
+        <argsstring>(double _gain_tx, double _gain_rx, double _wavelength, double _power_tx, double _range_tx_m, double _range_rx_m, double _diameter, double _bandwidth, double _rx_noise_temp, double _radar_albedo, double *_snr)</argsstring>
+        <name>hard_target_snr</name>
+        <param>
+          <type>double</type>
+          <declname>_gain_tx</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_gain_rx</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_wavelength</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_power_tx</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_range_tx_m</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_range_rx_m</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_diameter</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_bandwidth</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_rx_noise_temp</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>_radar_albedo</declname>
+        </param>
+        <param>
+          <type>double *</type>
+          <declname>_snr</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<sect1 id="signals_8h_1desc">
+<title>Description</title>
+<para>This function determines the <emphasis>signal-to-noise ratio</emphasis> (energy-to-noise) for a <bold>hard target</bold>. It assumes a smooth transition between the Rayleigh and optical scattering regimes. The Mie regime is ignored.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>_gain_tx</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> transmit antenna gain. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_gain_rx</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> receiver antenna gain. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_wavelength</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> radar wavelength (meters). </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_power_tx</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> transmit power (W). </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_range_tx_m</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> range from transmitter to target (meters). </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_range_rx_m</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> range from target to receiver (meters). </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_diameter</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> object diameter (meters). </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_bandwidth</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> effective receiver noise bandwidth. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_rx_noise_temp</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> receiver noise temperature (K). </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_radar_albedo</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double)</computeroutput> radar albedo. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>_snr</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>(double*)</computeroutput> Signal-to-noise ratio computation results.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para><computeroutput>void</computeroutput></para>
+</simplesect>
+</para>
+<sect2 id="signals_8h_1ressources">
+<title>External resources</title>
+<para><itemizedlist>
+<listitem><para>Markkanen et.al., 1999 </para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+</sect1>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/thomas/venvs/sorts/SORTS/src/signals.h" line="292" column="6" declfile="/home/thomas/venvs/sorts/SORTS/src/signals.h" declline="292" declcolumn="6"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="preprocessor">#include<sp/>&lt;stdio.h&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;stdlib.h&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;math.h&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="preprocessor">#define<sp/>BOLTZMAN_CONSTANT<sp/>1.380649e-23</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="preprocessor">#define<sp/>C_VACUUM<sp/>299792458<sp/>//<sp/>meters<sp/>per<sp/>seconds</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight></codeline>
+<codeline lineno="48"><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>doppler_spread_hard_target_snr_vectorized(</highlight></codeline>
+<codeline lineno="49"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_t_obs,<sp/></highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_spin_period,<sp/></highlight></codeline>
+<codeline lineno="51"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*_gain_tx,<sp/></highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*_gain_rx,</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_wavelength,</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_power_tx,<sp/></highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*_range_tx_m,<sp/></highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*_range_rx_m,</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_duty_cycle,</highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_diameter,<sp/></highlight></codeline>
+<codeline lineno="59"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_bandwidth,</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_rx_noise_temp,</highlight></codeline>
+<codeline lineno="61"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_radar_albedo,<sp/></highlight></codeline>
+<codeline lineno="62"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*_snr_coh,<sp/></highlight></codeline>
+<codeline lineno="63"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*_snr_incoh,<sp/></highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>_N);</highlight></codeline>
+<codeline lineno="65"><highlight class="normal"></highlight></codeline>
+<codeline lineno="66"><highlight class="normal"></highlight></codeline>
+<codeline lineno="96"><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>doppler_spread_hard_target_snr(</highlight></codeline>
+<codeline lineno="97"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_t_obs,<sp/></highlight></codeline>
+<codeline lineno="98"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_spin_period,<sp/></highlight></codeline>
+<codeline lineno="99"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_gain_tx,<sp/></highlight></codeline>
+<codeline lineno="100"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_gain_rx,</highlight></codeline>
+<codeline lineno="101"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_wavelength,</highlight></codeline>
+<codeline lineno="102"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_power_tx,<sp/></highlight></codeline>
+<codeline lineno="103"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_range_tx_m,<sp/></highlight></codeline>
+<codeline lineno="104"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_range_rx_m,</highlight></codeline>
+<codeline lineno="105"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_duty_cycle,</highlight></codeline>
+<codeline lineno="106"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_diameter,<sp/></highlight></codeline>
+<codeline lineno="107"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_bandwidth,<sp/></highlight></codeline>
+<codeline lineno="108"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_rx_noise_temp,</highlight></codeline>
+<codeline lineno="109"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_radar_albedo,<sp/></highlight></codeline>
+<codeline lineno="110"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*_snr_coh,<sp/></highlight></codeline>
+<codeline lineno="111"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*_snr_incoh);</highlight></codeline>
+<codeline lineno="112"><highlight class="normal"></highlight></codeline>
+<codeline lineno="113"><highlight class="normal"></highlight></codeline>
+<codeline lineno="135"><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>incoherent_snr(</highlight></codeline>
+<codeline lineno="136"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_signal_power,<sp/></highlight></codeline>
+<codeline lineno="137"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_noise_power,<sp/></highlight></codeline>
+<codeline lineno="138"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_epsilon,<sp/></highlight></codeline>
+<codeline lineno="139"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_bandwidth,<sp/></highlight></codeline>
+<codeline lineno="140"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_incoherent_integration_time,<sp/></highlight></codeline>
+<codeline lineno="141"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*_snr,<sp/></highlight></codeline>
+<codeline lineno="142"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*_snr_incoh,<sp/></highlight></codeline>
+<codeline lineno="143"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*_minimal_observation_time);</highlight></codeline>
+<codeline lineno="144"><highlight class="normal"></highlight></codeline>
+<codeline lineno="145"><highlight class="normal"></highlight></codeline>
+<codeline lineno="173"><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>hard_target_diameter_vectorized(</highlight></codeline>
+<codeline lineno="174"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*_gain_tx,<sp/></highlight></codeline>
+<codeline lineno="175"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*_gain_rx,<sp/></highlight></codeline>
+<codeline lineno="176"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_wavelength,<sp/></highlight></codeline>
+<codeline lineno="177"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_power_tx,<sp/></highlight></codeline>
+<codeline lineno="178"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*_range_tx_m,<sp/><sp/></highlight></codeline>
+<codeline lineno="179"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*_range_rx_m,<sp/></highlight></codeline>
+<codeline lineno="180"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*_snr,<sp/></highlight></codeline>
+<codeline lineno="181"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_bandwidth,<sp/></highlight></codeline>
+<codeline lineno="182"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_rx_noise_temp,<sp/></highlight></codeline>
+<codeline lineno="183"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_radar_albedo,<sp/></highlight></codeline>
+<codeline lineno="184"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*_diameter,<sp/></highlight></codeline>
+<codeline lineno="185"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>_N);</highlight></codeline>
+<codeline lineno="186"><highlight class="normal"></highlight></codeline>
+<codeline lineno="187"><highlight class="normal"></highlight></codeline>
+<codeline lineno="213"><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>hard_target_diameter(</highlight></codeline>
+<codeline lineno="214"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_gain_tx,<sp/></highlight></codeline>
+<codeline lineno="215"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_gain_rx,<sp/></highlight></codeline>
+<codeline lineno="216"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_wavelength,<sp/></highlight></codeline>
+<codeline lineno="217"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_power_tx,</highlight></codeline>
+<codeline lineno="218"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_range_tx_m,<sp/><sp/></highlight></codeline>
+<codeline lineno="219"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_range_rx_m,<sp/></highlight></codeline>
+<codeline lineno="220"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_snr,<sp/></highlight></codeline>
+<codeline lineno="221"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_bandwidth,</highlight></codeline>
+<codeline lineno="222"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_rx_noise_temp,<sp/></highlight></codeline>
+<codeline lineno="223"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_radar_albedo,<sp/></highlight></codeline>
+<codeline lineno="224"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*_diameter);</highlight></codeline>
+<codeline lineno="225"><highlight class="normal"></highlight></codeline>
+<codeline lineno="226"><highlight class="normal"></highlight></codeline>
+<codeline lineno="253"><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>hard_target_snr_vectorized(</highlight></codeline>
+<codeline lineno="254"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*_gain_tx,<sp/></highlight></codeline>
+<codeline lineno="255"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*_gain_rx,<sp/></highlight></codeline>
+<codeline lineno="256"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_wavelength,<sp/></highlight></codeline>
+<codeline lineno="257"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_power_tx,<sp/></highlight></codeline>
+<codeline lineno="258"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*_range_tx_m,<sp/></highlight></codeline>
+<codeline lineno="259"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*_range_rx_m,<sp/></highlight></codeline>
+<codeline lineno="260"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_diameter,<sp/></highlight></codeline>
+<codeline lineno="261"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_bandwidth,<sp/></highlight></codeline>
+<codeline lineno="262"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_rx_noise_temp,<sp/></highlight></codeline>
+<codeline lineno="263"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_radar_albedo,<sp/></highlight></codeline>
+<codeline lineno="264"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*_snr,<sp/></highlight></codeline>
+<codeline lineno="265"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>_N);</highlight></codeline>
+<codeline lineno="266"><highlight class="normal"></highlight></codeline>
+<codeline lineno="292"><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>hard_target_snr(</highlight></codeline>
+<codeline lineno="293"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_gain_tx,<sp/></highlight></codeline>
+<codeline lineno="294"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_gain_rx,<sp/></highlight></codeline>
+<codeline lineno="295"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_wavelength,<sp/></highlight></codeline>
+<codeline lineno="296"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_power_tx,<sp/></highlight></codeline>
+<codeline lineno="297"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_range_tx_m,<sp/></highlight></codeline>
+<codeline lineno="298"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_range_rx_m,<sp/></highlight></codeline>
+<codeline lineno="299"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_diameter,<sp/></highlight></codeline>
+<codeline lineno="300"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_bandwidth,<sp/></highlight></codeline>
+<codeline lineno="301"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_rx_noise_temp,<sp/></highlight></codeline>
+<codeline lineno="302"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>_radar_albedo,<sp/></highlight></codeline>
+<codeline lineno="303"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>*_snr</highlight></codeline>
+<codeline lineno="304"><highlight class="normal">);</highlight></codeline>
+    </programlisting>
+    <location file="/home/thomas/venvs/sorts/SORTS/src/signals.h"/>
+  </compounddef>
+</doxygen>

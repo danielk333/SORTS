@@ -1,0 +1,1086 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>sorts.radar.system.station &#8212; SORTS v4.0 Manual</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "dark";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="dark">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">SORTS v4.0 Manual</p>
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../intro.html">
+  Introduction
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../install.html">
+  Installation
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../usermanual.html">
+  SORTS Manual
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <form class="bd-search d-flex align-items-center" action="../../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/danielk333/sorts" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <h1>Source code for sorts.radar.system.station</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="c1">#Python standard import</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="c1">#Third party import</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pyant</span>
+
+<span class="c1">#Local import</span>
+<span class="kn">from</span> <span class="nn">...transformations</span> <span class="kn">import</span> <span class="n">frames</span>
+
+<span class="k">class</span> <span class="nc">PropertyError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<div class="viewcode-block" id="Station"><a class="viewcode-back" href="../../../../reference/radar/system/station/sorts.radar.system.station.Station.html#sorts.radar.system.station.Station">[docs]</a><span class="k">class</span> <span class="nc">Station</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Encapsulates a RADAR station.</span>
+
+<span class="sd">    The role of the RADAR station is to transmit/receive Radar pulses (of given wavelength, power, gain pattern, ...) in a given direction to </span>
+<span class="sd">    perform Radar measurements.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ---------- </span>
+<span class="sd">    lat : float</span>
+<span class="sd">        Geographical latitude of radar station in decimal degrees (North+).</span>
+<span class="sd">    lon : float</span>
+<span class="sd">        Geographical longitude of radar station in decimal degrees (East+).</span>
+<span class="sd">    alt : float</span>
+<span class="sd">        Geographical altitude above geoid surface of radar station in meter.</span>
+<span class="sd">    min_elevation: float</span>
+<span class="sd">        Elevation threshold for the radar station in degrees, i.e. it cannot detect or point below this elevation.</span>
+<span class="sd">    beam : pyant.Beam </span>
+<span class="sd">        Radiation pattern for radar station.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span>  <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">,</span> <span class="s2">&quot;alt&quot;</span><span class="p">,</span> <span class="s2">&quot;min_elevation&quot;</span><span class="p">,</span> <span class="s2">&quot;ecef&quot;</span><span class="p">,</span> <span class="s2">&quot;beam&quot;</span><span class="p">,</span> <span class="s2">&quot;enabled&quot;</span><span class="p">,</span> <span class="s2">&quot;pointing_range&quot;</span><span class="p">,</span> <span class="s2">&quot;_type&quot;</span><span class="p">]</span>
+
+    <span class="n">CONTROL_VARIABLES</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;pointing_direction&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="sd">&quot;&quot;&quot; list of Radar :class:`Station&lt;Station&gt;` control variables. A control variable is a </span>
+<span class="sd">    variable which must be controlled by a Radar Controller for the Radar controls to be </span>
+<span class="sd">    considered valid (see :ref:`radar_controller&lt;radar_controller&gt;` for more information).</span>
+
+<span class="sd">    .. note:: </span>
+<span class="sd">        Please note that in the current implementation of sorts, ``CONTROL_VARIABLES`` is only supposed</span>
+<span class="sd">        to be modified internally. Therefore do not advise the manual modification of the</span>
+<span class="sd">        ``CONTROL_VARIABLES`` list during runtime.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">PROPERTIES</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="sd">&quot;&quot;&quot; list of properties of a radar :class:`Station&lt;Station&gt;`. Those properties can be controlled </span>
+<span class="sd">    by Radar controllers (see :ref:`radar_controller&lt;radar_controller&gt;` for more information).</span>
+
+<span class="sd">    .. note:: </span>
+<span class="sd">        Please note that in the current implementation of sorts, ``PROPERTIES`` is only supposed</span>
+<span class="sd">        to be modified internally. Therefore do not advise the manual modification of the</span>
+<span class="sd">        ``PROPERTIES`` list during runtime.</span>
+
+<span class="sd">        See :func:`~Station.add_property` to obtain more information on how to add new controllable</span>
+<span class="sd">        Radar properties. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">BEAM_PROPERTIES</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;phase_steering&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;wavelength&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="sd">&quot;&quot;&quot; list of radar beam properties of a radar :class:`Station&lt;Station&gt;`. Those properties can be controlled </span>
+<span class="sd">    by Radar controllers (see :ref:`radar_controller&lt;radar_controller&gt;` for more information).</span>
+
+<span class="sd">    .. note:: </span>
+<span class="sd">        Please note that in the current implementation of sorts, ``BEAM_PROPERTIES`` is only supposed</span>
+<span class="sd">        to be modified internally. Therefore do not advise the manual modification of the</span>
+<span class="sd">        ``BEAM_PROPERTIES`` list during runtime.</span>
+
+<span class="sd">        See :func:`~Station.add_property` to obtain more information on how to add new controllable</span>
+<span class="sd">        Radar properties. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Station.__init__"><a class="viewcode-back" href="../../../../reference/radar/system/station/sorts.radar.system.station.Station.__init__.html#sorts.radar.system.station.Station.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">min_elevation</span><span class="p">,</span> <span class="n">beam</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lat</span> <span class="o">=</span> <span class="n">lat</span> 
+        <span class="sd">&quot;&quot;&quot; Station geographical latitude (in degrees). &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">lon</span> <span class="o">=</span> <span class="n">lon</span>    
+        <span class="sd">&quot;&quot;&quot; Station geographical longitude (in degrees). &quot;&quot;&quot;</span>    
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">alt</span> <span class="o">=</span> <span class="n">alt</span>
+        <span class="sd">&quot;&quot;&quot; Station geographical altitude (in meters). &quot;&quot;&quot;</span>    
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_elevation</span> <span class="o">=</span> <span class="n">min_elevation</span>
+        <span class="sd">&quot;&quot;&quot; Station minimal beam elevation angle (in degrees). </span>
+
+<span class="sd">        The beam elevation angle is defined as the angle between the local vertical </span>
+<span class="sd">        (:math:`\hat{n_z} = [0 \hspace{0.5mm}0 \hspace{0.5mm} 1]^{T}` in the ENU frame) </span>
+<span class="sd">        and the pointing direction of the Radar beam :math:`\hat{k}`.</span>
+<span class="sd">        The minimial elevation angle is used to compute passes (sequence of </span>
+<span class="sd">        radar states within a given field of view) used for data reduction purposes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>    
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ecef</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">geodetic_to_ITRS</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">radians</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot; Station position vector in the ECEF frame. &quot;&quot;&quot;</span>    
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">beam</span> <span class="o">=</span> <span class="n">beam</span>
+        <span class="sd">&quot;&quot;&quot; Station gain pattern (taking into account the properties of the transmitter/receiver and of the signal itself). &quot;&quot;&quot;</span>    
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="sd">&quot;&quot;&quot; State of the station. &quot;&quot;&quot;</span>    
+        <span class="bp">self</span><span class="o">.</span><span class="n">pointing_range</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="sd">&quot;&quot;&quot; Range (in meters) from the point being targetted by the radar beam. &quot;&quot;&quot;</span>    
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="kc">None</span> 
+        <span class="sd">&quot;&quot;&quot; Station type (&quot;tx&quot;/&quot;rx&quot;). &quot;&quot;&quot;</span>
+
+        <span class="c1"># add properties to access beam properties from the station</span>
+        <span class="k">for</span> <span class="n">prop_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">BEAM_PROPERTIES</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="p">,</span> <span class="n">prop_name</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop_name</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">prop_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">PROPERTIES</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">PROPERTIES</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prop_name</span><span class="p">)</span>
+
+                <span class="n">property_code</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;@property   </span>
+<span class="s2">                </span><span class="se">\n</span><span class="s2">def prop(self,):</span>
+<span class="s2">                </span><span class="se">\n</span><span class="s2">    val = self.beam.</span><span class="si">{</span><span class="n">prop_name</span><span class="si">}</span><span class="s2"></span>
+<span class="s2">                </span><span class="se">\n</span><span class="s2">    return val</span>
+
+<span class="s2">                </span><span class="se">\n</span><span class="s2">@prop.setter</span>
+<span class="s2">                </span><span class="se">\n</span><span class="s2">def prop(self, value):</span>
+<span class="s2">                </span><span class="se">\n</span><span class="s2">    self.beam.</span><span class="si">{</span><span class="n">prop_name</span><span class="si">}</span><span class="s2"> = value</span>
+
+<span class="s2">                </span><span class="se">\n</span><span class="s2">setattr(self.__class__, &#39;</span><span class="si">{</span><span class="n">prop_name</span><span class="si">}</span><span class="s2">&#39;, prop)</span>
+<span class="s2">                &quot;&quot;&quot;</span>
+
+                <span class="n">exec</span><span class="p">(</span><span class="n">property_code</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="Station.add_property"><a class="viewcode-back" href="../../../../reference/radar/system/station/sorts.radar.system.station.Station.add_property.html#sorts.radar.system.station.Station.add_property">[docs]</a>    <span class="k">def</span> <span class="nf">add_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Adds a new property to the station available for the given station.</span>
+
+<span class="sd">        Each station property can be individually controlled by Radar controls (see :class:`RadarControls`).</span>
+<span class="sd">        The addition of new controls during runtime allows for a standard interface for the creation of custom </span>
+<span class="sd">        station instances without the need to create new station classes. If a property with the same name already</span>
+<span class="sd">        exists with the current station instance, the </span>
+<span class="sd">    </span>
+<span class="sd">        .. note:</span>
+<span class="sd">            In the current implementation, a property is defined by its name and can only take scalar values at</span>
+<span class="sd">            each control time point.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        name : str</span>
+<span class="sd">            Name of the radar property to be added.     </span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None   </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">PROPERTIES</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">PROPERTIES</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Station.get_properties"><a class="viewcode-back" href="../../../../reference/radar/system/station/sorts.radar.system.station.Station.get_properties.html#sorts.radar.system.station.Station.get_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns all properties available for the given station. </span>
+
+<span class="sd">        Each Radar station possesses a set of properties which can be controlled by a Radar</span>
+<span class="sd">        Controller (see :attr:`Station.PROPERTIES` for more information). The function </span>
+<span class="sd">        :func:`Station.get_properties` returns the list of all controllable properties associated</span>
+<span class="sd">        with the current station.</span>
+
+<span class="sd">        Parameters </span>
+<span class="sd">        ----------</span>
+<span class="sd">        None</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list </span>
+<span class="sd">            List of Radar properties within the current station. </span>
+<span class="sd">        </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        By default, all stations possess a single property named ``wavelength`` which corresponds to the wavelength</span>
+<span class="sd">        of the received or transmitted signal. </span>
+
+<span class="sd">        Therefore, suppose that we have previously created a station named ``radar_station``,</span>
+<span class="sd">        calling :func:`Station.has_property` over a station this property yields :</span>
+
+<span class="sd">        &gt;&gt;&gt; radar_station.get_properties()</span>
+<span class="sd">        [&quot;wavelength&quot;]</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">property_list</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">PROPERTIES</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop</span><span class="p">):</span>
+                <span class="n">property_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prop</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">property_list</span></div>
+
+
+<div class="viewcode-block" id="Station.has_property"><a class="viewcode-back" href="../../../../reference/radar/system/station/sorts.radar.system.station.Station.has_property.html#sorts.radar.system.station.Station.has_property">[docs]</a>    <span class="k">def</span> <span class="nf">has_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Checks if the station possesses a given property. </span>
+<span class="sd">        </span>
+<span class="sd">        Each Radar station possesses a set of properties which can be controlled by a Radar</span>
+<span class="sd">        Controller (see :attr:`Station.PROPERTIES` for more information). The function </span>
+<span class="sd">        :func:`Station.has_property` checks if the station has a given property</span>
+
+<span class="sd">        Parameters </span>
+<span class="sd">        ----------</span>
+<span class="sd">        name : str</span>
+<span class="sd">            Station property name.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool </span>
+<span class="sd">            ``True`` if the station possesses the given property, and ``False`` if not.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        All stations possess a property named ``wavelength`` which corresponds to the wavelength</span>
+<span class="sd">        of the received or transmitted signal. </span>
+
+<span class="sd">        Therefore, suppose that we have previously created a station named ``radar_station``,</span>
+<span class="sd">        calling :func:`Station.has_property` over a station this property yields :</span>
+
+<span class="sd">        &gt;&gt;&gt; radar_station.has_property(&quot;wavelength&quot;)</span>
+<span class="sd">        True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">PROPERTIES</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Station.field_of_view"><a class="viewcode-back" href="../../../../reference/radar/system/station/sorts.radar.system.station.Station.field_of_view.html#sorts.radar.system.station.Station.field_of_view">[docs]</a>    <span class="k">def</span> <span class="nf">field_of_view</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ecef</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Checks if a set of ECEF point in FOV.</span>
+
+<span class="sd">        This function checks if a given set of ECEF points are within the field of view </span>
+<span class="sd">        of the station. Used to determine when a &quot;pass&quot; is occurring based on the input </span>
+<span class="sd">        ECEF states and times. The default implementation relies on a minimum elevation </span>
+<span class="sd">        check.</span>
+
+<span class="sd">        Parameters </span>
+<span class="sd">        ----------</span>
+<span class="sd">            ecef : numpy.ndarray of float (6, N)</span>
+<span class="sd">                set of ecef points which are to be checked.</span>
+
+<span class="sd">        Returns </span>
+<span class="sd">        -------</span>
+<span class="sd">            numpy.ndarray of bools (N,)</span>
+<span class="sd">                Mask indicating the points which are within the field of view of the station </span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        This function is used for the generation of Tracking  Radar Controls for reducing </span>
+<span class="sd">        the number of states by removing all the states which are outside of the FOV of the</span>
+<span class="sd">        stations.</span>
+
+<span class="sd">        First we get the propagated space object states we want to track ``states`` (see</span>
+<span class="sd">        :class:SpaceObject&lt;sorts.targets.space_object.SpaceObject&gt;). </span>
+
+<span class="sd">        &gt;&gt;&gt; states = space_object.get_state(t)</span>
+<span class="sd">        &gt;&gt;&gt; t # radar controller time points</span>
+<span class="sd">        array([0., 100., 200., 300., 400., 500.])</span>
+
+<span class="sd">        For the purpose of simplifying this example, we will assume that only the states at time</span>
+<span class="sd">        t = 200, 300 and 400 seconds are within the FOV of the radar station. Therefore, we get :</span>
+
+<span class="sd">        &gt;&gt;&gt; pass_mask = radar_station.field_of_view(states)</span>
+<span class="sd">        &gt;&gt;&gt; pass_mask</span>
+<span class="sd">        &gt;&gt;&gt; array([False, False, True, True, True, False])</span>
+
+<span class="sd">        we can then use the ``pass_mask`` array to only keep the time points which are within </span>
+<span class="sd">        the FOV :</span>
+
+<span class="sd">        &gt;&gt;&gt; t = t[pass_mask] # remove time points outside of the FOV</span>
+<span class="sd">        &gt;&gt;&gt; t</span>
+<span class="sd">        &gt;&gt;&gt; array([200., 300., 400.])</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ecef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ecef</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+
+        <span class="c1"># compute station local normal direction</span>
+        <span class="n">local_normal_ecef</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_local_vertical</span><span class="p">()</span>
+
+        <span class="c1"># compute direction from station to each ecef point to check</span>
+        <span class="n">station_to_points_ecef</span> <span class="o">=</span> <span class="n">ecef</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ecef</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">station_to_points_ecef</span> <span class="o">=</span> <span class="n">station_to_points_ecef</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">station_to_points_ecef</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+
+        <span class="c1"># compute dot product to get angle between vectors</span>
+        <span class="n">dotp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij, i-&gt;j&quot;</span><span class="p">,</span> <span class="n">station_to_points_ecef</span><span class="p">,</span> <span class="n">local_normal_ecef</span><span class="p">)</span> <span class="c1"># since all vector are normalized, dotp = cos(theta)</span>
+
+        <span class="k">return</span> <span class="n">dotp</span> <span class="o">&gt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">2.0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_elevation</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">180.0</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Station.rebase"><a class="viewcode-back" href="../../../../reference/radar/system/station/sorts.radar.system.station.Station.rebase.html#sorts.radar.system.station.Station.rebase">[docs]</a>    <span class="k">def</span> <span class="nf">rebase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Change geographical location of the station. </span>
+
+<span class="sd">        The position of a station can be defined either by a vector in the ``ECEF`` frame </span>
+<span class="sd">        (:math:`r_{ecef}=[x, y, z]^T`), or by a vector in the ``Geodetic`` frame </span>
+<span class="sd">        (:math:`r_{geo}=[\phi, \lambda, h]^T`, which elements correspond </span>
+<span class="sd">        respectively to latitude [deg], longitude [deg] and altitude [m]). </span>
+
+<span class="sd">        The function :func:`Station.rebase` allows the user to change the position of the</span>
+<span class="sd">        radar station to a new set of ``Geodetic`` coordinates :math:`r_{geo}=[\phi</span>
+<span class="sd">        , \lambda, h]^T`. The function will also update the value of the position vector in</span>
+<span class="sd">        the ``ECEF`` frame.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lat : float</span>
+<span class="sd">            Station geographical latitude (in degrees).</span>
+<span class="sd">        lon : float</span>
+<span class="sd">            Station geographical longitude (in degrees).</span>
+<span class="sd">        alt : float</span>
+<span class="sd">            Station geographical altitude (in meters).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        Assume that we have previously created a station named ``radar_station`` : </span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; import sorts</span>
+<span class="sd">        &gt;&gt;&gt; radar = sorts.radars.eiscat3d</span>
+<span class="sd">        &gt;&gt;&gt; radar_station = radar.tx[0]</span>
+
+<span class="sd">        The station is by default located at 69.34023844°N, 20.313166°E, 0.0m :</span>
+
+<span class="sd">        &gt;&gt;&gt; radar_station.lon</span>
+<span class="sd">        20.313166</span>
+<span class="sd">        &gt;&gt;&gt; radar_station.lat</span>
+<span class="sd">        69.34023844</span>
+<span class="sd">        &gt;&gt;&gt; radar_station.alt</span>
+<span class="sd">        0.0</span>
+<span class="sd">        &gt;&gt;&gt; radar_station.ecef</span>
+<span class="sd">        array([2116582.84832936,  783500.73846828, 5945469.15155332])</span>
+
+<span class="sd">        We can relocate this station to 0.0°N, 0.0°E, 0.0m by calling :</span>
+
+<span class="sd">        &gt;&gt;&gt; radar_station.rebase(0.0, 0.0, 0.0)</span>
+<span class="sd">        &gt;&gt;&gt; radar_station.lon</span>
+<span class="sd">        0.0</span>
+<span class="sd">        &gt;&gt;&gt; radar_station.lat</span>
+<span class="sd">        0.0</span>
+<span class="sd">        &gt;&gt;&gt; radar_station.alt</span>
+<span class="sd">        0.0</span>
+<span class="sd">        &gt;&gt;&gt; radar_station.ecef</span>
+<span class="sd">        array([6378137., 0., 0.])</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lat</span> <span class="o">=</span> <span class="n">lat</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lon</span> <span class="o">=</span> <span class="n">lon</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alt</span> <span class="o">=</span> <span class="n">alt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ecef</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">geodetic_to_ITRS</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">radians</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Station.copy"><a class="viewcode-back" href="../../../../reference/radar/system/station/sorts.radar.system.station.Station.copy.html#sorts.radar.system.station.Station.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Performs a deepcopy of the Radar station. &quot;&quot;&quot;</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">Station</span><span class="p">(</span>
+            <span class="n">lat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span>
+            <span class="n">lon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span>
+            <span class="n">alt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">,</span>
+            <span class="n">min_elevation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_elevation</span><span class="p">,</span>
+            <span class="n">beam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span>
+        <span class="k">return</span> <span class="n">st</span></div>
+
+<div class="viewcode-block" id="Station.enu"><a class="viewcode-back" href="../../../../reference/radar/system/station/sorts.radar.system.station.Station.enu.html#sorts.radar.system.station.Station.enu">[docs]</a>    <span class="k">def</span> <span class="nf">enu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ecefs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Converts a set of ECEF points to local Radar station coordinates (ENU). &quot;&quot;&quot;</span>
+        <span class="n">rel_</span> <span class="o">=</span> <span class="n">ecefs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="n">rel_</span><span class="p">[:</span><span class="mi">3</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">rel_</span><span class="p">[:</span><span class="mi">3</span><span class="p">,:]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ecef</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">rel_</span><span class="p">[:</span><span class="mi">3</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">ecef_to_enu</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">,</span>
+            <span class="n">rel_</span><span class="p">[:</span><span class="mi">3</span><span class="p">,:],</span>
+            <span class="n">radians</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ecefs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">rel_</span><span class="p">[</span><span class="mi">3</span><span class="p">:,:]</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">ecef_to_enu</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">,</span>
+                <span class="n">rel_</span><span class="p">[</span><span class="mi">3</span><span class="p">:,:],</span>
+                <span class="n">radians</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rel_</span></div>
+
+<div class="viewcode-block" id="Station.to_ecef"><a class="viewcode-back" href="../../../../reference/radar/system/station/sorts.radar.system.station.Station.to_ecef.html#sorts.radar.system.station.Station.to_ecef">[docs]</a>    <span class="k">def</span> <span class="nf">to_ecef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enus</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Converts a set of ECEF points to local Radar station coordinates (ENU). &quot;&quot;&quot;</span>
+        <span class="n">ecefs</span> <span class="o">=</span> <span class="n">enus</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">ecefs</span><span class="p">[:</span><span class="mi">3</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">enu_to_ecef</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">,</span>
+            <span class="n">enus</span><span class="p">[:</span><span class="mi">3</span><span class="p">,:],</span>
+            <span class="n">radians</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ecef</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+
+        <span class="c1"># transform velocity to ecef</span>
+        <span class="k">if</span> <span class="n">enus</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">ecefs</span><span class="p">[</span><span class="mi">3</span><span class="p">:,:]</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">enu_to_ecef</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">,</span>
+                <span class="n">enus</span><span class="p">[</span><span class="mi">3</span><span class="p">:,:],</span>
+                <span class="n">radians</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>            
+        <span class="k">return</span> <span class="n">ecefs</span></div>
+
+
+<div class="viewcode-block" id="Station.point"><a class="viewcode-back" href="../../../../reference/radar/system/station/sorts.radar.system.station.Station.point.html#sorts.radar.system.station.Station.point">[docs]</a>    <span class="k">def</span> <span class="nf">point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Point Station beam in local ENU coordinates.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">point</span><span class="p">(</span><span class="n">k</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Station.point_ecef"><a class="viewcode-back" href="../../../../reference/radar/system/station/sorts.radar.system.station.Station.point_ecef.html#sorts.radar.system.station.Station.point_ecef">[docs]</a>    <span class="k">def</span> <span class="nf">point_ecef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Point Station beam in location of ECEF coordinate. Returns local pointing direction.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">frames</span><span class="o">.</span><span class="n">ecef_to_enu</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">,</span>
+            <span class="n">point</span><span class="p">,</span>
+            <span class="n">radians</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">point</span><span class="p">(</span><span class="n">k</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pointing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Station beam pointing direction in local ENU coordinates.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">pointing</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pointing_ecef</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Station beam pointing direction in ECEF coordinates.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">frames</span><span class="o">.</span><span class="n">enu_to_ecef</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">,</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">pointing</span><span class="p">,</span> 
+            <span class="n">radians</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Station type (&quot;tx&quot;/&quot;rx&quot;).&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span>
+
+
+<div class="viewcode-block" id="Station.get_local_vertical"><a class="viewcode-back" href="../../../../reference/radar/system/station/sorts.radar.system.station.Station.get_local_vertical.html#sorts.radar.system.station.Station.get_local_vertical">[docs]</a>    <span class="k">def</span> <span class="nf">get_local_vertical</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the local normal direction of the station.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        None</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.ndarray of float (3,)</span>
+<span class="sd">            local vertical pointing direction in ECEF coordinates.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">frames</span><span class="o">.</span><span class="n">enu_to_ecef</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]))</span></div></div>
+
+<div class="viewcode-block" id="RX"><a class="viewcode-back" href="../../../../reference/radar/system/station/sorts.radar.system.station.RX.html#sorts.radar.system.station.RX">[docs]</a><span class="k">class</span> <span class="nc">RX</span><span class="p">(</span><span class="n">Station</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">    Defines a Radar Receiving station.</span>
+
+<span class="sd">    Receiving stations (called :class:`RX&lt;RX&gt;` in SORTS) are responsible for </span>
+<span class="sd">    aquireing and processing the incomming Radar signal scattered by the `target` which </span>
+<span class="sd">    properties (such as size, position or velocity) we want to determine. </span>
+
+<span class="sd">    The :class:`RX&lt;RX&gt;` class defines all the methods and arguments common to all </span>
+<span class="sd">    `receiving stations`. </span>
+
+<span class="sd">    .. note:: </span>
+<span class="sd">       One has to keep in mind that the :class:`RX&lt;RX&gt;` only represents the reciving </span>
+<span class="sd">       part of station, and not the entirety of the physical Radar station. </span>
+
+<span class="sd">       In reality, some stations are able to perform both the transmission and reception of </span>
+<span class="sd">       the signal. Such stations are modelled by two different instances :class:`TX&lt;TX&gt;` </span>
+<span class="sd">       and :class:`RX&lt;RX&gt;` which are then joint together within the </span>
+<span class="sd">       :class:`Radar&lt;sorts.radar.system.radar.Radar&gt;` class.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    There are two main ways to create a :class:`RX&lt;RX&gt;` Radar station.</span>
+
+<span class="sd">    1. Predifined Radar stations:</span>
+<span class="sd">        One can used the predifined radar stations which are defined within the :ref:`sorts.radars&lt;radar_instances&gt;`</span>
+<span class="sd">        module.</span>
+
+<span class="sd">        .. admonition:: Example</span>
+
+<span class="sd">            To import a predifined radar instance, one first needs to import the ``sorts`` toolbox, </span>
+<span class="sd">            and then to get an instance from the :ref:`sorts.radars&lt;radar_instances&gt;` module.</span>
+<span class="sd">            </span>
+<span class="sd">            &gt;&gt;&gt; import sorts</span>
+<span class="sd">            &gt;&gt;&gt; radar = sorts.radars.eiscat3d</span>
+
+<span class="sd">            When the radar is imported, one can then access the stations as follow :</span>
+<span class="sd">            </span>
+<span class="sd">            &gt;&gt;&gt; station_rx = radar.rx[0]</span>
+<span class="sd">            &gt;&gt;&gt; station_rx.type</span>
+<span class="sd">            &quot;rx&quot;</span>
+
+<span class="sd">    2. Create a new Radar stations:</span>
+<span class="sd">        The other solution to create a Radar station is to create a brand new station using the </span>
+<span class="sd">        default :class:`RX&lt;RX&gt;` constructor.</span>
+
+<span class="sd">        .. admonition:: Example</span>
+
+<span class="sd">            First import the station module from sorts</span>
+<span class="sd">            </span>
+<span class="sd">            &gt;&gt;&gt; from sorts import station</span>
+
+<span class="sd">            Then, import the :class:`Beam&lt;pyant.Beam&gt;` from pyant to create the radiation</span>
+<span class="sd">            pattern of the station&#39;s antenna.</span>
+<span class="sd">            </span>
+<span class="sd">            &gt;&gt;&gt; from pyant import Beam</span>
+
+<span class="sd">            Define the position of the station is defined as follow :</span>
+<span class="sd">            </span>
+<span class="sd">            &gt;&gt;&gt; lon = 20.22 # in degrees</span>
+<span class="sd">            &gt;&gt;&gt; lat = 67.86 # in degrees</span>
+<span class="sd">            &gt;&gt;&gt; alt = 530.0 # in meters</span>
+
+<span class="sd">            Set the station minimal elevation (which defines the FOV of the station)</span>
+<span class="sd">            </span>
+<span class="sd">            &gt;&gt;&gt; min_el = 30.0 # in degrees</span>
+
+<span class="sd">            Define the station radiation pattern :</span>
+<span class="sd">            </span>
+<span class="sd">            &gt;&gt;&gt; az = 0.0 # beam azimuth (degrees)</span>
+<span class="sd">            &gt;&gt;&gt; el = 0.0 # beam elevation (degrees)</span>
+<span class="sd">            &gt;&gt;&gt; f = 500e6 # bram frequency at 500MHz</span>
+<span class="sd">            &gt;&gt;&gt; beam_rx = pyant.Beam(az, el, f)</span>
+
+<span class="sd">            Define the properties of the receiver processing unit :</span>
+<span class="sd">            </span>
+<span class="sd">            &gt;&gt;&gt; noise_temperature = 150 # in Kelvins</span>
+
+<span class="sd">            Finally, one can create the station by calling :</span>
+<span class="sd">            </span>
+<span class="sd">            &gt;&gt;&gt; station_rx = station.RX(</span>
+<span class="sd">                    lat, </span>
+<span class="sd">                    lon, </span>
+<span class="sd">                    alt, </span>
+<span class="sd">                    min_el, </span>
+<span class="sd">                    beam_rx, </span>
+<span class="sd">                    noise_temperature)</span>
+<span class="sd">            &gt;&gt;&gt; station_rx.type</span>
+<span class="sd">            &quot;rx&quot;</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    lat : float</span>
+<span class="sd">        Geographical latitude of radar station in decimal degrees (North+).</span>
+<span class="sd">    lon : float</span>
+<span class="sd">        Geographical longitude of radar station in decimal degrees (East+).</span>
+<span class="sd">    alt : float</span>
+<span class="sd">        Geographical altitude above geoid surface of radar station in meter.</span>
+<span class="sd">    min_elevation: </span>
+<span class="sd">        Elevation threshold for the radar station in degrees, i.e. it cannot detect or point below this elevation.</span>
+<span class="sd">    beam : pyant.Beam </span>
+<span class="sd">        Radiation pattern for radar station.</span>
+<span class="sd">    noise_temperature : float</span>
+<span class="sd">        Temperature of the receiver noise. The noise power can then be computed as follows :</span>
+
+<span class="sd">        .. math::       P_n=k_B T_{noise} b_n</span>
+
+<span class="sd">        With :math:`P_n` the ``noise power``, :math:`k_B` the ``Boltzman constant`` (equal to </span>
+<span class="sd">        :math:`1.380649 . 10^{-23} m^{2} kg s^{-2} K^{-1}`), :math:`T_{noise}` the ``noise temperature``</span>
+<span class="sd">        and :math:`b_n` the ``effective receiver noise bandwidth``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">PROPERTIES</span> <span class="o">=</span> <span class="n">Station</span><span class="o">.</span><span class="n">PROPERTIES</span> <span class="o">+</span> <span class="p">[]</span>
+    <span class="sd">&quot;&quot;&quot; list of properties of a :class:`RX&lt;RX&gt;` Radar station. Those properties can be controlled </span>
+<span class="sd">    by Radar controllers (see :ref:`radar_controller&lt;radar_controller&gt;` for more information).</span>
+
+<span class="sd">    .. note:: </span>
+<span class="sd">        Please note that in the current implementation of sorts, ``PROPERTIES`` is only supposed</span>
+<span class="sd">        to be modified internally. Therefore do not advise the manual modification of the</span>
+<span class="sd">        ``PROPERTIES`` list.</span>
+
+<span class="sd">        See :func:`~TX.add_property` to obtain more information on how to add new controllable</span>
+<span class="sd">        Radar properties. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="RX.__init__"><a class="viewcode-back" href="../../../../reference/radar/system/station/sorts.radar.system.station.RX.__init__.html#sorts.radar.system.station.RX.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">min_elevation</span><span class="p">,</span> <span class="n">beam</span><span class="p">,</span> <span class="n">noise_temperature</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; __init__(self, lat, lon, alt, min_elevation, beam, noise_temperature)</span>
+
+<span class="sd">        Default :class:`RX&lt;RX&gt;` class constructor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">min_elevation</span><span class="p">,</span> <span class="n">beam</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noise_temperature</span> <span class="o">=</span> <span class="n">noise_temperature</span>
+        <span class="sd">&#39;&#39;&#39; Receiver noise temperature.</span>
+
+<span class="sd">        It is possible to express the noise power density :math:`P_N` (in W/Hz) as an equivalent temperature  </span>
+<span class="sd">        :math:`T_n` (called *noise temperature*) that would produce the same **Johnson–Nyquist noise** as the </span>
+<span class="sd">        receiver :</span>
+
+<span class="sd">        .. math::           P_N = k_B T_n b</span>
+
+<span class="sd">        with :math:`b` the bandwidth of the receiver and :math:`k_B = 1.381 \\times 10^{-23} J/K` the Boltzmann </span>
+<span class="sd">        constant.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="s2">&quot;rx&quot;</span></div>
+
+
+<div class="viewcode-block" id="RX.copy"><a class="viewcode-back" href="../../../../reference/radar/system/station/sorts.radar.system.station.RX.copy.html#sorts.radar.system.station.RX.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Performs a deep copy of the Radar station. </span>
+
+<span class="sd">        This method is used to perform a copy of a radar station.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        Assuming that we have created a :class:`TX&lt;TX&gt;` station named ``station_old``, the  </span>
+<span class="sd">        station can be copied by simply calling :</span>
+
+<span class="sd">        &gt;&gt;&gt; station_new = station_old.copy()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">RX</span><span class="p">(</span>
+            <span class="n">lat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span>
+            <span class="n">lon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span>
+            <span class="n">alt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">,</span>
+            <span class="n">min_elevation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_elevation</span><span class="p">,</span>
+            <span class="n">beam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+            <span class="n">noise_temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_temperature</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span>
+        <span class="k">return</span> <span class="n">st</span></div></div>
+
+
+<div class="viewcode-block" id="TX"><a class="viewcode-back" href="../../../../reference/radar/system/station/sorts.radar.system.station.TX.html#sorts.radar.system.station.TX">[docs]</a><span class="k">class</span> <span class="nc">TX</span><span class="p">(</span><span class="n">Station</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">    Defines a Radar Transmitting station.</span>
+
+<span class="sd">    Transmittig stations (called :class:`TX&lt;TX&gt;` in SORTS) are responsible for </span>
+<span class="sd">    amplifying and transmitting the Radar signal in the direction of the `target` which </span>
+<span class="sd">    properties (such as size, position or velocity) we want to determine. As such, the </span>
+<span class="sd">    definition of the radar pulse properties is entirely done within the :class:`TX&lt;TX&gt;` </span>
+<span class="sd">    station. </span>
+
+<span class="sd">    The :class:`TX&lt;TX&gt;` class defines all the methods and arguments common to all </span>
+<span class="sd">    `transmitting stations`. </span>
+
+<span class="sd">    .. note:: </span>
+<span class="sd">       One has to keep in mind that the :class:`TX&lt;TX&gt;` only represents the transmitting </span>
+<span class="sd">       part of station, and not the entirety of the physical Radar station. </span>
+
+<span class="sd">       In reality, some stations are able to perform both the transmission and reception of </span>
+<span class="sd">       the signal. Such stations are modelled by two different instances :class:`TX&lt;TX&gt;` </span>
+<span class="sd">       and :class:`RX&lt;RX&gt;` which are then joint together within the </span>
+<span class="sd">       :class:`Radar&lt;sorts.radar.system.radar.Radar&gt;` class.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    There are two main ways to create a :class:`TX&lt;TX&gt;` Radar station.</span>
+
+<span class="sd">    1. Predifined Radar stations:</span>
+<span class="sd">        One can used the predifined radar stations which are defined within the :ref:`sorts.radars&lt;radar_instances&gt;`</span>
+<span class="sd">        module.</span>
+
+<span class="sd">        .. admonition:: Example</span>
+
+<span class="sd">            To import a predifined radar instance, one first needs to import the ``sorts`` toolbox, </span>
+<span class="sd">            and then to get an instance from the :ref:`sorts.radars&lt;radar_instances&gt;` module.</span>
+<span class="sd">            </span>
+<span class="sd">            &gt;&gt;&gt; import sorts</span>
+<span class="sd">            &gt;&gt;&gt; radar = sorts.radars.eiscat3d</span>
+
+<span class="sd">            When the radar is imported, one can then access the stations as follow :</span>
+<span class="sd">            </span>
+<span class="sd">            &gt;&gt;&gt; station_tx = radar.tx[0]</span>
+<span class="sd">            &gt;&gt;&gt; station_tx.type</span>
+<span class="sd">            &quot;tx&quot;</span>
+
+<span class="sd">    2. Create a new Radar stations:</span>
+<span class="sd">        The other solution to create a Radar station is to create a brand new station using the </span>
+<span class="sd">        default :class:`TX&lt;TX&gt;` constructor.</span>
+
+<span class="sd">        .. admonition:: Example</span>
+
+<span class="sd">            First import the station module from sorts</span>
+<span class="sd">            </span>
+<span class="sd">            &gt;&gt;&gt; from sorts import station</span>
+
+<span class="sd">            Then, import the :class:`Beam&lt;pyant.Beam&gt;` from pyant to create the radiation</span>
+<span class="sd">            pattern of the station&#39;s antenna.</span>
+<span class="sd">            </span>
+<span class="sd">            &gt;&gt;&gt; from pyant import Beam</span>
+
+<span class="sd">            Define the position of the station is defined as follow :</span>
+<span class="sd">            </span>
+<span class="sd">            &gt;&gt;&gt; lon = 20.22 # in degrees</span>
+<span class="sd">            &gt;&gt;&gt; lat = 67.86 # in degrees</span>
+<span class="sd">            &gt;&gt;&gt; alt = 530.0 # in meters</span>
+
+<span class="sd">            Set the station minimal elevation (which defines the FOV of the station)</span>
+<span class="sd">            </span>
+<span class="sd">            &gt;&gt;&gt; min_el = 30.0 # in degrees</span>
+
+<span class="sd">            Define the station radiation pattern :</span>
+<span class="sd">            </span>
+<span class="sd">            &gt;&gt;&gt; az = 0.0 # beam azimuth (degrees)</span>
+<span class="sd">            &gt;&gt;&gt; el = 0.0 # beam elevation (degrees)</span>
+<span class="sd">            &gt;&gt;&gt; f = 500e6 # bram frequency at 500MHz</span>
+<span class="sd">            &gt;&gt;&gt; beam_tx = pyant.Beam(az, el, f)</span>
+
+<span class="sd">            Define the properties of the radar pulse :</span>
+<span class="sd">            </span>
+<span class="sd">            &gt;&gt;&gt; power = 500e3 # 500kW power</span>
+<span class="sd">            &gt;&gt;&gt; bandwidth = 10.0 # 10Hz emission bandwidth</span>
+<span class="sd">            &gt;&gt;&gt; duty_cycle = 0.1 # 10% duty cycle</span>
+<span class="sd">            &gt;&gt;&gt; pulse_length = 1e-3 # 1ms pulse length</span>
+<span class="sd">            &gt;&gt;&gt; ipp = 10e-3 # 10ms inter-pulse period</span>
+<span class="sd">            &gt;&gt;&gt; n_ipp = 20 # 20 IPPs per time slice</span>
+
+<span class="sd">            Finally, one can create the station by calling :</span>
+<span class="sd">            </span>
+<span class="sd">            &gt;&gt;&gt; station_tx = station.TX(</span>
+<span class="sd">                    lat, </span>
+<span class="sd">                    lon, </span>
+<span class="sd">                    alt, </span>
+<span class="sd">                    min_el, </span>
+<span class="sd">                    beam_tx, </span>
+<span class="sd">                    power, </span>
+<span class="sd">                    bandwidth, </span>
+<span class="sd">                    duty_cycle, </span>
+<span class="sd">                    pulse_length=pulse_length, </span>
+<span class="sd">                    ipp=ipp, </span>
+<span class="sd">                    n_ipp=n_ipp)</span>
+<span class="sd">            &gt;&gt;&gt; station_tx.type</span>
+<span class="sd">            &quot;tx&quot;</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    lat : float</span>
+<span class="sd">        Geographical latitude of radar station in decimal degrees (North+).</span>
+<span class="sd">    lon : float</span>
+<span class="sd">        Geographical longitude of radar station in decimal degrees (East+).</span>
+<span class="sd">    alt : float</span>
+<span class="sd">        Geographical altitude above geoid surface of radar station in meter.</span>
+<span class="sd">    min_elevation: </span>
+<span class="sd">        Elevation threshold for the radar station in degrees, i.e. it cannot detect or point below this elevation.</span>
+<span class="sd">    beam : pyant.Beam </span>
+<span class="sd">        Radiation pattern for radar station.</span>
+<span class="sd">    bandwidth : float</span>
+<span class="sd">        Emission bandwidth of the transmitted Radar signal.</span>
+<span class="sd">    duty_cycle : float</span>
+<span class="sd">        Duty cycle of the :class:`TX&lt;TX&gt;` station.</span>
+
+<span class="sd">        The duty cycle is defined as : </span>
+<span class="sd">    </span>
+<span class="sd">    .. math:: D=\\frac{t_{pulse}}{t_{IPP}}</span>
+
+
+<span class="sd">    pulse_length : float</span>
+<span class="sd">        Length of the Radar pulse.</span>
+<span class="sd">    ipp : float</span>
+<span class="sd">        Inter-pulse perdiod (in seconds).</span>
+<span class="sd">    n_ipp : int</span>
+<span class="sd">        Number of Inter-pulse perdiod per control time slice.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">PROPERTIES</span> <span class="o">=</span> <span class="n">Station</span><span class="o">.</span><span class="n">PROPERTIES</span> <span class="o">+</span> <span class="p">[</span>
+        <span class="s2">&quot;power&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ipp&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;n_ipp&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pulse_length&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;coh_int_bandwidth&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;duty_cycle&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bandwidth&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="sd">&quot;&quot;&quot; list of properties of a :class:`TX&lt;TX&gt;` Radar station. Those properties can be controlled </span>
+<span class="sd">    by Radar controllers (see :ref:`radar_controller&lt;radar_controller&gt;` for more information).</span>
+
+<span class="sd">    .. note:: </span>
+<span class="sd">        Please note that in the current implementation of sorts, ``PROPERTIES`` is only supposed</span>
+<span class="sd">        to be modified internally. Therefore do not advise the manual modification of the</span>
+<span class="sd">        ``PROPERTIES`` list.</span>
+
+<span class="sd">        See :func:`~TX.add_property` to obtain more information on how to add new controllable</span>
+<span class="sd">        Radar properties. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TX.__init__"><a class="viewcode-back" href="../../../../reference/radar/system/station/sorts.radar.system.station.TX.__init__.html#sorts.radar.system.station.TX.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+                 <span class="n">lat</span><span class="p">,</span> 
+                 <span class="n">lon</span><span class="p">,</span> 
+                 <span class="n">alt</span><span class="p">,</span> 
+                 <span class="n">min_elevation</span><span class="p">,</span> 
+                 <span class="n">beam</span><span class="p">,</span> 
+                 <span class="n">power</span><span class="p">,</span> 
+                 <span class="n">bandwidth</span><span class="p">,</span> 
+                 <span class="n">duty_cycle</span><span class="p">,</span> 
+                 <span class="n">pulse_length</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> 
+                 <span class="n">ipp</span><span class="o">=</span><span class="mf">10e-3</span><span class="p">,</span> 
+                 <span class="n">n_ipp</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> 
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">min_elevation</span><span class="p">,</span> <span class="n">beam</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot; __init__(self, lat, lon, alt, min_elevation, beam, power, bandwidth, duty_cycle, pulse_length=1e-3, ipp=10e-3, n_ipp=20, **kwargs):</span>
+
+<span class="sd">        Default :class:`TX&lt;TX&gt;` class constructor. </span>
+
+<span class="sd">        See :class:`TX&lt;TX&gt;` for more information about the input parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">bandwidth</span> <span class="o">=</span> <span class="n">bandwidth</span>
+        <span class="sd">&quot;&quot;&quot; Bandwidth (in Hertz) of the transmitted signal. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">duty_cycle</span> <span class="o">=</span> <span class="n">duty_cycle</span>
+        <span class="sd">&quot;&quot;&quot; Station duty cycle.</span>
+
+<span class="sd">        The duty cycle is defined as the ratio : :math:`D=\\frac{t_{pulse}}{t_{IPP}}`, where </span>
+<span class="sd">        :math:`t_{pulse}` and :math:`t_{IPP}` represent respectively the duration of the</span>
+<span class="sd">        pulse and the duration of the inter-pulse period. </span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">power</span> <span class="o">=</span> <span class="n">power</span>
+        <span class="sd">&quot;&quot;&quot; Transmitted Radar pulse power (in seconds). &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pulse_length</span> <span class="o">=</span> <span class="n">pulse_length</span>
+        <span class="sd">&quot;&quot;&quot; Transmitted Radar pulse length (in seconds). &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ipp</span> <span class="o">=</span> <span class="n">ipp</span>
+        <span class="sd">&quot;&quot;&quot; Inter-pulse period duration (in seconds). &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_ipp</span> <span class="o">=</span> <span class="n">n_ipp</span>
+        <span class="sd">&quot;&quot;&quot; Number of pulses (or inter-pulse periods) per time slice. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coh_int_bandwidth</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="n">pulse_length</span><span class="o">*</span><span class="n">n_ipp</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot; Bandwidth (in Hertz) of the coherently integrated transmitted signal. &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="s2">&quot;tx&quot;</span></div>
+
+
+<div class="viewcode-block" id="TX.copy"><a class="viewcode-back" href="../../../../reference/radar/system/station/sorts.radar.system.station.TX.copy.html#sorts.radar.system.station.TX.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Performs a deep copy of the Radar station. </span>
+
+<span class="sd">        This method is used to perform a copy of a radar station.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        Assuming that we have created a :class:`TX&lt;TX&gt;` station named ``station_old``, the  </span>
+<span class="sd">        station can be copied by simply calling :</span>
+
+<span class="sd">        &gt;&gt;&gt; station_new = station_old.copy()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">st</span> <span class="o">=</span> <span class="n">TX</span><span class="p">(</span>
+            <span class="n">lat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span>
+            <span class="n">lon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span>
+            <span class="n">alt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">,</span>
+            <span class="n">min_elevation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_elevation</span><span class="p">,</span>
+            <span class="n">beam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beam</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+            <span class="n">power</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">power</span><span class="p">,</span>
+            <span class="n">bandwidth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandwidth</span><span class="p">,</span>
+            <span class="n">duty_cycle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">duty_cycle</span><span class="p">,</span>
+            <span class="n">pulse_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulse_length</span><span class="p">,</span>
+            <span class="n">ipp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ipp</span><span class="p">,</span>
+            <span class="n">n_ipp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_ipp</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">st</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span>
+        <span class="k">return</span> <span class="n">st</span></div></div>
+</pre></div>
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright [2020-2022] Daniel Kastinen, Juha Vierinen, Thomas Maynadie.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

@@ -1,0 +1,2462 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Beampark.min_dwell &#8212; SORTS v4.0 Manual</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "dark";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Beampark.pointing" href="sorts.radar.scans.bp.Beampark.pointing.html" />
+    <link rel="prev" title="Beampark.enu_pointing" href="sorts.radar.scans.bp.Beampark.enu_pointing.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="dark">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">SORTS v4.0 Manual</p>
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../intro.html">
+  Introduction
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../../install.html">
+  Installation
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="../../../../usermanual.html">
+  SORTS Manual
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <form class="bd-search d-flex align-items-center" action="../../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/danielk333/sorts" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <ul class="current nav bd-sidenav">
+ <li class="toctree-l1 current active has-children">
+  <a class="reference internal" href="../../../radar.html">
+   Radar systems
+  </a>
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul class="current">
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../system/radar.html">
+     Radar (sorts.radar.system.radar)
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+    <label for="toctree-checkbox-2">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../system/radar/sorts.radar.system.radar.Radar.html">
+       Radar
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/>
+      <label for="toctree-checkbox-3">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/radar/sorts.radar.system.radar.Radar.TIME_VARIABLES.html">
+         Radar.TIME_VARIABLES
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/radar/sorts.radar.system.radar.Radar.tx.html">
+         Radar.tx
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/radar/sorts.radar.system.radar.Radar.rx.html">
+         Radar.rx
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/radar/sorts.radar.system.radar.Radar.logger.html">
+         Radar.logger
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/radar/sorts.radar.system.radar.Radar.profiler.html">
+         Radar.profiler
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/radar/sorts.radar.system.radar.Radar.min_SNRdb.html">
+         Radar.min_SNRdb
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/radar/sorts.radar.system.radar.Radar.measurement_class.html">
+         Radar.measurement_class
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/radar/sorts.radar.system.radar.Radar.states.html">
+         Radar.states
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/radar/sorts.radar.system.radar.Radar.joint_stations.html">
+         Radar.joint_stations
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/radar/sorts.radar.system.radar.Radar.__init__.html">
+         Radar.__init__
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/radar/sorts.radar.system.radar.Radar.check_control_feasibility.html">
+         Radar.check_control_feasibility
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/radar/sorts.radar.system.radar.Radar.compute_intersection_points.html">
+         Radar.compute_intersection_points
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/radar/sorts.radar.system.radar.Radar.compute_measurements.html">
+         Radar.compute_measurements
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/radar/sorts.radar.system.radar.Radar.control.html">
+         Radar.control
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/radar/sorts.radar.system.radar.Radar.copy.html">
+         Radar.copy
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/radar/sorts.radar.system.radar.Radar.field_of_view.html">
+         Radar.field_of_view
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/radar/sorts.radar.system.radar.Radar.find_passes.html">
+         Radar.find_passes
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/radar/sorts.radar.system.radar.Radar.get_station_id.html">
+         Radar.get_station_id
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/radar/sorts.radar.system.radar.Radar.observe_passes.html">
+         Radar.observe_passes
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/radar/sorts.radar.system.radar.Radar.set_beam.html">
+         Radar.set_beam
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/radar/sorts.radar.system.radar.Radar.set_rx_beam.html">
+         Radar.set_rx_beam
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/radar/sorts.radar.system.radar.Radar.set_tx_beam.html">
+         Radar.set_tx_beam
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../system/instances/sorts.radar.system.instances.RadarSystemsGetter.html">
+       RadarSystemsGetter
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/>
+      <label for="toctree-checkbox-4">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/instances/sorts.radar.system.instances.RadarSystemsGetter.instances.html">
+         RadarSystemsGetter.instances
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/instances/sorts.radar.system.instances.RadarSystemsGetter.__init__.html">
+         RadarSystemsGetter.__init__
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../system/instances/sorts.radar.system.instances.eiscat_3d.html">
+       instances.eiscat_3d
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/>
+      <label for="toctree-checkbox-5">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/instances/sorts.radar.system.instances.eiscat_3d.eiscat3d_demo_interp.html">
+         eiscat3d_demo_interp
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/instances/sorts.radar.system.instances.eiscat_3d.eiscat3d_interp.html">
+         eiscat3d_interp
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/instances/sorts.radar.system.instances.eiscat_3d.gen_eiscat3d.html">
+         gen_eiscat3d
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/instances/sorts.radar.system.instances.eiscat_3d.gen_eiscat3d_demonstrator.html">
+         gen_eiscat3d_demonstrator
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../system/instances/sorts.radar.system.instances.eiscat_esr.html">
+       instances.eiscat_esr
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/>
+      <label for="toctree-checkbox-6">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/instances/sorts.radar.system.instances.eiscat_esr.gen_eiscat_esr.html">
+         gen_eiscat_esr
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../system/instances/sorts.radar.system.instances.eiscat_uhf.html">
+       instances.eiscat_uhf
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/>
+      <label for="toctree-checkbox-7">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/instances/sorts.radar.system.instances.eiscat_uhf.gen_eiscat_uhf.html">
+         gen_eiscat_uhf
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../system/instances/sorts.radar.system.instances.mock.html">
+       instances.mock
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/>
+      <label for="toctree-checkbox-8">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/instances/sorts.radar.system.instances.mock.gen_mock.html">
+         gen_mock
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../system/instances/sorts.radar.system.instances.tsdr.html">
+       instances.tsdr
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/>
+      <label for="toctree-checkbox-9">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/instances/sorts.radar.system.instances.tsdr.gen_tromso_space_debris_radar.html">
+         gen_tromso_space_debris_radar
+        </a>
+       </li>
+      </ul>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../system/station.html">
+     Station (sorts.radar.system.station)
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" type="checkbox"/>
+    <label for="toctree-checkbox-10">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.html">
+       Station
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" type="checkbox"/>
+      <label for="toctree-checkbox-11">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.lat.html">
+         Station.lat
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.lon.html">
+         Station.lon
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.alt.html">
+         Station.alt
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.min_elevation.html">
+         Station.min_elevation
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.ecef.html">
+         Station.ecef
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.beam.html">
+         Station.beam
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.enabled.html">
+         Station.enabled
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.pointing_range.html">
+         Station.pointing_range
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.BEAM_PROPERTIES.html">
+         Station.BEAM_PROPERTIES
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.CONTROL_VARIABLES.html">
+         Station.CONTROL_VARIABLES
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.PROPERTIES.html">
+         Station.PROPERTIES
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.pointing.html">
+         Station.pointing
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.pointing_ecef.html">
+         Station.pointing_ecef
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.type.html">
+         Station.type
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.__init__.html">
+         Station.__init__
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.add_property.html">
+         Station.add_property
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.copy.html">
+         Station.copy
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.enu.html">
+         Station.enu
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.field_of_view.html">
+         Station.field_of_view
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.get_local_vertical.html">
+         Station.get_local_vertical
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.get_properties.html">
+         Station.get_properties
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.has_property.html">
+         Station.has_property
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.point.html">
+         Station.point
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.point_ecef.html">
+         Station.point_ecef
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.rebase.html">
+         Station.rebase
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.Station.to_ecef.html">
+         Station.to_ecef
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.html">
+       TX
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" type="checkbox"/>
+      <label for="toctree-checkbox-12">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.lat.html">
+         TX.lat
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.lon.html">
+         TX.lon
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.alt.html">
+         TX.alt
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.min_elevation.html">
+         TX.min_elevation
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.ecef.html">
+         TX.ecef
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.beam.html">
+         TX.beam
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.enabled.html">
+         TX.enabled
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.pointing_range.html">
+         TX.pointing_range
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.BEAM_PROPERTIES.html">
+         TX.BEAM_PROPERTIES
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.CONTROL_VARIABLES.html">
+         TX.CONTROL_VARIABLES
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.PROPERTIES.html">
+         TX.PROPERTIES
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.pointing.html">
+         TX.pointing
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.pointing_ecef.html">
+         TX.pointing_ecef
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.type.html">
+         TX.type
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.bandwidth.html">
+         TX.bandwidth
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.duty_cycle.html">
+         TX.duty_cycle
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.power.html">
+         TX.power
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.pulse_length.html">
+         TX.pulse_length
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.ipp.html">
+         TX.ipp
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.n_ipp.html">
+         TX.n_ipp
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.coh_int_bandwidth.html">
+         TX.coh_int_bandwidth
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.__init__.html">
+         TX.__init__
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.add_property.html">
+         TX.add_property
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.copy.html">
+         TX.copy
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.enu.html">
+         TX.enu
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.field_of_view.html">
+         TX.field_of_view
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.get_local_vertical.html">
+         TX.get_local_vertical
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.get_properties.html">
+         TX.get_properties
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.has_property.html">
+         TX.has_property
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.point.html">
+         TX.point
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.point_ecef.html">
+         TX.point_ecef
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.rebase.html">
+         TX.rebase
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.TX.to_ecef.html">
+         TX.to_ecef
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.html">
+       RX
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" type="checkbox"/>
+      <label for="toctree-checkbox-13">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.lat.html">
+         RX.lat
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.lon.html">
+         RX.lon
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.alt.html">
+         RX.alt
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.min_elevation.html">
+         RX.min_elevation
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.ecef.html">
+         RX.ecef
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.beam.html">
+         RX.beam
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.enabled.html">
+         RX.enabled
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.pointing_range.html">
+         RX.pointing_range
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.BEAM_PROPERTIES.html">
+         RX.BEAM_PROPERTIES
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.CONTROL_VARIABLES.html">
+         RX.CONTROL_VARIABLES
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.PROPERTIES.html">
+         RX.PROPERTIES
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.pointing.html">
+         RX.pointing
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.pointing_ecef.html">
+         RX.pointing_ecef
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.type.html">
+         RX.type
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.noise_temperature.html">
+         RX.noise_temperature
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.__init__.html">
+         RX.__init__
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.add_property.html">
+         RX.add_property
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.copy.html">
+         RX.copy
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.enu.html">
+         RX.enu
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.field_of_view.html">
+         RX.field_of_view
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.get_local_vertical.html">
+         RX.get_local_vertical
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.get_properties.html">
+         RX.get_properties
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.has_property.html">
+         RX.has_property
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.point.html">
+         RX.point
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.point_ecef.html">
+         RX.point_ecef
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.rebase.html">
+         RX.rebase
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../system/station/sorts.radar.system.station.RX.to_ecef.html">
+         RX.to_ecef
+        </a>
+       </li>
+      </ul>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 current active has-children">
+    <a class="reference internal" href="../scans_base.html">
+     Scans (sorts.radar.scans)
+    </a>
+    <input checked="" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" type="checkbox"/>
+    <label for="toctree-checkbox-14">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul class="current">
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="sorts.radar.scans.scan.Scan.html">
+       Scan
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" type="checkbox"/>
+      <label for="toctree-checkbox-15">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.scan.Scan.coordinates.html">
+         Scan.coordinates
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.scan.Scan.__init__.html">
+         Scan.__init__
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.scan.Scan.check_dwell_tx.html">
+         Scan.check_dwell_tx
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.scan.Scan.copy.html">
+         Scan.copy
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.scan.Scan.cycle.html">
+         Scan.cycle
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.scan.Scan.dwell.html">
+         Scan.dwell
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.scan.Scan.ecef_pointing.html">
+         Scan.ecef_pointing
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.scan.Scan.enu_pointing.html">
+         Scan.enu_pointing
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.scan.Scan.min_dwell.html">
+         Scan.min_dwell
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.scan.Scan.pointing.html">
+         Scan.pointing
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 current active has-children">
+      <a class="reference internal" href="sorts.radar.scans.bp.Beampark.html">
+       Beampark
+      </a>
+      <input checked="" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" type="checkbox"/>
+      <label for="toctree-checkbox-16">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul class="current">
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.bp.Beampark.elevation.html">
+         Beampark.elevation
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.bp.Beampark.azimuth.html">
+         Beampark.azimuth
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.bp.Beampark.__init__.html">
+         Beampark.__init__
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.bp.Beampark.check_dwell_tx.html">
+         Beampark.check_dwell_tx
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.bp.Beampark.copy.html">
+         Beampark.copy
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.bp.Beampark.cycle.html">
+         Beampark.cycle
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.bp.Beampark.dwell.html">
+         Beampark.dwell
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.bp.Beampark.ecef_pointing.html">
+         Beampark.ecef_pointing
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.bp.Beampark.enu_pointing.html">
+         Beampark.enu_pointing
+        </a>
+       </li>
+       <li class="toctree-l4 current active">
+        <a class="current reference internal" href="#">
+         Beampark.min_dwell
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.bp.Beampark.pointing.html">
+         Beampark.pointing
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="sorts.radar.scans.fence.Fence.html">
+       Fence
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" type="checkbox"/>
+      <label for="toctree-checkbox-17">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.fence.Fence.num.html">
+         Fence.num
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.fence.Fence.min_elevation.html">
+         Fence.min_elevation
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.fence.Fence.azimuth.html">
+         Fence.azimuth
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.fence.Fence.__init__.html">
+         Fence.__init__
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.fence.Fence.check_dwell_tx.html">
+         Fence.check_dwell_tx
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.fence.Fence.copy.html">
+         Fence.copy
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.fence.Fence.cycle.html">
+         Fence.cycle
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.fence.Fence.dwell.html">
+         Fence.dwell
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.fence.Fence.ecef_pointing.html">
+         Fence.ecef_pointing
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.fence.Fence.enu_pointing.html">
+         Fence.enu_pointing
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.fence.Fence.min_dwell.html">
+         Fence.min_dwell
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.fence.Fence.pointing.html">
+         Fence.pointing
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="sorts.radar.scans.plane.Plane.html">
+       Plane
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" type="checkbox"/>
+      <label for="toctree-checkbox-18">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.plane.Plane.min_elevation.html">
+         Plane.min_elevation
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.plane.Plane.altitude.html">
+         Plane.altitude
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.plane.Plane.x_size.html">
+         Plane.x_size
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.plane.Plane.y_size.html">
+         Plane.y_size
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.plane.Plane.x_num.html">
+         Plane.x_num
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.plane.Plane.y_num.html">
+         Plane.y_num
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.plane.Plane.num.html">
+         Plane.num
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.plane.Plane.pointings.html">
+         Plane.pointings
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.plane.Plane.__init__.html">
+         Plane.__init__
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.plane.Plane.check_dwell_tx.html">
+         Plane.check_dwell_tx
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.plane.Plane.copy.html">
+         Plane.copy
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.plane.Plane.cycle.html">
+         Plane.cycle
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.plane.Plane.dwell.html">
+         Plane.dwell
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.plane.Plane.ecef_pointing.html">
+         Plane.ecef_pointing
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.plane.Plane.enu_pointing.html">
+         Plane.enu_pointing
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.plane.Plane.min_dwell.html">
+         Plane.min_dwell
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.plane.Plane.pointing.html">
+         Plane.pointing
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="sorts.radar.scans.random_fence.RandomFence.html">
+       RandomFence
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" type="checkbox"/>
+      <label for="toctree-checkbox-19">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.random_fence.RandomFence.__init__.html">
+         RandomFence.__init__
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.random_fence.RandomFence.check_dwell_tx.html">
+         RandomFence.check_dwell_tx
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.random_fence.RandomFence.copy.html">
+         RandomFence.copy
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.random_fence.RandomFence.cycle.html">
+         RandomFence.cycle
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.random_fence.RandomFence.dwell.html">
+         RandomFence.dwell
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.random_fence.RandomFence.ecef_pointing.html">
+         RandomFence.ecef_pointing
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.random_fence.RandomFence.enu_pointing.html">
+         RandomFence.enu_pointing
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.random_fence.RandomFence.min_dwell.html">
+         RandomFence.min_dwell
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.random_fence.RandomFence.pointing.html">
+         RandomFence.pointing
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="sorts.radar.scans.random_uniform.RandomUniform.html">
+       RandomUniform
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" type="checkbox"/>
+      <label for="toctree-checkbox-20">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.random_uniform.RandomUniform.num.html">
+         RandomUniform.num
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.random_uniform.RandomUniform.min_elevation.html">
+         RandomUniform.min_elevation
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.random_uniform.RandomUniform.pointings.html">
+         RandomUniform.pointings
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.random_uniform.RandomUniform.__init__.html">
+         RandomUniform.__init__
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.random_uniform.RandomUniform.check_dwell_tx.html">
+         RandomUniform.check_dwell_tx
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.random_uniform.RandomUniform.copy.html">
+         RandomUniform.copy
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.random_uniform.RandomUniform.cycle.html">
+         RandomUniform.cycle
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.random_uniform.RandomUniform.dwell.html">
+         RandomUniform.dwell
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.random_uniform.RandomUniform.ecef_pointing.html">
+         RandomUniform.ecef_pointing
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.random_uniform.RandomUniform.enu_pointing.html">
+         RandomUniform.enu_pointing
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.random_uniform.RandomUniform.min_dwell.html">
+         RandomUniform.min_dwell
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.random_uniform.RandomUniform.pointing.html">
+         RandomUniform.pointing
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="sorts.radar.scans.uniform.Uniform.html">
+       Uniform
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" type="checkbox"/>
+      <label for="toctree-checkbox-21">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.uniform.Uniform.min_elevation.html">
+         Uniform.min_elevation
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.uniform.Uniform.num.html">
+         Uniform.num
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.uniform.Uniform.sph_num.html">
+         Uniform.sph_num
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.uniform.Uniform.pointings.html">
+         Uniform.pointings
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.uniform.Uniform.__init__.html">
+         Uniform.__init__
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.uniform.Uniform.check_dwell_tx.html">
+         Uniform.check_dwell_tx
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.uniform.Uniform.copy.html">
+         Uniform.copy
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.uniform.Uniform.cycle.html">
+         Uniform.cycle
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.uniform.Uniform.dwell.html">
+         Uniform.dwell
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.uniform.Uniform.ecef_pointing.html">
+         Uniform.ecef_pointing
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.uniform.Uniform.enu_pointing.html">
+         Uniform.enu_pointing
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.uniform.Uniform.min_dwell.html">
+         Uniform.min_dwell
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.scans.uniform.Uniform.pointing.html">
+         Uniform.pointing
+        </a>
+       </li>
+      </ul>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../signals/signals_base.html">
+     Signals (sorts.radar.signals)
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" type="checkbox"/>
+    <label for="toctree-checkbox-22">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../signals/auto/sorts.radar.signals.doppler_spread_hard_target_snr.html">
+       doppler_spread_hard_target_snr
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../signals/auto/sorts.radar.signals.hard_target_diameter.html">
+       hard_target_diameter
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../signals/auto/sorts.radar.signals.hard_target_rcs.html">
+       hard_target_rcs
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../signals/auto/sorts.radar.signals.hard_target_snr.html">
+       hard_target_snr
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../signals/auto/sorts.radar.signals.hard_target_snr_scaling.html">
+       hard_target_snr_scaling
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../signals/auto/sorts.radar.signals.incoherent_snr.html">
+       incoherent_snr
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../passes/passes_base.html">
+     Radar passes (sorts.radar.passes)
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" type="checkbox"/>
+    <label for="toctree-checkbox-23">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../passes/auto/sorts.radar.passes.Pass.html">
+       Pass
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" type="checkbox"/>
+      <label for="toctree-checkbox-24">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../passes/auto/sorts.radar.passes.Pass.stations.html">
+         Pass.stations
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../passes/auto/sorts.radar.passes.Pass.inds.html">
+         Pass.inds
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../passes/auto/sorts.radar.passes.Pass.t.html">
+         Pass.t
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../passes/auto/sorts.radar.passes.Pass.enu.html">
+         Pass.enu
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../passes/auto/sorts.radar.passes.Pass.cache.html">
+         Pass.cache
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../passes/auto/sorts.radar.passes.Pass.snr.html">
+         Pass.snr
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../passes/auto/sorts.radar.passes.Pass.__init__.html">
+         Pass.__init__
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../passes/auto/sorts.radar.passes.Pass.calculate_range.html">
+         Pass.calculate_range
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../passes/auto/sorts.radar.passes.Pass.calculate_range_rate.html">
+         Pass.calculate_range_rate
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../passes/auto/sorts.radar.passes.Pass.calculate_snr.html">
+         Pass.calculate_snr
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../passes/auto/sorts.radar.passes.Pass.calculate_zenith_angle.html">
+         Pass.calculate_zenith_angle
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../passes/auto/sorts.radar.passes.Pass.end.html">
+         Pass.end
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../passes/auto/sorts.radar.passes.Pass.get_range.html">
+         Pass.get_range
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../passes/auto/sorts.radar.passes.Pass.get_range_rate.html">
+         Pass.get_range_rate
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../passes/auto/sorts.radar.passes.Pass.get_zenith_angle.html">
+         Pass.get_zenith_angle
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../passes/auto/sorts.radar.passes.Pass.range.html">
+         Pass.range
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../passes/auto/sorts.radar.passes.Pass.range_rate.html">
+         Pass.range_rate
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../passes/auto/sorts.radar.passes.Pass.start.html">
+         Pass.start
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../passes/auto/sorts.radar.passes.Pass.zenith_angle.html">
+         Pass.zenith_angle
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../passes/auto/sorts.radar.passes.equidistant_sampling.html">
+       equidistant_sampling
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../passes/auto/sorts.radar.passes.find_passes.html">
+       find_passes
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../passes/auto/sorts.radar.passes.find_simultaneous_passes.html">
+       find_simultaneous_passes
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../passes/auto/sorts.radar.passes.group_passes.html">
+       group_passes
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../measurements/measurements_base.html">
+     Measurements (sorts.radar.measurements)
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" type="checkbox"/>
+    <label for="toctree-checkbox-25">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../measurements/auto/sorts.radar.measurements.measurement.Measurement.html">
+       Measurement
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" type="checkbox"/>
+      <label for="toctree-checkbox-26">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurements/auto/sorts.radar.measurements.measurement.Measurement.__init__.html">
+         Measurement.__init__
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurements/auto/sorts.radar.measurements.measurement.Measurement.compute_gain_and_wavelength.html">
+         Measurement.compute_gain_and_wavelength
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurements/auto/sorts.radar.measurements.measurement.Measurement.compute_measurement_jacobian.html">
+         Measurement.compute_measurement_jacobian
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurements/auto/sorts.radar.measurements.measurement.Measurement.compute_pass_measurements.html">
+         Measurement.compute_pass_measurements
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurements/auto/sorts.radar.measurements.measurement.Measurement.compute_ranges_and_range_rates.html">
+         Measurement.compute_ranges_and_range_rates
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurements/auto/sorts.radar.measurements.measurement.Measurement.compute_space_object_measurements.html">
+         Measurement.compute_space_object_measurements
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurements/auto/sorts.radar.measurements.measurement.Measurement.get_beam_gain_and_wavelength.html">
+         Measurement.get_beam_gain_and_wavelength
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurements/auto/sorts.radar.measurements.measurement.Measurement.get_bounds.html">
+         Measurement.get_bounds
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurements/auto/sorts.radar.measurements.measurement.Measurement.get_states.html">
+         Measurement.get_states
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurements/auto/sorts.radar.measurements.measurement.Measurement.measure_states.html">
+         Measurement.measure_states
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurements/auto/sorts.radar.measurements.measurement.Measurement.observable_filter.html">
+         Measurement.observable_filter
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurements/auto/sorts.radar.measurements.measurement.Measurement.parallel_states_measurements.html">
+         Measurement.parallel_states_measurements
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurements/auto/sorts.radar.measurements.measurement.Measurement.stop_condition.html">
+         Measurement.stop_condition
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../measurements/auto/sorts.radar.measurements.measurement.recover_data.html">
+       recover_data
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../measurements/auto/sorts.radar.measurements.measurement.get_max_snr_measurements.html">
+       get_max_snr_measurements
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../measurement_errors/measurement_errors_base.html">
+     Measurement Errors (sorts.radar.measurement_errors)
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-27" name="toctree-checkbox-27" type="checkbox"/>
+    <label for="toctree-checkbox-27">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../measurement_errors/auto/sorts.radar.measurement_errors.errors.Errors.html">
+       Errors
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-28" name="toctree-checkbox-28" type="checkbox"/>
+      <label for="toctree-checkbox-28">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurement_errors/auto/sorts.radar.measurement_errors.errors.Errors.VARIABLES.html">
+         Errors.VARIABLES
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurement_errors/auto/sorts.radar.measurement_errors.errors.Errors.__init__.html">
+         Errors.__init__
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurement_errors/auto/sorts.radar.measurement_errors.errors.Errors.get.html">
+         Errors.get
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurement_errors/auto/sorts.radar.measurement_errors.errors.Errors.set_numpy_seed.html">
+         Errors.set_numpy_seed
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../measurement_errors/linearized_coded.html">
+       Linearized coded errors
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-29" name="toctree-checkbox-29" type="checkbox"/>
+      <label for="toctree-checkbox-29">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurement_errors/auto/sorts.radar.measurement_errors.linearized_coded.simulate_echo.html">
+         simulate_echo
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurement_errors/auto/sorts.radar.measurement_errors.linearized_coded.lin_error.html">
+         lin_error
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurement_errors/auto/sorts.radar.measurement_errors.linearized_coded.precalculate_dr.html">
+         precalculate_dr
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurement_errors/auto/sorts.radar.measurement_errors.linearized_coded.LinearizedCoded.html">
+         LinearizedCoded
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurement_errors/auto/sorts.radar.measurement_errors.linearized_coded.LinearizedCodedIonospheric.html">
+         LinearizedCodedIonospheric
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../../measurement_errors/ionospheric_ray_trace.html">
+       Ionospheric Ray Tracing Errors
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-30" name="toctree-checkbox-30" type="checkbox"/>
+      <label for="toctree-checkbox-30">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurement_errors/auto/sorts.radar.measurement_errors.ionospheric_ray_trace.calculate_delay.html">
+         calculate_delay
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurement_errors/auto/sorts.radar.measurement_errors.ionospheric_ray_trace.ray_trace.html">
+         ray_trace
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurement_errors/auto/sorts.radar.measurement_errors.ionospheric_ray_trace.ray_trace_error.html">
+         ray_trace_error
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurement_errors/auto/sorts.radar.measurement_errors.ionospheric_ray_trace.ionospheric_error.html">
+         ionospheric_error
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../../measurement_errors/auto/sorts.radar.measurement_errors.ionospheric_ray_trace.IonosphericRayTrace.html">
+         IonosphericRayTrace
+        </a>
+       </li>
+      </ul>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../targets.html">
+   Radar targets
+  </a>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../../../controllers.html">
+   Radar controllers and schedulers
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-31" name="toctree-checkbox-31" type="checkbox"/>
+  <label for="toctree-checkbox-31">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.html">
+     RadarControls
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-32" name="toctree-checkbox-32" type="checkbox"/>
+    <label for="toctree-checkbox-32">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.priority.html">
+       RadarControls.priority
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.t.html">
+       RadarControls.t
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.t_slice.html">
+       RadarControls.t_slice
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.logger.html">
+       RadarControls.logger
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.profiler.html">
+       RadarControls.profiler
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.radar.html">
+       RadarControls.radar
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.controller.html">
+       RadarControls.controller
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.scheduler.html">
+       RadarControls.scheduler
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.pdirs.html">
+       RadarControls.pdirs
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.pdir_args.html">
+       RadarControls.pdir_args
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.has_pdirs.html">
+       RadarControls.has_pdirs
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.n_control_points.html">
+       RadarControls.n_control_points
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.n_periods.html">
+       RadarControls.n_periods
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.max_points.html">
+       RadarControls.max_points
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.splitting_indices.html">
+       RadarControls.splitting_indices
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.property_controls.html">
+       RadarControls.property_controls
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.controlled_properties.html">
+       RadarControls.controlled_properties
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.meta.html">
+       RadarControls.meta
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.__init__.html">
+       RadarControls.__init__
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.add_property_control.html">
+       RadarControls.add_property_control
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.check_time_slice_overlap.html">
+       RadarControls.check_time_slice_overlap
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.copy.html">
+       RadarControls.copy
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.create_new_property_control_field.html">
+       RadarControls.create_new_property_control_field
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.get_control_period_id.html">
+       RadarControls.get_control_period_id
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.get_pdirs.html">
+       RadarControls.get_pdirs
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.get_property_control.html">
+       RadarControls.get_property_control
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.get_property_control_list.html">
+       RadarControls.get_property_control_list
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.get_splitting_indices.html">
+       RadarControls.get_splitting_indices
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.remove_periods.html">
+       RadarControls.remove_periods
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.set_pdirs.html">
+       RadarControls.set_pdirs
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.set_time_slices.html">
+       RadarControls.set_time_slices
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.split_array.html">
+       RadarControls.split_array
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.radar_controller.RadarController.html">
+     RadarController
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-33" name="toctree-checkbox-33" type="checkbox"/>
+    <label for="toctree-checkbox-33">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.radar_controller.RadarController.META_FIELDS.html">
+       RadarController.META_FIELDS
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.radar_controller.RadarController.logger.html">
+       RadarController.logger
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.radar_controller.RadarController.profiler.html">
+       RadarController.profiler
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.radar_controller.RadarController.meta.html">
+       RadarController.meta
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.radar_controller.RadarController.__init__.html">
+       RadarController.__init__
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.radar_controller.RadarController.coh_integration.html">
+       RadarController.coh_integration
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.radar_controller.RadarController.compute_pointing_directions.html">
+       RadarController.compute_pointing_directions
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.radar_controller.RadarController.generate_controls.html">
+       RadarController.generate_controls
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.scanner.Scanner.html">
+     Scanner
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-34" name="toctree-checkbox-34" type="checkbox"/>
+    <label for="toctree-checkbox-34">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.scanner.Scanner.META_FIELDS.html">
+       Scanner.META_FIELDS
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.scanner.Scanner.__init__.html">
+       Scanner.__init__
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.scanner.Scanner.coh_integration.html">
+       Scanner.coh_integration
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.scanner.Scanner.compute_pointing_directions.html">
+       Scanner.compute_pointing_directions
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.scanner.Scanner.generate_controls.html">
+       Scanner.generate_controls
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.tracker.Tracker.html">
+     Tracker
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-35" name="toctree-checkbox-35" type="checkbox"/>
+    <label for="toctree-checkbox-35">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.tracker.Tracker.META_FIELDS.html">
+       Tracker.META_FIELDS
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.tracker.Tracker.__init__.html">
+       Tracker.__init__
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.tracker.Tracker.coh_integration.html">
+       Tracker.coh_integration
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.tracker.Tracker.compute_pointing_directions.html">
+       Tracker.compute_pointing_directions
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.tracker.Tracker.generate_controls.html">
+       Tracker.generate_controls
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.static.Static.html">
+     Static
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-36" name="toctree-checkbox-36" type="checkbox"/>
+    <label for="toctree-checkbox-36">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.static.Static.META_FIELDS.html">
+       Static.META_FIELDS
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.static.Static.__init__.html">
+       Static.__init__
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.static.Static.coh_integration.html">
+       Static.coh_integration
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.static.Static.compute_pointing_directions.html">
+       Static.compute_pointing_directions
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.static.Static.generate_controls.html">
+       Static.generate_controls
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.html">
+     SpaceObjectTracker
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-37" name="toctree-checkbox-37" type="checkbox"/>
+    <label for="toctree-checkbox-37">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.META_FIELDS.html">
+       SpaceObjectTracker.META_FIELDS
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.__init__.html">
+       SpaceObjectTracker.__init__
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.check_space_object_priorities.html">
+       SpaceObjectTracker.check_space_object_priorities
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.coh_integration.html">
+       SpaceObjectTracker.coh_integration
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.compute_pointing_directions.html">
+       SpaceObjectTracker.compute_pointing_directions
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.compute_tracking_states.html">
+       SpaceObjectTracker.compute_tracking_states
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.generate_controls.html">
+       SpaceObjectTracker.generate_controls
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.get_passes.html">
+       SpaceObjectTracker.get_passes
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.get_sampling_time.html">
+       SpaceObjectTracker.get_sampling_time
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.get_states.html">
+       SpaceObjectTracker.get_states
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../../scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.html">
+     RadarSchedulerBase
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-38" name="toctree-checkbox-38" type="checkbox"/>
+    <label for="toctree-checkbox-38">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.scheduler_period.html">
+       RadarSchedulerBase.scheduler_period
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.t0.html">
+       RadarSchedulerBase.t0
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.__init__.html">
+       RadarSchedulerBase.__init__
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.exctract_scheduler_results.html">
+       RadarSchedulerBase.exctract_scheduler_results
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.extract_control_sequence.html">
+       RadarSchedulerBase.extract_control_sequence
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.get_pointing_direction_sequence.html">
+       RadarSchedulerBase.get_pointing_direction_sequence
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.run.html">
+       RadarSchedulerBase.run
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="../../../scheduler/auto/sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.html">
+     StaticPriorityScheduler
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-39" name="toctree-checkbox-39" type="checkbox"/>
+    <label for="toctree-checkbox-39">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../scheduler/auto/sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.scheduler_period.html">
+       StaticPriorityScheduler.scheduler_period
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../scheduler/auto/sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.t0.html">
+       StaticPriorityScheduler.t0
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../scheduler/auto/sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.__init__.html">
+       StaticPriorityScheduler.__init__
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../scheduler/auto/sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.check_priority.html">
+       StaticPriorityScheduler.check_priority
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../scheduler/auto/sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.exctract_scheduler_results.html">
+       StaticPriorityScheduler.exctract_scheduler_results
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../scheduler/auto/sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.extract_control_sequence.html">
+       StaticPriorityScheduler.extract_control_sequence
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../scheduler/auto/sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.get_pointing_direction_sequence.html">
+       StaticPriorityScheduler.get_pointing_direction_sequence
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../scheduler/auto/sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.log_scheduler_performances.html">
+       StaticPriorityScheduler.log_scheduler_performances
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="../../../scheduler/auto/sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.run.html">
+       StaticPriorityScheduler.run
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../io.html">
+   I/O
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../transformations.html">
+   Coordinate and time transformations
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../plotting.html">
+   Plotting
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../correlator.html">
+   Population correlator
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../common.html">
+   Additional features
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../../c-api.html">
+   C library
+  </a>
+ </li>
+</ul>
+
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
+
+<nav id="bd-toc-nav">
+    
+</nav>
+    </div>
+    
+    <div class="toc-item">
+      
+    </div>
+    
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <section id="beampark-min-dwell">
+<h1>Beampark.min_dwell<a class="headerlink" href="#beampark-min-dwell" title="Permalink to this headline">#</a></h1>
+<p class="rubric">Beampark.min_dwell</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sorts.radar.scans.bp.Beampark.min_dwell">
+<span class="sig-prename descclassname"><span class="pre">Beampark.</span></span><span class="sig-name descname"><span class="pre">min_dwell</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/sorts/radar/scans/bp.html#Beampark.min_dwell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sorts.radar.scans.bp.Beampark.min_dwell" title="Permalink to this definition">#</a></dt>
+<dd><p>If there are dynamic dwell times, returns the minimum dwell time. 
+Otherwise, returns same as <span class="xref std std-ref">Scan.dwell</span>.</p>
+</dd></dl>
+
+</section>
+
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="sorts.radar.scans.bp.Beampark.enu_pointing.html" title="previous page">
+      <i class="fas fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">Beampark.enu_pointing</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="sorts.radar.scans.bp.Beampark.pointing.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Beampark.pointing</p>
+  </div>
+  <i class="fas fa-angle-right"></i>
+  </a>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright [2020-2022] Daniel Kastinen, Juha Vierinen, Thomas Maynadie.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

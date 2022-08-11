@@ -1,0 +1,8 @@
+Scanner.compute\_pointing\_direction
+====================================
+
+.. currentmodule:: sorts.radar.controllers.scanner
+
+.. rubric:: Scanner.compute_pointing_direction
+
+.. automethod:: Scanner.compute_pointing_direction
