@@ -540,8 +540,8 @@ void get_control_sequence_time_indices(
 	int _first_iteration,
 	void (*_callback_save_arrays)(double*, int*, int*, int))
 {
-	/*
-		Gets the indices of the control time points in a given control time array that correspond to the time points in the final scheduler control sequence.
+	/** Gets the indices of the control time points in a given control time array that correspond to the 
+	 * time points in the final scheduler control sequence.
 	*/
 	int stop_index;
 	int start_index;
@@ -553,9 +553,9 @@ void get_control_sequence_time_indices(
 	int *new_pdir_ctrl_id;
 	double *new_pdir_t;
 
-	new_pdir_ctrl_t_id = (int*)malloc(_n_dirs_final_sequence*sizeof(int));
-	new_pdir_ctrl_id = (int*)malloc(_n_dirs_final_sequence*sizeof(int));
-	new_pdir_t = (double*)malloc(_n_dirs_final_sequence*sizeof(double));
+	new_pdir_ctrl_t_id 	= (int*)malloc(_n_dirs_final_sequence*sizeof(int));
+	new_pdir_ctrl_id 	= (int*)malloc(_n_dirs_final_sequence*sizeof(int));
+	new_pdir_t 			= (double*)malloc(_n_dirs_final_sequence*sizeof(double));
 
 	for(int i = 0; i < _n_dirs_final_sequence; i++)
 	{
@@ -572,28 +572,21 @@ void get_control_sequence_time_indices(
 	// for each time point in final control sequence
 	for(int ti = 0; ti < _n_time_points_final_sequence; ti++)
 	{
+		// look for the index of the start of the current control time slice in the control time index
 		t_control_id = find_time_index(_t_control, _t_final_sequence[ti], 1, 1, _n_time_points_controls);
 
+		// if the point is found and the control is active during this time slice
 		if (t_control_id > -1 && _active_control_indices[ti] == _control_id)
 		{	
-			// get start and end control time slice indices in control time array
+			// get start and end indices in the pdirs time array correspoding to the current time slice
 			start_index = find_time_index(_t_dirs_control, _t_final_sequence[ti], 1, 1, _n_dirs_control);
 			stop_index = start_index;
 
-			while(_t_dirs_control[stop_index+1] <= _t_final_sequence[ti] + _t_slice_final_sequence[ti] && stop_index != -1)
-			{
-				if(stop_index == _n_dirs_control - 1)
-				{
-					stop_index = -1;
-				}
-				else
-				{
-					stop_index++;
-				}
-			}
+			while(_t_dirs_control[stop_index+1] <= _t_final_sequence[ti] + _t_slice_final_sequence[ti] && stop_index != _n_dirs_control-1)
+				stop_index++;
 
 			n_indices = stop_index - start_index + 1;
-			//printf("t=%f, (%f, %f) - start index = %d, end index = %d, t0=%f, tf=%f\n", _t_final_sequence[ti], _t_final_sequence[0], _t_final_sequence[_n_time_points_final_sequence-1], start_index, stop_index, _t_dirs_control[0], _t_dirs_control[_n_dirs_control-1]);
+			printf("t=%f, (%f, %f) - start index = %d, end index = %d, t0=%f, tf=%f\n", _t_final_sequence[ti], _t_final_sequence[0], _t_final_sequence[_n_time_points_final_sequence-1], start_index, stop_index, _t_dirs_control[0], _t_dirs_control[_n_dirs_control-1]);
 
 			if(start_index > -1 && stop_index > -1 && n_indices > 0)
 			{
@@ -602,6 +595,7 @@ void get_control_sequence_time_indices(
 				new_pdir_t = (double*)realloc(new_pdir_t, (_n_dirs_final_sequence + n_indices)*sizeof(double));
 
 				// find index at which the new pointing direction has to be inserted (if _allocate_time_array is 1, then look for closest existing time point)
+				printf("finding insertion index \n");
 				insertion_id = find_time_index(_t_sequence_pointing_directions, _t_final_sequence[ti], 1, 0, _n_dirs_final_sequence);
 				
 				if(insertion_id == -1 || _n_dirs_final_sequence == 0)
@@ -626,15 +620,15 @@ void get_control_sequence_time_indices(
 					new_pdir_ctrl_t_id[insertion_id + index] = start_index + index;
 					new_pdir_t[insertion_id + index] = _t_dirs_control[start_index + index];
 					
-					//printf("point t=%f (ctrl_id %d) added -> id=%d\n", new_pdir_t[insertion_id + index], new_pdir_ctrl_id[insertion_id + index], start_index + index);				
+					printf("point t=%f (ctrl_id %d) added -> id=%d\n", new_pdir_t[insertion_id + index], new_pdir_ctrl_id[insertion_id + index], start_index + index);				
 				}
 
 				_n_dirs_final_sequence += n_indices;
 
-				/*for(int i = 0; i < _n_dirs_final_sequence; i++)
+				for(int i = 0; i < _n_dirs_final_sequence; i++)
 				{
 					printf("new_pdir_t[%d] : %f\n", i, new_pdir_t[i]);
-				}*/
+				}
 			}
 		}
 	}
@@ -689,17 +683,18 @@ int find_time_index(
 				index = i_mid;
 			}
 
-			//printf("t=%f, target = %f -> i_start %d, i_mid %d, i_end %d\n", _t[i_mid], _t_target, i_start, i_mid, i_end);
-			//printf("t=%f / exact=%d\n", _t[i_end], exact);
+			printf("t=%f, target = %f -> i_start %d, i_mid %d, i_end %d\n", _t[i_mid], _t_target, i_start, i_mid, i_end);
+			printf("t=%f / exact=%d\n", _t[i_end], exact);
 		}
 	}
 	
+	printf("index before transformation is : %d\n", index);
 
 	if(index > -1)
 	{
 		while(_t[index] == _t[index + 1 - 2*first] && (exact == 1))
 			index +=  1 - 2*first;
 	}
-	//printf("return index = %d\n", index);
+	printf("return index = %d\n", index);
 	return index;
 }

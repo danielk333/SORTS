@@ -37,7 +37,7 @@ logger.info(f"test_space_object_tracking_controller -> intialized radar instance
 tracking_period = 50
 t_slice = 2
 t_start = 0
-t_end = 3600*24
+t_end = 3600*10
 
 epoch = 53005.0
 
@@ -72,7 +72,7 @@ orbits_raan = np.array([86, 86, 160, 180, 90]) # deg
 orbits_aop = np.array([0, 0, 50, 40, 55]) # deg
 orbits_mu0 = np.array([60, 50, 5, 30, 8]) # deg
 
-priority = np.array([3, 2, 0, 1, 4])
+priorities = np.array([4, 3, 1, 2, 5])
 
 space_objects = []
 for so_id in range(len(orbits_a)):
@@ -98,7 +98,7 @@ p.stop("test_space_object_tracking_controller:Initialization")
 
 p.start("test_space_object_tracking_controller:Computations")  
 logger.info("test_space_object_tracking_controller -> Generating tracking controls")
-controls = so_tracking_controller.generate_controls(t_tracking, eiscat3d, space_objects, epoch, t_slice, priority=priority, save_states=True)
+controls = so_tracking_controller.generate_controls(t_tracking, eiscat3d, space_objects, epoch, t_slice, space_object_priorities=priorities, save_states=True)
 logger.info(f"test_space_object_tracking_controller -> Tracking controls generated")
 p.stop("test_space_object_tracking_controller:Computations")  
 
@@ -120,37 +120,48 @@ for tx in eiscat3d.tx:
 for rx in eiscat3d.rx:
     ax.plot([rx.ecef[0]],[rx.ecef[1]],[rx.ecef[2]],'og')       
 
+# plot all space object states
+for space_object_index in range(len(space_objects)):
+    states = controls.meta["objects_states"][space_object_index]
+    ax.plot(states[0], states[1], states[2], '--', label=f"so-{space_object_index} (p={priorities[space_object_index]})")
+
 logger.info("test_space_object_tracking_controller -> plotting tracked object states")
 
-ecef_tracking = controls.space_objects_states
-object_ids = controls.state_priorities
+ecef_tracking = controls.meta["tracking_states"]
+object_ids = controls.meta["state_priorities"]
 
-transition_ids = np.where(np.abs(object_ids[1:] - object_ids[:-1]) > 0)[0]+1
-
-states_split = []
-for i in range(len(transition_ids)+1):
-    if i == 0:
-        i_start = 0
-    else:
-        i_start = transition_ids[i-1]
-
-    if i == len(transition_ids):
-        i_end = len(t_tracking)-1
-    else:
-        i_end = transition_ids[i]
-
-    states_split.append(ecef_tracking[:, i_start:i_end])
-
-    ax.plot(ecef_tracking[:, i_start:i_end][0], ecef_tracking[:, i_start:i_end][1], ecef_tracking[:, i_start:i_end][2], '-b')
-
-logger.info("test_space_object_tracking_controller -> plotting radar pointing directions")
 for period_id in range(controls.n_periods):
+    print(np.abs(controls.t[period_id][1:] - controls.t[period_id][:-1]))
+    print(object_ids[period_id][1:] - object_ids[period_id][:-1])
+    mask = np.logical_or(np.abs(controls.t[period_id][1:] - controls.t[period_id][:-1]) > tracking_period, object_ids[period_id][1:] - object_ids[period_id][:-1] != 0)
+    transition_ids = np.where(mask)[0]+1
+    print(transition_ids)
+
+    logger.info("test_space_object_tracking_controller -> plotting radar pointing directions")
     ax = plotting.plot_beam_directions(controls.get_pdirs(period_id), eiscat3d, ax=ax, zoom_level=0.6, azimuth=10, elevation=20)
+
+    for i in range(len(transition_ids)+1):
+        if i == 0:
+            i_start = 0
+        else:
+            i_start = transition_ids[i-1]
+
+        if i == len(transition_ids):
+            i_end = len(t_tracking)+1
+        else:
+            i_end = transition_ids[i]
+
+        print(i_start)
+        print(i_end)
+
+        ax.plot(ecef_tracking[period_id][0, i_start:i_end], ecef_tracking[period_id][1, i_start:i_end], ecef_tracking[period_id][2, i_start:i_end], '-b')
+    
 
 p.stop("test_space_object_tracking_controller:Plotting")  
 p.stop("test_space_object_tracking_controller:Total")    
 logger.info("test_space_object_tracking_controller -> execution finised !")
 
+ax.legend()
 print(p)
 
 plt.show()

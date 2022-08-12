@@ -196,6 +196,7 @@ class RadarControls(object):
 		self.meta = dict()
 		''' Control structure metadata. '''
 		self.meta['controller_type'] = self.controller.__class__
+		self.meta['scheduler'] = self.scheduler
 
 
 	def copy(self):
@@ -218,7 +219,7 @@ class RadarControls(object):
 		ret.pdirs 			= copy.copy(self.pdirs)
 
 		ret.n_control_points 		= self.n_control_points
-		ret.n_periods 					= self.n_periods
+		ret.n_periods 				= self.n_periods
 		ret.max_points 				= self.max_points
 		ret.splitting_indices 		= self.splitting_indices
 
@@ -306,9 +307,9 @@ class RadarControls(object):
 		if max_points <= 0 or not isinstance(max_points, int):
 			raise ValueError("max_points must be a positive integer")
 
-		if np.size(np.atleast_1d(t[0])) == 1 and not isinstance(t[0], np.ndarray):
+		if np.size(t[0]) == 1 and not isinstance(t[0], np.ndarray) and t[0] is not None:
 			# both the time slice and the time arrays are protected to ensure that they are the same size and add verification
-			t 				= np.atleast_1d(t).astype(np.float64)
+			t 			= np.atleast_1d(t).astype(np.float64)
 			duration 	= np.atleast_1d(duration).astype(np.float64)
 
 			# check time array  
@@ -340,30 +341,38 @@ class RadarControls(object):
 			self.get_splitting_indices()
 
 			# slice arrays according to scheduler period  or max_points requirements
-			self._t 			= self.split_array(self._t)
+			self._t 		= self.split_array(self._t)
 			self._t_slice 	= self.split_array(self._t_slice)
-			self._priority = self.split_array(self._priority)
+			self._priority 	= self.split_array(self._priority)
 		else:
 			if len(t) != len(duration):
 				raise Exception("t must be the same length as the duration array")
 
-			self.splitting_indices = np.ndarray((len(t)-1,), dtype=int)
+			self.splitting_indices = np.ndarray((len(t),), dtype=int)
+			print(t)
+			start_time = t[0][0]//self.scheduler.scheduler_period*self.scheduler.scheduler_period
 
 			index = 0
 			for period_id in range(len(t)):
-				if period_id < len(t)-1:
+				if t[period_id] is not None:
 					index += len(t[period_id])
 					self.splitting_indices[period_id] = index
 
-				if self.scheduler is not None:
-					if t[period_id][-1] > self.scheduler.t0 + (period_id + 1)*self.scheduler.scheduler_period or t[period_id][0] < self.scheduler.t0 + period_id*self.scheduler.scheduler_period:
-						raise Exception("t is not synchronized with the scheduler period. Please provide a valid splitted time array t or use the automatic splitting feature by calling set_time_slices with flat time arrays")
-				else:
-					if len(t[period_id]) > max_points:
-						raise Exception(f"time subarrays have more elements than max_points (max_points={max_points}). Please provide a valid splitted time array t or use the automatic splitting feature by calling set_time_slices with flat time arrays ")
+					if self.scheduler is not None:
+						print(t[period_id][-1])
+						if t[period_id][-1] > start_time + (period_id + 1)*self.scheduler.scheduler_period or t[period_id][0] < start_time + period_id*self.scheduler.scheduler_period:
+							raise Exception("t is not synchronized with the scheduler period. Please provide a valid splitted time array t or use the automatic splitting feature by calling set_time_slices with flat time arrays")
+					else:
+						if len(t[period_id]) > max_points:
+							raise Exception(f"time subarrays have more elements than max_points (max_points={max_points}). Please provide a valid splitted time array t or use the automatic splitting feature by calling set_time_slices with flat time arrays ")
 
-				if len(t[period_id]) != len(duration[period_id]):
-					raise Exception("t must be the same length as the duration array for each period index")
+					if len(t[period_id]) != len(duration[period_id]):
+						raise Exception("t must be the same length as the duration array for each period index")
+				else:
+					self.splitting_indices[period_id] = -1
+
+					if duration[period_id] is not None:
+						raise Exception("t must be the same length as the duration array for each period index")
 
 			self._t = t
 			self._t_slice = duration
@@ -374,8 +383,11 @@ class RadarControls(object):
 			self._priority = np.ndarray((len(t),), dtype=object)
 
 			for period_id in range(len(t)):
-				self.n_control_points += len(t[period_id])
-				self._priority[period_id] = np.repeat(np.atleast_1d(tmp_priority), len(t[period_id]))
+				if self._t[period_id] is not None:
+					self.n_control_points += len(self._t[period_id])
+					self._priority[period_id] = np.repeat(np.atleast_1d(tmp_priority), len(self._t[period_id]))
+				else:
+					self._priority[period_id] = None
 
 		# set array of property controls		
 		self.property_controls = np.ndarray((self.n_periods,), dtype=object)
@@ -433,8 +445,8 @@ class RadarControls(object):
 			self.n_control_points += len(self._t[period_id])*mask[period_id]
 
 		# update time slices and priority
-		self._t 						= self._t[mask]
-		self._t_slice 				= self._t_slice[mask]
+		self._t 				= self._t[mask]
+		self._t_slice 			= self._t_slice[mask]
 		self._priority 			= self._priority[mask]
 
 		# update property controls
@@ -460,6 +472,44 @@ class RadarControls(object):
 	def priority(self):
 		''' Time slice priority. '''
 		return self._priority
+
+	@priority.setter
+	def priority(self, value):
+		''' Set time slice priority. '''
+		if self._t is None:
+			raise AttributeError("Control sequence time slices are not set, please set the control time slice properties before setting the priority.")
+
+		# check validity of value
+		error = False
+		split = False
+		if isinstance(value, int) or isinstance(value, float): # if integer, convert to array
+			if value <= 0:
+				error = True
+			else:
+				value = np.full((self.n_control_points,), int(value), int)
+				split = True
+		else:
+			if not isinstance(value, np.ndarray): # if not array, error
+				raise ValueError("priority must be a positive integer or an array")
+			else:
+				shape_error = False
+				if len(value) != self.n_control_points:
+					if len(value) != self.n_periods:
+						shape_error = True
+					else:
+						for period_id in range(self.n_periods):
+							if np.size(value[period_id]) != len(controls.t[period_id]):
+								shape_error = True	
+							else:
+								value[period_id] = value[period_id].astype(int)
+				else:
+					split = True
+
+		if split is True:
+			value = self.split_array(value)
+		if error is True:
+			raise ValueError("priority must have the same shape as control.t or must be of length controls.n_control_points.")
+	
 
 
 	def set_pdirs(self, pdir_args, cache_pdirs=False):
@@ -865,8 +915,8 @@ class RadarControls(object):
 		if self.scheduler is None: 
 			ctrl_period_id = scheduler_period_id
 		else:
-			ctrl_period_id = scheduler_period_id - int(self._t[0][0]//self.scheduler.scheduler_period)  # computes the time subarray id
-
+			ctrl_period_id = scheduler_period_id - int((self._t[0][0] - self.scheduler.t0)/self.scheduler.scheduler_period)  # computes the time subarray id
+			print(ctrl_period_id)
 			# the time subarray id is bigger than the number of time subarrays in the given control structure
 			if ctrl_period_id < 0 or ctrl_period_id > len(self._t)-1: 
 				ctrl_period_id = -1
@@ -935,15 +985,15 @@ class RadarControls(object):
 
 			id_start = 0
 			for period_id in range(self.n_periods):
-				# get end index of the control period in the linear array
-				if period_id < self.n_periods-1:
-					id_end = self.splitting_indices[period_id]
+				if self.splitting_indices[period_id] == -1: # if the periods does not contain any controls
+						splitted_array[period_id] = None
 				else:
-					id_end = self.n_control_points
+					# get end index of the control period in the linear array
+					id_end = self.splitting_indices[period_id]
 
-				# copy values from the array in the corresponding control period
-				splitted_array[period_id] = array[id_start:id_end]
-				id_start = id_end
+					# copy values from the array in the corresponding control period
+					splitted_array[period_id] = array[id_start:id_end]
+					id_start = id_end
 		else:
 			splitted_array = array[None, :]
 
@@ -971,12 +1021,37 @@ class RadarControls(object):
 
 			if not issubclass(self.scheduler.__class__, scheduler.RadarSchedulerBase):
 				raise ValueError(f"scheduler has to be an instance of {RadarSchedulerBase}, not {scheduler}")
+			
+			start_time = self._t[0]//self.scheduler.scheduler_period*self.scheduler.scheduler_period
 
-			period_idx = (self._t - self.scheduler.t0)//self.scheduler.scheduler_period
+			self.n_periods = int((self._t[-1] - start_time)//self.scheduler.scheduler_period)+1
+			self.splitting_indices = np.ndarray((self.n_periods,), dtype=int)
 
-			self.splitting_indices = np.array(np.where((period_idx[1:] - period_idx[:-1]) == 1)[0]) + 1
-			self.n_periods = len(self.splitting_indices) + 1
-			del period_idx
+			i_start = 0
+			for period_id in range(self.n_periods):
+				# compute next time index (last point inside the current period)
+				if period_id < self.n_periods-1:
+					i_end = int(np.argmax(self._t[i_start:] >= start_time + (period_id+1)*self.scheduler.scheduler_period)) + i_start - 1
+				else:
+					i_end = len(self._t) - 1
+
+				# if the point has been found within the control array
+				add_index = False
+				if i_end > -1:
+					if i_start == i_end:
+						if self._t[i_end] < start_time + (period_id+1)*self.scheduler.scheduler_period: # if equal and t_end inside control period, add a single point
+							add_index = True
+					else:
+						if self._t[i_end] - self._t[i_start] > self.scheduler.scheduler_period or i_start > i_end:
+							add_index = False
+						else:
+							add_index = True
+
+				if add_index is True:
+					self.splitting_indices[period_id] = i_end+1
+					i_start = i_end+1
+				else:
+					self.splitting_indices[period_id] = -1
 		else:
 			if self.logger is not None:
 				self.logger.info("radar_controls:get_splitting_indices -> No scheduler provided, skipping master clock splitting...")

@@ -35,10 +35,11 @@
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="RadarSchedulerBase" href="auto/sorts.radar.scheduler.base.RadarSchedulerBase.html" />
-    <link rel="prev" title="Radar controllers" href="../controllers/controllers_base.html" />
+    <link rel="prev" title="SpaceObjectTracker.get_states" href="../controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.get_states.html" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="docsearch:language" content="None">
   </head>
@@ -1825,8 +1826,8 @@
   </label>
   <ul class="current">
    <li class="toctree-l2 has-children">
-    <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.html">
-     RadarControls
+    <a class="reference internal" href="../radar_controls/radar_controls_base.html">
+     Radar controls
     </a>
     <input class="toctree-checkbox" id="toctree-checkbox-32" name="toctree-checkbox-32" type="checkbox"/>
     <label for="toctree-checkbox-32">
@@ -1834,179 +1835,428 @@
      </i>
     </label>
     <ul>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.priority.html">
-       RadarControls.priority
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.html">
+       RadarControls
       </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.t.html">
-       RadarControls.t
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.t_slice.html">
-       RadarControls.t_slice
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.logger.html">
-       RadarControls.logger
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.profiler.html">
-       RadarControls.profiler
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.radar.html">
-       RadarControls.radar
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.controller.html">
-       RadarControls.controller
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.scheduler.html">
-       RadarControls.scheduler
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.pdirs.html">
-       RadarControls.pdirs
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.pdir_args.html">
-       RadarControls.pdir_args
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.has_pdirs.html">
-       RadarControls.has_pdirs
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.n_control_points.html">
-       RadarControls.n_control_points
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.n_periods.html">
-       RadarControls.n_periods
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.max_points.html">
-       RadarControls.max_points
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.splitting_indices.html">
-       RadarControls.splitting_indices
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.property_controls.html">
-       RadarControls.property_controls
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.controlled_properties.html">
-       RadarControls.controlled_properties
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.meta.html">
-       RadarControls.meta
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.__init__.html">
-       RadarControls.__init__
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.add_property_control.html">
-       RadarControls.add_property_control
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.check_time_slice_overlap.html">
-       RadarControls.check_time_slice_overlap
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.copy.html">
-       RadarControls.copy
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.create_new_property_control_field.html">
-       RadarControls.create_new_property_control_field
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.get_control_period_id.html">
-       RadarControls.get_control_period_id
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.get_pdirs.html">
-       RadarControls.get_pdirs
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.get_property_control.html">
-       RadarControls.get_property_control
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.get_property_control_list.html">
-       RadarControls.get_property_control_list
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.get_splitting_indices.html">
-       RadarControls.get_splitting_indices
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.remove_periods.html">
-       RadarControls.remove_periods
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.set_pdirs.html">
-       RadarControls.set_pdirs
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.set_time_slices.html">
-       RadarControls.set_time_slices
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.split_array.html">
-       RadarControls.split_array
-      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-33" name="toctree-checkbox-33" type="checkbox"/>
+      <label for="toctree-checkbox-33">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.priority.html">
+         RadarControls.priority
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.t.html">
+         RadarControls.t
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.t_slice.html">
+         RadarControls.t_slice
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.logger.html">
+         RadarControls.logger
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.profiler.html">
+         RadarControls.profiler
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.radar.html">
+         RadarControls.radar
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.controller.html">
+         RadarControls.controller
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.scheduler.html">
+         RadarControls.scheduler
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.pdirs.html">
+         RadarControls.pdirs
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.pdir_args.html">
+         RadarControls.pdir_args
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.has_pdirs.html">
+         RadarControls.has_pdirs
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.n_control_points.html">
+         RadarControls.n_control_points
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.n_periods.html">
+         RadarControls.n_periods
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.max_points.html">
+         RadarControls.max_points
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.splitting_indices.html">
+         RadarControls.splitting_indices
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.property_controls.html">
+         RadarControls.property_controls
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.controlled_properties.html">
+         RadarControls.controlled_properties
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.meta.html">
+         RadarControls.meta
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.__init__.html">
+         RadarControls.__init__
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.add_property_control.html">
+         RadarControls.add_property_control
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.check_time_slice_overlap.html">
+         RadarControls.check_time_slice_overlap
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.copy.html">
+         RadarControls.copy
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.create_new_property_control_field.html">
+         RadarControls.create_new_property_control_field
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.get_control_period_id.html">
+         RadarControls.get_control_period_id
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.get_pdirs.html">
+         RadarControls.get_pdirs
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.get_property_control.html">
+         RadarControls.get_property_control
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.get_property_control_list.html">
+         RadarControls.get_property_control_list
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.get_splitting_indices.html">
+         RadarControls.get_splitting_indices
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.remove_periods.html">
+         RadarControls.remove_periods
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.set_pdirs.html">
+         RadarControls.set_pdirs
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.set_time_slices.html">
+         RadarControls.set_time_slices
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.split_array.html">
+         RadarControls.split_array
+        </a>
+       </li>
+      </ul>
      </li>
     </ul>
    </li>
-   <li class="toctree-l2">
+   <li class="toctree-l2 has-children">
     <a class="reference internal" href="../controllers/controllers_base.html">
      Radar controllers
     </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-34" name="toctree-checkbox-34" type="checkbox"/>
+    <label for="toctree-checkbox-34">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.radar_controller.RadarController.html">
+       RadarController
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-35" name="toctree-checkbox-35" type="checkbox"/>
+      <label for="toctree-checkbox-35">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.radar_controller.RadarController.META_FIELDS.html">
+         RadarController.META_FIELDS
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.radar_controller.RadarController.logger.html">
+         RadarController.logger
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.radar_controller.RadarController.profiler.html">
+         RadarController.profiler
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.radar_controller.RadarController.meta.html">
+         RadarController.meta
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.radar_controller.RadarController.__init__.html">
+         RadarController.__init__
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.radar_controller.RadarController.coh_integration.html">
+         RadarController.coh_integration
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.radar_controller.RadarController.compute_pointing_directions.html">
+         RadarController.compute_pointing_directions
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.radar_controller.RadarController.generate_controls.html">
+         RadarController.generate_controls
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.scanner.Scanner.html">
+       Scanner
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-36" name="toctree-checkbox-36" type="checkbox"/>
+      <label for="toctree-checkbox-36">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.scanner.Scanner.META_FIELDS.html">
+         Scanner.META_FIELDS
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.scanner.Scanner.__init__.html">
+         Scanner.__init__
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.scanner.Scanner.coh_integration.html">
+         Scanner.coh_integration
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.scanner.Scanner.compute_pointing_directions.html">
+         Scanner.compute_pointing_directions
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.scanner.Scanner.generate_controls.html">
+         Scanner.generate_controls
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.tracker.Tracker.html">
+       Tracker
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-37" name="toctree-checkbox-37" type="checkbox"/>
+      <label for="toctree-checkbox-37">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.tracker.Tracker.META_FIELDS.html">
+         Tracker.META_FIELDS
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.tracker.Tracker.__init__.html">
+         Tracker.__init__
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.tracker.Tracker.coh_integration.html">
+         Tracker.coh_integration
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.tracker.Tracker.compute_pointing_directions.html">
+         Tracker.compute_pointing_directions
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.tracker.Tracker.generate_controls.html">
+         Tracker.generate_controls
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.tracker.Tracker.retreive_target_states.html">
+         Tracker.retreive_target_states
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.static.Static.html">
+       Static
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-38" name="toctree-checkbox-38" type="checkbox"/>
+      <label for="toctree-checkbox-38">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.static.Static.META_FIELDS.html">
+         Static.META_FIELDS
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.static.Static.__init__.html">
+         Static.__init__
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.static.Static.coh_integration.html">
+         Static.coh_integration
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.static.Static.compute_pointing_directions.html">
+         Static.compute_pointing_directions
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.static.Static.generate_controls.html">
+         Static.generate_controls
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li class="toctree-l3 has-children">
+      <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.html">
+       SpaceObjectTracker
+      </a>
+      <input class="toctree-checkbox" id="toctree-checkbox-39" name="toctree-checkbox-39" type="checkbox"/>
+      <label for="toctree-checkbox-39">
+       <i class="fas fa-chevron-down">
+       </i>
+      </label>
+      <ul>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.META_FIELDS.html">
+         SpaceObjectTracker.META_FIELDS
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.__init__.html">
+         SpaceObjectTracker.__init__
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.check_space_object_priorities.html">
+         SpaceObjectTracker.check_space_object_priorities
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.coh_integration.html">
+         SpaceObjectTracker.coh_integration
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.compute_pointing_directions.html">
+         SpaceObjectTracker.compute_pointing_directions
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.compute_tracking_states.html">
+         SpaceObjectTracker.compute_tracking_states
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.generate_controls.html">
+         SpaceObjectTracker.generate_controls
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.get_passes.html">
+         SpaceObjectTracker.get_passes
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.get_sampling_time.html">
+         SpaceObjectTracker.get_sampling_time
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="../controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.get_states.html">
+         SpaceObjectTracker.get_states
+        </a>
+       </li>
+      </ul>
+     </li>
+    </ul>
    </li>
    <li class="toctree-l2 current active has-children">
     <a class="current reference internal" href="#">
      Radar schedulers
     </a>
-    <input checked="" class="toctree-checkbox" id="toctree-checkbox-33" name="toctree-checkbox-33" type="checkbox"/>
-    <label for="toctree-checkbox-33">
+    <input checked="" class="toctree-checkbox" id="toctree-checkbox-40" name="toctree-checkbox-40" type="checkbox"/>
+    <label for="toctree-checkbox-40">
      <i class="fas fa-chevron-down">
      </i>
     </label>
@@ -2015,8 +2265,8 @@
       <a class="reference internal" href="auto/sorts.radar.scheduler.base.RadarSchedulerBase.html">
        RadarSchedulerBase
       </a>
-      <input class="toctree-checkbox" id="toctree-checkbox-34" name="toctree-checkbox-34" type="checkbox"/>
-      <label for="toctree-checkbox-34">
+      <input class="toctree-checkbox" id="toctree-checkbox-41" name="toctree-checkbox-41" type="checkbox"/>
+      <label for="toctree-checkbox-41">
        <i class="fas fa-chevron-down">
        </i>
       </label>
@@ -2032,18 +2282,33 @@
         </a>
        </li>
        <li class="toctree-l4">
+        <a class="reference internal" href="auto/sorts.radar.scheduler.base.RadarSchedulerBase.profiler.html">
+         RadarSchedulerBase.profiler
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="auto/sorts.radar.scheduler.base.RadarSchedulerBase.logger.html">
+         RadarSchedulerBase.logger
+        </a>
+       </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="auto/sorts.radar.scheduler.base.RadarSchedulerBase.radar.html">
+         RadarSchedulerBase.radar
+        </a>
+       </li>
+       <li class="toctree-l4">
         <a class="reference internal" href="auto/sorts.radar.scheduler.base.RadarSchedulerBase.__init__.html">
          RadarSchedulerBase.__init__
         </a>
        </li>
        <li class="toctree-l4">
-        <a class="reference internal" href="auto/sorts.radar.scheduler.base.RadarSchedulerBase.exctract_scheduler_results.html">
-         RadarSchedulerBase.exctract_scheduler_results
+        <a class="reference internal" href="auto/sorts.radar.scheduler.base.RadarSchedulerBase.extract_control_sequence.html">
+         RadarSchedulerBase.extract_control_sequence
         </a>
        </li>
        <li class="toctree-l4">
-        <a class="reference internal" href="auto/sorts.radar.scheduler.base.RadarSchedulerBase.extract_control_sequence.html">
-         RadarSchedulerBase.extract_control_sequence
+        <a class="reference internal" href="auto/sorts.radar.scheduler.base.RadarSchedulerBase.generate_schedule.html">
+         RadarSchedulerBase.generate_schedule
         </a>
        </li>
        <li class="toctree-l4">
@@ -2062,8 +2327,8 @@
       <a class="reference internal" href="auto/sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.html">
        StaticPriorityScheduler
       </a>
-      <input class="toctree-checkbox" id="toctree-checkbox-35" name="toctree-checkbox-35" type="checkbox"/>
-      <label for="toctree-checkbox-35">
+      <input class="toctree-checkbox" id="toctree-checkbox-42" name="toctree-checkbox-42" type="checkbox"/>
+      <label for="toctree-checkbox-42">
        <i class="fas fa-chevron-down">
        </i>
       </label>
@@ -2089,13 +2354,13 @@
         </a>
        </li>
        <li class="toctree-l4">
-        <a class="reference internal" href="auto/sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.exctract_scheduler_results.html">
-         StaticPriorityScheduler.exctract_scheduler_results
+        <a class="reference internal" href="auto/sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.extract_control_sequence.html">
+         StaticPriorityScheduler.extract_control_sequence
         </a>
        </li>
        <li class="toctree-l4">
-        <a class="reference internal" href="auto/sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.extract_control_sequence.html">
-         StaticPriorityScheduler.extract_control_sequence
+        <a class="reference internal" href="auto/sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.generate_schedule.html">
+         StaticPriorityScheduler.generate_schedule
         </a>
        </li>
        <li class="toctree-l4">
@@ -2175,22 +2440,49 @@
     <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#description">
-   Description
+   1. Description
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#why-use-a-scheduler">
+   2. Why use a scheduler
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#general-scheduling-procedure">
+   3. General scheduling procedure
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#scheduling-of-the-time-slices">
+     3.1. Scheduling of the time slices
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#extraction-of-the-property-and-pointing-direction-controls">
+     3.2. Extraction of the property and pointing direction controls
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#example">
+     3.3. Example
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#api-reference">
-   API Reference
+   4. API Reference
   </a>
   <ul class="nav section-nav flex-column">
    <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#scheduler-base-class">
-     1. Scheduler Base Class
+     4.1. Scheduler Base Class
     </a>
    </li>
    <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#predifined-schedulers">
-     2. Predifined schedulers
+     4.2. Predifined schedulers
     </a>
    </li>
   </ul>
@@ -2217,14 +2509,80 @@
   <section id="radar-schedulers">
 <span id="schedulers"></span><h1>Radar schedulers<a class="headerlink" href="#radar-schedulers" title="Permalink to this headline">#</a></h1>
 <section id="description">
-<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">#</a></h2>
-<p>Radar schedulers are used to combine multiple (possibly conflicting) types of radar controls. Its goal is to generate a new control sequence which will contain a portion of the time slices of the input controls according to a set of criteria specific to the type of scheduler.</p>
+<h2>1. Description<a class="headerlink" href="#description" title="Permalink to this headline">#</a></h2>
+<p><a class="reference internal" href="#schedulers"><span class="std std-ref">Radar schedulers</span></a> are used when multiple <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.html#sorts.radar.radar_controls.RadarControls" title="sorts.radar.radar_controls.RadarControls"><code class="xref py py-class docutils literal notranslate"><span class="pre">radar</span> <span class="pre">control</span> <span class="pre">sequences</span></code></a> are in conflict for a given <span class="xref std std-ref">radar system</span>. They combine multiple radar control sequences (generated by different types of <a class="reference internal" href="../controllers/controllers_base.html#controllers"><span class="std std-ref">Radar controllers</span></a>). This is achieved by chosing the time slice which will be executed by the radar from the list of input control sequences by satisfying a set of scheduling constraints (specific to the type of scheduler).</p>
 <p>The research of new schedulers (optimizing the management of radar ressources) being an open research topic, SORTS defines a standard scheduler structure which can be used to define new scheduler types and simulate their results.</p>
 </section>
+<section id="why-use-a-scheduler">
+<h2>2. Why use a scheduler<a class="headerlink" href="#why-use-a-scheduler" title="Permalink to this headline">#</a></h2>
+<p>Let us take the example of a <strong>radar measurement campain</strong> where multiple scientists want to use the <em>same radar system to conduct different observations</em>. Each scientist will require a different set of <a class="reference internal" href="../radar_controls/auto/sorts.radar.radar_controls.RadarControls.html#sorts.radar.radar_controls.RadarControls" title="sorts.radar.radar_controls.RadarControls"><code class="xref py py-class docutils literal notranslate"><span class="pre">radar</span> <span class="pre">controls</span></code></a>, which aren’t necessarily compatible with each other.</p>
+<dl>
+<dt>The <a class="reference internal" href="#schedulers"><span class="std std-ref">Radar schedulers</span></a> module can be used to solve this problem as follow:</dt><dd><ul class="simple">
+<li><p>Each scientist can generate the controls he wants to perform with the radar (i.e. tracking of a meteoroid, random scan each 10s, …).</p></li>
+</ul>
+<blockquote>
+<div><ul class="simple">
+<li><p>A unique priority can be affected to each control.</p></li>
+<li><p>The different controls are stacked into a single array.</p></li>
+<li><p>Finally, one can call <a class="reference internal" href="auto/sorts.radar.scheduler.base.RadarSchedulerBase.run.html#sorts.radar.scheduler.base.RadarSchedulerBase.run" title="sorts.radar.scheduler.base.RadarSchedulerBase.run"><code class="xref py py-attr docutils literal notranslate"><span class="pre">scheduler.run</span></code></a> method to get a final control sequence which (hopefully) will satisfy the requirements of each scientist.</p></li>
+</ul>
+</div></blockquote>
+</dd>
+</dl>
+</section>
+<section id="general-scheduling-procedure">
+<h2>3. General scheduling procedure<a class="headerlink" href="#general-scheduling-procedure" title="Permalink to this headline">#</a></h2>
+<p>SORTS implementation of the scheduler generates the final control sequence in two main steps.</p>
+<section id="scheduling-of-the-time-slices">
+<span id="time-slice-scheduling"></span><h3>3.1. Scheduling of the time slices<a class="headerlink" href="#scheduling-of-the-time-slices" title="Permalink to this headline">#</a></h3>
+<p>The first step in generating the scheduled control sequence consists in <strong>selecting which time slices from the original list of controls will be executed</strong>. This selection can be made according to many different constraints (priority of the control/time slice, cost function, …).</p>
+<p>When a time slice is considered as selected to be part of the final control sequence (output of the scheduler), the algorithm also stores the <em>index of the time slice</em> and of the <em>controller</em> which has generated it. This step facilitates the retreival of the pointing directions and of the controls after finishing the scheduling process.</p>
+</section>
+<section id="extraction-of-the-property-and-pointing-direction-controls">
+<span id="control-extraction-scheduler"></span><h3>3.2. Extraction of the property and pointing direction controls<a class="headerlink" href="#extraction-of-the-property-and-pointing-direction-controls" title="Permalink to this headline">#</a></h3>
+<p>This step consists in <strong>copying the property and pointing directions controls</strong> corresponding to the control sequence of the selected time slice into the final control sequence.</p>
+</section>
+<section id="example">
+<h3>3.3. Example<a class="headerlink" href="#example" title="Permalink to this headline">#</a></h3>
+<p>Consider a set of 3 control sequence which we want to schedule:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">controls</span> <span class="o">=</span> <span class="p">[</span><span class="n">controls1</span><span class="p">,</span> <span class="n">controls2</span><span class="p">,</span> <span class="n">controls3</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Such that</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">controls1</span><span class="o">.</span><span class="n">t</span>
+<span class="go">array([0., 1., 2., 3., 4.])</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">controls2</span><span class="o">.</span><span class="n">t</span>
+<span class="go">array([0., 5., 10.])</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">controls3</span><span class="o">.</span><span class="n">t</span>
+<span class="go">array([1., 2.5, 3.25, 4.])</span>
+</pre></div>
+</div>
+<p>The <strong>control sequence index</strong> corresponds to the index that the considered control structure has inside the <code class="docutils literal notranslate"><span class="pre">controls</span></code> list. Suppose that after the first step (see <a class="reference internal" href="#time-slice-scheduling"><span class="std std-ref">3.1. Scheduling of the time slices</span></a>), the array of time slices and corresponding control indices are the following:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">time_slice_start</span> <span class="c1"># scheduler time slice start time (extracted from the control sequences)</span>
+<span class="go">array([0., 1., 2., 2.5, 3., 3.25, 4., 5., 10.])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">control_index</span> <span class="c1"># indices controls which time slice have been selected by the scheduler at each time t.</span>
+<span class="go">array([0, 2, 0, 2, 0, 2, 2, 1, 1])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time_slice_index</span> <span class="c1"># indices of the time slices inside there corresponding control sequence time slice array</span>
+<span class="go">array([0, 0, 1, 1, 2 2, 3, 1, 2])</span>
+</pre></div>
+</div>
+<p>The second step (see <a class="reference internal" href="#control-extraction-scheduler"><span class="std std-ref">3.2. Extraction of the property and pointing direction controls</span></a>) consists in <em>copying the property and pointing direction controls</em> from each control time slice in <code class="docutils literal notranslate"><span class="pre">time_slice_index</span></code> and control sequence index within <code class="docutils literal notranslate"><span class="pre">control_index</span></code>. Therefore, the final control sequence can be constructed as</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{p}_f = \{ \hspace{1mm} \mathbf{p}^i_j \hspace{2mm} | \hspace{2mm} ((i, j)_k \in E_{slices} \times E_{ctrl} | k \in [\![0, n[\![) \hspace{1mm} \}\]</div>
+<p>with <span class="math notranslate nohighlight">\(\mathbf{p}^i_j\)</span> the pointing direction of the <span class="math notranslate nohighlight">\(j^{th}\)</span> control sequence at the <span class="math notranslate nohighlight">\(i^{th}\)</span> time slice (<span class="math notranslate nohighlight">\(E_{slices}\)</span> being <code class="docutils literal notranslate"><span class="pre">time_slice_index</span></code> and <span class="math notranslate nohighlight">\(E_{ctrl}\)</span> being <code class="docutils literal notranslate"><span class="pre">control_index</span></code>) and <span class="math notranslate nohighlight">\(n\)</span> is the number of time slices within the final control structure. The same can be done for the property controls:</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{x}_f = \{ \hspace{1mm} \mathbf{x}^i_j \hspace{2mm} | \hspace{2mm} ((i, j)_k \in E_{slices} \times E_{ctrl} | k \in [\![0, n[\![) \hspace{1mm} \}\]</div>
+<p>with <span class="math notranslate nohighlight">\(\mathbf{x}^i_j\)</span> the <strong>targeted state vector of the radar system</strong> defined by the <span class="math notranslate nohighlight">\(j^{th}\)</span> control sequence at the <span class="math notranslate nohighlight">\(i^{th}\)</span> time slice.</p>
+</section>
+</section>
 <section id="api-reference">
-<h2>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">#</a></h2>
+<h2>4. API Reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">#</a></h2>
 <section id="scheduler-base-class">
-<h3>1. Scheduler Base Class<a class="headerlink" href="#scheduler-base-class" title="Permalink to this headline">#</a></h3>
+<h3>4.1. Scheduler Base Class<a class="headerlink" href="#scheduler-base-class" title="Permalink to this headline">#</a></h3>
 <p>The <a class="reference internal" href="auto/sorts.radar.scheduler.base.RadarSchedulerBase.html#sorts.radar.scheduler.base.RadarSchedulerBase" title="sorts.radar.scheduler.base.RadarSchedulerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.RadarSchedulerBase</span></code></a> class defines the fundamental architecture of a radar scheduler.</p>
 <table class="autosummary longtable table autosummary">
 <colgroup>
@@ -2233,13 +2591,13 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="auto/sorts.radar.scheduler.base.RadarSchedulerBase.html#sorts.radar.scheduler.base.RadarSchedulerBase" title="sorts.radar.scheduler.base.RadarSchedulerBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RadarSchedulerBase</span></code></a>(radar, t0, scheduler_period)</p></td>
-<td><p></p></td>
+<td><p>Defines the fundamental structure of a radar Scheduler.</p></td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="predifined-schedulers">
-<h3>2. Predifined schedulers<a class="headerlink" href="#predifined-schedulers" title="Permalink to this headline">#</a></h3>
+<h3>4.2. Predifined schedulers<a class="headerlink" href="#predifined-schedulers" title="Permalink to this headline">#</a></h3>
 <p>The current implementation of SORTS includes a single predifined <a class="reference internal" href="auto/sorts.radar.scheduler.base.RadarSchedulerBase.html#sorts.radar.scheduler.base.RadarSchedulerBase" title="sorts.radar.scheduler.base.RadarSchedulerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">scheduler</span></code></a> instance.</p>
 <table class="autosummary longtable table autosummary">
 <colgroup>
@@ -2248,7 +2606,7 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="auto/sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.html#sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler" title="sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StaticPriorityScheduler</span></code></a>(radar, t0, ...[, ...])</p></td>
-<td><p></p></td>
+<td><p>Defines the static priority scheduler.</p></td>
 </tr>
 </tbody>
 </table>
@@ -2264,11 +2622,11 @@
               <footer class="bd-footer-article">
                   <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-  <a class='left-prev' id="prev-link" href="../controllers/controllers_base.html" title="previous page">
+  <a class='left-prev' id="prev-link" href="../controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.get_states.html" title="previous page">
       <i class="fas fa-angle-left"></i>
       <div class="prev-next-info">
           <p class="prev-next-subtitle">previous</p>
-          <p class="prev-next-title">Radar controllers</p>
+          <p class="prev-next-title">SpaceObjectTracker.get_states</p>
       </div>
   </a>
   <a class='right-next' id="next-link" href="auto/sorts.radar.scheduler.base.RadarSchedulerBase.html" title="next page">

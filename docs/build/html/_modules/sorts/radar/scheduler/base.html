@@ -176,14 +176,49 @@
 
 <span class="kn">from</span> <span class="nn">sorts</span> <span class="kn">import</span> <span class="n">clibsorts</span>
 
-<div class="viewcode-block" id="RadarSchedulerBase"><a class="viewcode-back" href="../../../../reference/scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.html#sorts.radar.scheduler.base.RadarSchedulerBase">[docs]</a><span class="k">class</span> <span class="nc">RadarSchedulerBase</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-<div class="viewcode-block" id="RadarSchedulerBase.__init__"><a class="viewcode-back" href="../../../../reference/scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.__init__.html#sorts.radar.scheduler.base.RadarSchedulerBase.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radar</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">scheduler_period</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">profiler</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="o">=</span> <span class="n">profiler</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span>
+<div class="viewcode-block" id="RadarSchedulerBase"><a class="viewcode-back" href="../../../../reference/radar/scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.html#sorts.radar.scheduler.base.RadarSchedulerBase">[docs]</a><span class="k">class</span> <span class="nc">RadarSchedulerBase</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Defines the fundamental structure of a radar Scheduler.</span>
 
+<span class="sd">    The role of a scheduler is to schedule the time slices which will </span>
+<span class="sd">    be run by the radar system by satisfying a set of constraints. The</span>
+<span class="sd">    generated control sequence can then be used to control a radar system.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    radar : :class:`sorts.Radar&lt;sorts.radar.system.radar.Radar&gt;`</span>
+<span class="sd">        Radar instance being controlled.</span>
+<span class="sd">    t0 : float</span>
+<span class="sd">        Start time of the scheduler with respect to the reference time of the</span>
+<span class="sd">        simulation (in seconds).</span>
+<span class="sd">    scheduler_period : float</span>
+<span class="sd">        Duration of a scheduler period (in seconds). </span>
+
+<span class="sd">        The input :class:`sorts.RadarControls&lt;sorts.radar.radar_controls.RadarControls&gt;` </span>
+<span class="sd">        control periods must coincide with the scheduler periods (see :ref:`radar_controls` </span>
+<span class="sd">        to obtain more information about control period synchronization). </span>
+<span class="sd">    logger : :class:`logging.Logger`, default=None</span>
+<span class="sd">        Logger instance used to log the compuation status of the class methods.</span>
+<span class="sd">    profiler : :class:`sorts.profiling.Profiler&lt;sorts.common.profiling.Profiler&gt;`, default=None</span>
+<span class="sd">        Profiler instance used to monitor the computation performances of the class methods.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+<div class="viewcode-block" id="RadarSchedulerBase.__init__"><a class="viewcode-back" href="../../../../reference/radar/scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.__init__.html#sorts.radar.scheduler.base.RadarSchedulerBase.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radar</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">scheduler_period</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">profiler</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="o">=</span> <span class="n">profiler</span>
+        <span class="sd">&#39;&#39;&#39; Profiler instance used to monitor the computation performances of the class methods. &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span>
+        <span class="sd">&#39;&#39;&#39; Logger instance used to log the compuation status of the class methods. &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">radar</span> <span class="o">=</span> <span class="n">radar</span>
+        <span class="sd">&#39;&#39;&#39; Radar instance being controlled. &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_t0</span> <span class="o">=</span> <span class="n">t0</span>
+        <span class="sd">&#39;&#39;&#39; Start time of the scheduler with respect to the reference time of the</span>
+<span class="sd">        simulation (in seconds). </span>
+<span class="sd">        &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_scheduler_period</span> <span class="o">=</span> <span class="n">scheduler_period</span>
+        <span class="sd">&#39;&#39;&#39; Duration of a scheduler period (in seconds). </span>
+
+<span class="sd">        The input :class:`sorts.RadarControls&lt;sorts.radar.radar_controls.RadarControls&gt;` </span>
+<span class="sd">        control periods must coincide with the scheduler periods (see :ref:`radar_controls` </span>
+<span class="sd">        to obtain more information about control period synchronization).</span>
+<span class="sd">        &#39;&#39;&#39;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RadarSchedulerBase:init -&gt; setting scheduling start time t0=</span><span class="si">{</span><span class="n">t0</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -194,37 +229,73 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;RadarSchedulerBase:init -&gt; ignoring scheduling period...&quot;</span><span class="p">)</span>   </div>
 
 
-<div class="viewcode-block" id="RadarSchedulerBase.run"><a class="viewcode-back" href="../../../../reference/scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.run.html#sorts.radar.scheduler.base.RadarSchedulerBase.run">[docs]</a>    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="RadarSchedulerBase.run"><a class="viewcode-back" href="../../../../reference/radar/scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.run.html#sorts.radar.scheduler.base.RadarSchedulerBase.run">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controls</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Runs the control scheduler algorithm to obtain the final RADAR control sequence sent to the RADAR.</span>
+        <span class="sd">&#39;&#39;&#39; Runs the control scheduler algorithm to obtain the final RADAR control </span>
+<span class="sd">        sequence sent to the RADAR.</span>
+
+<span class="sd">        This method must generate a new control sequence containing non-overlapping </span>
+<span class="sd">        time slices. Those time slices must be extracted from the list of radar controls</span>
+<span class="sd">        which are to be scheduled. The scheduler shall also implement the constraints </span>
+<span class="sd">        relative to the choice of time slices to run.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
+<span class="sd">        controls : numpy.ndarray / list</span>
+<span class="sd">            Array of RADAR controls to be managed. The algorithm will arrange the time </span>
+<span class="sd">            slices from those controls to create a control sequence compatible with the </span>
+<span class="sd">            RADAR system.</span>
 
-<span class="sd">        controls : np.ndarray/list</span>
-<span class="sd">        Array of RADAR controls to be managed. The algorithm will arrange the time slices from those controls to create a control sequence compatible with the RADAR system.</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        final_control_sequence : :class:`sorts.RadarControls&lt;sorts.radar.radar_controls.RadarControls&gt;`</span>
+<span class="sd">            Final RADAR control sequence compatible with the RADAR system.</span>
 
-<span class="sd">        Return value</span>
-<span class="sd">        ------------</span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        This simple example implementation returns a combination of all the control sequences</span>
+<span class="sd">        (in order of arrival).</span>
 
-<span class="sd">        final_control_sequence : dict</span>
-<span class="sd">        Final RADAR control sequence compatible with the RADAR system</span>
+<span class="sd">        .. code-block:: Python</span>
 
+<span class="sd">                # TODO Test </span>
+
+<span class="sd">                def run(self, controls):</span>
+<span class="sd">                    time_slice_start_time   = np.ndarray(0, dtype=float)</span>
+<span class="sd">                    time_slice_duration     = np.ndarray(0, dtype=float)</span>
+<span class="sd">                    controls_id             = np.ndarray(0, dtype=int)</span>
+
+<span class="sd">                    for ctrl_id, ctrl in controls:</span>
+<span class="sd">                        controls_id         = np.append(controls_id, np.full(ctrl.n_control_points, ctrl_id, int))</span>
+
+<span class="sd">                        for period_id in range(ctrl.n_periods):</span>
+<span class="sd">                            time_slice_start_time   = np.append(time_slice_start_time, ctrl.t[period_id])</span>
+<span class="sd">                            time_slice_duration     = np.append(time_slice_duration, ctrl.t_slice[period_id])</span>
+<span class="sd">                    </span>
+<span class="sd">                    final_control_sequence = sorts.RadarControls(self.radar, None, scheduler=self, priority=None)</span>
+<span class="sd">                    final_control_sequence.set_time_slices(time_slice_start_time, time_slice_duration)</span>
+
+<span class="sd">                    final_control_sequence.active_control = final_control_sequence.split_array(controls_id)</span>
+<span class="sd">                    final_control_sequence.meta[&quot;scheduled_controls&quot;] = controls</span>
+
+<span class="sd">                    return self.extract_control_sequence(controls, final_control_sequence)         </span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="RadarSchedulerBase.exctract_scheduler_results"><a class="viewcode-back" href="../../../../reference/scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.exctract_scheduler_results.html#sorts.radar.scheduler.base.RadarSchedulerBase.exctract_scheduler_results">[docs]</a>    <span class="k">def</span> <span class="nf">exctract_scheduler_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control_sequence</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39; Exctracts the results of the scheduler from the generated control sequence. &#39;&#39;&#39;</span>
+<div class="viewcode-block" id="RadarSchedulerBase.generate_schedule"><a class="viewcode-back" href="../../../../reference/radar/scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.generate_schedule.html#sorts.radar.scheduler.base.RadarSchedulerBase.generate_schedule">[docs]</a>    <span class="k">def</span> <span class="nf">generate_schedule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">control_sequence</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Extracts the results of the scheduler from the generated control sequence. &#39;&#39;&#39;</span>
         <span class="k">pass</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">scheduler_period</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Scheduler period time (in seconds). &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scheduler_period</span>
 
 
     <span class="nd">@scheduler_period</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">scheduler_period</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Scheduler period time (in seconds). &#39;&#39;&#39;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
@@ -238,11 +309,13 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">t0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Scheduler start time (in seconds). &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t0</span>
     
 
     <span class="nd">@t0</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">t0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Scheduler start time (in seconds). &#39;&#39;&#39;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
@@ -254,9 +327,29 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RadarSchedulerBase:t0:setter -&gt; setting scheduling start time : t0=</span><span class="si">{</span><span class="n">val</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>     
 
 
-<div class="viewcode-block" id="RadarSchedulerBase.extract_control_sequence"><a class="viewcode-back" href="../../../../reference/scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.extract_control_sequence.html#sorts.radar.scheduler.base.RadarSchedulerBase.extract_control_sequence">[docs]</a>    <span class="k">def</span> <span class="nf">extract_control_sequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controls</span><span class="p">,</span> <span class="n">final_control_sequence</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39; </span>
-<span class="sd">        Extracts the control data at the given time points and control ids</span>
+<div class="viewcode-block" id="RadarSchedulerBase.extract_control_sequence"><a class="viewcode-back" href="../../../../reference/radar/scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.extract_control_sequence.html#sorts.radar.scheduler.base.RadarSchedulerBase.extract_control_sequence">[docs]</a>    <span class="k">def</span> <span class="nf">extract_control_sequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controls</span><span class="p">,</span> <span class="n">final_control_sequence</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Extracts the scheduled control at specific time points and control indices after the time slices </span>
+<span class="sd">        have been scheduled.</span>
+
+<span class="sd">        This function extracts the pointing directions and property controls corresponding to the time slices </span>
+<span class="sd">        scheduled by the radar scheduler from the list of radar control sequences. This step is essential after</span>
+<span class="sd">        completing the time slice scheduling to ensure that the generated control sequence possesses the right </span>
+<span class="sd">        property and pointing direction controls.</span>
+
+<span class="sd">        The algorithm goes through each scheduled time slice and gets the all the pointing and property controls </span>
+<span class="sd">        from corresponding control structure (i.e. the one which has generated time slice chosen by the scheduler).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        controls : list / numpy.ndarray of :class:`sorts.RadarControllers&lt;sorts.radar.radar_controls.RadarControls&gt;`</span>
+<span class="sd">            List of radar control sequences being scheduled.</span>
+<span class="sd">        final_control_sequence : :class:`sorts.RadarControllers&lt;sorts.radar.radar_controls.RadarControls&gt;`</span>
+<span class="sd">            Final radar control sequence generated by the scheduler.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        final_control_sequence : :class:`sorts.RadarControllers&lt;sorts.radar.radar_controls.RadarControls&gt;`</span>
+<span class="sd">            Updated </span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="c1"># extract pointing directions (as splitted arrays)</span>
         <span class="n">final_control_sequence</span><span class="o">.</span><span class="n">pdirs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_pointing_direction_sequence</span><span class="p">(</span><span class="n">controls</span><span class="p">,</span> <span class="n">final_control_sequence</span><span class="p">)</span>
@@ -312,9 +405,25 @@
         <span class="k">return</span> <span class="n">final_control_sequence</span></div>
 
 
-<div class="viewcode-block" id="RadarSchedulerBase.get_pointing_direction_sequence"><a class="viewcode-back" href="../../../../reference/scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.get_pointing_direction_sequence.html#sorts.radar.scheduler.base.RadarSchedulerBase.get_pointing_direction_sequence">[docs]</a>    <span class="k">def</span> <span class="nf">get_pointing_direction_sequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controls</span><span class="p">,</span> <span class="n">final_control_sequence</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39; </span>
-<span class="sd">        Get the pointing directions at specific time points and control ids</span>
+<div class="viewcode-block" id="RadarSchedulerBase.get_pointing_direction_sequence"><a class="viewcode-back" href="../../../../reference/radar/scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.get_pointing_direction_sequence.html#sorts.radar.scheduler.base.RadarSchedulerBase.get_pointing_direction_sequence">[docs]</a>    <span class="k">def</span> <span class="nf">get_pointing_direction_sequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controls</span><span class="p">,</span> <span class="n">final_control_sequence</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Extracts the pointing directions at specific time points and control indices.</span>
+
+<span class="sd">        This function extracts the pointing directions corresponding to the time slices scheduled</span>
+<span class="sd">        by the radar scheduler from the list of radar control sequences.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        controls : list / numpy.ndarray of :class:`sorts.RadarControllers&lt;sorts.radar.radar_controls.RadarControls&gt;`</span>
+<span class="sd">            List of radar control sequences being scheduled.</span>
+<span class="sd">        final_control_sequence : :class:`sorts.RadarControllers&lt;sorts.radar.radar_controls.RadarControls&gt;`</span>
+<span class="sd">            Final radar control sequence generated by the scheduler.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pointing_direction : dict</span>
+<span class="sd">            Data structure containing the array of scheduled pointing directions (see :attr:`RadarController.compute_pointing_directions</span>
+<span class="sd">            &lt;sorts.radar.radar_controls.RadarControls.compute_pointing_directions&gt;` for more information about the pointing direction </span>
+<span class="sd">            data structure).</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="c1"># get number of Rx/Tx stations</span>
         <span class="n">n_tx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">controls</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">tx</span><span class="p">)</span>
@@ -327,15 +436,15 @@
             <span class="c1"># intialization of the pointing direction sequence</span>
 
             <span class="c1"># allocate memory</span>
-            <span class="n">pointing_direction</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-            <span class="n">pointing_direction</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="s2">&quot;t&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-
-            <span class="n">control_t_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
-            <span class="n">control_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+            <span class="n">pointing_direction</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span>       <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="n">pointing_direction</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="s2">&quot;t&quot;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+            <span class="n">control_t_ids</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+            <span class="n">control_ids</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
 
 
             <span class="c1"># callback function to save arrays</span>
             <span class="k">def</span> <span class="nf">save_arrays</span><span class="p">(</span><span class="n">array_pdir_time_points_c</span><span class="p">,</span> <span class="n">arrays_control_ids_c</span><span class="p">,</span> <span class="n">arrays_control_t_ids_c</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+                <span class="sd">&#39;&#39;&#39; Save pointing direction arrays (time, control index, time index) from the C library. &#39;&#39;&#39;</span>
                 <span class="k">nonlocal</span> <span class="n">pointing_direction</span><span class="p">,</span> <span class="n">control_ids</span><span class="p">,</span> <span class="n">control_t_ids</span><span class="p">,</span> <span class="n">period_id</span>
 
                 <span class="k">if</span> <span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -416,6 +525,7 @@
 
                         <span class="n">first_iteration</span> <span class="o">=</span> <span class="kc">False</span>
 
+            <span class="c1"># create final pointing direction array</span>
             <span class="n">n_directions</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pointing_direction</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="s2">&quot;t&quot;</span><span class="p">])</span>
             <span class="n">pointing_direction</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="s1">&#39;tx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">((</span><span class="n">n_tx</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">n_directions</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
             <span class="n">pointing_direction</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="s1">&#39;rx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">((</span><span class="n">n_rx</span><span class="p">,</span> <span class="n">n_tx</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">n_directions</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>

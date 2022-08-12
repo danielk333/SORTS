@@ -35,6 +35,7 @@
     <script src="../../../../_static/jquery.js"></script>
     <script src="../../../../_static/underscore.js"></script>
     <script src="../../../../_static/doctools.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
     <link rel="next" title="SpaceObjectTracker.META_FIELDS" href="sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.META_FIELDS.html" />
@@ -2142,6 +2143,11 @@
          Tracker.generate_controls
         </a>
        </li>
+       <li class="toctree-l4">
+        <a class="reference internal" href="sorts.radar.controllers.tracker.Tracker.retreive_target_states.html">
+         Tracker.retreive_target_states
+        </a>
+       </li>
       </ul>
      </li>
      <li class="toctree-l3 has-children">
@@ -2436,8 +2442,134 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="sorts.radar.controllers.space_object_tracker.SpaceObjectTracker">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sorts.radar.controllers.space_object_tracker.</span></span><span class="sig-name descname"><span class="pre">SpaceObjectTracker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profiler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/sorts/radar/controllers/space_object_tracker.html#SpaceObjectTracker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sorts.radar.controllers.space_object_tracker.SpaceObjectTracker" title="Permalink to this definition">#</a></dt>
-<dd><p>This class allows the used to easily track multiple space objects based on their priority. It will generate a set of pointing directions compatible with the 
-specified Radar system over the given time interval.</p>
+<dd><p>Generates a control sequence which tracks multiple objects based on their priority.</p>
+<blockquote>
+<div><p>The <a class="reference internal" href="#sorts.radar.controllers.space_object_tracker.SpaceObjectTracker" title="sorts.radar.controllers.space_object_tracker.SpaceObjectTracker"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpaceObjectTracker</span></code></a> controller generates a set of tracking controls allowing for</p>
+</div></blockquote>
+<p>the tracking multiple space objects in time based on their priority.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The tracking of space objects assumes that our knowledge of the objects’ orbit at time
+<span class="math notranslate nohighlight">\(t_0\)</span> is sufficient to propagate the orbits in time to determine the consecutive 
+ECEF points to be targetted by the radar system.</p>
+</div>
+<p>When coherent/incoherent integration is used, the implementation of the controller allows for
+multiple pointing directions per time slice (but this number is set to be constant).</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../../system/radar/sorts.radar.system.radar.Radar.html#sorts.radar.system.radar.Radar" title="sorts.radar.system.radar.Radar"><code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.Radar</span></code></a> : class encapsulating the radar system.</p></li>
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.RadarController</span></code> : radar controller base class.</p></li>
+<li><p><a class="reference internal" href="../../radar_controls/auto/sorts.radar.radar_controls.RadarControls.html#sorts.radar.radar_controls.RadarControls" title="sorts.radar.radar_controls.RadarControls"><code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.RadarControls</span></code></a> : class encapsulating radar control sequences.</p></li>
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.SpaceObject</span></code> : class encapsulating a space object.</p></li>
+</ul>
+</div>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>profiler</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">sorts.Profiler</span></code>, default=None</span></dt><dd><p>Profiler instance used to monitor the computation performances of the class methods.</p>
+</dd>
+<dt><strong>logger</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">logging.Logger</span></code>, default=None</span></dt><dd><p>Logger instance used to log the computation status of the class methods.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p id="tracker-controller-example">This example showcases the generation of multiple controls sequences allowing to track a 
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Space</span> <span class="pre">object</span></code> passing over the EISCAT_3D radar system:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="kn">import</span> <span class="nn">sorts</span>
+
+<span class="c1"># RADAR system definition</span>
+<span class="n">eiscat3d</span> <span class="o">=</span> <span class="n">sorts</span><span class="o">.</span><span class="n">radars</span><span class="o">.</span><span class="n">eiscat3d</span>
+
+<span class="c1"># controller and simulation parameters</span>
+<span class="n">max_points</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">end_t</span> <span class="o">=</span> <span class="mi">3600</span><span class="o">*</span><span class="mi">12</span>
+<span class="n">t_slice</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">tracking_period</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">states_per_slice</span> <span class="o">=</span> <span class="mi">10</span>
+
+<span class="c1"># Propagator</span>
+<span class="n">Prop_cls</span> <span class="o">=</span> <span class="n">sorts</span><span class="o">.</span><span class="n">propagator</span><span class="o">.</span><span class="n">Kepler</span>
+<span class="n">Prop_opts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">out_frame</span><span class="o">=</span><span class="s1">&#39;ITRS&#39;</span><span class="p">,</span>
+        <span class="n">in_frame</span><span class="o">=</span><span class="s1">&#39;TEME&#39;</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+<span class="c1"># Object definition</span>
+<span class="n">space_object</span> <span class="o">=</span> <span class="n">sorts</span><span class="o">.</span><span class="n">SpaceObject</span><span class="p">(</span>
+        <span class="n">Prop_cls</span><span class="p">,</span>
+        <span class="n">propagator_options</span> <span class="o">=</span> <span class="n">Prop_opts</span><span class="p">,</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="mf">7200.0e3</span><span class="p">,</span> 
+        <span class="n">e</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mf">80.0</span><span class="p">,</span>
+        <span class="n">raan</span> <span class="o">=</span> <span class="mf">86.0</span><span class="p">,</span>
+        <span class="n">aop</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">mu0</span> <span class="o">=</span> <span class="mf">50.0</span><span class="p">,</span>
+        <span class="n">epoch</span> <span class="o">=</span> <span class="mf">53005.0</span><span class="p">,</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+<span class="c1"># create state time array</span>
+<span class="n">t_states</span> <span class="o">=</span> <span class="n">sorts</span><span class="o">.</span><span class="n">equidistant_sampling</span><span class="p">(</span>
+    <span class="n">orbit</span> <span class="o">=</span> <span class="n">space_object</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> 
+    <span class="n">start_t</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> 
+    <span class="n">end_t</span> <span class="o">=</span> <span class="n">end_t</span><span class="p">,</span> 
+    <span class="n">max_dpos</span><span class="o">=</span><span class="mf">50e3</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># create tracking controller</span>
+<span class="n">tracker_controller</span> <span class="o">=</span> <span class="n">sorts</span><span class="o">.</span><span class="n">controllers</span><span class="o">.</span><span class="n">Tracker</span><span class="p">()</span>
+
+<span class="c1"># get object states/passes in ECEF frame</span>
+<span class="n">object_states</span> <span class="o">=</span> <span class="n">space_object</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">t_states</span><span class="p">)</span>
+<span class="n">eiscat_passes</span> <span class="o">=</span> <span class="n">sorts</span><span class="o">.</span><span class="n">find_simultaneous_passes</span><span class="p">(</span><span class="n">t_states</span><span class="p">,</span> <span class="n">object_states</span><span class="p">,</span> <span class="n">eiscat3d</span><span class="o">.</span><span class="n">tx</span> <span class="o">+</span> <span class="n">eiscat3d</span><span class="o">.</span><span class="n">rx</span><span class="p">)</span>
+
+<span class="c1"># plot results</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">)</span>
+
+<span class="c1"># Plotting station ECEF positions and earth grid</span>
+<span class="k">for</span> <span class="n">tx</span> <span class="ow">in</span> <span class="n">eiscat3d</span><span class="o">.</span><span class="n">tx</span><span class="p">:</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">tx</span><span class="o">.</span><span class="n">ecef</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="p">[</span><span class="n">tx</span><span class="o">.</span><span class="n">ecef</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="p">[</span><span class="n">tx</span><span class="o">.</span><span class="n">ecef</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span><span class="s1">&#39;or&#39;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">rx</span> <span class="ow">in</span> <span class="n">eiscat3d</span><span class="o">.</span><span class="n">rx</span><span class="p">:</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">rx</span><span class="o">.</span><span class="n">ecef</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="p">[</span><span class="n">rx</span><span class="o">.</span><span class="n">ecef</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="p">[</span><span class="n">rx</span><span class="o">.</span><span class="n">ecef</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span><span class="s1">&#39;og&#39;</span><span class="p">)</span>
+
+<span class="n">sorts</span><span class="o">.</span><span class="n">plotting</span><span class="o">.</span><span class="n">grid_earth</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">num_lat</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">num_lon</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">res</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">hide_ax</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># plotting object states</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">object_states</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">object_states</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">object_states</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="s2">&quot;--b&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+
+<span class="c1"># compute and plot controls for each pass</span>
+<span class="k">for</span> <span class="n">pass_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">eiscat_passes</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
+    <span class="c1"># get states within pass to generate tracking controls</span>
+    <span class="n">tracking_states</span> <span class="o">=</span> <span class="n">object_states</span><span class="p">[:,</span> <span class="n">eiscat_passes</span><span class="p">[</span><span class="n">pass_id</span><span class="p">]</span><span class="o">.</span><span class="n">inds</span><span class="p">]</span>
+    <span class="n">t_states_i</span> <span class="o">=</span> <span class="n">t_states</span><span class="p">[</span><span class="n">eiscat_passes</span><span class="p">[</span><span class="n">pass_id</span><span class="p">]</span><span class="o">.</span><span class="n">inds</span><span class="p">]</span>
+
+    <span class="c1"># generate controls</span>
+    <span class="n">t_controller</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">t_states_i</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">t_states_i</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">tracking_period</span><span class="p">,</span> <span class="n">tracking_period</span><span class="p">)</span>
+    <span class="n">controls</span> <span class="o">=</span> <span class="n">tracker_controller</span><span class="o">.</span><span class="n">generate_controls</span><span class="p">(</span><span class="n">t_controller</span><span class="p">,</span> <span class="n">eiscat3d</span><span class="p">,</span> <span class="n">t_states_i</span><span class="p">,</span> <span class="n">tracking_states</span><span class="p">,</span> <span class="n">t_slice</span><span class="o">=</span><span class="n">t_slice</span><span class="p">,</span> <span class="n">max_points</span><span class="o">=</span><span class="n">max_points</span><span class="p">,</span> <span class="n">states_per_slice</span><span class="o">=</span><span class="n">states_per_slice</span><span class="p">)</span>
+
+    <span class="c1"># plot states being tracked</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tracking_states</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tracking_states</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tracking_states</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">)</span>
+
+    <span class="c1"># plot beam directions over each control period</span>
+    <span class="k">for</span> <span class="n">period_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">controls</span><span class="o">.</span><span class="n">n_periods</span><span class="p">):</span>
+        <span class="n">ctrl</span> <span class="o">=</span> <span class="n">controls</span><span class="o">.</span><span class="n">get_pdirs</span><span class="p">(</span><span class="n">period_id</span><span class="p">)</span>
+        <span class="n">sorts</span><span class="o">.</span><span class="n">plotting</span><span class="o">.</span><span class="n">plot_beam_directions</span><span class="p">(</span><span class="n">ctrl</span><span class="p">,</span> <span class="n">eiscat3d</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">tx_beam</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">rx_beam</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">zoom_level</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">azimuth</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">elevation</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<figure class="align-default">
+<img alt="../../../../_images/example_tracker_controller.png" src="../../../../_images/example_tracker_controller.png" />
+</figure>
 <p class="rubric">Attributes</p>
 <table class="autosummary longtable table autosummary">
 <colgroup>
@@ -2473,7 +2605,7 @@ specified Radar system over the given time interval.</p>
 <td><p>Process subroutine used to gather the states of one of the object to follow.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.generate_controls.html#sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.generate_controls" title="sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.generate_controls"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpaceObjectTracker.generate_controls</span></code></a>(t, ...)</p></td>
-<td><p>This method can be called to generate a sequence of radar controls which allow for the tracking of multiple space objects. The generated controls will</p></td>
+<td><p>This method can be called to generate a sequence of radar controls which allow for the tracking of multiple space</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.get_passes.html#sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.get_passes" title="sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.get_passes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpaceObjectTracker.get_passes</span></code></a>(t_states, ...)</p></td>
 <td><p>Finds the passes which are simultaneously in the FOV of all the radar stations.</p></td>
@@ -2482,7 +2614,7 @@ specified Radar system over the given time interval.</p>
 <td><p>This function returns the array of sampling time points needed to propagate the states of a given space object.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.get_states.html#sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.get_states" title="sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.get_states"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpaceObjectTracker.get_states</span></code></a>(t, t_slice, ...)</p></td>
-<td><p>Computes the ecef states $</p></td>
+<td><p>Computes the ecef states of a given space object over the control time interval.</p></td>
 </tr>
 </tbody>
 </table>

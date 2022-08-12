@@ -558,10 +558,10 @@
         <li><a href="reference/radar/system/station/sorts.radar.system.station.TX.enabled.html#sorts.radar.system.station.TX.enabled">(sorts.radar.system.station.TX attribute)</a>
 </li>
       </ul></li>
-      <li><a href="reference/radar/passes/auto/sorts.radar.passes.Pass.end.html#sorts.radar.passes.Pass.end">end() (sorts.radar.passes.Pass method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/radar/passes/auto/sorts.radar.passes.Pass.end.html#sorts.radar.passes.Pass.end">end() (sorts.radar.passes.Pass method)</a>
+</li>
       <li><a href="reference/radar/passes/auto/sorts.radar.passes.Pass.enu.html#sorts.radar.passes.Pass.enu">enu (sorts.radar.passes.Pass attribute)</a>
 </li>
       <li><a href="reference/radar/system/station/sorts.radar.system.station.RX.enu.html#sorts.radar.system.station.RX.enu">enu() (sorts.radar.system.station.RX method)</a>
@@ -592,12 +592,6 @@
 </li>
       <li><a href="reference/radar/measurement_errors/auto/sorts.radar.measurement_errors.errors.Errors.html#sorts.radar.measurement_errors.errors.Errors">Errors (class in sorts.radar.measurement_errors.errors)</a>
 </li>
-      <li><a href="reference/radar/scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.exctract_scheduler_results.html#sorts.radar.scheduler.base.RadarSchedulerBase.exctract_scheduler_results">exctract_scheduler_results() (sorts.radar.scheduler.base.RadarSchedulerBase method)</a>
-
-      <ul>
-        <li><a href="reference/radar/scheduler/auto/sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.exctract_scheduler_results.html#sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.exctract_scheduler_results">(sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler method)</a>
-</li>
-      </ul></li>
       <li><a href="reference/radar/scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.extract_control_sequence.html#sorts.radar.scheduler.base.RadarSchedulerBase.extract_control_sequence">extract_control_sequence() (sorts.radar.scheduler.base.RadarSchedulerBase method)</a>
 
       <ul>
@@ -660,6 +654,12 @@
         <li><a href="reference/radar/controllers/auto/sorts.radar.controllers.static.Static.generate_controls.html#sorts.radar.controllers.static.Static.generate_controls">(sorts.radar.controllers.static.Static method)</a>
 </li>
         <li><a href="reference/radar/controllers/auto/sorts.radar.controllers.tracker.Tracker.generate_controls.html#sorts.radar.controllers.tracker.Tracker.generate_controls">(sorts.radar.controllers.tracker.Tracker method)</a>
+</li>
+      </ul></li>
+      <li><a href="reference/radar/scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.generate_schedule.html#sorts.radar.scheduler.base.RadarSchedulerBase.generate_schedule">generate_schedule() (sorts.radar.scheduler.base.RadarSchedulerBase method)</a>
+
+      <ul>
+        <li><a href="reference/radar/scheduler/auto/sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.generate_schedule.html#sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.generate_schedule">(sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler method)</a>
 </li>
       </ul></li>
       <li><a href="reference/radar/measurement_errors/auto/sorts.radar.measurement_errors.errors.Errors.get.html#sorts.radar.measurement_errors.errors.Errors.get">get() (sorts.radar.measurement_errors.errors.Errors method)</a>
@@ -826,14 +826,16 @@
 </li>
       <li><a href="reference/radar/measurement_errors/auto/sorts.radar.measurement_errors.linearized_coded.LinearizedCodedIonospheric.html#sorts.radar.measurement_errors.linearized_coded.LinearizedCodedIonospheric">LinearizedCodedIonospheric (class in sorts.radar.measurement_errors.linearized_coded)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="reference/radar/scheduler/auto/sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.log_scheduler_performances.html#sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler.log_scheduler_performances">log_scheduler_performances() (sorts.radar.scheduler.static_priority_scheduler.StaticPriorityScheduler method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="reference/radar/controllers/auto/sorts.radar.controllers.radar_controller.RadarController.logger.html#sorts.radar.controllers.radar_controller.RadarController.logger">logger (sorts.radar.controllers.radar_controller.RadarController attribute)</a>
 
       <ul>
         <li><a href="reference/radar/radar_controls/auto/sorts.radar.radar_controls.RadarControls.logger.html#sorts.radar.radar_controls.RadarControls.logger">(sorts.radar.radar_controls.RadarControls attribute)</a>
+</li>
+        <li><a href="reference/radar/scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.logger.html#sorts.radar.scheduler.base.RadarSchedulerBase.logger">(sorts.radar.scheduler.base.RadarSchedulerBase attribute)</a>
 </li>
         <li><a href="reference/radar/system/radar/sorts.radar.system.radar.Radar.logger.html#sorts.radar.system.radar.Radar.logger">(sorts.radar.system.radar.Radar attribute)</a>
 </li>
@@ -1064,6 +1066,8 @@
       <ul>
         <li><a href="reference/radar/radar_controls/auto/sorts.radar.radar_controls.RadarControls.profiler.html#sorts.radar.radar_controls.RadarControls.profiler">(sorts.radar.radar_controls.RadarControls attribute)</a>
 </li>
+        <li><a href="reference/radar/scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.profiler.html#sorts.radar.scheduler.base.RadarSchedulerBase.profiler">(sorts.radar.scheduler.base.RadarSchedulerBase attribute)</a>
+</li>
         <li><a href="reference/radar/system/radar/sorts.radar.system.radar.Radar.profiler.html#sorts.radar.system.radar.Radar.profiler">(sorts.radar.system.radar.Radar attribute)</a>
 </li>
       </ul></li>
@@ -1088,7 +1092,11 @@
       <li><a href="reference/radar/system/radar/sorts.radar.system.radar.Radar.html#sorts.radar.system.radar.Radar">Radar (class in sorts.radar.system.radar)</a>
 </li>
       <li><a href="reference/radar/radar_controls/auto/sorts.radar.radar_controls.RadarControls.radar.html#sorts.radar.radar_controls.RadarControls.radar">radar (sorts.radar.radar_controls.RadarControls attribute)</a>
+
+      <ul>
+        <li><a href="reference/radar/scheduler/auto/sorts.radar.scheduler.base.RadarSchedulerBase.radar.html#sorts.radar.scheduler.base.RadarSchedulerBase.radar">(sorts.radar.scheduler.base.RadarSchedulerBase attribute)</a>
 </li>
+      </ul></li>
       <li><a href="reference/radar/controllers/auto/sorts.radar.controllers.radar_controller.RadarController.html#sorts.radar.controllers.radar_controller.RadarController">RadarController (class in sorts.radar.controllers.radar_controller)</a>
 </li>
       <li><a href="reference/radar/radar_controls/auto/sorts.radar.radar_controls.RadarControls.html#sorts.radar.radar_controls.RadarControls">RadarControls (class in sorts.radar.radar_controls)</a>
@@ -1119,14 +1127,14 @@
         <li><a href="reference/radar/passes/auto/sorts.radar.passes.Pass.range_rate.html#sorts.radar.passes.Pass.range_rate">(sorts.radar.passes.Pass method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="reference/radar/measurement_errors/auto/sorts.radar.measurement_errors.linearized_coded.LinearizedCoded.range_rate_std.html#sorts.radar.measurement_errors.linearized_coded.LinearizedCoded.range_rate_std">range_rate_std() (sorts.radar.measurement_errors.linearized_coded.LinearizedCoded method)</a>
 
       <ul>
         <li><a href="reference/radar/measurement_errors/auto/sorts.radar.measurement_errors.linearized_coded.LinearizedCodedIonospheric.range_rate_std.html#sorts.radar.measurement_errors.linearized_coded.LinearizedCodedIonospheric.range_rate_std">(sorts.radar.measurement_errors.linearized_coded.LinearizedCodedIonospheric method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="reference/radar/measurement_errors/auto/sorts.radar.measurement_errors.linearized_coded.LinearizedCoded.range_std.html#sorts.radar.measurement_errors.linearized_coded.LinearizedCoded.range_std">range_std() (sorts.radar.measurement_errors.linearized_coded.LinearizedCoded method)</a>
 
       <ul>

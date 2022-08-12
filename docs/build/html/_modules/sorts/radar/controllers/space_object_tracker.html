@@ -184,15 +184,139 @@
 <span class="kn">from</span> <span class="nn">.</span>					<span class="kn">import</span> <span class="n">Tracker</span><span class="p">,</span> <span class="n">radar_controller</span>
 
 
-<div class="viewcode-block" id="SpaceObjectTracker"><a class="viewcode-back" href="../../../../reference/controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.html#sorts.radar.controllers.space_object_tracker.SpaceObjectTracker">[docs]</a><span class="k">class</span> <span class="nc">SpaceObjectTracker</span><span class="p">(</span><span class="n">radar_controller</span><span class="o">.</span><span class="n">RadarController</span><span class="p">):</span>
-	<span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">	This class allows the used to easily track multiple space objects based on their priority. It will generate a set of pointing directions compatible with the </span>
-<span class="sd">	specified Radar system over the given time interval.</span>
-<span class="sd">	&#39;&#39;&#39;</span>
+<div class="viewcode-block" id="SpaceObjectTracker"><a class="viewcode-back" href="../../../../reference/radar/controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.html#sorts.radar.controllers.space_object_tracker.SpaceObjectTracker">[docs]</a><span class="k">class</span> <span class="nc">SpaceObjectTracker</span><span class="p">(</span><span class="n">radar_controller</span><span class="o">.</span><span class="n">RadarController</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39; Generates a control sequence which tracks multiple objects based on their priority.</span>
 
+<span class="sd">	The :class:`SpaceObjectTracker` controller generates a set of tracking controls allowing for </span>
+<span class="sd">    the tracking multiple space objects in time based on their priority.</span>
+
+<span class="sd">    .. note::</span>
+<span class="sd">        The tracking of space objects assumes that our knowledge of the objects&#39; orbit at time</span>
+<span class="sd">        :math:`t_0` is sufficient to propagate the orbits in time to determine the consecutive </span>
+<span class="sd">        ECEF points to be targetted by the radar system.</span>
+
+<span class="sd">    When coherent/incoherent integration is used, the implementation of the controller allows for</span>
+<span class="sd">    multiple pointing directions per time slice (but this number is set to be constant).</span>
+
+<span class="sd">    .. seealso::</span>
+
+<span class="sd">        * :class:`sorts.Radar&lt;sorts.radar.system.radar.Radar&gt;` : class encapsulating the radar system.</span>
+<span class="sd">        * :class:`sorts.RadarController&lt;sorts.radar.controllers.radar_congirtroller.RadarController&gt;` : radar controller base class.</span>
+<span class="sd">        * :class:`sorts.RadarControls&lt;sorts.radar.radar_controls.RadarControls&gt;` : class encapsulating radar control sequences.</span>
+<span class="sd">        * :class:`sorts.SpaceObject&lt;sorts.targets.space_object.SpaceObject&gt;` : class encapsulating a space object.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    profiler : :class:`sorts.Profiler&lt;sorts.common.profing.Profiler&gt;`, default=None</span>
+<span class="sd">        Profiler instance used to monitor the computation performances of the class methods. </span>
+<span class="sd">    logger : :class:`logging.Logger`, default=None</span>
+<span class="sd">        Logger instance used to log the computation status of the class methods.</span>
+<span class="sd">    </span>
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    .. _tracker_controller_example:</span>
+
+<span class="sd">    This example showcases the generation of multiple controls sequences allowing to track a </span>
+<span class="sd">    :class:`Space object&lt;sorts.targets.space_object.SpaceObject&gt;` passing over the EISCAT_3D radar system:</span>
+
+<span class="sd">    .. code-block:: Python</span>
+
+<span class="sd">        import numpy as np</span>
+<span class="sd">        import matplotlib.pyplot as plt</span>
+
+<span class="sd">        import sorts</span>
+
+<span class="sd">        # RADAR system definition</span>
+<span class="sd">        eiscat3d = sorts.radars.eiscat3d</span>
+
+<span class="sd">        # controller and simulation parameters</span>
+<span class="sd">        max_points = 100</span>
+<span class="sd">        end_t = 3600*12</span>
+<span class="sd">        t_slice = 10</span>
+<span class="sd">        tracking_period = 20</span>
+<span class="sd">        states_per_slice = 10</span>
+
+<span class="sd">        # Propagator</span>
+<span class="sd">        Prop_cls = sorts.propagator.Kepler</span>
+<span class="sd">        Prop_opts = dict(</span>
+<span class="sd">            settings = dict(</span>
+<span class="sd">                out_frame=&#39;ITRS&#39;,</span>
+<span class="sd">                in_frame=&#39;TEME&#39;,</span>
+<span class="sd">            ),</span>
+<span class="sd">        )</span>
+<span class="sd">        # Object definition</span>
+<span class="sd">        space_object = sorts.SpaceObject(</span>
+<span class="sd">                Prop_cls,</span>
+<span class="sd">                propagator_options = Prop_opts,</span>
+<span class="sd">                a = 7200.0e3, </span>
+<span class="sd">                e = 0.1,</span>
+<span class="sd">                i = 80.0,</span>
+<span class="sd">                raan = 86.0,</span>
+<span class="sd">                aop = 0.0,</span>
+<span class="sd">                mu0 = 50.0,</span>
+<span class="sd">                epoch = 53005.0,</span>
+<span class="sd">                parameters = dict(</span>
+<span class="sd">                    d = 0.1,</span>
+<span class="sd">                ),</span>
+<span class="sd">            )</span>
+<span class="sd">        # create state time array</span>
+<span class="sd">        t_states = sorts.equidistant_sampling(</span>
+<span class="sd">            orbit = space_object.state, </span>
+<span class="sd">            start_t = 0, </span>
+<span class="sd">            end_t = end_t, </span>
+<span class="sd">            max_dpos=50e3,</span>
+<span class="sd">        )</span>
+
+<span class="sd">        # create tracking controller</span>
+<span class="sd">        tracker_controller = sorts.controllers.Tracker()</span>
+
+<span class="sd">        # get object states/passes in ECEF frame</span>
+<span class="sd">        object_states = space_object.get_state(t_states)</span>
+<span class="sd">        eiscat_passes = sorts.find_simultaneous_passes(t_states, object_states, eiscat3d.tx + eiscat3d.rx)</span>
+
+<span class="sd">        # plot results</span>
+<span class="sd">        fig = plt.figure()</span>
+<span class="sd">        ax = fig.add_subplot(111, projection=&#39;3d&#39;)</span>
+
+<span class="sd">        # Plotting station ECEF positions and earth grid</span>
+<span class="sd">        for tx in eiscat3d.tx:</span>
+<span class="sd">            ax.plot([tx.ecef[0]], [tx.ecef[1]], [tx.ecef[2]],&#39;or&#39;)</span>
+
+<span class="sd">        for rx in eiscat3d.rx:</span>
+<span class="sd">            ax.plot([rx.ecef[0]], [rx.ecef[1]], [rx.ecef[2]],&#39;og&#39;)</span>
+
+<span class="sd">        sorts.plotting.grid_earth(ax, num_lat=25, num_lon=50, alpha=0.1, res = 100, color=&#39;black&#39;, hide_ax=True)</span>
+
+<span class="sd">        # plotting object states</span>
+<span class="sd">        ax.plot(object_states[0], object_states[1], object_states[2], &quot;--b&quot;, alpha=0.2)</span>
+
+<span class="sd">        # compute and plot controls for each pass</span>
+<span class="sd">        for pass_id in range(np.shape(eiscat_passes)[0]):</span>
+<span class="sd">            # get states within pass to generate tracking controls</span>
+<span class="sd">            tracking_states = object_states[:, eiscat_passes[pass_id].inds]</span>
+<span class="sd">            t_states_i = t_states[eiscat_passes[pass_id].inds]</span>
+<span class="sd">            </span>
+<span class="sd">            # generate controls</span>
+<span class="sd">            t_controller = np.arange(t_states_i[0], t_states_i[-1] + tracking_period, tracking_period)</span>
+<span class="sd">            controls = tracker_controller.generate_controls(t_controller, eiscat3d, t_states_i, tracking_states, t_slice=t_slice, max_points=max_points, states_per_slice=states_per_slice)</span>
+<span class="sd">            </span>
+<span class="sd">            # plot states being tracked</span>
+<span class="sd">            ax.plot(tracking_states[0], tracking_states[1], tracking_states[2], &quot;-&quot;, color=&quot;blue&quot;)</span>
+<span class="sd">            </span>
+<span class="sd">            # plot beam directions over each control period</span>
+<span class="sd">            for period_id in range(controls.n_periods):</span>
+<span class="sd">                ctrl = controls.get_pdirs(period_id)</span>
+<span class="sd">                sorts.plotting.plot_beam_directions(ctrl, eiscat3d, ax=ax, tx_beam=True, rx_beam=True, zoom_level=0.9, azimuth=10, elevation=10)</span>
+
+<span class="sd">        plt.show()</span>
+
+<span class="sd">    .. figure:: ../../../../figures/example_tracker_controller.png</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+	
 	<span class="n">META_FIELDS</span> <span class="o">=</span> <span class="n">radar_controller</span><span class="o">.</span><span class="n">RadarController</span><span class="o">.</span><span class="n">META_FIELDS</span>
 
-<div class="viewcode-block" id="SpaceObjectTracker.__init__"><a class="viewcode-back" href="../../../../reference/controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.__init__.html#sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.__init__">[docs]</a>	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">profiler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="SpaceObjectTracker.__init__"><a class="viewcode-back" href="../../../../reference/radar/controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.__init__.html#sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.__init__">[docs]</a>	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">profiler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 		<span class="sd">&#39;&#39;&#39; </span>
 <span class="sd">		This class can be used to generate a set of states (ECEF frame) which allow for the tracking of multiple space objects while satisfying a set of observational </span>
 <span class="sd">		requirements.</span>
@@ -212,7 +336,7 @@
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 		    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SpaceObjectTracker:Init&#39;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SpaceObjectTracker.compute_pointing_directions"><a class="viewcode-back" href="../../../../reference/controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.compute_pointing_directions.html#sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.compute_pointing_directions">[docs]</a>	<span class="k">def</span> <span class="nf">compute_pointing_directions</span><span class="p">(</span>
+<div class="viewcode-block" id="SpaceObjectTracker.compute_pointing_directions"><a class="viewcode-back" href="../../../../reference/radar/controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.compute_pointing_directions.html#sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.compute_pointing_directions">[docs]</a>	<span class="k">def</span> <span class="nf">compute_pointing_directions</span><span class="p">(</span>
 		<span class="bp">self</span><span class="p">,</span> 
 		<span class="n">controls</span><span class="p">,</span>
 		<span class="n">period_id</span><span class="p">,</span> 
@@ -238,13 +362,13 @@
 <span class="sd">				directions. In the case of the SpaceObjectTracker controller args = (final_states, final_t_tracking), which correspond to the </span>
 <span class="sd">				array of interpolated states and time points where pointing directions are to be computed</span>
 <span class="sd">		&#39;&#39;&#39;</span>
-		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracker_controller</span><span class="o">.</span><span class="n">compute_pointing_direction</span><span class="p">(</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracker_controller</span><span class="o">.</span><span class="n">compute_pointing_directions</span><span class="p">(</span>
 			<span class="n">controls</span><span class="p">,</span>
 			<span class="n">period_id</span><span class="p">,</span> 
 			<span class="n">args</span><span class="p">,</span>
 		<span class="p">)</span></div>
 
-<div class="viewcode-block" id="SpaceObjectTracker.generate_controls"><a class="viewcode-back" href="../../../../reference/controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.generate_controls.html#sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.generate_controls">[docs]</a>	<span class="k">def</span> <span class="nf">generate_controls</span><span class="p">(</span>
+<div class="viewcode-block" id="SpaceObjectTracker.generate_controls"><a class="viewcode-back" href="../../../../reference/radar/controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.generate_controls.html#sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.generate_controls">[docs]</a>	<span class="k">def</span> <span class="nf">generate_controls</span><span class="p">(</span>
 		<span class="bp">self</span><span class="p">,</span> 
 		<span class="n">t</span><span class="p">,</span> 
 		<span class="n">radar</span><span class="p">,</span> 
@@ -263,190 +387,248 @@
 		<span class="n">save_states</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 		<span class="n">cache_pdirs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 	<span class="p">):</span>
-		<span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">		This method can be called to generate a sequence of radar controls which allow for the tracking of multiple space objects. The generated controls will</span>
-<span class="sd">		contain the pointing directions for each radar station. </span>
+		<span class="sd">&#39;&#39;&#39; This method can be called to generate a sequence of radar controls which allow for the tracking of multiple space </span>
+<span class="sd">		objects. The generated controls will contain the pointing directions for each radar station. </span>
 
-<span class="sd">		The current implementation of this algorithm relies on the concept of static priority to choose which space object will be tracked at a given time t. </span>
-<span class="sd">		It is important to note that when a specific space object is chosen for tracking at the start of the time slice, this object will remain tracked until</span>
-<span class="sd">		then end of the time slice, even if a higher priority object enters the field of view.</span>
+<span class="sd">		The current implementation of this algorithm relies on the concept of static priority to choose which space object will </span>
+<span class="sd">		be tracked at a given time t. </span>
+<span class="sd">		It is important to note that when a specific space object is chosen for tracking at the start of the time slice, </span>
+<span class="sd">		this object will remain tracked until then end of the time slice, even if a higher priority object enters the field </span>
+<span class="sd">		of view.</span>
 
 <span class="sd">		The generate_controls method consists of two distinct parts :</span>
-<span class="sd">			- First the states of each space object are propagated over the whole control time interval (given by t). When all the states are computed, data </span>
-<span class="sd">			reduction will be achieved by removing all the states lying outside of the radar system field of view. Finally, the tracking schedule (i.e. the </span>
-<span class="sd">			choice of which space object to follow) will be done according to the priority of each space object.</span>
-<span class="sd">			- When the tracking schedule is generated, the algorithm will then perform an interpolation to the $i^{th}$ object for all tracking instants $t_{ik}$</span>
-<span class="sd">			associated with this space object. </span>
+<span class="sd">			- 	First the states of each space object are propagated over the whole control time interval (given by t). </span>
+<span class="sd">				When all the states are computed, data reduction will be achieved by removing all the states lying outside </span>
+<span class="sd">				of the radar system field of view. </span>
+<span class="sd">				Finally, the tracking schedule (i.e. the choice of which space object to follow) will be done according </span>
+<span class="sd">				to the priority of each space object.</span>
+<span class="sd">			- 	When the tracking schedule is generated, the algorithm will then perform an interpolation to the </span>
+<span class="sd">				:math:`i^{th}` object for all tracking instants :math:`t_{ik}` associated with this space object. </span>
 
-<span class="sd">		As an example, consider that we want to track 3 space objects (0, 1, 2) of priority (0, 1, 2) at times $t = [0, 10, 20, 30]$</span>
+<span class="sd">		As an example, consider that we want to track 3 space objects (0, 1, 2) of priority (0, 1, 2) at times </span>
+<span class="sd">		:math:`t = [0, 10, 20, 30]`</span>
 
-<span class="sd">		The first part of the algorithm has propagated the states and has found the following passes (sequence of points inside the FOV of all stations) :</span>
+<span class="sd">		The first part of the algorithm has propagated the states and has found the following passes (sequence of </span>
+<span class="sd">		points inside the FOV of all stations) :</span>
 
-<span class="sd">			- Object 0 (p = 0) :		$t_0^p = [10, 15]$</span>
-<span class="sd">			- Object 1 (p = 1) :		$t_0^p = [30]$</span>
-<span class="sd">			- Object 2 (p = 2) :		$t_0^p = [10, 20, 30]$</span>
+<span class="sd">			- Object 0 (p = 0) :        :math:`t_0^p = [10, 15]`</span>
+<span class="sd">			- Object 1 (p = 1) :        :math:`t_0^p = [30]`</span>
+<span class="sd">			- Object 2 (p = 2) :        :math:`t_0^p = [10, 20, 30]`</span>
 
-<span class="sd">		Since all objects are outside the radar&#39;s FOV at time 0, we can remove the control time slice at $t=0$, yielding $t = [10, 20, 30]$. We can then </span>
-<span class="sd">		follow an iterative procedure : first we create an array containing the index of the space object beaing tracked during the time slice $t_k$ :</span>
+<span class="sd">		Since all objects are outside the radar&#39;s FOV at time 0, we can remove the control time slice at :math:`t=0`, </span>
+<span class="sd">		yielding :math:`t = [10, 20, 30]`. We can then follow an iterative procedure : first we create an array </span>
+<span class="sd">		containing the index of the space object beaing tracked during the time slice :math:`t_k` :</span>
 
-<span class="sd">			$C = [-1 \hspace{1.5mm} -1 \hspace{1.5mm} -1]$</span>
+<span class="sd">		.. math:: C = [-1 \hspace{1.5mm} -1 \hspace{1.5mm} -1]</span>
 
-<span class="sd">		Looking at the first object, we can see that at time $t = 10s$, the object will be inside the radar FOV. Therefore, we allocate the first time slice </span>
-<span class="sd">		to the tracking of this space object :</span>
+<span class="sd">		Looking at the first object, we can see that at time :math:`t = 10s`, the object will be inside the radar FOV. </span>
+<span class="sd">		Therefore, we allocate the first time slice to the tracking of this space object :</span>
 
-<span class="sd">			$C = [0 \hspace{1.5mm} -1 \hspace{1.5mm} -1]$</span>
+<span class="sd">		.. math:: C = [0 \hspace{1.5mm} -1 \hspace{1.5mm} -1]</span>
 
-<span class="sd">		Then, we see that the second space object is inside the stations&#39; FOV at time $t = 30s$. Since there are no conflicts with other space objects at this time,</span>
-<span class="sd">		we allocate the last time slice to the tracking of this space object :</span>
+<span class="sd">		Then, we see that the second space object is inside the stations&#39; FOV at time :math:`t = 30s`. Since there are </span>
+<span class="sd">		no conflicts with other space objects at this time, we allocate the last time slice to the tracking of this </span>
+<span class="sd">		space object :</span>
 
-<span class="sd">			$C = [0 \hspace{1.5mm} -1 \hspace{1.5mm} 1]$</span>
+<span class="sd">		.. math:: C = [0 \hspace{1.5mm} -1 \hspace{1.5mm} 1]</span>
 
-<span class="sd">		Finally, we can see that the last space object is visible during the whole control interval, but the first and last time slices are already allocated for </span>
-<span class="sd">		the tracking of higher priority objects. Therefore, the middle time slice will be allocated for the tracking of the last space object :</span>
+<span class="sd">		Finally, we can see that the last space object is visible during the whole control interval, but the first and </span>
+<span class="sd">		last time slices are already allocated for the tracking of higher priority objects. Therefore, the middle time </span>
+<span class="sd">		slice will be allocated for the tracking of the last space object :</span>
 
-<span class="sd">			$C = [0 \hspace{1.5mm} 2 \hspace{1.5mm} 1]$</span>
+<span class="sd">		.. math:: C = [0 \hspace{1.5mm} 2 \hspace{1.5mm} 1]</span>
 
-<span class="sd">		The last part of this algorithm consists in computing the states of the objects at each tracking point, and then computing the pointing directions for</span>
-<span class="sd">		each station.</span>
-
+<span class="sd">		The last part of this algorithm consists in computing the states of the objects at each tracking point, and then </span>
+<span class="sd">		computing the pointing directions for each station.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">		t : np.ndarray</span>
-<span class="sd">			Start time of a Tracking time slice. This array limits the controls time interval between t[0] and t[-1], but please note that if no space objects are found </span>
-<span class="sd">			at a given time slice, the latter will be discarded so that the final conrtol array only contains time slices allocated for the observation of a space object.</span>
+<span class="sd">		t : numpy.ndarray (N,)</span>
+<span class="sd">			Start time of Tracking time slices (in seconds). </span>
+<span class="sd">			This array limits the controls time interval between t[0] and t[-1].</span>
+<span class="sd">			</span>
+<span class="sd">			.. note::</span>
+<span class="sd">				If no space objects are found at a given time slice, the latter will be discarded such that the final control</span>
+<span class="sd">				array only contains time slices allocated for the observation of a space object.</span>
+<span class="sd">		radar : :class:`sorts.Radar&lt;sorts.radar.system.radar.Radar&gt;`</span>
+<span class="sd">			Radar instance being controlled to track the space objects. </span>
+<span class="sd">		space_objects : list / numpy.ndarray of :class:`sorts.SpaceObject&lt;sorts.targets.space_object.SpaceObject&gt;`</span>
+<span class="sd">			Array of space objects being targeted during the specified time interval (t[0], t[-1]). </span>
+<span class="sd">		epoch : int / float (in ``MJD`` format)</span>
+<span class="sd">			Time epoch (at the start of the simulation) given in MJD format (Modified Julian Date). This epoch is used </span>
+<span class="sd">			to synchronize the states of the space objects with the simulation time reference.</span>
+<span class="sd">		t_slice : float / numpy.ndarray (N,)</span>
+<span class="sd">            Time slice durations (in seconds). The duration of each time slice must be less or equal to the </span>
+<span class="sd">            time step between two consecutive time slices.</span>
+<span class="sd">        states_per_slice : int, default=1</span>
+<span class="sd">            Number of pointing directions per time slice. A space object can be tracked at multiple time points within </span>
+<span class="sd">            a given time slice. If ``state_per_slice`` is greater than one, then additional tracking points will be added </span>
+<span class="sd">            within time slices separated by a duration</span>
 
-<span class="sd">			Each time slice $T_s^i$ is defined by its start time $t^i$ (contained in the t array) and its duration $t_{slice}^i$ (contained in the t_slice array)</span>
+<span class="sd">            .. math:: \\delta t^k = \\frac{\\Delta t_{slice}^k}{n}.</span>
 
-<span class="sd">		radar : sorts.radar.system.Radar</span>
-<span class="sd">			Radar instance being controlled to track the space objects. This instance is used for the computations of the station pointing directions and for the </span>
-<span class="sd">			checking of a space object visibility. </span>
-
-<span class="sd">		space_objects : list/np.ndarray of sorts.targets.SpaceObject</span>
-<span class="sd">			Array of space objects to be observed during the specified time interval (t[0], t[-1]). </span>
-
-<span class="sd">		epoch : int/float</span>
-<span class="sd">			Time epoch (at the start of the simulation) given in MJD format (Modified Julian Date). This epoch is used to synchronize the states of the space objects</span>
-<span class="sd">			with the simulation time.</span>
-
-<span class="sd">		t_slice : float/numpy.ndarray </span>
-<span class="sd">            Array of time slice durations. The duration of each time slice $T_s^i$ be less than or equal to the time step between two consecutive time slices. In other</span>
-<span class="sd">            words, $t_{slice}^i &lt; t^{i+1} - t^{i}$</span>
-
-<span class="sd">        state_per_slice (optional) : int</span>
-<span class="sd">            number of tracking control points per time slice. </span>
-
-<span class="sd">            A space object can be tracked at multiple time points within a given time slice. If state_per_slice is greater than one, then additional tracking points</span>
-<span class="sd">            will be added within the time slice at regular time intervals (separated by a duration t_slice/state_per_slice).</span>
-
-<span class="sd">		space_object_priorities (optional) : np.ndarray (int)</span>
-<span class="sd">			Priority of each space object (given in the same order as space_objects array). if None, the priorities will be set automatically following the FIFO algorithm.</span>
+<span class="sd">            where :math:`\\Delta t_slice` is the duration of the :math:`k^{k}` time slice and :math:`n` is the number of </span>
+<span class="sd">            pointing directions per time slice.</span>
+<span class="sd">		space_object_priorities : numpy.ndarray of int, default=None</span>
+<span class="sd">			Priority of each space object (given in the same order as space_objects array). if None, the priorities </span>
+<span class="sd">			will be set automatically following the FIFO algorithm.</span>
 <span class="sd">			Low numbers indicate a high tracking prioriy.</span>
-
-<span class="sd">		priority : int (optional)</span>
-<span class="sd">            Priority of the generated controls, only used by the scheduler to choose between overlapping controls. Low numbers indicate a high control prioriy. None is used for dynamic priority management algorithms.</span>
-
-<span class="sd">		interpolator (optional) : sorts.interpolation.Interpolation</span>
+<span class="sd">		priority : int, default=None</span>
+<span class="sd">            Priority of the generated controls, only used by the scheduler to choose between overlapping controls. </span>
+<span class="sd">            Low numbers indicate a high control prioriy. ``None`` is used for dynamic priority management algorithms.</span>
+<span class="sd">		interpolator : :class:`sorts.Interpolator&lt;sorts.common.interpolation.Interpolator&gt;, default=None</span>
 <span class="sd">			Interpolation algorithm used to reconstruct interpolate target states between propagated states.</span>
-<span class="sd">			If no interpolator is profided, the default interpolation class used will be sorts.interpolation.Linear </span>
+<span class="sd">			If no interpolator is provided, the default interpolation class used will be </span>
+<span class="sd">			:class:`sorts.interpolation.Linear&lt;sorts.common.interpolation.Linear&gt;`. </span>
+<span class="sd">		max_dpos : float, default=50e3</span>
+<span class="sd">			Maximum distance in meters between two consecutive propagated states.</span>
+<span class="sd">		max_samp : int, default=1000</span>
+<span class="sd">			Maximum number of time samples used for target states propagation.</span>
+<span class="sd">		max_processes : int, default=16</span>
+<span class="sd">			Maximum number of simultaneous processes used during the generation of the tracking schedule. </span>
+<span class="sd">		scheduler : :class:`sorts.RadarSchedulerBase&lt;sorts.radar.scheduler.base.RadarSchedulerBase&gt;`, default=None</span>
+<span class="sd">            RadarSchedulerBase instance used for time synchronization between control periods.</span>
+<span class="sd">            This parameter is useful when multiple controls are sent to a given scheduler.</span>
+<span class="sd">            If the scheduler is not provided, the control periods will be generated using the ``max_points``</span>
+<span class="sd">            parameter.</span>
+<span class="sd">        max_points : default=100</span>
+<span class="sd">            Max number of points for a given control array computed simultaneously. This number is used to limit the </span>
+<span class="sd">            impact of computations over RAM.</span>
 
-<span class="sd">		max_dpos (optional) : int</span>
-<span class="sd">			maximum distance in meters between two consecutive propagated states.</span>
-<span class="sd">			The default value is 50km.</span>
+<span class="sd">            .. note::</span>
+<span class="sd">            	Lowering this number might increase computation time, while increasing this number might cause </span>
+<span class="sd">            	problems depending on the available RAM on your machine.</span>
 
-<span class="sd">		max_samp (optional) : int</span>
-<span class="sd">			maximum number of time samples used for target states propagation.</span>
-
-<span class="sd">		max_processes (optional) : int</span>
-<span class="sd">			maximum number of simultaneous processes used during the generation of the tracking schedule. The default value is 16 processes. </span>
-
-<span class="sd">		scheduler (optional) : sorts.Scheduler </span>
-<span class="sd">            scheduler instance used for scheduling time sunchromization between controls for tims slicing. </span>
-<span class="sd">            Time slicing refers to the slicing of the time array into multiple subcontrol arrays (given as generator objects) to reduce memory (RAM) usage.</span>
-<span class="sd">            This parameter is only useful when multiple controls are sent to a given scheduler.</span>
-<span class="sd">            If the scheduler is not provided, the controller will slice the controls using the max_points parameter.</span>
-
-<span class="sd">        max_points (optional) : int </span>
-<span class="sd">            Max number of points for a given control array computed simultaneously. This number is used to limit the impact of computations over RAM</span>
-<span class="sd">            Note that lowering this number might increase computation time, while increasing this number might cause problems depending on the available RAM on your machine</span>
-
-<span class="sd">		save_states (optional) : bool </span>
-<span class="sd">			If Rrue, the states of the space objects will be saved within the meta of the generated controls. (default value : False)</span>
-
-<span class="sd">		cache_pdirs (optional) : bool</span>
-<span class="sd">			If True, the pointing directions computation results will be cached within the control structure. Bear in mind that setting cache_pdirs might drasticly increase</span>
-<span class="sd">			your RAM usage.</span>
+<span class="sd">		save_states : bool, default=False</span>
+<span class="sd">			If True, the states of the space objects will be saved within the ``meta`` field of the generated controls. </span>
+<span class="sd">			Setting ``save_states`` to True might drasticly increase your RAM usage.</span>
+<span class="sd">		cache_pdirs : bool, default=False</span>
+<span class="sd">			If True, the pointing directions computation results will be cached within the control structure. </span>
+<span class="sd">			Setting ``cache_pdirs`` to True might drasticly increase your RAM usage.</span>
 
 <span class="sd">		Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        sorts.RadarControls</span>
-<span class="sd">            Radar Controls to be applied to the radar to perform tracking of the the given array of space objects during the control interval t. </span>
+<span class="sd">        controls : :class:`sorts.RadarControls&lt;sorts.radar.radar_controls.RadarControls&gt;`</span>
+<span class="sd">            Radar control sequence to be applied to the radar to perform tracking of the the given array of space objects </span>
+<span class="sd">            during the control interval t. </span>
 <span class="sd">		</span>
-<span class="sd">		Examples :</span>
-<span class="sd">		----------</span>
-
-<span class="sd">		To allow the tracking of multiple objects, one first needs to define the array of objects to be tracked.</span>
-<span class="sd">		For example, an array of five objects can be defined as follows :</span>
-
-<span class="sd">		&gt;&gt;&gt; # Target propagator options </span>
-<span class="sd">		&gt;&gt;&gt; Prop_cls = sorts.Kepler</span>
-<span class="sd">		&gt;&gt;&gt; Prop_opts = dict(</span>
-<span class="sd">		&gt;&gt;&gt;     settings = dict(</span>
-<span class="sd">		&gt;&gt;&gt;         out_frame=&#39;ITRS&#39;,</span>
-<span class="sd">		&gt;&gt;&gt;         in_frame=&#39;TEME&#39;,</span>
-<span class="sd">		&gt;&gt;&gt;     ),</span>
-<span class="sd">		&gt;&gt;&gt; )</span>
-
-<span class="sd">		&gt;&gt;&gt; # define objects&#39; orbital parameters</span>
-<span class="sd">		&gt;&gt;&gt; orbits_a = np.array([7200, 7200, 8500, 12000, 10000])*1e3 # semi major axis - m</span>
-<span class="sd">		&gt;&gt;&gt; orbits_i = np.array([80, 80, 105, 105, 80]) # inclination - deg</span>
-<span class="sd">		&gt;&gt;&gt; orbits_raan = np.array([86, 86, 160, 180, 90]) # right ascension of ascending node - deg</span>
-<span class="sd">		&gt;&gt;&gt; orbits_aop = np.array([0, 0, 50, 40, 55]) # argument of perigee - deg</span>
-<span class="sd">		&gt;&gt;&gt; orbits_mu0 = np.array([60, 50, 5, 30, 8]) # mean anomaly - deg</span>
-
-<span class="sd">		&gt;&gt;&gt; # Initialization of each space object</span>
-<span class="sd">		&gt;&gt;&gt; space_objects = []</span>
-<span class="sd">		&gt;&gt;&gt; for so_id in range(len(orbits_a)):</span>
-<span class="sd">		&gt;&gt;&gt;     space_objects.append(sorts.SpaceObject(</span>
-<span class="sd">		&gt;&gt;&gt;             Prop_cls,</span>
-<span class="sd">		&gt;&gt;&gt;             propagator_options = Prop_opts,</span>
-<span class="sd">		&gt;&gt;&gt;             a = orbits_a[so_id], </span>
-<span class="sd">		&gt;&gt;&gt;             e = 0.1,</span>
-<span class="sd">		&gt;&gt;&gt;             i = orbits_i[so_id],</span>
-<span class="sd">		&gt;&gt;&gt;             raan = orbits_raan[so_id],</span>
-<span class="sd">		&gt;&gt;&gt;             aop = orbits_aop[so_id],</span>
-<span class="sd">		&gt;&gt;&gt;             mu0 = orbits_mu0[so_id],</span>
-<span class="sd">		&gt;&gt;&gt;             </span>
-<span class="sd">		&gt;&gt;&gt;             epoch = epoch,</span>
-<span class="sd">		&gt;&gt;&gt;             parameters = dict(</span>
-<span class="sd">		&gt;&gt;&gt;                 d = 0.1,</span>
-<span class="sd">		&gt;&gt;&gt;            ),</span>
-<span class="sd">		&gt;&gt;&gt;         ))</span>
-
-<span class="sd">		When space objects are created, one has to define a tracking priority for each one of them. The lower the scalar for the tracking priority is for a given object,</span>
-<span class="sd">		the more importance will be given by the scheduler to the observation of this object.</span>
-
-<span class="sd">		&gt;&gt;&gt; priority = np.array([3, 2, 0, 1, 4]) # observational priority associated to each object</span>
+<span class="sd">		Examples</span>
+<span class="sd">		--------</span>
+<span class="sd">		This example showcases the simultaneous tracking of 5 space objects by the ``EISCAT_3D`` radar system. </span>
 <span class="sd">		</span>
-<span class="sd">		Then, we can initialize the scheduler :</span>
+<span class="sd">		.. code-block:: Python</span>
 
-<span class="sd">		&gt;&gt;&gt; so_tracking_controller = sorts.SpaceObjectTracking(logger=logger, profiler=p)</span>
+<span class="sd">			import numpy as np</span>
+<span class="sd">			import matplotlib.pyplot as plt</span>
+
+<span class="sd">			import sorts</span>
+
+<span class="sd">			# RADAR definition</span>
+<span class="sd">			eiscat3d = sorts.radars.eiscat3d</span>
+
+<span class="sd">			# Object definition</span>
+<span class="sd">			# Propagator</span>
+<span class="sd">			Prop_cls = sorts.propagator.Kepler</span>
+<span class="sd">			Prop_opts = dict(</span>
+<span class="sd">			    settings = dict(</span>
+<span class="sd">			        out_frame=&#39;ITRS&#39;,</span>
+<span class="sd">			        in_frame=&#39;TEME&#39;,</span>
+<span class="sd">			    ),</span>
+<span class="sd">			)</span>
+
+<span class="sd">			# Object properties</span>
+<span class="sd">			orbits_a = np.array([7200, 7200, 8500, 12000, 10000])*1e3 # m</span>
+<span class="sd">			orbits_i = np.array([80, 80, 105, 105, 80]) # deg</span>
+<span class="sd">			orbits_raan = np.array([86, 86, 160, 180, 90]) # deg</span>
+<span class="sd">			orbits_aop = np.array([0, 0, 50, 40, 55]) # deg</span>
+<span class="sd">			orbits_mu0 = np.array([60, 50, 5, 30, 8]) # deg</span>
+<span class="sd">			priorities = np.array([4, 3, 1, 2, 5])</span>
+<span class="sd">			epoch = 53005.0</span>
+
+<span class="sd">			# Creating space objects</span>
+<span class="sd">			space_objects = []</span>
+<span class="sd">			for so_id in range(len(orbits_a)):</span>
+<span class="sd">			    space_objects.append(sorts.SpaceObject(</span>
+<span class="sd">			            Prop_cls,</span>
+<span class="sd">			            propagator_options = Prop_opts,</span>
+<span class="sd">			            a=orbits_a[so_id], </span>
+<span class="sd">			            e=0.1,</span>
+<span class="sd">			            i=orbits_i[so_id],</span>
+<span class="sd">			            raan=orbits_raan[so_id],</span>
+<span class="sd">			            aop=orbits_aop[so_id],</span>
+<span class="sd">			            mu0=orbits_mu0[so_id],</span>
+<span class="sd">			            epoch=epoch,</span>
+<span class="sd">			            parameters = dict(</span>
+<span class="sd">			                d=0.1,</span>
+<span class="sd">			            ),</span>
+<span class="sd">			        ))</span>
+
+
+
+<span class="sd">			# Radar controller parameters</span>
+<span class="sd">			tracking_period = 50.0</span>
+<span class="sd">			t_slice = 2.0</span>
+<span class="sd">			t_start = 0.0</span>
+<span class="sd">			t_end = 3600*5</span>
+
+<span class="sd">			# intialization of the space object tracker controller</span>
+<span class="sd">			so_tracking_controller = sorts.SpaceObjectTracker()</span>
+
+<span class="sd">			# generate controls</span>
+<span class="sd">			t_tracking = np.arange(t_start, t_end, tracking_period)</span>
+<span class="sd">			controls = so_tracking_controller.generate_controls(t_tracking, eiscat3d, space_objects, epoch, t_slice, space_object_priorities=priorities, save_states=True)</span>
+
+
+
+<span class="sd">			# plotting results</span>
+<span class="sd">			fig = plt.figure()</span>
+<span class="sd">			ax = fig.add_subplot(111, projection=&#39;3d&#39;)</span>
+
+<span class="sd">			# Plotting station ECEF positions and earth grid</span>
+<span class="sd">			sorts.plotting.grid_earth(ax, num_lat=25, num_lon=50, alpha=0.1, res=100, color=&#39;black&#39;, hide_ax=True)</span>
+<span class="sd">			for tx in eiscat3d.tx:</span>
+<span class="sd">			    ax.plot([tx.ecef[0]],[tx.ecef[1]],[tx.ecef[2]],&#39;or&#39;)</span>
+
+<span class="sd">			for rx in eiscat3d.rx:</span>
+<span class="sd">			    ax.plot([rx.ecef[0]],[rx.ecef[1]],[rx.ecef[2]],&#39;og&#39;)       </span>
+
+<span class="sd">			# plot all space object states</span>
+<span class="sd">			for space_object_index in range(len(space_objects)):</span>
+<span class="sd">			    states = controls.meta[&quot;objects_states&quot;][space_object_index]</span>
+<span class="sd">			    ax.plot(states[0], states[1], states[2], &#39;--&#39;, label=f&quot;so-{space_object_index} (p={priorities[space_object_index]})&quot;, alpha=0.35)</span>
+
+
+<span class="sd">			# plot states being tracked and </span>
+<span class="sd">			ecef_tracking = controls.meta[&quot;tracking_states&quot;]</span>
+<span class="sd">			object_ids = controls.meta[&quot;state_priorities&quot;]</span>
+
+<span class="sd">			for period_id in range(controls.n_periods):</span>
+<span class="sd">			    # compute transitions between the tracking of multiple objects (used to plot segments)</span>
+<span class="sd">			    mask = np.logical_or(np.abs(controls.t[period_id][1:] - controls.t[period_id][:-1]) &gt; tracking_period, object_ids[period_id][1:] - object_ids[period_id][:-1] != 0)</span>
+<span class="sd">			    transition_ids = np.where(mask)[0]+1</span>
+
+<span class="sd">			    # plot control sequence beam directions</span>
+<span class="sd">			    ax = sorts.plotting.plot_beam_directions(controls.get_pdirs(period_id), eiscat3d, ax=ax, zoom_level=0.6, azimuth=10, elevation=20)</span>
+
+<span class="sd">			    # plot states being tracked as segments</span>
+<span class="sd">			    for i in range(len(transition_ids)+1):</span>
+<span class="sd">			        if i == 0:</span>
+<span class="sd">			            i_start = 0</span>
+<span class="sd">			        else:</span>
+<span class="sd">			            i_start = transition_ids[i-1]</span>
+
+<span class="sd">			        if i == len(transition_ids):</span>
+<span class="sd">			            i_end = len(t_tracking)+1</span>
+<span class="sd">			        else:</span>
+<span class="sd">			            i_end = transition_ids[i]</span>
+<span class="sd">			             </span>
+<span class="sd">			        ax.plot(ecef_tracking[period_id][0, i_start:i_end], ecef_tracking[period_id][1, i_start:i_end], ecef_tracking[period_id][2, i_start:i_end], &#39;-b&#39;)</span>
+<span class="sd">			             </span>
+<span class="sd">			ax.legend()</span>
+<span class="sd">			plt.show()</span>
+
+<span class="sd">		.. figure:: ../../../../figures/example_spaceobject_tracker_controller.png</span>
 <span class="sd">		</span>
-<span class="sd">		Finally, after defining the radar and the tracking time points, one can generate the tracking schedule :</span>
-
-<span class="sd">		&gt;&gt;&gt; radar = instances.eiscat3d # definition of the radar instance used to track the objects</span>
-
-<span class="sd">		&gt;&gt;&gt; # definition of tracking time points</span>
-<span class="sd">		&gt;&gt;&gt; t_start = 0</span>
-<span class="sd">		&gt;&gt;&gt; t_end = 100000</span>
-<span class="sd">		&gt;&gt;&gt; t_slice = 0.1</span>
-<span class="sd">		&gt;&gt;&gt; states_per_slice = 1</span>
-<span class="sd">		&gt;&gt;&gt; epoch = 53005.0</span>
-<span class="sd">		&gt;&gt;&gt; t_tracking = np.arange(t_start, t_end, tracking_period)</span>
-
-<span class="sd">		&gt;&gt;&gt; # generation of the tracking points in the ECEF frame</span>
-<span class="sd">		&gt;&gt;&gt; controls = so_tracking_controller.generate_controls(t_tracking, radar, space_objects, epoch, t_slice, states_per_slice, priority=priority)</span>
-
 <span class="sd">		&#39;&#39;&#39;</span>
 		<span class="c1"># check the validity of the input values</span>
 		<span class="n">space_objects</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">space_objects</span><span class="p">)</span> <span class="c1"># if list, convert space_objects to a numpy array</span>
@@ -456,7 +638,7 @@
 
 		<span class="c1"># check/initialize interpolator</span>
 		<span class="k">if</span> <span class="n">interpolator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;TrackingScheduler:generate_schedule -&gt; no interpolator information provided, using interpolator.Linear&quot;</span><span class="p">)</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;SpaceObjectTracker:generate_controls -&gt; no interpolator information provided, using interpolator.Linear&quot;</span><span class="p">)</span>
 			<span class="n">interpolator</span> <span class="o">=</span> <span class="n">interpolation</span><span class="o">.</span><span class="n">Linear</span>
 
 		<span class="c1"># check/initialize epoch</span>
@@ -469,7 +651,7 @@
 			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;t must be an array&quot;</span><span class="p">)</span>
 
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
-			<span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s2">&quot;TrackingScheduler:generate_schedule&quot;</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s2">&quot;SpaceObjectTracker:generate_controls&quot;</span><span class="p">)</span>
 
 		<span class="n">n_control_points</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
 
@@ -477,14 +659,21 @@
 		<span class="c1"># Those arrays are shared between all processes</span>
 		<span class="c1"># each process will updated the array values to get the final tracking states </span>
 		<span class="n">mp_shared_final_states</span> 		<span class="o">=</span> <span class="n">mptools</span><span class="o">.</span><span class="n">convert_to_shared_array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">((</span><span class="mi">6</span><span class="p">,</span> <span class="n">n_control_points</span><span class="o">*</span><span class="n">states_per_slice</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">)</span>
-		<span class="n">mp_shared_state_priorities</span> 	<span class="o">=</span> <span class="n">mptools</span><span class="o">.</span><span class="n">convert_to_shared_array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">n_control_points</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">)</span>
-		<span class="n">mp_shared_object_indices</span> 	<span class="o">=</span> <span class="n">mptools</span><span class="o">.</span><span class="n">convert_to_shared_array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">n_control_points</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">)</span>
+		<span class="n">mp_shared_state_priorities</span> 	<span class="o">=</span> <span class="n">mptools</span><span class="o">.</span><span class="n">convert_to_shared_array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">n_control_points</span><span class="p">,),</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">)</span>
+		<span class="n">mp_shared_object_indices</span> 	<span class="o">=</span> <span class="n">mptools</span><span class="o">.</span><span class="n">convert_to_shared_array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">n_control_points</span><span class="p">,),</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">)</span>
 
 		<span class="c1"># create final output arrays from the memory slots of the shared arrays</span>
 		<span class="n">final_states</span> 				<span class="o">=</span> <span class="n">mptools</span><span class="o">.</span><span class="n">convert_to_numpy_array</span><span class="p">(</span><span class="n">mp_shared_final_states</span><span class="p">,</span> 		<span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">n_control_points</span><span class="o">*</span><span class="n">states_per_slice</span><span class="p">))</span>
 		<span class="n">state_priorities</span> 			<span class="o">=</span> <span class="n">mptools</span><span class="o">.</span><span class="n">convert_to_numpy_array</span><span class="p">(</span><span class="n">mp_shared_state_priorities</span><span class="p">,</span> 	<span class="p">(</span><span class="n">n_control_points</span><span class="p">,))</span>
 		<span class="n">object_indices</span> 				<span class="o">=</span> <span class="n">mptools</span><span class="o">.</span><span class="n">convert_to_numpy_array</span><span class="p">(</span><span class="n">mp_shared_object_indices</span><span class="p">,</span> 		<span class="p">(</span><span class="n">n_control_points</span><span class="p">,))</span>
 
+		<span class="c1"># if save states is true, create arrays to save propagated states.</span>
+		<span class="k">if</span> <span class="n">save_states</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+			<span class="n">mp_shared_obj_states</span> 	<span class="o">=</span> <span class="n">mptools</span><span class="o">.</span><span class="n">convert_to_shared_array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">((</span><span class="n">n_space_objects</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="n">n_control_points</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">)</span>
+			<span class="n">obj_states</span> 				<span class="o">=</span> <span class="n">mptools</span><span class="o">.</span><span class="n">convert_to_numpy_array</span><span class="p">(</span><span class="n">mp_shared_obj_states</span><span class="p">,</span> 		<span class="p">(</span><span class="n">n_space_objects</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="n">n_control_points</span><span class="p">))</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">mp_shared_obj_states</span> 	<span class="o">=</span> <span class="kc">None</span>
+			<span class="n">obj_states</span> 				<span class="o">=</span> <span class="kc">None</span>
 
 		<span class="c1"># generate tracking time array (adding itermediate time points to reach states_per_slice)</span>
 		<span class="n">dt_tracking</span> <span class="o">=</span> <span class="n">t_slice</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">states_per_slice</span><span class="p">)</span>
@@ -495,7 +684,7 @@
 
 
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
-			<span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;TrackingScheduler:generate_schedule -&gt; Starting multiprocessing computations&quot;</span><span class="p">)</span> 
+			<span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SpaceObjectTracker:generate_controls -&gt; Starting multiprocessing computations&quot;</span><span class="p">)</span> 
 
 		<span class="c1"># function used to create each subprocess </span>
 		<span class="k">def</span> <span class="nf">schedule_tracking</span><span class="p">(</span><span class="n">space_object_index</span><span class="p">,</span> <span class="n">mutex</span><span class="p">):</span>
@@ -506,16 +695,19 @@
 				<span class="n">final_t_tracking</span><span class="p">,</span> 
 				<span class="n">space_objects</span><span class="p">[</span><span class="n">space_object_index</span><span class="p">],</span> 
 				<span class="n">space_object_index</span><span class="p">,</span> 
+				<span class="n">n_space_objects</span><span class="p">,</span>
 				<span class="n">radar</span><span class="p">,</span> 
 				<span class="n">epoch</span><span class="p">,</span> 
 				<span class="n">space_object_priorities</span><span class="p">[</span><span class="n">space_object_index</span><span class="p">],</span> 
 				<span class="n">interpolator</span><span class="p">,</span> 
 				<span class="n">max_dpos</span><span class="p">,</span>
 				<span class="n">max_samp</span><span class="p">,</span> 
+				<span class="n">mp_shared_obj_states</span><span class="p">,</span>
 				<span class="n">mp_shared_final_states</span><span class="p">,</span> 
 				<span class="n">mp_shared_state_priorities</span><span class="p">,</span> 
 				<span class="n">mp_shared_object_indices</span><span class="p">,</span> 
-				<span class="n">mutex</span>
+				<span class="n">mutex</span><span class="p">,</span>
+				<span class="n">save_states</span><span class="p">,</span>
 			<span class="p">)</span>
 
 		<span class="c1"># subgroup of processes (size max_processes) will be created to propagate and find the states to track for each space object</span>
@@ -534,7 +726,7 @@
 				<span class="n">process</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">schedule_tracking</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">so_id</span><span class="p">,</span> <span class="n">mutex</span><span class="p">,))</span> <span class="c1"># create new process</span>
 
 				<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
-					<span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;TrackingScheduler:generate_schedule -&gt; (process pid </span><span class="si">{</span><span class="n">mptools</span><span class="o">.</span><span class="n">get_process_id</span><span class="p">()</span><span class="si">}</span><span class="s2">) creating subprocess id </span><span class="si">{</span><span class="n">so_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> 
+					<span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SpaceObjectTracker:generate_controls -&gt; (process pid </span><span class="si">{</span><span class="n">mptools</span><span class="o">.</span><span class="n">get_process_id</span><span class="p">()</span><span class="si">}</span><span class="s2">) creating subprocess id </span><span class="si">{</span><span class="n">so_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> 
 
 				<span class="n">process_subgroup</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">process</span><span class="p">)</span>
 				<span class="n">process</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
@@ -553,11 +745,20 @@
 
 		<span class="n">controls</span><span class="o">.</span><span class="n">set_time_slices</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">ctrl_msk</span><span class="p">],</span> <span class="n">t_slice</span><span class="p">,</span> <span class="n">max_points</span><span class="o">=</span><span class="n">max_points</span><span class="p">)</span>
 
-		<span class="n">final_states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hsplit</span><span class="p">(</span><span class="n">final_states</span><span class="p">[:,</span> <span class="n">state_msk</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="n">states_per_slice</span><span class="o">*</span><span class="n">controls</span><span class="o">.</span><span class="n">splitting_indices</span><span class="p">)</span>
-		<span class="n">final_t_tracking</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hsplit</span><span class="p">(</span><span class="n">final_t_tracking</span><span class="p">[</span><span class="n">state_msk</span><span class="p">],</span> <span class="n">states_per_slice</span><span class="o">*</span><span class="n">controls</span><span class="o">.</span><span class="n">splitting_indices</span><span class="p">)</span>
+		<span class="c1"># remove points where no space objects were found and split arrays according to control time slices</span>
+		<span class="k">if</span> <span class="n">controls</span><span class="o">.</span><span class="n">splitting_indices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">final_states</span> 		<span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hsplit</span><span class="p">(</span><span class="n">final_states</span><span class="p">[:,</span> <span class="n">state_msk</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="n">states_per_slice</span><span class="o">*</span><span class="n">controls</span><span class="o">.</span><span class="n">splitting_indices</span><span class="p">)</span>
+			<span class="n">final_t_tracking</span> 	<span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hsplit</span><span class="p">(</span><span class="n">final_t_tracking</span><span class="p">[</span><span class="n">state_msk</span><span class="p">],</span> <span class="n">states_per_slice</span><span class="o">*</span><span class="n">controls</span><span class="o">.</span><span class="n">splitting_indices</span><span class="p">)</span>
+			<span class="n">state_priorities</span> 	<span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hsplit</span><span class="p">(</span><span class="n">state_priorities</span><span class="p">[</span><span class="n">ctrl_msk</span><span class="p">],</span> <span class="n">controls</span><span class="o">.</span><span class="n">splitting_indices</span><span class="p">)</span>
+			<span class="n">object_indices</span> 		<span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hsplit</span><span class="p">(</span><span class="n">object_indices</span><span class="p">[</span><span class="n">ctrl_msk</span><span class="p">],</span> <span class="n">controls</span><span class="o">.</span><span class="n">splitting_indices</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">final_states</span> 		<span class="o">=</span> <span class="n">final_states</span><span class="p">[:,</span> <span class="n">state_msk</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">][</span><span class="kc">None</span><span class="p">,</span><span class="o">...</span><span class="p">]</span>
+			<span class="n">final_t_tracking</span> 	<span class="o">=</span> <span class="n">final_t_tracking</span><span class="p">[</span><span class="n">state_msk</span><span class="p">][</span><span class="kc">None</span><span class="p">,</span><span class="o">...</span><span class="p">]</span>
+			<span class="n">state_priorities</span> 	<span class="o">=</span> <span class="n">state_priorities</span><span class="p">[</span><span class="n">ctrl_msk</span><span class="p">][</span><span class="kc">None</span><span class="p">,</span><span class="o">...</span><span class="p">]</span>
+			<span class="n">object_indices</span> 		<span class="o">=</span> <span class="n">object_indices</span><span class="p">[</span><span class="n">ctrl_msk</span><span class="p">][</span><span class="kc">None</span><span class="p">,</span><span class="o">...</span><span class="p">]</span>
 
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
-			<span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s2">&quot;TrackingScheduler:generate_schedule&quot;</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s2">&quot;SpaceObjectTracker:generate_controls&quot;</span><span class="p">)</span>
 
 		<span class="c1"># Compute controls</span>
 		<span class="n">pdir_args</span> <span class="o">=</span> <span class="p">(</span><span class="n">final_states</span><span class="p">,</span> <span class="n">final_t_tracking</span><span class="p">)</span>
@@ -566,13 +767,14 @@
 		<span class="n">radar_controller</span><span class="o">.</span><span class="n">RadarController</span><span class="o">.</span><span class="n">coh_integration</span><span class="p">(</span><span class="n">controls</span><span class="p">,</span> <span class="n">radar</span><span class="p">,</span> <span class="n">t_slice</span><span class="p">)</span>
 
 		<span class="k">if</span> <span class="n">save_states</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-			<span class="n">controls</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;object_indices&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">object_indices</span><span class="p">[</span><span class="n">ctrl_msk</span><span class="p">]</span>
-			<span class="n">controls</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;state_priorities&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">state_priorities</span><span class="p">[</span><span class="n">ctrl_msk</span><span class="p">]</span>
-			<span class="n">controls</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;space_objects_states&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">final_states</span>
+			<span class="n">controls</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;object_indices&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">object_indices</span>
+			<span class="n">controls</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;state_priorities&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">state_priorities</span>
+			<span class="n">controls</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;tracking_states&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">final_states</span>
+			<span class="n">controls</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;objects_states&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj_states</span>
 
 		<span class="k">return</span> <span class="n">controls</span></div>
 
-<div class="viewcode-block" id="SpaceObjectTracker.compute_tracking_states"><a class="viewcode-back" href="../../../../reference/controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.compute_tracking_states.html#sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.compute_tracking_states">[docs]</a>	<span class="k">def</span> <span class="nf">compute_tracking_states</span><span class="p">(</span>
+<div class="viewcode-block" id="SpaceObjectTracker.compute_tracking_states"><a class="viewcode-back" href="../../../../reference/radar/controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.compute_tracking_states.html#sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.compute_tracking_states">[docs]</a>	<span class="k">def</span> <span class="nf">compute_tracking_states</span><span class="p">(</span>
 		<span class="bp">self</span><span class="p">,</span> 
 		<span class="n">t_controller</span><span class="p">,</span> 
 		<span class="n">t_slice</span><span class="p">,</span>
@@ -580,87 +782,98 @@
 		<span class="n">final_t_tracking</span><span class="p">,</span> 
 		<span class="n">space_object</span><span class="p">,</span> 
 		<span class="n">space_object_index</span><span class="p">,</span> 
+		<span class="n">n_space_objects</span><span class="p">,</span> 
 		<span class="n">radar</span><span class="p">,</span> 
 		<span class="n">epoch</span><span class="p">,</span> 
 		<span class="n">space_object_priority</span><span class="p">,</span> 
 		<span class="n">interpolator</span><span class="p">,</span> 
 		<span class="n">max_dpos</span><span class="p">,</span> 
 		<span class="n">max_samp</span><span class="p">,</span> 
+		<span class="n">object_states_shared</span><span class="p">,</span> 
 		<span class="n">final_states_shared</span><span class="p">,</span> 
 		<span class="n">state_priorities_shared</span><span class="p">,</span> 
 		<span class="n">object_indices_shared</span><span class="p">,</span> 
-		<span class="n">mutex</span>
+		<span class="n">mutex</span><span class="p">,</span>
+		<span class="n">save_states</span><span class="p">,</span>
 	<span class="p">):</span>
-		<span class="sd">&#39;&#39;&#39; </span>
-<span class="sd">		Process subroutine used to gather the states of one of the object to follow. After computing the states, this function will add the states which satify the set of constraints to the schedule.</span>
+		<span class="sd">&#39;&#39;&#39; Process subroutine used to gather the states of one of the object to follow. </span>
 
-<span class="sd">		First, the algorithm computes the states of the given space object over the entirety of the control time interval. Then, it performs a data reduction procedure by only keeping the states which </span>
-<span class="sd">		are within the field of view of all the stations. Then, the algorithm will compare the priorities of the previous pointing direction controls and will overwrite the ones with a lower priority </span>
-<span class="sd">		compared to the current space object. Finally, the algorithm will performs an interpolation to compute the states at each time point where a tracking pointing direction control will be applied </span>
-<span class="sd">		(states_per_slice pointing directions will be performed during each time slice).</span>
+<span class="sd">		After computing the states, this function will add the states which satify the set of constraints to the schedule.</span>
+
+<span class="sd">		First, the algorithm computes the states of the given space object over the entirety of the control time interval. Then, </span>
+<span class="sd">		it performs a data reduction procedure by only keeping the states which are within the field of view of all the stations. </span>
+<span class="sd">		Then, the algorithm will compare the priorities of the previous pointing direction controls and will overwrite the ones </span>
+<span class="sd">		with a lower priority compared to the current space object. Finally, the algorithm will performs an interpolation to </span>
+<span class="sd">		compute the states at each time point where a tracking pointing direction control will be applied (states_per_slice </span>
+<span class="sd">		pointing directions will be performed during each time slice).</span>
 <span class="sd">		</span>
-<span class="sd">		Parameters :</span>
-<span class="sd">		------------ </span>
-<span class="sd">			t_controller : np.ndarray (N,)</span>
-<span class="sd">				Starting point of each time slice of the controller (in seconds). </span>
-
-<span class="sd">			t_slice : float</span>
-<span class="sd">				Duration of each time slice of the controller (in seconds). </span>
-
-<span class="sd">			space_object : sorts.SpaceObject</span>
-<span class="sd">				Space object instance which states we wish to propagate in time.</span>
-
-<span class="sd">			states_per_slice : int</span>
-<span class="sd">				numver of pointing directions controls per time slice. If this number is greater than one, the algorithm will create &quot;states_per_slice&quot; pointing direction controls per time slice which </span>
-<span class="sd">				separated by a constant time interval of dt = t_slice/states_per_slice</span>
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		t_controller : numpy.ndarray (N,)</span>
+<span class="sd">			Start time of Tracking time slices (in seconds). </span>
+<span class="sd">			This array limits the controls time interval between t[0] and t[-1].</span>
 <span class="sd">			</span>
-<span class="sd">			final_t_tracking : np.ndarray (M,)</span>
-<span class="sd">				Array containing the instants at which a pointing direction control will be performed to track a set of space objects.</span>
-<span class="sd">		</span>
-<span class="sd">			space_object : sorts.SpaceObject</span>
-<span class="sd">				one of the space object to be tracked by the controller.</span>
+<span class="sd">			.. note::</span>
+<span class="sd">				If no space objects are found at a given time slice, the latter will be discarded such that the final control</span>
+<span class="sd">				array only contains time slices allocated for the observation of a space object.</span>
 
-<span class="sd">			space_object_index : np.ndarray (M,)</span>
-<span class="sd">				index of the space object to be tracked by the controller inside the population of objects to considered by the controller.</span>
+<span class="sd">		t_slice : float / numpy.ndarray (N,)</span>
+<span class="sd">			Time slice durations (in seconds). The duration of each time slice must be less or equal to the </span>
+<span class="sd">            time step between two consecutive time slices.</span>
+<span class="sd">		states_per_slice : int</span>
+<span class="sd">			Number of pointing directions per time slice. A space object can be tracked at multiple time points within </span>
+<span class="sd">            a given time slice. If ``state_per_slice`` is greater than one, then additional tracking points will be added </span>
+<span class="sd">            within time slices separated by a duration</span>
 
-<span class="sd">			radar : sorts.Radar</span>
-<span class="sd">				Radar instance controlled by the controller.</span>
+<span class="sd">            .. math:: \\delta t^k = \\frac{\\Delta t_slice^k}{n}.</span>
 
-<span class="sd">			epoch : float</span>
-<span class="sd">				epoch at which the propagation/computations are performed. The epoch must be specified in MJD format</span>
+<span class="sd">            where :math:`\\Delta t_slice` is the duration of the :math:`k^{k}` time slice and :math:`n` is the number of </span>
+<span class="sd">            pointing directions per time slice.</span>
+<span class="sd">		final_t_tracking : numpy.ndarray (M,)</span>
+<span class="sd">			Array containing the instants at which a pointing direction control will be performed to track a set of space objects.</span>
+<span class="sd">		space_object : :class:`sorts.SpaceObject&lt;sorts.targets.space_object.SpaceObject&gt;`</span>
+<span class="sd">			Space object to be tracked by the controller.</span>
+<span class="sd">		space_object_index : numpy.ndarray (M,)</span>
+<span class="sd">			Index of the space object to be tracked by the controller inside the population of objects tracked by </span>
+<span class="sd">			the controller.</span>
+<span class="sd">		radar : :class:`sorts.Radar&lt;sorts.radar.system.radar.Radar&gt;`</span>
+<span class="sd">			Radar instance being controlled to track the space objects. </span>
+<span class="sd">		epoch : float (in ``MJD`` format)</span>
+<span class="sd">			Time epoch (at the start of the simulation) given in MJD format (Modified Julian Date). This epoch is used </span>
+<span class="sd">			to synchronize the states of the space objects with the simulation time reference.</span>
+<span class="sd">		space_object_priority : int</span>
+<span class="sd">			Priority of the current space object. The priority is used to choose which space object to track when multiple </span>
+<span class="sd">			space objects are within the field of view of the radar. In this case, the object of highest priority (i.e. </span>
+<span class="sd">			space_object_priority is the lowest number of all) at a given instant will be the one being tracked. </span>
+<span class="sd">		interpolator : :class:`sorts.Interpolator&lt;sorts.common.interpolation.Interpolator&gt;</span>
+<span class="sd">			Interpolation algorithm used to reconstruct interpolate target states between propagated states.</span>
+<span class="sd">			If no interpolator is provided, the default interpolation class used will be </span>
+<span class="sd">			:class:`sorts.interpolation.Linear&lt;sorts.common.interpolation.Linear&gt;`. </span>
+<span class="sd">		max_dpos : float</span>
+<span class="sd">			maximum distance between two consecutive states when the equidistant sampling method is used when computing the space </span>
+<span class="sd">			object states. This sampling method is used when the state of the object (retreivable by calling space_object.state) </span>
+<span class="sd">			is given as a pyorb.Orbit instance.</span>
+<span class="sd">		max_samp : int</span>
+<span class="sd">			Maximum number of time points in the array when the constant time sampling method is used when computing the space </span>
+<span class="sd">			object states. This sampling method is used when the state of the object (retreivable by calling space_object.state) </span>
+<span class="sd">			is NOT given as a pyorb.Orbit instance, but for example as (6,1) vector.</span>
+<span class="sd">		object_states_shared : multiprocessing.Array (n_objects, 6, N)</span>
+<span class="sd">			Array (shared between processes) containing the states of each space objects evaluated at the start of each control </span>
+<span class="sd">			time slice. If ``save_states`` is False, this array will be None.</span>
+<span class="sd">		final_states_shared, : multiprocessing.Array (6, M)</span>
+<span class="sd">			Array (shared between processes) containing the states of the different space objects (ECEF coordinate frame) for each </span>
+<span class="sd">			pointing direction control points. </span>
+<span class="sd">		state_priorities_shared : multiprocessing.Array (N,)</span>
+<span class="sd">			Array (shared between processes) containing the priorities of each pointing direction control points. The priority of </span>
+<span class="sd">			a given pointing direction control points correspond to the priority of the space object being tracked at this instant. </span>
+<span class="sd">		object_indices_shared : multiprocessing.Array (N,)</span>
+<span class="sd">			Array (shared between processes) containing the space object id being tracked at each pointing direction control points. </span>
+<span class="sd">		mutex : processing.Lock</span>
+<span class="sd">			Mutex instance used for synchronization between processes.</span>
 
-<span class="sd">			space_object_priority : int</span>
-<span class="sd">				priority of the current space object. The priority is used to choose which space object to track when multiple space objects are within the field of view of the radar. In this case, the object of </span>
-<span class="sd">				highest priority (i.e. space_object_priority is the lowest number of all) at a given instant will be the one being tracked. </span>
-
-<span class="sd">			interpolator : interpolation.Interpolator</span>
-<span class="sd">				interpolator instance used to interpolate between states (see sorts.Linear or sorts.Lagrange8 for more information on how to use the interpolators)</span>
-
-<span class="sd">			max_dpos : float</span>
-<span class="sd">				maximum distance between two consecutive states when the equidistant sampling method is used when computing the space object states. This sampling method is used when the state of the object</span>
-<span class="sd">				(retreivable by calling space_object.state) is given as a pyorb.Orbit instance.</span>
-
-<span class="sd">			max_samp : int </span>
-<span class="sd">				maximum number of time points in the array when the constant time sampling method is used when computing the space object states. This sampling method is used when the state of the object</span>
-<span class="sd">				(retreivable by calling space_object.state) is NOT given as a pyorb.Orbit instance, but for example as (6,1) vector.</span>
-<span class="sd">	</span>
-<span class="sd">			final_states_shared, : multiprocessing.Array (6, M)</span>
-<span class="sd">				Array (shared between processes) containing the states of the different space objects (ECEF coordinate frame) for each pointing direction control points. </span>
-
-<span class="sd">			state_priorities_shared : multiprocessing.Array (N,)</span>
-<span class="sd">				Array (shared between processes) containing the priorities of each pointing direction control points. The priority of a given pointing direction control points correspond to the priority of</span>
-<span class="sd">				the space object being tracked at this instant. </span>
-
-<span class="sd">			object_indices_shared : multiprocessing.Array (N,)</span>
-<span class="sd">				Array (shared between processes) containing the space object id being tracked at each pointing direction control points. </span>
-
-<span class="sd">			mutex : processing.Lock</span>
-<span class="sd">				Mutex instance used for synchronization between processes</span>
-
-
-<span class="sd">		Returns : </span>
-<span class="sd">		---------</span>
-<span class="sd">			None</span>
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+<span class="sd">		None</span>
 <span class="sd">		&#39;&#39;&#39;</span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
 			<span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;TrackingScheduler:generate_schedule -&gt; (subprocess pid </span><span class="si">{</span><span class="n">mptools</span><span class="o">.</span><span class="n">get_process_id</span><span class="p">()</span><span class="si">}</span><span class="s2">) object </span><span class="si">{</span><span class="n">space_object_index</span><span class="si">}</span><span class="s2"> starting&quot;</span><span class="p">)</span>
@@ -676,6 +889,16 @@
 		<span class="n">passes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_passes</span><span class="p">(</span><span class="n">t_states</span><span class="p">,</span> <span class="n">states</span><span class="p">,</span> <span class="n">radar</span><span class="p">)</span>
 		<span class="k">del</span> <span class="n">states</span>
 
+		<span class="c1"># get shared memory arrays</span>
+		<span class="n">state_priorities</span> 	<span class="o">=</span> <span class="n">mptools</span><span class="o">.</span><span class="n">convert_to_numpy_array</span><span class="p">(</span><span class="n">state_priorities_shared</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t_controller</span><span class="p">),))</span>
+		<span class="n">final_states</span> 		<span class="o">=</span> <span class="n">mptools</span><span class="o">.</span><span class="n">convert_to_numpy_array</span><span class="p">(</span><span class="n">final_states_shared</span><span class="p">,</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">t_controller</span><span class="p">)</span><span class="o">*</span><span class="n">states_per_slice</span><span class="p">))</span>
+		<span class="n">object_indices</span> 		<span class="o">=</span> <span class="n">mptools</span><span class="o">.</span><span class="n">convert_to_numpy_array</span><span class="p">(</span><span class="n">object_indices_shared</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t_controller</span><span class="p">),))</span>
+
+		<span class="c1"># if save_states is true, save states for each time slice </span>
+		<span class="k">if</span> <span class="n">save_states</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+			<span class="n">obj_states</span> <span class="o">=</span> <span class="n">mptools</span><span class="o">.</span><span class="n">convert_to_numpy_array</span><span class="p">(</span><span class="n">object_states_shared</span><span class="p">,</span> <span class="p">(</span><span class="n">n_space_objects</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">t_controller</span><span class="p">)))</span> 
+			<span class="n">obj_states</span><span class="p">[</span><span class="n">space_object_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">state_interpolator</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">t_controller</span><span class="p">)</span>
+
 		<span class="c1"># check if there are conflicts with existing final tracking states and modifies the schedule</span>
 		<span class="k">for</span> <span class="n">pass_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">passes</span><span class="p">)):</span>
 			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
@@ -685,63 +908,64 @@
 				<span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;TrackingScheduler:generate_schedule -&gt; (subprocess pid </span><span class="si">{</span><span class="n">mptools</span><span class="o">.</span><span class="n">get_process_id</span><span class="p">()</span><span class="si">}</span><span class="s2">) Extracting states for radar pass </span><span class="si">{</span><span class="n">pass_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 				<span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;TrackingScheduler:generate_schedule -&gt; (subprocess pid </span><span class="si">{</span><span class="n">mptools</span><span class="o">.</span><span class="n">get_process_id</span><span class="p">()</span><span class="si">}</span><span class="s2">) Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">passes</span><span class="p">[</span><span class="n">pass_id</span><span class="p">]</span><span class="o">.</span><span class="n">inds</span><span class="p">)</span><span class="si">}</span><span class="s2"> time points&quot;</span><span class="p">)</span>
 
-			<span class="c1"># get shared memory priority array</span>
-			<span class="n">state_priorities</span> 	<span class="o">=</span> <span class="n">mptools</span><span class="o">.</span><span class="n">convert_to_numpy_array</span><span class="p">(</span><span class="n">state_priorities_shared</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t_controller</span><span class="p">),))</span>
-
 			<span class="c1"># get states in the pass which satisfy the constraints (priority is greater than already scheduled observations (or free obs. slot available) and the controller time slice is inside the pass time interval) </span>
-			<span class="n">pass_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">t_controller</span> <span class="o">&gt;=</span> <span class="n">t_states</span><span class="p">[</span><span class="n">passes</span><span class="p">[</span><span class="n">pass_id</span><span class="p">]</span><span class="o">.</span><span class="n">inds</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">t_controller</span> <span class="o">&lt;=</span> <span class="n">t_states</span><span class="p">[</span><span class="n">passes</span><span class="p">[</span><span class="n">pass_id</span><span class="p">]</span><span class="o">.</span><span class="n">inds</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">t_slice</span><span class="p">)</span>	<span class="c1"># remove control points outside of the pass</span>
-			<span class="k">del</span> <span class="n">t_states</span>
-
-			<span class="n">priority_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">state_priorities</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">state_priorities</span> <span class="o">&gt;</span> <span class="n">space_object_priority</span><span class="p">)</span>	<span class="c1"># remove points where there is already a higher priority observation</span>
-
-			<span class="n">ctrl_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">pass_mask</span><span class="p">,</span> <span class="n">priority_mask</span><span class="p">)</span> <span class="c1"># compute intersection of priority constraint and observational constraints</span>
-			<span class="n">state_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">ctrl_mask</span><span class="p">,</span> <span class="n">states_per_slice</span><span class="p">)</span>
+			<span class="n">pass_mask</span> 		<span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">t_controller</span> <span class="o">&gt;=</span> <span class="n">t_states</span><span class="p">[</span><span class="n">passes</span><span class="p">[</span><span class="n">pass_id</span><span class="p">]</span><span class="o">.</span><span class="n">inds</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">t_controller</span> <span class="o">&lt;=</span> <span class="n">t_states</span><span class="p">[</span><span class="n">passes</span><span class="p">[</span><span class="n">pass_id</span><span class="p">]</span><span class="o">.</span><span class="n">inds</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">t_slice</span><span class="p">)</span>	<span class="c1"># remove control points outside of the pass</span>
+			<span class="n">priority_mask</span> 	<span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">state_priorities</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">state_priorities</span> <span class="o">&gt;</span> <span class="n">space_object_priority</span><span class="p">)</span>	<span class="c1"># remove points where there is already a higher priority observation</span>
+			
+			<span class="n">ctrl_mask</span> 		<span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">pass_mask</span><span class="p">,</span> <span class="n">priority_mask</span><span class="p">)</span> <span class="c1"># compute intersection of priority constraint and observational constraints</span>
+			<span class="n">state_mask</span> 		<span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">ctrl_mask</span><span class="p">,</span> <span class="n">states_per_slice</span><span class="p">)</span>
 			<span class="k">del</span> <span class="n">priority_mask</span><span class="p">,</span> <span class="n">pass_mask</span>
 			
 			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
 				<span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;TrackingScheduler:generate_schedule -&gt; (subprocess pid </span><span class="si">{</span><span class="n">mptools</span><span class="o">.</span><span class="n">get_process_id</span><span class="p">()</span><span class="si">}</span><span class="s2">) saving </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">state_mask</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s2"> states&quot;</span><span class="p">)</span>
-
-			<span class="c1"># get remaining arrays from shared process memory</span>
-			<span class="n">final_states</span> 		<span class="o">=</span> <span class="n">mptools</span><span class="o">.</span><span class="n">convert_to_numpy_array</span><span class="p">(</span><span class="n">final_states_shared</span><span class="p">,</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">t_controller</span><span class="p">)</span><span class="o">*</span><span class="n">states_per_slice</span><span class="p">))</span>
-			<span class="n">object_indices</span> 		<span class="o">=</span> <span class="n">mptools</span><span class="o">.</span><span class="n">convert_to_numpy_array</span><span class="p">(</span><span class="n">object_indices_shared</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t_controller</span><span class="p">),))</span>
-
+			
 			<span class="c1"># modify the tracking schedule where constraints are statisfied </span>
 			<span class="n">mutex</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
 			<span class="n">final_states</span><span class="p">[:,</span> <span class="n">state_mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">state_interpolator</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">final_t_tracking</span><span class="p">[</span><span class="n">state_mask</span><span class="p">]</span> <span class="o">-</span> <span class="n">dt</span><span class="p">)</span>
 			<span class="n">state_priorities</span><span class="p">[</span><span class="n">ctrl_mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">space_object_priority</span>
-			<span class="n">object_indices</span><span class="p">[</span><span class="n">ctrl_mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">space_object_index</span>
+			<span class="n">object_indices</span><span class="p">[</span><span class="n">ctrl_mask</span><span class="p">]</span> 	<span class="o">=</span> <span class="n">space_object_index</span>
 			<span class="n">mutex</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
 
 			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
 				<span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="s2">&quot;TrackingScheduler:generate_schedule:extract_states&quot;</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="SpaceObjectTracker.get_states"><a class="viewcode-back" href="../../../../reference/radar/controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.get_states.html#sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.get_states">[docs]</a>	<span class="k">def</span> <span class="nf">get_states</span><span class="p">(</span>
+		<span class="bp">self</span><span class="p">,</span> 
+		<span class="n">t</span><span class="p">,</span> 
+		<span class="n">t_slice</span><span class="p">,</span> 
+		<span class="n">space_object</span><span class="p">,</span> 
+		<span class="n">epoch</span><span class="p">,</span> 
+		<span class="n">max_dpos</span><span class="p">,</span> 
+		<span class="n">max_samp</span><span class="p">,</span>
+	<span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39; Computes the ecef states of a given space object over the control time interval.</span>
 
-<div class="viewcode-block" id="SpaceObjectTracker.get_states"><a class="viewcode-back" href="../../../../reference/controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.get_states.html#sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.get_states">[docs]</a>	<span class="k">def</span> <span class="nf">get_states</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">t_slice</span><span class="p">,</span> <span class="n">space_object</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">max_dpos</span><span class="p">,</span> <span class="n">max_samp</span><span class="p">):</span>
-		<span class="sd">&#39;&#39;&#39; </span>
-<span class="sd">		Computes the ecef states $\vec{x} = [x, y, z, vx, vy, vz]^{T}$ of the given space object over the control time interval given by t and t_slice.</span>
+<span class="sd">		This function computes the space object states </span>
 
-<span class="sd">		Parameters :</span>
-<span class="sd">		------------ </span>
-<span class="sd">			t : np.ndarray (N,)</span>
-<span class="sd">				Starting point of each time slice of the controller (in seconds). </span>
+<span class="sd">		.. math:: \\mathbf{x^k} = [x^k, y^k, z^k, v_x^k, v_y^k, v_z^k]^T</span>
 
-<span class="sd">			t_slice : float</span>
-<span class="sd">				Duration of each time slice of the controller (in seconds). </span>
+<span class="sd">		over the control interval given by ``t`` and ``t_slice``.</span>
 
-<span class="sd">			space_object : sorts.SpaceObject</span>
-<span class="sd">				Space object instance which states we wish to propagate in time.</span>
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		t : numpy.ndarray (N,)</span>
+<span class="sd">			Starting point of each controller time slice (in seconds). </span>
+<span class="sd">		t_slice : float / numpy.ndarray (N,)</span>
+<span class="sd">			Duration of each controller time slice (in seconds). </span>
+<span class="sd">		space_object : :class:`sorts.SpaceObject&lt;sorts.targets.space_object.SpaceObject&gt;`</span>
+<span class="sd">			Space object instance which states we wish to propagate in time.</span>
+<span class="sd">		max_dpos : float</span>
+<span class="sd">			Maximum distance (in meters) between two consecutive states when the equidistant sampling method is used (1st method).</span>
+<span class="sd">		max_samp : int </span>
+<span class="sd">			Maximum number of time points in the array when the constant time sampling method is used (2nd method).</span>
 
-<span class="sd">			max_dpos : float</span>
-<span class="sd">				maximum distance between two consecutive states when the equidistant sampling method is used (1st method).</span>
-
-<span class="sd">			max_samp : int </span>
-<span class="sd">				maximum number of time points in the array when the constant time sampling method is used (2nd method).</span>
-
-<span class="sd">		Returns : </span>
-<span class="sd">		---------</span>
-<span class="sd">			np.ndarray (6, M)</span>
-<span class="sd">				propagated states of the space object over the given control time interval.</span>
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+<span class="sd">		t_states : numpy.ndarray (M,)</span>
+<span class="sd">			State sampling time array of the given space object (in seconds).</span>
+<span class="sd">		states : numpy.ndarray (6, M)</span>
+<span class="sd">			Propagated states of the space object over the given control time interval.</span>
 <span class="sd">		&#39;&#39;&#39;</span>
 		<span class="n">t_states</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sampling_time</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">t_slice</span><span class="p">,</span> <span class="n">space_object</span><span class="p">,</span> <span class="n">max_dpos</span><span class="p">,</span> <span class="n">max_samp</span><span class="p">)</span>
 
@@ -754,35 +978,37 @@
 
 
 
-<div class="viewcode-block" id="SpaceObjectTracker.get_sampling_time"><a class="viewcode-back" href="../../../../reference/controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.get_sampling_time.html#sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.get_sampling_time">[docs]</a>	<span class="k">def</span> <span class="nf">get_sampling_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">t_slice</span><span class="p">,</span> <span class="n">space_object</span><span class="p">,</span> <span class="n">max_dpos</span><span class="p">,</span> <span class="n">max_samp</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		This function returns the array of sampling time points needed to propagate the states of a given space object. </span>
+<div class="viewcode-block" id="SpaceObjectTracker.get_sampling_time"><a class="viewcode-back" href="../../../../reference/radar/controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.get_sampling_time.html#sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.get_sampling_time">[docs]</a>	<span class="k">def</span> <span class="nf">get_sampling_time</span><span class="p">(</span>
+		<span class="bp">self</span><span class="p">,</span> 
+		<span class="n">t</span><span class="p">,</span> 
+		<span class="n">t_slice</span><span class="p">,</span> 
+		<span class="n">space_object</span><span class="p">,</span> 
+		<span class="n">max_dpos</span><span class="p">,</span> 
+		<span class="n">max_samp</span><span class="p">,</span>
+	<span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot; This function returns the array of sampling time points needed to propagate the states of a given space object. </span>
 
 <span class="sd">		There are two possible ways to generate sampling time arrays :</span>
 <span class="sd">			1. When the states of the space objects are given as a pyorb.Orbit instance, the time points are generated to ensure that the distance between two consecutive states on the orbit stays constant. </span>
 <span class="sd">			2. If the states of the space object are not given as a pyorb.Orbit instance, the time points are instead generated to ensure that the time interval between two consecutive states stays constant.</span>
 
-<span class="sd">		Parameters :</span>
-<span class="sd">		------------ </span>
-<span class="sd">			t : np.ndarray (N,)</span>
-<span class="sd">				Starting point of each time slice of the controller (in seconds). </span>
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		t : numpy.ndarray (N,)</span>
+<span class="sd">			Starting point of each controller time slice (in seconds). </span>
+<span class="sd">		t_slice : float / numpy.ndarray (N,)</span>
+<span class="sd">			Duration of each controller time slice (in seconds). </span>
+<span class="sd">		space_object : sorts.SpaceObject</span>
+<span class="sd">			Space object instance which states we wish to propagate in time.</span>
+<span class="sd">		max_dpos : float</span>
+<span class="sd">			Maximum distance (in meters) between two consecutive states when the equidistant sampling method is used (1st method).</span>
+<span class="sd">		max_samp : int </span>
+<span class="sd">			Maximum number of time points in the array when the constant time sampling method is used (2nd method).</span>
 
-<span class="sd">			t_slice : float</span>
-<span class="sd">				Duration of each time slice of the controller (in seconds). </span>
-
-<span class="sd">			space_object : sorts.SpaceObject</span>
-<span class="sd">				Space object instance which states we wish to propagate in time.</span>
-
-<span class="sd">			max_dpos : float</span>
-<span class="sd">				maximum distance between two consecutive states when the equidistant sampling method is used (1st method).</span>
-
-<span class="sd">			max_samp : int </span>
-<span class="sd">				maximum number of time points in the array when the constant time sampling method is used (2nd method).</span>
-
-<span class="sd">		Returns : </span>
-<span class="sd">		---------</span>
-<span class="sd">			np.ndarray (M,)</span>
-<span class="sd">				state sampling time array of the given space object </span>
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+<span class="sd">		t_states : numpy.ndarray (M,)</span>
+<span class="sd">			State sampling time array of the given space object (in seconds).</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
 			<span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;TrackingScheduler:generate_schedule -&gt; (subprocess pid </span><span class="si">{</span><span class="n">mptools</span><span class="o">.</span><span class="n">get_process_id</span><span class="p">()</span><span class="si">}</span><span class="s2">) generating state time array&quot;</span><span class="p">)</span>
@@ -795,7 +1021,7 @@
 			<span class="n">t_states</span> <span class="o">=</span> <span class="n">equidistant_sampling</span><span class="p">(</span>
 				<span class="n">orbit</span> <span class="o">=</span> <span class="n">space_object</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> 
 				<span class="n">start_t</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> 
-				<span class="n">end_t</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">t_slice</span><span class="p">,</span> 
+				<span class="n">end_t</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">t_slice</span><span class="o">*</span><span class="mi">10</span><span class="p">,</span> 
 				<span class="n">max_dpos</span> <span class="o">=</span> <span class="n">max_dpos</span><span class="p">,</span>
 			<span class="p">)</span>
 		<span class="k">else</span><span class="p">:</span> <span class="c1"># or by finding temporally equidistant time points</span>
@@ -808,25 +1034,33 @@
 
 
 
-<div class="viewcode-block" id="SpaceObjectTracker.get_passes"><a class="viewcode-back" href="../../../../reference/controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.get_passes.html#sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.get_passes">[docs]</a>	<span class="k">def</span> <span class="nf">get_passes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t_states</span><span class="p">,</span> <span class="n">states</span><span class="p">,</span> <span class="n">radar</span><span class="p">):</span>
-		<span class="sd">&#39;&#39;&#39; </span>
-<span class="sd">		Finds the passes which are simultaneously in the FOV of all the radar stations. </span>
+<div class="viewcode-block" id="SpaceObjectTracker.get_passes"><a class="viewcode-back" href="../../../../reference/radar/controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.get_passes.html#sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.get_passes">[docs]</a>	<span class="k">def</span> <span class="nf">get_passes</span><span class="p">(</span>
+		<span class="bp">self</span><span class="p">,</span> 
+		<span class="n">t_states</span><span class="p">,</span> 
+		<span class="n">states</span><span class="p">,</span> 
+		<span class="n">radar</span>
+	<span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39; Finds the passes which are simultaneously in the FOV of all the radar stations. </span>
 
-<span class="sd">		Parameters :</span>
-<span class="sd">		------------</span>
-<span class="sd">			t_states : np.ndarray (N,)</span>
-<span class="sd">				this array contains the time points (in seconds) at which the states were propagated. It is assumed that the time values are given with respect to the space object&#39;s epoch.</span>
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		t_states : numpy.ndarray (N,)</span>
+<span class="sd">			this array contains the time points (in seconds) at which the states were propagated. </span>
+<span class="sd">			It is assumed that the time values are given with respect to the space object&#39;s epoch.</span>
+<span class="sd">		states : numpy.ndarray (6, N) </span>
+<span class="sd">			This array contains the space object&#39;s states </span>
 
-<span class="sd">			states : np.ndarray (6, N) </span>
-<span class="sd">				This array contains the space object&#39;s states $\vec{x} = [x, y, z, vx, vy, vz]^{T}$ associated to each time point of t_states.</span>
-<span class="sd">	</span>
-<span class="sd">			radar : sorts.Radar</span>
-<span class="sd">				radar instance over which we want to compute the space object passes.</span>
+<span class="sd">			.. math:: \\mathbf{x^k} = [x^k, y^k, z^k, v_x^k, v_y^k, v_z^k]^T</span>
 
-<span class="sd">		Returns :</span>
-<span class="sd">		---------</span>
-<span class="sd">			np.ndarray :</span>
-<span class="sd">				the function returns an array of sorts.Pass objects which correspond to all the radar passes found for the given state array and radar instance.</span>
+<span class="sd">			associated to each time point of ``t_states``.</span>
+<span class="sd">		radar : sorts.Radar</span>
+<span class="sd">			radar instance over which we want to compute the space object passes.</span>
+
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+<span class="sd">		passes : numpy.ndarray</span>
+<span class="sd">			Array of :class:`sorts.Pass&lt;sorts.radar.passes.Pass&gt;` objects which correspond to all </span>
+<span class="sd">			the radar passes found for the given state array and radar instance.</span>
 <span class="sd">		&#39;&#39;&#39;</span>
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
 			<span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;TrackingScheduler:generate_schedule -&gt; (subprocess pid </span><span class="si">{</span><span class="n">mptools</span><span class="o">.</span><span class="n">get_process_id</span><span class="p">()</span><span class="si">}</span><span class="s2">) searching for simultaneous passes&quot;</span><span class="p">)</span>
@@ -845,25 +1079,28 @@
 		<span class="k">return</span> <span class="n">passes</span></div>
 
 
-<div class="viewcode-block" id="SpaceObjectTracker.check_space_object_priorities"><a class="viewcode-back" href="../../../../reference/controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.check_space_object_priorities.html#sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.check_space_object_priorities">[docs]</a>	<span class="k">def</span> <span class="nf">check_space_object_priorities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">space_object_priorities</span><span class="p">,</span> <span class="n">n_space_objects</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Checks the validity of the space_object_priorities array. If space_object_priorities is None, the space objects priorities will be created following a </span>
-<span class="sd">		FIFO algorithm.</span>
+<div class="viewcode-block" id="SpaceObjectTracker.check_space_object_priorities"><a class="viewcode-back" href="../../../../reference/radar/controllers/auto/sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.check_space_object_priorities.html#sorts.radar.controllers.space_object_tracker.SpaceObjectTracker.check_space_object_priorities">[docs]</a>	<span class="k">def</span> <span class="nf">check_space_object_priorities</span><span class="p">(</span>
+		<span class="bp">self</span><span class="p">,</span> 
+		<span class="n">space_object_priorities</span><span class="p">,</span> 
+		<span class="n">n_space_objects</span><span class="p">,</span>
+	<span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot; Checks the validity of the space_object_priorities array. </span>
 
-<span class="sd">		The space object priority is used to choose which space object will be tracked when multiple objects are within range at the same time.</span>
+<span class="sd">		If space_object_priorities is None, the space objects priorities will be created following a FIFO algorithm.</span>
+<span class="sd">		The space object priority is used to choose which space object will be tracked when multiple objects are within </span>
+<span class="sd">		range at the same time.</span>
 
-<span class="sd">		Parameters :</span>
-<span class="sd">		------------</span>
-<span class="sd">			space_object_priorities : np.ndarray</span>
-<span class="sd">				array containing the priority of each space object.</span>
+<span class="sd">		Parameters</span>
+<span class="sd">		----------</span>
+<span class="sd">		space_object_priorities : numpy.ndarray</span>
+<span class="sd">			Priority of each space object. If None, the priority of each space object will be set using the FIFO algorithm.</span>
+<span class="sd">		n_space_objects : int</span>
+<span class="sd">			Number of space objects.</span>
 
-<span class="sd">			n_space_objects : int</span>
-<span class="sd">				number of space objects</span>
-
-<span class="sd">		Returns :</span>
-<span class="sd">		---------</span>
-<span class="sd">			np.ndarray :</span>
-<span class="sd">				returns the validated/generated space object priority array.</span>
+<span class="sd">		Returns</span>
+<span class="sd">		-------</span>
+<span class="sd">		space_object_priorities : numpy.ndarray</span>
+<span class="sd">			returns the validated/generated space object priority array.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">if</span> <span class="n">space_object_priorities</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># if none, the priority is generated automatically following the FIFO algorithm</span>
 			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 

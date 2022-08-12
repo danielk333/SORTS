@@ -12,6 +12,9 @@
    
       RadarSchedulerBase.scheduler_period
       RadarSchedulerBase.t0
+      RadarSchedulerBase.profiler
+      RadarSchedulerBase.logger
+      RadarSchedulerBase.radar
    
    
 
@@ -24,8 +27,8 @@
       :toctree: .
    
       RadarSchedulerBase.__init__
-      RadarSchedulerBase.exctract_scheduler_results
       RadarSchedulerBase.extract_control_sequence
+      RadarSchedulerBase.generate_schedule
       RadarSchedulerBase.get_pointing_direction_sequence
       RadarSchedulerBase.run
    
