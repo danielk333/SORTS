@@ -273,7 +273,7 @@ class Scanner(radar_controller.RadarController):
         # get Tx pointing directions
         # [ind_tx][x, y, z][t]
         points = controls.meta["scan"].ecef_pointing(controls.t[period_id], controls.radar.tx).reshape((len(tx_ecef), 3, -1))
- 
+
         # Compute Tx pointing directions
         pointing_direction['tx'] = np.repeat(points[:, None, :, :], len(r), axis=3) # the beam directions are given as unit vectors in the ecef frame of reference
         
@@ -284,7 +284,6 @@ class Scanner(radar_controller.RadarController):
         # get Rx target points on the Tx beam        
         point_rx_to_tx = np.repeat(points[None, :, :, :], len(r), axis=3)*np.tile(r, len(points[0, 0]))[None, None, None, :] + tx_ecef[None, :, :, None] # compute the target points for the Rx stations
         del tx_ecef, points
-
         
         point_rx = np.repeat(point_rx_to_tx, len(controls.radar.rx), axis=0) 
         del point_rx_to_tx
@@ -296,7 +295,7 @@ class Scanner(radar_controller.RadarController):
         # save computation results
         pointing_direction['rx'] = rx_dirs/np.linalg.norm(rx_dirs, axis=2)[:, :, None, :] # the beam directions are given as unit vectors in the ecef frame of reference
         pointing_direction['t'] = np.repeat(controls.t[period_id], len(r))
-        
+
         if self.profiler is not None:
             self.profiler.stop('Scanner:pointing_direction:compute_controls_subarray:rx')
             

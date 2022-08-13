@@ -576,6 +576,7 @@ class SpaceObjectTracker(radar_controller.RadarController):
 
 		# remove points where no space objects were found and split arrays according to control time slices
 		if controls.splitting_indices is not None:
+			print(controls.splitting_indices)
 			final_states 		= np.hsplit(final_states[:, state_msk][0:3], states_per_slice*controls.splitting_indices)
 			final_t_tracking 	= np.hsplit(final_t_tracking[state_msk], states_per_slice*controls.splitting_indices)
 			state_priorities 	= np.hsplit(state_priorities[ctrl_msk], controls.splitting_indices)

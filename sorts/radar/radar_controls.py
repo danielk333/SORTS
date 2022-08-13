@@ -442,7 +442,8 @@ class RadarControls(object):
 		# the number of points is the same for all periods but the last, so treat the last separatly to get total number of points remaining
 		self.n_control_points = 0
 		for period_id in range(self.n_periods):
-			self.n_control_points += len(self._t[period_id])*mask[period_id]
+			if self._t[period_id] is not None:
+				self.n_control_points += len(self._t[period_id])*mask[period_id]
 
 		# update time slices and priority
 		self._t 				= self._t[mask]
@@ -720,7 +721,9 @@ class RadarControls(object):
 				data = self.split_array(data)
 
 		# create new control field if doesn't already exist
-		self.create_new_property_control_field(name, station)		
+		self.create_new_property_control_field(name, station)	
+		print("created new field : ", name)	
+		print("in : ", self.controlled_properties)	
 
 		# add control for each station
 		for station_ in station:
@@ -916,7 +919,7 @@ class RadarControls(object):
 			ctrl_period_id = scheduler_period_id
 		else:
 			ctrl_period_id = scheduler_period_id - int((self._t[0][0] - self.scheduler.t0)/self.scheduler.scheduler_period)  # computes the time subarray id
-			print(ctrl_period_id)
+
 			# the time subarray id is bigger than the number of time subarrays in the given control structure
 			if ctrl_period_id < 0 or ctrl_period_id > len(self._t)-1: 
 				ctrl_period_id = -1
@@ -982,6 +985,8 @@ class RadarControls(object):
 		# Split arrays according to transition indices
 		if self.splitting_indices is not None:
 			splitted_array = np.ndarray((self.n_periods,), dtype=object)
+			print(self.splitting_indices)
+			print(self.n_periods)
 
 			id_start = 0
 			for period_id in range(self.n_periods):
@@ -1053,13 +1058,15 @@ class RadarControls(object):
 				else:
 					self.splitting_indices[period_id] = -1
 		else:
+			print("ok")
 			if self.logger is not None:
 				self.logger.info("radar_controls:get_splitting_indices -> No scheduler provided, skipping master clock splitting...")
 				self.logger.info(f"radar_controls:get_splitting_indices -> using max_points={self.max_points} (max time points limit)")
 
 			if(np.size(self._t) > self.max_points):                
 				self.splitting_indices = np.arange(self.max_points, np.size(self._t), self.max_points, dtype=int)
-				self.n_periods = len(self.splitting_indices) + 1
+				self.splitting_indices = np.append(self.splitting_indices, np.size(self._t))
+				self.n_periods = len(self.splitting_indices)
 			else:
 				self.n_periods = 1 
 
@@ -1083,8 +1090,9 @@ class RadarControls(object):
 				for name in self.controlled_properties[station.type][station_id]:
 					periods = []
 					for period_id in range(self.n_periods):
-						if self.property_controls[period_id][station.type][name][station_id] is not None:
-							periods.append(period_id)
+						if self.t[period_id] is not None:
+							if self.property_controls[period_id][station.type][name][station_id] is not None:
+								periods.append(period_id)
 
 					print(f"    - {name} -> (periods {periods})")
 								

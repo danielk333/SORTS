@@ -114,14 +114,14 @@ class Beampark(Scan):
         else:
             shape = (3, np.size(t))
 
-        if hasattr(self.elevation, '__len__'):
+        if hasattr(self.elevation, '__len__') and np.size(self.elevation) > 1:
             shape += (len(self.elevation), )
-        elif hasattr(self.azimuth, '__len__'):
+        elif hasattr(self.azimuth, '__len__') and np.size(self.azimuth) > 1:
             shape += (len(self.azimuth), )
 
         azelr = np.empty(shape, dtype=np.float64)
 
-        if hasattr(self.azimuth, '__len__'):
+        if hasattr(self.azimuth, '__len__') and np.size(self.azimuth) > 1:
             for ind in range(len(self.azimuth)):
                 if len(shape) == 2:
                     azelr[0,ind] = self.azimuth[ind]
@@ -130,7 +130,7 @@ class Beampark(Scan):
         else:
             azelr[0,...] = self.azimuth
 
-        if hasattr(self.elevation, '__len__'):
+        if hasattr(self.elevation, '__len__') and np.size(self.elevation) > 1:
             for ind in range(len(self.elevation)):
                 if len(shape) == 2:
                     azelr[1,ind] = self.elevation[ind]

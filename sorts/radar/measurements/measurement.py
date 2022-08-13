@@ -574,6 +574,7 @@ class Measurement(object):
             t_dirs = lambda period_id : radar_states.pdirs[period_id]["t"]
             pdirs = lambda period_id : radar_states.pdirs[period_id]
 
+            
         n_periods = len(radar_states.t)
 
         # get states interpolator
@@ -618,6 +619,10 @@ class Measurement(object):
         # interruption flag is used to stop simulations if the stop_condition is met
         interruption_flag = False
         for period_id in range(n_periods):
+            if radar_states.t[period_id] is None:
+                data.append(None)
+                continue
+                
             t_tmp = t_dirs(period_id)
             if t_tmp[-1] > txrx_pass.start():
                 # interpolate states over subperiod
@@ -1267,7 +1272,7 @@ class Measurement(object):
                 # update bounds
                 bound_indices_pdirs[1] = interrupt_inds[0]-1 # first index where the interruption is reached = end of simulation
                 bounds  = [bound_indices_pdirs[0], bound_indices_pdirs[-1]]
-        
+
         # get states which are not observable
         detection_mask = np.full(len(t_dirs), False, bool)
         detection_mask[bound_indices_pdirs[0]:bound_indices_pdirs[-1]+1] = self.observable_filter(

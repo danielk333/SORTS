@@ -211,6 +211,9 @@ class Tracker(radar_controller.RadarController):
             
             # get the states for each time sub-array
             for period_id in range(controls.n_periods):   
+                if controls.t[period_id] is None:
+                    continue
+                    
                 pass_msk = np.logical_and(controls.t[period_id] >= t_start, controls.t[period_id] <= t_end) # get all time slices in the pass
 
                 if np.size(np.where(pass_msk)) < len(pass_msk): 
