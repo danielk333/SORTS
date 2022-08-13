@@ -8,11 +8,18 @@ from .version import __version__
 
 import os
 import ctypes
+import pathlib
+import sysconfig
 
-__sortspath__ = os.path.dirname(__file__)
-__libpath__ = __sortspath__ + "/../libsorts.so"
+# Find suffix
+suffix = sysconfig.get_config_var('EXT_SUFFIX')
+if suffix is None:
+    suffix = ".so"
 
-clibsorts = ctypes.cdll.LoadLibrary(__libpath__)
+__sortspath__ = pathlib.Path(__file__).resolve().parent
+__libpath__ = __sortspath__ / ("clibsorts" + suffix)
+
+clibsorts = ctypes.cdll.LoadLibrary(str(__libpath__))
 
 # -----------------------------------------------------------------
 #                           Radar
