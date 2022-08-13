@@ -14,6 +14,21 @@ from ...transformations import frames
 from . import station
 from sorts import clibsorts
 
+# Define C interface
+clibsorts.compute_intersection_points.argtypes = [
+    np.ctypeslib.ndpointer(dtype=ctypes.c_double, flags="C"),
+    np.ctypeslib.ndpointer(dtype=ctypes.c_double, flags="C"),
+    np.ctypeslib.ndpointer(dtype=ctypes.c_double, flags="C"),
+    np.ctypeslib.ndpointer(dtype=ctypes.c_double, flags="C"),
+    np.ctypeslib.ndpointer(dtype=ctypes.c_double, flags="C"),
+    ctypes.c_double,
+    np.ctypeslib.ndpointer(dtype=ctypes.c_int),
+    ctypes.c_int,
+    ctypes.c_int,
+    ctypes.c_int,
+]
+
+
 class Radar(object):
     '''Encapsulates a Radar system.
         
@@ -1075,19 +1090,6 @@ class Radar(object):
         keep = np.zeros((n_points,), dtype=np.int32)
 
         # Calling c library
-        clibsorts.compute_intersection_points.argtypes = [
-            np.ctypeslib.ndpointer(dtype=ctypes.c_double, ndim=tx_directions.ndim, shape=tx_directions.shape, flags="C"),
-            np.ctypeslib.ndpointer(dtype=ctypes.c_double, ndim=rx_directions.ndim, shape=rx_directions.shape, flags="C"),
-            np.ctypeslib.ndpointer(dtype=ctypes.c_double, ndim=tx_ecef.ndim, shape=tx_ecef.shape, flags="C"),
-            np.ctypeslib.ndpointer(dtype=ctypes.c_double, ndim=rx_ecef.ndim, shape=rx_ecef.shape, flags="C"),
-            np.ctypeslib.ndpointer(dtype=ctypes.c_double, ndim=intersection_points.ndim, shape=intersection_points.shape, flags="C"),
-            ctypes.c_double,
-            np.ctypeslib.ndpointer(dtype=ctypes.c_int, ndim=keep.ndim, shape=keep.shape),
-            ctypes.c_int,
-            ctypes.c_int,
-            ctypes.c_int,
-        ]
-
         clibsorts.compute_intersection_points(
             tx_directions,
             rx_directions,
