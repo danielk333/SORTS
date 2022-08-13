@@ -1,15 +1,12 @@
-import os
 import setuptools
-from setuptools.command.develop import develop
-from setuptools.command.install import install
-from setuptools.command.egg_info import egg_info
-import pip
 import pathlib
 import codecs
+import sys
 
 HERE = pathlib.Path(__file__).resolve().parents[0]
 
 sys.path.append("/home/me/docproj/ext/breathe/")
+
 
 def get_version(path):
     with codecs.open(path, 'r') as fp:
@@ -48,7 +45,7 @@ setuptools.setup(
     ],
     install_requires=pip_req,
     packages=setuptools.find_packages(),
-    extensions = ['sphinx.ext.pngmath', 'sphinx.ext.todo', 'breathe' ]
+    extensions = ['sphinx.ext.pngmath', 'sphinx.ext.todo', 'breathe'],
     package_data={
         'sorts': ['data/*'],
     },
