@@ -1,21 +1,22 @@
-include Makefile.defs
+CC=gcc
+CFLAGS=-fPIC -shared
+LIBS=-lm
 
-OPT+= -fPIC -DLIBSORTS
-
-# SOURCES=radar_controller.c static_priority_scheduler.c plotting_controls.c signals.c measurements.c radar.c
-SOURCES := $(wildcard *.c)
+SOURCES=radar_controller.c static_priority_scheduler.c plotting_controls.c signals.c measurements.c radar.c
 OBJECTS=$(SOURCES:.c=.o)
 HEADERS=$(SOURCES:.c=.h)
+EXT=$(shell python -c "import sysconfig; print(sysconfig.get_config_var('EXT_SUFFIX'))")
+OUTLIB=clibsorts$(EXT)
 
-all: $(SOURCES) libsorts.so
+all: $(OUTLIB)
 
-%.o: %.c $(HEADERS)
+%.o: %.c
 	@echo "SORTS installation -> Compiling source file $< ..."
-	$(CC) -c $(OPT) $(PREDEF) -o $@ $<
+	$(CC) -c $(CFLAGS) -o $@ $<
 
-libsorts.so: $(OBJECTS)
+$(OUTLIB): $(OBJECTS)
 	@echo "SORTS installation -> Linking share library $@ ..."
-	$(CC) $(OPT) -shared $(OBJECTS) $(LIB) -o $@
+	$(CC) $(CFLAGS) -shared $(OBJECTS) $(LIBS) -o $@
 	@mv $@ ../sorts/ -v
 	@echo "SORTS installation -> The shared library $< has been created successfully."
 
