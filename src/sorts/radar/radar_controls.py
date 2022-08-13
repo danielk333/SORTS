@@ -499,7 +499,7 @@ class RadarControls(object):
 						shape_error = True
 					else:
 						for period_id in range(self.n_periods):
-							if np.size(value[period_id]) != len(controls.t[period_id]):
+							if np.size(value[period_id]) != len(self._t[period_id]):
 								shape_error = True	
 							else:
 								value[period_id] = value[period_id].astype(int)

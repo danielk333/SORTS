@@ -6,6 +6,9 @@ examples/data/orekit-data-master.zip
 examples/data/tle.txt
 examples/data/tle-201801.txt
 
+#temporary test data
+tests/tmp_test_data/*
+
 # Compiled source #
 ###################
 
@@ -24,6 +27,7 @@ __pycache__/
 
 # C extensions
 *.so
+*.o
 
 # Distribution / packaging
 .Python
@@ -112,9 +116,3 @@ cache_error*
 *~
 .*.sw[op]
 
-#temporary test data
-tests/tmp_test_data/*
-
-#do not version control some data
-data/spice/*.bsp
-data/spice/*.tls

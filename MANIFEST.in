@@ -1,0 +1,3 @@
+include src/clibsorts/*.c
+include src/clibsorts/*.h
+include README.rst

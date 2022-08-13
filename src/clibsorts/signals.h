@@ -1,3 +1,7 @@
+// inclusion guard
+#ifndef SIGNALS_H_
+#define SIGNALS_H_
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -302,3 +306,5 @@ void hard_target_snr(
 	double _radar_albedo, 
 	double *_snr
 );
+
+#endif //SIGNALS_H_

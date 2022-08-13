@@ -1,5 +1,5 @@
 from sorts import signals
-from sorts.radar import signals_old
+from sorts.radar import signals_c_wrapper as signals_old
 import numpy as np
 
 from sorts import profiling
