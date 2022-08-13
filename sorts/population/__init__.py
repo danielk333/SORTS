@@ -10,3 +10,5 @@ from .master import master_catalog
 from .master import master_catalog_factor
 
 from .tles import tle_catalog
+
+from .minimoon import NESCv9_minimoons

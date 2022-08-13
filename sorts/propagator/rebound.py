@@ -83,7 +83,7 @@ class Rebound(Propagator):
         self.geo_internal_frame = 'GCRS'
         self._earth_ind = self.planet_index('Earth')
         self._sun_ind = self.planet_index('Sun')
-        self.N_massive = len(self.settings['massive_objects']);
+        self.N_massive = len(self.settings['massive_objects'])
 
 
     def __str__(self):
