@@ -30,8 +30,8 @@ project = 'SORTS'
 version ='.'.join(sorts.__version__.split('.')[:2])
 release = sorts.__version__
 
-copyright = f'[2020-{date.today().year}] Daniel Kastinen, Juha Vierinen, Thomas Maynadie'
-author = 'Daniel Kastinen, Juha Vierinen, Thomas Maynadie'
+copyright = f'[2020-{date.today().year}] Daniel Kastinen, Juha Vierinen, Thomas Maynadie, Tom Grydeland'
+author = 'Daniel Kastinen, Juha Vierinen, Thomas Maynadie, Tom Grydeland'
 
 
 # -- General configuration ---------------------------------------------------
