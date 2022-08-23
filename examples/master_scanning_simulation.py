@@ -44,7 +44,7 @@ scan = Beampark(azimuth=radar.tx[0].beam.azimuth, elevation=radar.tx[0].beam.ele
 # create scanner controller and generate radar controls
 scanner_controller = sorts.Scanner()
 t = np.arange(0, end_t, scan.dwell())
-controls = scanner_controller.generate_controls(t, radar, scan, max_points=1000, cache_pdirs=False)
+controls = scanner_controller.generate_controls(t, radar, scan, max_points=200, cache_pdirs=False)
 
 # generate radar states from the radar controls
 radar_states = radar.control(controls)
@@ -123,7 +123,7 @@ class ScanningSimulation(sorts.Simulation):
         if self.logger is not None:
             self.logger.always(f'Observing object {index}')
 
-        data = radar.observe_passes(item, self.radar_states, self.population.get_object(index), snr_limit=False, parallelization=True)
+        data = radar.observe_passes(item, self.radar_states, self.population.get_object(index), snr_limit=False, parallelization=False)
         
         if self.logger is not None:
             self.logger.always(f'Object {index} observation done')
