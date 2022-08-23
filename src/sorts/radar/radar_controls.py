@@ -211,12 +211,12 @@ class RadarControls(object):
 		>>> controls_copy = controls.copy()
 		'''
 		ret = RadarControls(self.radar, self.controller, scheduler=self.scheduler, priority=None, logger=self.logger, profiler=self.profiler)
-		ret._t 				= copy.copy(self._t)
-		ret._t_slice 		= copy.copy(self._t_slice)
-		ret.pdir_args 		= copy.copy(self.pdir_args)
-		ret.has_pdirs 		= copy.copy(self.has_pdirs)
-		ret._priority 		= copy.copy(self.priority)
-		ret.pdirs 			= copy.copy(self.pdirs)
+		ret._t 						= copy.copy(self._t)
+		ret._t_slice 				= copy.copy(self._t_slice)
+		ret.pdir_args 				= copy.copy(self.pdir_args)
+		ret.has_pdirs 				= copy.copy(self.has_pdirs)
+		ret._priority 				= copy.copy(self.priority)
+		ret.pdirs 					= copy.copy(self.pdirs)
 
 		ret.n_control_points 		= self.n_control_points
 		ret.n_periods 				= self.n_periods
@@ -307,9 +307,9 @@ class RadarControls(object):
 		if max_points <= 0 or not isinstance(max_points, int):
 			raise ValueError("max_points must be a positive integer")
 
-		if np.size(t[0]) == 1 and not isinstance(t[0], np.ndarray) and t[0] is not None:
+		if not isinstance(t[0], np.ndarray):
 			# both the time slice and the time arrays are protected to ensure that they are the same size and add verification
-			t 			= np.atleast_1d(t).astype(np.float64)
+			t 			= t.astype(np.float64)
 			duration 	= np.atleast_1d(duration).astype(np.float64)
 
 			# check time array  
@@ -334,6 +334,8 @@ class RadarControls(object):
 
 			self._t = t
 			self._t_slice = duration
+
+			# TODO : change to float array to allow for continuous priorities
 			self._priority = np.repeat(self._priority, self.n_control_points)
 			
 			# split time slices according to scheduler periods or max points for performance
@@ -349,7 +351,7 @@ class RadarControls(object):
 				raise Exception("t must be the same length as the duration array")
 
 			self.splitting_indices = np.ndarray((len(t),), dtype=int)
-			print(t)
+
 			start_time = t[0][0]//self.scheduler.scheduler_period*self.scheduler.scheduler_period
 
 			index = 0
@@ -359,7 +361,6 @@ class RadarControls(object):
 					self.splitting_indices[period_id] = index
 
 					if self.scheduler is not None:
-						print(t[period_id][-1])
 						if t[period_id][-1] > start_time + (period_id + 1)*self.scheduler.scheduler_period or t[period_id][0] < start_time + period_id*self.scheduler.scheduler_period:
 							raise Exception("t is not synchronized with the scheduler period. Please provide a valid splitted time array t or use the automatic splitting feature by calling set_time_slices with flat time arrays")
 					else:
@@ -388,14 +389,16 @@ class RadarControls(object):
 					self._priority[period_id] = np.repeat(np.atleast_1d(tmp_priority), len(self._t[period_id]))
 				else:
 					self._priority[period_id] = None
-
+		
 		# set array of property controls		
+			
 		self.property_controls = np.ndarray((self.n_periods,), dtype=object)
 		for period_id in range(self.n_periods):
-			self.property_controls[period_id] = dict() # station types
+			if self._t[period_id] is not None:
+				self.property_controls[period_id] = dict() # station types
 
-			for station_type in ("tx", "rx"):
-				self.property_controls[period_id][station_type] = dict() # property names
+				for station_type in ("tx", "rx"):
+					self.property_controls[period_id][station_type] = dict() # property names
 
 
 	def remove_periods(self, mask):
@@ -442,17 +445,31 @@ class RadarControls(object):
 		# the number of points is the same for all periods but the last, so treat the last separatly to get total number of points remaining
 		self.n_control_points = 0
 		for period_id in range(self.n_periods):
-			if self._t[period_id] is not None:
-				self.n_control_points += len(self._t[period_id])*mask[period_id]
+			if self._t[period_id] is not None and mask[period_id] is not False:
+				self.n_control_points += len(self._t[period_id])
+
+		i_start = np.argmax(mask==False)
+		i_end = self.n_periods - np.argmax(np.flip(mask)==False)
+
+		# remove empty periods at start and end 
+		self._t = self._t[i_start:i_end]
+		self._t_slice = self._t_slice[i_start:i_end]
+		self._priority = self._priority[i_start:i_end]
+		self.property_controls = self.property_controls[i_start:i_end]
+
+		if self.pdirs is not None:
+			self.pdirs = self.pdirs[i_start:i_end]
+
+		mask = mask[i_start:i_end]
 
 		# update time slices and priority
-		self._t 				= self._t[mask]
-		self._t_slice 			= self._t_slice[mask]
-		self._priority 			= self._priority[mask]
+		self._t[mask] 					= None
+		self._t_slice[mask] 			= None
+		self._priority[mask] 			= None
 
 		# update property controls
-		self.property_controls 	= self.property_controls[mask]
-		self.n_periods 			= len(self._t)
+		self.property_controls[mask] 	= None
+		self.n_periods 					= len(self._t)
 
 		# updates pointing directions
 		if self.pdirs is not None:
@@ -709,12 +726,12 @@ class RadarControls(object):
 			raise ValueError("name must be a string")
 
 		station = np.atleast_1d(station)
-		
+
 		# check array size (if not already splitted : split data array)
 		if np.size(data) == 1:
 			data = np.repeat(np.atleast_1d(data), self.n_control_points)
 
-		if np.size(data) != self.n_periods and not isinstance(data[0], np.ndarray):
+		if not isinstance(data[0], np.ndarray):
 			if np.size(data) != self.n_control_points:
 				raise Exception("the control data shall either be of the shape (n_control_points,), where n_control_points is the total number of time points inside the time slice array, or (n_periods,...) where n_periods is the number of control periods")
 			else:
@@ -722,8 +739,6 @@ class RadarControls(object):
 
 		# create new control field if doesn't already exist
 		self.create_new_property_control_field(name, station)	
-		print("created new field : ", name)	
-		print("in : ", self.controlled_properties)	
 
 		# add control for each station
 		for station_ in station:
@@ -732,7 +747,8 @@ class RadarControls(object):
 			station_type = station_.type
 			
 			for period_id in range(self.n_periods):
-				self.property_controls[period_id][station_type][name][station_id] = data[period_id]
+				if self.property_controls[period_id] is not None:
+					self.property_controls[period_id][station_type][name][station_id] = data[period_id]
 
 
 	def create_new_property_control_field(self, name, stations):
@@ -781,9 +797,10 @@ class RadarControls(object):
 
 					# create new field for each period
 					for period_id in range(self.n_periods):
-						if not name in self.property_controls[period_id][station_type].keys():
-							self.property_controls[period_id][station_type][name] = np.ndarray((len(getattr(self.radar, station_type)),), dtype=object)
-				
+						if self.property_controls[period_id] is not None:
+							if not name in self.property_controls[period_id][station_type].keys():
+								self.property_controls[period_id][station_type][name] = np.ndarray((len(getattr(self.radar, station_type)),), dtype=object)
+					
 	def get_property_control(self, name, station, period_id):
 		''' Gets the control data corresponding to the specified control period id.
 
@@ -985,8 +1002,6 @@ class RadarControls(object):
 		# Split arrays according to transition indices
 		if self.splitting_indices is not None:
 			splitted_array = np.ndarray((self.n_periods,), dtype=object)
-			print(self.splitting_indices)
-			print(self.n_periods)
 
 			id_start = 0
 			for period_id in range(self.n_periods):
@@ -997,7 +1012,11 @@ class RadarControls(object):
 					id_end = self.splitting_indices[period_id]
 
 					# copy values from the array in the corresponding control period
-					splitted_array[period_id] = array[id_start:id_end]
+					data = array[id_start:id_end]
+					if np.size(data) == 1:
+						data = np.array(data)
+
+					splitted_array[period_id] = data
 					id_start = id_end
 		else:
 			splitted_array = array[None, :]
@@ -1058,7 +1077,6 @@ class RadarControls(object):
 				else:
 					self.splitting_indices[period_id] = -1
 		else:
-			print("ok")
 			if self.logger is not None:
 				self.logger.info("radar_controls:get_splitting_indices -> No scheduler provided, skipping master clock splitting...")
 				self.logger.info(f"radar_controls:get_splitting_indices -> using max_points={self.max_points} (max time points limit)")

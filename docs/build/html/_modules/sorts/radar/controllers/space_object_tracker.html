@@ -747,6 +747,7 @@
 
 		<span class="c1"># remove points where no space objects were found and split arrays according to control time slices</span>
 		<span class="k">if</span> <span class="n">controls</span><span class="o">.</span><span class="n">splitting_indices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="nb">print</span><span class="p">(</span><span class="n">controls</span><span class="o">.</span><span class="n">splitting_indices</span><span class="p">)</span>
 			<span class="n">final_states</span> 		<span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hsplit</span><span class="p">(</span><span class="n">final_states</span><span class="p">[:,</span> <span class="n">state_msk</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="n">states_per_slice</span><span class="o">*</span><span class="n">controls</span><span class="o">.</span><span class="n">splitting_indices</span><span class="p">)</span>
 			<span class="n">final_t_tracking</span> 	<span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hsplit</span><span class="p">(</span><span class="n">final_t_tracking</span><span class="p">[</span><span class="n">state_msk</span><span class="p">],</span> <span class="n">states_per_slice</span><span class="o">*</span><span class="n">controls</span><span class="o">.</span><span class="n">splitting_indices</span><span class="p">)</span>
 			<span class="n">state_priorities</span> 	<span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hsplit</span><span class="p">(</span><span class="n">state_priorities</span><span class="p">[</span><span class="n">ctrl_msk</span><span class="p">],</span> <span class="n">controls</span><span class="o">.</span><span class="n">splitting_indices</span><span class="p">)</span>
@@ -1148,7 +1149,7 @@
   
   <div class="footer-item">
     <p class="copyright">
-    &copy; Copyright [2020-2022] Daniel Kastinen, Juha Vierinen, Thomas Maynadie.<br>
+    &copy; Copyright [2020-2022] Daniel Kastinen, Juha Vierinen, Thomas Maynadie, Tom Grydeland.<br>
 </p>
   </div>
   

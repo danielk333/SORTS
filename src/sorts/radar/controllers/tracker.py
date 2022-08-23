@@ -211,7 +211,7 @@ class Tracker(radar_controller.RadarController):
             
             # get the states for each time sub-array
             for period_id in range(controls.n_periods):   
-                if controls.t[period_id] is None:
+                if controls.t[period_id] is None: # remove period if None
                     continue
                     
                 pass_msk = np.logical_and(controls.t[period_id] >= t_start, controls.t[period_id] <= t_end) # get all time slices in the pass
@@ -239,9 +239,9 @@ class Tracker(radar_controller.RadarController):
                         break
 
         # remove control periods where no space object states are present
-        controls.remove_periods(keep)
+        controls.remove_periods(np.invert(keep))
 
-        return target_states[keep], t_states_final[keep]
+        return target_states, t_states_final
 
 
     def compute_pointing_directions(
@@ -638,6 +638,7 @@ class Tracker(radar_controller.RadarController):
         controls.meta["interpolator"] = interpolator
 
         controls.set_time_slices(t, t_slice, max_points=max_points)
+        radar_controller.RadarController.coh_integration(controls, radar, t_slice)
 
         # split time array into scheduler periods and target states if a scheduler is attached to the controls
         target_states_interp, t_states_interp = self.retreive_target_states(controls, t_states, state_interpolator, states_per_slice)
@@ -645,8 +646,6 @@ class Tracker(radar_controller.RadarController):
         # Compute controls
         pdir_args = (target_states_interp, t_states_interp)
         controls.set_pdirs(pdir_args, cache_pdirs=cache_pdirs)
-
-        radar_controller.RadarController.coh_integration(controls, radar, t_slice)
 
         # TODO : include this in radar -> RadarController.coh_integration(self.radar, self.meta['dwell'])
 

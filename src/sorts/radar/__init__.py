@@ -46,5 +46,5 @@ from .passes import find_passes, find_simultaneous_passes
 from .signals import hard_target_snr
 
 # measurements
-from . import measurements 
+from .measurements import measurement
 from .measurements import Measurement

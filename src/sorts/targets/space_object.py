@@ -1,65 +1,6 @@
 #!/usr/bin/env python
 
-'''Defines a space object. Encapsulates orbital elements, propagation and related methods.
-
-
-**Example:**
-
-Using space object for propagation.
-
-.. code-block:: python
-
-    import numpy as np
-    import matplotlib.pyplot as plt
-    from mpl_toolkits.mplot3d import Axes3D
-    from astropy.time import Time
-
-    from sorts.propagator import Kepler
-    from sorts import SpaceObject
-
-    options = dict(
-        settings=dict(
-            in_frame='GCRS',
-            out_frame='GCRS',
-        ),
-    )
-
-    t = np.linspace(0,3600*24.0*2,num=5000)
-
-    obj = SpaceObject(
-        Kepler,
-        propagator_options = options,
-        a = 7000e3, 
-        e = 0.0, 
-        i = 69, 
-        raan = 0, 
-        aop = 0, 
-        mu0 = 0, 
-        epoch = Time(57125.7729, format='mjd'),
-        parameters = dict(
-            d = 0.2,
-        )
-    )
-
-    print(obj)
-
-    states = obj.get_state(t)
-
-
-
-    fig = plt.figure(figsize=(15,15))
-    ax = fig.add_subplot(111, projection='3d')
-    ax.plot(states[0,:], states[1,:], states[2,:],"-b")
-
-    max_range = np.linalg.norm(states[0:3,0])*2
-
-    ax.set_xlim(-max_range, max_range)
-    ax.set_ylim(-max_range, max_range)
-    ax.set_zlim(-max_range, max_range)
-    plt.show()
-
-
-'''
+''' Defines a space object. Encapsulates orbital elements, propagation and related methods. '''
 
 #Python standard import
 import copy
@@ -71,63 +12,111 @@ from astropy.time import Time, TimeDelta
 
 
 class SpaceObject(object):
-    ''' Encapsulates a object in space who's dynamics is governed in time by a propagator.
+    ''' Encapsulates a object in space which dynamics are governed by :ref:`propagators`.
 
-    The state of the object is stored in a `pyorb.Orbit` instance. This instance contains direct transformations between
-    the Cartesian and Kepler states. The transformation follows the below the below orientation rules:
+    The state of the object is stored in a :class:`pyorb.Orbit` instance which allows for the direct transformation between
+    Cartesian and Kepler state vectors. 
 
-    **Orientation of the ellipse in the coordinate system:**
+    The orbit of a space object obeys the following convention :
        * For zero inclination :math:`i`: the ellipse is located in the x-y plane.
        * The direction of motion as True anoamly :math:`\\nu`: increases for a zero inclination :math:`i`: orbit is anti-coockwise, i.e. from +x towards +y.
        * If the eccentricity :math:`e`: is increased, the periapsis will lie in +x direction.
        * If the inclination :math:`i`: is increased, the ellipse will rotate around the x-axis, so that +y is rotated toward +z.
-       * An increase in Longitude of ascending node :math:`\Omega`: corresponds to a rotation around the z-axis so that +x is rotated toward +y.
-       * Changing argument of perihelion :math:`\omega`: will not change the plane of the orbit, it will rotate the orbit in the plane.
+       * An increase in Longitude of ascending node :math:`\\Omega`: corresponds to a rotation around the z-axis so that +x is rotated toward +y.
+       * Changing argument of perihelion :math:`\\omega`: will not change the plane of the orbit, it will rotate the orbit in the plane.
        * The periapsis is shifted in the direction of motion.
-       * True anomaly measures from the +x axis, i.e :math:`\\nu = 0` is located at periapsis and :math:`\\nu = \pi` at apoapsis.
-       * All anomalies and orientation angles reach between 0 and :math:`2\pi`
+       * True anomaly measures from the +x axis, i.e :math:`\\nu = 0` is located at periapsis and :math:`\\nu = \\pi` at apoapsis.
+       * All anomalies and orientation angles reach between 0 and :math:`2\\pi`
 
        *Reference:* "Orbital Motion" by A.E. Roy.
     
-    TODO: docs left
-
-    :param Propagator propagator: Propagator class
-    :param dict propagator_options: Propagator initialization keyword arguments
-    :param dict propagator_args: Keyword arguments to be passed to the propagator call    
-    :param dict parameters: Parameters for the space object. Some parameters are by default recognized by the `SpaceObject`.
-    :param float/astropy.time.Time epoch: Epoch for the state, if not an astropy `Time` is given, it is assumed the input float is `format='mjd', scale='utc'`.
-    :param int oid: Object ID
-    :param dict kwargs: All additional keywords are used to initialize the orbit. If the keyword `state` is given, that input variable is simply saved as the state. This is useful for e.g. `SGP4` that does not use regular cartesian states for propagation.
     
-    :Keyword arguments:
-        * *a* (``float``) -- Semi-major axis in meters
-        * *e* (``float``) -- Eccentricity
-        * *i* (``float``) -- Inclination in degrees
-        * *aop* (``float``) -- Argument of perigee in degrees
+    Parameters
+    ----------
+    propagator : :class:`sorts.Propagator<sorts.targets.propagator.base>` 
+        :class:`sorts.Propagator<sorts.targets.propagator.base>`  class used to propagate the states of the space object.
+    propagator_options : dict
+        :class:`sorts.Propagator<sorts.targets.propagator.base>`  initialization keyword arguments.
+    propagator_args : dict
+        Keyword arguments to be passed to the propagator call.
+    parameters : dict
+        Space object parameters. Some parameters are by default recognized by the :class:`SpaceObject`.
+    epoch : float / :class:`astropy.time.Time`
+        Epoch for the state, if not an astropy :class:`astropy.time.Time` is given, it is assumed the input float is `format='mjd', scale='utc'`.
+    oid : int
+        Object ID
+    kwargs : dict
+        All additional keywords are used to initialize the orbit. If the keyword `state` is given, that input variable 
+        is simply saved as the state. This is useful for e.g. :class:`sorts.propagator.SGP4<sorts.targets.propagator.pysgp4.SGP4>` 
+        that does not use regular cartesian states for propagation.
+    
+        * *a* (``float``)    -- Semi-major axis in meters
+        * *e* (``float``)    -- Eccentricity
+        * *i* (``float``)    -- Inclination in degrees
+        * *aop* (``float``)  -- Argument of perigee in degrees
         * *raan* (``float``) -- Right ascension of the ascending node in degrees
-        * *mu0* (``float``) -- Mean anomaly in degrees
-        * *x* (``float``) -- X-position
-        * *y* (``float``) -- Y-position
-        * *z* (``float``) -- Z-position
-        * *vx* (``float``) -- X-velocity
-        * *vy* (``float``) -- Y-velocity
-        * *vz* (``float``) -- Z-velocity
+        * *mu0* (``float``)  -- Mean anomaly in degrees
+        * *x* (``float``)    -- X-position
+        * *y* (``float``)    -- Y-position
+        * *z* (``float``)    -- Z-position
+        * *vx* (``float``)   -- X-velocity
+        * *vy* (``float``)   -- Y-velocity
+        * *vz* (``float``)   -- Z-velocity
 
 
-    :ivar state: State instance, is an `pyorb.Orbit` unless the state keyword was used.
-    :ivar pyorb.Orbit orbit: Orbit instance if the `state` is an orbit.
-    :param dict parameters: Parameters for the space object.
-    :ivar int oid: Object ID
-    :ivar float C_D: Drag coefficient
-    :ivar float C_R: Radiation pressure coefficient
-    :ivar float A: Area [:math:`m^2`]
-    :ivar float m: Mass [kg]
-    :ivar float d: Diameter [m]
-    :ivar float mjd0: Epoch for state [BC-relative JD]
-    :ivar Propagator __propagator: Propagator class (used internally only)
-    :ivar Propagator propagator: Propagator instance
-    :ivar dict propagator_options: Propagator initialization keyword arguments
-    :ivar dict propagator_args: Propagator call keyword arguments
+    Examples
+    --------
+    Using space object for propagation.
+
+    .. code-block:: python
+
+        import numpy as np
+        import matplotlib.pyplot as plt
+        from mpl_toolkits.mplot3d import Axes3D
+        from astropy.time import Time
+
+        from sorts.propagator import Kepler
+        from sorts import SpaceObject
+
+        options = dict(
+            settings=dict(
+                in_frame='GCRS',
+                out_frame='GCRS',
+            ),
+        )
+
+        t = np.linspace(0,3600*24.0*2,num=5000)
+
+        obj = SpaceObject(
+            Kepler,
+            propagator_options = options,
+            a = 7000e3, 
+            e = 0.0, 
+            i = 69, 
+            raan = 0, 
+            aop = 0, 
+            mu0 = 0, 
+            epoch = Time(57125.7729, format='mjd'),
+            parameters = dict(
+                d = 0.2,
+            )
+        )
+
+        print(obj)
+
+        states = obj.get_state(t)
+
+        fig = plt.figure(figsize=(15,15))
+        ax = fig.add_subplot(111, projection='3d')
+        ax.plot(states[0,:], states[1,:], states[2,:],"-b")
+
+        max_range = np.linalg.norm(states[0:3,0])*2
+
+        ax.set_xlim(-max_range, max_range)
+        ax.set_ylim(-max_range, max_range)
+        ax.set_zlim(-max_range, max_range)
+        
+        plt.show()
     '''
 
     default_parameters = dict(
@@ -135,6 +124,18 @@ class SpaceObject(object):
         m = 1.0,
         C_R = 1.0,
     )
+    ''' Default space object parameters.
+    
+    Values 
+     - C_D = 2.3
+     - m = 1.0
+     - C_R = 1.0
+
+    .. seealso::
+        - :attr:`SpaceObject.C_D` : object drag coefficient.
+        - :attr:`SpaceObject.m` : object mass.
+        - :attr:`SpaceObject.C_R` : object radiation pressure coefficient.
+    '''
 
     def __init__(self,
             propagator,
@@ -147,7 +148,9 @@ class SpaceObject(object):
         ):
 
         self.oid = oid
+        ''' float : Object index. ''' 
         self.parameters = copy.copy(SpaceObject.default_parameters)
+        ''' dict : Parameters for the space object. ''' 
         self.parameters.update(**parameters)
                 
         #assume MJD if not "Time" object
@@ -155,6 +158,7 @@ class SpaceObject(object):
             epoch = Time(epoch, format='mjd', scale='utc')
 
         self._epoch = epoch
+        ''' dict : Parameters for the space object. ''' 
 
         if 'state' in kwargs:
             self.state = kwargs['state']
@@ -207,31 +211,35 @@ class SpaceObject(object):
                 setattr(self.__class__, key, prop)
 
         self.__propagator = propagator
+        ''' Propagator class used for the propagation of the space object states. '''
         self.propagator_options = propagator_options
+        ''' Space object propagator options. '''
         self.propagator_args = propagator_args
+        ''' Arguments used by the propagator to propagates the space object states. '''
         self.propagator = propagator(**propagator_options)
+        ''' Propagator class used for the propagation of the space object states. '''
 
 
     def copy(self):
-        '''Returns a copy of the SpaceObject instance.
+        ''' Performs a deepcopy of the :class:`SpaceObject` instance. 
         '''
         return SpaceObject(
-            propagator = self.__propagator,
-            propagator_options = copy.deepcopy(self.propagator_options),
-            propagator_args = copy.deepcopy(self.propagator_args),
+            propagator=self.__propagator,
+            propagator_options=copy.deepcopy(self.propagator_options),
+            propagator_args=copy.deepcopy(self.propagator_args),
             epoch=copy.deepcopy(self._epoch),
             oid=self.oid,
             state=copy.deepcopy(self.state),
-            parameters = copy.deepcopy(self.parameters),
+            parameters=copy.deepcopy(self.parameters),
         )
 
 
     @property
     def m(self):
-        '''Object mass, if changed the Kepler elements stays constant
-        '''
+        ''' Space object mass (in kg), if changed the Kepler elements stays constant. '''
         return self.parameters['m']
     
+
     @m.setter
     def m(self, val):
         self.parameters['m'] = val
@@ -244,6 +252,7 @@ class SpaceObject(object):
 
     @property
     def d(self):
+        ''' Space object diameter (in meters). '''
         if 'd' in self.parameters:
             diam = self.parameters['d']
         elif 'diam' in self.parameters:
@@ -260,20 +269,19 @@ class SpaceObject(object):
 
     @property
     def C_R(self):
-        ''' Object mass, if changed the Kepler elements stays constant
-        '''
+        ''' Object radiation pressure coefficient. '''
         return self.parameters['C_R']
 
 
     @property
     def C_D(self):
-        ''' Object mass, if changed the Kepler elements stays constant
-        '''
+        ''' Object drag coefficient. '''
         return self.parameters['C_D']
 
 
     @property
     def orbit(self):
+        ''' Space object orbit instance encapsulating the `state` if the latter is an orbit. '''
         if isinstance(self.state, pyorb.Orbit):
             return self.state
         else:
@@ -283,6 +291,11 @@ class SpaceObject(object):
 
     @property
     def out_frame(self):
+        ''' Output reference frame of the computed space object states used by the propagator. 
+
+        .. seealso::
+            - :ref:`propagators` : for more information about the possible input/output frames.
+        '''
         if 'out_frame' not in self.propagator.settings:
             return None 
 
@@ -291,6 +304,11 @@ class SpaceObject(object):
 
     @out_frame.setter
     def out_frame(self, val):
+        ''' Output reference frame of the computed space object states used by the propagator. 
+
+        .. seealso::
+            - :ref:`propagators` : for more information about the possible input/output frames.
+        '''
         if 'settings' not in self.propagator_options:
             self.propagator_options['settings'] = {}
             
@@ -300,25 +318,51 @@ class SpaceObject(object):
 
     @property
     def in_frame(self):
+        ''' Input reference frame of the computed space object states used by the propagator. 
+
+        .. seealso::
+            - :ref:`propagators` : for more information about the possible input/output frames.
+        '''
         if 'in_frame' not in self.propagator.settings:
             return None 
 
         return self.propagator.settings['in_frame']
 
+
     @in_frame.setter
     def in_frame(self, val):
+        ''' Input reference frame of the computed space object states used by the propagator. 
+
+        .. seealso::
+            - :ref:`propagators` : for more information about the possible input/output frames.
+        '''
         if 'settings' not in self.propagator_options:
             self.propagator_options['settings'] = {}
             
         self.propagator_options['settings']['in_frame'] = val
         self.propagator.settings['in_frame'] = val
 
+
     @property
     def epoch(self):
+        ''' Space obejct reference epoch. '''
         return self._epoch 
 
+
     def propagate(self, dt):
-        '''Propagate and change the epoch of this space object if the state is a `pyorb.Orbit`.
+        ''' Propagate and change the epoch of this space object if the state is a `pyorb.Orbit`. 
+
+        Updates the state and epoch of the object.
+
+        Parameters
+        ----------
+        dt : float
+            Time interval through which the object is propagated in time relative to the current epoch of the object (in seconds). 
+            The new state of the object will correspond to the state at time :math:`t_0 + dt`.
+
+        Returns 
+        -------
+        None
         '''
 
         if 'in_frame' in self.propagator.settings and 'out_frame' in self.propagator.settings:
@@ -348,28 +392,46 @@ class SpaceObject(object):
 
 
     def update(self, **kwargs):
-        '''If a `pyorb.Orbit` is present, updates the orbital elements and Cartesian state vector of the space object.
+        ''' Updates the orbital elements and Cartesian state vector of the space object if a :class:`pyorb.Orbit` is present.
 
-        Can update any of the related state parameters, all others will automatically update.
+        Can update any of the related state parameters, all others will automatically update. This function cannot be used
+        to update Keplerian and Cartesian elements simultaneously.
+        
+        Parameters
+        ----------
+        a : float
+            Semi-major axis in km.
+        e : float
+            Eccentricity.
+        i : float
+            Inclination in degrees.
+        aop / omega : float
+            Argument of perigee in degrees.
+        raan / Omega : float
+            Right ascension of the ascending node in degrees.
+        mu0 / anom : float
+            Mean anomaly in degrees.
+        x : float
+            X position in km.
+        y : float
+            Y position in km.
+        z : float
+            Z position in km.
+        vx : float
+            X-direction velocity in km/s.
+        vy : float
+            Y-direction velocity in km/s.
+        vz : float
+            Z-direction velocity in km/s.
 
-        Cannot update Keplerian and Cartesian elements simultaneously.
-
-        :param float a: Semi-major axis in km
-        :param float e: Eccentricity
-        :param float i: Inclination in degrees
-        :param float aop/omega: Argument of perigee in degrees
-        :param float raan/Omega: Right ascension of the ascending node in degrees
-        :param float mu0/anom: Mean anomaly in degrees
-        :param float x: X position in km
-        :param float y: Y position in km
-        :param float z: Z position in km
-        :param float vx: X-direction velocity in km/s
-        :param float vy: Y-direction velocity in km/s
-        :param float vz: Z-direction velocity in km/s
+        Returns
+        -------
+        None
         '''
         if not isinstance(self.state, pyorb.Orbit):
             raise ValueError(f'Cannot update non-Orbit state ({type(self.state)})')
 
+        # remove duplicated elements in the parameters to update
         if 'aop' in kwargs:
             kwargs['omega'] = kwargs.pop('aop')
         if 'raan' in kwargs:
@@ -377,6 +439,7 @@ class SpaceObject(object):
         if 'mu0' in kwargs:
             kwargs['anom'] = kwargs.pop('mu0')
 
+        # adds a new property if not already present.
         for key in kwargs:
             if key not in pyorb.Orbit.UPDATE_KW:
                 self.parameters[key] = kwargs[key]
@@ -393,11 +456,13 @@ class SpaceObject(object):
                 # add attribute to class to enable calls like space_object.X
                 setattr(self.__class__, key, prop)
 
+        # update the pyorb orbit
         self.orbit.update(**kwargs)
 
 
 
     def __str__(self):
+        ''' Overloaded __str__ method. '''
         p = '\nSpace object {}: {}:\n'.format(self.oid, repr(self._epoch))
         
         p+= str(self.state) + '\n'
@@ -409,36 +474,60 @@ class SpaceObject(object):
 
 
     def get_position(self,t):
-        '''Gets position at specified times using propagator instance.
+        ''' Gets position at specified times using propagator instance.
+        
+        This function propagates the states of the space object to fet all the
+        states at each specified time point relative to the space object epoch.
 
-        :param float/list/numpy.ndarray t: Time relative epoch in seconds.
-
-        :return: Array of positions as a function of time.
-        :rtype: numpy.ndarray of size (3,len(t))
+        Parameters
+        ----------
+        t : float / list / numpy.ndarray (N,)
+            Time relative epoch in seconds.
+        
+        Returns
+        -------
+        ecefs : numpy.ndarray (3, N)
+            Array of positions as a function of time.
         '''
         ecefs = self.get_state(t)
         return ecefs[:3,:]
 
 
     def get_velocity(self,t):
-        '''Gets velocity at specified times using propagator instance.
+        ''' Gets velocity at specified times using propagator instance.
+        
+        This function propagates the states of the space object to fet all the
+        states at each specified time point relative to the space object epoch.
 
-        :param float/list/numpy.ndarray t: Time relative epoch in seconds.
-
-        :return: Array of positions as a function of time.
-        :rtype: numpy.ndarray of size (3,len(t))
+        Parameters
+        ----------
+        t : float / list / numpy.ndarray (N,)
+            Time relative epoch in seconds.
+        
+        Returns
+        -------
+        ecefs : numpy.ndarray (3, N)
+            Array of velocities as a function of time.
         '''
         ecefs = self.get_state(t)
         return ecefs[3:,:]
 
 
     def get_state(self, t):
-        '''Gets ECEF state at specified times using propagator instance.
+        ''' Gets ECEF state at specified times using propagator instance.
 
-        :param int/float/list/numpy.ndarray/astropy.time.Time/astropy.time.TimeDelta t: Time relative epoch in seconds.
-
-        :return: Array of state (position and velocity) as a function of time.
-        :rtype: numpy.ndarray of size (6,len(t))
+        This function propagates the states of the space object to fet all the
+        states at each specified time point relative to the space object epoch.
+        
+        Parameters
+        ----------
+        t : int/float/list/numpy.ndarray/astropy.time.Time/astropy.time.TimeDelta
+            Time relative epoch in seconds.
+        
+        Returns
+        -------
+        states : numpy.ndarray of size (6,len(t))
+            Array of state (position and velocity) as a function of time.
         '''
         kw = {}
         kw.update(self.propagator_args)

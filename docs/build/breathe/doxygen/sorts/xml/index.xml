@@ -1,16 +1,3 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
 <doxygenindex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="index.xsd" version="1.8.17">
-  <compound refid="signals_8h" kind="file"><name>signals.h</name>
-    <member refid="signals_8h_1a961be4eceff5348ca7de42d8873b977e" kind="define"><name>BOLTZMAN_CONSTANT</name></member>
-    <member refid="signals_8h_1a3a006ed13c7b50b3e0f63be480ab7aaf" kind="define"><name>C_VACUUM</name></member>
-    <member refid="signals_8h_1ac16cec4783edd40f7ca586be25efbc5d" kind="function"><name>doppler_spread_hard_target_snr_vectorized</name></member>
-    <member refid="signals_8h_1a7c4f4b37a3a283c28863c5748f508d24" kind="function"><name>doppler_spread_hard_target_snr</name></member>
-    <member refid="signals_8h_1a2fbc39a8b18df4c27e2183fe90ab0e55" kind="function"><name>incoherent_snr</name></member>
-    <member refid="signals_8h_1a19816f8dc6d7f95f9c6939d832394831" kind="function"><name>hard_target_diameter_vectorized</name></member>
-    <member refid="signals_8h_1a495cff0d53d6ddf100f27e884afab4f4" kind="function"><name>hard_target_diameter</name></member>
-    <member refid="signals_8h_1a1f0d0169539b2330434dbeb4a448d134" kind="function"><name>hard_target_snr_vectorized</name></member>
-    <member refid="signals_8h_1a39208efd6d00be258758c0d041ec9796" kind="function"><name>hard_target_snr</name></member>
-  </compound>
-  <compound refid="dir_68267d1309a1af8e8297ef4c3efbcdba" kind="dir"><name>/home/thomas/venvs/sorts/SORTS/src</name>
-  </compound>
 </doxygenindex>

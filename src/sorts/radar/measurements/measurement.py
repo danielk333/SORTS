@@ -864,7 +864,6 @@ class Measurement(object):
 
             - **states** : if ``save_states`` is ``True``, **states** will contain the states of the space object being measured.
         '''
-
         # get object properties
         diameter                    = space_object.d
         spin_period                 = space_object.parameters.get('spin_period', 0.0)
@@ -1246,6 +1245,9 @@ class Measurement(object):
 
             - **states** : if ``save_states`` is ``True``, **states** will contain the states of the space object being measured.
         '''
+        if t is None:
+            return None
+
         # if the state mask is not provided, define new state mask for measurement computations
         if bounds is None:
             bounds = [t[0], t[-1]]

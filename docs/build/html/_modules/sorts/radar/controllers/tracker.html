@@ -382,6 +382,9 @@
             
             <span class="c1"># get the states for each time sub-array</span>
             <span class="k">for</span> <span class="n">period_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">controls</span><span class="o">.</span><span class="n">n_periods</span><span class="p">):</span>   
+                <span class="k">if</span> <span class="n">controls</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># remove period if None</span>
+                    <span class="k">continue</span>
+                    
                 <span class="n">pass_msk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">controls</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">t_start</span><span class="p">,</span> <span class="n">controls</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">t_end</span><span class="p">)</span> <span class="c1"># get all time slices in the pass</span>
 
                 <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">pass_msk</span><span class="p">))</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">pass_msk</span><span class="p">):</span> 
@@ -407,9 +410,9 @@
                         <span class="k">break</span>
 
         <span class="c1"># remove control periods where no space object states are present</span>
-        <span class="n">controls</span><span class="o">.</span><span class="n">remove_periods</span><span class="p">(</span><span class="n">keep</span><span class="p">)</span>
+        <span class="n">controls</span><span class="o">.</span><span class="n">remove_periods</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">keep</span><span class="p">))</span>
 
-        <span class="k">return</span> <span class="n">target_states</span><span class="p">[</span><span class="n">keep</span><span class="p">],</span> <span class="n">t_states_final</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="n">target_states</span><span class="p">,</span> <span class="n">t_states_final</span></div>
 
 
 <div class="viewcode-block" id="Tracker.compute_pointing_directions"><a class="viewcode-back" href="../../../../reference/radar/controllers/auto/sorts.radar.controllers.tracker.Tracker.compute_pointing_directions.html#sorts.radar.controllers.tracker.Tracker.compute_pointing_directions">[docs]</a>    <span class="k">def</span> <span class="nf">compute_pointing_directions</span><span class="p">(</span>
@@ -806,6 +809,7 @@
         <span class="n">controls</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;interpolator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interpolator</span>
 
         <span class="n">controls</span><span class="o">.</span><span class="n">set_time_slices</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">t_slice</span><span class="p">,</span> <span class="n">max_points</span><span class="o">=</span><span class="n">max_points</span><span class="p">)</span>
+        <span class="n">radar_controller</span><span class="o">.</span><span class="n">RadarController</span><span class="o">.</span><span class="n">coh_integration</span><span class="p">(</span><span class="n">controls</span><span class="p">,</span> <span class="n">radar</span><span class="p">,</span> <span class="n">t_slice</span><span class="p">)</span>
 
         <span class="c1"># split time array into scheduler periods and target states if a scheduler is attached to the controls</span>
         <span class="n">target_states_interp</span><span class="p">,</span> <span class="n">t_states_interp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">retreive_target_states</span><span class="p">(</span><span class="n">controls</span><span class="p">,</span> <span class="n">t_states</span><span class="p">,</span> <span class="n">state_interpolator</span><span class="p">,</span> <span class="n">states_per_slice</span><span class="p">)</span>
@@ -813,8 +817,6 @@
         <span class="c1"># Compute controls</span>
         <span class="n">pdir_args</span> <span class="o">=</span> <span class="p">(</span><span class="n">target_states_interp</span><span class="p">,</span> <span class="n">t_states_interp</span><span class="p">)</span>
         <span class="n">controls</span><span class="o">.</span><span class="n">set_pdirs</span><span class="p">(</span><span class="n">pdir_args</span><span class="p">,</span> <span class="n">cache_pdirs</span><span class="o">=</span><span class="n">cache_pdirs</span><span class="p">)</span>
-
-        <span class="n">radar_controller</span><span class="o">.</span><span class="n">RadarController</span><span class="o">.</span><span class="n">coh_integration</span><span class="p">(</span><span class="n">controls</span><span class="p">,</span> <span class="n">radar</span><span class="p">,</span> <span class="n">t_slice</span><span class="p">)</span>
 
         <span class="c1"># TODO : include this in radar -&gt; RadarController.coh_integration(self.radar, self.meta[&#39;dwell&#39;])</span>
 
@@ -848,7 +850,7 @@
   
   <div class="footer-item">
     <p class="copyright">
-    &copy; Copyright [2020-2022] Daniel Kastinen, Juha Vierinen, Thomas Maynadie.<br>
+    &copy; Copyright [2020-2022] Daniel Kastinen, Juha Vierinen, Thomas Maynadie, Tom Grydeland.<br>
 </p>
   </div>
   

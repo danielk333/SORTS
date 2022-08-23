@@ -745,6 +745,7 @@
             <span class="n">t_dirs</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">period_id</span> <span class="p">:</span> <span class="n">radar_states</span><span class="o">.</span><span class="n">pdirs</span><span class="p">[</span><span class="n">period_id</span><span class="p">][</span><span class="s2">&quot;t&quot;</span><span class="p">]</span>
             <span class="n">pdirs</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">period_id</span> <span class="p">:</span> <span class="n">radar_states</span><span class="o">.</span><span class="n">pdirs</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span>
 
+            
         <span class="n">n_periods</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">radar_states</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
 
         <span class="c1"># get states interpolator</span>
@@ -789,6 +790,10 @@
         <span class="c1"># interruption flag is used to stop simulations if the stop_condition is met</span>
         <span class="n">interruption_flag</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">for</span> <span class="n">period_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_periods</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">radar_states</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                <span class="k">continue</span>
+                
             <span class="n">t_tmp</span> <span class="o">=</span> <span class="n">t_dirs</span><span class="p">(</span><span class="n">period_id</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">t_tmp</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">txrx_pass</span><span class="o">.</span><span class="n">start</span><span class="p">():</span>
                 <span class="c1"># interpolate states over subperiod</span>
@@ -1030,7 +1035,6 @@
 
 <span class="sd">            - **states** : if ``save_states`` is ``True``, **states** will contain the states of the space object being measured.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-
         <span class="c1"># get object properties</span>
         <span class="n">diameter</span>                    <span class="o">=</span> <span class="n">space_object</span><span class="o">.</span><span class="n">d</span>
         <span class="n">spin_period</span>                 <span class="o">=</span> <span class="n">space_object</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;spin_period&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
@@ -1412,6 +1416,9 @@
 
 <span class="sd">            - **states** : if ``save_states`` is ``True``, **states** will contain the states of the space object being measured.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">t</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
         <span class="c1"># if the state mask is not provided, define new state mask for measurement computations</span>
         <span class="k">if</span> <span class="n">bounds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">bounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">t</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
@@ -1438,7 +1445,7 @@
                 <span class="c1"># update bounds</span>
                 <span class="n">bound_indices_pdirs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">interrupt_inds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span> <span class="c1"># first index where the interruption is reached = end of simulation</span>
                 <span class="n">bounds</span>  <span class="o">=</span> <span class="p">[</span><span class="n">bound_indices_pdirs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bound_indices_pdirs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
-        
+
         <span class="c1"># get states which are not observable</span>
         <span class="n">detection_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t_dirs</span><span class="p">),</span> <span class="kc">False</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
         <span class="n">detection_mask</span><span class="p">[</span><span class="n">bound_indices_pdirs</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">bound_indices_pdirs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observable_filter</span><span class="p">(</span>
@@ -2306,7 +2313,7 @@
   
   <div class="footer-item">
     <p class="copyright">
-    &copy; Copyright [2020-2022] Daniel Kastinen, Juha Vierinen, Thomas Maynadie.<br>
+    &copy; Copyright [2020-2022] Daniel Kastinen, Juha Vierinen, Thomas Maynadie, Tom Grydeland.<br>
 </p>
   </div>
   

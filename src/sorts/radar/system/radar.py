@@ -527,6 +527,9 @@ class Radar(object):
         # in the specific time slice
         controlled = False
         for period_id in range(radar_states.n_periods): 
+            if radar_states.property_controls[period_id] is None:
+                continue
+
             for station in self.rx + self.tx:
                 station_id = radar_states.radar.get_station_id(station)
                 station_type = station.type
@@ -550,23 +553,20 @@ class Radar(object):
         for station in self.rx + self.tx:
             station_id = radar_states.radar.get_station_id(station)
             station_type = station.type
-            print(station_type, " ", station_id)
 
             for property_name in station.get_properties():
-                print(property_name)
                 if property_name not in radar_states.controlled_properties[station_type][station_id]:
                     data = getattr(station, property_name)
                     radar_states.add_property_control(property_name, station, data*np.ones(radar_states.n_control_points))
-                    print("added ", property_name)
 
                     if self.logger is not None:
                         self.logger.info(f"added control {property_name} for station {station_type} id {station_id}")
-                    #print(f"added control {property_name} for station {station_type} id {station_id}")
+
+                    # remove from controlled properties (to hide from controlled properties)
                     radar_states.controlled_properties[station_type][station_id].pop(-1)
 
         self.states = radar_states
-        print(radar_states)
-        exit()
+   
         return radar_states
 
     def compute_measurements(

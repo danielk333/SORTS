@@ -185,6 +185,21 @@
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">station</span>
 <span class="kn">from</span> <span class="nn">sorts</span> <span class="kn">import</span> <span class="n">clibsorts</span>
 
+<span class="c1"># Define C interface</span>
+<span class="n">clibsorts</span><span class="o">.</span><span class="n">compute_intersection_points</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">ctypeslib</span><span class="o">.</span><span class="n">ndpointer</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">),</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">ctypeslib</span><span class="o">.</span><span class="n">ndpointer</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">),</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">ctypeslib</span><span class="o">.</span><span class="n">ndpointer</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">),</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">ctypeslib</span><span class="o">.</span><span class="n">ndpointer</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">),</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">ctypeslib</span><span class="o">.</span><span class="n">ndpointer</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">),</span>
+    <span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">ctypeslib</span><span class="o">.</span><span class="n">ndpointer</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">),</span>
+    <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span>
+    <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span>
+    <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span>
+<span class="p">]</span>
+
+
 <div class="viewcode-block" id="Radar"><a class="viewcode-back" href="../../../../reference/radar/system/radar/sorts.radar.system.radar.Radar.html#sorts.radar.system.radar.Radar">[docs]</a><span class="k">class</span> <span class="nc">Radar</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Encapsulates a Radar system.</span>
 <span class="sd">        </span>
@@ -683,6 +698,9 @@
         <span class="c1"># in the specific time slice</span>
         <span class="n">controlled</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">for</span> <span class="n">period_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">radar_states</span><span class="o">.</span><span class="n">n_periods</span><span class="p">):</span> 
+            <span class="k">if</span> <span class="n">radar_states</span><span class="o">.</span><span class="n">property_controls</span><span class="p">[</span><span class="n">period_id</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+
             <span class="k">for</span> <span class="n">station</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rx</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">tx</span><span class="p">:</span>
                 <span class="n">station_id</span> <span class="o">=</span> <span class="n">radar_states</span><span class="o">.</span><span class="n">radar</span><span class="o">.</span><span class="n">get_station_id</span><span class="p">(</span><span class="n">station</span><span class="p">)</span>
                 <span class="n">station_type</span> <span class="o">=</span> <span class="n">station</span><span class="o">.</span><span class="n">type</span>
@@ -714,10 +732,12 @@
 
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;added control </span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2"> for station </span><span class="si">{</span><span class="n">station_type</span><span class="si">}</span><span class="s2"> id </span><span class="si">{</span><span class="n">station_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                    <span class="c1">#print(f&quot;added control {property_name} for station {station_type} id {station_id}&quot;)</span>
+
+                    <span class="c1"># remove from controlled properties (to hide from controlled properties)</span>
                     <span class="n">radar_states</span><span class="o">.</span><span class="n">controlled_properties</span><span class="p">[</span><span class="n">station_type</span><span class="p">][</span><span class="n">station_id</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">states</span> <span class="o">=</span> <span class="n">radar_states</span>
+   
         <span class="k">return</span> <span class="n">radar_states</span></div>
 
 <div class="viewcode-block" id="Radar.compute_measurements"><a class="viewcode-back" href="../../../../reference/radar/system/radar/sorts.radar.system.radar.Radar.compute_measurements.html#sorts.radar.system.radar.Radar.compute_measurements">[docs]</a>    <span class="k">def</span> <span class="nf">compute_measurements</span><span class="p">(</span>
@@ -1246,19 +1266,6 @@
         <span class="n">keep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_points</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
 
         <span class="c1"># Calling c library</span>
-        <span class="n">clibsorts</span><span class="o">.</span><span class="n">compute_intersection_points</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">ctypeslib</span><span class="o">.</span><span class="n">ndpointer</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="n">tx_directions</span><span class="o">.</span><span class="n">ndim</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">tx_directions</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">),</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">ctypeslib</span><span class="o">.</span><span class="n">ndpointer</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="n">rx_directions</span><span class="o">.</span><span class="n">ndim</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">rx_directions</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">),</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">ctypeslib</span><span class="o">.</span><span class="n">ndpointer</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="n">tx_ecef</span><span class="o">.</span><span class="n">ndim</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">tx_ecef</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">),</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">ctypeslib</span><span class="o">.</span><span class="n">ndpointer</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="n">rx_ecef</span><span class="o">.</span><span class="n">ndim</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">rx_ecef</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">),</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">ctypeslib</span><span class="o">.</span><span class="n">ndpointer</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="n">intersection_points</span><span class="o">.</span><span class="n">ndim</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">intersection_points</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">),</span>
-            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">ctypeslib</span><span class="o">.</span><span class="n">ndpointer</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="n">keep</span><span class="o">.</span><span class="n">ndim</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">keep</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
-            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span>
-            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span>
-            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span>
-        <span class="p">]</span>
-
         <span class="n">clibsorts</span><span class="o">.</span><span class="n">compute_intersection_points</span><span class="p">(</span>
             <span class="n">tx_directions</span><span class="p">,</span>
             <span class="n">rx_directions</span><span class="p">,</span>
@@ -1299,7 +1306,7 @@
   
   <div class="footer-item">
     <p class="copyright">
-    &copy; Copyright [2020-2022] Daniel Kastinen, Juha Vierinen, Thomas Maynadie.<br>
+    &copy; Copyright [2020-2022] Daniel Kastinen, Juha Vierinen, Thomas Maynadie, Tom Grydeland.<br>
 </p>
   </div>
   

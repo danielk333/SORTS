@@ -91,7 +91,9 @@ class MyScheduler(RadarSchedulerBase):
         ''' The scheduler in this example only takes the i^th control into account '''
         if self.logger is not None: self.logger.info("Running scheduler")
 
+
         control = controls[control_id] 
+
         final_control_sequence = control.copy()
         return final_control_sequence
 
@@ -99,22 +101,25 @@ class MyScheduler(RadarSchedulerBase):
         # extract scheduler dara
         data = np.empty((controls.n_periods,), dtype=object)
         for period_id in range(controls.n_periods):
-            n_points    = len(controls.t[period_id])
+            if controls.t[period_id] is not None:
+                n_points    = len(controls.t[period_id])
 
-            names = np.repeat(controls.meta['controller_type'], n_points)
-            targets = np.repeat(controls.meta['target'], n_points)
-            data_tmp    = np.ndarray((n_points, len(self.radar.rx)*2 + 1))
-            data_tmp[:,0] = controls.t[period_id]
-            
-            pdirs = controls.get_pdirs(period_id)
-            for ri, rx in enumerate(self.radar.rx):
-                rx.point_ecef(pdirs["rx"][ri, 0, :, :])
-                data_tmp[:,1+ri*2] = rx.beam.azimuth
-                data_tmp[:,2+ri*2] = rx.beam.elevation
+                names = np.repeat(controls.meta['controller_type'], n_points)
+                targets = np.repeat(controls.meta['target'], n_points)
+                data_tmp    = np.ndarray((n_points, len(self.radar.rx)*2 + 1))
+                data_tmp[:,0] = controls.t[period_id]
+                
+                pdirs = controls.get_pdirs(period_id)
+                for ri, rx in enumerate(self.radar.rx):
+                    rx.point_ecef(pdirs["rx"][ri, 0, :, :])
+                    data_tmp[:,1+ri*2] = rx.beam.azimuth
+                    data_tmp[:,2+ri*2] = rx.beam.elevation
 
-            data_tmp = data_tmp.T.tolist() + [names, targets]
-            data_tmp = list(map(list, zip(*data_tmp)))
-            data[period_id] = data_tmp
+                data_tmp = data_tmp.T.tolist() + [names, targets]
+                data_tmp = list(map(list, zip(*data_tmp)))
+                data[period_id] = data_tmp
+            else:
+                data[period_id] = None
         return data
         
 
@@ -134,6 +139,7 @@ controls = e3d_tracker.generate_controls(
     interpolator=interpolation.Linear, 
     scheduler=scheduler)
 
+
 # update meta and run scheduler
 controls.meta['target'] = 'Cool object 1'
 controls.meta['controller_type'] = 'Tracker'
@@ -150,11 +156,13 @@ for period_id in range(controls.n_periods):
     print("")
 
 # control radar to get radar states
+print(controls.property_controls)
 radar_states = eiscat3d.control(controls)
+print("after controls ", radar_states.property_controls)
 
 # simulate radar observations
 p.start('parallelization')
-data0 = eiscat3d.observe_passes(passes0, radar_states, objs[0], snr_limit=False, parallelization=True, interpolator=interpolation.Linear, interrupt=True)
+data0 = eiscat3d.observe_passes(passes0, radar_states, objs[0], snr_limit=False, parallelization=False, interpolator=interpolation.Linear, interrupt=True)
 p.stop('parallelization')
 
 print(data0)
