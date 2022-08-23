@@ -363,8 +363,8 @@ class Radar(object):
         ecef = np.atleast_1d(ecef).reshape((6, -1))
         in_fov = np.full((len(ecef[0]),), True, dtype=bool)
     
-        for station in self.tx + self.rx:
-            in_fov = np.logical_and(in_fov, station.field_of_view(ecef))
+        for st in self.tx + self.rx:
+            in_fov = np.logical_and(in_fov, st.field_of_view(ecef))
            
         return in_fov
 
@@ -530,9 +530,9 @@ class Radar(object):
             if radar_states.property_controls[period_id] is None:
                 continue
 
-            for station in self.rx + self.tx:
-                station_id = radar_states.radar.get_station_id(station)
-                station_type = station.type
+            for st in self.rx + self.tx:
+                station_id = radar_states.radar.get_station_id(st)
+                station_type = st.type
 
                 # for each controlled property of the station
                 for property_name in radar_states.controlled_properties[station_type][station_id]:
@@ -546,18 +546,18 @@ class Radar(object):
 
                     # if there is no controls for the current property at the specified control period, set default value
                     if controlled is False:
-                        data = getattr(station, property_name)
+                        data = getattr(st, property_name)
                         radar_states.property_controls[period_id][station_type][property_name][station_id] = data*np.ones(len(radar_states.t[period_id]))        
 
         # create control fields for each stations properties which aren't controlled
-        for station in self.rx + self.tx:
-            station_id = radar_states.radar.get_station_id(station)
-            station_type = station.type
+        for st in self.rx + self.tx:
+            station_id = radar_states.radar.get_station_id(st)
+            station_type = st.type
 
-            for property_name in station.get_properties():
+            for property_name in st.get_properties():
                 if property_name not in radar_states.controlled_properties[station_type][station_id]:
-                    data = getattr(station, property_name)
-                    radar_states.add_property_control(property_name, station, data*np.ones(radar_states.n_control_points))
+                    data = getattr(st, property_name)
+                    radar_states.add_property_control(property_name, st, data*np.ones(radar_states.n_control_points))
 
                     if self.logger is not None:
                         self.logger.info(f"added control {property_name} for station {station_type} id {station_id}")
