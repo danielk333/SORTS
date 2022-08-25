@@ -125,7 +125,7 @@ class MyScheduler(RadarSchedulerBase):
 
 
 # create scheduler instance with a 10s schedule period
-scheduler = MyScheduler(eiscat3d, 0.0, 10.0, logger=logger, profiler=p)
+scheduler = MyScheduler(eiscat3d, 0.0, 100.0, logger=logger, profiler=p)
 
 # create the controller and generate the controls in sync with the radar scheduler
 e3d_tracker = Tracker()

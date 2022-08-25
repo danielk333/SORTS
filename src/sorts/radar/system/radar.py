@@ -918,6 +918,7 @@ class Radar(object):
             for rxi in range(len(pass_list[txi])):
                 data[-1].append([])
                 for ps in pass_list[txi][rxi]:
+                    print(ps.start())
                     if ps.start() > t_end or ps.end() < t_start: # if the pass is outside of the control range
                         pass_data = None
                     else:
@@ -936,11 +937,12 @@ class Radar(object):
                                 )
                             else:
                                 new_ps = passes.Pass(
-                                    t=np.array([t_start, t_end]), 
+                                    t=np.array([ps.start(), ps.end()]), 
                                     enu=None, 
                                     inds=None, 
                                     cache=True,
                                 )
+                                print("start, ", new_ps.start())
                             ps = new_ps
                             ps.station_id = [txi, rxi]
 

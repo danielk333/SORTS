@@ -25,7 +25,7 @@ from sorts.targets.population import master_catalog, master_catalog_factor
 
 # gets example config 
 master_path = "/home/thomas/venvs/sorts/master catalog/celn_20090501_00.sim"
-simulation_root = "./results/"
+simulation_root = "./examples/results/"
 
 # initializes the propagator
 from sorts.targets.propagator import SGP4
@@ -44,7 +44,7 @@ scan = Beampark(azimuth=radar.tx[0].beam.azimuth, elevation=radar.tx[0].beam.ele
 # create scanner controller and generate radar controls
 scanner_controller = sorts.Scanner()
 t = np.arange(0, end_t, scan.dwell())
-controls = scanner_controller.generate_controls(t, radar, scan, max_points=200, cache_pdirs=False)
+controls = scanner_controller.generate_controls(t, radar, scan, max_points=250, cache_pdirs=False)
 
 # generate radar states from the radar controls
 radar_states = radar.control(controls)
@@ -76,8 +76,10 @@ class ScanningSimulation(sorts.Simulation):
             propagator = Prop_cls,
             propagator_options = Prop_opts,
         )
-        self.population = master_catalog_factor(self.population, treshhold = 0.1)
+        self.population = master_catalog_factor(self.population, treshhold = 0.1, seed=123)
         self.population.delete(slice(100, None, None)) # DELETE ALL BUT THE FIRST 100
+
+        print(self.population)
 
         self.inds = list(range(len(self.population)))
 
@@ -97,14 +99,17 @@ class ScanningSimulation(sorts.Simulation):
     @cached_step(caches='h5')
     def get_states(self, index, item, **kwargs):
         obj = self.population.get_object(item)
+        print(obj.orbit)
+        print(obj.epoch)
 
         t = sorts.equidistant_sampling(
             orbit = obj.orbit,
             start_t = self.radar_states.t[0][0],
-            end_t = self.radar_states.t[-1][-1] + (self.radar_states.t[-1][-1] - self.radar_states.t[-1][-2]),
-            max_dpos=1e3,
+            end_t = self.radar_states.t[-1][-1] + 50,
+            max_dpos=10e3,
         )
         state = obj.get_state(t)
+        # print("object ", index, " states : ", state, ", t = ", t)
         return state, t
 
     @MPI_action(action='barrier')
@@ -113,6 +118,7 @@ class ScanningSimulation(sorts.Simulation):
     def find_passes(self, index, item, **kwargs):
         state, t = item
         passes = radar.find_passes(t, state, cache_data=False)
+        print("object ", index, " passes : ", passes)
         return passes
 
     @MPI_action(action='barrier')
@@ -120,14 +126,7 @@ class ScanningSimulation(sorts.Simulation):
     @cached_step(caches='pickle')
     def observe_passes(self, index, item, **kwargs):
         # TODO understand role of item : t, x ? states
-        if self.logger is not None:
-            self.logger.always(f'Observing object {index}')
-
         data = radar.observe_passes(item, self.radar_states, self.population.get_object(index), snr_limit=False, parallelization=False)
-        
-        if self.logger is not None:
-            self.logger.always(f'Object {index} observation done')
-
         return data
 
 
@@ -159,10 +158,14 @@ class ScanningSimulation(sorts.Simulation):
     @iterable_cache(steps='observe', caches='pickle', MPI=True, log=True, reduce=_sum)
     def count_detected(self, index, item, **kwargs):
         detected_ = 0.0
+        i = 0
         for pass_ in item:
             for tx_ps in pass_:
                 for txrx_ps in tx_ps:
                     data = sorts.radar.measurement.get_max_snr_measurements(txrx_ps, copy=True)
+                    print("object ", index, " passes : ", i, "data = " , data["measurements"]["snr"])
+                    i += 1
+
                     if np.sum(np.log10(data["measurements"]["snr"])*10.0 > 10.0) >= self.ipp_detection_lim:
                         detected_ = 1.0
 

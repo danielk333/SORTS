@@ -562,6 +562,8 @@ class Measurement(object):
         # get states from the pass or propagate (enu)
         txi, rxi = txrx_pass.station_id
 
+        print(txrx_pass.start())
+
         # get pdirs and tdirs arrays
         if radar_states.pdirs is None:
             if logger is not None: 
@@ -573,7 +575,6 @@ class Measurement(object):
         else:
             t_dirs = lambda period_id : radar_states.pdirs[period_id]["t"]
             pdirs = lambda period_id : radar_states.pdirs[period_id]
-
             
         n_periods = len(radar_states.t)
 
@@ -1248,6 +1249,8 @@ class Measurement(object):
         if t is None:
             return None
 
+        # print(t)
+
         # if the state mask is not provided, define new state mask for measurement computations
         if bounds is None:
             bounds = [t[0], t[-1]]
@@ -1316,6 +1319,8 @@ class Measurement(object):
                 profiler=profiler,
             )
             if profiler is not None: profiler.stop('Measurements:Measure:beam_gain')
+
+
 
             if profiler is not None: profiler.start('Measurements:Measure:rcs')
             rcs = signals.hard_target_rcs(wavelength_tx, diameter=diameter)       
@@ -1666,13 +1671,13 @@ class Measurement(object):
         wavelength : float
             Beam wavelength (in meters).
         '''
-        if len(beam.pointing.shape) > 1:
-            g = np.max([
-                beam.gain(enu, ind={'pointing': pi})
-                for pi in range(beam.pointing.shape[1])
-            ])
-        else:
-            g = beam.gain(enu)
+        # if len(beam.pointing.shape) > 1:
+        #     g = np.max([
+        #         beam.gain(enu, ind={'pointing': pi})
+        #         for pi in range(beam.pointing.shape[1])
+        #     ])
+        # else:
+        g = beam.gain(enu)
 
         wavelength = beam.wavelength
         return g, wavelength
@@ -1770,86 +1775,89 @@ class Measurement(object):
         '''
         N = len(t)
         N_dirs = len(t_dirs)
-        
+
+        start_index = np.argmax(t >= t_dirs[0])
+
+        if t[-1] == t_dirs[-1]:
+            stop_index = N
+        else:
+            stop_index = np.argmax(t[start_index:] >= t_dirs[-1]) + start_index
+
         gain_tx = np.zeros((N_dirs,), dtype=np.float64)
         gain_rx = np.zeros((N_dirs,), dtype=np.float64)
 
         wavelength_tx = np.zeros((N_dirs,), dtype=np.float64)
         wavelength_rx = np.zeros((N_dirs,), dtype=np.float64)
- 
-        def tx_gain(t_dir, ti):
-            ''' callback function to compute the gain of the transmitting station. '''
-            nonlocal property_controls, controlled_properties
-            station = radar.tx[txi]
 
-            if profiler is not None: 
-                profiler.start('Measurements:compute_gain:set_properties')
-
-            # set tx properties
+        i_dirs_start = 0
+        for ti in range(start_index, stop_index):
+            # print(t[ti])
+            # print(N)
+            # print("ti, ", ti)
+            if ti == stop_index-1:
+                i_dirs_stop = N_dirs
+                # print(f"interval [{i_dirs_start}:{i_dirs_stop}] ([{t[ti]}, -1]]) : t={t_dirs[i_dirs_start:i_dirs_stop]}")
+            else:
+                i_dirs_stop = np.argmax(t_dirs[i_dirs_start:] >= t[ti+1]) + i_dirs_start
+                # print(f"interval [{i_dirs_start}:{i_dirs_stop}] ([{t[ti]}, {t[ti+1]}]) : t={t_dirs[i_dirs_start:i_dirs_stop]}")
+            # print(t[stop_index-3:stop_index])
+            # print(t_dirs[-11:])
+            # print(stop_index)
             if pdirs_tx is not None:
-                station.point_ecef(pdirs_tx[:, t_dir]) # point the station in the controlled direction
-            for property_name in controlled_properties["tx"][txi]: # set each property according to the radar state at ti
-                if hasattr(station, property_name):
-                    exec("radar.tx[txi]." + property_name + " = property_controls['tx'][property_name][txi][ti]")
-
-            if profiler is not None: 
-                profiler.stop('Measurements:compute_gain:set_properties')
-                profiler.start('Measurements:compute_gain:gain')
-
-            gain_tx[t_dir], wavelength_tx[t_dir] = self.get_beam_gain_and_wavelength(station.beam, tx_enus[0:3, t_dir])
-            
-            if profiler is not None: 
-                profiler.stop('Measurements:compute_gain:gain')
-
-
-        def rx_gain(t_dir, ti):
-            ''' callback function to compute the gain of the receiving station. '''
-            nonlocal property_controls, controlled_properties
-            station = radar.rx[rxi]
-
-            if profiler is not None: 
-                profiler.start('Measurements:compute_gain:set_properties')
-
-            # set beam properties
+                radar.tx[txi].point_ecef(pdirs_tx[:, i_dirs_start:i_dirs_stop]) # point the station in the controlled direction
             if pdirs_rx is not None:
-                station.point_ecef(pdirs_rx[:, t_dir]) # point the station in the controlled direction
+                radar.rx[rxi].point_ecef(pdirs_rx[:, i_dirs_start:i_dirs_stop]) # point the station in the controlled direction
+            
+            # print("t, ", t[ti])
+            # print(radar.tx[txi].pointing_ecef)
+            # print(radar.rx[rxi].pointing_ecef)
+
+            # print("tx_enus, ", tx_enus[0:3, i_dirs_start:i_dirs_stop])
+            # print("rx_enus, ", rx_enus[0:3, i_dirs_start:i_dirs_stop])
+
+
+
+            # update radar properties
             for property_name in controlled_properties["rx"][rxi]: # set each property according to the radar state at ti
-                if hasattr(station, property_name):
+                if hasattr(radar.rx[rxi], property_name):
                     exec("radar.rx[rxi]." + property_name + " = property_controls['rx'][property_name][rxi][ti]")
 
-            if profiler is not None: 
-                profiler.stop('Measurements:compute_gain:set_properties')
-                profiler.start('Measurements:compute_gain:gain')
+            for property_name in controlled_properties["tx"][txi]: # set each property according to the radar state at ti
+                if hasattr(radar.tx[txi], property_name):
+                    exec("radar.tx[txi]." + property_name + " = property_controls['tx'][property_name][txi][ti]")
 
-            gain_rx[t_dir], wavelength_rx[t_dir] = self.get_beam_gain_and_wavelength(station.beam, rx_enus[0:3, t_dir])
+            if i_dirs_start < i_dirs_stop-1:
+                gain_tx[i_dirs_start:i_dirs_stop] = np.array([
+                    radar.tx[txi].beam.gain(tx_enus[0:3, i_dirs_start + pi], ind={'pointing': pi})
+                    for pi in range(radar.tx[txi].beam.pointing.shape[1])
+                ])
 
-            if profiler is not None: 
-                profiler.stop('Measurements:compute_gain:gain')
+                gain_rx[i_dirs_start:i_dirs_stop] = np.array([
+                    radar.rx[rxi].beam.gain(rx_enus[0:3, i_dirs_start + pi], ind={'pointing': pi})
+                    for pi in range(radar.rx[rxi].beam.pointing.shape[1])
+                ])
 
+                wavelength_tx[i_dirs_start:i_dirs_stop] = radar.tx[txi].beam.wavelength
+                wavelength_rx[i_dirs_start:i_dirs_stop] = radar.rx[rxi].beam.wavelength
+            else:
+                gain_tx[i_dirs_start] = radar.tx[txi].beam.gain(tx_enus[0:3, i_dirs_start])
+                gain_rx[i_dirs_start] = radar.rx[rxi].beam.gain(rx_enus[0:3, i_dirs_start])
 
-        # define callback functions 
-        COMPUTE_GAIN_TX = ctypes.CFUNCTYPE(None, ctypes.c_int, ctypes.c_int)
-        COMPUTE_GAIN_RX = ctypes.CFUNCTYPE(None, ctypes.c_int, ctypes.c_int)
-        compute_antenna_gain_tx_c = COMPUTE_GAIN_TX(tx_gain)
-        compute_antenna_gain_rx_c = COMPUTE_GAIN_RX(rx_gain)
+                wavelength_tx[i_dirs_start] = radar.tx[txi].beam.wavelength
+                wavelength_rx[i_dirs_start] = radar.rx[rxi].beam.wavelength
+            
+            # print(gain_tx[i_dirs_start:i_dirs_stop])
+            # print(gain_rx[i_dirs_start:i_dirs_stop])
 
-        clibsorts.compute_gain.argtypes = [
-            np.ctypeslib.ndpointer(dtype=ctypes.c_double, ndim=t.ndim, shape=t.shape),
-            np.ctypeslib.ndpointer(dtype=ctypes.c_double, ndim=t_dirs.ndim, shape=t_dirs.shape),
-            ctypes.c_int,
-            ctypes.c_int,
-            COMPUTE_GAIN_TX,
-            COMPUTE_GAIN_RX,
-            ]
-
-        clibsorts.compute_gain(
-            t,
-            t_dirs,
-            ctypes.c_int(N),
-            ctypes.c_int(N_dirs),
-            compute_antenna_gain_tx_c,
-            compute_antenna_gain_rx_c,
-            )
+            # print(radar.tx[txi].n_ipp)
+            # print(radar.tx[txi].wavelength)
+            # print(radar.tx[txi].power)
+            # print(radar.tx[txi].duty_cycle)
+            # print(radar.tx[txi].pulse_length)
+            # print(radar.tx[txi].ipp)
+            # print(radar.tx[txi].bandwidth)
+            # exit()
+            i_dirs_start = i_dirs_stop
 
         return gain_tx, gain_rx, wavelength_tx, wavelength_rx
 
