@@ -118,8 +118,15 @@ class ScanningSimulation(Simulation):
             self.states_interp[space_object_index, :, :] = interpolation.Linear(self.controls.meta["objects_states"][space_object_index], self.t_tracking).get_state(self.t_anim)[0:3, :]
 
         # simulation steps
+        self.steps['init'] = self.init_computation
         self.steps['plot'] = self.generate_plots
         self.steps['video'] = self.generate_video
+    
+    @MPI_action(action="barrier")
+    @MPI_single_process(process_id=0)
+    def init_computation(self):
+        if not os.path.exists("./imgs/"):
+            os.mkdir("./imgs/")
 
     @MPI_action(action='barrier')
     @iterable_step(iterable='t_anim', MPI=True, log=True, reduce=lambda t,x: None)
