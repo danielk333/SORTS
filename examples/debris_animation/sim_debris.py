@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-
-'''
-TSDR beam park simulation
-===========================
-'''
 import pathlib
 import configparser
 
@@ -21,7 +15,7 @@ from sorts import interpolation
 from sorts import plotting
 
 # gets example config 
-master_path = "/home/thomas/venvs/sorts/master catalog/celn_20090501_00.sim"
+master_path = "/home/thomas/venvs/sorts/master catalog/celn_20090501_00.sim" # replace with your master population file path
 simulation_root = "./results/"
 
 # initializes the propagator
@@ -43,14 +37,6 @@ def count(result, item):
         result += 1
     return result
 
-def _sum(result, item):
-    if result is None:
-        result = item
-    else:
-        result += item
-    return result
-
-
 class ScanningSimulation(Simulation):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -65,43 +51,51 @@ class ScanningSimulation(Simulation):
         self.inds = list(range(len(self.population)))
 
         # plotting parameters
-        duration = 60 # seconds
-        fps = 30
+        self.duration = 60 # seconds
+        self.fps = 30
 
-        self.t_anim = np.linspace(0, end_t, int(duration*fps)+1)
+        self.t_anim = np.linspace(0, end_t, int(self.duration*self.fps)+1)
         self.so_states = np.ndarray((len(self.population), 3, len(self.t_anim)), dtype=float)
 
         if self.logger is not None:
             self.logger.always(f'Population of size {len(self.population)} objects loaded.')
 
-        self.steps['propagate'] = self.get_states
-        self.steps['interpolate'] = self.interpolate_states
+        self.steps['init'] = self.init_computation
+        self.steps['propagate'] = self.compute_states
+        self.steps['load'] = self.load_states
         self.steps['plot'] = self.generate_plots
+        self.steps['video'] = self.generate_video
+
+    @MPI_action(action="barrier")
+    @MPI_single_process(process_id=0)
+    def init_computation(self):
+        if not os.path.exists("./imgs/"):
+            os.mkdir("./imgs/")
+
 
     @MPI_action(action='barrier')
     @store_step(store='object_prop')
     @iterable_step(iterable='inds', MPI=True, log=True, reduce=count)
     @cached_step(caches='h5')
-    def get_states(self, index, item, **kwargs):
+    def compute_states(self, index, item, **kwargs):
         obj = self.population.get_object(item)
 
-        t = equidistant_sampling(
-            orbit = obj.orbit,
-            start_t = self.t_anim[0],
-            end_t = self.t_anim[-1] + np.diff(self.t_anim)[-1],
-            max_dpos=50e3,
-        )
-        state = obj.get_state(t)
-        return state, t
+        # one can also use an interpolator
+        state = obj.get_state(self.t_anim)[0:3]
+        return state
 
-    @iterable_cache(steps='propagate', caches='h5', MPI=False, log=True, reduce=lambda t,x: None)
-    def interpolate_states(self, index, item, **kwargs):
-        state, t = item
-        self.so_states[index, :, :] = interpolation.Linear(state, t).get_state(self.t_anim)[0:3, :]        
+    @iterable_cache(steps='propagate', caches='h5', MPI=False, log=True)
+    def load_states(self, index, item, **kwargs):
+        state = item
+        self.so_states[index, :, :] = state    
 
     @MPI_action(action='barrier')
-    @iterable_step(iterable='t_anim', MPI=True, log=True, reduce=lambda t,x: None)
+    @iterable_step(iterable='t_anim', MPI=True, log=True)
     def generate_plots(self, index, item, **kwargs):
+        # skip step if image already exists
+        if os.path.exists(f"./imgs/debris_img_{index:05d}.jpg"):
+            return None
+
         fig = plt.figure(dpi=600)
         ax = fig.add_subplot(111, projection='3d')
 
@@ -116,6 +110,13 @@ class ScanningSimulation(Simulation):
         fig.savefig(f"./imgs/debris_img_{index:05d}.jpg")   # save the figure to file
         plt.close()
 
+    @MPI_action(action="barrier")
+    @MPI_single_process(process_id=0)
+    def generate_video(self):
+        del self.so_states
+
+        os.system(f"ffmpeg -framerate {self.fps} -pattern_type glob -i './imgs/*.jpg' -c:v libx264 -pix_fmt yuv420p out.mp4")
+
 sim = ScanningSimulation(
     scheduler = None,
     root = simulation_root,
@@ -123,13 +124,6 @@ sim = ScanningSimulation(
     profiler=True,
 )
 
-sim.profiler.start('total')
 sim.run()
 
-sim.profiler.stop('total')
-sim.logger.always('\n' + sim.profiler.fmt(normalize='total'))
-
-os.system("cd ./imgs")
-os.system("fmpeg -framerate 30 -pattern_type glob -i '*.jpg' -c:v libx264 -pix_fmt yuv420p out.mp4")
-os.system("rm -rf *.jpg")
-os.system("cd ..")
+print("DO NOT FORGET TO REMOVE ALL IMAGES IN ./imgs/")
