@@ -44,7 +44,7 @@ def set_axes_equal(ax):
     ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
 
 
-def grid_earth(ax, num_lat=25, num_lon=50, alpha=0.1, res = 100, color='black', hide_ax=True):
+def grid_earth(ax, num_lat=25, num_lon=50, rotation=0, alpha=0.1, linewidth=1, res = 100, color='black', hide_ax=True):
     '''Add a 3d spherical grid to the given axis that represent the Earth.
 
     '''
@@ -55,18 +55,32 @@ def grid_earth(ax, num_lat=25, num_lon=50, alpha=0.1, res = 100, color='black', 
     lonsl = np.linspace(-180, 180, res) * np.pi/180 
     latsl = np.linspace(-90, 90, res) * np.pi/180 
 
+    rot = np.radians(rotation)
+
     r_e = constants.R_earth
     for lat in lats:
         x = r_e*np.cos(lonsl)*np.cos(lat)
         y = r_e*np.sin(lonsl)*np.cos(lat)
         z = r_e*np.ones(np.size(lonsl))*np.sin(lat)
-        ax.plot(x,y,z,alpha=alpha,linestyle='-', marker='',color=color)
+
+        x_ = x.copy()
+        x = x_*np.cos(rot) - y*np.sin(rot)
+        y = x_*np.sin(rot) + y*np.cos(rot)
+        del x_
+
+        ax.plot(x,y,z,alpha=alpha,linestyle='-',linewidth=linewidth, marker='',color=color)
 
     for lon in lons:
         x = r_e*np.cos(lon)*np.cos(latsl)
         y = r_e*np.sin(lon)*np.cos(latsl)
         z = r_e*np.sin(latsl)
-        ax.plot(x,y,z,alpha=alpha,color=color)
+
+        x_ = x.copy()
+        x = x_*np.cos(rot) - y*np.sin(rot)
+        y = x_*np.sin(rot) + y*np.cos(rot)
+        del x_
+
+        ax.plot(x,y,z,alpha=alpha,linestyle='-',linewidth=linewidth, marker='',color=color)
     
     if hide_ax:
         # Hide grid lines

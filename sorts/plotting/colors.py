@@ -216,18 +216,18 @@ def get_cmap(colormap=None, **kwargs):
     Returns a matplotlib colormap.
     '''
     if colormap is None:
-        return list(CMAP.keys()) + list(CMAPS_DISCRETE.keys()) + list(CMAP_SPECIAL.keys())
+        return list(CMAPS.keys()) + list(CMAPS_DISCRETE.keys()) + list(CMAP_SPECIAL.keys())
 
-    if cname in CMAPS:
-        clrs, bad = CMAPS[cname]
-        cmap = LinearSegmentedColormap.from_list(cname, clrs)
+    if colormap in CMAPS:
+        clrs, bad = CMAPS[colormap]
+        cmap = LinearSegmentedColormap.from_list(colormap, clrs)
         cmap.set_bad(bad)
-    elif cname in CMAPS_DISCRETE:
-        clrs, bad = CMAPS[cname]
-        cmap = discretemap(cname, clrs)
+    elif colormap in CMAPS_DISCRETE:
+        clrs, bad = CMAPS[colormap]
+        cmap = discretemap(colormap, clrs)
         cmap.set_bad(bad)
-    elif cname in CMAP_SPECIAL:
-        func = CMAP_SPECIAL[cname]
+    elif colormap in CMAP_SPECIAL:
+        func = CMAP_SPECIAL[colormap]
         cmap = func(**kwargs)
     else:
         raise ValueError('*** Warning: requested colormap not defined,' + 
@@ -256,7 +256,7 @@ def get_cset(colorset=None):
         cset = ctup(*cols)
     else:
         raise ValueError('*** Warning: requested colorset not defined,' +
-              'known colorsets are {}.'.format(CSET_NAMELIST)) 
+              'known colorsets are {}.'.format(list(CSET.keys())))
 
     return cset
 
