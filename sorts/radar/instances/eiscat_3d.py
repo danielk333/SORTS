@@ -16,7 +16,7 @@ def eiscat3d_interp(tx_fnames=None, rx_fnames=None, res=500):
 
     tx_intp = []
     for txi in range(1):
-        tx_intp += [pyant.PlaneArrayInterp(
+        tx_intp += [pyant.InterpolatedArray(
             azimuth=0,
             elevation=90,
             frequency=233e6,
@@ -30,7 +30,7 @@ def eiscat3d_interp(tx_fnames=None, rx_fnames=None, res=500):
 
     rx_intp = []
     for rxi in range(3):
-        rx_intp += [pyant.PlaneArrayInterp(
+        rx_intp += [pyant.InterpolatedArray(
             azimuth=0,
             elevation=90,
             frequency=233e6,
@@ -149,7 +149,7 @@ def gen_eiscat3d(beam='array', stage=1):
 
 def eiscat3d_demo_interp(tx_fnames=None, rx_fnames=None, res=500):
 
-    tx_intp = pyant.PlaneArrayInterp(
+    tx_intp = pyant.InterpolatedArray(
         azimuth=0,
         elevation=90,
         frequency=233e6,
@@ -161,7 +161,7 @@ def eiscat3d_demo_interp(tx_fnames=None, rx_fnames=None, res=500):
     else:
         tx_intp.load(tx_fnames[0])
 
-    rx_intp = pyant.PlaneArrayInterp(
+    rx_intp = pyant.InterpolatedArray(
         azimuth=0,
         elevation=90,
         frequency=233e6,
