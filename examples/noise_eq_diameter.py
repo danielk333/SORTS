@@ -16,7 +16,8 @@ color_cycle = sorts.plotting.colors.get_cycle(cmap_name)
 
 ranges = 10**(np.linspace(2, 5, 1000))
 ranges = ranges*1e3  # km -> m
-snr = 1.0
+snr = 33.0
+range_marked = 1000e3
 
 data = zip(
     [
@@ -57,7 +58,22 @@ for tx, rx, label in data:
         radar_albedo = 1.0,
     )
 
+    diam1k = sorts.signals.hard_target_diameter(
+        G0_tx,
+        G0_rx,
+        tx.beam.wavelength,
+        tx.power,
+        range_marked, 
+        range_marked,
+        snr, 
+        bandwidth = tx.coh_int_bandwidth,
+        rx_noise_temp = rx.noise,
+        radar_albedo = 1.0,
+    )
+
     ax.loglog(ranges*1e-3, diameters*1e2, label=label)
+    ax.plot(range_marked*1e-3, diam1k*1e2, 'or')
+    print(label, diam1k)
 
 ax.set_xlabel('Range [km]')
 ax.set_ylabel('System noise equivalent diameter [cm]')
