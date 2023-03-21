@@ -69,7 +69,7 @@ class Scheduler(ABC):
         elif stop is not None:
             check_t = lambda c: c.t <= stop
         else:
-            check_t = lambda c: np.full(c.t.shape, True, dtype=np.bool)
+            check_t = lambda c: np.full(c.t.shape, True, dtype=bool)
 
         ctrls = [c for c in ctrls if np.any(check_t(c))]
         

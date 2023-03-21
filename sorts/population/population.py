@@ -210,7 +210,7 @@ class Population:
         elif not (isinstance(inds, list) or isinstance(inds, np.ndarray)):
             raise Exception('Cannot delete indecies given with type {}'.format(type(inds)))
 
-        mask = np.full( (self.data.shape[0],), True, dtype=np.bool)
+        mask = np.full( (self.data.shape[0],), True, dtype=bool)
         for ind in inds:
             mask[ind] = False
         self.data=self.data[ mask ]
@@ -239,7 +239,7 @@ class Population:
         '''
         if col in self.fields:
             ind = self.fields.index(col)
-            mask = np.full( (self.data.shape[0],), True, dtype=np.bool)
+            mask = np.full( (self.data.shape[0],), True, dtype=bool)
             for row in range(self.data.shape[0]):
                 mask[row] = fun(self.data[col][row])
             self.data=self.data[ mask ]

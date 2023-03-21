@@ -137,7 +137,7 @@ pop.filter('oid', lambda oid: oid == 43075 or oid in random_selection)
 
 #Lets also remove all but 1 TLE for IRIDIUM
 #Using some numpy magic filtering
-keep = np.full((len(pop),), True, dtype=np.bool)
+keep = np.full((len(pop),), True, dtype=bool)
 mjds = pop.data[pop.data['oid'] == 43075]['mjd0']
 best_mjd = np.argmin(np.abs(mjds - epoch.mjd))
 best_mjd = mjds[best_mjd]

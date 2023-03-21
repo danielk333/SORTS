@@ -64,9 +64,9 @@ p.stop('find_passes')
 
 p.start('sim_passes')
 #finding simultaneous passes
-chtx0 = np.full((len(t),), False, dtype=np.bool)
+chtx0 = np.full((len(t),), False, dtype=bool)
 chtx0[passes_tx0[0].inds] = True
-chrx1 = np.full((len(t),), False, dtype=np.bool)
+chrx1 = np.full((len(t),), False, dtype=bool)
 chrx1[passes_rx1[0].inds] = True
 
 inds = np.where(np.logical_and(chtx0, chrx1))[0]

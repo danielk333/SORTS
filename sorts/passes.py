@@ -331,7 +331,7 @@ def find_simultaneous_passes(t, states, stations, cache_data=True, fov_kw=None):
         fov_kw = {}
 
     enu = []
-    check = np.full((len(t),), True, dtype=np.bool)
+    check = np.full((len(t),), True, dtype=bool)
     for station in stations:
 
         enu_st = station.enu(states)

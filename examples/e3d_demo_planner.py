@@ -71,7 +71,7 @@ class ObservedTracking(Tracking, ObservedParameters):
                         #Check for overlap
 
                         #to keep from this pass
-                        t_keep = np.full(__t.shape, True, dtype=np.bool)
+                        t_keep = np.full(__t.shape, True, dtype=bool)
                         #to remove (index form) from all previous scheduled
                         t_all_del = []
 

@@ -66,7 +66,7 @@ class ObservedParameters(Scheduler):
         if data0 is None:
             return None, None
 
-        keep = np.full(t.shape, False, dtype=np.bool)
+        keep = np.full(t.shape, False, dtype=bool)
         keep[data0['kept']] = True
 
         r = np.empty((len(t),2), dtype=np.float64)
@@ -98,7 +98,7 @@ class ObservedParameters(Scheduler):
 
             ddata = self.calculate_observation(txrx_pass, t, generator, dso, **kwargs)
 
-            dkeep = np.full(t.shape, False, dtype=np.bool)
+            dkeep = np.full(t.shape, False, dtype=bool)
             dkeep[ddata['kept']] = True
             keep = np.logical_and(keep, dkeep)
 
@@ -123,7 +123,7 @@ class ObservedParameters(Scheduler):
                 data0[key] = [x for ind_, x in enumerate(data0[key]) if keep[data0['kept']][ind_]]
         data0['kept'] = np.argwhere(keep).flatten()
 
-        Jkeep = np.full((len(t)*2,), False, dtype=np.bool)
+        Jkeep = np.full((len(t)*2,), False, dtype=bool)
         Jkeep[:len(t)]=keep
         Jkeep[len(t):]=keep
 
@@ -179,7 +179,7 @@ class ObservedParameters(Scheduler):
 
 
     def vectorized_observable_filter(self, t, vectorized_data, tx_enus, rx_enus, tx_index, rx_index):
-        return np.full(t.shape, True, dtype=np.bool)
+        return np.full(t.shape, True, dtype=bool)
 
 
     def get_vectorized_row(self, radar, meta, tx_index, rx_index):
@@ -262,7 +262,7 @@ class ObservedParameters(Scheduler):
         snr = np.empty((len(t),), dtype=np.float64)
         snr_inch = np.empty((len(t),), dtype=np.float64)
         rcs = np.empty((len(t),), dtype=np.float64)
-        keep = np.full((len(t),), True, dtype=np.bool)
+        keep = np.full((len(t),), True, dtype=bool)
         
 
         if self.profiler is not None:
@@ -290,7 +290,7 @@ class ObservedParameters(Scheduler):
             bandwidths = np.empty((len(t),), dtype=np.float64)
             duty_cycles = np.empty((len(t),), dtype=np.float64)
             rx_noise_temps = np.empty((len(t),), dtype=np.float64)
-            txrx_on = np.full((len(t),), False, dtype=np.bool)
+            txrx_on = np.full((len(t),), False, dtype=bool)
 
             vectorized_data = None
             for ri, (radar, meta) in enumerate(generator):
