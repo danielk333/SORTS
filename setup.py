@@ -68,6 +68,11 @@ setuptools.setup(
         'Operating System :: Unix',
         'Intended Audience :: Science/Research',
     ],
+    entry_points={
+        'console_scripts': [
+            'sorts = sorts.cli:main',
+        ],
+    },
     install_requires=pip_req,
     packages=setuptools.find_packages(),
     package_data={
