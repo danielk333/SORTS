@@ -11,6 +11,7 @@ examples/data/tle-201801.txt
 
 #Sublime
 *.sublime*
+.vscode
 
 #vi/vim
 *~
