@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''Wrapper for the Orekit propagator
+"""Wrapper for the Orekit propagator
 
 **Links:**
     * `orekit <https://www.orekit.org/>`_
@@ -18,8 +18,8 @@ Simple propagation showing time difference due to loading of model data.
 .. code-block:: python
 
     from sorts.propagator import Orekit
- 
-'''
+
+"""
 
 # Python standard import
 import copy
@@ -68,9 +68,9 @@ def init_vm():
 
 
 def npdt2absdate(dt, utc):
-    '''
+    """
     Converts a numpy datetime64 value to an orekit AbsoluteDate
-    '''
+    """
 
     year, month, day, hour, minutes, seconds, microsecond = dates.npdt_to_date(dt)
     return AbsoluteDate(
@@ -79,21 +79,21 @@ def npdt2absdate(dt, utc):
         int(day),
         int(hour),
         int(minutes),
-        float(seconds + microsecond*1e-6),
+        float(seconds + microsecond * 1e-6),
         utc,
     )
 
 
 def mjd2absdate(mjd, utc):
-    '''
+    """
     Converts a Modified Julian Date value to an orekit AbsoluteDate
-    '''
+    """
 
     return npdt2absdate(dates.mjd_to_npdt(mjd), utc)
 
 
 class Orekit(Propagator):
-    '''Propagator class implementing the Orekit propagator.
+    """Propagator class implementing the Orekit propagator.
 
     #TODO: Update docs according to new "settings dict" method.
     #TODO: Valdiate Orekit v10 compatibility
@@ -144,11 +144,11 @@ class Orekit(Propagator):
     :param str earth_gravity: Gravitation model to use for calculating central acceleration force. Currently avalible options are `'HolmesFeatherstone'` and `'Newtonian'`. See `gravity <https://www.orekit.org/static/apidocs/org/orekit/forces/gravity/package-summary.html>`_.
     :param tuple gravity_order: A tuple of two integers for describing the order of spherical harmonics used in the `HolmesFeatherstoneAttractionModel <https://www.orekit.org/static/apidocs/org/orekit/forces/gravity/HolmesFeatherstoneAttractionModel.html>`_ model.
     :param str solar_activity_strength: The strength of the solar activity. Options are 'AVRAGE', 'STRONG', 'WEAK'.
-    '''
+    """
 
     class OrekitVariableStep(PythonOrekitStepHandler):
-        '''Class for handling the steps.
-        '''
+        """Class for handling the steps."""
+
         def set_params(self, t, start_date, states_pointer, outputFrame, heartbeat, profiler=None):
             self.t = t
             self.start_date = start_date
@@ -162,7 +162,7 @@ class Orekit(Propagator):
 
         def handleStep(self, interpolator, isLast):
             if self.profiler is not None:
-                self.profiler.start('Orekit:propagate:steps:step-handler')
+                self.profiler.start("Orekit:propagate:steps:step-handler")
 
             state1 = interpolator.getCurrentState()
             state0 = interpolator.getPreviousState()
@@ -174,7 +174,7 @@ class Orekit(Propagator):
 
             for ti, t in zip(np.where(t_filt)[0], self.t[t_filt]):
                 if self.profiler is not None:
-                    self.profiler.start('Orekit:propagate:steps:step-handler:getState')
+                    self.profiler.start("Orekit:propagate:steps:step-handler:getState")
 
                 t_date = self.start_date.shiftedBy(float(t))
 
@@ -193,41 +193,45 @@ class Orekit(Propagator):
                 self.states_pointer[5, ti] = v_tmp.getZ()
 
                 if self.__heartbeat is not None:
-                    self.__heartbeat(float(t), self.states_pointer[:, ti], interpolator=interpolator)
+                    self.__heartbeat(
+                        float(t), self.states_pointer[:, ti], interpolator=interpolator
+                    )
 
                 if self.profiler is not None:
-                    self.profiler.stop('Orekit:propagate:steps:step-handler:getState')
+                    self.profiler.stop("Orekit:propagate:steps:step-handler:getState")
 
             if self.profiler is not None:
-                self.profiler.stop('Orekit:propagate:steps:step-handler')
+                self.profiler.stop("Orekit:propagate:steps:step-handler")
 
     DEFAULT_SETTINGS = copy.copy(Propagator.DEFAULT_SETTINGS)
     DEFAULT_SETTINGS.update(
         dict(
-            in_frame='Orekit-EME',
-            out_frame='Orekit-ITRF',
+            in_frame="Orekit-EME",
+            out_frame="Orekit-ITRF",
             frame_tidal_effects=False,
-            integrator='DormandPrince853',
+            integrator="DormandPrince853",
             min_step=0.001,
             max_step=120.0,
             position_tolerance=10.0,
-            earth_gravity='HolmesFeatherstone',
+            earth_gravity="HolmesFeatherstone",
             gravity_order=(10, 10),
-            solarsystem_perturbers=['Moon', 'Sun'],
+            solarsystem_perturbers=["Moon", "Sun"],
             drag_force=True,
-            atmosphere='DTM2000',
+            atmosphere="DTM2000",
             radiation_pressure=True,
-            solar_activity='Marshall',
-            constants_source='WGS84',
-            solar_activity_strength='WEAK',
+            solar_activity="Marshall",
+            constants_source="WGS84",
+            solar_activity_strength="WEAK",
         )
     )
 
     @staticmethod
-    def download_quickstart_data(path, url=None, headers=None, timeout=10.0, block_size=2048, verbose=True):
+    def download_quickstart_data(
+        path, url=None, headers=None, timeout=10.0, block_size=2048, verbose=True
+    ):
         if url is None:
             # Standard URL of the example data distributed on orekit.org
-            url = 'https://gitlab.orekit.org/orekit/orekit-data/-/archive/master/orekit-data-master.zip'
+            url = "https://gitlab.orekit.org/orekit/orekit-data/-/archive/master/orekit-data-master.zip"
         if headers is None:
             headers = {}
 
@@ -245,8 +249,8 @@ class Orekit(Propagator):
         with urlopener.open(request, timeout=timeout) as remote:
             info = remote.info()
             try:
-                size = int(info['Content-Length'])
-                size_kb = int(size//1024)
+                size = int(info["Content-Length"])
+                size_kb = int(size // 1024)
             except (KeyError, ValueError, TypeError):
                 size = None
                 size_kb = None
@@ -254,7 +258,7 @@ class Orekit(Propagator):
             if verbose:
                 pbar = tqdm(total=size_kb)
 
-            with open(path, 'wb') as f:
+            with open(path, "wb") as f:
                 try:
                     bytes_done = 0
                     block = remote.read(block_size)
@@ -264,198 +268,223 @@ class Orekit(Propagator):
 
                         if verbose:
                             pbar.set_description(pbar_str)
-                            pbar.update(int(len(block)//1024))
+                            pbar.update(int(len(block) // 1024))
 
                         block = remote.read(block_size)
 
                     if size is not None and bytes_done != size:
-                        raise Exception(f'Content-Length {size} did not match download size {bytes_done}, aborting...')
+                        raise Exception(
+                            f"Content-Length {size} did not match download size {bytes_done}, aborting..."
+                        )
                 except BaseException:
                     if path.is_file():
                         try:
-                            print('Attempting to remove failed partial download')
+                            print("Attempting to remove failed partial download")
                             path.unlink()
                         except:
                             pass
                     raise
 
-    def __init__(
-                self,
-                orekit_data,
-                settings=None,
-                **kwargs
-            ):
-
+    def __init__(self, orekit_data, settings=None, **kwargs):
         super(Orekit, self).__init__(settings=settings, **kwargs)
         init_vm()
 
         if self.logger is not None:
-            self.logger.debug(f'sorts.propagator.Orekit:init')
+            self.logger.debug(f"sorts.propagator.Orekit:init")
         if self.profiler is not None:
-            self.profiler.start('Orekit:init')
+            self.profiler.start("Orekit:init")
 
         if isinstance(orekit_data, pathlib.Path):
             orekit_data = str(orekit_data)
 
-        setup_orekit_curdir(filename = orekit_data)
+        setup_orekit_curdir(filename=orekit_data)
 
         if self.logger is not None:
-            self.logger.debug(f'Orekit:init:orekit-data = {orekit_data}')
+            self.logger.debug(f"Orekit:init:orekit-data = {orekit_data}")
 
         self.utc = TimeScalesFactory.getUTC()
 
         self.__settings = dict()
-        self.__settings['SolarStrengthLevel'] = getattr(
-            orekit_atm.data.MarshallSolarActivityFutureEstimation.StrengthLevel, 
-            self.settings['solar_activity_strength'],
+        self.__settings["SolarStrengthLevel"] = getattr(
+            orekit_atm.data.MarshallSolarActivityFutureEstimation.StrengthLevel,
+            self.settings["solar_activity_strength"],
         )
         self._tolerances = None
-        
-        if self.settings['constants_source'] == 'JPL-IAU':
+
+        if self.settings["constants_source"] == "JPL-IAU":
             self.mu = Constants.JPL_SSD_EARTH_GM
             self.R_earth = Constants.IAU_2015_NOMINAL_EARTH_EQUATORIAL_RADIUS
-            R_diff = Constants.IAU_2015_NOMINAL_EARTH_EQUATORIAL_RADIUS \
+            R_diff = (
+                Constants.IAU_2015_NOMINAL_EARTH_EQUATORIAL_RADIUS
                 - Constants.IAU_2015_NOMINAL_EARTH_POLAR_RADIUS
-            self.f_earth = R_diff/Constants.IAU_2015_NOMINAL_EARTH_POLAR_RADIUS
+            )
+            self.f_earth = R_diff / Constants.IAU_2015_NOMINAL_EARTH_POLAR_RADIUS
         else:
             self.mu = Constants.WGS84_EARTH_MU
             self.R_earth = Constants.WGS84_EARTH_EQUATORIAL_RADIUS
             self.f_earth = Constants.WGS84_EARTH_FLATTENING
 
-        self.M_earth = self.mu/scipy.constants.G
+        self.M_earth = self.mu / scipy.constants.G
 
         self.__params = None
 
         self._forces = {}
 
-        if self.settings['radiation_pressure']:
-            self._forces['radiation_pressure'] = None
-        if self.settings['drag_force']:
-            self._forces['drag_force'] = None
+        if self.settings["radiation_pressure"]:
+            self._forces["radiation_pressure"] = None
+        if self.settings["drag_force"]:
+            self._forces["drag_force"] = None
 
-        if self.settings['earth_gravity'] == 'HolmesFeatherstone':
-            provider = org.orekit.forces.gravity.potential.GravityFieldFactory.getNormalizedProvider(
-                self.settings['gravity_order'][0], 
-                self.settings['gravity_order'][1],
+        if self.settings["earth_gravity"] == "HolmesFeatherstone":
+            provider = (
+                org.orekit.forces.gravity.potential.GravityFieldFactory.getNormalizedProvider(
+                    self.settings["gravity_order"][0],
+                    self.settings["gravity_order"][1],
+                )
             )
             holmesFeatherstone = org.orekit.forces.gravity.HolmesFeatherstoneAttractionModel(
                 FramesFactory.getITRF(IERSConventions.IERS_2010, True),
                 provider,
             )
-            self._forces['earth_gravity'] = holmesFeatherstone
+            self._forces["earth_gravity"] = holmesFeatherstone
 
-        elif self.settings['earth_gravity'] == 'Newtonian':
+        elif self.settings["earth_gravity"] == "Newtonian":
             Newtonian = org.orekit.forces.gravity.NewtonianAttraction(self.mu)
-            self._forces['earth_gravity'] = Newtonian
+            self._forces["earth_gravity"] = Newtonian
 
         else:
-            raise Exception(f'Supplied Earth gravity model "{self.settings["earth_gravity"]}" not recognized')
+            raise Exception(
+                f'Supplied Earth gravity model "{self.settings["earth_gravity"]}" not recognized'
+            )
 
-        if self.settings['solarsystem_perturbers'] is not None:
-            for body in self.settings['solarsystem_perturbers']:
-                body_template = getattr(CelestialBodyFactory, 'get{}'.format(body))
+        if self.settings["solarsystem_perturbers"] is not None:
+            for body in self.settings["solarsystem_perturbers"]:
+                body_template = getattr(CelestialBodyFactory, "get{}".format(body))
                 body_instance = body_template()
                 perturbation = org.orekit.forces.gravity.ThirdBodyAttraction(body_instance)
 
-                self._forces['perturbation_{}'.format(body)] = perturbation
+                self._forces["perturbation_{}".format(body)] = perturbation
 
         if self.logger is not None:
             for key in self._forces:
-                if self._forces[key] is not None:                
-                    self.logger.debug(f'Orekit:init:_forces:{key} = {type(self._forces[key])}')
+                if self._forces[key] is not None:
+                    self.logger.debug(f"Orekit:init:_forces:{key} = {type(self._forces[key])}")
                 else:
-                    self.logger.debug(f'Orekit:init:_forces:{key} = None')
+                    self.logger.debug(f"Orekit:init:_forces:{key} = None")
 
         if self.profiler is not None:
-            self.profiler.stop('Orekit:init')
+            self.profiler.stop("Orekit:init")
 
     def __str__(self):
-        
-        ret = ''
-        ret += 'Orekit instance @ {}:'.format(hash(self)) + '\n' + '-'*25 + '\n'
-        ret += '{:20s}: '.format('Integrator') + self.settings['integrator'] + '\n'
-        ret += '{:20s}: '.format('Minimum step') + str(self.settings['min_step']) + ' s' + '\n'
-        ret += '{:20s}: '.format('Maximum step') + str(self.settings['max_step']) + ' s' + '\n'
-        ret += '{:20s}: '.format('Position Tolerance') + str(self.settings['position_tolerance']) + ' m' + '\n'
+        ret = ""
+        ret += "Orekit instance @ {}:".format(hash(self)) + "\n" + "-" * 25 + "\n"
+        ret += "{:20s}: ".format("Integrator") + self.settings["integrator"] + "\n"
+        ret += "{:20s}: ".format("Minimum step") + str(self.settings["min_step"]) + " s" + "\n"
+        ret += "{:20s}: ".format("Maximum step") + str(self.settings["max_step"]) + " s" + "\n"
+        ret += (
+            "{:20s}: ".format("Position Tolerance")
+            + str(self.settings["position_tolerance"])
+            + " m"
+            + "\n"
+        )
         if self._tolerances is not None:
-            ret += '{:20s}: '.format('Absolute Tolerance') + str(JArray_double.cast_(self._tolerances[0])) + ' m' + '\n'
-            ret += '{:20s}: '.format('Relative Tolerance') + str(JArray_double.cast_(self._tolerances[1])) + ' m' + '\n'
-        ret += '\n'
-        ret += '{:20s}: '.format('Input frame') + self.settings['in_frame'] + '\n'
-        ret += '{:20s}: '.format('Output frame') + self.settings['out_frame'] + '\n'
-        ret += '{:20s}: '.format('Gravity model') + self.settings['earth_gravity'] + '\n'
-        if self.settings['earth_gravity'] == 'HolmesFeatherstone':
-            ret += '{:20s} - Harmonic expansion order {}'.format('', self.settings['gravity_order']) + '\n'
-        ret += '{:20s}: '.format('Atmosphere model') + self.settings['atmosphere'] + '\n'
-        ret += '{:20s}: '.format('Solar model') + self.settings['solar_activity'] + '\n'
-        ret += '{:20s}: '.format('Constants') + self.settings['constants_source'] + '\n'
-        ret += 'Included forces:' + '\n'
+            ret += (
+                "{:20s}: ".format("Absolute Tolerance")
+                + str(JArray_double.cast_(self._tolerances[0]))
+                + " m"
+                + "\n"
+            )
+            ret += (
+                "{:20s}: ".format("Relative Tolerance")
+                + str(JArray_double.cast_(self._tolerances[1]))
+                + " m"
+                + "\n"
+            )
+        ret += "\n"
+        ret += "{:20s}: ".format("Input frame") + self.settings["in_frame"] + "\n"
+        ret += "{:20s}: ".format("Output frame") + self.settings["out_frame"] + "\n"
+        ret += "{:20s}: ".format("Gravity model") + self.settings["earth_gravity"] + "\n"
+        if self.settings["earth_gravity"] == "HolmesFeatherstone":
+            ret += (
+                "{:20s} - Harmonic expansion order {}".format("", self.settings["gravity_order"])
+                + "\n"
+            )
+        ret += "{:20s}: ".format("Atmosphere model") + self.settings["atmosphere"] + "\n"
+        ret += "{:20s}: ".format("Solar model") + self.settings["solar_activity"] + "\n"
+        ret += "{:20s}: ".format("Constants") + self.settings["constants_source"] + "\n"
+        ret += "Included forces:" + "\n"
         for key in self._forces:
-            ret += ' - {}'.format(' '.join(key.split('_'))) + '\n'
-        ret += 'Third body perturbations:' + '\n'
-        for body in self.settings['solarsystem_perturbers']:
-            ret += ' - {:}'.format(body) + '\n'
-        
+            ret += " - {}".format(" ".join(key.split("_"))) + "\n"
+        ret += "Third body perturbations:" + "\n"
+        for body in self.settings["solarsystem_perturbers"]:
+            ret += " - {:}".format(body) + "\n"
+
         return ret
 
     def _get_frame(self, name):
-        '''Uses a string to identify which coordinate frame to initialize from Orekit package.
+        """Uses a string to identify which coordinate frame to initialize from Orekit package.
 
         See `Orekit FramesFactory <https://www.orekit.org/static/apidocs/org/orekit/frames/FramesFactory.html>`_
-        '''
+        """
 
         if self.profiler is not None:
-            self.profiler.start('Orekit:get_frame')
+            self.profiler.start("Orekit:get_frame")
 
-        if name == 'EME':
+        if name == "EME":
             frame = FramesFactory.getEME2000()
-        elif name == 'EME2000':
+        elif name == "EME2000":
             frame = FramesFactory.getEME2000()
-        elif name == 'GCRF':
+        elif name == "GCRF":
             frame = FramesFactory.getGCRF()
-        elif name == 'CIRF':
-            frame = FramesFactory.getCIRF(IERSConventions.IERS_2010, not self.settings['frame_tidal_effects'])
-        elif name == 'ITRF':
-            frame = FramesFactory.getITRF(IERSConventions.IERS_2010, not self.settings['frame_tidal_effects'])
-        elif name == 'TIRF':
-            frame = FramesFactory.getTIRF(IERSConventions.IERS_2010, not self.settings['frame_tidal_effects'])
-        elif name == 'ITRFEquinox':
-            frame = FramesFactory.getITRFEquinox(IERSConventions.IERS_2010, not self.settings['frame_tidal_effects'])
-        elif name == 'TEME':
+        elif name == "CIRF":
+            frame = FramesFactory.getCIRF(
+                IERSConventions.IERS_2010, not self.settings["frame_tidal_effects"]
+            )
+        elif name == "ITRF":
+            frame = FramesFactory.getITRF(
+                IERSConventions.IERS_2010, not self.settings["frame_tidal_effects"]
+            )
+        elif name == "TIRF":
+            frame = FramesFactory.getTIRF(
+                IERSConventions.IERS_2010, not self.settings["frame_tidal_effects"]
+            )
+        elif name == "ITRFEquinox":
+            frame = FramesFactory.getITRFEquinox(
+                IERSConventions.IERS_2010, not self.settings["frame_tidal_effects"]
+            )
+        elif name == "TEME":
             frame = FramesFactory.getTEME()
         else:
             raise Exception('Frame "{}" not recognized'.format(name))
 
         if self.profiler is not None:
-            self.profiler.stop('Orekit:get_frame')
+            self.profiler.stop("Orekit:get_frame")
 
         return frame
 
     def _construct_propagator(self, initialOrbit):
-        '''
-        Get the specified integrator from hipparchus package. List available at: 
+        """
+        Get the specified integrator from hipparchus package. List available at:
         `nonstiff ode <https://www.hipparchus.org/apidocs/org/hipparchus/ode/nonstiff/package-summary.html>`_
 
         Configure the integrator tolerances using the orbit.
-        '''
+        """
 
         if self.profiler is not None:
-            self.profiler.start('Orekit:propagate:construct_propagator')
+            self.profiler.start("Orekit:propagate:construct_propagator")
 
         self._tolerances = NumericalPropagator.tolerances(
-            self.settings['position_tolerance'],
-            initialOrbit,
-            initialOrbit.getType()
+            self.settings["position_tolerance"], initialOrbit, initialOrbit.getType()
         )
 
         integrator_constructor = getattr(
             org.hipparchus.ode.nonstiff,
-            '{}Integrator'.format(self.settings['integrator']),
+            "{}Integrator".format(self.settings["integrator"]),
         )
 
         integrator = integrator_constructor(
-            self.settings['min_step'],
-            self.settings['max_step'], 
+            self.settings["min_step"],
+            self.settings["max_step"],
             JArray_double.cast_(self._tolerances[0]),
             JArray_double.cast_(self._tolerances[1]),
         )
@@ -466,23 +495,23 @@ class Orekit(Propagator):
         self.propagator = propagator
 
         if self.profiler is not None:
-            self.profiler.stop('Orekit:propagate:construct_propagator')
+            self.profiler.stop("Orekit:propagate:construct_propagator")
 
     def _set_forces(self, A, cd, cr):
-        '''Using the spacecraft specific parameters, set the drag force and radiation pressure models.
-        
+        """Using the spacecraft specific parameters, set the drag force and radiation pressure models.
+
         **See:**
             * `drag <https://www.orekit.org/static/apidocs/org/orekit/forces/drag/package-summary.html>`_
             * `radiation <https://www.orekit.org/static/apidocs/org/orekit/forces/radiation/package-summary.html>`_
-        '''
+        """
 
         if self.profiler is not None:
-            self.profiler.start('Orekit:propagate:set_forces')
+            self.profiler.start("Orekit:propagate:set_forces")
 
         if self.logger is not None:
-            self.logger.debug(f'Orekit:set_forces:A = {A}')
-            self.logger.debug(f'Orekit:set_forces:cd = {cd}')
-            self.logger.debug(f'Orekit:set_forces:cr = {cr}')
+            self.logger.debug(f"Orekit:set_forces:A = {A}")
+            self.logger.debug(f"Orekit:set_forces:cd = {cd}")
+            self.logger.debug(f"Orekit:set_forces:cr = {cr}")
 
         __params = [A, cd, cr]
 
@@ -490,57 +519,59 @@ class Orekit(Propagator):
         if self.__params is None:
             re_calc = True
         else:
-            if not np.allclose(np.array(__params,dtype=np.float), self.__params, rtol=1e-3):
+            if not np.allclose(np.array(__params, dtype=np.float64), self.__params, rtol=1e-3):
                 re_calc = True
 
         if self.logger is not None:
-            self.logger.debug(f'Orekit:set_forces:re_calc = {re_calc}')
+            self.logger.debug(f"Orekit:set_forces:re_calc = {re_calc}")
 
         self.atmosphere_instance = None
         self.spacecraft_drag_model = None
 
-        if re_calc:        
+        if re_calc:
             self.__params = __params
-            self.force_params = {'A': A, 'C_D': cd, 'C_R': cr}
-            if self.settings['drag_force']:
-                if self.settings['solar_activity'] == 'Marshall':
+            self.force_params = {"A": A, "C_D": cd, "C_R": cr}
+            if self.settings["drag_force"]:
+                if self.settings["solar_activity"] == "Marshall":
                     self._msafe = orekit_atm.data.MarshallSolarActivityFutureEstimation(
                         orekit_atm.data.MarshallSolarActivityFutureEstimation.DEFAULT_SUPPORTED_NAMES,
-                        self.__settings['SolarStrengthLevel'],
+                        self.__settings["SolarStrengthLevel"],
                     )
                     self._manager = org.orekit.data.DataProvidersManager.getInstance()
                     self._manager.feed(self._msafe.getSupportedNames(), self._msafe)
 
-                    if self.settings['atmosphere'] == 'DTM2000':
+                    if self.settings["atmosphere"] == "DTM2000":
                         self.atmosphere_instance = orekit_atm.DTM2000(
-                            self._msafe, 
-                            CelestialBodyFactory.getSun(), 
+                            self._msafe,
+                            CelestialBodyFactory.getSun(),
                             self.body,
                             self.utc,
                         )
                     else:
-                        raise Exception('Atmosphere model not recognized')
+                        raise Exception("Atmosphere model not recognized")
 
-                    self._forces['drag_force'] = self.GetIsotropicDragForce(A, cd)
+                    self._forces["drag_force"] = self.GetIsotropicDragForce(A, cd)
                 else:
-                    raise Exception('Solar activity model not recognized')
+                    raise Exception("Solar activity model not recognized")
 
-            if self.settings['radiation_pressure']:
+            if self.settings["radiation_pressure"]:
                 radiation_pressure_model = org.orekit.forces.radiation.SolarRadiationPressure(
                     CelestialBodyFactory.getSun(),
                     self.body.getEquatorialRadius(),
-                    org.orekit.forces.radiation.IsotropicRadiationSingleCoefficient(float(A), float(cr)),
+                    org.orekit.forces.radiation.IsotropicRadiationSingleCoefficient(
+                        float(A), float(cr)
+                    ),
                 )
 
-                self._forces['radiation_pressure'] = radiation_pressure_model
+                self._forces["radiation_pressure"] = radiation_pressure_model
 
             # self.propagator.removeForceModels()
 
             self.UpdateForces()
 
         if self.profiler is not None:
-            self.profiler.stop('Orekit:propagate:set_forces')
-        
+            self.profiler.stop("Orekit:propagate:set_forces")
+
     def UpdateForces(self):
         for force_name, force in self._forces.items():
             self.propagator.addForceModel(force)
@@ -554,31 +585,31 @@ class Orekit(Propagator):
         return force_
 
     def propagate(self, t, state0, epoch, **kwargs):
-        '''
+        """
         **Implementation:**
-    
+
         Keyword arguments are:
 
             * float A: Area in m^2
             * float C_D: Drag coefficient
             * float C_R: Radiation pressure coefficient
             * float m: Mass of object in kg
-        '''
+        """
         if self.profiler is not None:
-            self.profiler.start('Orekit:propagate')
+            self.profiler.start("Orekit:propagate")
 
-        if self.settings['in_frame'].startswith('Orekit-'):
-            self.inputFrame = self._get_frame(self.settings['in_frame'].replace('Orekit-', ''))
+        if self.settings["in_frame"].startswith("Orekit-"):
+            self.inputFrame = self._get_frame(self.settings["in_frame"].replace("Orekit-", ""))
             orekit_in_frame = True
         else:
-            self.inputFrame = self._get_frame('GCRF')
+            self.inputFrame = self._get_frame("GCRF")
             orekit_in_frame = False
 
-        if self.settings['out_frame'].startswith('Orekit-'):
-            self.outputFrame = self._get_frame(self.settings['out_frame'].replace('Orekit-', ''))
+        if self.settings["out_frame"].startswith("Orekit-"):
+            self.outputFrame = self._get_frame(self.settings["out_frame"].replace("Orekit-", ""))
             orekit_out_frame = True
         else:
-            self.outputFrame = self._get_frame('GCRF')
+            self.outputFrame = self._get_frame("GCRF")
             orekit_out_frame = False
 
         if self.inputFrame.isPseudoInertial():
@@ -593,25 +624,25 @@ class Orekit(Propagator):
         else:
             state0_cart = state0
 
-        if self.settings['radiation_pressure']:
-            if 'C_R' not in kwargs:
+        if self.settings["radiation_pressure"]:
+            if "C_R" not in kwargs:
                 raise Exception('Radiation pressure force enabled but no coefficient "C_R" given')
         else:
-            kwargs['C_R'] = 1.0
+            kwargs["C_R"] = 1.0
 
-        if self.settings['drag_force']:
-            if 'C_D' not in kwargs:
+        if self.settings["drag_force"]:
+            if "C_D" not in kwargs:
                 raise Exception('Drag force enabled but no drag coefficient "C_D" given')
-            if 'A' not in kwargs:
+            if "A" not in kwargs:
                 raise Exception('Drag force enabled but no area "A" given')
         else:
-            if 'C_D' not in kwargs:
-                kwargs['C_D'] = 2.3
-            if 'A' not in kwargs:
-                kwargs['A'] = 1.0
+            if "C_D" not in kwargs:
+                kwargs["C_D"] = 2.3
+            if "A" not in kwargs:
+                kwargs["A"] = 1.0
 
-        if 'm' not in kwargs:
-            kwargs['m'] = 0.0
+        if "m" not in kwargs:
+            kwargs["m"] = 0.0
 
         t, epoch = self.convert_time(t, epoch)
         times = epoch + t
@@ -622,28 +653,28 @@ class Orekit(Propagator):
             t = np.array([t])
 
         if self.logger is not None:
-            self.logger.debug(f'Orekit:propagate:len(t) = {len(t)}')
+            self.logger.debug(f"Orekit:propagate:len(t) = {len(t)}")
 
         if not orekit_in_frame:
             state0_cart = frames.convert(
-                epoch, 
-                state0_cart, 
-                in_frame=self.settings['in_frame'], 
-                out_frame='GCRS',
-                profiler = self.profiler,
-                logger = self.logger,
+                epoch,
+                state0_cart,
+                in_frame=self.settings["in_frame"],
+                out_frame="GCRS",
+                profiler=self.profiler,
+                logger=self.logger,
             )
 
         initialDate = mjd2absdate(mjd0, self.utc)
 
         pos = org.hipparchus.geometry.euclidean.threed.Vector3D(
-            float(state0_cart[0]), 
-            float(state0_cart[1]), 
+            float(state0_cart[0]),
+            float(state0_cart[1]),
             float(state0_cart[2]),
         )
         vel = org.hipparchus.geometry.euclidean.threed.Vector3D(
-            float(state0_cart[3]), 
-            float(state0_cart[4]), 
+            float(state0_cart[3]),
+            float(state0_cart[4]),
             float(state0_cart[5]),
         )
         PV_state = PVCoordinates(pos, vel)
@@ -656,11 +687,11 @@ class Orekit(Propagator):
             PV_state,
             self.inertialFrame,
             initialDate,
-            self.mu + float(scipy.constants.G*kwargs['m']),
+            self.mu + float(scipy.constants.G * kwargs["m"]),
         )
 
         self._construct_propagator(initialOrbit)
-        self._set_forces(kwargs['A'], kwargs['C_D'], kwargs['C_R'])
+        self._set_forces(kwargs["A"], kwargs["C_D"], kwargs["C_R"])
 
         initialState = SpacecraftState(initialOrbit)
 
@@ -678,13 +709,13 @@ class Orekit(Propagator):
                 t_forward = []
                 tb_inds = t <= 0
 
-        state = np.empty((6, len(t)), dtype=np.float)
+        state = np.empty((6, len(t)), dtype=np.float64)
         step_handler = Orekit.OrekitVariableStep()
 
         if self.profiler is not None:
-            self.profiler.start('Orekit:propagate:steps')
+            self.profiler.start("Orekit:propagate:steps")
 
-        if self.settings['heartbeat']:
+        if self.settings["heartbeat"]:
             __heartbeat = self.heartbeat
         else:
             __heartbeat = None
@@ -694,22 +725,22 @@ class Orekit(Propagator):
             _t_order = np.argsort(np.abs(_t))
             _t_res = np.argsort(_t_order)
             _t = _t[_t_order]
-            _state = np.empty((6, len(_t)), dtype=np.float) 
+            _state = np.empty((6, len(_t)), dtype=np.float64)
 
             step_handler.set_params(
-                _t, 
-                initialDate, 
-                _state, 
-                self.outputFrame, 
-                __heartbeat, 
-                profiler = self.profiler,
+                _t,
+                initialDate,
+                _state,
+                self.outputFrame,
+                __heartbeat,
+                profiler=self.profiler,
             )
 
             self.propagator.setMasterMode(step_handler)
 
             t_next = initialDate.shiftedBy(float(_t[-1]))
             self.propagator.propagate(t_next)
-            
+
             # now _state is full and in the order of _t
             state[:, tb_inds] = _state[:, _t_res]
 
@@ -718,39 +749,39 @@ class Orekit(Propagator):
             _t_order = np.argsort(np.abs(_t))
             _t_res = np.argsort(_t_order)
             _t = _t[_t_order]
-            _state = np.empty((6, len(_t)), dtype=np.float) 
+            _state = np.empty((6, len(_t)), dtype=np.float64)
             step_handler.set_params(
-                _t, 
-                initialDate, 
-                _state, 
-                self.outputFrame, 
-                __heartbeat, 
-                profiler = self.profiler,
+                _t,
+                initialDate,
+                _state,
+                self.outputFrame,
+                __heartbeat,
+                profiler=self.profiler,
             )
 
             self.propagator.setMasterMode(step_handler)
 
             t_next = initialDate.shiftedBy(float(_t[-1]))
             self.propagator.propagate(t_next)
-            
+
             # now _state is full and in the order of _t
             state[:, tf_indst] = _state[:, _t_res]
 
         if not orekit_out_frame:
             state = frames.convert(
-                times, 
-                state, 
-                in_frame='GCRS', 
-                out_frame=self.settings['out_frame'],
-                profiler = self.profiler,
-                logger = self.logger,
+                times,
+                state,
+                in_frame="GCRS",
+                out_frame=self.settings["out_frame"],
+                profiler=self.profiler,
+                logger=self.logger,
             )
 
         if self.profiler is not None:
-            self.profiler.stop('Orekit:propagate:steps')
-            self.profiler.stop('Orekit:propagate')
+            self.profiler.stop("Orekit:propagate:steps")
+            self.profiler.stop("Orekit:propagate")
 
         if self.logger is not None:
-            self.logger.debug(f'Orekit:propagate:completed')
+            self.logger.debug(f"Orekit:propagate:completed")
 
         return state
