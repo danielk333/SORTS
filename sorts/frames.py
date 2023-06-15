@@ -20,7 +20,7 @@ try:
 except ImportError:
     SPK = None
 
-from pyant.coordinates import sph_to_cart
+from pyant.coordinates import sph_to_cart, cart_to_sph, vector_angle
 
 
 """List of astropy frames

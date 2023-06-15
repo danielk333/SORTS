@@ -40,7 +40,7 @@ class Station(object):
         self.lon = lon
         self.alt = alt
         self.min_elevation = min_elevation
-        self.ecef = frames.geodetic_to_ITRS(lat, lon, alt, radians=False)
+        self.ecef = frames.geodetic_to_ITRS(lat, lon, alt, degrees=True)
         self.beam = beam
         self.enabled = True
         self.pointing_range = None
@@ -67,7 +67,7 @@ class Station(object):
         self.lat = lat
         self.lon = lon
         self.alt = alt
-        self.ecef = frames.geodetic_to_ITRS(lat, lon, alt, radians=False)
+        self.ecef = frames.geodetic_to_ITRS(lat, lon, alt, degrees=True)
 
     def copy(self):
         st = Station(
@@ -97,7 +97,7 @@ class Station(object):
             self.lon,
             self.alt,
             rel_[:3, :],
-            radians=False,
+            degrees=True,
         )
         if ecefs.shape[0] > 3:
             rel_[3:, :] = frames.ecef_to_enu(
@@ -105,7 +105,7 @@ class Station(object):
                 self.lon,
                 self.alt,
                 rel_[3:, :],
-                radians=False,
+                degrees=True,
             )
         return rel_
 
@@ -120,7 +120,7 @@ class Station(object):
             self.lon,
             self.alt,
             point,
-            radians=False,
+            degrees=True,
         )
         k_norm = np.linalg.norm(k, axis=0)
 
@@ -143,7 +143,7 @@ class Station(object):
             self.lon,
             self.alt,
             self.beam.pointing,
-            radians=False,
+            degrees=True,
         )
 
     def __str__(self):
