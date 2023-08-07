@@ -1,18 +1,19 @@
 #!/usr/bin/env python
 
-'''SORTS package
+"""SORTS package
 
-'''
+"""
 
 from .version import __version__
 
 __all__ = []
 
 from .propagator import __all__ as propagators
+
 __all__ += propagators
 del propagators
 
-#classes
+# classes
 from .space_object import SpaceObject
 from .population import Population
 from .propagator import Propagator
@@ -26,7 +27,7 @@ from .simulation import Simulation
 from .profiling import Profiler
 
 
-#modules
+# modules
 from .radar import scans
 from . import functions
 from . import constants
@@ -44,10 +45,18 @@ from .radar import instances as radars
 from . import simulation
 from . import signals
 
-#Functions
-from .correlator import correlate
+# Functions
+from .correlator import correlate, save_correlation_results, load_correlation_results
 from .passes import equidistant_sampling
 from .passes import find_passes, find_simultaneous_passes, group_passes
 from .signals import hard_target_snr
-from .simulation import MPI_single_process, MPI_action, iterable_step, store_step, cached_step, iterable_cache, pre_post_actions
-from .pre_encounter import propagate_pre_encounter, distance_termination 
+from .simulation import (
+    MPI_single_process,
+    MPI_action,
+    iterable_step,
+    store_step,
+    cached_step,
+    iterable_cache,
+    pre_post_actions,
+)
+from .pre_encounter import propagate_pre_encounter, distance_termination

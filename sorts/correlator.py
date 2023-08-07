@@ -4,11 +4,13 @@
 
 Currently only works for Mono-static measurements.
 
-# TODO: Assume a uniform prior distribution over population index, posterior distribution is the probability
-of what object generated the data. Probability comes from measurement covariance.
+# TODO: Assume a uniform prior distribution over population index, posterior distribution is the
+probability of what object generated the data. Probability comes from measurement covariance.
 """
 
 from tqdm import tqdm
+import h5py
+from astropy.time import Time
 
 try:
     from mpi4py import MPI
@@ -95,6 +97,74 @@ def default_propagation_handling(obj, t, t_measurement_indices, measurements):
     return obj.get_state(t)
 
 
+def save_correlation_results(file, indecies, metric, measurements, variables, correlation_data):
+    with h5py.File(file, "w") as hf:
+        hf["indecies"] = indecies
+        hf["metric"] = metric
+        meas = hf.create_group("measurements")
+        meas.attrs["variables"] = variables
+        for ind in range(len(measurements)):
+            dat = meas.create_group(f"{ind}")
+            for var in variables:
+                dat[var] = measurements[ind][var]
+            dat["t"] = measurements[ind]["t"]
+            dat.attrs["epoch"] = measurements[ind]["epoch"].unix
+            if measurements[ind]["tx"].uid is not None:
+                dat.attrs["tx"] = measurements[ind]["tx"].uid
+            if measurements[ind]["rx"].uid is not None:
+                dat.attrs["rx"] = measurements[ind]["rx"].uid
+
+        crl = hf.create_group("correlation_data")
+        for key in correlation_data:
+            grp = crl.create_group(f"{key}")
+            for ind in range(len(correlation_data[key])):
+                subgrp = grp.create_group(f"{ind}")
+                subgrp.attrs["oid"] = correlation_data[key][ind]["oid"]
+                subgrp.attrs["match"] = correlation_data[key][ind]["match"]
+                subgrp["valid"] = correlation_data[key][ind]["valid"]
+                for var in variables:
+                    subgrp[f"{var}_ref"] = correlation_data[key][ind][f"{var}_ref"]
+
+
+def load_correlation_results(file):
+    with h5py.File(file, "r") as hf:
+        indecies = hf["indecies"][()]
+        metric = hf["metric"][()]
+        measurements = []
+        meas = hf["measurements"]
+        variables = meas.attrs["variables"]
+        for key in meas:
+            dat = {
+                "t": meas[key]["t"][()],
+                "epoch": Time(meas[key].attrs["epoch"], format="unix", scale="utc"),
+            }
+            if "tx" in meas[key].attrs:
+                dat["tx"] = meas[key].attrs["tx"]
+            if "rx" in meas[key].attrs:
+                dat["rx"] = meas[key].attrs["rx"]
+            for var in variables:
+                dat[var] = meas[key][var][()]
+            measurements.append(dat)
+        correlation_data = []
+        crl = hf["correlation_data"]
+        for key in crl:
+            cdat = []
+            grp = crl[key]
+            for ind_str in grp:
+                subgrp = grp[ind_str]
+                dat = {
+                    "oid": subgrp.attrs["oid"],
+                    "match": subgrp.attrs["match"],
+                    "valid": subgrp["valid"][()],
+                }
+                for var in variables:
+                    dat[f"{var}_ref"] = subgrp[f"{var}_ref"][()]
+                cdat.append(dat)
+            correlation_data.append(cdat)
+
+    return indecies, metric, measurements, correlation_data
+
+
 def correlate(
     measurements,
     population,
@@ -115,7 +185,8 @@ def correlate(
     MPI=False,
     save_states=False,
 ):
-    """Given a mono-static measurement of ranges and rage-rates, a radar model and a population: correlate measurements with population.
+    """Given a mono-static measurement of ranges and rage-rates, a radar model and a population:
+    correlate measurements with population.
 
     # TODO: Update docstring
     # TODO: Add FOV check option
