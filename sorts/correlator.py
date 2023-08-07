@@ -97,22 +97,27 @@ def default_propagation_handling(obj, t, t_measurement_indices, measurements):
     return obj.get_state(t)
 
 
+def save_measurements(hf, measurements, variables):
+    meas = hf.create_group("measurements")
+    meas.attrs["variables"] = variables
+    for ind in range(len(measurements)):
+        dat = meas.create_group(f"{ind}")
+        for var in variables:
+            dat[var] = measurements[ind][var]
+        dat["t"] = measurements[ind]["t"]
+        dat.attrs["epoch"] = measurements[ind]["epoch"].unix
+        if measurements[ind]["tx"].uid is not None:
+            dat.attrs["tx"] = measurements[ind]["tx"].uid
+        if measurements[ind]["rx"].uid is not None:
+            dat.attrs["rx"] = measurements[ind]["rx"].uid
+
+
 def save_correlation_results(file, indecies, metric, measurements, variables, correlation_data):
     with h5py.File(file, "w") as hf:
         hf["indecies"] = indecies
         hf["metric"] = metric
-        meas = hf.create_group("measurements")
-        meas.attrs["variables"] = variables
-        for ind in range(len(measurements)):
-            dat = meas.create_group(f"{ind}")
-            for var in variables:
-                dat[var] = measurements[ind][var]
-            dat["t"] = measurements[ind]["t"]
-            dat.attrs["epoch"] = measurements[ind]["epoch"].unix
-            if measurements[ind]["tx"].uid is not None:
-                dat.attrs["tx"] = measurements[ind]["tx"].uid
-            if measurements[ind]["rx"].uid is not None:
-                dat.attrs["rx"] = measurements[ind]["rx"].uid
+
+        save_measurements(hf, measurements, variables)
 
         crl = hf.create_group("correlation_data")
         for key in correlation_data:
@@ -126,25 +131,32 @@ def save_correlation_results(file, indecies, metric, measurements, variables, co
                     subgrp[f"{var}_ref"] = correlation_data[key][ind][f"{var}_ref"]
 
 
+def load_measurements(hf):
+    measurements = []
+    meas = hf["measurements"]
+    variables = meas.attrs["variables"]
+    for key in meas:
+        dat = {
+            "t": meas[key]["t"][()],
+            "epoch": Time(meas[key].attrs["epoch"], format="unix", scale="utc"),
+        }
+        if "tx" in meas[key].attrs:
+            dat["tx"] = meas[key].attrs["tx"]
+        if "rx" in meas[key].attrs:
+            dat["rx"] = meas[key].attrs["rx"]
+        for var in variables:
+            dat[var] = meas[key][var][()]
+        measurements.append(dat)
+    return measurements, variables
+
+
 def load_correlation_results(file):
     with h5py.File(file, "r") as hf:
         indecies = hf["indecies"][()]
         metric = hf["metric"][()]
-        measurements = []
-        meas = hf["measurements"]
-        variables = meas.attrs["variables"]
-        for key in meas:
-            dat = {
-                "t": meas[key]["t"][()],
-                "epoch": Time(meas[key].attrs["epoch"], format="unix", scale="utc"),
-            }
-            if "tx" in meas[key].attrs:
-                dat["tx"] = meas[key].attrs["tx"]
-            if "rx" in meas[key].attrs:
-                dat["rx"] = meas[key].attrs["rx"]
-            for var in variables:
-                dat[var] = meas[key][var][()]
-            measurements.append(dat)
+
+        measurements, variables = load_measurements(hf)
+
         correlation_data = []
         crl = hf["correlation_data"]
         for key in crl:

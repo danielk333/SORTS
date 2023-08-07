@@ -44,9 +44,10 @@ from . import interpolation
 from .radar import instances as radars
 from . import simulation
 from . import signals
+from . import correlator
 
 # Functions
-from .correlator import correlate, save_correlation_results, load_correlation_results
+from .correlator import correlate
 from .passes import equidistant_sampling
 from .passes import find_passes, find_simultaneous_passes, group_passes
 from .signals import hard_target_snr
