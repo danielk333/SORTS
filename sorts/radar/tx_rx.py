@@ -35,7 +35,7 @@ class Station(object):
 
     """
 
-    def __init__(self, lat, lon, alt, min_elevation, beam):
+    def __init__(self, lat, lon, alt, min_elevation, beam, uid=None):
         self.lat = lat
         self.lon = lon
         self.alt = alt
@@ -44,6 +44,7 @@ class Station(object):
         self.beam = beam
         self.enabled = True
         self.pointing_range = None
+        self.uid = uid
 
     def field_of_view(self, states, **kwargs):
         """Determines the field of view of the station.
@@ -158,8 +159,8 @@ class RX(Station):
     :ivar float noise: Receiver noise in Kelvin, i.e. system temperature.
     """
 
-    def __init__(self, lat, lon, alt, min_elevation, beam, noise):
-        super().__init__(lat, lon, alt, min_elevation, beam)
+    def __init__(self, lat, lon, alt, min_elevation, beam, noise, uid=None):
+        super().__init__(lat, lon, alt, min_elevation, beam, uid=uid)
         self.noise = noise
 
     def copy(self):
@@ -209,8 +210,9 @@ class TX(Station):
         pulse_length=1e-3,
         ipp=10e-3,
         n_ipp=20,
+        uid=None,
     ):
-        super().__init__(lat, lon, alt, min_elevation, beam)
+        super().__init__(lat, lon, alt, min_elevation, beam, uid=uid)
 
         self.bandwidth = bandwidth
         self.duty_cycle = duty_cycle
