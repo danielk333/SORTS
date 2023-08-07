@@ -191,28 +191,62 @@ def correlate(
     # TODO: Update docstring
     # TODO: Add FOV check option
 
-    :param list measurements: List of dictionaries that contains measurement data. Contents are described below.
-    :param Population population: Population to correlate against.
-    :param function metric: Metric used to correlate measurement and simulated object measurement.
-    :param function metric_reduce: Metric used to correlate measurement and simulated object measurement. Can be `None`, in which case each measurement is correlated individually, for this to work the metric also needs to be vectorized.
-    :param function forward_model: A pointer to a function that takes in the ecef-state, the rx and tx station ecefs and calculates the observed variables return as a tuple.
-    :param function sorting_function: A pointer to a sorting function that takes in the metric result array and returns a list of indices indicating the sorting order.
-    :param function valid_measurement_checker: A pointer to a function that checks if the measurnment to calculate a metric is valid or not. By default checks if the object is within both stations FOV. The function expects to take (time, states, rx station, tx station).
-    :param function propagation_handling: A pointer to a function that handles the propagation of the object to the measurnment point. By defaults simple uses the space object `get_state` method. TODO: add doc reference here to the default function to use as template for modifications.
-    :param numpy.dtype metric_dtype: A valid numpy dtype declaration for the metric output array. This allows complex structured results to be processed.
-    :param list variables: The data variables recorded by the system. Theses should be in `measurements` and returned by the `forward_model`.
-    :param list meta_variables: The data meta variables recorded by the system. These are input as keyword arguments to the metric and does not need to be produced by any model.
-    :param int n_closest: Number of closest matches to save.
-    :param bool scalar_metric: indicats if the metric returns a scalar or a vector. If `False` the `metric_reduce` is expected to only take one argument to reduce the vectorized results.
-    :param Profiler profiler: Profiler instance for checking function performance.
-    :param logging.Logger logger: Logger instance for logging the execution of the function.
-    :param bool MPI: If True use internal parallelization with MPI to calculate correlation. Turn to False to externally parallelize with MPI.
-    :param bool save_states: If True use saves the propagated states in the output data.
+    Parameters
+    ----------
+    measurements : list
+        List of dictionaries that contains measurement data. Contents are described below.
+    population : Population
+        Population to correlate against.
+    metric : function
+        Metric used to correlate measurement and simulated object measurement.
+    metric_reduce : function
+        Metric used to correlate measurement and simulated object measurement.
+        Can be `None`, in which case each measurement is correlated individually,
+        for this to work the metric also needs to be vectorized.
+    forward_model : function
+        A pointer to a function that takes in the ecef-state, the rx and tx
+        station ecefs and calculates the observed variables return as a tuple.
+    sorting_function : function
+        A pointer to a sorting function that takes in the metric result array
+        and returns a list of indices indicating the sorting order.
+    valid_measurement_checker : function
+        A pointer to a function that checks if the measurnment to calculate a
+        metric is valid or not. By default checks if the object is within both
+        stations FOV. The function expects to take (time, states, rx station, tx station).
+    propagation_handling : function
+        A pointer to a function that handles the propagation of the object to
+        the measurnment point. By defaults simple uses the space object
+        `get_state` method. TODO: add doc reference here to the default function
+        to use as template for modifications.
+    metric_dtype : numpy.dtype
+        A valid numpy dtype declaration for the metric output array.
+        This allows complex structured results to be processed.
+    variables : list
+        The data variables recorded by the system. Theses should be in
+        `measurements` and returned by the `forward_model`.
+    meta_variables : list
+        The data meta variables recorded by the system. These are input as
+        keyword arguments to the metric and does not need to be produced by any model.
+    n_closest : int
+        Number of closest matches to save.
+    scalar_metric : bool
+        indicats if the metric returns a scalar or a vector. If `False` the
+        `metric_reduce` is expected to only take one argument to reduce the vectorized results.
+    profiler : Profiler
+        Profiler instance for checking function performance.
+    logger : logging.Logger
+        Logger instance for logging the execution of the function.
+    MPI : bool
+        If True use internal parallelization with MPI to calculate correlation.
+        Turn to False to externally parallelize with MPI.
+    save_states : bool
+        If True use saves the propagated states in the output data.
 
 
     **Measurement data:**
 
-      Each entry in the input :code:`measurements` list must be a dictionary that contains the following fields:
+      Each entry in the input :code:`measurements` list must be a dictionary
+      that contains the following fields:
         * 't': [numpy.ndarray] Times relative epoch in seconds
         * 'epoch': [astropy.Time] epoch for measurements
         * 'tx': [sorts.TX] Pointer to the TX station
@@ -318,9 +352,7 @@ def correlate(
             rx = data["rx"]
 
             tx_ecef = tx.ecef.copy()
-            # tx_ecef_norm = tx_ecef/np.linalg.norm(tx_ecef)
             rx_ecef = rx.ecef.copy()
-            # rx_ecef_norm = rx_ecef/np.linalg.norm(rx_ecef)
 
             # Select from all propagated states the ones for this
             # measurnment block in the same order as the measurnments
