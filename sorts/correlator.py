@@ -200,6 +200,20 @@ def correlate(
     """Given a mono-static measurement of ranges and rage-rates, a radar model and a population:
     correlate measurements with population.
 
+    The behavior should be thought of as the following matrix
+
+    Metric reduce |     Function     |       None
+    Scalar metric
+    -------------
+                     Only one scalar   Each measurement
+        True           correlation        correlated
+                       calculated        individually
+    -------------
+                     Only one vector   Each data point
+        False          correlation        correlated
+                       calculated        individually
+    -------------
+
     # TODO: Update docstring
     # TODO: Add FOV check option
 
@@ -362,7 +376,8 @@ def correlate(
             t = (data["epoch"] - obj.epoch).sec + data["t"][t_sorts[di]]
             tx = data["tx"]
             rx = data["rx"]
-
+            # TODO: station data can be extraced and passed on more generally for
+            # e.g. single station and multi station correlations
             tx_ecef = tx.ecef.copy()
             rx_ecef = rx.ecef.copy()
 
