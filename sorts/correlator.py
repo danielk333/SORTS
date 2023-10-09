@@ -436,6 +436,8 @@ def correlate(
 
             cdat = {}
             for i, x in enumerate(variables):
+                if ref_var[i].size == 0:
+                    ref_var[i].shape = (0,) + base_valid.shape[1:]
                 _xp = np.full(base_valid.shape, np.nan, dtype=ref_var[i].dtype)
                 _xp[valid, ...] = ref_var[i]
                 cdat[f"{x}_ref"] = _xp

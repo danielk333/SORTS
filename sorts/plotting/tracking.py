@@ -59,6 +59,9 @@ def local_tracking(
     elevation,
     ax=None,
     t=None,
+    track_line_style="-",
+    track_marker=None,
+    track_color=None,
     add_track=False,
     node_times=False,
     degrees=True,
@@ -71,7 +74,7 @@ def local_tracking(
         fig = None
 
     x0, y0 = az_el_to_xy(azimuth, elevation)
-    ax.plot(x0, y0, alpha=alpha)
+    ax.plot(x0, y0, c=track_color, ls=track_line_style, marker=track_marker, alpha=alpha)
 
     if not add_track:
         x, y = az_el_to_xy(np.linspace(0, 360, num=360), np.repeat(0.0, 360))
