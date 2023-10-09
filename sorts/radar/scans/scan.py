@@ -114,12 +114,12 @@ class Scan(ABC):
 
     def _transform_ecef(self, point, ant):
         if self.coordinates == "ned":
-            k0 = frames.ned_to_ecef(ant.lat, ant.lon, ant.alt, point, degrees=True)
+            k0 = frames.ned_to_ecef(ant.ecef_lat, ant.ecef_lon, ant.ecef_alt, point, degrees=True)
         elif self.coordinates == "enu":
-            k0 = frames.enu_to_ecef(ant.lat, ant.lon, ant.alt, point, degrees=True)
+            k0 = frames.enu_to_ecef(ant.ecef_lat, ant.ecef_lon, ant.ecef_alt, point, degrees=True)
         elif self.coordinates == "azelr":
             k0 = frames.azel_to_ecef(
-                ant.lat, ant.lon, ant.alt, point[0, ...], point[1, ...], degrees=True
+                ant.ecef_lat, ant.ecef_lon, ant.ecef_alt, point[0, ...], point[1, ...], degrees=True
             )
         return k0
 

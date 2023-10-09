@@ -273,10 +273,11 @@ def _convert_to_astropy(states, frame, **kw):
 
 
 def enu_to_ecef(lat, lon, alt, enu, degrees=True):
-    """ENU (east/north/up) to ECEF coordinate system conversion, not including translation.
+    """ENU (east/north/up) using geocentric zenith to ECEF coordinate system
+    conversion, not including translation.
 
-    :param float lat: Latitude on the ellipsoid
-    :param float lon: Longitude on the ellipsoid
+    :param float lat: Latitude of the origin in geocentric spherical coordinates
+    :param float lon: Longitude of the origin in geocentric spherical coordinates
     :param float alt: Altitude above ellipsoid, **Unused in this implementation**.
     :param numpy.ndarray enu: (3,n) input matrix of positions in the ENU-convention.
     :param bool radians: If :code:`True` then all values are given in radians instead of degrees.
@@ -299,11 +300,12 @@ def enu_to_ecef(lat, lon, alt, enu, degrees=True):
 
 
 def ned_to_ecef(lat, lon, alt, ned, degrees=True):
-    """NED (north/east/down) to ECEF coordinate system conversion, not including translation.
+    """NED (north/east/down) using geocentric zenith to ECEF coordinate system
+    conversion, not including translation.
 
-    :param float lat: Latitude on the ellipsoid
-    :param float lon: Longitude on the ellipsoid
-    :param float alt: Altitude above ellipsoid, **Unused in this implementation**.
+    :param float lat: Latitude of the origin in geocentric spherical coordinates
+    :param float lon: Longitude of the origin in geocentric spherical coordinates
+    :param float alt: Altitude **Unused in this implementation**.
     :param numpy.ndarray ned: (3,n) input matrix of positions in the NED-convention.
     :param bool radians: If :code:`True` then all values are given in radians instead of degrees.
     :rtype: numpy.ndarray
@@ -317,15 +319,17 @@ def ned_to_ecef(lat, lon, alt, ned, degrees=True):
 
 
 def ecef_to_enu(lat, lon, alt, ecef, degrees=True):
-    """ECEF coordinate system to local ENU (east,north,up), not including translation.
+    """ECEF coordinate system to local ENU (east,north,up) using geocentric
+    zenith, not including translation.
 
-    :param float lat: Latitude on the ellipsoid
-    :param float lon: Longitude on the ellipsoid
-    :param float alt: Altitude above ellipsoid, **Unused in this implementation**.
+    :param float lat: Latitude of the origin in geocentric spherical coordinates
+    :param float lon: Longitude of the origin in geocentric spherical coordinates
+    :param float alt: Altitude **Unused in this implementation**.
     :param numpy.ndarray ecef: (3,n) array x,y and z coordinates in ECEF.
     :param bool radians: If :code:`True` then all values are given in radians instead of degrees.
     :rtype: numpy.ndarray
-    :return: (3,n) array x,y and z in local coordinates in the ENU-convention.
+    :return: (3,n) array x,y and z in local coordinates in the
+        ENU-convention using geocentric zenith.
     """
     if degrees:
         lat, lon = np.radians(lat), np.radians(lon)
@@ -342,7 +346,8 @@ def ecef_to_enu(lat, lon, alt, ecef, degrees=True):
 
 
 def azel_to_ecef(lat, lon, alt, az, el, degrees=True):
-    """Radar pointing (az,el) to unit vector in ECEF, not including translation.
+    """Radar pointing (az,el) using geocentric zenith to unit vector in
+    ECEF, not including translation.
 
     TODO: Docstring
     """

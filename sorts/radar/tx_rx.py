@@ -41,6 +41,10 @@ class Station(object):
         self.alt = alt
         self.min_elevation = min_elevation
         self.ecef = frames.geodetic_to_ITRS(lat, lon, alt, degrees=True)
+        ecef_lla = pyant.coordinates.cart_to_sph(self.ecef, degrees=True)
+        self.ecef_lat = ecef_lla[1]
+        self.ecef_lon = 90 - ecef_lla[0]
+        self.ecef_alt = ecef_lla[2]
         self.beam = beam
         self.enabled = True
         self.pointing_range = None
@@ -69,6 +73,10 @@ class Station(object):
         self.lon = lon
         self.alt = alt
         self.ecef = frames.geodetic_to_ITRS(lat, lon, alt, degrees=True)
+        ecef_lla = pyant.coordinates.cart_to_sph(self.ecef, degrees=True)
+        self.ecef_lat = ecef_lla[1]
+        self.ecef_lon = 90 - ecef_lla[0]
+        self.ecef_alt = ecef_lla[2]
 
     def copy(self):
         st = Station(
@@ -90,36 +98,36 @@ class Station(object):
         return self.beam.wavelength
 
     def enu(self, ecefs):
-        """Converts a set of ECEF states to local ENU coordinates."""
+        """Converts a set of ECEF states to local ENU coordinates using geocentric zenith."""
         rel_ = ecefs.copy()
         rel_[:3, :] = rel_[:3, :] - self.ecef[:, None]
         rel_[:3, :] = frames.ecef_to_enu(
-            self.lat,
-            self.lon,
-            self.alt,
+            self.ecef_lat,
+            self.ecef_lon,
+            self.ecef_alt,
             rel_[:3, :],
             degrees=True,
         )
         if ecefs.shape[0] > 3:
             rel_[3:, :] = frames.ecef_to_enu(
-                self.lat,
-                self.lon,
-                self.alt,
+                self.ecef_lat,
+                self.ecef_lon,
+                self.ecef_alt,
                 rel_[3:, :],
                 degrees=True,
             )
         return rel_
 
     def point(self, k):
-        """Point Station beam in local ENU coordinates."""
+        """Point Station beam in local ENU coordinates using geocentric zenith."""
         self.beam.point(k)
 
     def point_ecef(self, point):
         """Point Station beam in location of ECEF coordinate. Returns local pointing direction."""
         k = frames.ecef_to_enu(
-            self.lat,
-            self.lon,
-            self.alt,
+            self.ecef_lat,
+            self.ecef_lon,
+            self.ecef_alt,
             point,
             degrees=True,
         )
@@ -133,22 +141,19 @@ class Station(object):
 
     @property
     def pointing(self):
-        """Station beam pointing in local ENU coordinates."""
+        """Station beam pointing in local ENU coordinates using geocentric zenith."""
         return self.beam.pointing.copy()
 
     @property
     def pointing_ecef(self):
-        """Station beam pointing in local ENU coordinates."""
+        """Station beam pointing in local ENU coordinates using geocentric zenith."""
         return frames.enu_to_ecef(
-            self.lat,
-            self.lon,
-            self.alt,
+            self.ecef_lat,
+            self.ecef_lon,
+            self.ecef_alt,
             self.beam.pointing,
             degrees=True,
         )
-
-    def __str__(self):
-        pass
 
 
 class RX(Station):
