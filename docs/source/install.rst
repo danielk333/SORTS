@@ -57,7 +57,7 @@ Now you should be inside the new virtual environment. Check this by
 
    pip --version
 
-And you should see the path to "/path/to/new/sorts/environment". 
+And you should see the path to "/path/to/new/sorts/environment".
 
 Alternatively if you want to use pip with Python 3.7 without using `venv`, the get-pip.py method can be used. WARNING: Using the bootstrap solution will break your current Python 2.7/3.5 pip, It is not recommended.
 
@@ -156,7 +156,7 @@ Taken from "https://github.com/timduly4/pyglow/"
 For developers
 -----------------
 
-To install developer dependencies 
+To install developer dependencies
 
 .. code-block:: bash
 
@@ -178,6 +178,3 @@ To make doc
    git checkout gh-pages
    git cd docsrc
    make github
-
-
-

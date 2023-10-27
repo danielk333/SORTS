@@ -2,6 +2,12 @@
 API Reference
 ==============
 
+clibsorts
+===========
+
+.. c:autodoc:: clibsorts/measurements.c
+   :transform: napoleon
+
 Modules
 ========
 
@@ -158,4 +164,3 @@ Radars
 -------
 
 .. automodule:: sorts.radar.instances
-

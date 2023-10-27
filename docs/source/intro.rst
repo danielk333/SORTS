@@ -31,7 +31,7 @@ Feature list
 * Collection of predefined population formats for loading e.g. TLE catalogs
 * Correlation algorithms for correlating measurement data to a population
 * Input/Output package for writing and reading standardized data formats e.g. CCSDS TDM files
-* Large collection of plotting functions for quick visualization 
+* Large collection of plotting functions for quick visualization
 * Interpolation methods for propagation optimization
 * ...
 
@@ -60,24 +60,24 @@ Finding all passes of a space object over a radar system
     )
 
     orb = pyorb.Orbit(
-        M0 = pyorb.M_earth, 
-        direct_update=True, 
-        auto_update=True, 
-        degrees=True, 
-        a=7200e3, 
-        e=0.05, 
-        i=75, 
-        omega=0, 
-        Omega=79, 
-        anom=72, 
+        M0 = pyorb.M_earth,
+        direct_update=True,
+        auto_update=True,
+        degrees=True,
+        a=7200e3,
+        e=0.05,
+        i=75,
+        omega=0,
+        Omega=79,
+        anom=72,
         epoch=53005.0,
     )
     print(orb)
 
     t = sorts.equidistant_sampling(
-        orbit = orb, 
-        start_t = 0, 
-        end_t = 3600*24*1, 
+        orbit = orb,
+        start_t = 0,
+        end_t = 3600*24*1,
         max_dpos=1e4,
     )
 

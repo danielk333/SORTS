@@ -12,7 +12,7 @@ SORTS
 
 .. toctree::
    :maxdepth: 3
-   
+
    intro
    install
    auto_gallery/index
