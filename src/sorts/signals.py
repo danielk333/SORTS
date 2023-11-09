@@ -41,7 +41,7 @@ def hard_target_rcs(wavelength, diameter):
     is_rayleigh = diameter < wavelength / (np.pi * np.sqrt(3.0))
     is_optical = diameter >= wavelength / (np.pi * np.sqrt(3.0))
     optical_rcs = np.pi * diameter**2.0 / 4.0
-    rayleigh_rcs = np.pi * diameter**2.0 * 7.11 / 4.0 * (np.pi * diameter / wavelength) ** 4
+    rayleigh_rcs = diameter**6.0 * 9.0 * np.pi**5 / (4.0 * wavelength**4)
     rcs = is_rayleigh * rayleigh_rcs + is_optical * optical_rcs
     return rcs
 
@@ -197,7 +197,8 @@ def doppler_spread_hard_target_snr(
     """
     t_obs = observation duration
 
-    #TODO: Double check the "bandwidth" parameter to see that it is actually defined and used correctly
+    #TODO: Double check the "bandwidth" parameter to see that it is actually
+    # defined and used correctly
 
     returns:
     snr - signal to noise ratio using coherent integration, when doing object discovery with a
@@ -222,7 +223,8 @@ def doppler_spread_hard_target_snr(
     # effective noise power when using just coherent integration
     p_n0 = scipy.constants.k * rx_noise_temp * detection_bandwidth / duty_cycle
 
-    # effective noise power when doing incoherent integration and using a good a priori orbital elements
+    # effective noise power when doing incoherent integration and using a good
+    # a priori orbital elements
     p_n1 = scipy.constants.k * rx_noise_temp * base_int_bandwidth / duty_cycle
 
     h_snr = hard_target_snr(
