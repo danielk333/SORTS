@@ -122,7 +122,7 @@ class Pass:
     def calculate_zenith_angle(enu, radians=False):
         """Zenith angle of the ENU coordinates."""
         return pyant.coordinates.vector_angle(
-            np.array([0, 0, 1], dtype=np.float64), enu[:3, :], radians=radians
+            np.array([0, 0, 1], dtype=np.float64), enu[:3, :], degrees=not radians
         )
 
     def get_range(self):

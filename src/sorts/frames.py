@@ -223,11 +223,14 @@ def geodetic_to_ITRS(lat, lon, alt, degrees=True, ellipsoid=None):
     )
     x, y, z = cord.to_geocentric()
 
-    pos = np.empty((3,), dtype=np.float64)
+    if x.size <= 1:
+        pos = np.empty((3,), dtype=np.float64)
+    else:
+        pos = np.empty((3, x.size), dtype=np.float64)
 
-    pos[0] = x.to(units.m).value
-    pos[1] = y.to(units.m).value
-    pos[2] = z.to(units.m).value
+    pos[0, ...] = x.to(units.m).value
+    pos[1, ...] = y.to(units.m).value
+    pos[2, ...] = z.to(units.m).value
 
     return pos
 
