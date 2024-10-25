@@ -148,7 +148,10 @@ class ObservedParameters(Scheduler):
         else:
             g = beam.gain(enu)
 
-        return g, beam.wavelength
+        # TODO: ugly hack because we are gonna scrap this method anyway
+        # this should to picked based on experiment setup
+        lam = beam.wavelength[0]
+        return g, lam
 
     def stop_condition(self, t, radar, meta, tx_enu, rx_enu, tx_index, rx_index):
         """Implement this function if there should be abort condition in the sequential generator. Work with both vectorization and linear iteration (as vectorization first caches the generator)."""

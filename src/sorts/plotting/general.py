@@ -10,6 +10,7 @@ import numpy as np
 
 # Local import
 from .. import constants
+from .. import frames
 
 
 def set_axes_equal(ax):
@@ -90,6 +91,77 @@ def grid_earth(
 
         ax.plot(x, y, z, alpha=alpha, linestyle="-", linewidth=linewidth, marker="", color=color)
 
+    if hide_ax:
+        # Hide grid lines
+        ax.grid(False)
+
+        # Hide axes ticks
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_zticks([])
+        ax.set_axis_off()
+
+    return ax
+
+
+def transformed_grid_earth(
+    ax,
+    frame,
+    time,
+    num_lat=25,
+    num_lon=50,
+    alpha=0.1,
+    linewidth=1,
+    res=100,
+    color="black",
+    hide_ax=True,
+):
+    """Add a 3d spherical grid to the given axis that represent the Earth."""
+    lons = np.linspace(-180, 180, num_lon + 1)
+    lons = lons[:-1]
+    lats = np.linspace(-90, 90, num_lat)
+
+    lonsl = np.linspace(-180, 180, res)
+    latsl = np.linspace(-90, 90, res)
+
+    for lat in lats:
+        pos = frames.geodetic_to_ITRS(np.ones_like(lonsl) * lat, lonsl, np.zeros_like(lonsl))
+        pos = frames.convert(
+            time,
+            np.concatenate([pos, np.zeros((3, len(lonsl)))], axis=0),
+            in_frame="ITRS",
+            out_frame="TEME",
+        )
+
+        ax.plot(
+            pos[0, :],
+            pos[1, :],
+            pos[2, :],
+            alpha=alpha,
+            linestyle="-",
+            linewidth=linewidth,
+            marker="",
+            color=color,
+        )
+
+    for lon in lons:
+        pos = frames.geodetic_to_ITRS(latsl, np.ones_like(latsl) * lon, np.zeros_like(latsl))
+        pos = frames.convert(
+            time,
+            np.concatenate([pos, np.zeros((3, len(latsl)))], axis=0),
+            in_frame="ITRS",
+            out_frame="TEME",
+        )
+        ax.plot(
+            pos[0, :],
+            pos[1, :],
+            pos[2, :],
+            alpha=alpha,
+            linestyle="-",
+            linewidth=linewidth,
+            marker="",
+            color=color,
+        )
     if hide_ax:
         # Hide grid lines
         ax.grid(False)
