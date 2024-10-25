@@ -4,7 +4,8 @@
 Correlating data with TLE catalog
 ===================================
 
-TO RUN THIS EXAMPLE, YOU NEED THE CELESTRACK CATALOG FROM 2018-01-01 CONFIGURED IN "example_config.conf"
+TO RUN THIS EXAMPLE, YOU NEED THE CELESTRACK CATALOG FROM
+2018-01-01 CONFIGURED IN "example_config.conf"
 """
 import configparser
 import pathlib
@@ -78,7 +79,8 @@ if not obs_pth.is_absolute():
     obs_pth = base_pth / obs_pth.relative_to(".")
 
 
-# Each entry in the input `measurements` list must be a dictionary that contains the following fields:
+# Each entry in the input `measurements` list must be a dictionary
+# that contains the following fields:
 #   * 't': [numpy.ndarray] Times relative epoch in seconds
 #   * 'r': [numpy.ndarray] Two-way ranges in meters
 #   * 'v': [numpy.ndarray] Two-way range-rates in meters per second
@@ -157,9 +159,7 @@ for ind, dst in zip(indecies, metric):
     print(f"ind = {ind}: metric = {dst}")
     print(pop.print(n=ind, fields=["oid", "mjd0", "line1", "line2"]) + "\n")
 
-
-plot_correlation(dat, cdat[0][0])
-plot_correlation(dat, cdat[3][0])
+    plot_correlation(dat, cdat[ind][0])
 
 
 #
@@ -168,7 +168,10 @@ plot_correlation(dat, cdat[3][0])
 
 
 def vector_diff_metric(t, r, v, r_ref, v_ref, **kwargs):
-    """Return a vector of negated log-probabilities (to avoid number precision problems and still find max probability by minimization) assuming uncorrelated range and range rate measurements with Normal errors."""
+    """Return a vector of negated log-probabilities
+    (to avoid number precision problems and still find max probability by minimization)
+    assuming uncorrelated range and range rate measurements with Normal errors.
+    """
     r_std = kwargs.get("r_std")
     v_std = kwargs.get("v_std")
 
@@ -190,6 +193,7 @@ def sorting_function(metric):
     return np.argsort(P, axis=0)
 
 
+# since we don't reduce, it assumes we are doing correlation measurement-wise
 indecies0, metric0, cdat0 = sorts.correlate(
     measurements=[dat2],
     population=pop,
@@ -198,7 +202,8 @@ indecies0, metric0, cdat0 = sorts.correlate(
     metric=vector_diff_metric,
     sorting_function=sorting_function,
     metric_dtype=[("dr", np.float64), ("dv", np.float64)],
-    metric_reduce=None,  # since we don't reduce, it assumes we are doing correlation measurement-wise
+    metric_reduce=None,
+    scalar_metric=False,
 )
 
 print("Individual measurement match metric:")
