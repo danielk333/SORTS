@@ -19,14 +19,13 @@ https://sanaregistry.org/files/ndmxml_qualified/*
 
 
 """
-import time
-import pkg_resources
 import xmlschema
 import numpy as np
 import scipy.constants as consts
 from astropy.time import TimeISO, Time
 from ..version import __version__
-from .. import dates
+
+from sorts.data import DATA
 
 
 class epochType(TimeISO):
@@ -60,7 +59,7 @@ _SCHEMA = None
 def get_schema():
     global _SCHEMA
     if _SCHEMA is None:
-        xsd_path = pkg_resources.resource_filename("sorts.data", "ndmxml-2.0.0-master-2.0.xsd")
+        xsd_path = DATA["ndmxml-2.0.0-master-2.0.xsd"]
         _SCHEMA = xmlschema.XMLSchema(xsd_path)
     return _SCHEMA
 

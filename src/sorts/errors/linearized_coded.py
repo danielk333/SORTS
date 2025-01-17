@@ -5,7 +5,6 @@
 """
 # Python standard import
 import pathlib
-import pkg_resources
 
 # Third party import
 import numpy as np
@@ -17,6 +16,7 @@ from tqdm import tqdm
 
 # Local import
 from .errors import Errors
+from sorts.data import DATA
 
 
 def simulate_echo(codes, t_vecs, bw=1e6, dop_Hz=0.0, range_m=1e3, sr=5e6):
@@ -78,7 +78,8 @@ def lin_error(enr=10.0, txlen=1000.0, n_ipp=10, ipp=20e-3, bw=1e6, dr=10.0, ddop
     z0 = simulate_echo(codes, t_vecs, dop_Hz=0.0, range_m=0.0, bw=bw, sr=sr)
     tau = float(n_ipp) * txlen / 1e6
 
-    # convert coherently integrated ENR to SNR (variance of the measurement errors at receiver bandwidth)
+    # convert coherently integrated ENR to SNR
+    # (variance of the measurement errors at receiver bandwidth)
     snr = enr / (tau * sr)
 
     z_dr = simulate_echo(codes, t_vecs, dop_Hz=0.0, range_m=dr, bw=bw, sr=sr)
@@ -150,13 +151,12 @@ class LinearizedCoded(Errors):
 
         if cache_folder is None:
             try:
-                stream = pkg_resources.resource_stream("sorts.data", fname)
-                h = h5py.File(stream, "r")
+                h = h5py.File(DATA[fname], "r")
                 enrs = np.copy(h["enrs"][()])
                 drs = np.copy(h["drs"][()])
                 ddops = np.copy(h["ddops"][()])
                 h.close()
-            except:
+            except KeyError:
                 enrs, drs, ddops = precalculate_dr(txlen, bw, ipp=ipp, n_ipp=n_ipp, n_interp=20)
         else:
             if not isinstance(cache_folder, pathlib.Path):

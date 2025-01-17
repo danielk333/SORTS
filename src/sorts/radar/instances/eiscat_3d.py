@@ -2,14 +2,11 @@
 
 """
 """
-# Python standard import
-import pkg_resources
-
-import numpy as np
 import pyant
 
 from ..radar import Radar
 from ..tx_rx import TX, RX
+from sorts.data import DATA
 
 
 def eiscat3d_interp(tx_fnames=None, rx_fnames=None, res=500):
@@ -24,8 +21,8 @@ def eiscat3d_interp(tx_fnames=None, rx_fnames=None, res=500):
         ]
 
         if tx_fnames is None:
-            stream = pkg_resources.resource_stream("sorts.data", f"e3d_tx{txi}_res{res}_interp.npy")
-            tx_intp[-1].load(stream)
+            fname = DATA[f"e3d_tx{txi}_res{res}_interp.npy"]
+            tx_intp[-1].load(fname)
         else:
             tx_intp[-1].load(tx_fnames[txi])
 
@@ -40,8 +37,8 @@ def eiscat3d_interp(tx_fnames=None, rx_fnames=None, res=500):
         ]
 
         if rx_fnames is None:
-            stream = pkg_resources.resource_stream("sorts.data", f"e3d_rx{rxi}_res{res}_interp.npy")
-            rx_intp[-1].load(stream)
+            fname = DATA[f"e3d_rx{rxi}_res{res}_interp.npy"]
+            rx_intp[-1].load(fname)
         else:
             rx_intp[-1].load(rx_fnames[rxi])
 
@@ -63,7 +60,10 @@ def gen_eiscat3d(beam="array", stage=1):
 
     **EISCAT 3D Stages:**
 
-      * Stage 1: As of writing it is assumed to have all of the antennas in place but only transmitters on half of the antennas in a dense core ,i.e. TX will have 42 dB peak gain while RX still has 45 dB peak gain. 3 Sites will exist, one is a TX and RX, the other 2 RX sites.
+      * Stage 1: As of writing it is assumed to have all of the antennas
+        in place but only transmitters on half of the antennas in a dense core,
+        i.e. TX will have 42 dB peak gain while RX still has 45 dB peak gain.
+        3 Sites will exist, one is a TX and RX, the other 2 RX sites.
       * Stage 2: Both TX and RX sites will have 45 dB peak gain.
       * Stage 3: (NOT IMPLEMENTED HERE) 2 additional RX sites will be added.
 
@@ -71,7 +71,8 @@ def gen_eiscat3d(beam="array", stage=1):
     **Beam options:**
 
       * interp: Interpolated array pattern.
-      * array: Ideal summation of all antennas in the array :func:`antenna_library.e3d_array_beam_stage1` and :func:`antenna_library.e3d_array_beam`.
+      * array: Ideal summation of all antennas in the array
+        :func:`antenna_library.e3d_array_beam_stage1` and :func:`antenna_library.e3d_array_beam`.
 
     """
 
@@ -158,8 +159,8 @@ def eiscat3d_demo_interp(tx_fnames=None, rx_fnames=None, res=500):
     )
 
     if tx_fnames is None:
-        stream = pkg_resources.resource_stream("sorts.data", f"e3d_demo_tx{0}_res{res}_interp.npy")
-        tx_intp.load(stream)
+        fname = DATA[f"e3d_demo_tx{0}_res{res}_interp.npy"]
+        tx_intp.load(fname)
     else:
         tx_intp.load(tx_fnames[0])
 
@@ -170,8 +171,8 @@ def eiscat3d_demo_interp(tx_fnames=None, rx_fnames=None, res=500):
     )
 
     if rx_fnames is None:
-        stream = pkg_resources.resource_stream("sorts.data", f"e3d_demo_rx{0}_res{res}_interp.npy")
-        rx_intp.load(stream)
+        fname = DATA[f"e3d_demo_rx{0}_res{res}_interp.npy"]
+        rx_intp.load(fname)
     else:
         rx_intp.load(rx_fnames[0])
 

@@ -19,8 +19,3 @@ repos:
     -   id: black
         name: black
         entry: black
--   repo: https://github.com/rubik/xenon
-    rev: v0.9.0
-    hooks:
-      - id: xenon
-        args: [ --max-absolute B, --max-modules A, --max-average A ]
