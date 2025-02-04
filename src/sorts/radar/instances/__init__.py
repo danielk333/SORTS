@@ -17,6 +17,7 @@ from .eiscat_3d import gen_eiscat3d, gen_eiscat3d_demonstrator
 from .tsdr import gen_tromso_space_debris_radar
 from .eiscat_uhf import gen_eiscat_uhf
 from .eiscat_esr import gen_eiscat_esr
+from .nostra import gen_nostra
 from .mock import gen_mock
 
 radar_instances = [
@@ -62,6 +63,8 @@ class RadarSystemsGetter:
             return gen_eiscat_uhf()
         elif name == "eiscat_esr":
             return gen_eiscat_esr()
+        elif name == "nostra":
+            return gen_nostra()
         raise AttributeError(
             f"module '{__name__}' has no attribute '{name}'\n(valid names: {radar_instances}"
         )
