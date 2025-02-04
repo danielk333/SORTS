@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
-"""Encapsulates a fundamental component of tracking space objects: a pass over a geographic location.
-Also provides convenience functions for finding passes given states and stations and sorting structures of passes in particular ways.
+"""Encapsulates a fundamental component of tracking space objects:
+a pass over a geographic location.
+Also provides convenience functions for finding passes given states
+and stations and sorting structures of passes in particular ways.
 
 """
 import datetime
@@ -11,12 +13,13 @@ import pyorb
 import pyant
 
 # Local import
-from . import frames
 from .signals import hard_target_snr
 
 
 class Pass:
-    """Saves the local coordinate data for a single pass. Optionally also indicates the location of that pass in a bigger dataset."""
+    """Saves the local coordinate data for a single pass.
+    Optionally also indicates the location of that pass in a bigger dataset.
+    """
 
     def __init__(self, t, enu, inds=None, cache=True, station_id=None):
         self.inds = inds
@@ -38,7 +41,11 @@ class Pass:
         str_ = "Pass "
         if self.station_id is not None:
             str_ += f"Station {self.station_id} | "
-        str_ += f"Rise {str(datetime.timedelta(seconds=self.start()))} ({(self.end() - self.start())/60.0:.1f} min) {str(datetime.timedelta(seconds=self.end()))} Fall"
+        str_ += (
+            f"Rise {str(datetime.timedelta(seconds=self.start()))}"
+            f"({(self.end() - self.start())/60.0:.1f} min)"
+            f"{str(datetime.timedelta(seconds=self.end()))} Fall"
+        )
 
         return str_
 
@@ -46,7 +53,8 @@ class Pass:
         return str(self)
 
     def calculate_snr(self, tx, rx, diameter):
-        """Uses the :code:`signals.hard_target_snr` function to calculate the optimal SNR curve of a target during the pass **if the TX and RX stations are pointing at the object**.
+        """Uses the :code:`signals.hard_target_snr` function to calculate the optimal SNR curve
+        of a target during the pass **if the TX and RX stations are pointing at the object**.
         The SNR's are returned from the function but also stored in the property :code:`self.snr`.
 
         :param TX tx: The TX station that observed the pass.
@@ -91,7 +99,8 @@ class Pass:
             return 1
 
     def start(self):
-        """The Start time of the pass (uses cached value after first call if :code:`self.cache=True`)."""
+        """The Start time of the pass
+        (uses cached value after first call if :code:`self.cache=True`)."""
         if self.cache:
             if self._start is None:
                 self._start = self.t.min()
@@ -100,7 +109,8 @@ class Pass:
             return self.t.min()
 
     def end(self):
-        """The ending time of the pass (uses cached value after first call if :code:`self.cache=True`)."""
+        """The ending time of the pass
+        (uses cached value after first call if :code:`self.cache=True`)."""
         if self.cache:
             if self._end is None:
                 self._end = self.t.max()
@@ -129,7 +139,8 @@ class Pass:
         """Get ranges from all stations involved in the pass.
 
         :rtype: list of numpy.ndarray or numpy.ndarray
-        :return: If there is one station observing the pass, return a vector of ranges, otherwise return a list of vectors with ranges.
+        :return: If there is one station observing the pass, return a vector of ranges,
+        otherwise return a list of vectors with ranges.
         """
         if self.stations > 1:
             return [Pass.calculate_range(enu) for enu in self.enu]
@@ -137,11 +148,13 @@ class Pass:
             return Pass.calculate_range(self.enu)
 
     def range(self):
-        """Get ranges from all stations involved in the pass (uses cached value after first call if :code:`self.cache=True`).
+        """Get ranges from all stations involved in the pass
+        (uses cached value after first call if :code:`self.cache=True`).
         The cache is stored in :code:`self._r`.
 
         :rtype: list of numpy.ndarray or numpy.ndarray
-        :return: If there is one station observing the pass, return a vector of ranges, otherwise return a list of vectors with ranges.
+        :return: If there is one station observing the pass, return a vector of ranges,
+            otherwise return a list of vectors with ranges.
         """
         if self.cache:
             if self._r is None:
@@ -154,7 +167,8 @@ class Pass:
         """Get range rates from all stations involved in the pass.
 
         :rtype: list of numpy.ndarray or numpy.ndarray
-        :return: If there is one station observing the pass, return a vector of range rates, otherwise return a list of vectors with range rates.
+        :return: If there is one station observing the pass, return a vector of range rates,
+            otherwise return a list of vectors with range rates.
         """
         if self.stations > 1:
             return [Pass.calculate_range_rate(enu) for enu in self.enu]
@@ -162,11 +176,13 @@ class Pass:
             return Pass.calculate_range_rate(self.enu)
 
     def range_rate(self):
-        """Get range rates from all stations involved in the pass (uses cached value after first call if :code:`self.cache=True`).
+        """Get range rates from all stations involved in the pass
+        (uses cached value after first call if :code:`self.cache=True`).
         The cache is stored in :code:`self._v`.
 
         :rtype: list of numpy.ndarray or numpy.ndarray
-        :return: If there is one station observing the pass, return a vector of range rates, otherwise return a list of vectors with range rates.
+        :return: If there is one station observing the pass, return a vector of range rates,
+            otherwise return a list of vectors with range rates.
         """
         if self.cache:
             if self._v is None:
@@ -179,7 +195,8 @@ class Pass:
         """Get zenith angles for all stations involved in the pass.
 
         :rtype: list of numpy.ndarray or numpy.ndarray
-        :return: If there is one station observing the pass, return a vector of zenith angles, otherwise return a list of vectors with zenith angles.
+        :return: If there is one station observing the pass, return a vector of zenith angles,
+            otherwise return a list of vectors with zenith angles.
         """
         if self.stations > 1:
             return [Pass.calculate_zenith_angle(enu, radians=radians) for enu in self.enu]
@@ -187,11 +204,13 @@ class Pass:
             return Pass.calculate_zenith_angle(self.enu, radians=radians)
 
     def zenith_angle(self, radians=False):
-        """Get zenith angles from all stations involved in the pass (uses cached value after first call if :code:`self.cache=True`).
+        """Get zenith angles from all stations involved in the pass
+        (uses cached value after first call if :code:`self.cache=True`).
         The cache is stored in :code:`self._v`.
 
         :rtype: list of numpy.ndarray or numpy.ndarray
-        :return: If there is one station observing the pass, return a vector of zenith angles, otherwise return a list of vectors with zenith angles.
+        :return: If there is one station observing the pass, return a vector of zenith angles,
+            otherwise return a list of vectors with zenith angles.
         """
         if self.cache:
             if self._zang is None:
@@ -202,15 +221,17 @@ class Pass:
 
 
 def equidistant_sampling(orbit, start_t, end_t, max_dpos=1e3, eccentricity_tol=0.3):
-    """Find the temporal sampling of an orbit which is sufficient to achieve a maximum spatial separation.
-    Assume elliptic orbit and uses Keplerian propagation to find sampling, does not take perturbation patterns into account.
-    If eccentricity is small, uses periapsis speed and uniform sampling in time.
+    """Find the temporal sampling of an orbit which is sufficient to achieve a
+    maximum spatial separation. Assume elliptic orbit and uses Keplerian propagation
+    to find sampling, does not take perturbation patterns into account. If
+    eccentricity is small, uses periapsis speed and uniform sampling in time.
 
     :param pyorb.Orbit orbit: Orbit to find temporal sampling of.
     :param float start_t: Start time in seconds
     :param float end_t: End time in seconds
     :param float max_dpos: Maximum separation between evaluation points in meters.
-    :param float eccentricity_tol: Minimum eccentricity below which the orbit is approximated as a circle and temporal samples are uniform in time.
+    :param float eccentricity_tol: Minimum eccentricity below which the orbit is
+        approximated as a circle and temporal samples are uniform in time.
     :return: Vector of sample times in seconds.
     :rtype: numpy.ndarray
     """
@@ -252,16 +273,17 @@ def find_passes(t, states, station, cache_data=True):
 
     :param numpy.ndarray t: Vector of times in seconds to use as a base to find passes.
     :param numpy.ndarray states: ECEF states of the object to find passes for.
-    :param sorts.Station station: Radar station that defines the FOV.
+    :param sorts.Station station: Radar station that defines the FOV, or a list of radar stations.
     :return: list of passes
     :rtype: sorts.Pass
 
     """
     passes = []
 
-    enu = station.enu(states[:3, :])
-
-    check = station.field_of_view(states)
+    if isinstance(station, list):
+        check = np.logical_or.reduce([st.field_of_view(states) for st in station])
+    else:
+        check = station.field_of_view(states)
     inds = np.where(check)[0]
 
     if len(inds) == 0:
@@ -277,6 +299,7 @@ def find_passes(t, states, station, cache_data=True):
         ps_inds = inds[splits[si] : splits[si + 1]]
 
         if cache_data:
+            enu = station.enu(states[:3, :])
             ps = Pass(
                 t=t[ps_inds],
                 enu=enu[:, ps_inds],
@@ -361,7 +384,10 @@ def find_simultaneous_passes(t, states, stations, cache_data=True, fov_kw=None):
 
 
 def group_passes(passes):
-    """Takes a list of passes structured as [tx][rx][pass] and find all simultaneous passes and groups them according to [tx], resulting in a [tx][pass][rx] structure."""
+    """Takes a list of passes structured as
+    [tx][rx][pass] and find all simultaneous passes
+    and groups them according to [tx], resulting in a [tx][pass][rx] structure.
+    """
 
     def overlap(ps1, ps2):
         return ps1.start() <= ps2.end() and ps2.start() <= ps1.end()
