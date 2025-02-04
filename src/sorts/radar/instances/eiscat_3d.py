@@ -13,32 +13,30 @@ def eiscat3d_interp(tx_fnames=None, rx_fnames=None, res=500):
     tx_intp = []
     for txi in range(1):
         tx_intp += [
-            pyant.InterpolatedArray(
-                azimuth=0,
-                elevation=90,
-                frequency=233e6,
+            pyant.beam_of_radar(
+                pyant.Radars.EISCAT_3D_stage1,
+                pyant.Models.InterpolatedArray,
+                DATA[f"e3d_tx{txi}_res{res}_interp.npy"],
             )
         ]
 
         if tx_fnames is None:
-            fname = DATA[f"e3d_tx{txi}_res{res}_interp.npy"]
-            tx_intp[-1].load(fname)
+            tx_intp[-1].load(DATA[f"e3d_tx{txi}_res{res}_interp.npy"])
         else:
             tx_intp[-1].load(tx_fnames[txi])
 
     rx_intp = []
     for rxi in range(3):
         rx_intp += [
-            pyant.InterpolatedArray(
-                azimuth=0,
-                elevation=90,
-                frequency=233e6,
+            pyant.beam_of_radar(
+                pyant.Radars.EISCAT_3D_stage1,
+                pyant.Models.InterpolatedArray,
+                DATA[f"e3d_rx{rxi}_res{res}_interp.npy"],
             )
         ]
 
         if rx_fnames is None:
-            fname = DATA[f"e3d_rx{rxi}_res{res}_interp.npy"]
-            rx_intp[-1].load(fname)
+            rx_intp[-1].load(DATA[f"e3d_rx{rxi}_res{res}_interp.npy"])
         else:
             rx_intp[-1].load(rx_fnames[rxi])
 
