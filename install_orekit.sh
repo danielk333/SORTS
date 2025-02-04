@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-# 
+#
 # This installation method needs the following to be installed before
 # - openjdk-8
 # - maven
 # - JCC (pip install)
-# 
+#
 
 if [ -z "$2" ]; then
     TARGET_DIR="$HOME/tmp/orekit_build"
@@ -59,7 +59,7 @@ check)
     else
         echo "[JDK OK]"
     fi
-    
+
     echo "Checking maven"
     mvn --version
     if [ $? -eq 0 ]; then
@@ -73,8 +73,11 @@ build)
     mkdir -p $TARGET_DIR/build
     cd $TARGET_DIR
 
-    git clone -b python-wrapper-additions-V10.3.1 https://github.com/petrushy/Orekit.git 
+    git clone -b python-wrapper-additions-V10.3.1 https://github.com/petrushy/Orekit.git
     git clone https://gitlab.orekit.org/orekit-labs/python-wrapper.git
+    cd python-wrapper
+    git checkout 4af53ece8140c28334f90044630ba23713c68ad1
+    cd ..
     wget https://packages.orekit.org/repository/maven-releases/org/orekit/rugged/2.2/rugged-2.2.jar
     wget https://www.hipparchus.org/downloads/hipparchus-1.8-bin.tar.bz2
 
@@ -190,7 +193,7 @@ install)
     --build \
     --install
     ;;
-clean) 
+clean)
     rm -rv $TARGET_DIR/Orekit
     rm -v $TARGET_DIR/hipparchus-1.8-bin.tar.bz2
     rm -rv $TARGET_DIR/hipparchus-1.8-bin
@@ -273,5 +276,3 @@ lazy)
     echo "Command not found, exiting"
     ;;
 esac
-
-

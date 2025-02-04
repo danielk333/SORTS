@@ -13,23 +13,9 @@ repos:
     hooks:
     -   id: flake8
         args: [--config, setup.cfg]
--   repo: local
-    hooks:
-    -   id: pytest
-        name: pytest
-        entry: pytest
-        args: [--skipslow]
-        language: system
-        pass_filenames: false
-        always_run: true
 -   repo: https://github.com/psf/black
     rev: 23.3.0
     hooks:
     -   id: black
         name: black
         entry: black
--   repo: https://github.com/rubik/xenon
-    rev: v0.9.0
-    hooks:
-      - id: xenon
-        args: [ --max-absolute B, --max-modules A, --max-average A ]

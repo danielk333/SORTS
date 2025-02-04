@@ -26,7 +26,7 @@ Feature list
 * Collection of predefined population formats for loading e.g. TLE catalogs
 * Correlation algorithms for correlating measurement data to a population
 * Input/Output package for writing and reading standardized data formats e.g. CCSDS TDM files
-* Large collection of plotting functions for quick visualization 
+* Large collection of plotting functions for quick visualization
 * Interpolation methods for propagation optimization
 * ...
 
@@ -47,6 +47,17 @@ The installation can be automatically tested if `pytest` is also installed
 .. code-block:: bash
 
    pytest
+
+
+Container
+---------
+
+
+To build the container with `podman` run
+
+.. code-block:: bash
+
+    podman build . -t sorts
 
 
 From scratch
@@ -78,7 +89,7 @@ Now you should be inside the new virtual environment. Check this by
 
    pip --version
 
-And you should see the path to "/path/to/new/sorts/environment". 
+And you should see the path to "/path/to/new/sorts/environment".
 
 Alternatively if you want to use pip with Python 3.7 without using `venv`, the get-pip.py method can be used. WARNING: Using the bootstrap solution will break your current Python 2.7/3.5 pip, It is not recommended.
 
@@ -197,24 +208,24 @@ Finding passes over radar system
     )
 
     orb = pyorb.Orbit(
-        M0 = pyorb.M_earth, 
-        direct_update=True, 
-        auto_update=True, 
-        degrees=True, 
-        a=7200e3, 
-        e=0.05, 
-        i=75, 
-        omega=0, 
-        Omega=79, 
-        anom=72, 
+        M0 = pyorb.M_earth,
+        direct_update=True,
+        auto_update=True,
+        degrees=True,
+        a=7200e3,
+        e=0.05,
+        i=75,
+        omega=0,
+        Omega=79,
+        anom=72,
         epoch=53005.0,
     )
     print(orb)
 
     t = sorts.equidistant_sampling(
-        orbit = orb, 
-        start_t = 0, 
-        end_t = 3600*24*1, 
+        orbit = orb,
+        start_t = 0,
+        end_t = 3600*24*1,
         max_dpos=1e4,
     )
 
@@ -229,7 +240,7 @@ Finding passes over radar system
 For developers
 ===============
 
-To install developer dependencies 
+To install developer dependencies
 ------------------------------------
 
 .. code-block:: bash
@@ -257,7 +268,7 @@ To compile the github pages documentation run
    git cd docsrc
    make github
 
-Otherwise, one can compile the documentation directly on the current branch by running 
+Otherwise, one can compile the documentation directly on the current branch by running
 
 .. code-block:: bash
 
@@ -270,4 +281,3 @@ When used for publications
 ===========================
 
 A paper and a DOI is underway and will soon be available, for now: please just tell us by email (daniel.kastinen@irf.se) or here on Github.
-
