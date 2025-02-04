@@ -10,7 +10,6 @@ import pyant
 
 from ..radar import Radar
 from ..tx_rx import TX, RX
-from ... import frames
 
 
 def gen_eiscat_esr():
