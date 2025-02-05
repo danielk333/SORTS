@@ -4,6 +4,7 @@
 """
 import pyant
 
+from .radars import radar_generator
 from ..radar import Radar
 from ..tx_rx import TX, RX
 from sorts.data import DATA
@@ -43,6 +44,7 @@ def eiscat3d_interp(tx_fnames=None, rx_fnames=None, res=500):
     return tx_intp, rx_intp
 
 
+@radar_generator("eiscat3d", "stage1")
 def gen_eiscat3d(beam="array", stage=1):
     """The EISCAT 3D system.
 
