@@ -19,13 +19,6 @@ __libpath__ = __sortspath__ / ("clibsorts" + suffix)
 
 clibsorts = ctypes.cdll.LoadLibrary(str(__libpath__))
 
-__all__ = []
-
-from .propagator import __all__ as propagators
-
-__all__ += propagators
-del propagators
-
 # classes
 from .space_object import SpaceObject
 from .population import Population
@@ -42,6 +35,7 @@ from .profiling import Profiler
 
 # modules
 from .radar import scans
+from . import radar
 from . import functions
 from . import constants
 from . import frames
@@ -54,12 +48,13 @@ from . import passes
 from . import errors
 from . import io
 from . import interpolation
-from .radar import instances as radars
 from . import simulation
 from . import signals
 from . import correlator
+from . import propagator
 
 # Functions
+from .radar import get_radar, list_radars
 from .correlator import correlate
 from .passes import equidistant_sampling
 from .passes import find_passes, find_simultaneous_passes, group_passes

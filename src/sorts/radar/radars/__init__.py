@@ -9,4 +9,4 @@ from . import eiscat_esr
 from . import nostra
 from . import mock
 
-from .radars import get_radar
+from .radars import get_radar, list_radars

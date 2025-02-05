@@ -1,7 +1,7 @@
 RADARS = dict()
 
 
-def avalible_radars():
+def list_radars():
     """Returns a dict listing all avalible Radars and their variants"""
     return {key: list(val.keys()) for key, val in RADARS.items()}
 
