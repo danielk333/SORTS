@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-"""
-"""
+""" """
 import pyant
 
+from .radars import radar_generator
 from ..radar import Radar
 from ..tx_rx import TX, RX
 
@@ -22,6 +22,7 @@ def gen_nostra_beam():
     return beam
 
 
+@radar_generator("nostra", "example1")
 def gen_nostra():
     """The NOSTRA system."""
     dwell_time = 0.1

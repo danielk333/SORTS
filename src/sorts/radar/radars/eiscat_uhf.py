@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 
-"""
-"""
+""" """
 
 import pyant
 
+from .radars import radar_generator
 from ..radar import Radar
 from ..tx_rx import TX, RX
 from ... import frames
 
 
+@radar_generator("eiscat_uhf", "measured")
 def gen_eiscat_uhf():
     lat_tro = 69.0 + frames.arctime_to_degrees(35, 11)
     lon_tro = 19.0 + frames.arctime_to_degrees(13, 38)

@@ -1,17 +1,18 @@
 #!/usr/bin/env python
 
-"""
-"""
+""" """
 # Python standard import
 
 
 import numpy as np
 import pyant
 
+from .radars import radar_generator
 from ..radar import Radar
 from ..tx_rx import TX, RX
 
 
+@radar_generator("eiscat_esr", "cassegrain")
 def gen_eiscat_esr():
     # TODO: Proper ESR coordinates.  These were eyeballed from maps
     lat_esr32 = 78.153145
