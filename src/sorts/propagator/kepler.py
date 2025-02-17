@@ -5,6 +5,7 @@
 """
 
 # Python standard import
+import logging
 from copy import copy
 
 # Third party import
@@ -15,6 +16,8 @@ import pyorb
 # Local import
 from .base import Propagator
 from .. import frames
+
+logger = logging.getLogger(__name__)
 
 
 class Kepler(Propagator):
@@ -40,8 +43,7 @@ class Kepler(Propagator):
 
     def __init__(self, settings=None, **kwargs):
         super(Kepler, self).__init__(settings=settings, **kwargs)
-        if self.logger is not None:
-            self.logger.debug("sorts.propagator.Kepler:init")
+        logger.debug("sorts.propagator.Kepler:init")
 
     def propagate(self, t, state0, epoch, **kwargs):
         """Propagate a state
@@ -56,8 +58,7 @@ class Kepler(Propagator):
         """
         if self.profiler is not None:
             self.profiler.start("Kepler:propagate")
-        if self.logger is not None:
-            self.logger.debug(f"Kepler:propagate:len(t) = {len(t)}")
+        logger.debug(f"Kepler:propagate:len(t) = {len(t)}")
 
         t, epoch = self.convert_time(t, epoch)
         times = epoch + t
@@ -79,7 +80,6 @@ class Kepler(Propagator):
                 in_frame=self.settings["in_frame"],
                 out_frame="GCRS",
                 profiler=self.profiler,
-                logger=self.logger,
             )
             orb.cartesian = cart0
         else:
@@ -89,7 +89,6 @@ class Kepler(Propagator):
                 in_frame=self.settings["in_frame"],
                 out_frame="GCRS",
                 profiler=self.profiler,
-                logger=self.logger,
             )
             kw = {key: val for key, val in zip(pyorb.Orbit.CARTESIAN, cart0.flatten())}
             kw.update(kwargs)
@@ -120,7 +119,6 @@ class Kepler(Propagator):
             in_frame="GCRS",
             out_frame=self.settings["out_frame"],
             profiler=self.profiler,
-            logger=self.logger,
         )
 
         if self.profiler is not None:
@@ -128,7 +126,6 @@ class Kepler(Propagator):
 
         if self.profiler is not None:
             self.profiler.stop("Kepler:propagate")
-        if self.logger is not None:
-            self.logger.debug("Kepler:propagate:completed")
+        logger.debug("Kepler:propagate:completed")
 
         return states

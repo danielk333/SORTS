@@ -32,8 +32,6 @@ Prop_opts = dict(
 
 end_t = 600.0
 
-logger = sorts.profiling.get_logger('scanning')
-
 obj = SpaceObject(
     Prop_cls,
     propagator_options = Prop_opts,
@@ -55,14 +53,14 @@ print(obj)
 class ObservedScanning(StaticList, ObservedParameters):
     pass
 
-static_ctrl = Static(eiscat3d, azimuth=0, elevation=90, logger=logger, meta={'dwell': 0.1})
+static_ctrl = Static(eiscat3d, azimuth=0, elevation=90, meta={'dwell': 0.1})
 static_ctrl.t = np.arange(0, end_t, static_ctrl.meta['dwell'])
 
-static_ctrl_undersamp = Static(eiscat3d, azimuth=0, elevation=90, logger=logger, meta={'dwell': 0.1})
+static_ctrl_undersamp = Static(eiscat3d, azimuth=0, elevation=90, meta={'dwell': 0.1})
 static_ctrl_undersamp.t = np.arange(0, end_t, 1.0)
 
 scan = Beampark(azimuth=0, elevation=90, dwell=0.1)
-scanner_ctrl = Scanner(eiscat3d.copy(), scan, logger=logger)
+scanner_ctrl = Scanner(eiscat3d.copy(), scan)
 scanner_ctrl.t = np.arange(0, end_t, scan.dwell())
 
 def run_scanning_simulation(radar_ctrl):
@@ -73,8 +71,7 @@ def run_scanning_simulation(radar_ctrl):
     p.start('total')
     scheduler = ObservedScanning(
         radar = eiscat3d, 
-        controllers = [radar_ctrl], 
-        logger = logger,
+        controllers = [radar_ctrl],
         profiler = p,
     )
 

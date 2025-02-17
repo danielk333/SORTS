@@ -30,8 +30,6 @@ poptions = dict(
 
 epoch = Time(53005.0, format='mjd')
 
-logger = sorts.profiling.get_logger('tracking')
-
 np.random.seed(23847)
 
 def get_objects(mu_std):
@@ -123,7 +121,6 @@ scheduler = ObservedTracking(
     max_dpos = 1e4,
     epoch = epoch,
     priority = [0.2, 1.0],
-    logger = logger,
     use_pass_states = True,
     collect_passes = True,
 )

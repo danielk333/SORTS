@@ -4,6 +4,7 @@
 
 """
 
+import logging
 import numpy as np
 import scipy.constants
 
@@ -12,6 +13,7 @@ from .scheduler import Scheduler
 from .. import signals
 from ..passes import Pass
 
+logger = logging.getLogger(__name__)
 
 class ObservedParameters(Scheduler):
     """Bi-static radar observation parameters of hard targets.
@@ -30,10 +32,9 @@ class ObservedParameters(Scheduler):
 
     """
 
-    def __init__(self, radar, logger=None, profiler=None, **kwargs):
+    def __init__(self, radar, profiler=None, **kwargs):
         super().__init__(
             radar=radar,
-            logger=logger,
             profiler=profiler,
         )
 
@@ -49,10 +50,9 @@ class ObservedParameters(Scheduler):
         #TODO: Docstring
         """
 
-        if self.logger is not None:
-            self.logger.debug(
-                f"Obs.Param.:calculate_observation_jacobian:{variables}, deltas={deltas}"
-            )
+        logger.debug(
+            f"Obs.Param.:calculate_observation_jacobian:{variables}, deltas={deltas}"
+        )
 
         if self.profiler is not None:
             self.profiler.start("Obs.Param.:calculate_observation_jacobian")
@@ -225,10 +225,9 @@ class ObservedParameters(Scheduler):
 
         txi, rxi = txrx_pass.station_id
 
-        if self.logger is not None:
-            self.logger.debug(
-                f"Obs.Param.:calculate_observation:(tx={txi}, rx={rxi}), len(t) = {len(t)}"
-            )
+        logger.debug(
+            f"Obs.Param.:calculate_observation:(tx={txi}, rx={rxi}), len(t) = {len(t)}"
+        )
 
         if self.profiler is not None:
             self.profiler.start("Obs.Param.:calculate_observation")
@@ -607,6 +606,5 @@ class ObservedParameters(Scheduler):
         if self.profiler is not None:
             self.profiler.stop("Obs.Param.:calculate_observation")
 
-        if self.logger is not None:
-            self.logger.debug(f"Obs.Param.:calculate_observation:complete")
+        logger.debug(f"Obs.Param.:calculate_observation:complete")
         return data

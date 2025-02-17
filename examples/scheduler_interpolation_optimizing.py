@@ -4,7 +4,7 @@
 Optimizing with interpolation
 ======================================
 '''
-import pathlib
+import pathlib, logging
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -46,7 +46,7 @@ scan = Fence(azimuth=90, num=40, dwell=0.1, min_elevation=30)
 
 p = Profiler()
 
-logger = sorts.profiling.get_logger('scanning')
+logger = logging.getLogger(__name__)
 
 objs = [
     SpaceObject(
@@ -72,14 +72,13 @@ for obj in objs: print(obj)
 class ObservedScanning(StaticList, ObservedParameters):
     pass
 
-scanner_ctrl = Scanner(eiscat3d, scan, profiler=p, logger=logger)
+scanner_ctrl = Scanner(eiscat3d, scan, profiler=p)
 scanner_ctrl.t = np.arange(0, end_t, scan.dwell())
 
 p.start('total')
 scheduler = ObservedScanning(
     radar = eiscat3d, 
-    controllers = [scanner_ctrl], 
-    logger = logger,
+    controllers = [scanner_ctrl],
     profiler = p,
 )
 

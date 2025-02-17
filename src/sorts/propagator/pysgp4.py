@@ -5,6 +5,7 @@
 """
 
 # Python standard import
+import logging
 from copy import copy
 
 # Third party import
@@ -22,6 +23,7 @@ from .base import Propagator
 from .. import dates
 from .. import frames
 
+logger = logging.getLogger(__name__)
 
 class SGP4(Propagator):
     """Propagator class implementing the SGP4 propagator.
@@ -58,8 +60,7 @@ class SGP4(Propagator):
 
     def __init__(self, settings=None, **kwargs):
         super(SGP4, self).__init__(settings=settings, **kwargs)
-        if self.logger is not None:
-            self.logger.debug(f"sorts.propagator.SGP4:init")
+        logger.debug(f"sorts.propagator.SGP4:init")
 
         self.sgp4_mjd0 = Time("1949-12-31 00:00:00", format="iso", scale="ut1").mjd
         self.rho0 = 2.461e-5 / 6378.135e3  # kg/m^2/m
@@ -98,8 +99,7 @@ class SGP4(Propagator):
         satellite = Satrec.twoline2rv(line1, line2, self.grav_ind)
 
         epoch = Time(satellite.jdsatepoch + satellite.jdsatepochF, format="jd", scale="utc")
-        if self.logger is not None:
-            self.logger.debug(f"SGP4:propagate_tle:epoch={epoch}")
+        logger.debug(f"SGP4:propagate_tle:epoch={epoch}")
 
         t, epoch = self.convert_time(t, epoch)
         times = epoch + t
@@ -118,8 +118,8 @@ class SGP4(Propagator):
             error, r, v = satellite.sgp4(jd0, jd_f)
 
             if logger_profiler_on:
-                if error != 0 and self.logger is not None:
-                    self.logger.error(f"SGP4:propagate:steps:{SGP4_ERRORS[error]}")
+                if error != 0:
+                    logger.error(f"SGP4:propagate:steps:{SGP4_ERRORS[error]}")
 
             states[:3] = r
             states[3:] = v
@@ -141,8 +141,8 @@ class SGP4(Propagator):
                 states[3:, ...] = v.T
 
         for ind, err in enumerate(errors):
-            if err != 0 and self.logger is not None:
-                self.logger.error(f"SGP4:propagate_tle:step-{ind}:{SGP4_ERRORS[err]}")
+            if err != 0:
+                logger.error(f"SGP4:propagate_tle:step-{ind}:{SGP4_ERRORS[err]}")
 
         states *= 1e3  # km to m, km/s to m/s
 
@@ -152,7 +152,6 @@ class SGP4(Propagator):
             in_frame="TEME",
             out_frame=self.settings["out_frame"],
             profiler=self.profiler,
-            logger=self.logger,
         )
 
         if self.profiler is not None:
@@ -188,8 +187,7 @@ class SGP4(Propagator):
         """
         if self.profiler is not None:
             self.profiler.start("SGP4:propagate")
-        if self.logger is not None:
-            self.logger.debug(f"SGP4:propagate:len(t) = {len(t)}")
+        logger.debug(f"SGP4:propagate:len(t) = {len(t)}")
 
         if self.settings["tle_input"]:
             if isinstance(state0, np.ndarray):
@@ -213,8 +211,7 @@ class SGP4(Propagator):
         else:
             B = 0.5 * kwargs.pop("C_D", 2.3) * kwargs.pop("A", 1.0) / kwargs.pop("m", 1.0)
 
-        if self.logger is not None:
-            self.logger.debug(f"SGP4:propagate:B = {B}")
+        logger.debug(f"SGP4:propagate:B = {B}")
 
         input_mean = kwargs.get("SGP4_mean_elements", False)
         input_mean_cart = kwargs.get("SGP4_mean_cartesian", False)
@@ -246,7 +243,6 @@ class SGP4(Propagator):
                 in_frame=self.settings["in_frame"],
                 out_frame="TEME",
                 profiler=self.profiler,
-                logger=self.logger,
             )
 
             if state0_cart.size > 6:
@@ -269,13 +265,11 @@ class SGP4(Propagator):
             in_frame="TEME",
             out_frame=self.settings["out_frame"],
             profiler=self.profiler,
-            logger=self.logger,
         )
 
         if self.profiler is not None:
             self.profiler.stop("SGP4:propagate")
-        if self.logger is not None:
-            self.logger.debug("SGP4:propagate:completed")
+        logger.debug("SGP4:propagate:completed")
 
         return states
 
@@ -346,8 +340,8 @@ class SGP4(Propagator):
             error, r, v = satellite.sgp4(jd0, jd_f)
 
             if logger_profiler_on:
-                if error != 0 and self.logger is not None:
-                    self.logger.error(f"SGP4:propagate:step:{SGP4_ERRORS[error]}")
+                if error != 0:
+                    logger.error(f"SGP4:propagate:step:{SGP4_ERRORS[error]}")
 
             states[:3] = r
             states[3:] = v
@@ -370,8 +364,8 @@ class SGP4(Propagator):
 
             if logger_profiler_on:
                 for ind, err in enumerate(errors):
-                    if err != 0 and self.logger is not None:
-                        self.logger.error(f"SGP4:propagate:step-{ind}:{SGP4_ERRORS[err]}")
+                    if err != 0:
+                        logger.error(f"SGP4:propagate:step-{ind}:{SGP4_ERRORS[err]}")
 
         states *= 1e3  # km to m and km/s to m/s
 
@@ -394,8 +388,7 @@ class SGP4(Propagator):
         """
         if self.profiler is not None:
             self.profiler.start("SGP4:TEME_to_TLE_OPTIM")
-        if self.logger is not None:
-            self.logger.info("SGP4:TEME_to_TLE_OPTIM")
+        logger.info("SGP4:TEME_to_TLE_OPTIM")
 
         if len(state.shape) == 1:
             state.shape = (state.size, 1)
@@ -471,8 +464,7 @@ class SGP4(Propagator):
 
         if self.profiler is not None:
             self.profiler.stop("SGP4:TEME_to_TLE_OPTIM")
-        if self.logger is not None:
-            self.logger.info(f"SGP4:TEME_to_TLE_OPTIM:completed")
+        logger.info(f"SGP4:TEME_to_TLE_OPTIM:completed")
 
         return mean_elements
 
@@ -490,8 +482,7 @@ class SGP4(Propagator):
         """
         if self.profiler is not None:
             self.profiler.start("SGP4:TEME_to_TLE")
-        if self.logger is not None:
-            self.logger.info("SGP4:TEME_to_TLE")
+        logger.info("SGP4:TEME_to_TLE")
 
         mean_elements = None
 
@@ -509,8 +500,7 @@ class SGP4(Propagator):
 
                 if self.profiler is not None:
                     self.profiler.stop("SGP4:TEME_to_TLE")
-                if self.logger is not None:
-                    self.logger.info(f"SGP4:TEME_to_TLE:completed")
+                logger.info(f"SGP4:TEME_to_TLE:completed")
 
                 return mean_elements
             else:
@@ -591,8 +581,7 @@ class SGP4(Propagator):
 
         if self.profiler is not None:
             self.profiler.stop("SGP4:TEME_to_TLE")
-        if self.logger is not None:
-            self.logger.info(f"SGP4:TEME_to_TLE:completed")
+        logger.info(f"SGP4:TEME_to_TLE:completed")
 
         return mean_elements
 

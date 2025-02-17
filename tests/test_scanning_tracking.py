@@ -62,8 +62,9 @@ class TestSimulateScan(unittest.TestCase):
         #
 
 
+    # ASK: `simulate_scan` and/or `get_detections()` no longer exist?
     def test_get_detections(self):
-        det_times = simulate_scan.get_detections(self.o, self.radar, 0.0, self.T, logger=None, pass_dt=0.05)
+        det_times = simulate_scan.get_detections(self.o, self.radar, 0.0, self.T, pass_dt=0.05)
         
         #should be detected
         assert len(det_times[0]['tm']) > 0

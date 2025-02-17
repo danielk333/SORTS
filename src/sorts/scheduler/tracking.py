@@ -3,6 +3,7 @@
 """Basis for developing a scheduler for tracking multiple space objects.
 
 """
+import logging
 from abc import abstractmethod
 
 import numpy as np
@@ -12,6 +13,7 @@ from ..controller import Tracker
 from .scheduler import Scheduler
 from ..passes import equidistant_sampling
 
+logger = logging.getLogger(__name__)
 
 class Tracking(Scheduler):
     """#TODO: Docstring"""
@@ -28,12 +30,11 @@ class Tracking(Scheduler):
         max_dpos=1e3,
         max_samp=30.0,
         profiler=None,
-        logger=None,
         use_pass_states=True,
         calculate_max_snr=False,
         collect_passes=False,
     ):
-        super().__init__(radar, profiler=profiler, logger=logger)
+        super().__init__(radar, profiler=profiler)
         self.epoch = epoch
         self.controller = controller
         self.controller_args = controller_args
@@ -88,8 +89,7 @@ class Tracking(Scheduler):
         else:
             t = np.arange(self.start_time, self.end_time, self.max_samp)
 
-        if self.logger is not None:
-            self.logger.info(f"Tracking:get_passes(ind={ind}):propagating {len(t)} steps")
+        logger.info(f"Tracking:get_passes(ind={ind}):propagating {len(t)} steps")
         if self.profiler is not None:
             self.profiler.start("Tracking:get_passes:propagating")
 
@@ -100,8 +100,7 @@ class Tracking(Scheduler):
 
         if self.profiler is not None:
             self.profiler.stop("Tracking:get_passes:propagating")
-        if self.logger is not None:
-            self.logger.info(f"Tracking:get_passes(ind={ind}):propagating complete")
+        logger.info(f"Tracking:get_passes(ind={ind}):propagating complete")
 
         if self.profiler is not None:
             self.profiler.start("Tracking:get_passes:find_passes")
@@ -112,10 +111,9 @@ class Tracking(Scheduler):
         # we may need SNR to plan observations
         for txi in range(len(self.radar.tx)):
             for rxi in range(len(self.radar.rx)):
-                if self.logger is not None:
-                    self.logger.info(
-                        f"Tracking:get_passes(ind={ind}):tx{txi}-rx{rxi} {len(self.passes[ind][txi][rxi])} passes"
-                    )
+                logger.info(
+                    f"Tracking:get_passes(ind={ind}):tx{txi}-rx{rxi} {len(self.passes[ind][txi][rxi])} passes"
+                )
                 if not self.calculate_max_snr:
                     continue
                 for ps in self.passes[ind][txi][rxi]:
@@ -138,8 +136,7 @@ class Tracking(Scheduler):
 
     def get_controllers(self):
         """#TODO: Docstring"""
-        if self.logger is not None:
-            self.logger.debug(f"Tracking:get_controllers")
+        logger.debug(f"Tracking:get_controllers")
 
         ctrls = []
         for ind in range(len(self.space_objects)):

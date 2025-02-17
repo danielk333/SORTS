@@ -32,8 +32,6 @@ scan = Fence(azimuth=90, num=40, dwell=0.1, min_elevation=30)
 
 p = Profiler()
 
-logger = sorts.profiling.get_logger("scanning")
-
 objs = [
     SpaceObject(
         Prop_cls,
@@ -61,14 +59,13 @@ class ObservedScanning(StaticList, ObservedParameters):
 
 
 scanner_ctrl = Scanner(
-    eiscat3d, scan, t=np.arange(0, end_t, scan.dwell()), profiler=p, logger=logger
+    eiscat3d, scan, t=np.arange(0, end_t, scan.dwell()), profiler=p,
 )
 
 p.start("total")
 scheduler = ObservedScanning(
     radar=eiscat3d,
     controllers=[scanner_ctrl],
-    logger=logger,
     profiler=p,
 )
 

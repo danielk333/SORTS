@@ -2,8 +2,7 @@
 
 """Wrapper for the REBOUND propagator into SORTS format.
 """
-import copy
-import pathlib
+import copy, pathlib, logging
 
 import numpy as np
 import scipy
@@ -28,6 +27,7 @@ from .base import Propagator
 from .. import dates as dates
 from .. import frames
 
+logger = logging.getLogger(__name__)
 
 class Rebound(Propagator):
     """Propagator class implementing the REBOUND propagator.
@@ -82,8 +82,7 @@ class Rebound(Propagator):
         assert rebound is not None, "Rebound python package not found"
 
         super(Rebound, self).__init__(settings=settings, **kwargs)
-        if self.logger is not None:
-            self.logger.debug(f"sorts.propagator.Rebound:init")
+        logger.debug(f"sorts.propagator.Rebound:init")
 
         self.settings["massive_objects"] = [
             x.strip().capitalize() for x in self.settings["massive_objects"]
@@ -230,8 +229,7 @@ class Rebound(Propagator):
 
         if self.profiler is not None:
             self.profiler.start("Rebound:propagate")
-        if self.logger is not None:
-            self.logger.debug(f"Rebound:propagate:len(t) = {len(t)}")
+        logger.debug(f"Rebound:propagate:len(t) = {len(t)}")
 
         t, epoch = self.convert_time(t, epoch)
         times = epoch + t
@@ -309,7 +307,6 @@ class Rebound(Propagator):
                 in_frame=self.settings["in_frame"],
                 out_frame=self.geo_internal_frame,
                 profiler=self.profiler,
-                logger=self.logger,
             )
 
             if len(state0_cart.shape) > 1:
@@ -323,7 +320,6 @@ class Rebound(Propagator):
                 in_frame=self.settings["in_frame"],
                 out_frame=self.internal_frame,
                 profiler=self.profiler,
-                logger=self.logger,
             )
 
         if len(state0_cart.shape) > 1:
@@ -407,7 +403,6 @@ class Rebound(Propagator):
                 in_frame=int_frame_,
                 out_frame=self.settings["out_frame"],
                 profiler=self.profiler,
-                logger=self.logger,
             )
 
         states = states[:, t_restore, :]
@@ -426,7 +421,6 @@ class Rebound(Propagator):
                     in_frame=int_frame_,
                     out_frame=self.settings["out_frame"],
                     profiler=self.profiler,
-                    logger=self.logger,
                 )
 
             massive_states = massive_states[:, t_restore, :]

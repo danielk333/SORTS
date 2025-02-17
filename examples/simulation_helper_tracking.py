@@ -4,13 +4,10 @@
 Simulate tracking with simulation helper
 ==========================================
 '''
-import pathlib
-import configparser
+import pathlib,configparser, logging
 
 import numpy as np
 import matplotlib.pyplot as plt
-import h5py
-import pickle
 from astropy.time import Time
 
 import sorts
@@ -23,6 +20,10 @@ from sorts import MPI_single_process, MPI_action, iterable_step, store_step, cac
 from sorts.radar.scans import Fence
 
 from sorts.propagator import SGP4
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
 Prop_cls = SGP4
 Prop_opts = dict(
     settings = dict(
@@ -166,7 +167,7 @@ sim.profiler.start('total')
 sim.run()
 
 sim.profiler.stop('total')
-sim.logger.always('\n'+sim.profiler.fmt(normalize='total'))
+logger.info('\n'+sim.profiler.fmt(normalize='total')) # ASK: is info level good enough?
 
 sim.plot(oid=0)
 plt.show()

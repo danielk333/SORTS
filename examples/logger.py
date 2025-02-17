@@ -13,11 +13,12 @@ DEBUG   10
 
 '''
 
+import logging
 import sorts
 
 p = sorts.profiling.Profiler()
 
-logger = sorts.profiling.get_logger('example')
+logger = logging.getLogger(__name__)
 
 for i in range(10):
     # 'application' code
@@ -27,7 +28,6 @@ for i in range(10):
     logger.warning('warning message {}'.format(i))
     logger.error('error message {}'.format(i))
     logger.critical('critical message {}'.format(i))
-    logger.always('always message {}'.format(i))
     p.stop('log')
 
 for line in str(p).split('\n'):

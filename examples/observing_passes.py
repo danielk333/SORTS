@@ -5,7 +5,6 @@ Observing a set of passes
 ================================
 
 '''
-import pathlib
 from tabulate import tabulate
 import numpy as np
 import matplotlib.pyplot as plt
@@ -72,12 +71,11 @@ e3d_tracker.meta['target'] = 'Cool object 1'
 
 class MyStaticList(StaticList, ObservedParameters):
 
-    def __init__(self, radar, controllers, profiler=None, logger=None):
+    def __init__(self, radar, controllers, profiler=None):
         super().__init__(
             radar=radar, 
             controllers=controllers, 
             profiler=profiler,
-            logger=logger,
         )
 
     def generate_schedule(self, t, generator):

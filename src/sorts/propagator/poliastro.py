@@ -3,6 +3,7 @@
 """
 
 # Python standard import
+import logging
 from copy import copy
 
 # Third party import
@@ -17,6 +18,7 @@ import astropy.units as units
 from .base import Propagator
 from .. import frames
 
+logger = logging.getLogger(__name__)
 
 class TwoBody(Propagator):
     """Propagator class implementing the Kepler propagator using `poliastro`,
@@ -43,8 +45,7 @@ class TwoBody(Propagator):
 
     def __init__(self, settings=None, **kwargs):
         super(TwoBody, self).__init__(settings=settings, **kwargs)
-        if self.logger is not None:
-            self.logger.debug("sorts.propagator.TwoBody:init")
+        logger.debug("sorts.propagator.TwoBody:init")
 
     def propagate(self, t, state0, epoch, **kwargs):
         """Propagate a state
@@ -59,8 +60,7 @@ class TwoBody(Propagator):
         """
         if self.profiler is not None:
             self.profiler.start("TwoBody:propagate")
-        if self.logger is not None:
-            self.logger.debug(f"TwoBody:propagate:len(t) = {len(t)}")
+        logger.debug(f"TwoBody:propagate:len(t) = {len(t)}")
 
         t, epoch = self.convert_time(t, epoch)
         times = epoch + t
@@ -71,7 +71,6 @@ class TwoBody(Propagator):
             in_frame=self.settings["in_frame"],
             out_frame="GCRS",
             profiler=self.profiler,
-            logger=self.logger,
         )
 
         poli_orb = poliastro.twobody.Orbit.from_vectors(
@@ -103,7 +102,6 @@ class TwoBody(Propagator):
             in_frame="GCRS",
             out_frame=self.settings["out_frame"],
             profiler=self.profiler,
-            logger=self.logger,
         )
 
         if self.profiler is not None:
@@ -111,7 +109,6 @@ class TwoBody(Propagator):
 
         if self.profiler is not None:
             self.profiler.stop("TwoBody:propagate")
-        if self.logger is not None:
-            self.logger.debug("TwoBody:propagate:completed")
+        logger.debug("TwoBody:propagate:completed")
 
         return states

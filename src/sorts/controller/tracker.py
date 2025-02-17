@@ -4,10 +4,12 @@
 
 """
 
+import logging
 import numpy as np
 
 from .radar_controller import RadarController
 
+logger = logging.getLogger(__name__)
 
 class Tracker(RadarController):
     """Takes in ECEF points and a time vector and creates a tracking control."""
@@ -26,17 +28,15 @@ class Tracker(RadarController):
         dwell=0.1,
         return_copy=True,
         profiler=None,
-        logger=None,
         meta=None,
         **kwargs
     ):
-        super().__init__(radar, t=t, t0=t0, profiler=profiler, logger=logger, meta=meta, **kwargs)
+        super().__init__(radar, t=t, t0=t0, profiler=profiler, meta=meta, **kwargs)
         self.ecefs = ecefs
         self.dwell = dwell
         self.return_copy = return_copy
 
-        if self.logger is not None:
-            self.logger.info(f"Tracker:init")
+        logger.info(f"Tracker:init")
 
     @property
     def dwell(self):
@@ -64,8 +64,7 @@ class Tracker(RadarController):
     def generator(self, t):
         if self.profiler is not None:
             self.profiler.start("Tracker:generator")
-        if self.logger is not None:
-            self.logger.debug(f"Tracker:generator: len(t) = {len(t)}")
+        logger.debug(f"Tracker:generator: len(t) = {len(t)}")
 
         for ti in range(len(t)):
             if self.profiler is not None:
@@ -93,5 +92,4 @@ class Tracker(RadarController):
 
         if self.profiler is not None:
             self.profiler.stop("Tracker:generator")
-        if self.logger is not None:
-            self.logger.debug(f"Tracker:generator:completed")
+        logger.debug(f"Tracker:generator:completed")

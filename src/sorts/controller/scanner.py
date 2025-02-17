@@ -4,10 +4,12 @@
 
 """
 
+import logging
 import numpy as np
 
 from .radar_controller import RadarController
 
+logger = logging.getLogger(__name__)
 
 class Scanner(RadarController):
     """Takes in a scan and create a scanning radar controller."""
@@ -25,12 +27,11 @@ class Scanner(RadarController):
         r=np.linspace(300e3, 1000e3, num=10),
         as_altitude=False,
         profiler=None,
-        logger=None,
         return_copy=False,
         meta=None,
         **kwargs
     ):
-        super().__init__(radar, t0=t0, profiler=profiler, logger=logger, meta=meta, **kwargs)
+        super().__init__(radar, t0=t0, profiler=profiler, meta=meta, **kwargs)
         self.scan = scan
         if self.t is not None and self.t_slice is None:
             self.dwell = np.max(self.scan.dwell(self.t))
@@ -39,8 +40,7 @@ class Scanner(RadarController):
         self.return_copy = return_copy
         self.as_altitude = as_altitude
 
-        if self.logger is not None:
-            self.logger.info(f"Scanner:init")
+        logger.info(f"Scanner:init")
 
     @property
     def dwell(self):

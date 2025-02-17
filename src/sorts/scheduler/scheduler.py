@@ -4,6 +4,7 @@
 
 """
 # Python standard import
+import logging
 from abc import ABC, abstractmethod
 
 
@@ -12,6 +13,7 @@ import numpy as np
 
 # Local import
 
+logger = logging.getLogger(__name__)
 
 class Scheduler(ABC):
     """A Scheduler for executing time-slices of different radar controllers.
@@ -19,9 +21,8 @@ class Scheduler(ABC):
     #TODO: Docstring
     """
 
-    def __init__(self, radar, profiler=None, logger=None):
+    def __init__(self, radar, profiler=None):
         self.radar = radar
-        self.logger = logger
         self.profiler = profiler
 
     @abstractmethod
@@ -77,17 +78,15 @@ class Scheduler(ABC):
 
         ctrls = [c for c in ctrls if np.any(check_t(c))]
         if len(ctrls) == 0:
-            if self.logger is not None:
-                self.logger.debug(
-                    f"Scheduler:__call__:No radar events found between {start:.1f} and {stop:.1f}"
-                )
+            logger.debug(
+                f"Scheduler:__call__:No radar events found between {start:.1f} and {stop:.1f}"
+            )
             return None, None
         else:
             t = np.concatenate([c.t[check_t(c)] for c in ctrls], axis=0)
-            if self.logger is not None:
-                self.logger.debug(
-                    f"Scheduler:__call__:{len(t)} events found between {start:.1f} and {stop:.1f}"
-                )
+            logger.debug(
+                f"Scheduler:__call__:{len(t)} events found between {start:.1f} and {stop:.1f}"
+            )
 
             return t, Scheduler.chain_generators([c(c.t[check_t(c)] - c.t0) for c in ctrls])
 

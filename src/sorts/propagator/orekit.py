@@ -22,9 +22,8 @@ Simple propagation showing time difference due to loading of model data.
 """
 
 # Python standard import
-import copy
+import copy, pathlib, logging
 import urllib.request
-import pathlib
 
 # Third party import
 import numpy as np
@@ -56,6 +55,8 @@ import org.orekit.models.earth.atmosphere as orekit_atm
 import org
 
 from orekit import JArray_double
+
+logger = logging.getLogger(__name__)
 
 JAVA_VM = False
 
@@ -289,8 +290,7 @@ class Orekit(Propagator):
         super(Orekit, self).__init__(settings=settings, **kwargs)
         init_vm()
 
-        if self.logger is not None:
-            self.logger.debug(f"sorts.propagator.Orekit:init")
+        logger.debug(f"sorts.propagator.Orekit:init")
         if self.profiler is not None:
             self.profiler.start("Orekit:init")
 
@@ -299,8 +299,7 @@ class Orekit(Propagator):
 
         setup_orekit_curdir(filename=orekit_data)
 
-        if self.logger is not None:
-            self.logger.debug(f"Orekit:init:orekit-data = {orekit_data}")
+        logger.debug(f"Orekit:init:orekit-data = {orekit_data}")
 
         self.utc = TimeScalesFactory.getUTC()
 
@@ -365,12 +364,11 @@ class Orekit(Propagator):
 
                 self._forces["perturbation_{}".format(body)] = perturbation
 
-        if self.logger is not None:
-            for key in self._forces:
-                if self._forces[key] is not None:
-                    self.logger.debug(f"Orekit:init:_forces:{key} = {type(self._forces[key])}")
-                else:
-                    self.logger.debug(f"Orekit:init:_forces:{key} = None")
+        for key in self._forces:
+            if self._forces[key] is not None:
+                logger.debug(f"Orekit:init:_forces:{key} = {type(self._forces[key])}")
+            else:
+                logger.debug(f"Orekit:init:_forces:{key} = None")
 
         if self.profiler is not None:
             self.profiler.stop("Orekit:init")
@@ -508,10 +506,9 @@ class Orekit(Propagator):
         if self.profiler is not None:
             self.profiler.start("Orekit:propagate:set_forces")
 
-        if self.logger is not None:
-            self.logger.debug(f"Orekit:set_forces:A = {A}")
-            self.logger.debug(f"Orekit:set_forces:cd = {cd}")
-            self.logger.debug(f"Orekit:set_forces:cr = {cr}")
+        logger.debug(f"Orekit:set_forces:A = {A}")
+        logger.debug(f"Orekit:set_forces:cd = {cd}")
+        logger.debug(f"Orekit:set_forces:cr = {cr}")
 
         __params = [A, cd, cr]
 
@@ -522,8 +519,7 @@ class Orekit(Propagator):
             if not np.allclose(np.array(__params, dtype=np.float64), self.__params, rtol=1e-3):
                 re_calc = True
 
-        if self.logger is not None:
-            self.logger.debug(f"Orekit:set_forces:re_calc = {re_calc}")
+        logger.debug(f"Orekit:set_forces:re_calc = {re_calc}")
 
         self.atmosphere_instance = None
         self.spacecraft_drag_model = None
@@ -652,8 +648,7 @@ class Orekit(Propagator):
         if not isinstance(t, np.ndarray):
             t = np.array([t])
 
-        if self.logger is not None:
-            self.logger.debug(f"Orekit:propagate:len(t) = {len(t)}")
+        logger.debug(f"Orekit:propagate:len(t) = {len(t)}")
 
         if not orekit_in_frame:
             state0_cart = frames.convert(
@@ -662,7 +657,6 @@ class Orekit(Propagator):
                 in_frame=self.settings["in_frame"],
                 out_frame="GCRS",
                 profiler=self.profiler,
-                logger=self.logger,
             )
 
         initialDate = mjd2absdate(mjd0, self.utc)
@@ -774,14 +768,12 @@ class Orekit(Propagator):
                 in_frame="GCRS",
                 out_frame=self.settings["out_frame"],
                 profiler=self.profiler,
-                logger=self.logger,
             )
 
         if self.profiler is not None:
             self.profiler.stop("Orekit:propagate:steps")
             self.profiler.stop("Orekit:propagate")
 
-        if self.logger is not None:
-            self.logger.debug(f"Orekit:propagate:completed")
+        logger.debug(f"Orekit:propagate:completed")
 
         return state

@@ -6,6 +6,7 @@ Using scans on alternative parameters
 
 '''
 
+import logging
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -55,7 +56,7 @@ end_t = 3600.0
 
 p = Profiler()
 
-logger = sorts.profiling.get_logger('scanning')
+logger = logging.getLogger(__name__)
 
 objs = [
     SpaceObject(
@@ -102,8 +103,7 @@ class ObservedScanning(StaticList, ObservedParameters):
 p.start('total')
 scheduler = ObservedScanning(
     radar = radar_ctrl.radar, 
-    controllers = [radar_ctrl], 
-    logger = logger,
+    controllers = [radar_ctrl],
     profiler = p,
 )
 

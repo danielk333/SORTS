@@ -4,7 +4,7 @@
 Simulate scanning for objects with simulation class
 ======================================================
 '''
-import pathlib
+import pathlib, logging
 import configparser
 
 import numpy as np
@@ -13,6 +13,10 @@ import h5py
 import pickle
 
 import sorts
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
 eiscat3d = sorts.radars.eiscat3d_interp
 
 from sorts.scheduler import StaticList, ObservedParameters
@@ -214,7 +218,7 @@ sim.profiler.start('total')
 sim.run()
 
 sim.profiler.stop('total')
-sim.logger.always('\n'+sim.profiler.fmt(normalize='total'))
+logger.info('\n'+sim.profiler.fmt(normalize='total')) # ASK: is info level good enough?
 
 
 sim.plot()

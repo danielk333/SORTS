@@ -5,6 +5,7 @@ Example stare and chase scheduler
 ==================================
 '''
 
+import logging
 import numpy as np
 import matplotlib.pyplot as plt
 from tabulate import tabulate
@@ -25,7 +26,7 @@ epoch = Time(53005.0, format='mjd')
 scan = sorts.scans.Fence(azimuth=90, num=40, dwell=0.1, min_elevation=30)
 
 profiler = sorts.profiling.Profiler()
-logger = sorts.profiling.get_logger('StareAndChase')
+logger = logging.getLogger(__name__)
 
 obj = sorts.SpaceObject(
     sorts.propagator.SGP4,
@@ -44,10 +45,9 @@ obj = sorts.SpaceObject(
 
 
 class StareAndChase(sorts.scheduler.ObservedParameters):
-    def __init__(self, radar, scan, epoch, profiler=None, logger=None, **kwargs):
+    def __init__(self, radar, scan, epoch, profiler=None, **kwargs):
         super().__init__(
             radar=radar, 
-            logger=logger, 
             profiler=profiler,
         )
         self.end_time = kwargs.get('end_time', 3600.0*24.0)
@@ -70,8 +70,7 @@ class StareAndChase(sorts.scheduler.ObservedParameters):
             else:
                 self.states_t = np.arange(start_track, start_track + self.max_predict_time, self.timeslice)
 
-            if self.logger is not None:
-                self.logger.info(f'StareAndChase:update:propagating {len(self.states_t)} steps')
+            logger.info(f'StareAndChase:update:propagating {len(self.states_t)} steps')
             if self.profiler is not None:
                 self.profiler.start('StareAndChase:update:propagating')
 
@@ -79,8 +78,7 @@ class StareAndChase(sorts.scheduler.ObservedParameters):
 
             if self.profiler is not None:
                 self.profiler.stop('StareAndChase:update:propagating')
-            if self.logger is not None:
-                self.logger.info(f'StareAndChase:update:propagating complete')
+            logger.info(f'StareAndChase:update:propagating complete')
 
             self.passes = self.radar.find_passes(self.states_t, self.states, cache_data = False)
 
@@ -89,8 +87,7 @@ class StareAndChase(sorts.scheduler.ObservedParameters):
             self.scan,
             t_slice = self.timeslice,
             t = np.arange(0, self.end_time, self.timeslice), 
-            profiler=self.profiler, 
-            logger=self.logger,
+            profiler=self.profiler,
         )
         self.controllers = [self.scanner]
         if self.tracking_object is not None:
@@ -145,7 +142,6 @@ scheduler = StareAndChase(
     epoch = epoch,
     timeslice = 0.1, 
     end_time = 3600.0*6,
-    logger = logger,
     profiler = profiler,
 )
 

@@ -5,8 +5,7 @@ E3D Demonstrator SST planner
 ================================
 
 '''
-import pathlib
-import configparser
+import pathlib, configparser, logging
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -17,6 +16,9 @@ from astropy.time import Time, TimeDelta
 import sorts
 
 from sorts.scheduler import Tracking, ObservedParameters
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 try:
     base_pth = pathlib.Path(__file__).parents[1].resolve()
@@ -98,8 +100,7 @@ class ObservedTracking(Tracking, ObservedParameters):
                         t_vec += [__t]
                         t_all += __t.tolist()
 
-            if self.logger is not None:
-                self.logger.info(f'Propagating {sum(len(t) for t in t_vec)} measurement states for object {ind}')
+            logger.info(f'Propagating {sum(len(t) for t in t_vec)} measurement states for object {ind}')
 
             #epoch difference
             dt = (self.space_objects[ind].epoch - self.epoch).to_value('sec')
@@ -186,7 +187,6 @@ t_step = 10.0 #time step for finding passes
 dwell = 10.0 #the time between re-pointing beam, i.e. "radar actions" or "time slices"
 
 profiler = sorts.profiling.Profiler()
-logger = sorts.profiling.get_logger()
 
 #Get the space objects to track
 space_objects = []
@@ -195,7 +195,8 @@ for obj in objects:
     if len(ind) > 0:
         space_objects.append(pop.get_object(ind[0]))
 
-logger.always(f'Found {len(space_objects)} objects to track')
+# ASK: is this log level good enough? or should we use print() instead?
+logger.info(f'Found {len(space_objects)} objects to track')
 
 #Initialize the scheduler
 scheduler = ObservedTracking(
@@ -207,7 +208,6 @@ scheduler = ObservedTracking(
     controller_args = dict(return_copy=True, dwell=dwell),
     max_dpos = 1e3,
     profiler = profiler, 
-    logger = logger,
     use_pass_states = False,
 )
 
