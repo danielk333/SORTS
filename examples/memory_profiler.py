@@ -7,9 +7,7 @@ Profiling memory leaks
 '''
 import matplotlib.pyplot as plt
 
-from sorts.profiling import Profiler
-
-p = Profiler(track_memory=True)
+# ASK: this is a profiler module, do we want to remove everything or keep some part of it?
 
 #As the profiler data is also stored in Python tracked memory
 # a diff of "nothing" will still result in more allocation of memory

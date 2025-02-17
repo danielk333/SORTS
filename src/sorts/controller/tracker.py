@@ -27,11 +27,10 @@ class Tracker(RadarController):
         t0=0.0,
         dwell=0.1,
         return_copy=True,
-        profiler=None,
         meta=None,
         **kwargs
     ):
-        super().__init__(radar, t=t, t0=t0, profiler=profiler, meta=meta, **kwargs)
+        super().__init__(radar, t=t, t0=t0, meta=meta, **kwargs)
         self.ecefs = ecefs
         self.dwell = dwell
         self.return_copy = return_copy
@@ -52,24 +51,13 @@ class Tracker(RadarController):
         return dic
 
     def point_radar(self, radar, ind):
-        if self.profiler is not None:
-            self.profiler.start("Tracker:generator:point_radar")
-
         RadarController.point_tx_ecef(radar, self.ecefs[:3, ind])
         RadarController.point_rx_ecef(radar, self.ecefs[:3, ind])
 
-        if self.profiler is not None:
-            self.profiler.stop("Tracker:generator:point_radar")
-
     def generator(self, t):
-        if self.profiler is not None:
-            self.profiler.start("Tracker:generator")
         logger.debug(f"Tracker:generator: len(t) = {len(t)}")
 
         for ti in range(len(t)):
-            if self.profiler is not None:
-                self.profiler.start("Tracker:generator:step")
-
             if self.return_copy:
                 radar = self.radar.copy()
             else:
@@ -85,11 +73,6 @@ class Tracker(RadarController):
             self.toggle_stations(t[ti], radar)
             self.point_radar(radar, ind)
 
-            if self.profiler is not None:
-                self.profiler.stop("Tracker:generator:step")
-
             yield radar, meta
 
-        if self.profiler is not None:
-            self.profiler.stop("Tracker:generator")
         logger.debug(f"Tracker:generator:completed")

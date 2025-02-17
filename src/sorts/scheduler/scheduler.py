@@ -21,9 +21,8 @@ class Scheduler(ABC):
     #TODO: Docstring
     """
 
-    def __init__(self, radar, profiler=None):
+    def __init__(self, radar):
         self.radar = radar
-        self.profiler = profiler
 
     @abstractmethod
     def update(self, *args, **kwargs):

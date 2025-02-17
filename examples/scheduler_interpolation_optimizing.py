@@ -16,7 +16,6 @@ eiscat3d = sorts.radars.eiscat3d_interp
 from sorts.scheduler import StaticList, ObservedParameters
 from sorts.controller import Scanner
 from sorts import SpaceObject
-from sorts.profiling import Profiler
 from sorts.radar.scans import Fence
 from sorts.interpolation import Legendre8
 
@@ -44,8 +43,6 @@ Prop_opts = dict(
 end_t = 12*3600.0
 scan = Fence(azimuth=90, num=40, dwell=0.1, min_elevation=30)
 
-p = Profiler()
-
 logger = logging.getLogger(__name__)
 
 objs = [
@@ -72,14 +69,12 @@ for obj in objs: print(obj)
 class ObservedScanning(StaticList, ObservedParameters):
     pass
 
-scanner_ctrl = Scanner(eiscat3d, scan, profiler=p)
+scanner_ctrl = Scanner(eiscat3d, scan)
 scanner_ctrl.t = np.arange(0, end_t, scan.dwell())
 
-p.start('total')
 scheduler = ObservedScanning(
     radar = eiscat3d, 
     controllers = [scanner_ctrl],
-    profiler = p,
 )
 
 
@@ -92,29 +87,18 @@ for ind in range(len(objs)):
 
     print(f'Temporal points obj {ind}: {len(t)}')
     
-    p.start('get_state')
     states += [objs[ind].get_state(t)]
-    p.stop('get_state')
 
     interpolator = Legendre8(states[ind], t)
 
-    p.start('find_passes')
     #rename cache_data to something more descriptive
     passes += [eiscat3d.find_passes(t, states[ind], cache_data = False)] 
-    p.stop('find_passes')
 
-    p.start('observe_passes')
     data = scheduler.observe_passes(passes[ind], space_object = objs[ind], interpolator = None, snr_limit=False)
-    p.stop('observe_passes')
 
-    p.start('observe_passes_interpolator')
     data = scheduler.observe_passes(passes[ind], space_object = objs[ind], interpolator = interpolator, snr_limit=False)
-    p.stop('observe_passes_interpolator')
 
     datas.append(data)
-
-p.stop('total')
-print(p.fmt(normalize='total'))
 
 fig = plt.figure(figsize=(15,15))
 axes = [

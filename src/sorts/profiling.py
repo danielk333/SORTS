@@ -12,6 +12,7 @@ import numpy as np
 from tabulate import tabulate
 
 # ASK: this file is skipped from logger refactoring
+# ASK: this file the older profiler itself, shall we remove the whole thing?
 class Profiler:
     """Performance profiler class.
 

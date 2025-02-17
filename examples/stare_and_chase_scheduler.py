@@ -25,7 +25,6 @@ epoch = Time(53005.0, format='mjd')
 
 scan = sorts.scans.Fence(azimuth=90, num=40, dwell=0.1, min_elevation=30)
 
-profiler = sorts.profiling.Profiler()
 logger = logging.getLogger(__name__)
 
 obj = sorts.SpaceObject(
@@ -45,10 +44,9 @@ obj = sorts.SpaceObject(
 
 
 class StareAndChase(sorts.scheduler.ObservedParameters):
-    def __init__(self, radar, scan, epoch, profiler=None, **kwargs):
+    def __init__(self, radar, scan, epoch, **kwargs):
         super().__init__(
             radar=radar, 
-            profiler=profiler,
         )
         self.end_time = kwargs.get('end_time', 3600.0*24.0)
         self.timeslice = kwargs.get('timeslice', 0.1)
@@ -71,13 +69,9 @@ class StareAndChase(sorts.scheduler.ObservedParameters):
                 self.states_t = np.arange(start_track, start_track + self.max_predict_time, self.timeslice)
 
             logger.info(f'StareAndChase:update:propagating {len(self.states_t)} steps')
-            if self.profiler is not None:
-                self.profiler.start('StareAndChase:update:propagating')
 
             self.states = self.tracking_object.get_state(self.states_t - dt)
 
-            if self.profiler is not None:
-                self.profiler.stop('StareAndChase:update:propagating')
             logger.info(f'StareAndChase:update:propagating complete')
 
             self.passes = self.radar.find_passes(self.states_t, self.states, cache_data = False)
@@ -87,7 +81,6 @@ class StareAndChase(sorts.scheduler.ObservedParameters):
             self.scan,
             t_slice = self.timeslice,
             t = np.arange(0, self.end_time, self.timeslice), 
-            profiler=self.profiler,
         )
         self.controllers = [self.scanner]
         if self.tracking_object is not None:
@@ -134,15 +127,12 @@ class StareAndChase(sorts.scheduler.ObservedParameters):
 
         return data, header
 
-profiler.start('total')
-
 scheduler = StareAndChase(
     radar = radar, 
     scan = scan, 
     epoch = epoch,
     timeslice = 0.1, 
     end_time = 3600.0*6,
-    profiler = profiler,
 )
 
 #to simulate a stare and chase, we need to figure out the initial orbit determination errors
@@ -161,7 +151,6 @@ deltas = [1e-4]*3 + [1e-6]*3 + [1e-2]
 #see if the object is detected by the scan
 
 logger.info(f'ScanDetections:equidistant_sampling')
-profiler.start('ScanDetections:equidistant_sampling')
 
 _t = sorts.equidistant_sampling(
     orbit = obj.state, 
@@ -170,24 +159,16 @@ _t = sorts.equidistant_sampling(
     max_dpos=1e3,
 )
 
-profiler.stop('ScanDetections:equidistant_sampling')
-
 logger.info(f'ScanDetections:get_state')
-profiler.start('ScanDetections:get_state')
 
 states = obj.get_state(_t)
 
-profiler.stop('ScanDetections:get_state')
-
 logger.info(f'ScanDetections:find_passes')
-profiler.start('ScanDetections:find_passes')
 
 passes = radar.find_passes(_t, states, cache_data = True)
 
 #lets just look at the first pass
 passes[0][0] = passes[0][0][:1]
-
-profiler.stop('ScanDetections:find_passes')
 
 #Create a list of the same pass at all rx stations
 rx_passes = [p_tx0_rx[0] for p_tx0_rx in passes[0]]
@@ -195,7 +176,6 @@ rx_passes = [p_tx0_rx[0] for p_tx0_rx in passes[0]]
 datas = []
 
 logger.info(f'ScanDetections:observe_passes')
-profiler.start('ScanDetections:observe_passes')
 
 #observe one pass from all rx stations, including measurement Jacobian
 for rxi in range(len(radar.rx)):
@@ -230,8 +210,6 @@ for rxi in range(len(radar.rx)):
     print(r_stds_tx)
     print(f'Velocity errors std [m/s] (rx={rxi}):')
     print(v_stds_tx)
-
-profiler.stop('ScanDetections:observe_passes')
 
 #diagonal matrix inverse is just element wise inverse of the diagonal
 Sigma_m_inv = np.diag(1.0/Sigma_m_diag)
@@ -324,9 +302,6 @@ start_print = datas[0]['t'][0] - 10.0
 print(f'Time for scheduler to inject chase: {chase_schdeule_time} sec')
 
 scheduler.update(init_object, start_track=chase_schdeule_time)
-
-profiler.stop('total')
-print('\n' + profiler.fmt(normalize='total'))
 
 stare_and_chase_datas = scheduler.observe_passes(passes, space_object = obj, snr_limit=True)
 sorts.plotting.observed_parameters(stare_and_chase_datas[0][0])

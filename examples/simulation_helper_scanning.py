@@ -213,13 +213,7 @@ sim = Scanning(
 # sim.branch('test', empty=True) #to create an empty branch
 sim.checkout('test')
 
-sim.profiler.start('total')
-
 sim.run()
-
-sim.profiler.stop('total')
-logger.info('\n'+sim.profiler.fmt(normalize='total')) # ASK: is info level good enough?
-
 
 sim.plot()
 

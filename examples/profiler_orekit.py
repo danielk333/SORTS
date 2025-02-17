@@ -9,12 +9,9 @@ import pathlib
 
 import numpy as np
 
-from sorts.profiling import Profiler
 from sorts.propagator import Orekit
 import pyorb
 
-p = Profiler()
-p.start('total')
 
 try:
     pth = pathlib.Path(__file__).parent.resolve()
@@ -34,7 +31,6 @@ prop = Orekit(
         drag_force = False,
         radiation_pressure = False,
     ),
-    profiler = p,
 )
 
 print(prop)
@@ -48,16 +44,7 @@ mjd0 = 53005
 states = prop.propagate(t, state0, mjd0, A=1.0, C_R = 1.0, C_D = 1.0)
 
 
-p.stop('total')
-
-print(p)
-print(p.fmt(timedelta=True))
-print(p.fmt(normalize='total'))
-
 print('\nEnable Drag Force \n')
-
-p2 = Profiler()
-p2.start('total')
 
 prop = Orekit(
     orekit_data = pth, 
@@ -67,9 +54,5 @@ prop = Orekit(
         drag_force = True,
         radiation_pressure = False,
     ),
-    profiler = p2,
 )
 states = prop.propagate(t, state0, mjd0, A=1.0, C_R = 1.0, C_D = 1.0)
-
-p2.stop('total')
-print(p2.fmt(normalize='total'))

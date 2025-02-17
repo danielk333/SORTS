@@ -186,8 +186,6 @@ t_end = 12.0*3600.0 #end time of tracking scheduling
 t_step = 10.0 #time step for finding passes
 dwell = 10.0 #the time between re-pointing beam, i.e. "radar actions" or "time slices"
 
-profiler = sorts.profiling.Profiler()
-
 #Get the space objects to track
 space_objects = []
 for obj in objects:
@@ -207,7 +205,6 @@ scheduler = ObservedTracking(
     start_time = t_start, 
     controller_args = dict(return_copy=True, dwell=dwell),
     max_dpos = 1e3,
-    profiler = profiler, 
     use_pass_states = False,
 )
 

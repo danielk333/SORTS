@@ -160,7 +160,8 @@ def MPI_action(action, iterable=False, root=0):
 
 
 # ASK: we will always instantiate a logger now
-def iterable_step(iterable, MPI=False, log=False, reduce=None):
+# ASK: the log param is removed, I thin we don't need it?
+def iterable_step(iterable, MPI=False, reduce=None):
     """Simulation step iteration decorator.
 
     :param str/list iterable: The name/list of names of the instance properties (fetched using :code:`getattr`) to iterate over. Can be multiple levels, e.g. :code:`object.subobject.a_list`.
@@ -201,14 +202,10 @@ def iterable_step(iterable, MPI=False, log=False, reduce=None):
 
             step_name = kwargs.get("_step_name", None)
 
-            profiler_name = f"Simulation:iterable_step_{step_name}"
-
             _iters = 0
             _total = len(_iter)
 
             for index in _iter:
-                if log and self.profiler is not None:
-                    self.profiler.start(profiler_name)
                 item = attr[index]
 
                 if hasattr(func, "_simulation_step"):
@@ -221,22 +218,9 @@ def iterable_step(iterable, MPI=False, log=False, reduce=None):
                     rets = reduce_(rets, ret)
                     del ret
 
-                if log and self.profiler is not None:
-                    self.profiler.stop(profiler_name)
                 _iters += 1
-                if self.profiler is not None:
-                    _spent = self.profiler.total(name=profiler_name)
-                    _est_left = (_total - _iters) * self.profiler.mean(name=profiler_name)
-                    # ASK: is info level good enough?
-                    logger.info(
-                        f"Simulation:{step_name}:iterable_step: {_iters}/{_total}\n"
-                        + f"[Elapsed  ] {str(datetime.timedelta(seconds=_spent))} | "
-                        + f"[Time left] {str(datetime.timedelta(seconds=_est_left))}"
-                    )
 
-            if log and self.profiler is not None:
-                if step_name is None:
-                    del self.profiler.exec_times[profiler_name]
+                # ASK: per step reporting of time elapsed and time left is removed as a result of removing the profiler
 
             return rets
 
@@ -348,17 +332,12 @@ def iterable_cache(steps, caches, MPI=False, reduce=None):
 
             step_name = kwargs.get("_step_name", None)
 
-            profiler_name = f"Simulation:iterable_cache:{step_name}"
-
             _iters = 0
             _total = len(_iter)
 
             for index__ in _iter:
                 index = indecies[index__]
                 files = files_lst[index__]
-
-                if log and self.profiler is not None:
-                    self.profiler.start(profiler_name)
 
                 item = []
                 for cache, fname in zip(caches, files):
@@ -379,20 +358,8 @@ def iterable_cache(steps, caches, MPI=False, reduce=None):
                     del ret
 
                 _iters += 1
-                if self.profiler is not None:
-                    self.profiler.stop(profiler_name)
-                    _spent = self.profiler.total(name=profiler_name)
-                    _est_left = (_total - _iters) * self.profiler.mean(name=profiler_name)
-                    # ASK: is info level good enough?
-                    logger.info(
-                        f"Simulation:{step_name}:iterable_cache: {_iters}/{_total}\n"
-                        + f"[Elapsed  ] {str(datetime.timedelta(seconds=_spent))} | "
-                        + f"[Time left] {str(datetime.timedelta(seconds=_est_left))}"
-                    )
 
-            if self.profiler is not None:
-                if step_name is None:
-                    del self.profiler.exec_times[profiler_name]
+                # ASK: per step reporting of time elapsed and time left is removed as a result of removing the profiler
 
             return rets
 
@@ -497,12 +464,11 @@ def cached_step(caches):
 class Simulation:
     """Convenience simulation handler, creates a step-by-step simulation sequence and creates file system structure for saving of data to disk.
 
-    :param Scheduler scheduler: A scheduler instance to run. This input is used to assure that the same logger and profiler is used for the Simulation and the Scheduler.
+    :param Scheduler scheduler: A scheduler instance to run.
     :param str/pathlib.Path root: The path to the root folder where all files will be stored.
-    :param bool profiler: If :code:`False`, do not instantiate a profiler.
     """
 
-    def __init__(self, scheduler, root, profiler=True, **kwargs):
+    def __init__(self, scheduler, root, **kwargs):
         self.steps = OrderedDict()
         self.scheduler = scheduler
 
@@ -551,13 +517,6 @@ class Simulation:
         # ASK: do we need a per simulation logger?
         if self.scheduler is not None:
             self.scheduler.logger = logger
-
-        if profiler:
-            self.profiler = profiling.Profiler()
-            if self.scheduler is not None:
-                self.scheduler.profiler = self.profiler
-        else:
-            self.profiler = None
 
     def save_pickle(self, path, data):
         with open(path, "wb") as h:
@@ -716,6 +675,11 @@ class Simulation:
                 else:
                     raise TypeError(f'linkfiles type "{type(linkfiles)}" not supported')
 
+        # ASK: do we keep these:
+        #   - log dir
+        #   - log to file
+        #   - branch based simulation runs
+        
         # Make sure log directory exists
         (self.root / name / "logs").mkdir(exist_ok=True)
 
@@ -752,28 +716,23 @@ class Simulation:
 
         if step is None:
             for name, func in self.steps.items():
-                if self.profiler is not None:
-                    self.profiler.start(f"Simulation:run:{name}")
                 logger.info(f"Simulation:run:{name}")
 
                 if hasattr(func, "_simulation_step"):
                     func(*args, _step_name=name, **kwargs)
                 else:
                     func(*args, **kwargs)
-                if self.profiler is not None:
-                    self.profiler.stop(f"Simulation:run:{name}")
+
                 logger.info(f"Simulation:run:{name} [completed]")
         else:
             func = self.steps[step]
-            if self.profiler is not None:
-                self.profiler.start(f"Simulation:run:{step}")
+
             logger.info(f"Simulation:run:{step}")
             if hasattr(func, "_simulation_step"):
                 func(*args, _step_name=step, **kwargs)
             else:
                 func(*args, **kwargs)
-            if self.profiler is not None:
-                self.profiler.stop(f"Simulation:run:{step}")
+
             logger.info(f"Simulation:run:{step} [completed]")
 
     def add_cmd_argument(self, *args, **kwargs):

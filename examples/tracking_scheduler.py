@@ -14,7 +14,6 @@ import sorts
 
 from sorts.scheduler import PriorityTracking, ObservedParameters
 from sorts import SpaceObject
-from sorts.profiling import Profiler
 from sorts.propagator import SGP4
 
 

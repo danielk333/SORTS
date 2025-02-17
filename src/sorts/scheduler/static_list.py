@@ -13,10 +13,9 @@ logger = logging.getLogger(__name__)
 class StaticList(Scheduler):
     """#TODO: Docstring"""
 
-    def __init__(self, radar, controllers, profiler=None, **kwargs):
+    def __init__(self, radar, controllers, **kwargs):
         super().__init__(
             radar=radar,
-            profiler=profiler,
         )
         self.controllers = controllers
 

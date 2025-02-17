@@ -5,6 +5,9 @@ Profiling
 ==========
 
 '''
+
+# ASK: this is an example file for using/testing the profiler, shall we remove the whole thing?
+
 from sorts.profiling import Profiler
 
 p = Profiler()

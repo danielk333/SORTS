@@ -195,7 +195,6 @@ def correlate(
     meta_variables=[],
     n_closest=1,
     scalar_metric=True,
-    profiler=None,
     MPI=False,
     save_states=False,
 ):
@@ -260,8 +259,6 @@ def correlate(
     scalar_metric : bool
         indicats if the metric returns a scalar or a vector. If `False` the
         `metric_reduce` is expected to only take one argument to reduce the vectorized results.
-    profiler : Profiler
-        Profiler instance for checking function performance.
     MPI : bool
         If True use internal parallelization with MPI to calculate correlation.
         Turn to False to externally parallelize with MPI.

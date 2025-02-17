@@ -25,9 +25,8 @@ class Propagator(ABC):
         heartbeat=False,
     )
 
-    def __init__(self, settings=None, profiler=None):
+    def __init__(self, settings=None):
         self.settings = dict()
-        self.profiler = profiler
 
         self.settings.update(self.DEFAULT_SETTINGS)
         if settings is not None:
@@ -78,8 +77,6 @@ class Propagator(ABC):
         """Convert input time and epoch variables to :code:`astropy.TimeDelta`
         and :code:`astropy.Time` variables of the correct format and scale.
         """
-        if self.profiler is not None:
-            self.profiler.start("Propagator:convert_time")
         logger.debug(f"Propagator:convert_time")
 
         if epoch is None:
@@ -126,8 +123,6 @@ class Propagator(ABC):
         else:
             t = TimeDelta(t, format=self.settings["time_format"], scale=self.settings["time_scale"])
 
-        if self.profiler is not None:
-            self.profiler.stop("Propagator:convert_time")
         logger.debug(f"Propagator:convert_time:completed")
 
         return t, epoch

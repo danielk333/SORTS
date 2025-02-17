@@ -24,9 +24,6 @@ print(f'lat={eiscat3d.tx[0].lat:.2f} deg, lon={eiscat3d.tx[0].lon:.2f} deg')
 # CHOOSE OBJECTS
 #############
 
-profiler = sorts.profiling.Profiler() # TODO: not used?
-logger = logging.getLogger(__name__) # TODO: not used?
-
 # ENVISAT
 # tles = [
 #     (

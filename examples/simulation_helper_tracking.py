@@ -162,12 +162,7 @@ sim = Tracking(
 sim.checkout('test')
 # sim.branch('test-no-mpi', empty=True)
 
-sim.profiler.start('total')
-
 sim.run()
-
-sim.profiler.stop('total')
-logger.info('\n'+sim.profiler.fmt(normalize='total')) # ASK: is info level good enough?
 
 sim.plot(oid=0)
 plt.show()

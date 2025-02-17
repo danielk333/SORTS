@@ -26,11 +26,10 @@ class Static(RadarController):
         azimuth=0.0,
         elevation=90.0,
         r=np.linspace(300e3, 1000e3, num=10),
-        profiler=None,
         meta=None,
         **kwargs
     ):
-        super().__init__(radar.copy(), profiler=profiler, meta=meta, **kwargs)
+        super().__init__(radar.copy(), meta=meta, **kwargs)
         if self.meta["dwell"] is None:
             self.meta["dwell"] = 0.1
 
@@ -49,8 +48,6 @@ class Static(RadarController):
 
     def point_radar(self):
         """Assumes t is not array"""
-        if self.profiler is not None:
-            self.profiler.start("Static:generator:point_radar")
 
         t = 0.0
         point_rx_to_tx = []
@@ -84,9 +81,6 @@ class Static(RadarController):
             RadarController._point_station(rx, rx_point)
 
         RadarController.coh_integration(radar, self.meta["dwell"])
-
-        if self.profiler is not None:
-            self.profiler.stop("Static:generator:point_radar")
 
     def generator(self, t):
         for ti in range(len(t)):

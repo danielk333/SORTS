@@ -20,7 +20,6 @@ from sorts.radar.scans import Fence
 from sorts import RadarController
 from sorts.scheduler import StaticList, ObservedParameters
 from sorts import SpaceObject
-from sorts.profiling import Profiler
 from sorts.propagator import SGP4
 
 Prop_cls = SGP4
@@ -53,8 +52,6 @@ radar.tx[0].beam.phase_steering = 0.0
 
 scan = Fence(azimuth=0, num=100, dwell=0.1, min_elevation=30)
 end_t = 3600.0
-
-p = Profiler()
 
 logger = logging.getLogger(__name__)
 
@@ -100,11 +97,9 @@ radar_ctrl.t = np.arange(0, end_t, scan.dwell())
 class ObservedScanning(StaticList, ObservedParameters):
     pass
 
-p.start('total')
 scheduler = ObservedScanning(
     radar = radar_ctrl.radar, 
     controllers = [radar_ctrl],
-    profiler = p,
 )
 
 
@@ -112,34 +107,23 @@ datas = []
 passes = []
 states = []
 for ind in range(len(objs)):
-    p.start('equidistant_sampling')
     t = sorts.equidistant_sampling(
         orbit = objs[ind].state, 
         start_t = 0, 
         end_t = end_t, 
         max_dpos=1e3,
     )
-    p.stop('equidistant_sampling')
 
     print(f'Temporal points obj {ind}: {len(t)}')
     
-    p.start('get_state')
     states += [objs[ind].get_state(t)]
-    p.stop('get_state')
 
-    p.start('find_passes')
     #rename cache_data to something more descriptive
     passes += [scheduler.radar.find_passes(t, states[ind], cache_data = True)] 
-    p.stop('find_passes')
 
-    p.start('observe_passes')
     data = scheduler.observe_passes(passes[ind], space_object = objs[ind], snr_limit=False)
-    p.stop('observe_passes')
 
     datas.append(data)
-
-p.stop('total')
-print(p.fmt(normalize='total'))
 
 fig = plt.figure(figsize=(15,15))
 axes = [

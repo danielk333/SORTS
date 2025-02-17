@@ -140,16 +140,10 @@ sim = Scanning(
     population = pop,
     scheduler = scheduler,
     root = simulation_root,
-    profiler=True,
 )
-
-sim.profiler.start('total')
 
 sim.run()
 
 print(f'Propagations: {sim.object_prop}')
-
-sim.profiler.stop('total')
-logger.info('\n'+sim.profiler.fmt(normalize='total'))
 
 print(f'Total detected: {sim.total_detected()}')

@@ -10,15 +10,11 @@ import matplotlib.pyplot as plt
 from astropy.time import Time
 
 import pyorb
-from sorts.profiling import Profiler
 from sorts.propagator import TwoBody
 from sorts.propagator import Kepler
 
-p = Profiler()
-p.start('total')
-
-prop = TwoBody(profiler=p)
-prop_kep = Kepler(profiler=p)
+prop = TwoBody()
+prop_kep = Kepler()
 
 orb = pyorb.Orbit(
     M0=pyorb.M_earth,
@@ -46,9 +42,6 @@ prop.out_frame = 'GCRS'
 prop_kep.out_frame = 'GCRS'
 states_gcrs = prop.propagate(t, state0, epoch=epoch)
 states_gcrs_kep = prop_kep.propagate(t, orb, epoch=epoch)
-
-p.stop('total')
-print(p.fmt(normalize='total'))
 
 
 fig = plt.figure(figsize=(15, 15))

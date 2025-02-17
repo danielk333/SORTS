@@ -136,7 +136,7 @@ def get_solarsystem_body_states(bodies, epoch, kernel, units=None):
     return states
 
 
-def convert(t, states, in_frame, out_frame, profiler=None, **kwargs):
+def convert(t, states, in_frame, out_frame, **kwargs):
     """Perform predefined coordinate transformations using Astropy.
     Always returns a copy of the array.
 
@@ -145,7 +145,6 @@ def convert(t, states, in_frame, out_frame, profiler=None, **kwargs):
         rows 1-3 are position and 4-6 are velocity.
     :param str in_frame: Name of the frame the input states are currently in.
     :param str out_frame: Name of the state to transform to.
-    :param Profiler profiler: Profiler instance for checking function performance.
     :rtype: numpy.ndarray
     :return: Size `(6,n)` matrix of states in SI units where rows
         1-3 are position and 4-6 are velocity.
@@ -153,8 +152,6 @@ def convert(t, states, in_frame, out_frame, profiler=None, **kwargs):
     """
 
     logger.info(f"frames:convert: in_frame={in_frame}, out_frame={out_frame}")
-    if profiler is not None:
-        profiler.start(f"frames:convert:{in_frame}->{out_frame}")
 
     in_frame = in_frame.upper()
     out_frame = out_frame.upper()
@@ -201,8 +198,6 @@ def convert(t, states, in_frame, out_frame, profiler=None, **kwargs):
     rets[3:, ...] = out_states.velocity.d_xyz.to(units.m / units.s).value
 
     logger.info("frames:convert:completed")
-    if profiler is not None:
-        profiler.stop(f"frames:convert:{in_frame}->{out_frame}")
 
     return rets
 

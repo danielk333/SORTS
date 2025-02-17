@@ -14,7 +14,6 @@ from mpl_toolkits.mplot3d import Axes3D
 from astropy.time import Time
 
 from sorts.propagator import Orekit
-from sorts.profiling import Profiler
 
 try:
     pth = pathlib.Path(__file__).parent.resolve()
@@ -60,10 +59,6 @@ np.random.seed(23984)
 
 states = []
 
-ph = Profiler()
-ph.start('total')
-prop.profiler = ph
-
 for mci in range(10):
     print(f'MC-iteration {mci+1}/10')
     state = prop.propagate(
@@ -76,13 +71,7 @@ for mci in range(10):
     )
     states += [state]
 
-ph.stop('total')
 print('With heartbeat')
-print(ph.fmt(normalize='total'))
-
-p = Profiler()
-p.start('total')
-prop.profiler = p
 
 #Reference simulation without force modifying
 prop.set(heartbeat=False)
@@ -95,9 +84,7 @@ states0 = prop.propagate(
     C_D = 2.3,
 )
 
-p.stop('total')
 print('No heartbeat')
-print(p.fmt(normalize='total'))
 
 fig = plt.figure(figsize=(15,15))
 ax = fig.add_subplot(111, projection='3d')

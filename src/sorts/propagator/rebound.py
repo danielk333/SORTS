@@ -227,8 +227,6 @@ class Rebound(Propagator):
         #TODO: UPDATE THIS DOCSTRING
         """
 
-        if self.profiler is not None:
-            self.profiler.start("Rebound:propagate")
         logger.debug(f"Rebound:propagate:len(t) = {len(t)}")
 
         t, epoch = self.convert_time(t, epoch)
@@ -306,7 +304,6 @@ class Rebound(Propagator):
                 state0_cart,
                 in_frame=self.settings["in_frame"],
                 out_frame=self.geo_internal_frame,
-                profiler=self.profiler,
             )
 
             if len(state0_cart.shape) > 1:
@@ -319,7 +316,6 @@ class Rebound(Propagator):
                 state0_cart,
                 in_frame=self.settings["in_frame"],
                 out_frame=self.internal_frame,
-                profiler=self.profiler,
             )
 
         if len(state0_cart.shape) > 1:
@@ -402,7 +398,6 @@ class Rebound(Propagator):
                 states[:, :, ni],
                 in_frame=int_frame_,
                 out_frame=self.settings["out_frame"],
-                profiler=self.profiler,
             )
 
         states = states[:, t_restore, :]
@@ -420,7 +415,6 @@ class Rebound(Propagator):
                     massive_states[:, :, ni],
                     in_frame=int_frame_,
                     out_frame=self.settings["out_frame"],
-                    profiler=self.profiler,
                 )
 
             massive_states = massive_states[:, t_restore, :]

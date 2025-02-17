@@ -56,8 +56,6 @@ class Kepler(Propagator):
         :return: 6-D Cartesian state vectors in SI-units.
 
         """
-        if self.profiler is not None:
-            self.profiler.start("Kepler:propagate")
         logger.debug(f"Kepler:propagate:len(t) = {len(t)}")
 
         t, epoch = self.convert_time(t, epoch)
@@ -66,8 +64,6 @@ class Kepler(Propagator):
         if not isinstance(tv, np.ndarray):
             tv = np.array([tv])
 
-        if self.profiler is not None:
-            self.profiler.start("Kepler:propagate:in_frame")
         if isinstance(state0, pyorb.Orbit):
             orb = state0.copy()
         elif isinstance(state0, dict):
@@ -79,7 +75,6 @@ class Kepler(Propagator):
                 orb.cartesian,
                 in_frame=self.settings["in_frame"],
                 out_frame="GCRS",
-                profiler=self.profiler,
             )
             orb.cartesian = cart0
         else:
@@ -88,19 +83,13 @@ class Kepler(Propagator):
                 state0,
                 in_frame=self.settings["in_frame"],
                 out_frame="GCRS",
-                profiler=self.profiler,
             )
             kw = {key: val for key, val in zip(pyorb.Orbit.CARTESIAN, cart0.flatten())}
             kw.update(kwargs)
             orb = pyorb.Orbit(**kw)
-        if self.profiler is not None:
-            self.profiler.stop("Kepler:propagate:in_frame")
 
         orb.direct_update = False
         orb.auto_update = False
-
-        if self.profiler is not None:
-            self.profiler.start("Kepler:propagate:mean_motion")
 
         kw_in = {key: val for key, val in zip(pyorb.Orbit.KEPLER, orb.kepler.flatten())}
         orb.add(num=len(tv), **kw_in)
@@ -108,24 +97,13 @@ class Kepler(Propagator):
         orb.propagate(tv)
         orb.calculate_cartesian()
 
-        if self.profiler is not None:
-            self.profiler.stop("Kepler:propagate:mean_motion")
-        if self.profiler is not None:
-            self.profiler.start("Kepler:propagate:out_frame")
-
         states = frames.convert(
             times,
             orb._cart,
             in_frame="GCRS",
             out_frame=self.settings["out_frame"],
-            profiler=self.profiler,
         )
 
-        if self.profiler is not None:
-            self.profiler.stop("Kepler:propagate:out_frame")
-
-        if self.profiler is not None:
-            self.profiler.stop("Kepler:propagate")
         logger.debug("Kepler:propagate:completed")
 
         return states
