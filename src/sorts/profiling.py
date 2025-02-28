@@ -1,6 +1,5 @@
-"""Sets up a logging framework that can be imported and used anywhere.
+"""Sets up a logging framework that can be imported and used anywhere."""
 
-"""
 import json
 import logging
 import datetime
@@ -12,7 +11,17 @@ import numpy as np
 from tabulate import tabulate
 
 # ASK: this file is skipped from logger refactoring
+# RES: here we should see if the way we configure logging by default is good or not and refactor that as
+# needed, e.g. if we look at
+# https://github.com/danielk333/runningman/blob/main/src/runningman/manager.py#L125
+# this is how i setup logging there, i think this code is similar
+# We should aim for the pattern of: if the user wants to log they can setup logging themself or
+# use a convenience function that does `setup_logging(bunch of useful parameters)` and it will configure
+# most things
+
+
 # ASK: this file the older profiler itself, shall we remove the whole thing?
+# RES: see the todo to make something that can profile memory leaks exclusively instead
 class Profiler:
     """Performance profiler class.
 

@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-"""Contains all helper functions to automate parallelization with MPI, handle caching and stepping of simulations.
-
-"""
+"""Contains all helper functions to automate parallelization with MPI, handle caching and stepping of simulations."""
 
 # Python standard import
 import os
@@ -33,6 +31,7 @@ from . import profiling
 
 logger = logging.getLogger(__name__)
 
+
 def copy_tree(src, dst, linkfiles=False):
     """Copy path on thread rank=0 with :code:`shutil.copytree` or :code:`copy2` for files. If :code:`linkfiles` is true, files are soft-linked rather then copied."""
     if src.is_dir():
@@ -48,6 +47,11 @@ def copy_tree(src, dst, linkfiles=False):
 
 
 # ASK: the purpose/usage of this function will be affected
+# RES: I kind of like the idea of this class from the sense that it aims to make
+# simulation building much easier since there are always pattern you will need
+# like caching output of steps and trivially parallelizing iterations
+# but it will need to be refactored now that we change the rest - i think this is one of the functions
+# that might get cut once we do that
 def log_exceptions(func):
     """Enrich the exception error messages by logging the `args` and `kwargs`"""
 
@@ -161,6 +165,7 @@ def MPI_action(action, iterable=False, root=0):
 
 # ASK: we will always instantiate a logger now
 # ASK: the log param is removed, I thin we don't need it?
+# RES: yes that sounds correct!
 def iterable_step(iterable, MPI=False, reduce=None):
     """Simulation step iteration decorator.
 
@@ -221,6 +226,7 @@ def iterable_step(iterable, MPI=False, reduce=None):
                 _iters += 1
 
                 # ASK: per step reporting of time elapsed and time left is removed as a result of removing the profiler
+                # RES: yes that looks correct!
 
             return rets
 
@@ -360,6 +366,7 @@ def iterable_cache(steps, caches, MPI=False, reduce=None):
                 _iters += 1
 
                 # ASK: per step reporting of time elapsed and time left is removed as a result of removing the profiler
+                # RES: Yes!
 
             return rets
 
@@ -461,6 +468,8 @@ def cached_step(caches):
 
 
 # ASK: we will always instantiate a logger now
+# RES: yes - and this class will also need to be refactored,
+# there are quite a few choices here that are questionable
 class Simulation:
     """Convenience simulation handler, creates a step-by-step simulation sequence and creates file system structure for saving of data to disk.
 
@@ -515,6 +524,9 @@ class Simulation:
 
         # ASK: is part requires more adjustments, now the param `path`, `file_level`, `term_level` are gone
         # ASK: do we need a per simulation logger?
+        # RES: i think this whole scheduler part will be refactored away anyway
+        # now that i look a bit at this class i think we should instead split a lot of this out into
+        # "lego" pieces that can be used and not force the structure of the class itself anyway
         if self.scheduler is not None:
             self.scheduler.logger = logger
 
@@ -679,7 +691,7 @@ class Simulation:
         #   - log dir
         #   - log to file
         #   - branch based simulation runs
-        
+        # RES: I think we can assume logging is setup outside of this functionality now so these can be removed
         # Make sure log directory exists
         (self.root / name / "logs").mkdir(exist_ok=True)
 
@@ -746,6 +758,7 @@ class Simulation:
         """Parses the arguments from a terminal command-line execution of the simulation and executes appropriately"""
 
         # ASK: is info level good enough?
+        # RES: yes it should be
         logger.info("Simulation:parse_cmd:parsing command")
 
         arg_parser = argparse.ArgumentParser(description="Simulation command-line interface")
