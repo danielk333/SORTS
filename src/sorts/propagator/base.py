@@ -5,8 +5,8 @@
 """
 
 # Python standard import
+import logging
 from abc import ABC, abstractmethod
-
 
 # Third party import
 import numpy as np
@@ -14,6 +14,7 @@ from astropy.time import Time, TimeDelta
 
 # Local import
 
+logger = logging.getLogger(__name__)
 
 class Propagator(ABC):
     DEFAULT_SETTINGS = dict(
@@ -24,23 +25,19 @@ class Propagator(ABC):
         heartbeat=False,
     )
 
-    def __init__(self, settings=None, profiler=None, logger=None):
+    def __init__(self, settings=None):
         self.settings = dict()
-        self.profiler = profiler
-        self.logger = logger
 
         self.settings.update(self.DEFAULT_SETTINGS)
         if settings is not None:
             self.settings.update(settings)
             self._check_settings()
 
-        if self.logger is not None:
-            for key in self.settings:
-                self.logger.debug(f"Propagator:settings:{key} = {self.settings[key]}")
+        for key in self.settings:
+            logger.debug(f"Propagator:settings:{key} = {self.settings[key]}")
 
     def _check_settings(self):
-        if self.logger is not None:
-            self.logger.debug(f"Propagator:_check_settings")
+        logger.debug(f"Propagator:_check_settings")
 
         for key_s, val_s in self.settings.items():
             if key_s not in self.DEFAULT_SETTINGS:
@@ -80,10 +77,7 @@ class Propagator(ABC):
         """Convert input time and epoch variables to :code:`astropy.TimeDelta`
         and :code:`astropy.Time` variables of the correct format and scale.
         """
-        if self.profiler is not None:
-            self.profiler.start("Propagator:convert_time")
-        if self.logger is not None:
-            self.logger.debug(f"Propagator:convert_time")
+        logger.debug(f"Propagator:convert_time")
 
         if epoch is None:
             pass
@@ -129,10 +123,7 @@ class Propagator(ABC):
         else:
             t = TimeDelta(t, format=self.settings["time_format"], scale=self.settings["time_scale"])
 
-        if self.profiler is not None:
-            self.profiler.stop("Propagator:convert_time")
-        if self.logger is not None:
-            self.logger.debug(f"Propagator:convert_time:completed")
+        logger.debug(f"Propagator:convert_time:completed")
 
         return t, epoch
 

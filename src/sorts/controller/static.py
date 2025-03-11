@@ -4,11 +4,13 @@
 
 """
 
+import logging
 import numpy as np
 
 from .radar_controller import RadarController
 from ..radar.scans import Beampark
 
+logger = logging.getLogger(__name__)
 
 class Static(RadarController):
     """Takes in a direction and creates a static radar in beam park mode."""
@@ -24,20 +26,17 @@ class Static(RadarController):
         azimuth=0.0,
         elevation=90.0,
         r=np.linspace(300e3, 1000e3, num=10),
-        profiler=None,
-        logger=None,
         meta=None,
         **kwargs
     ):
-        super().__init__(radar.copy(), profiler=profiler, logger=logger, meta=meta, **kwargs)
+        super().__init__(radar.copy(), meta=meta, **kwargs)
         if self.meta["dwell"] is None:
             self.meta["dwell"] = 0.1
 
         self.scan = Beampark(azimuth=azimuth, elevation=elevation, dwell=self.meta["dwell"])
         self.r = r
 
-        if self.logger is not None:
-            self.logger.info(f"Static:init")
+        logger.info(f"Static:init")
 
         self.point_radar()
         self.turn_on(self.radar)
@@ -49,8 +48,6 @@ class Static(RadarController):
 
     def point_radar(self):
         """Assumes t is not array"""
-        if self.profiler is not None:
-            self.profiler.start("Static:generator:point_radar")
 
         t = 0.0
         point_rx_to_tx = []
@@ -84,9 +81,6 @@ class Static(RadarController):
             RadarController._point_station(rx, rx_point)
 
         RadarController.coh_integration(radar, self.meta["dwell"])
-
-        if self.profiler is not None:
-            self.profiler.stop("Static:generator:point_radar")
 
     def generator(self, t):
         for ti in range(len(t)):

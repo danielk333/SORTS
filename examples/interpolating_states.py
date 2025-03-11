@@ -8,17 +8,13 @@ Interpolation
 import numpy as np
 import matplotlib.pyplot as plt
 
-from sorts.profiling import Profiler
 from sorts.propagator import SGP4
 from sorts import interpolation
-
-p = Profiler()
 
 prop = SGP4(
     settings = dict(
         out_frame='TEME',
     ),
-    profiler = p,
 )
 
 state0 = np.array([-7100297.113,-3897715.442,18568433.707,86.771,-3407.231,2961.571])

@@ -4,8 +4,7 @@
 TSDR beam park simulation
 ===========================
 '''
-import pathlib
-import configparser
+import pathlib, logging
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,6 +13,8 @@ import sorts
 from sorts import Simulation
 from sorts import MPI_single_process, MPI_action, iterable_step, store_step, cached_step, iterable_cache
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 class ObservedScanning(sorts.scheduler.StaticList, sorts.scheduler.ObservedParameters):
     pass
@@ -77,8 +78,7 @@ class Scanning(Simulation):
 
         super().__init__(*args, **kwargs)
 
-        if self.logger is not None:
-            self.logger.always(f'Population of size {len(population)} objects loaded.')
+        logger.info(f'Population of size {len(population)} objects loaded.')
 
         self.steps['propagate'] = self.get_states
         self.steps['passes'] = self.find_passes
@@ -87,7 +87,7 @@ class Scanning(Simulation):
 
     @MPI_action(action='barrier')
     @store_step(store='object_prop')
-    @iterable_step(iterable='inds', MPI=True, log=True, reduce=count)
+    @iterable_step(iterable='inds', MPI=True, reduce=count)
     @cached_step(caches='h5')
     def get_states(self, index, item, **kwargs):
         obj = self.population.get_object(item)
@@ -101,7 +101,7 @@ class Scanning(Simulation):
         return state, t
 
     @MPI_action(action='barrier')
-    @iterable_cache(steps='propagate', caches='h5', MPI=True, log=True, reduce=lambda t,x: None)
+    @iterable_cache(steps='propagate', caches='h5', MPI=True, reduce=lambda t,x: None)
     @cached_step(caches='pickle')
     def find_passes(self, index, item, **kwargs):
         state, t = item
@@ -109,7 +109,7 @@ class Scanning(Simulation):
         return passes
 
     @MPI_action(action='barrier')
-    @iterable_cache(steps='passes', caches='pickle', MPI=True, log=True, reduce=lambda t,x: None)
+    @iterable_cache(steps='passes', caches='pickle', MPI=True, reduce=lambda t,x: None)
     @cached_step(caches='pickle')
     def observe_passes(self, index, item, **kwargs):
         data = scheduler.observe_passes(item, space_object = self.population.get_object(index), snr_limit=False)
@@ -117,7 +117,7 @@ class Scanning(Simulation):
 
     @store_step(store='detected_objects')
     @MPI_action(action='gather', root=0)
-    @iterable_cache(steps='observe', caches='pickle', MPI=True, log=True, reduce=_sum)
+    @iterable_cache(steps='observe', caches='pickle', MPI=True, reduce=_sum)
     def count_detected(self, index, item, **kwargs):
         detected_ = 0.0
         for pass_ in item:
@@ -140,17 +140,10 @@ sim = Scanning(
     population = pop,
     scheduler = scheduler,
     root = simulation_root,
-    logger=True,
-    profiler=True,
 )
-
-sim.profiler.start('total')
 
 sim.run()
 
 print(f'Propagations: {sim.object_prop}')
-
-sim.profiler.stop('total')
-sim.logger.always('\n'+sim.profiler.fmt(normalize='total'))
 
 print(f'Total detected: {sim.total_detected()}')

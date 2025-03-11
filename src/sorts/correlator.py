@@ -8,9 +8,12 @@ Currently only works for Mono-static measurements.
 probability of what object generated the data. Probability comes from measurement covariance.
 """
 
+import logging
 from tqdm import tqdm
 import h5py
 from astropy.time import Time
+
+logger = logging.getLogger(__name__)
 
 try:
     from mpi4py import MPI
@@ -192,8 +195,6 @@ def correlate(
     meta_variables=[],
     n_closest=1,
     scalar_metric=True,
-    profiler=None,
-    logger=None,
     MPI=False,
     save_states=False,
 ):
@@ -258,10 +259,6 @@ def correlate(
     scalar_metric : bool
         indicats if the metric returns a scalar or a vector. If `False` the
         `metric_reduce` is expected to only take one argument to reduce the vectorized results.
-    profiler : Profiler
-        Profiler instance for checking function performance.
-    logger : logging.Logger
-        Logger instance for logging the execution of the function.
     MPI : bool
         If True use internal parallelization with MPI to calculate correlation.
         Turn to False to externally parallelize with MPI.
@@ -361,9 +358,8 @@ def correlate(
         pbar.set_description("Correlating object {} ".format(ind))
         pbar.update(1)
 
-        if logger is not None:
-            logger.debug("correlating {}/{}".format(ind + 1, len(population)))
-            logger.debug(obj)
+        logger.debug("correlating {}/{}".format(ind + 1, len(population)))
+        logger.debug(obj)
 
         object_correlation_data = []
 
@@ -489,25 +485,21 @@ def correlate(
         indecies_pop[comm.rank] = index_pop
 
         if comm.rank == 0:
-            if logger is not None:
-                logger.debug("Receiving all results <barrier>")
+            logger.debug("Receiving all results <barrier>")
 
             for T in range(1, comm.size):
                 matches_pop[T] = comm.recv(source=T, tag=T * 10 + 1)
                 indecies_pop[T] = comm.recv(source=T, tag=T * 10 + 2)
                 correlation_data.update(comm.recv(source=T, tag=T * 10 + 3))
-                if logger is not None:
-                    logger.debug(f"Received data from PID{T}")
+                logger.debug(f"Received data from PID{T}")
         else:
-            if logger is not None:
-                logger.debug("Distributing all results to process 0 <barrier>")
+            logger.debug("Distributing all results to process 0 <barrier>")
 
             comm.send(matches_pop[comm.rank], dest=0, tag=comm.rank * 10 + 1)
             comm.send(indecies_pop[comm.rank], dest=0, tag=comm.rank * 10 + 2)
             comm.send(correlation_data, dest=0, tag=comm.rank * 10 + 3)
 
-        if logger is not None:
-            logger.debug("---> Distributing done </barrier>")
+        logger.debug("---> Distributing done </barrier>")
 
         if comm.rank == 0:
             match_pop = np.concatenate(matches_pop)

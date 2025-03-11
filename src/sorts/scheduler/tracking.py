@@ -3,6 +3,7 @@
 """Basis for developing a scheduler for tracking multiple space objects.
 
 """
+import logging
 from abc import abstractmethod
 
 import numpy as np
@@ -12,6 +13,7 @@ from ..controller import Tracker
 from .scheduler import Scheduler
 from ..passes import equidistant_sampling
 
+logger = logging.getLogger(__name__)
 
 class Tracking(Scheduler):
     """#TODO: Docstring"""
@@ -27,13 +29,11 @@ class Tracking(Scheduler):
         controller_args=dict(return_copy=True),
         max_dpos=1e3,
         max_samp=30.0,
-        profiler=None,
-        logger=None,
         use_pass_states=True,
         calculate_max_snr=False,
         collect_passes=False,
     ):
-        super().__init__(radar, profiler=profiler, logger=logger)
+        super().__init__(radar)
         self.epoch = epoch
         self.controller = controller
         self.controller_args = controller_args
@@ -88,46 +88,31 @@ class Tracking(Scheduler):
         else:
             t = np.arange(self.start_time, self.end_time, self.max_samp)
 
-        if self.logger is not None:
-            self.logger.info(f"Tracking:get_passes(ind={ind}):propagating {len(t)} steps")
-        if self.profiler is not None:
-            self.profiler.start("Tracking:get_passes:propagating")
+        logger.info(f"Tracking:get_passes(ind={ind}):propagating {len(t)} steps")
 
         states = self.space_objects[ind].get_state(t - dt)
         if self.use_pass_states:
             self.states[ind] = states
             self.states_t[ind] = t
 
-        if self.profiler is not None:
-            self.profiler.stop("Tracking:get_passes:propagating")
-        if self.logger is not None:
-            self.logger.info(f"Tracking:get_passes(ind={ind}):propagating complete")
+        logger.info(f"Tracking:get_passes(ind={ind}):propagating complete")
 
-        if self.profiler is not None:
-            self.profiler.start("Tracking:get_passes:find_passes")
         self.passes[ind] = self.radar.find_passes(t, states, cache_data=True)
-        if self.profiler is not None:
-            self.profiler.stop("Tracking:get_passes:find_passes")
 
         # we may need SNR to plan observations
         for txi in range(len(self.radar.tx)):
             for rxi in range(len(self.radar.rx)):
-                if self.logger is not None:
-                    self.logger.info(
-                        f"Tracking:get_passes(ind={ind}):tx{txi}-rx{rxi} {len(self.passes[ind][txi][rxi])} passes"
-                    )
+                logger.info(
+                    f"Tracking:get_passes(ind={ind}):tx{txi}-rx{rxi} {len(self.passes[ind][txi][rxi])} passes"
+                )
                 if not self.calculate_max_snr:
                     continue
                 for ps in self.passes[ind][txi][rxi]:
-                    if self.profiler is not None:
-                        self.profiler.start("Tracking:get_passes:calculate_max_snr")
                     ps.calculate_max_snr(
                         rx=self.radar.rx[rxi],
                         tx=self.radar.tx[txi],
                         diameter=self.space_objects[ind].d,
                     )
-                    if self.profiler is not None:
-                        self.profiler.stop("Tracking:get_passes:calculate_max_snr")
 
         return self.passes[ind], states, t
 
@@ -138,8 +123,7 @@ class Tracking(Scheduler):
 
     def get_controllers(self):
         """#TODO: Docstring"""
-        if self.logger is not None:
-            self.logger.debug(f"Tracking:get_controllers")
+        logger.debug(f"Tracking:get_controllers")
 
         ctrls = []
         for ind in range(len(self.space_objects)):

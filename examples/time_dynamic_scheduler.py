@@ -14,7 +14,6 @@ import sorts
 
 from sorts.scheduler import PriorityTracking, ObservedParameters
 from sorts import SpaceObject
-from sorts.profiling import Profiler
 from sorts.propagator import SGP4
 
 
@@ -29,8 +28,6 @@ poptions = dict(
 )
 
 epoch = Time(53005.0, format='mjd')
-
-logger = sorts.profiling.get_logger('tracking')
 
 np.random.seed(23847)
 
@@ -123,7 +120,6 @@ scheduler = ObservedTracking(
     max_dpos = 1e4,
     epoch = epoch,
     priority = [0.2, 1.0],
-    logger = logger,
     use_pass_states = True,
     collect_passes = True,
 )

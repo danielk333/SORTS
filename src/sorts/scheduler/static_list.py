@@ -4,25 +4,23 @@
 
 """
 
-import numpy as np
+import logging
 
 from .scheduler import Scheduler
 
+logger = logging.getLogger(__name__)
 
 class StaticList(Scheduler):
     """#TODO: Docstring"""
 
-    def __init__(self, radar, controllers, profiler=None, logger=None, **kwargs):
+    def __init__(self, radar, controllers, **kwargs):
         super().__init__(
             radar=radar,
-            logger=logger,
-            profiler=profiler,
         )
         self.controllers = controllers
 
     def update(self, controllers):
-        if self.logger is not None:
-            self.logger.debug(f"StaticList:update:id(controllers) = {id(controllers)}")
+        logger.debug(f"StaticList:update:id(controllers) = {id(controllers)}")
         self.controllers = controllers
 
     def get_controllers(self):

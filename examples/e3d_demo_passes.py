@@ -6,7 +6,7 @@ Finding passes over EISCAT 3D Demo
 
 '''
 
-import pathlib
+import logging
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -23,9 +23,6 @@ print(f'lat={eiscat3d.tx[0].lat:.2f} deg, lon={eiscat3d.tx[0].lon:.2f} deg')
 #############
 # CHOOSE OBJECTS
 #############
-
-profiler = sorts.profiling.Profiler()
-logger = sorts.profiling.get_logger()
 
 # ENVISAT
 # tles = [

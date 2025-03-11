@@ -10,13 +10,9 @@ import matplotlib.pyplot as plt
 from astropy.time import Time
 
 import pyorb
-from sorts.profiling import Profiler
 from sorts.propagator import Kepler
 
-p = Profiler()
-p.start('total')
-
-prop = Kepler(profiler=p)
+prop = Kepler()
 
 orb = pyorb.Orbit(
     M0=pyorb.M_earth,
@@ -58,11 +54,6 @@ states_gcrs_3 = prop.propagate(
     M0=pyorb.M_earth,
     epoch=mjd0,
 )
-
-p.stop('total')
-
-print(p.fmt(normalize='total'))
-
 
 fig = plt.figure(figsize=(15, 15))
 ax = fig.add_subplot(221, projection='3d')

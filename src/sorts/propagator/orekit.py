@@ -22,9 +22,8 @@ Simple propagation showing time difference due to loading of model data.
 """
 
 # Python standard import
-import copy
+import copy, pathlib, logging
 import urllib.request
-import pathlib
 
 # Third party import
 import numpy as np
@@ -56,6 +55,8 @@ import org.orekit.models.earth.atmosphere as orekit_atm
 import org
 
 from orekit import JArray_double
+
+logger = logging.getLogger(__name__)
 
 JAVA_VM = False
 
@@ -149,21 +150,17 @@ class Orekit(Propagator):
     class OrekitVariableStep(PythonOrekitStepHandler):
         """Class for handling the steps."""
 
-        def set_params(self, t, start_date, states_pointer, outputFrame, heartbeat, profiler=None):
+        def set_params(self, t, start_date, states_pointer, outputFrame, heartbeat):
             self.t = t
             self.start_date = start_date
             self.states_pointer = states_pointer
             self.outputFrame = outputFrame
-            self.profiler = profiler
             self.__heartbeat = heartbeat
 
         def init(self, s0, t):
             pass
 
         def handleStep(self, interpolator, isLast):
-            if self.profiler is not None:
-                self.profiler.start("Orekit:propagate:steps:step-handler")
-
             state1 = interpolator.getCurrentState()
             state0 = interpolator.getPreviousState()
 
@@ -173,9 +170,6 @@ class Orekit(Propagator):
             t_filt = np.logical_and(np.abs(self.t) >= np.abs(t0), np.abs(self.t) <= np.abs(t1))
 
             for ti, t in zip(np.where(t_filt)[0], self.t[t_filt]):
-                if self.profiler is not None:
-                    self.profiler.start("Orekit:propagate:steps:step-handler:getState")
-
                 t_date = self.start_date.shiftedBy(float(t))
 
                 _state = interpolator.getInterpolatedState(t_date)
@@ -196,12 +190,6 @@ class Orekit(Propagator):
                     self.__heartbeat(
                         float(t), self.states_pointer[:, ti], interpolator=interpolator
                     )
-
-                if self.profiler is not None:
-                    self.profiler.stop("Orekit:propagate:steps:step-handler:getState")
-
-            if self.profiler is not None:
-                self.profiler.stop("Orekit:propagate:steps:step-handler")
 
     DEFAULT_SETTINGS = copy.copy(Propagator.DEFAULT_SETTINGS)
     DEFAULT_SETTINGS.update(
@@ -289,18 +277,14 @@ class Orekit(Propagator):
         super(Orekit, self).__init__(settings=settings, **kwargs)
         init_vm()
 
-        if self.logger is not None:
-            self.logger.debug(f"sorts.propagator.Orekit:init")
-        if self.profiler is not None:
-            self.profiler.start("Orekit:init")
+        logger.debug(f"sorts.propagator.Orekit:init")
 
         if isinstance(orekit_data, pathlib.Path):
             orekit_data = str(orekit_data)
 
         setup_orekit_curdir(filename=orekit_data)
 
-        if self.logger is not None:
-            self.logger.debug(f"Orekit:init:orekit-data = {orekit_data}")
+        logger.debug(f"Orekit:init:orekit-data = {orekit_data}")
 
         self.utc = TimeScalesFactory.getUTC()
 
@@ -365,15 +349,11 @@ class Orekit(Propagator):
 
                 self._forces["perturbation_{}".format(body)] = perturbation
 
-        if self.logger is not None:
-            for key in self._forces:
-                if self._forces[key] is not None:
-                    self.logger.debug(f"Orekit:init:_forces:{key} = {type(self._forces[key])}")
-                else:
-                    self.logger.debug(f"Orekit:init:_forces:{key} = None")
-
-        if self.profiler is not None:
-            self.profiler.stop("Orekit:init")
+        for key in self._forces:
+            if self._forces[key] is not None:
+                logger.debug(f"Orekit:init:_forces:{key} = {type(self._forces[key])}")
+            else:
+                logger.debug(f"Orekit:init:_forces:{key} = None")
 
     def __str__(self):
         ret = ""
@@ -427,9 +407,6 @@ class Orekit(Propagator):
         See `Orekit FramesFactory <https://www.orekit.org/static/apidocs/org/orekit/frames/FramesFactory.html>`_
         """
 
-        if self.profiler is not None:
-            self.profiler.start("Orekit:get_frame")
-
         if name == "EME":
             frame = FramesFactory.getEME2000()
         elif name == "EME2000":
@@ -457,9 +434,6 @@ class Orekit(Propagator):
         else:
             raise Exception('Frame "{}" not recognized'.format(name))
 
-        if self.profiler is not None:
-            self.profiler.stop("Orekit:get_frame")
-
         return frame
 
     def _construct_propagator(self, initialOrbit):
@@ -469,9 +443,6 @@ class Orekit(Propagator):
 
         Configure the integrator tolerances using the orbit.
         """
-
-        if self.profiler is not None:
-            self.profiler.start("Orekit:propagate:construct_propagator")
 
         self._tolerances = NumericalPropagator.tolerances(
             self.settings["position_tolerance"], initialOrbit, initialOrbit.getType()
@@ -494,9 +465,6 @@ class Orekit(Propagator):
 
         self.propagator = propagator
 
-        if self.profiler is not None:
-            self.profiler.stop("Orekit:propagate:construct_propagator")
-
     def _set_forces(self, A, cd, cr):
         """Using the spacecraft specific parameters, set the drag force and radiation pressure models.
 
@@ -505,13 +473,9 @@ class Orekit(Propagator):
             * `radiation <https://www.orekit.org/static/apidocs/org/orekit/forces/radiation/package-summary.html>`_
         """
 
-        if self.profiler is not None:
-            self.profiler.start("Orekit:propagate:set_forces")
-
-        if self.logger is not None:
-            self.logger.debug(f"Orekit:set_forces:A = {A}")
-            self.logger.debug(f"Orekit:set_forces:cd = {cd}")
-            self.logger.debug(f"Orekit:set_forces:cr = {cr}")
+        logger.debug(f"Orekit:set_forces:A = {A}")
+        logger.debug(f"Orekit:set_forces:cd = {cd}")
+        logger.debug(f"Orekit:set_forces:cr = {cr}")
 
         __params = [A, cd, cr]
 
@@ -522,8 +486,7 @@ class Orekit(Propagator):
             if not np.allclose(np.array(__params, dtype=np.float64), self.__params, rtol=1e-3):
                 re_calc = True
 
-        if self.logger is not None:
-            self.logger.debug(f"Orekit:set_forces:re_calc = {re_calc}")
+        logger.debug(f"Orekit:set_forces:re_calc = {re_calc}")
 
         self.atmosphere_instance = None
         self.spacecraft_drag_model = None
@@ -569,9 +532,6 @@ class Orekit(Propagator):
 
             self.UpdateForces()
 
-        if self.profiler is not None:
-            self.profiler.stop("Orekit:propagate:set_forces")
-
     def UpdateForces(self):
         for force_name, force in self._forces.items():
             self.propagator.addForceModel(force)
@@ -595,8 +555,6 @@ class Orekit(Propagator):
             * float C_R: Radiation pressure coefficient
             * float m: Mass of object in kg
         """
-        if self.profiler is not None:
-            self.profiler.start("Orekit:propagate")
 
         if self.settings["in_frame"].startswith("Orekit-"):
             self.inputFrame = self._get_frame(self.settings["in_frame"].replace("Orekit-", ""))
@@ -652,8 +610,7 @@ class Orekit(Propagator):
         if not isinstance(t, np.ndarray):
             t = np.array([t])
 
-        if self.logger is not None:
-            self.logger.debug(f"Orekit:propagate:len(t) = {len(t)}")
+        logger.debug(f"Orekit:propagate:len(t) = {len(t)}")
 
         if not orekit_in_frame:
             state0_cart = frames.convert(
@@ -661,8 +618,6 @@ class Orekit(Propagator):
                 state0_cart,
                 in_frame=self.settings["in_frame"],
                 out_frame="GCRS",
-                profiler=self.profiler,
-                logger=self.logger,
             )
 
         initialDate = mjd2absdate(mjd0, self.utc)
@@ -712,9 +667,6 @@ class Orekit(Propagator):
         state = np.empty((6, len(t)), dtype=np.float64)
         step_handler = Orekit.OrekitVariableStep()
 
-        if self.profiler is not None:
-            self.profiler.start("Orekit:propagate:steps")
-
         if self.settings["heartbeat"]:
             __heartbeat = self.heartbeat
         else:
@@ -733,7 +685,6 @@ class Orekit(Propagator):
                 _state,
                 self.outputFrame,
                 __heartbeat,
-                profiler=self.profiler,
             )
 
             self.propagator.setMasterMode(step_handler)
@@ -756,7 +707,6 @@ class Orekit(Propagator):
                 _state,
                 self.outputFrame,
                 __heartbeat,
-                profiler=self.profiler,
             )
 
             self.propagator.setMasterMode(step_handler)
@@ -773,15 +723,8 @@ class Orekit(Propagator):
                 state,
                 in_frame="GCRS",
                 out_frame=self.settings["out_frame"],
-                profiler=self.profiler,
-                logger=self.logger,
             )
 
-        if self.profiler is not None:
-            self.profiler.stop("Orekit:propagate:steps")
-            self.profiler.stop("Orekit:propagate")
-
-        if self.logger is not None:
-            self.logger.debug(f"Orekit:propagate:completed")
+        logger.debug(f"Orekit:propagate:completed")
 
         return state

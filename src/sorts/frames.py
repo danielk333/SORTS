@@ -6,6 +6,7 @@ Main usage is the :code:`convert` function that wraps Astropy frame transformati
 """
 
 # Python standard import
+import logging
 from collections import OrderedDict
 
 # Third party import
@@ -22,6 +23,7 @@ except ImportError:
 
 from pyant.coordinates import sph_to_cart, cart_to_sph, vector_angle
 
+logger = logging.getLogger(__name__)
 
 """List of astropy frames
 """
@@ -134,7 +136,7 @@ def get_solarsystem_body_states(bodies, epoch, kernel, units=None):
     return states
 
 
-def convert(t, states, in_frame, out_frame, logger=None, profiler=None, **kwargs):
+def convert(t, states, in_frame, out_frame, **kwargs):
     """Perform predefined coordinate transformations using Astropy.
     Always returns a copy of the array.
 
@@ -143,19 +145,13 @@ def convert(t, states, in_frame, out_frame, logger=None, profiler=None, **kwargs
         rows 1-3 are position and 4-6 are velocity.
     :param str in_frame: Name of the frame the input states are currently in.
     :param str out_frame: Name of the state to transform to.
-    :param Profiler profiler: Profiler instance for checking function performance.
-    :param logging.Logger logger: Logger instance for logging the execution of
-        the function.
     :rtype: numpy.ndarray
     :return: Size `(6,n)` matrix of states in SI units where rows
         1-3 are position and 4-6 are velocity.
 
     """
 
-    if logger is not None:
-        logger.info(f"frames:convert: in_frame={in_frame}, out_frame={out_frame}")
-    if profiler is not None:
-        profiler.start(f"frames:convert:{in_frame}->{out_frame}")
+    logger.info(f"frames:convert: in_frame={in_frame}, out_frame={out_frame}")
 
     in_frame = in_frame.upper()
     out_frame = out_frame.upper()
@@ -201,10 +197,7 @@ def convert(t, states, in_frame, out_frame, logger=None, profiler=None, **kwargs
     rets[:3, ...] = out_states.cartesian.xyz.to(units.m).value
     rets[3:, ...] = out_states.velocity.d_xyz.to(units.m / units.s).value
 
-    if logger is not None:
-        logger.info("frames:convert:completed")
-    if profiler is not None:
-        profiler.stop(f"frames:convert:{in_frame}->{out_frame}")
+    logger.info("frames:convert:completed")
 
     return rets
 
