@@ -195,11 +195,7 @@ for obj in objects:
     if len(ind) > 0:
         space_objects.append(pop.get_object(ind[0]))
 
-# ASK: is this log level good enough? or should we use print() instead?
-# RES: for examples i think we can use print or info since here the idea
-# is to show something to the user when running the example, info will
-# format it like the rest of the output so maybe that is the way to good
-# if we make sure its actually also setup to print to the console
+
 logger.info(f"Found {len(space_objects)} objects to track")
 
 # Initialize the scheduler

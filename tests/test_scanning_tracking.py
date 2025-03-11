@@ -65,8 +65,8 @@ class TestSimulateScan(unittest.TestCase):
         # dpt.orbit3D(ecef)
         #
 
-    # ASK: `simulate_scan` and/or `get_detections()` no longer exist?
-    # RES: almost all tests are so old they will need to be re-written once refactoring is done so yes, i think those are gone since a long time now
+    # TODO: refactor
+    # NOTE: `simulate_scan` and `get_detections()` no longer exist
     def test_get_detections(self):
         det_times = simulate_scan.get_detections(self.o, self.radar, 0.0, self.T, pass_dt=0.05)
 

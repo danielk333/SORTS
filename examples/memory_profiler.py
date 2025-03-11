@@ -7,10 +7,11 @@ Profiling memory leaks
 """
 import matplotlib.pyplot as plt
 
-# ASK: this is a profiler module, do we want to remove everything or keep some part of it?
-# RES: The memory profiling im still not entiarly satisfied with - if we refactor the profiler to
-# JUST do memory profiling (and use yappi for the runtime profiling) then it might be useful
-# for debugging long running dynamic simulations - so lets remove this and put that one a todo
+# TODO: revisit what we want to do with memory profiling
+#   notes from danielk:
+#     The memory profiling im still not entiarly satisfied with - if we refactor the profiler to
+#     JUST do memory profiling (and use yappi for the runtime profiling) then it might be useful
+#     for debugging long running dynamic simulations - so lets remove this and put that one a todo
 
 # As the profiler data is also stored in Python tracked memory
 # a diff of "nothing" will still result in more allocation of memory
