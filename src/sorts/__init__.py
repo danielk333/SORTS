@@ -6,8 +6,13 @@
 import ctypes
 import pathlib
 import sysconfig
-
+import logging
 from .version import __version__
+from .logger import config_logger
+
+# Get and config module-level logger
+logger = logging.getLogger(__name__)
+config_logger(logger)
 
 # Find suffix
 suffix = sysconfig.get_config_var("EXT_SUFFIX")
@@ -18,6 +23,7 @@ __sortspath__ = pathlib.Path(__file__).resolve().parent
 __libpath__ = __sortspath__ / ("clibsorts" + suffix)
 
 clibsorts = ctypes.cdll.LoadLibrary(str(__libpath__))
+
 
 # classes
 from .space_object import SpaceObject
