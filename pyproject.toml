@@ -1,6 +1,51 @@
+[project]
+name = "sorts"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+    "h5py>=3.2.1",
+    "matplotlib>=2.2.2",
+    "numpy>=1.14.3",
+    "scipy>=1.1.0",
+    "sgp4>=2.7",
+    "tabulate>=0.8.7",
+    "tqdm>=4.46.0",
+    "astropy>=4.1",
+    "xmlschema>=1.5.1",
+    "pyorb>=0.5.4",
+    "pyant>=0.11.0",
+    "yappi>=1.4.0",
+    "requests>=2.32.3",
+]
+
+[project.optional-dependencies]
+spacetrack = ["spacetrack>=1.0.1"]
+
+[dependency-groups]
+dev = [
+    "pytest>=6.2.5",
+    "sphinx>=4.2.0",
+    "flake8>=4.0.1",
+    "wheel>=0.37.0",
+    "build>=0.7.0",
+    "twine>=3.4.2",
+    # "pytestcov>= 4.1.0",
+    # "sphinxgallery>= 0.3.1",
+    "matplotlib>=3.5.1",
+    "nbsphinx>=0.8.8",
+    "ipykernel>=6.9.1",
+    "radon>=5.1.0",
+    "numpydoc>=1.2",
+    # "precommit> 3.0.0",
+    "black>=23.3.0",
+    "auditwheel>=5.4.0",
+    "patchelf>=0.14",
+    "sphinx_panels>=0.6.0",
+    "hawkmoth>=0.16.0",
+]
+
 [tool.black]
 line-length = 100
-target_version = ['py35', 'py36', 'py37', 'py38', 'py39', 'py310']
 
 [tool.pytest.ini_options]
 minversion = "6.0"
