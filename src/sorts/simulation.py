@@ -26,9 +26,6 @@ try:
 except ImportError:
     comm = None
 
-# Local import
-from . import profiling
-
 logger = logging.getLogger(__name__)
 
 

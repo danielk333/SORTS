@@ -10,8 +10,8 @@ import logging
 #   We should aim for the pattern of: if the user wants to log they can setup logging themself or
 #   use a convenience function that does `setup_logging(bunch of useful parameters)` and it will configure
 #   most things
-def config_logger(logger: logging.Logger):
-    """provide a module level logger config"""
+def apply_suggested_config(logger: logging.Logger):
+    """configure a logger to a suggested configuration"""
 
     handler = logging.StreamHandler()  # this goes to console
     formatter = logging.Formatter("[%(asctime)s]%(levelname)s:%(name)s:%(message)s")

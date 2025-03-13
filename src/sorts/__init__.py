@@ -1,18 +1,14 @@
 #!/usr/bin/env python
 
-"""SORTS package
-
-"""
+"""SORTS package"""
 import ctypes
 import pathlib
 import sysconfig
 import logging
 from .version import __version__
-from .logger import config_logger
 
 # Get and config module-level logger
 logger = logging.getLogger(__name__)
-config_logger(logger)
 
 # Find suffix
 suffix = sysconfig.get_config_var("EXT_SUFFIX")
@@ -46,7 +42,6 @@ from . import constants
 from . import frames
 from . import dates
 from . import plotting
-from . import profiling
 from . import controller
 from . import scheduler
 from . import passes
