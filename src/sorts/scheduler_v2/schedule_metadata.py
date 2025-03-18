@@ -13,7 +13,10 @@ ScheduleColumnName = t.Literal[
     "stt_tstmp",
     "coordinate_system",
     "coh_int_bandwidth",
-    "pointing",
+    # "pointing",
+    "pointing_p1",
+    "pointing_p2",
+    "pointing_p3",
     "ipp",
     "pulse_length",
 ]
@@ -30,16 +33,27 @@ schedule_column_names: dict[ScheduleColumnName, ScheduleColumnName] = {
 a dict for conveniently using `ScheduleColumnName` as literal values
 """
 
+# TODO: remove?
+#   seems pandas dataframe is a better choice for schedule,
+#   so this seems not needed
 schedule_column_dtypes: dict[ScheduleColumnName, DTypeLike] = {
-    "stt_tstmp": np.int8,
-    "coordinate_system": np.float64,
+    "stt_tstmp": "datetime64[ns]",
+    "coordinate_system": np.int8,
     "coh_int_bandwidth": np.float64,
-    "pointing": [("p1", np.float64), ("p2", np.float64), ("p3", np.float64)],
+    # "pointing": [("p1", np.float64), ("p2", np.float64), ("p3", np.float64)],
+    "pointing_p1": np.float64,
+    "pointing_p2": np.float64,
+    "pointing_p3": np.float64,
     "ipp": np.float64,
     "pulse_length": np.float64,
 }
 
-
-schedule_nprecord_dtype: list[tuple[ScheduleColumnName, DTypeLike]] = [
+# TODO: remove?
+#   seems pandas dataframe is a better choice for schedule,
+#   so this seems not needed
+schedule_ndarray_dtype: list[tuple[ScheduleColumnName, DTypeLike]] = [
     (k, v) for k, v in schedule_column_dtypes.items()
 ]
+"""
+dtype for a schedule. generated from `schedule_column_dtypes`
+"""

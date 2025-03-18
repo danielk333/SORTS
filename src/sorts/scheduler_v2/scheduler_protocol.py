@@ -1,13 +1,18 @@
 import logging, typing as t, abc
 from datetime import datetime
 import pandas as pd
+from .. import controller_v2 as ctrlr
 
 logger = logging.getLogger(__name__)
 
 
-class ControllerProtocol(t.Protocol):
+class SchedulerProtocol(t.Protocol):
+    controllers: tuple[ctrlr.ControllerProtocol, ...] = ()
+    res_ns = int(1e6)
+    "time resolution in nanoseconds. defaults to `1e6` (1ms)"
+
     @abc.abstractmethod
-    def generate(self, stt_tstmp: datetime, end_tstmp: datetime, res_ns: int) -> pd.DataFrame:
+    def generate_schedule(self, stt_tstmp: datetime, end_tstmp: datetime) -> pd.DataFrame:
         """
         Parameters
         ---
@@ -17,7 +22,6 @@ class ControllerProtocol(t.Protocol):
         end_time
             end timestamp
 
-
         Returns
         ---
         a DataFrame with these columns:
@@ -26,5 +30,4 @@ class ControllerProtocol(t.Protocol):
         |:-        |:-               |:-               |:-                       |:-     |:-          |
         |datetime64|int8             |float64          |(float64,float64,float64)|float64|float64     |
         """
-
         ...
