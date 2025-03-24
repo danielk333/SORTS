@@ -5,18 +5,14 @@ from numpy.typing import DTypeLike
 
 class CoordinateSystem(enum.IntEnum):
     AZELR = enum.auto()
-    NED = enum.auto()
-    ENU = enum.auto()
 
 
 ScheduleColumnName = t.Literal[
     "stt_tstmp",
     "coordinate_system",
     "coh_int_bandwidth",
-    # "pointing",
-    "pointing_p1",
-    "pointing_p2",
-    "pointing_p3",
+    "pointing_az",
+    "pointing_el",
     "ipp",
     "pulse_length",
 ]
@@ -40,10 +36,8 @@ schedule_column_dtypes: dict[ScheduleColumnName, DTypeLike] = {
     "stt_tstmp": "datetime64[ns]",
     "coordinate_system": np.int8,
     "coh_int_bandwidth": np.float64,
-    # "pointing": [("p1", np.float64), ("p2", np.float64), ("p3", np.float64)],
-    "pointing_p1": np.float64,
-    "pointing_p2": np.float64,
-    "pointing_p3": np.float64,
+    "pointing_az": np.float64,
+    "pointing_el": np.float64,
     "ipp": np.float64,
     "pulse_length": np.float64,
 }

@@ -15,8 +15,6 @@ class RandomUniformScansController(ctrlr.ControllerProtocol):
     a controller that generate random uniform scans
 
     TODO: numpy structured array vs pandas dataframe?
-
-    ASK: is dwell calculated by `pulse_length` and does it includes ipp and other gaps?
     """
 
     min_elevation_deg: float = 30.0
