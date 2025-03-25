@@ -25,9 +25,9 @@ class DumbScheduler(schr.SchedulerProtocol):
         ---
         a DataFrame with these columns:
 
-        |index     |coordinate_system|coh_int_bandwidth|pointing                 |ipp    |pulse_length|
-        |:-        |:-               |:-               |:-                       |:-     |:-          |
-        |datetime64|int8             |float64          |(float64,float64,float64)|float64|float64     |
+        |index     |coh_int_bandwidth|pointing         |ipp    |pulse_length|
+        |:-        |:-               |:-               |:-     |:-          |
+        |datetime64|float64          |(float64,float64)|float64|float64     |
         """
 
         # ret_df = pd.DataFrame(

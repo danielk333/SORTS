@@ -16,8 +16,8 @@ def test_SimpleScheduler():
     end_tstmp = datetime.fromisoformat("2025-01-02 00:00:00")
     result = DumbScheduler(
         controllers=(
-            RandomUniformScansController(npoints=10),
-            RandomUniformScansController(npoints=5, coordinate_system=schr.CoordinateSystem.AZELR),
+            RandomUniformScansController(min_elevation_deg=75, npoints=10),
+            RandomUniformScansController(min_elevation_deg=5, npoints=5),
         )
     ).generate_schedule(stt_tstmp, end_tstmp)
 

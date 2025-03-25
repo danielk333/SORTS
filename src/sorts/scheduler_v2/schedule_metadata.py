@@ -2,14 +2,8 @@ import typing as t, enum
 import numpy as np
 from numpy.typing import DTypeLike
 
-
-class CoordinateSystem(enum.IntEnum):
-    AZELR = enum.auto()
-
-
 ScheduleColumnName = t.Literal[
     "stt_tstmp",
-    "coordinate_system",
     "coh_int_bandwidth",
     "pointing_az",
     "pointing_el",
@@ -34,7 +28,6 @@ a dict for conveniently using `ScheduleColumnName` as literal values
 #   so this seems not needed
 schedule_column_dtypes: dict[ScheduleColumnName, DTypeLike] = {
     "stt_tstmp": "datetime64[ns]",
-    "coordinate_system": np.int8,
     "coh_int_bandwidth": np.float64,
     "pointing_az": np.float64,
     "pointing_el": np.float64,
