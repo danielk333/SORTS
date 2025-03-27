@@ -2,7 +2,6 @@ import logging, typing as t, math
 from dataclasses import dataclass
 from datetime import datetime, timezone, timedelta
 import numpy as np
-import pandas as pd
 from .. import scheduler_v2 as schr
 from .. import controller_v2 as ctrlr
 
@@ -15,6 +14,7 @@ class RandomUniformScansController(ctrlr.ControllerProtocol):
     a controller that generate random uniform scans
     """
 
+    exp_num: int = 0
     min_elevation_deg: float = 30.0
     dwell_us: float = 1000  # 1ms
     npoints: int = 10_000
@@ -30,26 +30,20 @@ class RandomUniformScansController(ctrlr.ControllerProtocol):
 
     def generate(
         self,
-        stt_tstmp=datetime.now(timezone.utc),
-        end_tstmp=datetime.now(timezone.utc) + timedelta(hours=24),
+        stt_tstmp,
+        end_tstmp,
         res_us=1000,
-    ) -> pd.DataFrame:
+    ) -> schr.Schedule:
         """
         Parameters
         ---
 
         stt_tstmp
             start timestamp, irrelevant in this controller
-        end_time
+        end_tstmp
             end timestamp, irrelevant in this controller
-
-        Returns
-        ---
-        a DataFrame with these columns:
-
-        |index     |coh_int_bandwidth|pointing         |ipp    |pulse_length|
-        |:-        |:-               |:-               |:-     |:-          |
-        |datetime64|float64          |(float64,float64)|float64|float64     |
+        res_us
+            resolution in microseconds
         """
         ...
 
@@ -69,30 +63,17 @@ class RandomUniformScansController(ctrlr.ControllerProtocol):
 
         min_el = np.radians(self.min_elevation_deg)
 
-        arr = np.recarray((self.npoints,), dtype=schr.schedule_ndarray_dtype)
-        cn = schr.schedule_column_names
-
-        arr[cn["stt_tstmp"]] = pd.date_range(
-            start=stt_tstmp, end=end_tstmp, periods=self.npoints
-        ).values
-
-        arr[cn["coh_int_bandwidth"]].fill(self.coh_int_bandwidth)
-
         # TODO: chk the math and add a plot function in test?
-        arr[cn["pointing_az"]] = np.random.uniform(low=0, high=2 * np.pi, size=self.npoints)
-        arr[cn["pointing_el"]] = np.random.uniform(low=min_el, high=np.pi / 2, size=self.npoints)
-
-        arr[cn["ipp"]].fill(self.ipp)
-        arr[cn["ipp"]].fill(self.pulse_length)
-
-        ret_df = pd.DataFrame(
-            arr,
-            columns=[*schr.schedule_column_names.values()],
+        ret_sch = schr.Schedule(
+            stt_tstmp_ms=np.arange(
+                stt_tstmp, end_tstmp, np.timedelta64((end_tstmp - stt_tstmp) / self.npoints, "us")
+            ),
+            exp_num=np.full(self.npoints, self.exp_num),
+            pointing_az=np.random.uniform(low=0, high=2 * np.pi, size=self.npoints),
+            pointing_el=np.random.uniform(low=min_el, high=np.pi / 2, size=self.npoints),
+            coh_int_bandwidth=np.full(self.npoints, self.coh_int_bandwidth),
+            ipp=np.full(self.npoints, self.ipp),
+            pulse_length=np.full(self.npoints, self.pulse_length),
         )
 
-        # align the rows to res_us
-        ret_df[cn["stt_tstmp"]] = t.cast(pd.Series, ret_df[cn["stt_tstmp"]]).dt.floor(f"{res_us}ns")
-
-        ret_df.set_index(cn["stt_tstmp"], inplace=True)
-
-        return ret_df
+        return ret_sch

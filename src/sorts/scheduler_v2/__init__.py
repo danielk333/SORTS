@@ -1,7 +1,9 @@
+from ..schedule_v2 import Schedule
 from .schedule_metadata import (
     ScheduleColumnName,
     schedule_column_names,
     schedule_ndarray_dtype,
     schedule_column_dtypes,
 )
-from .scheduler_protocol import SchedulerProtocol, Schedule
+
+from .scheduler_protocol import SchedulerProtocol

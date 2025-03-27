@@ -1,9 +1,11 @@
-import logging, typing as t, abc
-from dataclasses import dataclass
+import logging, typing as t
+from dataclasses import dataclass, fields
 from datetime import datetime
 import pandas as pd
 from .. import scheduler_v2 as schr
 from .. import controller_v2 as ctrlr
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(kw_only=True)
@@ -22,13 +24,20 @@ class DumbScheduler(schr.SchedulerProtocol):
         Takes start and end time and returns a `Schedule`.
         """
 
-        ret_df = pd.DataFrame(columns=[*schr.schedule_column_names.values()]).set_index(
-            schr.schedule_column_names["stt_tstmp"]
-        )
-        ret_df.index = pd.to_datetime(ret_df.index)
-        for controller in self.controllers:
-            ctrlr_df = controller.generate(stt_tstmp, end_tstmp, self.res_us)
-            ret_df = ret_df.reindex(ret_df.index.union(ctrlr_df.index))
-            ret_df.update(ctrlr_df)
+        sch_field_names = [f.name for f in fields(schr.Schedule)]
+        merged_sch_df = pd.DataFrame(columns=sch_field_names).set_index("stt_tstmp_ms", drop=False)
 
-        return ret_df
+        for controller in self.controllers:
+            ctrlr_sch = controller.generate(stt_tstmp, end_tstmp, self.res_us)
+            ctrlr_df = pd.DataFrame({f: getattr(ctrlr_sch, f) for f in sch_field_names}).set_index(
+                "stt_tstmp_ms", drop=False
+            )
+
+            merged_sch_df = merged_sch_df.reindex(merged_sch_df.index.union(ctrlr_df.index))
+            merged_sch_df.update(ctrlr_df)
+
+        merged_sch = schr.Schedule(
+            **{col: merged_sch_df[col].to_numpy() for col in merged_sch_df.columns}
+        )
+
+        return merged_sch

@@ -1,3 +1,5 @@
+from datetime import datetime, timezone, timedelta
+from .. import scheduler_v2 as schr
 from .random_uniform_scans_controller import RandomUniformScansController
 
 
@@ -8,6 +10,13 @@ def setup_function():
 
 
 def test_random_uniform_scan_points():
+    """just a smoke test for now"""
+
     controller = RandomUniformScansController(npoints=10)
-    result = controller.generate()
-    print(result)
+
+    stt_tstmp = datetime.now(timezone.utc)
+    end_tstmp = stt_tstmp + timedelta(hours=24)
+    result = controller.generate(stt_tstmp, end_tstmp)
+
+    assert isinstance(result, schr.Schedule)
+    return

@@ -1,5 +1,4 @@
 from datetime import datetime
-import pandas as pd
 from .. import scheduler_v2 as schr
 from .dumb_scheduler import DumbScheduler
 from ..controller_v2 import RandomUniformScansController
@@ -11,16 +10,17 @@ def setup_function():
     print()
 
 
-def test_SimpleScheduler():
+def test_DumpScheduler():
+    """just a smoke test for now"""
+
     stt_tstmp = datetime.fromisoformat("2025-01-01 00:00:00")
     end_tstmp = datetime.fromisoformat("2025-01-02 00:00:00")
     result = DumbScheduler(
         controllers=(
-            RandomUniformScansController(min_elevation_deg=75, npoints=10),
-            RandomUniformScansController(min_elevation_deg=5, npoints=5),
+            RandomUniformScansController(exp_num=0, min_elevation_deg=75, npoints=10),
+            RandomUniformScansController(exp_num=1, min_elevation_deg=5, npoints=2),
         )
     ).generate_schedule(stt_tstmp, end_tstmp)
 
-    pd.set_option("display.max_rows", None)  # `None` means displaying all rows
-    pd.set_option("display.max_columns", None)  # `None` means displaying all columns
-    print(result)
+    assert isinstance(result, schr.Schedule)
+    return
