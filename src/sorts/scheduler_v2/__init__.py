@@ -4,4 +4,4 @@ from .schedule_metadata import (
     schedule_ndarray_dtype,
     schedule_column_dtypes,
 )
-from .scheduler_protocol import SchedulerProtocol
+from .scheduler_protocol import SchedulerProtocol, Schedule

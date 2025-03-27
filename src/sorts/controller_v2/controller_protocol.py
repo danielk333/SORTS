@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 class ControllerProtocol(t.Protocol):
     @abc.abstractmethod
-    def generate(self, stt_tstmp: datetime, end_tstmp: datetime, res_ns: int) -> pd.DataFrame:
+    def generate(self, stt_tstmp: datetime, end_tstmp: datetime, res_us: int) -> pd.DataFrame:
         """
         Parameters
         ---
@@ -16,15 +16,7 @@ class ControllerProtocol(t.Protocol):
             start timestamp
         end_time
             end timestamp
-
-
-        Returns
-        ---
-        a DataFrame with these columns:
-
-        |index     |coh_int_bandwidth|pointing         |ipp    |pulse_length|
-        |:-        |:-               |:-               |:-     |:-          |
-        |datetime64|float64          |(float64,float64)|float64|float64     |
+        res_us
+            resolution in microseconds
         """
-
         ...

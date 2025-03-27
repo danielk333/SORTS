@@ -16,7 +16,7 @@ class RandomUniformScansController(ctrlr.ControllerProtocol):
     """
 
     min_elevation_deg: float = 30.0
-    dwell_ns: float = 1e6  # 1ms
+    dwell_us: float = 1000  # 1ms
     npoints: int = 10_000
 
     coh_int_bandwidth: float = 1.0
@@ -30,9 +30,9 @@ class RandomUniformScansController(ctrlr.ControllerProtocol):
 
     def generate(
         self,
-        stt_tstmp: datetime = datetime.now(timezone.utc),
-        end_tstmp: datetime = datetime.now(timezone.utc) + timedelta(hours=24),
-        res_ns: int = int(1e6),
+        stt_tstmp=datetime.now(timezone.utc),
+        end_tstmp=datetime.now(timezone.utc) + timedelta(hours=24),
+        res_us=1000,
     ) -> pd.DataFrame:
         """
         Parameters
@@ -53,20 +53,18 @@ class RandomUniformScansController(ctrlr.ControllerProtocol):
         """
         ...
 
-        max_points_by_res_ns = math.floor(
-            (end_tstmp - stt_tstmp) / timedelta(microseconds=res_ns / 1000)
-        )
-        if max_points_by_res_ns < self.npoints:
+        max_points_by_res_us = math.floor((end_tstmp - stt_tstmp) / timedelta(microseconds=res_us))
+        if max_points_by_res_us < self.npoints:
             raise RuntimeError(
-                f"npoints: {self.npoints} larger than res_ns allows: {max_points_by_res_ns}"
+                f"npoints: {self.npoints} larger than res_us allows: {max_points_by_res_us}"
             )
 
-        max_points_by_dwell_ns = math.floor(
-            (end_tstmp - stt_tstmp) / timedelta(microseconds=self.dwell_ns / 1000)
+        max_points_by_dwell_us = math.floor(
+            (end_tstmp - stt_tstmp) / timedelta(microseconds=self.dwell_us)
         )
-        if max_points_by_dwell_ns < self.npoints:
+        if max_points_by_dwell_us < self.npoints:
             raise RuntimeError(
-                f"npoints: {self.npoints} larger than dwell_ns allows: {max_points_by_dwell_ns}"
+                f"npoints: {self.npoints} larger than dwell_us allows: {max_points_by_dwell_us}"
             )
 
         min_el = np.radians(self.min_elevation_deg)
@@ -92,8 +90,8 @@ class RandomUniformScansController(ctrlr.ControllerProtocol):
             columns=[*schr.schedule_column_names.values()],
         )
 
-        # align the rows to res_ns
-        ret_df[cn["stt_tstmp"]] = t.cast(pd.Series, ret_df[cn["stt_tstmp"]]).dt.floor(f"{res_ns}ns")
+        # align the rows to res_us
+        ret_df[cn["stt_tstmp"]] = t.cast(pd.Series, ret_df[cn["stt_tstmp"]]).dt.floor(f"{res_us}ns")
 
         ret_df.set_index(cn["stt_tstmp"], inplace=True)
 

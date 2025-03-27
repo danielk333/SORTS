@@ -14,49 +14,21 @@ class DumbScheduler(schr.SchedulerProtocol):
     """
 
     controllers: tuple[ctrlr.ControllerProtocol, ...] = ()
-    res_ns = int(1e6)
-    "time resolution in nanoseconds. defaults to `1e6` (1ms)"
+    res_us = 1000
+    "time resolution in microseconds. defaults to `1000` (1ms)"
 
-    def generate_schedule(self, stt_tstmp: datetime, end_tstmp: datetime) -> pd.DataFrame:
+    def generate_schedule(self, stt_tstmp: datetime, end_tstmp: datetime) -> schr.Schedule:
         """
-        Takes times and a corresponding generator that returns radar instances to generate a radar schedule.
-
-        Returns
-        ---
-        a DataFrame with these columns:
-
-        |index     |coh_int_bandwidth|pointing         |ipp    |pulse_length|
-        |:-        |:-               |:-               |:-     |:-          |
-        |datetime64|float64          |(float64,float64)|float64|float64     |
+        Takes start and end time and returns a `Schedule`.
         """
 
-        # ret_df = pd.DataFrame(
-        #     columns=[*schr.schedule_column_names.values()], index=pd.to_datetime([])
-        # )
         ret_df = pd.DataFrame(columns=[*schr.schedule_column_names.values()]).set_index(
             schr.schedule_column_names["stt_tstmp"]
         )
         ret_df.index = pd.to_datetime(ret_df.index)
-        # ret_df = pd.DataFrame(columns=[], index=pd.to_datetime([]))
         for controller in self.controllers:
-            ctrlr_df = controller.generate(stt_tstmp, end_tstmp, self.res_ns)
+            ctrlr_df = controller.generate(stt_tstmp, end_tstmp, self.res_us)
             ret_df = ret_df.reindex(ret_df.index.union(ctrlr_df.index))
             ret_df.update(ctrlr_df)
-
-            # ret_df = ret_df.merge(
-            #     controller.generate(stt_tstmp, end_tstmp, self.res_ns),
-            #     how="outer",
-            #     left_index=True,
-            #     right_index=True,
-            #     # suffixes=("_x", None),
-            # )
-        # ctrlr_df = controller.generate(stt_tstmp, end_tstmp, self.res_ns)
-        # ret_df = ret_df.reindex(ret_df.index.union(ctrlr_df.index))
-        # ret_df.update()
-
-        # ret_df = ret_df.join(
-        #     [c.generate(stt_tstmp, end_tstmp, self.res_ns) for c in self.controllers],
-        #     how="outer",
-        # )
 
         return ret_df
