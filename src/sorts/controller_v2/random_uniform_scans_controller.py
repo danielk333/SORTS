@@ -16,7 +16,7 @@ class RandomUniformScansController(ctrlr.ControllerProtocol):
 
     exp_num: int = 0
     min_elevation_deg: float = 30.0
-    dwell_us: float = 1000  # 1ms
+    time_slice_us: float = 1000  # 1ms
     npoints: int = 10_000
 
     coh_int_bandwidth: float = 1.0
@@ -26,7 +26,14 @@ class RandomUniformScansController(ctrlr.ControllerProtocol):
     # TODO: eval if we want to use `pydantic` (https://docs.pydantic.dev/)
     def __post_init__(self):
         if self.min_elevation_deg < 0 or self.min_elevation_deg > 90:
-            raise RuntimeError(f"`min_elevation_deg` has to be in the range [0, 90]")
+            raise RuntimeError(
+                f"`min_elevation_deg` ({self.min_elevation_deg}) has to be in the range [0, 90]"
+            )
+
+        if self.time_slice_us < self.ipp * self.npoints:
+            raise RuntimeError(
+                f"`time_slice_us` ({self.time_slice_us}) cannot be small than `ipp * npoints` ({self.ipp * self.npoints})"
+            )
 
     def generate(
         self,
@@ -47,18 +54,17 @@ class RandomUniformScansController(ctrlr.ControllerProtocol):
         """
         ...
 
-        max_points_by_res_us = math.floor((end_tstmp - stt_tstmp) / timedelta(microseconds=res_us))
-        if max_points_by_res_us < self.npoints:
+        if self.time_slice_us < res_us:
             raise RuntimeError(
-                f"npoints: {self.npoints} larger than res_us allows: {max_points_by_res_us}"
+                f"`time_slice_us` ({self.time_slice_us}) cannot finer than `res_us` ({res_us})"
             )
 
-        max_points_by_dwell_us = math.floor(
-            (end_tstmp - stt_tstmp) / timedelta(microseconds=self.dwell_us)
+        max_points_by_time_slice_us = math.floor(
+            (end_tstmp - stt_tstmp) / timedelta(microseconds=self.time_slice_us)
         )
-        if max_points_by_dwell_us < self.npoints:
+        if max_points_by_time_slice_us < self.npoints:
             raise RuntimeError(
-                f"npoints: {self.npoints} larger than dwell_us allows: {max_points_by_dwell_us}"
+                f"npoints: {self.npoints} larger than `time_slice_us` allows: {max_points_by_time_slice_us}"
             )
 
         min_el = np.radians(self.min_elevation_deg)
