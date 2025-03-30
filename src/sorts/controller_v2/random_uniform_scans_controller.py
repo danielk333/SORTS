@@ -16,7 +16,7 @@ class RandomUniformScansController(ctrlr.ControllerProtocol):
 
     exp_num: int = 0
     min_elevation_deg: float = 30.0
-    time_slice_us: float = 1000  # 1ms
+    time_slice_us: float = 1.0 * 10_000  # ipp * npoints
     npoints: int = 10_000
 
     coh_int_bandwidth: float = 1.0
