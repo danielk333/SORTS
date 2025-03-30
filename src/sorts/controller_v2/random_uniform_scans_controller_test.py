@@ -9,7 +9,7 @@ def setup_function():
     print()
 
 
-def test_random_uniform_scan_points():
+def test_random_uniform_scans_controller():
     """just a smoke test for now"""
 
     controller = RandomUniformScansController(npoints=10)
