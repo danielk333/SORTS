@@ -71,7 +71,7 @@ class RandomUniformScansController(ctrlr.ControllerProtocol):
 
         # TODO: chk the math and add a plot function in test?
         ret_sch = schr.Schedule(
-            stt_tstmp_ms=np.arange(
+            stt_tstmp_us=np.arange(
                 stt_tstmp,
                 end_tstmp,
                 np.timedelta64((end_tstmp - stt_tstmp) / self.npoints),

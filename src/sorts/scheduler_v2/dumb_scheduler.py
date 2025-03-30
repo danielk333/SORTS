@@ -25,12 +25,12 @@ class DumbScheduler(schr.SchedulerProtocol):
         """
 
         sch_field_names = [f.name for f in fields(schr.Schedule)]
-        merged_sch_df = pd.DataFrame(columns=sch_field_names).set_index("stt_tstmp_ms", drop=False)
+        merged_sch_df = pd.DataFrame(columns=sch_field_names).set_index("stt_tstmp_us", drop=False)
 
         for controller in self.controllers:
             ctrlr_sch = controller.generate(stt_tstmp, end_tstmp, self.res_us)
             ctrlr_df = pd.DataFrame({f: getattr(ctrlr_sch, f) for f in sch_field_names}).set_index(
-                "stt_tstmp_ms", drop=False
+                "stt_tstmp_us", drop=False
             )
 
             merged_sch_df = merged_sch_df.reindex(merged_sch_df.index.union(ctrlr_df.index))
