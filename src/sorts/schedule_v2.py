@@ -19,8 +19,9 @@ class Schedule:
     # TODO: seems useful to add end_tstmp_ms ?
     # end_tstmp_ms: npt.NDArray[np.datetime64]
 
-    # TODO: re-eval the size of `exp_num`
+    # TODO: re-eval the size of `exp_num`, `station_id`
     exp_num: npt.NDArray[np.int64]
+    station_id: npt.NDArray[np.int64]
 
     pointing_az: npt.NDArray[np.float64]
     pointing_el: npt.NDArray[np.float64]
