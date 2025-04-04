@@ -22,7 +22,8 @@ class Pass:
     Optionally also indicates the location of that pass in a bigger dataset.
     """
 
-    def __init__(self, t, enu, inds=None, cache=True, station_id=None):
+    # TODO: ndarray of enu is of shape (6,n), but should be (3,n)
+    def __init__(self, t, enu, inds=None, cache=True, station_id: int | list[int] = 0):
         self.inds = inds  # refer back to the population index
         self.t = t  # time
         self.enu: list[npt.NDArray] | npt.NDArray = enu  # of shapes: (3, n) | ((3, n), ..., k)

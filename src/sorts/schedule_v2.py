@@ -39,7 +39,7 @@ class Schedule:
         for idx, f in enumerate(fv_rests):
             if f.shape != fv_0.shape:
                 raise RuntimeError(
-                    "fields of a `Schedule` must have equal lengths.\n"
+                    "fields of a `Schedule` must have equal lengths. "
                     + f"but shape of {f_rests[idx].name} is {fv_rests[idx].shape}, "
                     f"while shape of {f_0.name} is {fv_0.shape} "
                 )
