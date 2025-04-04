@@ -9,6 +9,7 @@ and stations and sorting structures of passes in particular ways.
 import datetime
 
 import numpy as np
+import numpy.typing as npt
 import pyorb
 import pyant
 
@@ -22,9 +23,9 @@ class Pass:
     """
 
     def __init__(self, t, enu, inds=None, cache=True, station_id=None):
-        self.inds = inds
-        self.t = t
-        self.enu = enu
+        self.inds = inds  # refer back to the population index
+        self.t = t  # time
+        self.enu: list[npt.NDArray] | npt.NDArray = enu  # of shapes: (3, n) | ((3, n), ..., k)
         self.cache = cache
 
         self.station_id = station_id
