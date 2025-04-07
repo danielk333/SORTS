@@ -1,5 +1,7 @@
+import typing as t
 from datetime import datetime, timezone, timedelta
 import numpy as np
+from astropy.time import Time
 import pyorb
 import sorts
 
@@ -15,9 +17,7 @@ def setup_function():
     print()
 
 
-def test_tracker_controller():
-    """just a smoke test for now"""
-
+def tracker_controller_smoke_test():
     eiscat3d = sorts.get_radar("eiscat3d", "stage1-array")
 
     Prop_cls = SGP4
@@ -42,24 +42,31 @@ def test_tracker_controller():
         epoch=53005.0,
     )
 
-    t = sorts.equidistant_sampling(
+    # NOTE: kept for ref, will be used when switched to `Pass` class v2
+    _epoch = t.cast(np.datetime64, Time(53005.0, format="mjd", scale="utc").to_value("datetime64"))
+
+    t_arr = sorts.equidistant_sampling(
         orbit=orb,
         start_t=0,
         end_t=3600 * 24 * 1,
         max_dpos=1e3,
     )
 
-    states = prop.propagate(t, orb.cartesian[:, 0], orb.epoch, A=1.0, C_R=1.0, C_D=1.0)
+    states = prop.propagate(t_arr, orb.cartesian[:, 0], orb.epoch, A=1.0, C_R=1.0, C_D=1.0)
 
-    passes = eiscat3d.find_passes(t, states)
+    passes = eiscat3d.find_passes(t_arr, states)
+    pass_obj = passes[0][1][0]
 
-    controller = TrackerController(pass_obj=passes[0][1][0])
+    controller = TrackerController(pass_obj=pass_obj)
 
     stt_tstmp = datetime.now(timezone.utc)
     end_tstmp = stt_tstmp + timedelta(hours=24)
     result = controller.generate(stt_tstmp, end_tstmp)
 
     assert isinstance(result, schr.Schedule)
+
+    # TODO: wip; this is the current test target
+    _snr = pass_obj.calculate_snr(eiscat3d.tx[0], eiscat3d.rx[0], diameter=0.05)
     return
 
 
