@@ -1,11 +1,76 @@
 #!/usr/bin/env python
 
-"""Miscellaneous functions
-
-"""
+"""Miscellaneous functions"""
 
 import numpy as np
 import scipy.constants
+import pyant
+import pyorb
+
+
+def equidistant_sampling(orbit, start_t, end_t, max_dpos=1e3, eccentricity_tol=0.3):
+    """Find the temporal sampling of an orbit which is sufficient to achieve a
+    maximum spatial separation. Assume elliptic orbit and uses Keplerian propagation
+    to find sampling, does not take perturbation patterns into account. If
+    eccentricity is small, uses periapsis speed and uniform sampling in time.
+
+    :param pyorb.Orbit orbit: Orbit to find temporal sampling of.
+    :param float start_t: Start time in seconds
+    :param float end_t: End time in seconds
+    :param float max_dpos: Maximum separation between evaluation points in meters.
+    :param float eccentricity_tol: Minimum eccentricity below which the orbit is
+        approximated as a circle and temporal samples are uniform in time.
+    :return: Vector of sample times in seconds.
+    :rtype: numpy.ndarray
+    """
+    if len(orbit) > 1:
+        raise ValueError(f"Cannot use vectorized orbits: len(orbit) = {len(orbit)}")
+
+    if orbit.e <= eccentricity_tol:
+        r = pyorb.elliptic_radius(0.0, orbit.a, orbit.e, degrees=False)
+        v = pyorb.orbital_speed(r, orbit.a, orbit.G * (orbit.M0 + orbit.m))[0]
+        return np.arange(start_t, end_t, max_dpos / v)
+
+    tmp_orb = orbit.copy()
+    tmp_orb.auto_update = False
+
+    tmp_orb.propagate(start_t)
+    period = tmp_orb.period
+
+    t_curr = start_t
+    t = [t_curr]
+    t_repeat = None
+    while t_curr < end_t:
+        if t_curr - start_t > period:
+            if t_repeat is None:
+                t_repeat = len(t)
+            dt = t[-t_repeat + 1] - t[-t_repeat]
+            t_curr += dt
+        else:
+            v = tmp_orb.speed[0]
+            dt = max_dpos / v
+            t_curr += dt
+            tmp_orb.propagate(dt)
+
+        t.append(t_curr)
+    return np.array(t, dtype=np.float64)
+
+
+def calculate_range(enu):
+    """Norm of the ENU coordinates."""
+    return np.linalg.norm(enu[:3, :], axis=0)
+
+
+def calculate_range_rate(enu):
+    """Projected ENU velocity along the ENU range."""
+    return np.sum(enu[3:, :] * (enu[:3, :] / np.linalg.norm(enu[:3, :], axis=0)), axis=0)
+
+
+def calculate_zenith_angle(enu, radians=False):
+    """Zenith angle of the ENU coordinates."""
+    return pyant.coordinates.vector_angle(
+        np.array([0, 0, 1], dtype=np.float64), enu[:3, :], degrees=not radians
+    )
 
 
 def signal_delay(st1, st2, ecef):
