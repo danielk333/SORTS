@@ -6,7 +6,7 @@ import numpy.typing as npt
 import pyant
 from .. import scheduler_v2 as schr
 from .. import controller_v2 as ctrlr
-from .. import passes
+from .. import passes_v2
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ class TrackerController(ctrlr.ControllerProtocol):
     """
 
     # TODO: add `is_radian` as `Pass` member field? default to `False`?
-    pass_obj: passes.Pass
+    pass_obj: passes_v2.Pass
 
     exp_num: int = 0
     time_slice_us: float = 1000  # 1ms

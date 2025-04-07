@@ -54,7 +54,7 @@ def tracker_controller_smoke_test():
 
     states = prop.propagate(t_arr, orb.cartesian[:, 0], orb.epoch, A=1.0, C_R=1.0, C_D=1.0)
 
-    passes = eiscat3d.find_passes(t_arr, states)
+    passes = eiscat3d.find_passes_v2(t_arr, states)
     pass_obj = passes[0][1][0]
 
     controller = TrackerController(pass_obj=pass_obj)

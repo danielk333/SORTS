@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 
-"""This module is used to define the radar system
-
-"""
+"""This module is used to define the radar system"""
 import copy
 
-from .. import passes
+from .. import passes, passes_v2
 
 
 class Radar(object):
@@ -103,4 +101,40 @@ class Radar(object):
                 for ps in txrx:
                     ps.station_id = [txi, rxi]
                 rd_ps[-1].append(txrx)
+        return rd_ps
+
+    def find_passes_v2(self, t, states, cache_data=True, fov_kw=None):
+        """
+        ver 2 of the `find_passes()` func,
+        same logic as v1 but return v2 `Pass` class instead
+
+        Finds all passes that are simultaneously inside a transmitter
+        station FOV and a receiver station FOV.
+
+            :param numpy.ndarray t: Vector of times in seconds to use as a
+                base to find passes.
+            :param numpy.ndarray states: ECEF states of the object to find
+                passes for.
+            :return: list of passes indexed by first tx-station and then
+                rx-station.
+            :rtype: list of list of sorts.Pass
+
+        TODO: clean up the v1 func and remove the v2 suffix
+        """
+
+        rd_ps: list[list[list[passes_v2.Pass]]] = []
+        for txi, tx in enumerate(self.tx):
+            rd_ps.append([])
+            for rxi, rx in enumerate(self.rx):
+                txrx = passes_v2.find_simultaneous_passes(
+                    t,
+                    states,
+                    [tx, rx],
+                    cache_data=cache_data,
+                    fov_kw=fov_kw,
+                )
+                for ps in txrx:
+                    ps.station_id = [txi, rxi]
+                rd_ps[-1].append(txrx)
+
         return rd_ps

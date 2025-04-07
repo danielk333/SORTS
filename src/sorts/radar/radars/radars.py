@@ -1,3 +1,5 @@
+from .. import radar as radar_mod
+
 RADARS = dict()
 
 
@@ -27,7 +29,7 @@ def radar_generator(name, variant, override_ok=False):
     return registrator_wrapper
 
 
-def get_radar(name, variant, *args, **kwargs):
+def get_radar(name, variant, *args, **kwargs) -> radar_mod.Radar:
     """Get a predefined radar instance from the available library of radars.
 
 

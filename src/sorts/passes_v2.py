@@ -6,41 +6,28 @@ Also provides convenience functions for finding passes given states
 and stations and sorting structures of passes in particular ways.
 
 """
-import datetime
-
+from datetime import datetime, timedelta, timezone
+from dataclasses import dataclass, fields
 import numpy as np
 import numpy.typing as npt
 
 
+# TODO: rename to RadarPass or similar to avoid potential identifier clash with python `pass` keyword?
+@dataclass(kw_only=True)
 class Pass:
     """Saves the local coordinate data for a single pass.
     Optionally also indicates the location of that pass in a bigger dataset.
     """
 
+    t: npt.NDArray[np.datetime64]  # TODO: better naming
+    enu: list[npt.NDArray] | npt.NDArray  # of shapes: (3, n) | ((3, n), ..., k)
     # TODO: ndarray of enu is of shape (6,n), but should be (3,n)
-    def __init__(self, t, enu, epoch=None, station_id: int | list[int] = 0):
-        self.t = t  # time
-        self.enu: list[npt.NDArray] | npt.NDArray = enu  # of shapes: (3, n) | ((3, n), ..., k)
 
-        self.station_id = station_id
-
-    def __str__(self):
-        str_ = "Pass "
-        if self.station_id is not None:
-            str_ += f"Station {self.station_id} | "
-        str_ += (
-            f"Rise {str(datetime.timedelta(seconds=self.start()))}"
-            f"({(self.end() - self.start())/60.0:.1f} min)"
-            f"{str(datetime.timedelta(seconds=self.end()))} Fall"
-        )
-
-        return str_
-
-    def __repr__(self):
-        return str(self)
+    station_id: int | list[int] = 0
+    epoch: datetime
 
 
-def find_passes(t, states, station, cache_data=True):
+def find_passes(t, states, station, epoch: datetime):
     """Find passes inside the FOV of a radar station given a series of times for a space object.
 
     :param numpy.ndarray t: Vector of times in seconds to use as a base to find passes.
@@ -70,29 +57,19 @@ def find_passes(t, states, station, cache_data=True):
     for si in range(len(splits) - 1):
         ps_inds = inds[splits[si] : splits[si + 1]]
 
-        if cache_data:
-            enu = station.enu(states[:3, :])
-            ps = Pass(
-                t=t[ps_inds],
-                enu=enu[:, ps_inds],
-                inds=ps_inds,
-                cache=True,
-            )
-        else:
-            ps = Pass(
-                t=None,
-                enu=None,
-                inds=ps_inds,
-                cache=True,
-            )
-            ps._start = t[ps_inds].min()
-            ps._end = t[ps_inds].max()
+        enu = station.enu(states[:3, :])
+        ps = Pass(
+            t=t[ps_inds],
+            enu=enu[:, ps_inds],
+            epoch=epoch,
+        )
 
         passes.append(ps)
 
     return passes
 
 
+# TODO: check and implement
 def find_simultaneous_passes(t, states, stations, cache_data=True, fov_kw=None):
     """Finds all passes that are simultaneously inside a multiple stations FOV's.
 
@@ -155,42 +132,43 @@ def find_simultaneous_passes(t, states, stations, cache_data=True, fov_kw=None):
     return passes
 
 
-def group_passes(passes):
-    """Takes a list of passes structured as
-    [tx][rx][pass] and find all simultaneous passes
-    and groups them according to [tx], resulting in a [tx][pass][rx] structure.
-    """
+# TODO: check and implement
+# def group_passes(passes):
+#     """Takes a list of passes structured as
+#     [tx][rx][pass] and find all simultaneous passes
+#     and groups them according to [tx], resulting in a [tx][pass][rx] structure.
+#     """
 
-    def overlap(ps1, ps2):
-        return ps1.start() <= ps2.end() and ps2.start() <= ps1.end()
+#     def overlap(ps1, ps2):
+#         return ps1.start() <= ps2.end() and ps2.start() <= ps1.end()
 
-    grouped_passes = []
-    for tx_passes in passes:
-        grouped_passes.append([])
+#     grouped_passes = []
+#     for tx_passes in passes:
+#         grouped_passes.append([])
 
-        # first flatten
-        flat_passes = [x for rx_passes in tx_passes for x in rx_passes]
+#         # first flatten
+#         flat_passes = [x for rx_passes in tx_passes for x in rx_passes]
 
-        if len(flat_passes) > 0:
-            grouped_passes[-1].append([flat_passes[0]])
-        else:
-            continue
+#         if len(flat_passes) > 0:
+#             grouped_passes[-1].append([flat_passes[0]])
+#         else:
+#             continue
 
-        for x in range(1, len(flat_passes)):
-            for y in range(len(grouped_passes[-1])):
-                member = False
-                for gps in grouped_passes[-1][y]:
-                    if overlap(gps, flat_passes[x]):
-                        member = True
-                        break
+#         for x in range(1, len(flat_passes)):
+#             for y in range(len(grouped_passes[-1])):
+#                 member = False
+#                 for gps in grouped_passes[-1][y]:
+#                     if overlap(gps, flat_passes[x]):
+#                         member = True
+#                         break
 
-                if member:
-                    member_id = y
-                    break
+#                 if member:
+#                     member_id = y
+#                     break
 
-            if member:
-                grouped_passes[-1][member_id].append(flat_passes[x])
-            else:
-                grouped_passes[-1].append([flat_passes[x]])
+#             if member:
+#                 grouped_passes[-1][member_id].append(flat_passes[x])
+#             else:
+#                 grouped_passes[-1].append([flat_passes[x]])
 
-    return grouped_passes
+#     return grouped_passes
