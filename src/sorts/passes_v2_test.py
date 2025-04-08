@@ -86,4 +86,14 @@ def find_simultaneous_matches_radar_passes_example_test():
         ]
     )
 
+    # assert the states ndarray are equal:
+    # - ndarray from target is converted from `float64` of seconds to "timedelta64[us]"
+    # - ndarray from result is converted from "datetime64[us]" to "timedelta64[us]"
+    assert all(
+        [
+            np.array_equal(target.enu, candidate.enu)
+            for target, candidate in zip(radar_passes__passes[0][1], result)
+        ]
+    )
+
     return
