@@ -103,7 +103,7 @@ class Radar(object):
                 rd_ps[-1].append(txrx)
         return rd_ps
 
-    def find_passes_v2(self, t, states, cache_data=True, fov_kw=None):
+    def find_passes_v2(self, t, states, fov_kw=None):
         """
         ver 2 of the `find_passes()` func,
         same logic as v1 but return v2 `Pass` class instead
@@ -130,7 +130,6 @@ class Radar(object):
                     t,
                     states,
                     [tx, rx],
-                    cache_data=cache_data,
                     fov_kw=fov_kw,
                 )
                 for ps in txrx:
