@@ -24,8 +24,18 @@ class Pass:
     """
 
     t: npt.NDArray[np.datetime64]  # TODO: better naming
-    enu: list[npt.NDArray] | npt.NDArray  # TODO: shape should be (3,n), not (6,n)
+    enu: list[npt.NDArray]  # TODO: shape should be (3,n), not (6,n)
     radar_station_composite_keys: list[RadarStationCompositeKey]
+
+    def __post_init__(self):
+        # ensure the list len across different fields are consistent
+        if not (
+            isinstance(self.radar_station_composite_keys, list)
+            and len(self.enu) == len(self.radar_station_composite_keys)
+        ):
+            raise RuntimeError(
+                f"`length of `enu` and `radar_station_composite_keys` have to be equal in a `Pass` object"
+            )
 
     def get_deltatime_ndarray(self, epoch: datetime | None = None) -> npt.NDArray[np.float64]:
         _epoch: np.datetime64 = np.datetime64(epoch) or self.t[0]

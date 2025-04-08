@@ -27,18 +27,6 @@ class TrackerController(ctrlr.ControllerProtocol):
     ipp: float = 1.0
     pulse_length: float = 1.0
 
-    def __post_init__(self):
-        # TODO: move this check to `Pass` object?
-        # ensure the list len across different fields are consistent if a list of enu are in the Pass object
-        if isinstance(self.pass_obj.enu, list):
-            if not (
-                isinstance(self.pass_obj.station_id, list)
-                and len(self.pass_obj.enu) == len(self.pass_obj.station_id)
-            ):
-                raise RuntimeError(
-                    f"`length of `enu` and `station_id` have to be equal in a `Pass` object"
-                )
-
     def generate(
         self,
         stt_tstmp,
