@@ -255,7 +255,6 @@ def doppler_spread_hard_target_snr(
 
 def calculate_snr(
     pass_obj: Pass,
-    range_arrs: list[npt.NDArray],
     tx: tx_rx.TX,
     rx: tx_rx.RX,
     diameter: float,
@@ -271,6 +270,8 @@ def calculate_snr(
     :rtype: numpy.ndarray
 
     """
+
+    range_arrs = [np.linalg.norm(enu[:3, :], axis=0) for enu in pass_obj.enu]
 
     snr = np.empty((len(pass_obj.t),), dtype=np.float64)
     for ti in range(len(pass_obj.t)):

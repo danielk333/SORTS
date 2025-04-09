@@ -6,8 +6,9 @@ from astropy.time import Time
 import pyorb
 import sorts
 from sorts.propagator import SGP4
-from .passes_v2 import Pass, find_simultaneous_passes
+from .passes_v2 import find_simultaneous_passes
 from .radar.radars.composite_key import RadarStationCompositeKey
+from . import signals
 
 
 def setup_function():
@@ -73,28 +74,45 @@ def find_simultaneous_matches_radar_passes_example_test():
         epoch=t.cast(datetime, epoch.to_datetime(timezone=timezone.utc)),
     )
 
+    target_passes = radar_passes__passes[0][1]
     # assert the deltatime ndarray are equal:
     # - ndarray from target is converted from `float64` of seconds to "timedelta64[us]"
     # - ndarray from result is converted from "datetime64[us]" to "timedelta64[us]"
     assert all(
         [
             np.array_equal(
-                (target.t * 1e6).astype("timedelta64[us]"),
-                candidate.get_deltatime_ndarray(
+                (target_pass.t * 1e6).astype("timedelta64[us]"),
+                candidate_pass.get_deltatime_ndarray(
                     t.cast(datetime, epoch.to_datetime(timezone=timezone.utc))
                 ),
             )
-            for target, candidate in zip(radar_passes__passes[0][1], result)
+            for target_pass, candidate_pass in zip(target_passes, result)
         ]
     )
 
-    # assert the states ndarray are equal:
-    # - ndarray from target is converted from `float64` of seconds to "timedelta64[us]"
-    # - ndarray from result is converted from "datetime64[us]" to "timedelta64[us]"
+    # assert the states ndarray are equal
     assert all(
         [
-            np.array_equal(target.enu, candidate.enu)
-            for target, candidate in zip(radar_passes__passes[0][1], result)
+            np.array_equal(target_pass.enu, candidate_pass.enu)
+            for target_pass, candidate_pass in zip(target_passes, result)
+        ]
+    )
+
+    result_snrs = [
+        signals.calculate_snr(
+            pass_obj=pass_obj, tx=eiscat3d.tx[0], rx=eiscat3d.rx[0], diameter=0.05
+        )
+        for pass_obj in result
+    ]
+
+    # assert the snr ndarray are equal
+    target_snrs = [
+        ps.calculate_snr(eiscat3d.tx[0], eiscat3d.rx[0], diameter=0.05) for ps in target_passes
+    ]
+    assert all(
+        [
+            np.array_equal(target_snr, candidate_snr)
+            for target_snr, candidate_snr in zip(target_snrs, result_snrs)
         ]
     )
 
