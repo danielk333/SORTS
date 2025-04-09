@@ -4,6 +4,7 @@ from datetime import datetime
 import pandas as pd
 from .. import scheduler_v2 as schr
 from .. import controller_v2 as ctrlr
+from ..radar.radars.composite_key import RadarStationCompositeKey
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +20,10 @@ class DumbScheduler(schr.SchedulerProtocol):
     res_us = 1000
     "time resolution in microseconds. defaults to `1000` (1ms)"
 
-    def generate_schedule(self, stt_tstmp: datetime, end_tstmp: datetime) -> schr.Schedule:
+    # TODO: make it work with dict of schedule
+    def generate_schedule(
+        self, stt_tstmp: datetime, end_tstmp: datetime
+    ) -> dict[RadarStationCompositeKey, schr.Schedule]:
         """
         Takes start and end time and returns a `Schedule`.
         """

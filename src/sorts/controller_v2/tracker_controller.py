@@ -1,12 +1,13 @@
-import logging, typing as t, math
+import logging
 from dataclasses import dataclass
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
 import numpy as np
 import numpy.typing as npt
 import pyant
 from .. import scheduler_v2 as schr
 from .. import controller_v2 as ctrlr
 from .. import passes_v2
+from ..radar.radars.composite_key import RadarStationCompositeKey
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ class TrackerController(ctrlr.ControllerProtocol):
         stt_tstmp,
         end_tstmp,
         res_us=1000,
-    ) -> schr.Schedule:
+    ) -> dict[RadarStationCompositeKey, schr.Schedule]:
         """
         Parameters
         ---
@@ -44,70 +45,25 @@ class TrackerController(ctrlr.ControllerProtocol):
         res_us
             resolution in microseconds
         """
-        ...
-
-        # wrap `enu` ndarray and `station_id` in a list, if they are not a list already
-        enu_arr_list: list[npt.NDArray[np.float64]] = (
-            self.pass_obj.enu if isinstance(self.pass_obj.enu, list) else [self.pass_obj.enu]
-        )
-        station_id_list: list[int] = (
-            self.pass_obj.station_id
-            if isinstance(self.pass_obj.station_id, list)
-            else [self.pass_obj.station_id]
-        )
-
-        # TODO: maybe use `broadcast_to()` to avoid duplicating elements?
-        # compute stt_tstmp_arr by
-        #   - adjust `Pass.t` using `stt_tstmp`
-        #   - filtering out datetime >= end_tstmp
-        #   - duplicate and concat itself to match number of stations
-        stt_tstmp_arr = map_pass_t_to_tstmp_arr(self.pass_obj.t, stt_tstmp)
-        stt_tstmp_arr = stt_tstmp_arr[stt_tstmp_arr < np.datetime64(end_tstmp, "us")]
-        stt_tstmp_arr = np.concat([stt_tstmp_arr for _ in range(len(station_id_list))])
-
-        azelr_arr: npt.NDArray[np.float64] = np.concat(
-            [pyant.coordinates.cart_to_sph(enu_arr) for enu_arr in enu_arr_list],
-            axis=1,
-        )
-        station_id_arr = np.concat(
-            [
-                np.full(enu_arr.shape[1], station_id_list[idx])
-                for idx, enu_arr in enumerate(enu_arr_list)
-            ]
-        )
 
         # TODO: add conflict checks between schedule for passes?
         # TODO: add checks for lowest  time_slice (or schedule row) >= res_us
-        sch_total_rows = azelr_arr.shape[1]
+        stt_tstmp_arr = self.pass_obj.t[self.pass_obj.t < np.datetime64(end_tstmp, "us")]
+        sch_total_rows = stt_tstmp_arr.shape[0]
 
-        ret_sch = schr.Schedule(
-            stt_tstmp_us=stt_tstmp_arr,
-            exp_num=np.full(sch_total_rows, self.exp_num),
-            station_id=station_id_arr,
-            pointing_az=azelr_arr[0],
-            pointing_el=azelr_arr[1],
-            coh_int_bandwidth=np.full(sch_total_rows, self.coh_int_bandwidth),
-            ipp=np.full(sch_total_rows, self.ipp),
-            pulse_length=np.full(sch_total_rows, self.pulse_length),
-        )
+        sch_dict: dict[RadarStationCompositeKey, schr.Schedule] = {}
+        for idx, station_key in enumerate(self.pass_obj.radar_station_composite_keys):
+            azelr_arr = pyant.coordinates.cart_to_sph(self.pass_obj.enu[idx])
+            sch = schr.Schedule(
+                stt_tstmp_us=stt_tstmp_arr,
+                exp_num=np.full(sch_total_rows, self.exp_num),
+                pointing_az=azelr_arr[0],
+                pointing_el=azelr_arr[1],
+                coh_int_bandwidth=np.full(sch_total_rows, self.coh_int_bandwidth),
+                ipp=np.full(sch_total_rows, self.ipp),
+                pulse_length=np.full(sch_total_rows, self.pulse_length),
+            )
 
-        logger.error(f"generate() is wip, dummy values will be returned")
-        return ret_sch
+            sch_dict[station_key] = sch
 
-
-def map_pass_t_to_tstmp_arr(t_arr: npt.NDArray[np.float64], stt_tstmp: datetime):
-    """
-    instance member `Pass.t` starts from 0 and is based in seconds,
-    this method covert it to `timedelta64[us]` used in scheduler
-
-    returns a new ndarray with modified values
-
-
-    WIP; likely need to adjust `epoch` param of the orbit based on `stt_tstmp`
-    """
-
-    # NOTE: equidistant_sampling returns npt.NDArray[np.float64]
-    tstmp_arr = (t_arr.copy() * 1e6).astype("timedelta64[us]")
-    tstmp_arr = tstmp_arr + np.datetime64(stt_tstmp, "us")
-
-    return tstmp_arr
+        return sch_dict

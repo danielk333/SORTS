@@ -19,6 +19,7 @@ def setup_function():
 
 def tracker_controller_smoke_test():
     eiscat3d = sorts.get_radar("eiscat3d", "stage1-array")
+    epoch = Time(53005.0, format="mjd", scale="utc")
 
     Prop_cls = SGP4
     Prop_opts = dict(
@@ -42,19 +43,21 @@ def tracker_controller_smoke_test():
         epoch=53005.0,
     )
 
-    # NOTE: kept for ref, will be used when switched to `Pass` class v2
-    _epoch = t.cast(np.datetime64, Time(53005.0, format="mjd", scale="utc").to_value("datetime64"))
-
-    t_arr = sorts.equidistant_sampling(
+    dt_arr = sorts.equidistant_sampling(
         orbit=orb,
         start_t=0,
         end_t=3600 * 24 * 1,
         max_dpos=1e3,
     )
 
-    states = prop.propagate(t_arr, orb.cartesian[:, 0], orb.epoch, A=1.0, C_R=1.0, C_D=1.0)
+    states = prop.propagate(dt_arr, orb.cartesian[:, 0], orb.epoch, A=1.0, C_R=1.0, C_D=1.0)
 
-    passes = eiscat3d.find_passes_v2(t_arr, states)
+    passes = eiscat3d.find_passes_v2(
+        dt_arr=dt_arr,
+        states=states,
+        radar_composite_key=("eiscat3d", "stage1-array"),
+        epoch=t.cast(datetime, epoch.to_datetime(timezone=timezone.utc)),
+    )
     pass_obj = passes[0][1][0]
 
     controller = TrackerController(pass_obj=pass_obj)
@@ -63,12 +66,7 @@ def tracker_controller_smoke_test():
     end_tstmp = stt_tstmp + timedelta(hours=24)
     result = controller.generate(stt_tstmp, end_tstmp)
 
-    assert isinstance(result, schr.Schedule)
+    for k in result:
+        assert isinstance(result[k], schr.Schedule)
 
-    # TODO: wip; this is the current test target
-    _snr = pass_obj.calculate_snr(eiscat3d.tx[0], eiscat3d.rx[0], diameter=0.05)
     return
-
-
-def test_enu_to_azelr():
-    pass

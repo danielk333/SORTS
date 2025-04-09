@@ -1,9 +1,10 @@
-import logging, typing as t, math
+import logging, math
 from dataclasses import dataclass
-from datetime import datetime, timezone, timedelta
+from datetime import timedelta
 import numpy as np
 from .. import scheduler_v2 as schr
 from .. import controller_v2 as ctrlr
+from ..radar.radars.composite_key import RadarStationCompositeKey
 
 logger = logging.getLogger(__name__)
 
@@ -14,8 +15,8 @@ class RandomUniformScansController(ctrlr.ControllerProtocol):
     a controller that generate random uniform scans
     """
 
+    radar_station_composite_key: RadarStationCompositeKey
     exp_num: int = 0
-    station_id: int = 0
     min_elevation_deg: float = 30.0
     time_slice_us: float = 1.0 * 10_000  # ipp * npoints
     npoints: int = 10_000
@@ -41,7 +42,7 @@ class RandomUniformScansController(ctrlr.ControllerProtocol):
         stt_tstmp,
         end_tstmp,
         res_us=1000,
-    ) -> schr.Schedule:
+    ) -> dict[RadarStationCompositeKey, schr.Schedule]:
         """
         Parameters
         ---
@@ -79,7 +80,6 @@ class RandomUniformScansController(ctrlr.ControllerProtocol):
                 dtype="datetime64[us]",
             ),
             exp_num=np.full(self.npoints, self.exp_num),
-            station_id=np.full(self.npoints, self.station_id),
             pointing_az=np.random.uniform(low=0, high=2 * np.pi, size=self.npoints),
             pointing_el=np.random.uniform(low=min_el, high=np.pi / 2, size=self.npoints),
             coh_int_bandwidth=np.full(self.npoints, self.coh_int_bandwidth),
@@ -87,4 +87,4 @@ class RandomUniformScansController(ctrlr.ControllerProtocol):
             pulse_length=np.full(self.npoints, self.pulse_length),
         )
 
-        return ret_sch
+        return {self.radar_station_composite_key: ret_sch}

@@ -9,14 +9,16 @@ def setup_function():
     print()
 
 
-def test_random_uniform_scans_controller():
-    """just a smoke test for now"""
-
-    controller = RandomUniformScansController(npoints=10)
+def random_uniform_scans_controller_smoke_test():
+    controller = RandomUniformScansController(
+        radar_station_composite_key=("dummy", "0"), npoints=10
+    )
 
     stt_tstmp = datetime.now(timezone.utc)
     end_tstmp = stt_tstmp + timedelta(hours=24)
     result = controller.generate(stt_tstmp, end_tstmp)
 
-    assert isinstance(result, schr.Schedule)
+    for k in result:
+        assert isinstance(result[k], schr.Schedule)
+
     return

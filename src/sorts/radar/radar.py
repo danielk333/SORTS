@@ -2,8 +2,11 @@
 
 """This module is used to define the radar system"""
 import copy
-
+from datetime import datetime
+import numpy as np
+import numpy.typing as npt
 from .. import passes, passes_v2
+from .radars.composite_key import RadarCompositeKey
 
 
 class Radar(object):
@@ -103,7 +106,14 @@ class Radar(object):
                 rd_ps[-1].append(txrx)
         return rd_ps
 
-    def find_passes_v2(self, t, states, fov_kw=None):
+    def find_passes_v2(
+        self,
+        dt_arr: npt.NDArray[np.float64],
+        states: npt.NDArray[np.float64],
+        radar_composite_key: RadarCompositeKey,
+        epoch: datetime,
+        fov_kw=None,
+    ):
         """
         ver 2 of the `find_passes()` func,
         same logic as v1 but return v2 `Pass` class instead
@@ -120,6 +130,8 @@ class Radar(object):
             :rtype: list of list of sorts.Pass
 
         TODO: clean up the v1 func and remove the v2 suffix
+        TODO: radar should know RadarCompositeKey, RadarStationCompositeKey, and not need to get them from param
+        TODO: this `stations=[tx, rx],` feels a bit hard-coded?
         """
 
         rd_ps: list[list[list[passes_v2.Pass]]] = []
@@ -127,13 +139,17 @@ class Radar(object):
             rd_ps.append([])
             for rxi, rx in enumerate(self.rx):
                 txrx = passes_v2.find_simultaneous_passes(
-                    t,
-                    states,
-                    [tx, rx],
+                    dt_arr=dt_arr,
+                    states=states,
+                    stations=[tx, rx],
+                    radar_station_composite_keys=[
+                        (*radar_composite_key, "tx", f"{txi}"),
+                        (*radar_composite_key, "rx", f"{rxi}"),
+                    ],  # TODO: should not hard-code it here, each radar can have their own radar key to station key logic
+                    epoch=epoch,
                     fov_kw=fov_kw,
                 )
-                for ps in txrx:
-                    ps.station_id = [txi, rxi]
+
                 rd_ps[-1].append(txrx)
 
         return rd_ps
