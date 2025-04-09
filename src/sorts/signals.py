@@ -2,9 +2,15 @@
 
 """This module is used to define the radar network configuration.
 
+TODO: wrong module description?
+
 """
+
 import numpy as np
+import numpy.typing as npt
 import scipy.constants
+from .radar import tx_rx
+from .passes_v2 import Pass
 
 
 def hard_target_snr_scaling(diameter_from, diameter_to, wavelength):
@@ -54,7 +60,7 @@ def hard_target_snr(
     range_tx_m,
     range_rx_m,
     diameter=0.01,
-    bandwidth=10,
+    bandwidth=10.0,
     rx_noise_temp=150.0,
     radar_albedo=1.0,
 ):
@@ -245,3 +251,41 @@ def doppler_spread_hard_target_snr(
 
     snr_coh = p_s / p_n0
     return snr_coh, snr_incoh
+
+
+def calculate_snr(
+    pass_obj: Pass,
+    range_arrs: list[npt.NDArray],
+    tx: tx_rx.TX,
+    rx: tx_rx.RX,
+    diameter: float,
+):
+    """Uses the :code:`signals.hard_target_snr` function to calculate the optimal SNR curve
+    of a target during the pass **if the TX and RX stations are pointing at the object**.
+    The SNR's are returned from the function but also stored in the property :code:`self.snr`.
+
+    :param TX tx: The TX station that observed the pass.
+    :param RX rx: The RX station that observed the pass.
+    :param float diameter: The diameter of the object.
+    :return: (n,) Vector with the SNR's during the pass.
+    :rtype: numpy.ndarray
+
+    """
+
+    snr = np.empty((len(pass_obj.t),), dtype=np.float64)
+    for ti in range(len(pass_obj.t)):
+        tx.beam.point(pass_obj.enu[0][:3, ti])
+        rx.beam.point(pass_obj.enu[1][:3, ti])
+
+        snr[ti] = hard_target_snr(
+            tx.beam.gain(pass_obj.enu[0][:3, ti]),
+            rx.beam.gain(pass_obj.enu[1][:3, ti]),
+            rx.wavelength,
+            tx.power,
+            range_arrs[0][ti],
+            range_arrs[1][ti],
+            diameter=diameter,
+            bandwidth=tx.coh_int_bandwidth,
+            rx_noise_temp=rx.noise,
+        )
+    return snr

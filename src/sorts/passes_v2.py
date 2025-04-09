@@ -21,6 +21,7 @@ class Pass:
 
     TODO: rename to RadarPass or similar to avoid potential identifier clash with python `pass` keyword?
     TODO: better member field names, was kept for compatiblity during v1 -> v2 dev
+    TODO: should we store range array in this object as well?
     """
 
     t: npt.NDArray[np.datetime64]  # TODO: better naming
@@ -37,13 +38,10 @@ class Pass:
                 f"`length of `enu` and `radar_station_composite_keys` have to be equal in a `Pass` object"
             )
 
-    def get_deltatime_ndarray(self, epoch: datetime | None = None) -> npt.NDArray[np.float64]:
-        _epoch: np.datetime64 = np.datetime64(epoch) or self.t[0]
+    def get_deltatime_ndarray(self, epoch: datetime | None = None) -> npt.NDArray[np.timedelta64]:
+        _epoch: np.datetime64 = np.datetime64(epoch, "us") or self.t[0]
 
-        deltatime_arr = self.t - _epoch  # deltatime in numpy timedelta64
-        deltatime_arr = deltatime_arr / np.timedelta64(1, "s")  # deltatime in numpy float64
-
-        return deltatime_arr
+        return self.t - _epoch
 
 
 def find_simultaneous_passes(

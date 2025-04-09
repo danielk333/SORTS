@@ -80,7 +80,9 @@ def find_simultaneous_matches_radar_passes_example_test():
         [
             np.array_equal(
                 (target.t * 1e6).astype("timedelta64[us]"),
-                candidate.t - t.cast(np.datetime64, epoch.to_value("datetime64")),
+                candidate.get_deltatime_ndarray(
+                    t.cast(datetime, epoch.to_datetime(timezone=timezone.utc))
+                ),
             )
             for target, candidate in zip(radar_passes__passes[0][1], result)
         ]
