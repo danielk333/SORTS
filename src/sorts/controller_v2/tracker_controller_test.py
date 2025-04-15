@@ -4,7 +4,6 @@ import numpy as np
 from astropy.time import Time
 import pyorb
 import sorts
-
 from sorts.propagator import SGP4
 from .. import scheduler_v2 as schr
 from .tracker_controller import TrackerController
@@ -18,6 +17,8 @@ def setup_function():
 
 
 def tracker_controller_smoke_test():
+    """based on `examples/radar_passes.py`"""
+
     eiscat3d = sorts.get_radar("eiscat3d", "stage1-array")
     epoch = Time(53005.0, format="mjd", scale="utc")
 

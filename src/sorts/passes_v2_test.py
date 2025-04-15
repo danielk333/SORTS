@@ -18,6 +18,8 @@ def setup_function():
 
 
 def find_simultaneous_matches_radar_passes_example_test():
+    """based on `examples/radar_passes.py`"""
+
     passes_pickle_fpath = (
         Path(os.path.dirname(os.path.abspath(__file__)))
         / ".."
