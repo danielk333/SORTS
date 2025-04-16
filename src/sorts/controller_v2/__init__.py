@@ -1,2 +1,4 @@
 from .controller_protocol import ControllerProtocol
 from .random_uniform_scans_controller import RandomUniformScansController
+from .tracker_controller import TrackerController
+from .scanner_controller import ScannerController

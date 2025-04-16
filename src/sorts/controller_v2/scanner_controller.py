@@ -6,8 +6,8 @@ import numpy.typing as npt
 import pyant
 from .. import scheduler_v2 as schr
 from .. import controller_v2 as ctrlr
-from .. import passes_v2
 from ..radar.radars.composite_key import RadarStationCompositeKey
+from ..radar.scans.scan import Scan
 
 logger = logging.getLogger(__name__)
 
@@ -18,15 +18,15 @@ class ScannerController(ctrlr.ControllerProtocol):
     a controller for a `Scan` object
     """
 
-    # TODO: add `is_radian` as `Pass` member field? default to `False`?
-    pass_obj: passes_v2.Pass
-
+    scan: Scan
     exp_num: int = 0
     time_slice_us: float = 1000  # 1ms
-
     coh_int_bandwidth: float = 1.0
     ipp: float = 1.0
     pulse_length: float = 1.0
+
+    # t_slice_us: float # TODO: eval if we need it
+    # dwell_us: float # TODO: eval if we need it
 
     def generate(
         self,

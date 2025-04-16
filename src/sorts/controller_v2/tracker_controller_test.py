@@ -7,7 +7,6 @@ import sorts
 from sorts.propagator import SGP4
 from .. import scheduler_v2 as schr
 from .tracker_controller import TrackerController
-from ..passes import Pass
 
 
 def setup_function():
