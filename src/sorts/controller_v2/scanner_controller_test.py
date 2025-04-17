@@ -8,6 +8,7 @@ from .. import scheduler_v2 as schr
 from .scanner_controller import ScannerController
 from sorts.radar.scans import Fence
 from ..passes_v2 import Pass
+from ..calculations import calculate_observation
 
 
 def setup_function():
@@ -71,14 +72,26 @@ def scanner_controller_smoke_test():
 
     controller = ScannerController(scan=scan)
 
-    # result = controller.generate(
-    #     t.cast(datetime, epoch.to_datetime(timezone=timezone.utc))
-    #     t.cast(datetime, epoch.to_datetime(timezone=timezone.utc))
-    # )
+    schedule_dict = controller.generate(
+        t.cast(datetime, stt_tstmp.to_datetime(timezone=timezone.utc)),
+        t.cast(datetime, end_tstmp.to_datetime(timezone=timezone.utc)),
+    )
 
     # for k in result:
     #     assert isinstance(result[k], schr.Schedule)
     for pass_obj in passes[0][1]:
         assert isinstance(pass_obj, Pass)
+
+    result_dict = {
+        station_key: calculate_observation(
+            schedule=schedule_dict[station_key],
+            space_objects=objs,
+            stt_tstmp=t.cast(datetime, stt_tstmp.to_datetime(timezone=timezone.utc)),
+            end_tstmp=t.cast(datetime, end_tstmp.to_datetime(timezone=timezone.utc)),
+        )
+        for station_key in schedule_dict
+    }
+
+    assert isinstance(result_dict, dict)
 
     return
