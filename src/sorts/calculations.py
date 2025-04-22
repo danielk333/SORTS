@@ -16,17 +16,24 @@ vectorized_row_shape = (8,)  # TODO: this is a tmp soution
 
 
 # TODO: this is a tmp soution
-class ExperimentDetail(t.NamedTuple):
+# TODO: maybe need to support cases where some of them varies by time?
+@dataclass
+class ExperimentDetail:
     coh_int_bandwidth: float
     ipp: float
     pulse_length: float
+    power: float
+    bandwidth: float
+    duty_cycle: float
+    noise_temp: float
 
 
 # TODO: this is a tmp soution
-exp_num_map: dict[int, ExperimentDetail] = {0: ExperimentDetail(1.0, 1.0, 1.0)}
+exp_num_map: dict[int, ExperimentDetail] = {0: ExperimentDetail(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)}
 
 
-class Observation(t.NamedTuple):
+@dataclass
+class Observation:
     snr: npt.NDArray[np.float64]
     range: npt.NDArray[np.float64]
     range_rx: npt.NDArray[np.float64]
@@ -76,10 +83,10 @@ def calculate_observation(
 
     states = space_object.get_state(dt_arr)
 
-    snr = np.empty((len(schedule.stt_tstmp_us),), dtype=np.float64)
-    snr_inch = np.empty((len(schedule.stt_tstmp_us),), dtype=np.float64)
-    rcs = np.empty((len(schedule.stt_tstmp_us),), dtype=np.float64)
-    keep = np.full((len(schedule.stt_tstmp_us),), True, dtype=bool)
+    snr = np.empty((len(tx_schedule.stt_tstmp_us),), dtype=np.float64)
+    snr_inch = np.empty((len(tx_schedule.stt_tstmp_us),), dtype=np.float64)
+    rcs = np.empty((len(tx_schedule.stt_tstmp_us),), dtype=np.float64)
+    keep = np.full((len(tx_schedule.stt_tstmp_us),), True, dtype=bool)
 
     enus = [
         tx_station.enu(states),

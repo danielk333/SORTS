@@ -1,0 +1,114 @@
+import typing as t, os, pickle
+from pathlib import Path
+from datetime import datetime, timezone
+import numpy as np
+from astropy.time import Time
+import pyant
+import sorts
+from sorts.schedule_v2 import Schedule
+from sorts.calculations import ExperimentDetail
+from .detection_config import SimpleStxSrx, calculate_simple_stx_srx_observations
+
+
+def setup_function():
+    # a workaround to avoid pytest printings and test printings interleaved in the same line
+    # https://github.com/pytest-dev/pytest/issues/8574#issuecomment-1806404215
+    print()
+
+
+epoch = Time(53005.0, format="mjd", scale="utc")
+simulation_end_dt = 600.0  # in seconds
+eiscat3d = sorts.get_radar("eiscat3d", "stage1-array")
+
+Prop_cls = sorts.propagator.SGP4
+Prop_opts = dict(
+    settings=dict(
+        out_frame="ITRF",
+    ),
+)
+
+spobj = sorts.SpaceObject(
+    Prop_cls,
+    propagator_options=Prop_opts,
+    a=7200e3,
+    e=0.02,
+    i=75,
+    raan=86,
+    aop=0,
+    mu0=60,
+    epoch=epoch,
+    parameters=dict(
+        d=0.1,
+    ),
+)
+
+scan = sorts.radar.scans.Fence(azimuth=90, num=40, dwell=0.1, min_elevation=30)
+
+
+def SimpleStxSrx_smoke_test():
+    """following the params as in `examples/examples/simulate_scanning_v2.py`"""
+
+    dt_arr = sorts.equidistant_sampling(
+        orbit=spobj.state,
+        start_t=0,
+        end_t=simulation_end_dt,
+        max_dpos=1e3,
+    )
+    stt_tstmp_us = (dt_arr * 1e6).astype("timedelta64[us]") + np.datetime64(
+        t.cast(datetime, epoch.to_datetime(timezone=timezone.utc))
+    )
+    sch_total_rows = len(dt_arr)
+
+    tx_station = eiscat3d.tx[0]
+    rx_station = eiscat3d.rx[0]
+
+    exp_detail = ExperimentDetail(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
+    exp_num = 0
+    exp_num_map: dict[int, ExperimentDetail] = {0: exp_detail}
+
+    # TODO: feels like we could use a tracker controller here
+    #   (`src/sorts/controller_v2/tracker_controller.py`),
+    #   but it requires a `Pass` object which is not that convenient to use
+    #     - a `Pass` object feels like sth internal to a simulation and not sth known in prior/externally
+    spobj_states = spobj.get_state(dt_arr)
+    spobj_tx_enu = tx_station.enu(spobj_states)  # space object in tx station coordinate
+    spobj_rx_enu = rx_station.enu(spobj_states)  # space object in rx station coordinate
+    spobj_tx_azlr = pyant.coordinates.cart_to_sph(spobj_tx_enu)
+    spobj_rx_azlr = pyant.coordinates.cart_to_sph(spobj_rx_enu)
+
+    tx_schedule = Schedule(
+        stt_tstmp_us=stt_tstmp_us,
+        exp_num=np.full(sch_total_rows, exp_num),
+        pointing_az=spobj_tx_azlr[0],
+        pointing_el=spobj_tx_azlr[1],
+        coh_int_bandwidth=np.full(sch_total_rows, exp_detail.coh_int_bandwidth),
+        ipp=np.full(sch_total_rows, exp_detail.ipp),
+        pulse_length=np.full(sch_total_rows, exp_detail.pulse_length),
+    )
+
+    rx_schedule = Schedule(
+        stt_tstmp_us=stt_tstmp_us,
+        exp_num=np.full(sch_total_rows, exp_num),
+        pointing_az=spobj_rx_azlr[0],
+        pointing_el=spobj_rx_azlr[1],
+        coh_int_bandwidth=np.full(sch_total_rows, exp_detail.coh_int_bandwidth),
+        ipp=np.full(sch_total_rows, exp_detail.ipp),
+        pulse_length=np.full(sch_total_rows, exp_detail.pulse_length),
+    )
+
+    SimpleStxSrx(
+        stt_tstmp_us=stt_tstmp_us,
+        tx_station=eiscat3d.tx[0],
+        rx_station=eiscat3d.rx[0],
+        tx_schedule=tx_schedule,
+        rx_schedule=rx_schedule,
+        exp_num_map=exp_num_map,
+    )
+
+    return
+
+
+def calculate_simple_stx_srx_observations_smoke_test():
+    # calculate_simple_stx_srx_observations()
+
+    return

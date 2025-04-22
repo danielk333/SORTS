@@ -1,9 +1,11 @@
-#!/usr/bin/env python
-
 """
 Simulate scanning for objects
 ======================================
+
+same as `examples/simulate_scanning.py`,
+with adjustment made to make it runnable (as of `762e70e`)
 """
+
 import os, pickle
 from pathlib import Path
 import numpy as np
