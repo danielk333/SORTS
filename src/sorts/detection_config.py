@@ -100,24 +100,24 @@ def calculate_simple_stx_srx_observations(
     rx_wavelength: float = dcfg.rx_station.beam.wavelength
 
     # TODO: complete `hard_target_snr` support
-    # snr = sorts.signals.hard_target_snr(
-    #     tx_gain_arr,
-    #     rx_gain_arr,
-    #     tx_wavelength,
-    #     powers,
-    #     range_tx_m,
-    #     range_rx_m,
-    #     diameter=space_object.d,
-    #     bandwidth=bandwidths[0],
-    #     rx_noise_temp=rx_noise_temps[0],
-    #     radar_albedo=space_object.parameters.get("radar_albedo", 1.0),
-    # )
+    snr = sorts.signals.hard_target_snr(
+        tx_gain_arr,
+        rx_gain_arr,
+        tx_wavelength,
+        powers,
+        range_tx_m,
+        range_rx_m,
+        diameter=space_object.d,
+        bandwidth=bandwidths[0],
+        rx_noise_temp=rx_noise_temps[0],
+        radar_albedo=space_object.parameters.get("radar_albedo", 1.0),
+    )
 
     # TODO: add `doppler_spread_integrated_snr:` support
     # TODO: add `blind_ranges:` support
 
     obs = Observation(
-        snr=np.full(len(dcfg.stt_tstmp_us), 1.0, dtype=np.float64),  # TODO: imple
+        snr=snr,
         range=range_tx_m + range_rx_m,
         range_rx=range_rx_m,
         range_rate=np.full(len(dcfg.stt_tstmp_us), 1.0, dtype=np.float64),  # TODO: imple

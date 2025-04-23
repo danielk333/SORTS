@@ -42,8 +42,6 @@ spobj = sorts.SpaceObject(
     ),
 )
 
-scan = sorts.radar.scans.Fence(azimuth=90, num=40, dwell=0.1, min_elevation=30)
-
 
 def SimpleStxSrx_smoke_test():
     """following the same params as in `examples/examples/simulate_scanning_v2.py`"""
@@ -175,5 +173,117 @@ def calculate_simple_stx_srx_observations_smoke_test():
         epoch=t.cast(datetime, epoch.to_datetime(timezone=timezone.utc)),
     )
 
+    assert isinstance(obs, Observation)
+    return
+
+
+def calculate_simple_stx_srx_observations_should_matches_simulate_scanning_v2_example_test():
+    """following the same params as in `examples/examples/simulate_scanning_v2.py`"""
+
+    spobj_smpl_dt_arr = sorts.equidistant_sampling(
+        orbit=spobj.state,
+        start_t=0,
+        end_t=simulation_end_dt,
+        max_dpos=1e3,
+    )
+
+    tx_station = eiscat3d.tx[0]
+    rx_station = eiscat3d.rx[0]
+
+    exp_detail = ExperimentDetail(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
+    exp_num = 0
+    exp_num_map: dict[int, ExperimentDetail] = {0: exp_detail}
+
+    # TODO: feels like we could use a tracker controller here
+    #   (`src/sorts/controller_v2/tracker_controller.py`),
+    #   but it requires a `Pass` object which is not that convenient to use
+    #     - a `Pass` object feels like sth internal to a simulation and not sth known in prior/externally
+    spobj_smpl_states = spobj.get_state(spobj_smpl_dt_arr)
+
+    pass_arr = eiscat3d.find_passes(spobj_smpl_dt_arr, spobj_smpl_states, cache_data=True)
+    target_pass_obj: sorts.Pass = pass_arr[0][0][0]
+
+    scan = sorts.radar.scans.Fence(azimuth=90, num=40, dwell=0.1, min_elevation=30)
+    scan_dt_arr = np.arange(0, simulation_end_dt, scan.dwell())
+    scanner_ctrl = sorts.controller.Scanner(
+        eiscat3d,
+        scan,
+        t=scan_dt_arr,
+    )
+    scan_dt_arr_pass_mask = np.logical_and(
+        scan_dt_arr >= target_pass_obj.t[0], scan_dt_arr <= target_pass_obj.t[-1]
+    )
+    scan_dt_arr_pass = scan_dt_arr[scan_dt_arr_pass_mask]
+    sch_total_rows = len(scan_dt_arr_pass)
+
+    # space object in tx, rx station coordinate
+    spobj_tx_enu_obs = np.full((6, sch_total_rows), 0, dtype=np.float64)
+    spobj_rx_enu_obs = np.full((6, sch_total_rows), 0, dtype=np.float64)
+    for dt_idx, (radar, _meta) in enumerate(scanner_ctrl.generator(scan_dt_arr_pass)):
+        spobj_tx_enu_obs[:, dt_idx] = radar.tx[0].enu(spobj.get_state([scan_dt_arr_pass[dt_idx]]))[
+            :, 0
+        ]
+        spobj_rx_enu_obs[:, dt_idx] = radar.rx[0].enu(spobj.get_state([scan_dt_arr_pass[dt_idx]]))[
+            :, 0
+        ]
+
+    scan_stt_tstmp_us = (scan_dt_arr_pass * 1e6).astype("timedelta64[us]") + np.datetime64(
+        t.cast(datetime, epoch.to_datetime(timezone=timezone.utc))
+    )
+
+    spobj_tx_azlr_obs = pyant.coordinates.cart_to_sph(spobj_tx_enu_obs)
+    spobj_rx_azlr_obs = pyant.coordinates.cart_to_sph(spobj_rx_enu_obs)
+
+    tx_schedule = Schedule(
+        stt_tstmp_us=scan_stt_tstmp_us,
+        exp_num=np.full(sch_total_rows, exp_num),
+        pointing_az=spobj_tx_azlr_obs[0],
+        pointing_el=spobj_tx_azlr_obs[1],
+        coh_int_bandwidth=np.full(sch_total_rows, exp_detail.coh_int_bandwidth),
+        ipp=np.full(sch_total_rows, exp_detail.ipp),
+        pulse_length=np.full(sch_total_rows, exp_detail.pulse_length),
+    )
+
+    rx_schedule = Schedule(
+        stt_tstmp_us=scan_stt_tstmp_us,
+        exp_num=np.full(sch_total_rows, exp_num),
+        pointing_az=spobj_rx_azlr_obs[0],
+        pointing_el=spobj_rx_azlr_obs[1],
+        coh_int_bandwidth=np.full(sch_total_rows, exp_detail.coh_int_bandwidth),
+        ipp=np.full(sch_total_rows, exp_detail.ipp),
+        pulse_length=np.full(sch_total_rows, exp_detail.pulse_length),
+    )
+
+    dcfg = SimpleStxSrx(
+        stt_tstmp_us=scan_stt_tstmp_us,
+        tx_station=eiscat3d.tx[0],
+        rx_station=eiscat3d.rx[0],
+        tx_schedule=tx_schedule,
+        rx_schedule=rx_schedule,
+        exp_num_map=exp_num_map,
+    )
+
+    obs = calculate_simple_stx_srx_observations(
+        dcfg=dcfg,
+        space_object=spobj,
+        epoch=t.cast(datetime, epoch.to_datetime(timezone=timezone.utc)),
+    )
+
+    pickle_fpath = (
+        Path(os.path.dirname(os.path.abspath(__file__)))
+        / ".."
+        / ".."
+        / "examples"
+        / "simulate_scanning_v2__saves.pickle"
+    )
+    if not os.path.isfile(pickle_fpath):
+        raise RuntimeError(
+            f'saved data from example "simulate_scanning_v2.py" is required, please ensure the file {pickle_fpath} exists'
+        )
+    with open(pickle_fpath, "rb") as f:
+        example_result = pickle.load(f)
+
+    # we target the `[1st_result][tx station 0][rx station 0][0th pass]`
+    target = example_result["datas"][0][0][0][0]
     assert isinstance(obs, Observation)
     return
