@@ -48,9 +48,9 @@ DetectionConfig: t.TypeAlias = t.Union[SimpleStxSrx, StxMrx]
 def calculate_simple_stx_srx_observations(
     dcfg: SimpleStxSrx, space_object: sorts.SpaceObject, epoch: datetime
 ) -> Observation:
-    dt_arr: npt.NDArray[np.float64] = dcfg.stt_tstmp_us - np.datetime64(epoch).astype(
-        "timedelta64[us]"
-    ).astype(np.float64)
+    dt_arr: npt.NDArray[np.float64] = (
+        (dcfg.stt_tstmp_us - np.datetime64(epoch)).astype("timedelta64[us]").astype(np.float64)
+    )
     states = space_object.get_state(dt_arr)
 
     space_object_tx_enu = dcfg.tx_station.enu(states)  # space object in tx station coordinate
@@ -66,46 +66,32 @@ def calculate_simple_stx_srx_observations(
     t_slices = np.empty((len(dcfg.stt_tstmp_us),), dtype=np.float64)
     txrx_on = np.full((len(dcfg.stt_tstmp_us),), False, dtype=bool)
 
-    pulse_lengths = np.full(
-        len(dcfg.stt_tstmp_us),
-        dcfg.exp_num_map[int(dcfg.tx_schedule.exp_num)].pulse_length,
-        dtype=np.float64,
+    pulse_lengths = np.array(
+        [dcfg.exp_num_map[n].pulse_length for n in dcfg.tx_schedule.exp_num], dtype=np.float64
     )
-    ipps = np.full(
-        len(dcfg.stt_tstmp_us),
-        dcfg.exp_num_map[int(dcfg.tx_schedule.exp_num)].ipp,
-        dtype=np.float64,
+    ipps = np.array([dcfg.exp_num_map[n].ipp for n in dcfg.tx_schedule.exp_num], dtype=np.float64)
+    powers = np.array(
+        [dcfg.exp_num_map[n].power for n in dcfg.tx_schedule.exp_num], dtype=np.float64
     )
-    powers = np.full(
-        len(dcfg.stt_tstmp_us),
-        dcfg.exp_num_map[int(dcfg.tx_schedule.exp_num)].power,
-        dtype=np.float64,
+    bandwidths = np.array(
+        [dcfg.exp_num_map[n].bandwidth for n in dcfg.tx_schedule.exp_num], dtype=np.float64
     )
-    bandwidths = np.full(
-        len(dcfg.stt_tstmp_us),
-        dcfg.exp_num_map[int(dcfg.tx_schedule.exp_num)].bandwidth,
-        dtype=np.float64,
+    duty_cycles = np.array(
+        [dcfg.exp_num_map[n].duty_cycle for n in dcfg.tx_schedule.exp_num], dtype=np.float64
     )
-    duty_cycles = np.full(
-        len(dcfg.stt_tstmp_us),
-        dcfg.exp_num_map[int(dcfg.tx_schedule.exp_num)].duty_cycle,
-        dtype=np.float64,
-    )
-    rx_noise_temps = np.full(
-        len(dcfg.stt_tstmp_us),
-        dcfg.exp_num_map[int(dcfg.rx_schedule.exp_num)].noise_temp,
-        dtype=np.float64,
+    rx_noise_temps = np.array(
+        [dcfg.exp_num_map[n].noise_temp for n in dcfg.tx_schedule.exp_num], dtype=np.float64
     )
 
     # TODO: `pointing` and `vectorized_parameters` seems not needed?
     #   pointing can be obtained by [dcfg.tx_schedule.pointing_az, dcfg.tx_schedule.pointing_el, range?]
     tx_gain_arr = dcfg.tx_station.beam.gain(
-        space_object_tx_enu,
+        space_object_tx_enu[:3],
         # pointing=vectorized_data[:, 0:3].T,
         # vectorized_parameters=True,
     )
     rx_gain_arr = dcfg.rx_station.beam.gain(
-        space_object_rx_enu,
+        space_object_rx_enu[:3],
         # pointing=vectorized_data[:, 4:7].T,
         # vectorized_parameters=True,
     )
