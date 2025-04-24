@@ -227,7 +227,7 @@ def calculate_simple_stx_srx_observations_should_matches_simulate_scanning_v2_ex
             :, 0
         ]
 
-    scan_stt_tstmp_us = (scan_dt_arr_pass * 1e6).astype("timedelta64[us]") + np.datetime64(
+    scan_pass_stt_tstmp_us = (scan_dt_arr_pass * 1e6).astype("timedelta64[us]") + np.datetime64(
         t.cast(datetime, epoch.to_datetime(timezone=timezone.utc))
     )
 
@@ -235,7 +235,7 @@ def calculate_simple_stx_srx_observations_should_matches_simulate_scanning_v2_ex
     spobj_rx_azlr_obs = pyant.coordinates.cart_to_sph(spobj_rx_enu_obs)
 
     tx_schedule = Schedule(
-        stt_tstmp_us=scan_stt_tstmp_us,
+        stt_tstmp_us=scan_pass_stt_tstmp_us,
         exp_num=np.full(sch_total_rows, exp_num),
         pointing_az=spobj_tx_azlr_obs[0],
         pointing_el=spobj_tx_azlr_obs[1],
@@ -245,7 +245,7 @@ def calculate_simple_stx_srx_observations_should_matches_simulate_scanning_v2_ex
     )
 
     rx_schedule = Schedule(
-        stt_tstmp_us=scan_stt_tstmp_us,
+        stt_tstmp_us=scan_pass_stt_tstmp_us,
         exp_num=np.full(sch_total_rows, exp_num),
         pointing_az=spobj_rx_azlr_obs[0],
         pointing_el=spobj_rx_azlr_obs[1],
@@ -255,7 +255,7 @@ def calculate_simple_stx_srx_observations_should_matches_simulate_scanning_v2_ex
     )
 
     dcfg = SimpleStxSrx(
-        stt_tstmp_us=scan_stt_tstmp_us,
+        stt_tstmp_us=scan_pass_stt_tstmp_us,
         tx_station=eiscat3d.tx[0],
         rx_station=eiscat3d.rx[0],
         tx_schedule=tx_schedule,
@@ -283,7 +283,8 @@ def calculate_simple_stx_srx_observations_should_matches_simulate_scanning_v2_ex
     with open(pickle_fpath, "rb") as f:
         example_result = pickle.load(f)
 
+    assert isinstance(obs, Observation)
     # we target the `[1st_result][tx station 0][rx station 0][0th pass]`
     target = example_result["datas"][0][0][0][0]
-    assert isinstance(obs, Observation)
+    result = np.array_equal(target["snr"], obs.snr)
     return
