@@ -25,6 +25,7 @@ from .. import frames
 
 logger = logging.getLogger(__name__)
 
+
 class SGP4(Propagator):
     """Propagator class implementing the SGP4 propagator.
 
@@ -360,7 +361,7 @@ class SGP4(Propagator):
         :return: mean elements of: semi major axis (km), orbital eccentricity, orbital inclination (radians), right ascension of ascending node (radians), argument of perigee (radians), mean anomaly (radians)
         :rtype: numpy.ndarray
         """
-        logger.info("SGP4:TEME_to_TLE_OPTIM")
+        logger.debug("SGP4:TEME_to_TLE_OPTIM")
 
         if len(state.shape) == 1:
             state.shape = (state.size, 1)
@@ -433,7 +434,7 @@ class SGP4(Propagator):
 
         mean_elements = opt_res.x
 
-        logger.info(f"SGP4:TEME_to_TLE_OPTIM:completed")
+        logger.debug(f"SGP4:TEME_to_TLE_OPTIM:completed")
 
         return mean_elements
 
@@ -449,7 +450,7 @@ class SGP4(Propagator):
         :return: mean elements of: semi major axis (km), orbital eccentricity, orbital inclination (radians), right ascension of ascending node (radians), argument of perigee (radians), mean anomaly (radians)
         :rtype: numpy.ndarray
         """
-        logger.info("SGP4:TEME_to_TLE")
+        logger.debug("SGP4:TEME_to_TLE")
 
         mean_elements = None
 
@@ -465,7 +466,7 @@ class SGP4(Propagator):
                     tol_v=tol_v,
                 )
 
-                logger.info(f"SGP4:TEME_to_TLE:completed")
+                logger.debug(f"SGP4:TEME_to_TLE:completed")
 
                 return mean_elements
             else:
@@ -543,7 +544,7 @@ class SGP4(Propagator):
                     tol_v=tol_v,
                 )
 
-        logger.info(f"SGP4:TEME_to_TLE:completed")
+        logger.debug(f"SGP4:TEME_to_TLE:completed")
 
         return mean_elements
 

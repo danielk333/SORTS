@@ -151,7 +151,7 @@ def convert(t, states, in_frame, out_frame, **kwargs):
 
     """
 
-    logger.info(f"frames:convert: in_frame={in_frame}, out_frame={out_frame}")
+    logger.debug(f"frames:convert: in_frame={in_frame}, out_frame={out_frame}")
 
     in_frame = in_frame.upper()
     out_frame = out_frame.upper()
@@ -197,7 +197,7 @@ def convert(t, states, in_frame, out_frame, **kwargs):
     rets[:3, ...] = out_states.cartesian.xyz.to(units.m).value
     rets[3:, ...] = out_states.velocity.d_xyz.to(units.m / units.s).value
 
-    logger.info("frames:convert:completed")
+    logger.debug("frames:convert:completed")
 
     return rets
 
