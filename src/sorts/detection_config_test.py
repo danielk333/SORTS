@@ -317,7 +317,23 @@ def calculate_simple_stx_srx_observations_should_matches_simulate_scanning_v2_ex
     assert isinstance(obs, Observation)
     # we target the `[1st_result][tx station 0][rx station 0][0th pass]`
     target = example_result["datas"][0][0][0][0]
-    result = np.array_equal(target["snr"], obs.snr)
+    result_snr = np.array_equal(target["snr"], obs.snr)
+
+    # for comparison with `target["tx_k"]`, `target["rx_k"]`
+    tx_k = pyant.coordinates.sph_to_cart(
+        np.stack(
+            [
+                dcfg.tx_schedule.pointing_az,
+                dcfg.tx_schedule.pointing_el,
+                np.full(len(dcfg.stt_tstmp_us), 1.0, dtype=np.float64),
+            ],
+            axis=0,
+        )
+    )
+    rx_k = pyant.coordinates.sph_to_cart(dcfg)
+
+    result_tx_k = np.array_equal(target["tx_k"], tx_k)
+    result_rx_k = np.array_equal(target["tx_k"], rx_k)
 
     # optionally do some plotting for visual debugging aids
     # fig, ax = plt.subplots()
