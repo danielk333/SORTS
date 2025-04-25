@@ -2,6 +2,7 @@ import typing as t, os, pickle
 from pathlib import Path
 from datetime import datetime, timezone
 import numpy as np
+import matplotlib.pyplot as plt
 from astropy.time import Time
 import pyant
 import sorts
@@ -216,29 +217,33 @@ def calculate_simple_stx_srx_observations_should_matches_simulate_scanning_v2_ex
     scan_dt_arr_pass = scan_dt_arr[scan_dt_arr_pass_mask]
     sch_total_rows = len(scan_dt_arr_pass)
 
-    # space object in tx, rx station coordinate
-    spobj_tx_enu_obs = np.full((6, sch_total_rows), 0, dtype=np.float64)
-    spobj_rx_enu_obs = np.full((6, sch_total_rows), 0, dtype=np.float64)
+    # space object in tx, rx station coordinate and the pointings of tx, rx station,
+    # all under the delta times of a pass
+    # note that `tx_azelr_deg_pass`, `rx_azelr_deg_pass` init to 1.0,
+    # TODO: vectorize
+    spobj_tx_enu_pass = np.full((6, sch_total_rows), 0, dtype=np.float64)
+    spobj_rx_enu_pass = np.full((6, sch_total_rows), 0, dtype=np.float64)
+    tx_azelr_deg_pass = np.full((3, sch_total_rows), 1.0, dtype=np.float64)
+    rx_azelr_deg_pass = np.full((3, sch_total_rows), 1.0, dtype=np.float64)
     for dt_idx, (radar, _meta) in enumerate(scanner_ctrl.generator(scan_dt_arr_pass)):
-        spobj_tx_enu_obs[:, dt_idx] = radar.tx[0].enu(spobj.get_state([scan_dt_arr_pass[dt_idx]]))[
+        spobj_tx_enu_pass[:, dt_idx] = radar.tx[0].enu(spobj.get_state([scan_dt_arr_pass[dt_idx]]))[
             :, 0
         ]
-        spobj_rx_enu_obs[:, dt_idx] = radar.rx[0].enu(spobj.get_state([scan_dt_arr_pass[dt_idx]]))[
+        spobj_rx_enu_pass[:, dt_idx] = radar.rx[0].enu(spobj.get_state([scan_dt_arr_pass[dt_idx]]))[
             :, 0
         ]
+        tx_azelr_deg_pass[:2, dt_idx] = [radar.tx[0].beam.azimuth[0], radar.tx[0].beam.elevation[0]]
+        rx_azelr_deg_pass[:2, dt_idx] = [radar.rx[0].beam.azimuth[0], radar.rx[0].beam.elevation[0]]
 
     scan_pass_stt_tstmp_us = (scan_dt_arr_pass * 1e6).astype("timedelta64[us]") + np.datetime64(
         t.cast(datetime, epoch.to_datetime(timezone=timezone.utc))
     )
 
-    spobj_tx_azlr_obs = pyant.coordinates.cart_to_sph(spobj_tx_enu_obs)
-    spobj_rx_azlr_obs = pyant.coordinates.cart_to_sph(spobj_rx_enu_obs)
-
     tx_schedule = Schedule(
         stt_tstmp_us=scan_pass_stt_tstmp_us,
         exp_num=np.full(sch_total_rows, exp_num),
-        pointing_az=spobj_tx_azlr_obs[0],
-        pointing_el=spobj_tx_azlr_obs[1],
+        pointing_az=tx_azelr_deg_pass[0],
+        pointing_el=tx_azelr_deg_pass[1],
         coh_int_bandwidth=np.full(sch_total_rows, exp_detail.coh_int_bandwidth),
         ipp=np.full(sch_total_rows, exp_detail.ipp),
         pulse_length=np.full(sch_total_rows, exp_detail.pulse_length),
@@ -247,8 +252,8 @@ def calculate_simple_stx_srx_observations_should_matches_simulate_scanning_v2_ex
     rx_schedule = Schedule(
         stt_tstmp_us=scan_pass_stt_tstmp_us,
         exp_num=np.full(sch_total_rows, exp_num),
-        pointing_az=spobj_rx_azlr_obs[0],
-        pointing_el=spobj_rx_azlr_obs[1],
+        pointing_az=rx_azelr_deg_pass[0],
+        pointing_el=rx_azelr_deg_pass[1],
         coh_int_bandwidth=np.full(sch_total_rows, exp_detail.coh_int_bandwidth),
         ipp=np.full(sch_total_rows, exp_detail.ipp),
         pulse_length=np.full(sch_total_rows, exp_detail.pulse_length),
@@ -263,28 +268,58 @@ def calculate_simple_stx_srx_observations_should_matches_simulate_scanning_v2_ex
         exp_num_map=exp_num_map,
     )
 
+    # sim_result_fpath = (
+    #     Path(os.path.dirname(os.path.abspath(__file__)))
+    #     / f"{calculate_simple_stx_srx_observations_should_matches_simulate_scanning_v2_example_test.__name__}.pickle"
+    # )
+    # if os.path.isfile(sim_result_fpath):
+    #     with open(sim_result_fpath, "rb") as f:
+    #         saved_data = pickle.load(f)
+    #         dcfg = saved_data["dcfg"]
+    #         spobj = saved_data["spobj"]
+    #         epoch = saved_data["epoch"]
+    # else:
+    #     ...  # TODO: imple
+    #     # with open(sim_result_fpath, "wb") as f:
+    #     #     pickle.dump(
+    #     #         {
+    #     #             "scan_dt_arr_pass": scan_dt_arr_pass,
+    #     #             "dcfg": dcfg,
+    #     #             "spobj": spobj,
+    #     #             "epoch": epoch,
+    #     #             "obs": None,
+    #     #         },
+    #     #         f,
+    #     #     )
+
     obs = calculate_simple_stx_srx_observations(
         dcfg=dcfg,
         space_object=spobj,
         epoch=t.cast(datetime, epoch.to_datetime(timezone=timezone.utc)),
     )
 
-    pickle_fpath = (
+    target_data_fpath = (
         Path(os.path.dirname(os.path.abspath(__file__)))
         / ".."
         / ".."
         / "examples"
         / "simulate_scanning_v2__saves.pickle"
     )
-    if not os.path.isfile(pickle_fpath):
+    if not os.path.isfile(target_data_fpath):
         raise RuntimeError(
-            f'saved data from example "simulate_scanning_v2.py" is required, please ensure the file {pickle_fpath} exists'
+            f'saved data from example "simulate_scanning_v2.py" is required, please ensure the file {target_data_fpath} exists'
         )
-    with open(pickle_fpath, "rb") as f:
+    with open(target_data_fpath, "rb") as f:
         example_result = pickle.load(f)
 
     assert isinstance(obs, Observation)
     # we target the `[1st_result][tx station 0][rx station 0][0th pass]`
     target = example_result["datas"][0][0][0][0]
     result = np.array_equal(target["snr"], obs.snr)
+
+    # optionally do some plotting for visual debugging aids
+    # fig, ax = plt.subplots()
+    # ax.plot(scan_dt_arr_pass, obs.snr, "r")
+    # ax.plot(scan_dt_arr_pass, target["snr"], "b")
+    # plt.show()
     return

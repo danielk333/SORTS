@@ -83,18 +83,19 @@ def calculate_simple_stx_srx_observations(
         [dcfg.exp_num_map[n].noise_temp for n in dcfg.tx_schedule.exp_num], dtype=np.float64
     )
 
-    # TODO: `pointing` and `vectorized_parameters` seems not needed?
-    #   pointing can be obtained by [dcfg.tx_schedule.pointing_az, dcfg.tx_schedule.pointing_el, range?]
-    tx_gain_arr = dcfg.tx_station.beam.gain(
-        space_object_tx_enu[:3],
-        # pointing=vectorized_data[:, 0:3].T,
-        # vectorized_parameters=True,
-    )
-    rx_gain_arr = dcfg.rx_station.beam.gain(
-        space_object_rx_enu[:3],
-        # pointing=vectorized_data[:, 4:7].T,
-        # vectorized_parameters=True,
-    )
+    # TODO: vectorize
+    tx_gain_arr = np.full(len(dcfg.stt_tstmp_us), 0.0, dtype=np.float64)
+    rx_gain_arr = np.full(len(dcfg.stt_tstmp_us), 0.0, dtype=np.float64)
+    for idx, _ in enumerate(dcfg.stt_tstmp_us):
+        dcfg.tx_station.beam.sph_point(
+            dcfg.tx_schedule.pointing_az[idx], dcfg.tx_schedule.pointing_el[idx], degrees=True
+        )
+        tx_gain_arr[idx] = dcfg.tx_station.beam.gain(space_object_tx_enu[:3, idx])
+
+        dcfg.rx_station.beam.sph_point(
+            dcfg.rx_schedule.pointing_az[idx], dcfg.tx_schedule.pointing_el[idx], degrees=True
+        )
+        rx_gain_arr[idx] = dcfg.rx_station.beam.gain(space_object_rx_enu[:3, idx])
 
     tx_wavelength: float = dcfg.tx_station.beam.wavelength
     rx_wavelength: float = dcfg.rx_station.beam.wavelength
