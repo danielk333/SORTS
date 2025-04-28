@@ -188,6 +188,7 @@ def calculate_simple_stx_srx_observations_should_matches_simulate_scanning_v2_ex
     if os.path.isfile(sim_result_fpath):
         with open(sim_result_fpath, "rb") as f:
             saved_data = pickle.load(f)
+            scan_dt_arr_pass = saved_data["scan_dt_arr_pass"]
             dcfg = saved_data["dcfg"]
             # spobj = saved_data["spobj"] # skipped, it is a global of test file atm
             # epoch = saved_data["epoch"] # skipped, it is a global of test file atm
@@ -330,7 +331,16 @@ def calculate_simple_stx_srx_observations_should_matches_simulate_scanning_v2_ex
             axis=0,
         )
     )
-    rx_k = pyant.coordinates.sph_to_cart(dcfg)
+    rx_k = pyant.coordinates.sph_to_cart(
+        np.stack(
+            [
+                dcfg.rx_schedule.pointing_az,
+                dcfg.rx_schedule.pointing_el,
+                np.full(len(dcfg.stt_tstmp_us), 1.0, dtype=np.float64),
+            ],
+            axis=0,
+        )
+    )
 
     result_tx_k = np.array_equal(target["tx_k"], tx_k)
     result_rx_k = np.array_equal(target["tx_k"], rx_k)
