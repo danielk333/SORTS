@@ -50,7 +50,7 @@ def calculate_simple_stx_srx_observations(
 ) -> Observation:
     dt_arr: npt.NDArray[np.float64] = (
         (dcfg.stt_tstmp_us - np.datetime64(epoch)).astype("timedelta64[us]").astype(np.float64)
-    )
+    ) * 1e-6
     states = space_object.get_state(dt_arr)
 
     space_object_tx_enu = dcfg.tx_station.enu(states)  # space object in tx station coordinate
@@ -105,12 +105,12 @@ def calculate_simple_stx_srx_observations(
         tx_gain_arr,
         rx_gain_arr,
         tx_wavelength,
-        powers,
+        powers,  # TODO: improve: hard-coded from `exp_detail`
         range_tx_m,
         range_rx_m,
         diameter=space_object.d,
-        bandwidth=bandwidths[0],
-        rx_noise_temp=rx_noise_temps[0],
+        bandwidth=bandwidths[0],  # TODO: improve: hard-coded from `exp_detail`
+        rx_noise_temp=rx_noise_temps[0],  # TODO: improve: hard-coded from `exp_detail`
         radar_albedo=space_object.parameters.get("radar_albedo", 1.0),
     )
 

@@ -200,7 +200,15 @@ def calculate_simple_stx_srx_observations_should_matches_simulate_scanning_v2_ex
             max_dpos=1e3,
         )
 
-        exp_detail = ExperimentDetail(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
+        exp_detail = ExperimentDetail(
+            coh_int_bandwidth=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
+            ipp=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
+            pulse_length=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
+            power=5000000.0,
+            bandwidth=52.08333333333333,
+            duty_cycle=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
+            noise_temp=150.0,
+        )
         exp_num = 0
         exp_num_map: dict[int, ExperimentDetail] = {0: exp_detail}
 
@@ -318,7 +326,14 @@ def calculate_simple_stx_srx_observations_should_matches_simulate_scanning_v2_ex
     assert isinstance(obs, Observation)
     # we target the `[1st_result][tx station 0][rx station 0][0th pass]`
     target = example_result["datas"][0][0][0][0]
-    result_snr = np.array_equal(target["snr"], obs.snr)
+
+    max_snr_diff_ratio = (max(obs.snr) / max(target["snr"])) - 1
+    assert max_snr_diff_ratio < 1e-6
+
+    max_snr_dt_diff_ratio = (
+        scan_dt_arr_pass[np.argmax(obs.snr)] / target["t"][np.argmax(target["snr"])]
+    ) - 1
+    assert max_snr_dt_diff_ratio < 1e-6
 
     # for comparison with `target["tx_k"]`, `target["rx_k"]`
     tx_k = pyant.coordinates.sph_to_cart(
@@ -342,6 +357,7 @@ def calculate_simple_stx_srx_observations_should_matches_simulate_scanning_v2_ex
         )
     )
 
+    # ASK: why do they differ significantly?
     result_tx_k = np.array_equal(target["tx_k"], tx_k)
     result_rx_k = np.array_equal(target["tx_k"], rx_k)
 
