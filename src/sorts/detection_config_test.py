@@ -344,7 +344,8 @@ def calculate_simple_stx_srx_observations_should_matches_simulate_scanning_v2_ex
                 np.full(len(dcfg.stt_tstmp_us), 1.0, dtype=np.float64),
             ],
             axis=0,
-        )
+        ),
+        degrees=True,
     )
     rx_k = pyant.coordinates.sph_to_cart(
         np.stack(
@@ -354,7 +355,8 @@ def calculate_simple_stx_srx_observations_should_matches_simulate_scanning_v2_ex
                 np.full(len(dcfg.stt_tstmp_us), 1.0, dtype=np.float64),
             ],
             axis=0,
-        )
+        ),
+        degrees=True,
     )
 
     # ASK: why do they differ significantly?
