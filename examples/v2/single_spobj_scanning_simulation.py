@@ -76,18 +76,13 @@ sch_total_rows = len(scan_dt_arr_pass)
 # space object in tx, rx station coordinate and the pointings of tx, rx station,
 # all under the delta times of a pass
 # note that `tx_azelr_deg_pass`, `rx_azelr_deg_pass` init to 1.0,
+spobj_tx_enu_pass = eiscat3d.tx[0].enu(spobj.get_state(scan_dt_arr_pass))[:, 0]
+spobj_tx_enu_pass = eiscat3d.rx[0].enu(spobj.get_state(scan_dt_arr_pass))[:, 0]
 # TODO: vectorize
-spobj_tx_enu_pass = np.full((6, sch_total_rows), 0, dtype=np.float64)
-spobj_rx_enu_pass = np.full((6, sch_total_rows), 0, dtype=np.float64)
 tx_azelr_deg_pass = np.full((3, sch_total_rows), 1.0, dtype=np.float64)
 rx_azelr_deg_pass = np.full((3, sch_total_rows), 1.0, dtype=np.float64)
+
 for dt_idx, (radar, _meta) in enumerate(scanner_ctrl.generator(scan_dt_arr_pass)):
-    spobj_tx_enu_pass[:, dt_idx] = radar.tx[0].enu(spobj.get_state([scan_dt_arr_pass[dt_idx]]))[
-        :, 0
-    ]
-    spobj_rx_enu_pass[:, dt_idx] = radar.rx[0].enu(spobj.get_state([scan_dt_arr_pass[dt_idx]]))[
-        :, 0
-    ]
     tx_azelr_deg_pass[:2, dt_idx] = [
         radar.tx[0].beam.azimuth[0],
         radar.tx[0].beam.elevation[0],
@@ -146,17 +141,16 @@ if not os.path.isfile(target_data_fpath):
 with open(target_data_fpath, "rb") as f:
     example_result = pickle.load(f)
 
-assert isinstance(obs, Observation)
 # we target the `[1st_result][tx station 0][rx station 0][0th pass]`
 target = example_result["datas"][0][0][0][0]
 
 max_snr_diff_ratio = (max(obs.snr) / max(target["snr"])) - 1
-assert max_snr_diff_ratio < 1e-6
+assert max_snr_diff_ratio < 1e-6  # TODO: remove
 
 max_snr_dt_diff_ratio = (
     scan_dt_arr_pass[np.argmax(obs.snr)] / target["t"][np.argmax(target["snr"])]
 ) - 1
-assert max_snr_dt_diff_ratio < 1e-6
+assert max_snr_dt_diff_ratio < 1e-6  # TODO: remove
 
 # for comparison with `target["tx_k"]`, `target["rx_k"]`
 tx_k = pyant.coordinates.sph_to_cart(
@@ -186,8 +180,8 @@ rx_k = pyant.coordinates.sph_to_cart(
 result_tx_k = np.array_equal(target["tx_k"], tx_k)
 result_rx_k = np.array_equal(target["tx_k"], rx_k)
 
-# optionally do some plotting for visual debugging aids
-# fig, ax = plt.subplots()
-# ax.plot(scan_dt_arr_pass, obs.snr, "r")
-# ax.plot(scan_dt_arr_pass, target["snr"], "b")
-# plt.show()
+# do some plottings
+fig, ax = plt.subplots()
+ax.plot(scan_dt_arr_pass, obs.snr, "r")
+ax.plot(scan_dt_arr_pass, target["snr"], "b")
+plt.show()
