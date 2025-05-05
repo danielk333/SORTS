@@ -12,12 +12,10 @@ from ..radar.scans.scan import Scan
 logger = logging.getLogger(__name__)
 
 
+# TODO: rename the file to FenceScanController
+# TODO: rename the class to FenceScanController
 @dataclass(kw_only=True)
 class ScannerController(ctrlr.ControllerProtocol):
-    """
-    a controller for a `Scan` object
-    """
-
     scan: Scan
     exp_num: int = 0
     time_slice_us: float = 1000  # 1ms
@@ -46,8 +44,6 @@ class ScannerController(ctrlr.ControllerProtocol):
             resolution in microseconds
         """
 
-        # TODO: add conflict checks between schedule for passes?
-        # TODO: add checks for lowest  time_slice (or schedule row) >= res_us
         stt_tstmp_arr = self.pass_obj.t[self.pass_obj.t < np.datetime64(end_tstmp, "us")]
         sch_total_rows = stt_tstmp_arr.shape[0]
 
@@ -67,3 +63,6 @@ class ScannerController(ctrlr.ControllerProtocol):
             sch_dict[station_key] = sch
 
         return sch_dict
+
+
+__all__ = ["ScannerController"]

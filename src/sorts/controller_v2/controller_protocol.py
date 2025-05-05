@@ -23,3 +23,6 @@ class ControllerProtocol(t.Protocol):
             resolution in microseconds
         """
         ...
+
+
+__all__ = ["ControllerProtocol"]

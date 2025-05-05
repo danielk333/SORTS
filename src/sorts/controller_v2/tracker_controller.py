@@ -67,3 +67,6 @@ class TrackerController(ctrlr.ControllerProtocol):
             sch_dict[station_key] = sch
 
         return sch_dict
+
+
+__all__ = ["TrackerController"]
