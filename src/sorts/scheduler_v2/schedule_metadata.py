@@ -44,3 +44,10 @@ schedule_ndarray_dtype: list[tuple[ScheduleColumnName, DTypeLike]] = [
 """
 dtype for a schedule. generated from `schedule_column_dtypes`
 """
+
+__all__ = [
+    "ScheduleColumnName",
+    "schedule_column_names",
+    "schedule_column_dtypes",
+    "schedule_ndarray_dtype",
+]

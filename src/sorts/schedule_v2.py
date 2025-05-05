@@ -42,3 +42,6 @@ class Schedule:
                     + f"but shape of {f_rests[idx].name} is {fv_rests[idx].shape}, "
                     f"while shape of {f_0.name} is {fv_0.shape} "
                 )
+
+
+__all__ = ["Schedule"]
