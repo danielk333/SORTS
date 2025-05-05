@@ -3,7 +3,7 @@ from dataclasses import dataclass, fields
 from datetime import datetime
 import numpy as np
 import numpy.typing as npt
-from .schedule_v2 import Schedule
+from sorts.schedule_v2 import Schedule
 import sorts
 from sorts.radar.radar import Radar
 from sorts.radar.radars.composite_key import RadarStationCompositeKey
@@ -128,3 +128,11 @@ def calculate_simple_stx_srx_observations(
     )
 
     return obs
+
+
+__all__ = [
+    "SimpleStxSrx",
+    "StxMrx",
+    "DetectionConfig",
+    "calculate_simple_stx_srx_observations",
+]
