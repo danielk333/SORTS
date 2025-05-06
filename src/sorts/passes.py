@@ -221,7 +221,9 @@ class Pass:
             return self.get_zenith_angle(radians=radians)
 
 
-def equidistant_sampling(orbit, start_t, end_t, max_dpos=1e3, eccentricity_tol=0.3):
+def equidistant_sampling(
+    orbit, start_t, end_t, max_dpos=1e3, eccentricity_tol=0.3
+) -> npt.NDArray[np.float64]:
     """Find the temporal sampling of an orbit which is sufficient to achieve a
     maximum spatial separation. Assume elliptic orbit and uses Keplerian propagation
     to find sampling, does not take perturbation patterns into account. If
