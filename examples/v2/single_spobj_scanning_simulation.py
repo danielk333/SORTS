@@ -73,11 +73,8 @@ scan_dt_arr_pass_mask = np.logical_and(
 scan_dt_arr_pass = scan_dt_arr[scan_dt_arr_pass_mask]
 sch_total_rows = len(scan_dt_arr_pass)
 
-# space object in tx, rx station coordinate and the pointings of tx, rx station,
-# all under the delta times of a pass
+# the pointings of tx, rx station under the delta times of a pass
 # note that `tx_azelr_deg_pass`, `rx_azelr_deg_pass` init to 1.0,
-spobj_tx_enu_pass = eiscat3d.tx[0].enu(spobj.get_state(scan_dt_arr_pass))[:, 0]
-spobj_rx_enu_pass = eiscat3d.rx[0].enu(spobj.get_state(scan_dt_arr_pass))[:, 0]
 # TODO: vectorize
 tx_azelr_deg_pass = np.full((3, sch_total_rows), 1.0, dtype=np.float64)
 rx_azelr_deg_pass = np.full((3, sch_total_rows), 1.0, dtype=np.float64)
