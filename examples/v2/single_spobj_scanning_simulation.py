@@ -77,7 +77,7 @@ sch_total_rows = len(scan_dt_arr_pass)
 # all under the delta times of a pass
 # note that `tx_azelr_deg_pass`, `rx_azelr_deg_pass` init to 1.0,
 spobj_tx_enu_pass = eiscat3d.tx[0].enu(spobj.get_state(scan_dt_arr_pass))[:, 0]
-spobj_tx_enu_pass = eiscat3d.rx[0].enu(spobj.get_state(scan_dt_arr_pass))[:, 0]
+spobj_rx_enu_pass = eiscat3d.rx[0].enu(spobj.get_state(scan_dt_arr_pass))[:, 0]
 # TODO: vectorize
 tx_azelr_deg_pass = np.full((3, sch_total_rows), 1.0, dtype=np.float64)
 rx_azelr_deg_pass = np.full((3, sch_total_rows), 1.0, dtype=np.float64)
