@@ -21,6 +21,8 @@ class ControllerProtocol(t.Protocol):
             end timestamp
         res_us
             resolution in microseconds
+
+        TODO: do we still need `res_us`? should we renamed it to `alignment_us`?
         """
         ...
 

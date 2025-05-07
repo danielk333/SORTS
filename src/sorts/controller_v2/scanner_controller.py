@@ -12,8 +12,6 @@ from ..radar.scans.scan import Scan
 logger = logging.getLogger(__name__)
 
 
-# TODO: rename the file to FenceScanController
-# TODO: rename the class to FenceScanController
 @dataclass(kw_only=True)
 class ScannerController(ctrlr.ControllerProtocol):
     scan: Scan
