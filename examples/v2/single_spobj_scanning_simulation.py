@@ -180,5 +180,5 @@ result_rx_k = np.array_equal(target["tx_k"], rx_k)
 # do some plottings
 fig, ax = plt.subplots()
 ax.plot(scan_dt_arr_pass, obs.snr, "r")
-ax.plot(scan_dt_arr_pass, target["snr"], "b")
+ax.plot(scan_dt_arr_pass, target["snr"], "b.")
 plt.show()
