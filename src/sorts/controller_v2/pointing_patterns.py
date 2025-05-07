@@ -1,5 +1,4 @@
 import logging
-from datetime import datetime
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -8,19 +7,9 @@ logger = logging.getLogger(__name__)
 def fence_pointing(
     azimuth_deg: float,
     min_elevation_deg: float,
-    dwell_s: float,
     num: int,
-    start_time: datetime,
-    end_time: datetime,
 ):
     """Return an `azelr` of type `NDArray[float64]`, shape `(3, num)`"""
-
-    interval_s = (end_time - start_time).total_seconds() / num
-    if interval_s < dwell_s:
-        raise RuntimeError(
-            f"The available dwell duration will be too small with the give `start_time`, `end_time` and `num`: "
-            + f"{interval_s} < {dwell_s}"
-        )
 
     el = np.linspace(min_elevation_deg, 180.0 - min_elevation_deg, num=num, dtype=np.float64)
     el_over_90deg_mask = el > 90.0
