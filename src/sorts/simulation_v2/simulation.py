@@ -7,8 +7,7 @@ import pyorb
 import sorts
 from sorts import passes_v2 as passes
 from sorts import scheduler_v2 as scheduler
-from sorts import detection_config
-from sorts.simulation_v2.experiment_detail import ExperimentDetail
+from sorts import detection_config as detection_config_
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +18,7 @@ class SpaceObjectsDtSamplerS(t.Protocol):
     ) -> npt.NDArray[np.float64]: ...
 
 
-Dcfg = t.TypeVar("Dcfg", bound=detection_config.DetectionConfig)
+Dcfg = t.TypeVar("Dcfg", bound=detection_config_.DetectionConfig)
 
 
 # TODO: split into 'SimulationConfig' and 'Simulation'?
@@ -35,7 +34,7 @@ class Simulation(t.Generic[Dcfg]):
     space_objects_dt_sampler_s: SpaceObjectsDtSamplerS
     """A function with signature `(start_time: Time, end_time: Time) -> npt.NDArray[np.float64]`"""
 
-    exp_num_map: dict[int, ExperimentDetail]
+    exp_num_map: dict[int, detection_config_.ExperimentDetail]
 
     def __post_init__(self):
         self.spobjs_smpl_dt_s_arr: list[npt.NDArray[np.float64]] = [

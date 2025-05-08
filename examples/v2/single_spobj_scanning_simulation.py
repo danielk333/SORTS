@@ -12,8 +12,11 @@ from astropy.time import Time
 import pyant
 import sorts
 from sorts.schedule_v2 import Schedule
-from sorts.simulation_v2 import ExperimentDetail
-from sorts.detection_config import SimpleStxSrx, calculate_simple_stx_srx_observations
+from sorts.detection_config import (
+    ExperimentDetail,
+    SimpleStxSrx,
+    calculate_simple_stx_srx_observations,
+)
 
 epoch = Time(53005.0, format="mjd", scale="utc")
 simulation_end_dt = 600.0  # in seconds

@@ -2,9 +2,9 @@ import logging, typing as t
 from dataclasses import dataclass, fields
 from datetime import datetime
 import pandas as pd
-from .. import scheduler_v2 as schr
-from .. import controller_v2 as ctrlr
-from ..radar.radars.composite_key import RadarStationCompositeKey
+from sorts.radar.radars.composite_key import RadarStationCompositeKey
+from sorts import scheduler_v2 as schr
+from sorts import controller_v2 as ctrlr
 
 logger = logging.getLogger(__name__)
 

@@ -13,7 +13,6 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from astropy.time import Time
 import sorts
-from sorts.calculations import ExperimentDetail
 from sorts import _v2 as sortsV2
 
 # TODO: might be if `epoch`, `start_time`, `end_time` can be integrated into some config or dataclass ?
@@ -31,7 +30,7 @@ end_time = t.cast(
 
 eiscat3d = sorts.get_radar("eiscat3d", "stage1-array")
 
-exp_detail = ExperimentDetail(
+exp_detail = sortsV2.detection_config.ExperimentDetail(
     coh_int_bandwidth=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
     ipp=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
     pulse_length=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
@@ -40,7 +39,7 @@ exp_detail = ExperimentDetail(
     duty_cycle=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
     noise_temp=150.0,
 )
-exp_num_map: dict[int, ExperimentDetail] = {0: exp_detail}
+exp_num_map: dict[int, sortsV2.detection_config.ExperimentDetail] = {0: exp_detail}
 
 fence_scan_controller = sortsV2.controller.FenceScanController(
     tx_station=eiscat3d.tx[0],
@@ -88,7 +87,7 @@ sim = sortsV2.Simulation(
         max_dpos=1e3,
     ),
     exp_num_map={
-        0: ExperimentDetail(
+        0: sortsV2.detection_config.ExperimentDetail(
             coh_int_bandwidth=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
             ipp=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
             pulse_length=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?

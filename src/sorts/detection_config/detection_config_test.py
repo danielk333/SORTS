@@ -7,8 +7,12 @@ from astropy.time import Time
 import pyant
 import sorts
 from sorts.schedule_v2 import Schedule
-from sorts.simulation_v2 import ExperimentDetail, Observation
-from .detection_config import SimpleStxSrx, calculate_simple_stx_srx_observations
+from sorts.detection_config import (
+    ExperimentDetail,
+    Observation,
+    SimpleStxSrx,
+    calculate_simple_stx_srx_observations,
+)
 
 
 def setup_function():

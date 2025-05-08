@@ -8,10 +8,10 @@ import sorts
 from sorts.radar.radar import Radar
 from sorts.radar.radars.composite_key import RadarStationCompositeKey
 from sorts.radar.tx_rx import Station
-from sorts import simulation_v2 as simulation
 from sorts import passes_v2 as passes
 from sorts import scheduler_v2 as scheduler
 from sorts import controller_v2 as controller
+from sorts.detection_config import ExperimentDetail, Observation
 
 
 # TODO: rename to `DetectionSystem`?
@@ -28,7 +28,7 @@ class DetectionConfigProtocol(t.Protocol):
         space_objects: list[sorts.SpaceObject],
         epoch: datetime,
         schedule_mask: npt.NDArray[np.bool] | None,
-    ) -> simulation.Observation: ...
+    ) -> Observation: ...
 
 
 @dataclass
@@ -44,7 +44,7 @@ class SimpleStxSrx(DetectionConfigProtocol):
     rx_schedule: scheduler.Schedule
     "the rx radar station schedule, can contain more entries than `stt_tstmp_us`"
 
-    exp_num_map: dict[int, simulation.ExperimentDetail]
+    exp_num_map: dict[int, ExperimentDetail]
 
     # TODO: implement or remove
     def find_passes(
@@ -60,7 +60,7 @@ class SimpleStxSrx(DetectionConfigProtocol):
         space_objects: list[sorts.SpaceObject],
         epoch: datetime,
         schedule_mask: npt.NDArray[np.bool] | None,
-    ) -> simulation.Observation: ...
+    ) -> Observation: ...
 
 
 # TODO: dissolve existing `SimpleStxSrx` and rename this to `SimpleStxSrx`
@@ -77,7 +77,7 @@ class StxSrx(DetectionConfigProtocol):
     rx_station: Station
     rx_schedule: scheduler.Schedule
 
-    exp_num_map: dict[int, simulation.ExperimentDetail]
+    exp_num_map: dict[int, ExperimentDetail]
 
     # TODO: remove or complete the implementation of this helper method
     # @classmethod
@@ -215,7 +215,7 @@ class StxSrx(DetectionConfigProtocol):
         # TODO: add `doppler_spread_integrated_snr:` support
         # TODO: add `blind_ranges:` support
 
-        obs = simulation.Observation(
+        obs = Observation(
             snr=snr,
             range=range_tx_m + range_rx_m,
             range_rx=range_rx_m,
@@ -237,7 +237,7 @@ class StxMrx(DetectionConfigProtocol):
     rx_station_keys: list[RadarStationCompositeKey]
     tx_schedule: scheduler.Schedule
     rx_schedules: list[scheduler.Schedule]
-    exp_num_map: dict[int, simulation.ExperimentDetail]
+    exp_num_map: dict[int, ExperimentDetail]
 
     # TODO: implement or remove
     def find_passes(
@@ -253,7 +253,7 @@ class StxMrx(DetectionConfigProtocol):
         space_objects: list[sorts.SpaceObject],
         epoch: datetime,
         schedule_mask: npt.NDArray[np.bool] | None,
-    ) -> simulation.Observation: ...
+    ) -> Observation: ...
 
 
 DetectionConfig: t.TypeAlias = t.Union[SimpleStxSrx, StxSrx, StxMrx]
@@ -263,7 +263,7 @@ DetectionConfig: t.TypeAlias = t.Union[SimpleStxSrx, StxSrx, StxMrx]
 # TODO: should vectorize and work against an array of SpaceObject?
 def calculate_simple_stx_srx_observations(
     dcfg: SimpleStxSrx, space_object: sorts.SpaceObject, epoch: datetime
-) -> simulation.Observation:
+) -> Observation:
     dt_arr: npt.NDArray[np.float64] = (
         (dcfg.stt_tstmp_us - np.datetime64(epoch)).astype("timedelta64[us]").astype(np.float64)
     ) * 1e-6
@@ -332,7 +332,7 @@ def calculate_simple_stx_srx_observations(
     # TODO: add `doppler_spread_integrated_snr:` support
     # TODO: add `blind_ranges:` support
 
-    obs = simulation.Observation(
+    obs = Observation(
         snr=snr,
         range=range_tx_m + range_rx_m,
         range_rx=range_rx_m,
