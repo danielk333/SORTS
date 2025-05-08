@@ -75,7 +75,7 @@ class Simulation(t.Generic[Dcfg]):
         obs = self.detection_config.calculate_observations(
             space_objects=self.space_objects, epoch=self.epoch, schedule_mask=mask
         )
-        return obs, mask
+        return obs, mask  # TODO: returning `mask` is just a quick tmp workaround
 
     # NOTE: kept for ref until the class is stablized
     # def run(self) -> dict[RadarStationCompositeKey, dict]: ...

@@ -138,7 +138,7 @@ class StxSrx(DetectionConfigProtocol):
         tx_schedule = dcfg.tx_schedule
         rx_schedule = dcfg.rx_schedule
 
-        # apply mask if it exist
+        # apply mask if it exists
         if schedule_mask is not None:
             dt_s_arr = dt_s_arr[schedule_mask]
             tx_schedule = dcfg.tx_schedule.filter_by_mask(schedule_mask)
