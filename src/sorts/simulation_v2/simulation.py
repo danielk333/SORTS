@@ -1,16 +1,14 @@
 import logging, typing as t
-from datetime import datetime, timezone
+from datetime import datetime
 from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
-from astropy.time import Time
 import pyorb
 import sorts
-from sorts.radar.tx_rx import Station
-from sorts.calculations import ExperimentDetail
 from sorts import passes_v2 as passes
 from sorts import scheduler_v2 as scheduler
 from sorts import detection_config
+from sorts.simulation_v2.experiment_detail import ExperimentDetail
 
 logger = logging.getLogger(__name__)
 

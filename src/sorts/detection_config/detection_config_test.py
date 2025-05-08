@@ -7,7 +7,7 @@ from astropy.time import Time
 import pyant
 import sorts
 from sorts.schedule_v2 import Schedule
-from sorts.calculations import ExperimentDetail, Observation
+from sorts.simulation_v2 import ExperimentDetail, Observation
 from .detection_config import SimpleStxSrx, calculate_simple_stx_srx_observations
 
 
