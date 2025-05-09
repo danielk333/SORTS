@@ -86,17 +86,6 @@ sim = sortsV2.Simulation(
         end_t=(end_time - epoch).total_seconds(),
         max_dpos=1e3,
     ),
-    exp_num_map={
-        0: sortsV2.detection_config.ExperimentDetail(
-            coh_int_bandwidth=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-            ipp=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-            pulse_length=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-            power=5000000.0,
-            bandwidth=52.08333333333333,
-            duty_cycle=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-            noise_temp=150.0,
-        )
-    },
 )
 
 # sim.run()

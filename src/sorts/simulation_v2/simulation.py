@@ -34,8 +34,6 @@ class Simulation(t.Generic[Dcfg]):
     space_objects_dt_sampler_s: SpaceObjectsDtSamplerS
     """A function with signature `(start_time: Time, end_time: Time) -> npt.NDArray[np.float64]`"""
 
-    exp_num_map: dict[int, detection_config_.ExperimentDetail]
-
     def __post_init__(self):
         self.spobjs_smpl_dt_s_arr: list[npt.NDArray[np.float64]] = [
             self.space_objects_dt_sampler_s(
