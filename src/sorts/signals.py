@@ -6,6 +6,7 @@ TODO: wrong module description?
 
 """
 
+import typing as t
 import numpy as np
 import numpy.typing as npt
 import scipy.constants
@@ -52,13 +53,39 @@ def hard_target_rcs(wavelength, diameter):
     return rcs
 
 
+@t.overload
 def hard_target_snr(
-    gain_tx,
-    gain_rx,
-    wavelength,
-    power_tx,
-    range_tx_m,
-    range_rx_m,
+    gain_tx: npt.NDArray[np.float64],
+    gain_rx: npt.NDArray[np.float64],
+    wavelength: float,
+    power_tx: float,
+    range_tx_m: npt.NDArray[np.float64],
+    range_rx_m: npt.NDArray[np.float64],
+    diameter=0.01,
+    bandwidth=10.0,
+    rx_noise_temp=150.0,
+    radar_albedo=1.0,
+) -> npt.NDArray[np.float64]: ...
+@t.overload
+def hard_target_snr(
+    gain_tx: float,
+    gain_rx: float,
+    wavelength: float,
+    power_tx: float,
+    range_tx_m: float,
+    range_rx_m: float,
+    diameter=0.01,
+    bandwidth=10.0,
+    rx_noise_temp=150.0,
+    radar_albedo=1.0,
+) -> float: ...
+def hard_target_snr(
+    gain_tx: npt.NDArray[np.float64] | float,
+    gain_rx: npt.NDArray[np.float64] | float,
+    wavelength: float,
+    power_tx: float,
+    range_tx_m: npt.NDArray[np.float64] | float,
+    range_rx_m: npt.NDArray[np.float64] | float,
     diameter=0.01,
     bandwidth=10.0,
     rx_noise_temp=150.0,
@@ -86,9 +113,9 @@ def hard_target_snr(
 
     """
 
-    is_rayleigh = diameter < wavelength / (np.pi * np.sqrt(3.0))
-    is_optical = diameter >= wavelength / (np.pi * np.sqrt(3.0))
-    rayleigh_power = (
+    is_rayleigh: bool = diameter < wavelength / (np.pi * np.sqrt(3.0))
+    is_optical: bool = diameter >= wavelength / (np.pi * np.sqrt(3.0))
+    rayleigh_power: npt.NDArray[np.float64] | float = (
         9.0
         * power_tx
         * (
@@ -96,7 +123,7 @@ def hard_target_snr(
             / (256.0 * (wavelength**2.0) * (range_rx_m**2.0 * range_tx_m**2.0))
         )
     )
-    optical_power = (
+    optical_power: npt.NDArray[np.float64] | float = (
         power_tx
         * (((gain_tx * gain_rx) * (wavelength**2.0) * (diameter**2.0)))
         / (256.0 * (np.pi**2) * (range_rx_m**2.0 * range_tx_m**2.0))
