@@ -50,7 +50,7 @@ class Simulation(t.Generic[Dcfg]):
             for (spobj_smpl_dt_s_arr, spobj) in zip(self.spobjs_smpl_dt_s_arr, self.space_objects)
         ]
 
-        passes_foreach_spobj = [
+        passes_foreach_spobjs = [
             self.detection_config.find_passes(
                 dt_s_arr=spobj_smpl_dt_s_arr,
                 space_object_states=spobj_smpl_states,
@@ -61,16 +61,30 @@ class Simulation(t.Generic[Dcfg]):
             )
         ]
 
-        return passes_foreach_spobj
+        return passes_foreach_spobjs
 
     def calculate_observations(self):
         passes = self.find_passes()
-        mask = get_schedule_mask_by_pass(self.detection_config.tx_schedule, passes[0][0])
+        masks: list[list[npt.NDArray[np.bool]]] = []
+        obss: list[list[detection_config_.Observation]] = []
 
-        obs = self.detection_config.calculate_observations(
-            space_objects=self.space_objects, epoch=self.epoch, schedule_mask=mask
-        )
-        return obs, mask  # TODO: returning `mask` is just a quick tmp workaround
+        for spobj_idx, passes_for_spobj in enumerate(passes):
+            masks_for_spobj: list[npt.NDArray[np.bool]] = []
+            obs_for_spobj: list[detection_config_.Observation] = []
+
+            for ps in passes_for_spobj:
+                mask = get_schedule_mask_by_pass(self.detection_config.tx_schedule, ps)
+                masks_for_spobj.append(mask)
+
+                obs = self.detection_config.calculate_observation(
+                    space_object=self.space_objects[spobj_idx], epoch=self.epoch, schedule_mask=mask
+                )
+                obs_for_spobj.append(obs)
+
+            masks.append(masks_for_spobj)
+            obss.append(obs_for_spobj)
+
+        return obss, masks  # TODO: returning `masks` is just a quick tmp workaround
 
     # NOTE: kept for ref until the class is stablized
     # def run(self) -> dict[RadarStationCompositeKey, dict]: ...

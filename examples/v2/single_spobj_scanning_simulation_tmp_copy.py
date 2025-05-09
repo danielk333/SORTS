@@ -89,8 +89,10 @@ sim = sortsV2.Simulation(
 )
 
 # sim.run()
-obs, sch_dt_s_arr_pass_mask = sim.calculate_observations()
+obss, masks = sim.calculate_observations()
 # target_pass_obj = pass_arr[0][0]
+obs = obss[0][0]
+sch_dt_s_arr_pass_mask = masks[0][0]
 
 
 ##

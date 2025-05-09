@@ -5,7 +5,6 @@ from datetime import datetime
 import numpy as np
 import numpy.typing as npt
 import sorts
-from sorts.radar.radar import Radar
 from sorts.radar.radars.composite_key import RadarStationCompositeKey
 from sorts.radar.tx_rx import Station
 from sorts import passes_v2 as passes
@@ -23,9 +22,9 @@ class DetectionConfigProtocol(t.Protocol):
         epoch: datetime,
     ) -> list[passes.Pass]: ...
 
-    def calculate_observations(
+    def calculate_observation(
         self,
-        space_objects: list[sorts.SpaceObject],
+        space_object: sorts.SpaceObject,
         epoch: datetime,
         schedule_mask: npt.NDArray[np.bool] | None,
     ) -> Observation: ...
@@ -55,9 +54,9 @@ class SimpleStxSrx(DetectionConfigProtocol):
     ) -> list[passes.Pass]: ...
 
     # TODO: implement or remove
-    def calculate_observations(
+    def calculate_observation(
         self,
-        space_objects: list[sorts.SpaceObject],
+        space_object: sorts.SpaceObject,
         epoch: datetime,
         schedule_mask: npt.NDArray[np.bool] | None,
     ) -> Observation: ...
@@ -107,24 +106,28 @@ class StxSrx(DetectionConfigProtocol):
 
         return ps_objs
 
-    def calculate_observations(
+    def calculate_observation(
         self,
-        space_objects: list[sorts.SpaceObject],
+        space_object: sorts.SpaceObject,
         epoch: datetime,
         schedule_mask: npt.NDArray[np.bool] | None,
     ):
-        return StxSrx.calculate_observations_from_config(
+        return StxSrx.calculate_observation_from_config(
             self,
-            space_objects=space_objects,
+            space_object=space_object,
             epoch=epoch,
             schedule_mask=schedule_mask,
         )
 
+    # TODO: re-eval which one is better:
+    #   - calc per pass_obj
+    #   - batching over same timeframe, diff spobjbatching over same timeframe
+    #   - batching over diff spobj, diff timeframe
     # TODO: maybe making it a standalone func is better?
     @staticmethod
-    def calculate_observations_from_config(
+    def calculate_observation_from_config(
         dcfg: StxSrx,
-        space_objects: list[sorts.SpaceObject],
+        space_object: sorts.SpaceObject,
         epoch: datetime,
         schedule_mask: npt.NDArray[np.bool] | None,
     ):
@@ -146,17 +149,13 @@ class StxSrx(DetectionConfigProtocol):
 
         obs_size = len(dt_s_arr)
 
-        spobjs_states = [spobj.get_state(dt_s_arr) for spobj in space_objects]
+        # TODO: can probably be taken from the `simulation.find_passes`
+        spobj_states = space_object.get_state(dt_s_arr)
+        spobj_tx_enu = dcfg.tx_station.enu(spobj_states)  # space object in tx station coordinate
+        spobj_rx_enu = dcfg.rx_station.enu(spobj_states)  # space object in rx station coordinate
 
-        # TODO: loop over the spobjs_states instead of just handling one
-        spobj = space_objects[0]
-        states = spobjs_states[0]
-
-        spobj_tx_enu = dcfg.tx_station.enu(states)  # space object in tx station coordinate
-        spobj_rx_enu = dcfg.rx_station.enu(states)  # space object in rx station coordinate
-
-        range_tx_m = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
-        range_rx_m = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
+        range_tx_m: npt.NDArray[np.float64] = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
+        range_rx_m: npt.NDArray[np.float64] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
 
         snr = np.empty((obs_size,), dtype=np.float64)
         # rcs = np.empty((obs_size,), dtype=np.float64) # TODO: chk if needed
@@ -203,13 +202,13 @@ class StxSrx(DetectionConfigProtocol):
             tx_gain_arr,
             rx_gain_arr,
             tx_wavelength,
-            powers,  # TODO: improve: hard-coded from `exp_detail`
+            powers[0],  # TODO: improve: hard-coded from `exp_detail`
             range_tx_m,
             range_rx_m,
-            diameter=spobj.d,
+            diameter=space_object.d,
             bandwidth=bandwidths[0],  # TODO: improve: hard-coded from `exp_detail`
             rx_noise_temp=rx_noise_temps[0],  # TODO: improve: hard-coded from `exp_detail`
-            radar_albedo=spobj.parameters.get("radar_albedo", 1.0),
+            radar_albedo=space_object.parameters.get("radar_albedo", 1.0),
         )
 
         # TODO: add `doppler_spread_integrated_snr:` support
@@ -248,9 +247,9 @@ class StxMrx(DetectionConfigProtocol):
     ) -> list[passes.Pass]: ...
 
     # TODO: implement or remove
-    def calculate_observations(
+    def calculate_observation(
         self,
-        space_objects: list[sorts.SpaceObject],
+        space_object: sorts.SpaceObject,
         epoch: datetime,
         schedule_mask: npt.NDArray[np.bool] | None,
     ) -> Observation: ...
@@ -320,7 +319,7 @@ def calculate_simple_stx_srx_observations(
         tx_gain_arr,
         rx_gain_arr,
         tx_wavelength,
-        powers,  # TODO: improve: hard-coded from `exp_detail`
+        powers[0],  # TODO: improve: hard-coded from `exp_detail`
         range_tx_m,
         range_rx_m,
         diameter=space_object.d,
