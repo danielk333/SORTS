@@ -386,4 +386,5 @@ __all__ = [
     "StxMrx",
     "DetectionConfig",
     "calculate_simple_stx_srx_observations",
+    "find_simultaneous_passes_time_ranges",
 ]
