@@ -6,8 +6,6 @@ Finding passes over radar system
 
 """
 
-import os, pickle
-from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 import pyorb
@@ -55,12 +53,6 @@ passes = eiscat3d.find_passes(t, states)
 for ps in passes[0][0]:  # tx-0 and rx-0
     print(ps)
 
-# save `passes` object to file
-passes_pickle_fpath = (
-    Path(os.path.dirname(os.path.abspath(__file__))) / "radar_passes__passes.pickle"
-)
-with open(passes_pickle_fpath, "wb") as f:
-    pickle.dump(passes, f)
 
 fig = plt.figure(figsize=(15, 15))
 ax = fig.add_subplot(111, projection="3d")

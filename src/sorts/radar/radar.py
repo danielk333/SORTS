@@ -106,11 +106,11 @@ class Radar(object):
                 rd_ps[-1].append(txrx)
         return rd_ps
 
+    # TODO: broken as of 2025-05-13; fix or remove it
     def find_passes_v2(
         self,
         dt_arr: npt.NDArray[np.float64],
         states: npt.NDArray[np.float64],
-        radar_composite_key: RadarCompositeKey,
         epoch: datetime,
         fov_kw=None,
     ):
@@ -138,14 +138,10 @@ class Radar(object):
         for txi, tx in enumerate(self.tx):
             rd_ps.append([])
             for rxi, rx in enumerate(self.rx):
-                txrx = passes_v2.find_simultaneous_passes(
-                    dt_arr=dt_arr,
+                txrx = passes_v2.find_simultaneous_passes_time_ranges(
+                    dt_s_arr=dt_arr,
                     states=states,
                     stations=[tx, rx],
-                    radar_station_composite_keys=[
-                        (*radar_composite_key, "tx", f"{txi}"),
-                        (*radar_composite_key, "rx", f"{rxi}"),
-                    ],  # TODO: should not hard-code it here, each radar can have their own radar key to station key logic
                     epoch=epoch,
                     fov_kw=fov_kw,
                 )

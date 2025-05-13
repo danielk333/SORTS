@@ -12,6 +12,7 @@ from ..radar.radars.composite_key import RadarStationCompositeKey
 logger = logging.getLogger(__name__)
 
 
+# TODO: broken as of 2025-05-13; fix or remove it
 @dataclass(kw_only=True)
 class TrackerController(ctrlr.ControllerProtocol):
     """

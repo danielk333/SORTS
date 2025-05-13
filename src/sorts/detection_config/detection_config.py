@@ -7,6 +7,7 @@ import numpy.typing as npt
 import sorts
 from sorts.radar.radars.composite_key import RadarStationCompositeKey
 from sorts.radar.tx_rx import Station
+from sorts.types import Datetime64_us, Float_64_as_sec, Float64_as_m, EcefStates
 from sorts import passes_v2 as passes
 from sorts import scheduler_v2 as scheduler
 from sorts import controller_v2 as controller
@@ -15,12 +16,12 @@ from sorts.detection_config import ExperimentDetail, Observation
 
 # TODO: rename to `DetectionSystem`?
 class DetectionConfigProtocol(t.Protocol):
-    def find_passes(
+    def find_passes_time_ranges(
         self,
         dt_s_arr: npt.NDArray[np.float64],
         space_object_states: npt.NDArray[np.float64],
         epoch: datetime,
-    ) -> list[passes.Pass]: ...
+    ) -> t.Sequence[tuple[Datetime64_us, Datetime64_us]]: ...
 
     def calculate_observation(
         self,
@@ -46,12 +47,12 @@ class SimpleStxSrx(DetectionConfigProtocol):
     exp_num_map: dict[int, ExperimentDetail]
 
     # TODO: implement or remove
-    def find_passes(
+    def find_passes_time_ranges(
         self,
         dt_s_arr: npt.NDArray[np.float64],
         space_object_states: npt.NDArray[np.float64],
         epoch: datetime,
-    ) -> list[passes.Pass]: ...
+    ) -> t.Sequence[tuple[Datetime64_us, Datetime64_us]]: ...
 
     # TODO: implement or remove
     def calculate_observation(
@@ -65,12 +66,6 @@ class SimpleStxSrx(DetectionConfigProtocol):
 # TODO: dissolve existing `SimpleStxSrx` and rename this to `SimpleStxSrx`
 @dataclass(kw_only=True)
 class StxSrx(DetectionConfigProtocol):
-    # option 1
-    # tx_station: Station
-    # rx_station: Station
-    # schedule_dict: dict[RadarStationCompositeKey, scheduler.Schedule]
-
-    # option 2
     tx_station: Station
     tx_schedule: scheduler.Schedule
     rx_station: Station
@@ -78,33 +73,20 @@ class StxSrx(DetectionConfigProtocol):
 
     exp_num_map: dict[int, ExperimentDetail]
 
-    # TODO: remove or complete the implementation of this helper method
-    # @classmethod
-    # def from_radar(cls, radar: Radar) -> StxSrx:
-    #     return cls(
-    #         tx_station=radar
-    #         rx_station=
-    #         schedule=
-    #     )
-
-    def find_passes(
+    def find_passes_time_ranges(
         self,
-        dt_s_arr: npt.NDArray[np.float64],
-        space_object_states: npt.NDArray[np.float64],
+        dt_s_arr: npt.NDArray[Float_64_as_sec],
+        space_object_states: EcefStates,
         epoch: datetime,
     ):
-        ps_objs = passes.find_simultaneous_passes(
-            dt_arr=dt_s_arr,
+        time_ranges = passes.find_simultaneous_passes_time_ranges(
+            dt_s_arr=dt_s_arr,
             states=space_object_states,
             stations=[self.tx_station, self.rx_station],
-            radar_station_composite_keys=[
-                ("radar", "tx", "0"),
-                ("radar", "rx", "0"),
-            ],  # TODO: tmp hard-coded here, should use each radars' own logic/prop when implemented
             epoch=epoch,
         )
 
-        return ps_objs
+        return time_ranges
 
     def calculate_observation(
         self,
@@ -122,7 +104,8 @@ class StxSrx(DetectionConfigProtocol):
     # TODO: re-eval which one is better:
     #   - calc per pass_obj
     #   - batching over same timeframe, diff spobjbatching over same timeframe
-    #   - batching over diff spobj, diff timeframe
+    #   - batching over same spobj, diff timeframe
+    #   - or ... ?
     # TODO: maybe making it a standalone func is better?
     @staticmethod
     def calculate_observation_from_config(
@@ -133,7 +116,7 @@ class StxSrx(DetectionConfigProtocol):
     ):
         """NOTE: We assume the tx and rx time difference is negligible"""
 
-        dt_s_arr: npt.NDArray[np.float64] = (
+        dt_s_arr: npt.NDArray[Float_64_as_sec] = (
             (dcfg.rx_schedule.stt_tstmp_us - np.datetime64(epoch))
             .astype("timedelta64[us]")
             .astype(np.float64)
@@ -154,8 +137,8 @@ class StxSrx(DetectionConfigProtocol):
         spobj_tx_enu = dcfg.tx_station.enu(spobj_states)  # space object in tx station coordinate
         spobj_rx_enu = dcfg.rx_station.enu(spobj_states)  # space object in rx station coordinate
 
-        range_tx_m: npt.NDArray[np.float64] = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
-        range_rx_m: npt.NDArray[np.float64] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
+        range_tx_m: npt.NDArray[Float64_as_m] = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
+        range_rx_m: npt.NDArray[Float64_as_m] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
 
         snr = np.empty((obs_size,), dtype=np.float64)
         # rcs = np.empty((obs_size,), dtype=np.float64) # TODO: chk if needed
@@ -239,12 +222,12 @@ class StxMrx(DetectionConfigProtocol):
     exp_num_map: dict[int, ExperimentDetail]
 
     # TODO: implement or remove
-    def find_passes(
+    def find_passes_time_ranges(
         self,
         dt_s_arr: npt.NDArray[np.float64],
         space_object_states: npt.NDArray[np.float64],
         epoch: datetime,
-    ) -> list[passes.Pass]: ...
+    ) -> t.Sequence[tuple[Datetime64_us, Datetime64_us]]: ...
 
     # TODO: implement or remove
     def calculate_observation(
@@ -263,7 +246,7 @@ DetectionConfig: t.TypeAlias = t.Union[SimpleStxSrx, StxSrx, StxMrx]
 def calculate_simple_stx_srx_observations(
     dcfg: SimpleStxSrx, space_object: sorts.SpaceObject, epoch: datetime
 ) -> Observation:
-    dt_arr: npt.NDArray[np.float64] = (
+    dt_arr: npt.NDArray[Float_64_as_sec] = (
         (dcfg.stt_tstmp_us - np.datetime64(epoch)).astype("timedelta64[us]").astype(np.float64)
     ) * 1e-6
     states = space_object.get_state(dt_arr)

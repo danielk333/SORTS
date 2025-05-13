@@ -3,6 +3,7 @@ import logging, typing as t
 from dataclasses import dataclass, fields
 import numpy as np
 import numpy.typing as npt
+from sorts.types import Datetime64_us
 
 logger = logging.getLogger(__name__)
 
@@ -47,24 +48,41 @@ class Schedule:
                 )
 
     def filter_by_mask(self, mask: npt.NDArray[np.bool]):
-        """Return a slice of the origin schedule based on the `mask`"""
-        return Schedule.filter_schedule_by_mask(self, mask)
+        """Shorthand of `filter_schedule_by_mask`"""
+        return filter_schedule_by_mask(self, mask)
 
-    @staticmethod
-    def filter_schedule_by_mask(schedule: Schedule, mask: npt.NDArray[np.bool]):
-        """Return a slice of the origin schedule based on the `mask`"""
-
-        filtered_sch = Schedule(
-            stt_tstmp_us=schedule.stt_tstmp_us[mask],
-            exp_num=schedule.exp_num[mask],
-            pointing_az=schedule.pointing_az[mask],
-            pointing_el=schedule.pointing_el[mask],
-            coh_int_bandwidth=schedule.coh_int_bandwidth[mask],
-            ipp=schedule.ipp[mask],
-            pulse_length=schedule.pulse_length[mask],
-        )
-
-        return filtered_sch
+    def filter_by_time_range(self, time_range: tuple[Datetime64_us, Datetime64_us]):
+        """Shorthand of composing `get_schedule_mask_by_time_range`, `filter_schedule_by_mask`"""
+        return filter_schedule_by_mask(self, get_schedule_mask_by_time_range(self, time_range))
 
 
-__all__ = ["Schedule"]
+def filter_schedule_by_mask(schedule: Schedule, mask: npt.NDArray[np.bool]):
+    """Return a slice of the origin schedule based on the `mask`"""
+
+    filtered_sch = Schedule(
+        stt_tstmp_us=schedule.stt_tstmp_us[mask],
+        exp_num=schedule.exp_num[mask],
+        pointing_az=schedule.pointing_az[mask],
+        pointing_el=schedule.pointing_el[mask],
+        coh_int_bandwidth=schedule.coh_int_bandwidth[mask],
+        ipp=schedule.ipp[mask],
+        pulse_length=schedule.pulse_length[mask],
+    )
+
+    return filtered_sch
+
+
+def get_schedule_mask_by_time_range(
+    schedule: Schedule, time_range: tuple[Datetime64_us, Datetime64_us]
+):
+    start_time, end_time = time_range
+
+    sch_dt_s_arr_pass_mask: npt.NDArray[np.bool] = np.logical_and(
+        schedule.stt_tstmp_us >= start_time,
+        schedule.stt_tstmp_us <= end_time,
+    )
+
+    return sch_dt_s_arr_pass_mask
+
+
+__all__ = ["Schedule", "filter_schedule_by_mask", "get_schedule_mask_by_time_range"]

@@ -15,6 +15,7 @@ def setup_function():
     print()
 
 
+# TODO: broken as of 2025-05-13; fix or remove it
 def tracker_controller_smoke_test():
     """based on `examples/radar_passes.py`"""
 
