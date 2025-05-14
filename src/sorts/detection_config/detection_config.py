@@ -220,9 +220,6 @@ class StxMrx(DetectionConfigProtocol):
     ) -> Observation: ...
 
 
-DetectionConfig: t.TypeAlias = t.Union[SimpleStxSrx, StxMrx]
-
-
 def find_simultaneous_passes_time_ranges(
     dt_s_arr: npt.NDArray[np.float64],
     states: EcefStates,
@@ -281,6 +278,5 @@ __all__ = [
     "DetectionConfigProtocol",
     "SimpleStxSrx",
     "StxMrx",
-    "DetectionConfig",
     "find_simultaneous_passes_time_ranges",
 ]
