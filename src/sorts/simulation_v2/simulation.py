@@ -18,13 +18,16 @@ class SpaceObjectsDtSamplerS(t.Protocol):
     ) -> npt.NDArray[np.float64]: ...
 
 
+Dcfg = t.TypeVar("Dcfg", bound=detection_config_.DetectionConfigProtocol)
+
+
 # TODO: split into 'SimulationConfig' and 'Simulation'?
 @dataclass(kw_only=True)
-class Simulation:
+class Simulation(t.Generic[Dcfg]):
     epoch: datetime
     start_time: datetime
     end_time: datetime
-    detection_config: detection_config_.DetectionConfigProtocol
+    detection_config: Dcfg  # NOTE: generics is needed to retain the original type
     space_objects: list[sorts.SpaceObject]
 
     # TODO: support different sampler for different obj?
