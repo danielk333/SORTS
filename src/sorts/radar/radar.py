@@ -2,11 +2,7 @@
 
 """This module is used to define the radar system"""
 import copy
-from datetime import datetime
-import numpy as np
-import numpy.typing as npt
-from .. import passes, passes_v2
-from .radars.composite_key import RadarCompositeKey
+from .. import passes
 
 
 class Radar(object):
