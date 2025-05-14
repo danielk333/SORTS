@@ -68,6 +68,7 @@ import copy
 import numpy as np
 import pyorb
 from astropy.time import Time, TimeDelta
+from sorts.types import EcefStates
 
 
 class SpaceObject(object):
@@ -146,7 +147,7 @@ class SpaceObject(object):
         parameters={},
         epoch=Time(57125.7729, format="mjd"),
         oid=1,
-        **kwargs
+        **kwargs,
     ):
         self.oid = oid
         self.parameters = copy.copy(SpaceObject.default_parameters)
@@ -361,7 +362,7 @@ class SpaceObject(object):
         ecefs = self.get_state(t)
         return ecefs[3:, :]
 
-    def get_state(self, t):
+    def get_state(self, t) -> EcefStates:
         """Gets ECEF state at specified times using propagator instance.
 
         :param int/float/list/numpy.ndarray/astropy.time.Time/astropy.time.TimeDelta t: Time relative epoch in seconds.

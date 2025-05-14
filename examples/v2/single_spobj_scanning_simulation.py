@@ -86,6 +86,8 @@ sim = sortsV2.Simulation(
         end_t=(end_time - epoch).total_seconds(),
         max_dpos=1e3,
     ),
+    # space_objects_dt_interpolator_s=sorts.interpolation.Legendre8,
+    space_objects_dt_interpolator_s=sorts.interpolation.Linear,
 )
 
 # sim.run()

@@ -5,8 +5,8 @@
 """
 
 from abc import ABC, abstractmethod
-
 import numpy as np
+import numpy.typing as npt
 
 
 class Interpolator(ABC):
@@ -25,7 +25,7 @@ class Interpolator(ABC):
         self.t = np.atleast_1d(t)
 
     @abstractmethod
-    def get_state(self, t, **kwargs):
+    def get_state(self, t, **kwargs) -> npt.NDArray:
         pass
 
 

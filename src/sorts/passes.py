@@ -12,6 +12,7 @@ import numpy as np
 import numpy.typing as npt
 import pyorb
 import pyant
+from sorts.types import Float64_as_sec
 
 # Local import
 from .signals import hard_target_snr
@@ -223,7 +224,7 @@ class Pass:
 
 def equidistant_sampling(
     orbit, start_t, end_t, max_dpos=1e3, eccentricity_tol=0.3
-) -> npt.NDArray[np.float64]:
+) -> npt.NDArray[Float64_as_sec]:
     """Find the temporal sampling of an orbit which is sufficient to achieve a
     maximum spatial separation. Assume elliptic orbit and uses Keplerian propagation
     to find sampling, does not take perturbation patterns into account. If
