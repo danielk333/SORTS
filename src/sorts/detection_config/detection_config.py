@@ -7,7 +7,7 @@ import numpy.typing as npt
 import sorts
 from sorts.radar.radars.composite_key import RadarStationCompositeKey
 from sorts.radar.tx_rx import Station
-from sorts.types import Datetime64_us, Float_64_as_sec, Float64_as_m, EcefStates
+from sorts.types import Datetime64_us, Float64_as_sec, Float64_as_m, EcefStates
 from sorts import schedule_v2 as schedule
 from sorts import scheduler_v2 as scheduler
 from sorts.detection_config import ExperimentDetail, Observation
@@ -46,7 +46,7 @@ class SimpleStxSrx(DetectionConfigProtocol):
 
     def find_passes_time_ranges(
         self,
-        dt_s_arr: npt.NDArray[Float_64_as_sec],
+        dt_s_arr: npt.NDArray[Float64_as_sec],
         space_object_states: EcefStates,
         epoch: datetime,
     ):
@@ -93,7 +93,7 @@ class SimpleStxSrx(DetectionConfigProtocol):
     ):
         """NOTE: We assume the tx and rx time difference is negligible"""
 
-        dt_s_arr: npt.NDArray[Float_64_as_sec] = (
+        dt_s_arr: npt.NDArray[Float64_as_sec] = (
             (dcfg.rx_schedule.stt_tstmp_us - np.datetime64(epoch))
             .astype("timedelta64[us]")
             .astype(np.float64)
