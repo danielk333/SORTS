@@ -31,7 +31,7 @@ class DetectionConfigProtocol(t.Protocol):
 
 # TODO: dissolve existing `SimpleStxSrx` and rename this to `SimpleStxSrx`
 @dataclass(kw_only=True)
-class StxSrx(DetectionConfigProtocol):
+class SimpleStxSrx(DetectionConfigProtocol):
     tx_station: Station
     tx_schedule: scheduler.Schedule
     rx_station: Station
@@ -60,7 +60,7 @@ class StxSrx(DetectionConfigProtocol):
         epoch: datetime,
         schedule_mask: npt.NDArray[np.bool] | None,
     ):
-        return StxSrx.calculate_observation_from_config(
+        return SimpleStxSrx.calculate_observation_from_config(
             self,
             space_object=space_object,
             epoch=epoch,
@@ -75,7 +75,7 @@ class StxSrx(DetectionConfigProtocol):
     # TODO: maybe making it a standalone func is better?
     @staticmethod
     def calculate_observation_from_config(
-        dcfg: StxSrx,
+        dcfg: SimpleStxSrx,
         space_object: sorts.SpaceObject,
         epoch: datetime,
         schedule_mask: npt.NDArray[np.bool] | None,
@@ -204,7 +204,7 @@ class StxMrx(DetectionConfigProtocol):
     ) -> Observation: ...
 
 
-DetectionConfig: t.TypeAlias = t.Union[StxSrx, StxMrx]
+DetectionConfig: t.TypeAlias = t.Union[SimpleStxSrx, StxMrx]
 
 
 def find_simultaneous_passes_time_ranges(
@@ -263,7 +263,7 @@ def find_simultaneous_passes_time_ranges(
 
 __all__ = [
     "DetectionConfigProtocol",
-    "StxSrx",
+    "SimpleStxSrx",
     "StxMrx",
     "DetectionConfig",
     "find_simultaneous_passes_time_ranges",
