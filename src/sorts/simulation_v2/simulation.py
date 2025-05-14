@@ -5,8 +5,6 @@ import numpy as np
 import numpy.typing as npt
 import pyorb
 import sorts
-from sorts.schedule_v2 import get_schedule_mask_by_time_range
-from sorts import scheduler_v2 as scheduler
 from sorts import detection_config as detection_config_
 
 logger = logging.getLogger(__name__)
@@ -57,7 +55,7 @@ class Simulation(t.Generic[Dcfg]):
                 epoch=self.epoch,
             )
             masks_for_spobj: list[npt.NDArray[np.bool]] = [
-                get_schedule_mask_by_time_range(self.detection_config.tx_schedule, time_range)
+                self.detection_config.get_schedule_mask_by_time_range(time_range)
                 for time_range in time_ranges
             ]
 

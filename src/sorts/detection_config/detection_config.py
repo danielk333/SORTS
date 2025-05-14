@@ -8,6 +8,7 @@ import sorts
 from sorts.radar.radars.composite_key import RadarStationCompositeKey
 from sorts.radar.tx_rx import Station
 from sorts.types import Datetime64_us, Float_64_as_sec, Float64_as_m, EcefStates
+from sorts import schedule_v2 as schedule
 from sorts import scheduler_v2 as scheduler
 from sorts.detection_config import ExperimentDetail, Observation
 
@@ -20,6 +21,10 @@ class DetectionConfigProtocol(t.Protocol):
         space_object_states: npt.NDArray[np.float64],
         epoch: datetime,
     ) -> t.Sequence[tuple[Datetime64_us, Datetime64_us]]: ...
+
+    def get_schedule_mask_by_time_range(
+        self, time_range: tuple[Datetime64_us, Datetime64_us]
+    ) -> npt.NDArray[np.bool]: ...
 
     def calculate_observation(
         self,
@@ -53,6 +58,12 @@ class SimpleStxSrx(DetectionConfigProtocol):
         )
 
         return time_ranges
+
+    def get_schedule_mask_by_time_range(
+        self, time_range: tuple[Datetime64_us, Datetime64_us]
+    ) -> npt.NDArray[np.bool]:
+        mask = schedule.get_schedule_mask_by_time_range(self.tx_schedule, time_range)
+        return mask
 
     def calculate_observation(
         self,
@@ -194,6 +205,11 @@ class StxMrx(DetectionConfigProtocol):
         space_object_states: npt.NDArray[np.float64],
         epoch: datetime,
     ) -> t.Sequence[tuple[Datetime64_us, Datetime64_us]]: ...
+
+    # TODO: implement or remove
+    def get_schedule_mask_by_time_range(
+        self, time_range: tuple[Datetime64_us, Datetime64_us]
+    ) -> npt.NDArray[np.bool]: ...
 
     # TODO: implement or remove
     def calculate_observation(
