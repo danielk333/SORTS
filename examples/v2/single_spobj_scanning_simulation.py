@@ -1,8 +1,8 @@
 """
-A temp copy of `examples/v2/single_spobj_scanning_simulation.py`,
-it is used a testing ground for refactored code.
+following the same params as in `examples/examples/simulate_scanning_v2.py`
 
-Will be removed afterwards.
+NOTE: WIP; this is currently a testing ground for refactored code
+TODO: complete it and clean up
 """
 
 import typing as t

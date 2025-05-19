@@ -1,12 +1,14 @@
 """
-A temp copy of `examples/v2/single_spobj_scanning_simulation.py`,
-it is used a testing ground for refactored code.
+based on `examples/v2/single_spobj_scanning_simulation.py`,
+but modified to work with population of space objects
 
-Will be removed afterwards.
+NOTE: WIP; this is currently a testing ground for refactored code
+TODO: complete it and clean up
 """
 
 import typing as t
 from datetime import datetime, timezone
+from pathlib import Path
 import numpy as np
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
@@ -55,6 +57,15 @@ fence_scan_controller = sortsV2.controller.FenceScanController(
 
 (tx_schedule, rx_schedule) = fence_scan_controller.generate(start_time, end_time)
 
+catalog_fpath = Path(__file__).parent / ".." / ".." / "local_data" / "celn_20090501_00.sim"
+_pop = sorts.population.master_catalog(
+    catalog_fpath,
+    propagator=sorts.propagator.SGP4,
+    propagator_options={"settings": {"in_frame": "TEME", "out_frame": "ITRF"}},
+)
+rand_seed = 120389
+pop = sorts.population.master_catalog_factor(_pop, treshhold=10.0, seed=rand_seed)
+
 sim = sortsV2.Simulation(
     epoch=epoch,
     start_time=start_time,
@@ -66,20 +77,8 @@ sim = sortsV2.Simulation(
         rx_schedule=rx_schedule,
         exp_num_map=exp_num_map,
     ),
-    space_objects=[
-        sorts.SpaceObject(
-            sorts.propagator.SGP4,
-            propagator_options={"settings": {"out_frame": "ITRF"}},
-            a=7200e3,
-            e=0.02,
-            i=75,
-            raan=86,
-            aop=0,
-            mu0=60,
-            epoch=Time(epoch),
-            parameters={"d": 0.1},
-        )
-    ],
+    # space_objects=[pop.get_object(i) for i in range(pop.shape[0])],
+    space_objects=[pop.get_object(i) for i in range(pop.shape[0])][0:100],  # take only 100 items
     space_objects_dt_sampler_s=lambda orbit, start_time, end_time: sorts.equidistant_sampling(
         orbit=orbit,
         start_t=(start_time - epoch).total_seconds(),
@@ -90,11 +89,13 @@ sim = sortsV2.Simulation(
     space_objects_dt_interpolator_s=sorts.interpolation.Linear,
 )
 
-# sim.run()
 obss, masks = sim.calculate_observations()
-# target_pass_obj = pass_arr[0][0]
-obs = obss[0][0]
-sch_dt_s_arr_pass_mask = masks[0][0]
+
+# find the index of the first space object which has non-empty observation list
+nonempty_obss_idx_ls = [x[0] for x in filter(lambda x: len(x[1]) != 0, enumerate(obss))]
+
+obs = obss[nonempty_obss_idx_ls[0]][0]
+sch_dt_s_arr_pass_mask = masks[nonempty_obss_idx_ls[0]][0]
 
 
 ##
