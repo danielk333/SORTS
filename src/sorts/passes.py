@@ -18,6 +18,7 @@ from sorts.types import Float64_as_sec
 from .signals import hard_target_snr
 
 
+# TODO: remove?
 class Pass:
     """Saves the local coordinate data for a single pass.
     Optionally also indicates the location of that pass in a bigger dataset.

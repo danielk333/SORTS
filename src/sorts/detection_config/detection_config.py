@@ -5,6 +5,7 @@ from datetime import datetime
 import numpy as np
 import numpy.typing as npt
 import sorts
+from sorts.interpolation import Interpolator
 from sorts.radar.radars.composite_key import RadarStationCompositeKey
 from sorts.radar.tx_rx import Station
 from sorts.types import Datetime64_us, Float64_as_sec, Float64_as_m, EcefStates
@@ -29,12 +30,12 @@ class DetectionConfigProtocol(t.Protocol):
     def calculate_observation(
         self,
         space_object: sorts.SpaceObject,
+        space_object_states_interpolator: Interpolator,
         epoch: datetime,
         schedule_mask: npt.NDArray[np.bool] | None,
     ) -> Observation: ...
 
 
-# TODO: dissolve existing `SimpleStxSrx` and rename this to `SimpleStxSrx`
 @dataclass(kw_only=True)
 class SimpleStxSrx(DetectionConfigProtocol):
     tx_station: Station
@@ -68,26 +69,24 @@ class SimpleStxSrx(DetectionConfigProtocol):
     def calculate_observation(
         self,
         space_object: sorts.SpaceObject,
+        space_object_states_interpolator: Interpolator,
         epoch: datetime,
         schedule_mask: npt.NDArray[np.bool] | None,
     ):
         return SimpleStxSrx.calculate_observation_from_config(
             self,
             space_object=space_object,
+            space_object_states_interpolator=space_object_states_interpolator,
             epoch=epoch,
             schedule_mask=schedule_mask,
         )
 
-    # TODO: re-eval which one is better:
-    #   - calc per pass_obj
-    #   - batching over same timeframe, diff spobjbatching over same timeframe
-    #   - batching over same spobj, diff timeframe
-    #   - or ... ?
     # TODO: maybe making it a standalone func is better?
     @staticmethod
     def calculate_observation_from_config(
         dcfg: SimpleStxSrx,
         space_object: sorts.SpaceObject,
+        space_object_states_interpolator: Interpolator,
         epoch: datetime,
         schedule_mask: npt.NDArray[np.bool] | None,
     ):
@@ -110,7 +109,7 @@ class SimpleStxSrx(DetectionConfigProtocol):
         obs_size = len(dt_s_arr)
 
         # TODO: can probably be taken from the `simulation.find_passes`
-        spobj_states = space_object.get_state(dt_s_arr)
+        spobj_states = space_object_states_interpolator.get_state(dt_s_arr)
         spobj_tx_enu = dcfg.tx_station.enu(spobj_states)  # space object in tx station coordinate
         spobj_rx_enu = dcfg.rx_station.enu(spobj_states)  # space object in rx station coordinate
 
@@ -215,6 +214,7 @@ class StxMrx(DetectionConfigProtocol):
     def calculate_observation(
         self,
         space_object: sorts.SpaceObject,
+        space_object_states_interpolator: Interpolator,
         epoch: datetime,
         schedule_mask: npt.NDArray[np.bool] | None,
     ) -> Observation: ...

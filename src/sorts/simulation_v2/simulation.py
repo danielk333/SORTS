@@ -72,12 +72,12 @@ class Simulation(t.Generic[Dcfg]):
             )
         ]
 
-        for spobj, spobj_smpl_dt_s_arr, spobj_states_interp in zip(
-            self.space_objects, spobjs_smpl_dt_s_arr, spobjs_states_interps
+        for spobj, spobj_smpl_dt_s_arr, spobj_smpl_states, spobj_states_interp in zip(
+            self.space_objects, spobjs_smpl_dt_s_arr, spobjs_smpl_states, spobjs_states_interps
         ):
             time_ranges = self.detection_config.find_passes_time_ranges(
                 dt_s_arr=spobj_smpl_dt_s_arr,
-                space_object_states=spobj_states_interp.get_state(spobj_smpl_dt_s_arr),
+                space_object_states=spobj_smpl_states,
                 epoch=self.epoch,
             )
             masks_for_spobj: list[npt.NDArray[np.bool]] = [
@@ -87,7 +87,10 @@ class Simulation(t.Generic[Dcfg]):
 
             obs_for_spobj: list[detection_config_.Observation] = [
                 self.detection_config.calculate_observation(
-                    space_object=spobj, epoch=self.epoch, schedule_mask=mask
+                    space_object=spobj,
+                    space_object_states_interpolator=spobj_states_interp,
+                    epoch=self.epoch,
+                    schedule_mask=mask,
                 )
                 for mask in masks_for_spobj
             ]
