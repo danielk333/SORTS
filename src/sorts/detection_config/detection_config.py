@@ -261,11 +261,11 @@ def find_simultaneous_passes_time_ranges(
             continue
 
         start_time: Datetime64_us = t.cast(
-            np.timedelta64, (dt_s_arr[splits[si]] * 1e6).astype("timedelta64[us]")
+            np.timedelta64, (dt_s_arr[ps_inds[0]] * 1e6).astype("timedelta64[us]")
         ) + np.datetime64(epoch)
 
         end_time: Datetime64_us = t.cast(
-            np.timedelta64, (dt_s_arr[splits[si + 1]] * 1e6).astype("timedelta64[us]")
+            np.timedelta64, (dt_s_arr[ps_inds[-1]] * 1e6).astype("timedelta64[us]")
         ) + np.datetime64(epoch)
 
         time_range = (start_time, end_time)
