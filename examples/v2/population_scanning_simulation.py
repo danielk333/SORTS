@@ -6,7 +6,7 @@ NOTE: WIP; this is currently a testing ground for refactored code
 TODO: complete it and clean up
 """
 
-import typing as t
+import pickle, time, typing as t
 from datetime import datetime, timezone
 from pathlib import Path
 import numpy as np
@@ -89,7 +89,22 @@ sim = sortsV2.Simulation(
     space_objects_dt_interpolator_s=sorts.interpolation.Linear,
 )
 
-obss, masks = sim.calculate_observations()
+pickle_fpath = Path(__file__).parent / f"{Path(__file__).name}.pickle"
+if Path(pickle_fpath).is_file():
+    with open(pickle_fpath, "rb") as f:
+        saved_data = pickle.load(f)
+        obss = saved_data["obss"]
+        masks = saved_data["masks"]
+        calc_time = saved_data["calc_time"]
+else:
+    calc_start_time = time.perf_counter()
+    obss, masks = sim.calculate_observations()
+    calc_time = time.perf_counter() - calc_start_time
+
+    with open(pickle_fpath, "wb") as f:
+        pickle.dump({"obss": obss, "masks": masks, "calc_time": calc_time}, f)
+        print(f"calculate_observations took {calc_time} sec")
+
 
 # find the index of the first space object which has non-empty observation list
 nonempty_obss_idx_ls = [x[0] for x in filter(lambda x: len(x[1]) != 0, enumerate(obss))]

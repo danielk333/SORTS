@@ -6,7 +6,7 @@ same as `examples/simulate_scanning.py`,
 with adjustment made to make it runnable (as of `762e70e`)
 """
 
-import os, pickle
+import pickle
 from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
@@ -71,10 +71,8 @@ scheduler = ObservedScanning(
 datas = []
 passes = []
 states = []
-pickle_fpath = (
-    Path(os.path.dirname(os.path.abspath(__file__))) / "simulate_scanning_v2__saves.pickle"
-)
-if os.path.isfile(pickle_fpath):
+pickle_fpath = Path(__file__).parent / "simulate_scanning_v2__saves.pickle"
+if Path(pickle_fpath).is_file():
     with open(pickle_fpath, "rb") as f:
         saved_data = pickle.load(f)
         datas = saved_data["datas"]
