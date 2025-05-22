@@ -99,7 +99,7 @@ sim = sortsV2.Simulation(
     space_objects_dt_interpolator_s=sorts.interpolation.Linear,
 )
 
-pickle_fpath = Path(__file__).parent / f"{Path(__file__).name}.pickle"
+pickle_fpath = Path(__file__).parent / ".." / ".." / "local_data" / f"{Path(__file__).name}.pickle"
 if Path(pickle_fpath).is_file():
     with open(pickle_fpath, "rb") as f:
         saved_data = pickle.load(f)
