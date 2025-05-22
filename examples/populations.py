@@ -56,6 +56,7 @@ plotting.orbits.kepler_scatter(
     pop.get_states(named=False),
     title="Orbit distribution of Population",
     axis_labels="earth-orbit",
+    usetex=False,  # TODO: `usetex` defaults to `True` and introduce latex dependency; discuss with daniel
 )
 
 
