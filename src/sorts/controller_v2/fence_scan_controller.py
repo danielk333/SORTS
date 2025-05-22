@@ -3,16 +3,15 @@ from dataclasses import dataclass
 from datetime import datetime
 import numpy as np
 from sorts.radar.tx_rx import Station
-from sorts import scheduler_v2 as scheduler
+from sorts.scheduler_v2 import Schedule
+from sorts.controller_v2.controller_protocol import ControllerProtocol
 from sorts.controller_v2 import pointing_patterns
 
 logger = logging.getLogger(__name__)
 
 
-# TODO: remove 'scanner_controller.py'
-# TODO: update `controller.ControllerProtocol` and inherit from it
 @dataclass(kw_only=True)
-class FenceScanController:
+class FenceScanController(ControllerProtocol):
     """
     NOTE: `num` refers to the number of pointings within a cycle.
 
@@ -70,7 +69,7 @@ class FenceScanController:
         stt_tstmp: datetime,
         end_tstmp: datetime,
         res_us=1000,
-    ) -> tuple[scheduler.Schedule, scheduler.Schedule]:
+    ) -> tuple[Schedule, Schedule]:
         """Returns `(tx_schedule, rx_schedule)`"""
 
         time_range_mask = (self.start_time_us_arr >= np.datetime64(stt_tstmp)) & (
@@ -85,7 +84,7 @@ class FenceScanController:
             self._rx_pts_within_a_cycle, (schedule_size + self.num - 1) // self.num
         )[:schedule_size]
 
-        tx_schedule = scheduler.Schedule(
+        tx_schedule = Schedule(
             stt_tstmp_us=self.start_time_us_arr[time_range_mask],
             exp_num=np.full(schedule_size, self.exp_num, dtype=np.int64),
             pointing_az=tx_pointing[0],
@@ -95,7 +94,7 @@ class FenceScanController:
             pulse_length=np.full(schedule_size, 1.0, dtype=np.float64),
         )
 
-        rx_schedule = scheduler.Schedule(
+        rx_schedule = Schedule(
             stt_tstmp_us=self.start_time_us_arr[time_range_mask],
             exp_num=np.full(schedule_size, self.exp_num, dtype=np.int64),
             pointing_az=rx_pointing[0],

@@ -1,16 +1,15 @@
 import logging, typing as t, abc
 from datetime import datetime
-from sorts.schedule_v2 import Schedule
-from sorts.radar.radars.composite_key import RadarStationCompositeKey
+from sorts.scheduler_v2 import Schedule
 
 logger = logging.getLogger(__name__)
 
 
 class ControllerProtocol(t.Protocol):
-    @abc.abstractmethod
+    # TODO: re-eval what the return type should be
     def generate(
         self, stt_tstmp: datetime, end_tstmp: datetime, res_us: int
-    ) -> dict[RadarStationCompositeKey, Schedule]:
+    ) -> tuple[Schedule, Schedule]:
         """
         Parameters
         ---

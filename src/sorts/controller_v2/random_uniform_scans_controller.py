@@ -9,8 +9,9 @@ from ..radar.radars.composite_key import RadarStationCompositeKey
 logger = logging.getLogger(__name__)
 
 
+# TODO: this controller need some rework so it can inherit from `ControllerProtocol` again
 @dataclass(kw_only=True)
-class RandomUniformScansController(ctrlr.ControllerProtocol):
+class RandomUniformScansController:
     """
     a controller that generate random uniform scans
     """
