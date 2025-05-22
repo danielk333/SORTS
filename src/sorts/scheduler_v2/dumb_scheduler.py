@@ -9,6 +9,7 @@ from sorts import controller_v2 as ctrlr
 logger = logging.getLogger(__name__)
 
 
+# TODO: need some rework to get it working with `Simulation` and `DetectionConfig` class
 @dataclass(kw_only=True)
 class DumbScheduler(schr.SchedulerProtocol):
     """
