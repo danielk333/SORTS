@@ -22,6 +22,8 @@ Dcfg = t.TypeVar("Dcfg", bound=detection_config_.DetectionConfigProtocol)
 
 
 # TODO: split into 'SimulationConfig' and 'Simulation'?
+#   - `Simulation` is evolving into more than just a pure data class
+#   - we can move the pure data part into `SimulationConfig` and retain the top level api as `Simulation`
 @dataclass(kw_only=True)
 class Simulation(t.Generic[Dcfg]):
     epoch: datetime
@@ -35,7 +37,13 @@ class Simulation(t.Generic[Dcfg]):
     space_objects_dt_sampler_s: SpaceObjectsDtSamplerS
     """A function with signature `(start_time: Time, end_time: Time) -> npt.NDArray[np.float64]`"""
 
+    # TODO: rename to `space_objects_dt_s_interpolator`
     space_objects_dt_interpolator_s: type[Interpolator]
+
+    def __post_init__(self):
+        # TODO: these are short cuts to access internal states of `Simulation` (e.g. for plotting)
+        #   need to be removed or exposed more properly
+        self._spobjs_states_interps: list[Interpolator] = []
 
     def propagate_and_sample_space_objects_states(self):
         """
@@ -71,6 +79,7 @@ class Simulation(t.Generic[Dcfg]):
                 spobjs_smpl_dt_s_arr, spobjs_smpl_states
             )
         ]
+        self._spobjs_states_interps = spobjs_states_interps
 
         for spobj, spobj_smpl_dt_s_arr, spobj_smpl_states, spobj_states_interp in zip(
             self.space_objects, spobjs_smpl_dt_s_arr, spobjs_smpl_states, spobjs_states_interps

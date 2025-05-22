@@ -66,6 +66,8 @@ dev = [
     "sorts",
 ]
 
+vtk = ["pyvista>=0.45.2"]
+
 [tool.black]
 line-length = 100
 
