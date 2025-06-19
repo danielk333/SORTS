@@ -68,6 +68,9 @@ dev = [
 
 vtk = ["pyvista>=0.45.2"]
 
+[tool.setuptools.package-data]
+sorts = ["py.typed"]
+
 [tool.black]
 line-length = 100
 
