@@ -46,6 +46,3 @@ class DumbScheduler(schr.SchedulerProtocol):
         )
 
         return merged_sch
-
-
-__all__ = ["DumbScheduler"]

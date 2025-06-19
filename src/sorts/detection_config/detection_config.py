@@ -272,11 +272,3 @@ def find_simultaneous_passes_time_ranges(
         time_ranges.append(time_range)
 
     return time_ranges
-
-
-__all__ = [
-    "DetectionConfigProtocol",
-    "SimpleStxSrx",
-    "StxMrx",
-    "find_simultaneous_passes_time_ranges",
-]

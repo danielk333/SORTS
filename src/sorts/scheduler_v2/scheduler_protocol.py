@@ -26,6 +26,3 @@ class SchedulerProtocol(t.Protocol):
             end timestamp
         """
         ...
-
-
-__all__ = ["SchedulerProtocol"]

@@ -89,6 +89,3 @@ class RandomUniformScansController:
         )
 
         return {self.radar_station_composite_key: ret_sch}
-
-
-__all__ = ["RandomUniformScansController"]

@@ -14,6 +14,3 @@ class ExperimentDetail:
     bandwidth: float
     duty_cycle: float
     noise_temp: float
-
-
-__all__ = ["ExperimentDetail"]

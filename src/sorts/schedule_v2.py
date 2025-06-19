@@ -83,6 +83,3 @@ def get_schedule_mask_by_time_range(
     )
 
     return sch_dt_s_arr_pass_mask
-
-
-__all__ = ["Schedule", "filter_schedule_by_mask", "get_schedule_mask_by_time_range"]

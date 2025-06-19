@@ -105,6 +105,3 @@ class FenceScanController(ControllerProtocol):
         )
 
         return (tx_schedule, rx_schedule)
-
-
-__all__ = ["FenceScanController"]

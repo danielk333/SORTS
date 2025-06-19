@@ -24,6 +24,3 @@ class ControllerProtocol(t.Protocol):
         TODO: do we still need `res_us`? should we renamed it to `alignment_us`?
         """
         ...
-
-
-__all__ = ["ControllerProtocol"]

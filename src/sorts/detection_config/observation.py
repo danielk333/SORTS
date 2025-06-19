@@ -13,6 +13,3 @@ class Observation:
     tx_k: npt.NDArray[np.float64]
     rx_k: npt.NDArray[np.float64]
     rcs: npt.NDArray[np.float64]
-
-
-__all__ = ["Observation"]
