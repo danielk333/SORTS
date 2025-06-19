@@ -18,6 +18,17 @@ import pyvista as pv
 from pyvista import examples
 import sorts
 from sorts import _v2 as sortsV2
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("master_catalog")
+parser.add_argument("output_folder")
+parser.add_argument("-c", "-clobber", action="store_true")
+args = parser.parse_args()
+
+catalog_fpath = Path(args.master_catalog)
+output_folder = Path(args.output_folder)
+pickle_fpath = output_folder / f"{Path(__file__).name}.pickle"
 
 # TODO: might be if `epoch`, `start_time`, `end_time` can be integrated into some config or dataclass ?
 epoch = t.cast(
@@ -60,7 +71,6 @@ fence_scan_controller = sortsV2.controller.FenceScanController(
 
 (tx_schedule, rx_schedule) = fence_scan_controller.generate(start_time, end_time)
 
-catalog_fpath = Path(__file__).parent / ".." / ".." / "local_data" / "celn_20090501_00.sim"
 _pop = sorts.population.master_catalog(
     catalog_fpath,
     propagator=sorts.propagator.SGP4,
@@ -71,9 +81,9 @@ rand_seed = 120389
 pop = sorts.population.master_catalog_factor(_pop, treshhold=5.0, seed=rand_seed)
 space_objects = [pop.get_object(i) for i in range(pop.shape[0])]
 print(f"true population size: {len(space_objects)}")
-# space_objects_slice = slice(0, 100)  # take only 100 items
+space_objects_slice = slice(0, 100)  # take only 100 items
 # space_objects_slice = slice(0,500)  # take only 500 items
-space_objects_slice = slice(None, None)  # take all
+# space_objects_slice = slice(None, None)  # take all
 space_objects = space_objects[space_objects_slice]
 print(f"clamped population size: {len(space_objects)}")
 
@@ -99,7 +109,6 @@ sim = sortsV2.Simulation(
     space_objects_dt_interpolator_s=sorts.interpolation.Linear,
 )
 
-pickle_fpath = Path(__file__).parent / ".." / ".." / "local_data" / f"{Path(__file__).name}.pickle"
 if Path(pickle_fpath).is_file():
     with open(pickle_fpath, "rb") as f:
         saved_data = pickle.load(f)
@@ -174,7 +183,7 @@ axs[0, 1].plot(
     "g",
 )
 
-# plt.show() # tmp disabled
+plt.show() # tmp disabled
 
 ##
 # some vtk plottings
