@@ -47,14 +47,6 @@ class Schedule:
                     f"while shape of {f_0.name} is {fv_0.shape} "
                 )
 
-    def filter_by_mask(self, mask: npt.NDArray[np.bool]):
-        """Shorthand of `filter_schedule_by_mask`"""
-        return filter_schedule_by_mask(self, mask)
-
-    def filter_by_time_range(self, time_range: tuple[Datetime64_us, Datetime64_us]):
-        """Shorthand of composing `get_schedule_mask_by_time_range`, `filter_schedule_by_mask`"""
-        return filter_schedule_by_mask(self, get_schedule_mask_by_time_range(self, time_range))
-
 
 def filter_schedule_by_mask(schedule: Schedule, mask: npt.NDArray[np.bool]):
     """Return a slice of the origin schedule based on the `mask`"""
