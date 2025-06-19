@@ -18,6 +18,7 @@ examples/data/tle-201801.txt
 *~
 .*.swo
 .*.swp
+session.vim
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
