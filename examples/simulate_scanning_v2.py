@@ -71,7 +71,7 @@ scheduler = ObservedScanning(
 datas = []
 passes = []
 states = []
-pickle_fpath = Path(__file__).parent / "simulate_scanning_v2__saves.pickle"
+pickle_fpath = Path(__file__).parent / "example_data" / "simulate_scanning_v2__saves.pickle"
 if Path(pickle_fpath).is_file():
     with open(pickle_fpath, "rb") as f:
         saved_data = pickle.load(f)
