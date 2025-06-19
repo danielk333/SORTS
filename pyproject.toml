@@ -1,12 +1,12 @@
 [project]
 name = "sorts"
 version = "0.1.0"
-# TODO: migrate them to pyproject.toml
 dynamic = [
     "description",
     "readme",
     "license",
 
+    # TODO: migrate them to pyproject.toml ?
     # used in `setup.cfg`, but does not cause warnings/errors
     # "license-files"
     # "authors",
@@ -19,7 +19,7 @@ dynamic = [
     # "keywords",
     # "urls",
     # "gui-scripts",
-] # TODO: migrate them to pyproject.tomlname = "sorts" ?
+]
 requires-python = ">=3.10"
 dependencies = [
     "h5py>=3.2.1",
