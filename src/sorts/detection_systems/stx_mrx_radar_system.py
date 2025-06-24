@@ -10,9 +10,9 @@ from sorts.radar.tx_rx import Station
 from sorts.types import Datetime64_us, Float64_as_sec, Float64_as_m, EcefStates
 from sorts import schedule_v2 as schedule
 from sorts import scheduler_v2 as scheduler
-from sorts.detection_config.observation import Observation
-from sorts.detection_config.experiment_detail import ExperimentDetail
-from sorts.detection_config.detection_config import DetectionConfigProtocol
+from sorts.detection_systems.observation import Observation
+from sorts.detection_systems.experiment_detail import ExperimentDetail
+from sorts.detection_systems.detection_system import DetectionSystemProtocol
 
 
 class StxMrxRadarSystemParamDict(t.TypedDict):
@@ -38,7 +38,7 @@ class StxMrxRadarSystemParam:
         return StxMrxRadarSystemParam(**d)
 
 
-class StxMrxRadarSystem(DetectionConfigProtocol):
+class StxMrxRadarSystem(DetectionSystemProtocol):
     @t.overload
     def __init__(self, param: StxMrxRadarSystemParam): ...
 
@@ -201,6 +201,7 @@ class StxMrxRadarSystem(DetectionConfigProtocol):
         return [obs for obs in obss]
 
 
+# TODO: move it into a helper/util func file?
 def find_simultaneous_passes_time_ranges(
     dt_s_arr: npt.NDArray[np.float64],
     states: EcefStates,

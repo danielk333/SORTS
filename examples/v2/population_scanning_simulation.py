@@ -48,7 +48,7 @@ end_time = t.cast(
 
 eiscat3d = sorts.get_radar("eiscat3d", "stage1-array")
 
-exp_detail = sortsV2.detection_config.ExperimentDetail(
+exp_detail = sortsV2.detection_systems.ExperimentDetail(
     coh_int_bandwidth=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
     ipp=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
     pulse_length=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
@@ -58,7 +58,7 @@ exp_detail = sortsV2.detection_config.ExperimentDetail(
     duty_cycle=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
     noise_temp=150.0,
 )
-exp_num_map: dict[int, sortsV2.detection_config.ExperimentDetail] = {0: exp_detail}
+exp_num_map: dict[int, sortsV2.detection_systems.ExperimentDetail] = {0: exp_detail}
 
 fence_scan_controller = sortsV2.controller.FenceScanController(
     tx_station=eiscat3d.tx[0],
@@ -94,7 +94,7 @@ sim = sortsV2.Simulation(
     epoch=epoch,
     start_time=start_time,
     end_time=end_time,
-    detection_config=sortsV2.detection_config.StxMrxRadarSystem(
+    detection_system=sortsV2.detection_systems.StxMrxRadarSystem(
         {
             "tx_station": eiscat3d.tx[0],
             "tx_schedule": tx_schedule,
@@ -158,19 +158,19 @@ spobjs_states_interp = spobjs_states_interps[target_spobj_idx]
 fig, axs = plt.subplots(2, 2)
 
 sch_dt_s_arr = (
-    sim.detection_config.param.rx_schedules[0].stt_tstmp_us - np.datetime64(sim.epoch)
+    sim.detection_system.param.rx_schedules[0].stt_tstmp_us - np.datetime64(sim.epoch)
 ).astype("timedelta64[us]").astype(np.float64) / 1e6
 sch_dt_s_arr_pass = sch_dt_s_arr[sch_dt_s_arr_pass_mask]
 
 axs[0, 0].plot(
-    sim.detection_config.param.rx_schedules[0].stt_tstmp_us[sch_dt_s_arr_pass_mask],
+    sim.detection_system.param.rx_schedules[0].stt_tstmp_us[sch_dt_s_arr_pass_mask],
     np.log10(np.clip(obs.snr, a_min=1, a_max=None)) * 10,
     "r",
 )
 
 # interpolation functions for secondary x-axis
 datetimef = mdates.date2num(
-    sim.detection_config.param.rx_schedules[0].stt_tstmp_us[sch_dt_s_arr_pass_mask]
+    sim.detection_system.param.rx_schedules[0].stt_tstmp_us[sch_dt_s_arr_pass_mask]
 )
 # NOTE: `fill_value="extrapolate"` triggers error but is actually okay
 datetimef_to_timedelta = interp1d(datetimef, sch_dt_s_arr_pass, fill_value="extrapolate")  # type: ignore
@@ -180,13 +180,13 @@ timedelta_to_datetimef = interp1d(sch_dt_s_arr_pass, datetimef, fill_value="extr
 axs[0, 0].secondary_xaxis("top", functions=(datetimef_to_timedelta, timedelta_to_datetimef))
 
 axs[0, 1].plot(
-    sim.detection_config.param.rx_schedules[0].stt_tstmp_us,
-    sim.detection_config.param.rx_schedules[0].pointing_az,
+    sim.detection_system.param.rx_schedules[0].stt_tstmp_us,
+    sim.detection_system.param.rx_schedules[0].pointing_az,
     "r",
 )
 axs[0, 1].plot(
-    sim.detection_config.param.rx_schedules[0].stt_tstmp_us,
-    sim.detection_config.param.rx_schedules[0].pointing_el,
+    sim.detection_system.param.rx_schedules[0].stt_tstmp_us,
+    sim.detection_system.param.rx_schedules[0].pointing_el,
     "g",
 )
 

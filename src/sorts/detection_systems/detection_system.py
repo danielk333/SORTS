@@ -10,11 +10,10 @@ from sorts.radar.radars.composite_key import RadarStationCompositeKey
 from sorts.radar.tx_rx import Station
 from sorts.types import Datetime64_us, EcefStates
 from sorts import scheduler_v2 as scheduler
-from sorts.detection_config import ExperimentDetail, Observation
+from sorts.detection_systems import ExperimentDetail, Observation
 
 
-# TODO: rename to `DetectionSystem`?
-class DetectionConfigProtocol(t.Protocol):
+class DetectionSystemProtocol(t.Protocol):
     def find_passes_time_ranges(
         self,
         dt_s_arr: npt.NDArray[np.float64],
