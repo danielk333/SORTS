@@ -21,8 +21,11 @@ from sorts import _v2 as sortsV2
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("master_catalog")
-parser.add_argument("output_folder")
+parser.add_argument(
+    "-master_catalog",
+    default=Path(__file__).parent / ".." / ".." / "local_data" / "celn_20090501_00.sim",
+)
+parser.add_argument("-output_folder", default=Path(__file__).parent / ".." / ".." / "local_data")
 parser.add_argument("-c", "-clobber", action="store_true")
 args = parser.parse_args()
 
