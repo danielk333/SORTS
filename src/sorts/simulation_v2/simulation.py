@@ -94,14 +94,16 @@ class Simulation(t.Generic[Dcfg]):
                 for time_range in time_ranges
             ]
 
+            # TODO: improvements needed; this is only works for StxSrx case, where calculate_observation gives out 1 element list
             obs_for_spobj: list[detection_config_.Observation] = [
-                self.detection_config.calculate_observation(
+                obs
+                for mask in masks_for_spobj
+                for obs in self.detection_config.calculate_observation(
                     space_object=spobj,
                     space_object_states_interpolator=spobj_states_interp,
                     epoch=self.epoch,
                     schedule_mask=mask,
                 )
-                for mask in masks_for_spobj
             ]
 
             masks.append(masks_for_spobj)

@@ -94,12 +94,14 @@ sim = sortsV2.Simulation(
     epoch=epoch,
     start_time=start_time,
     end_time=end_time,
-    detection_config=sortsV2.detection_config.SimpleStxSrx(
-        tx_station=eiscat3d.tx[0],
-        tx_schedule=tx_schedule,
-        rx_station=eiscat3d.rx[0],
-        rx_schedule=rx_schedule,
-        exp_num_map=exp_num_map,
+    detection_config=sortsV2.detection_config.StxMrxRadarSystem(
+        {
+            "tx_station": eiscat3d.tx[0],
+            "tx_schedule": tx_schedule,
+            "rx_stations": [eiscat3d.rx[0]],
+            "rx_schedules": [rx_schedule],
+            "exp_num_map": exp_num_map,
+        }
     ),
     space_objects=space_objects,
     space_objects_dt_sampler_s=lambda orbit, start_time, end_time: sorts.equidistant_sampling(
@@ -155,19 +157,21 @@ spobjs_states_interp = spobjs_states_interps[target_spobj_idx]
 
 fig, axs = plt.subplots(2, 2)
 
-sch_dt_s_arr = (sim.detection_config.rx_schedule.stt_tstmp_us - np.datetime64(sim.epoch)).astype(
-    "timedelta64[us]"
-).astype(np.float64) / 1e6
+sch_dt_s_arr = (
+    sim.detection_config.param.rx_schedules[0].stt_tstmp_us - np.datetime64(sim.epoch)
+).astype("timedelta64[us]").astype(np.float64) / 1e6
 sch_dt_s_arr_pass = sch_dt_s_arr[sch_dt_s_arr_pass_mask]
 
 axs[0, 0].plot(
-    sim.detection_config.rx_schedule.stt_tstmp_us[sch_dt_s_arr_pass_mask],
+    sim.detection_config.param.rx_schedules[0].stt_tstmp_us[sch_dt_s_arr_pass_mask],
     np.log10(np.clip(obs.snr, a_min=1, a_max=None)) * 10,
     "r",
 )
 
 # interpolation functions for secondary x-axis
-datetimef = mdates.date2num(sim.detection_config.rx_schedule.stt_tstmp_us[sch_dt_s_arr_pass_mask])
+datetimef = mdates.date2num(
+    sim.detection_config.param.rx_schedules[0].stt_tstmp_us[sch_dt_s_arr_pass_mask]
+)
 # NOTE: `fill_value="extrapolate"` triggers error but is actually okay
 datetimef_to_timedelta = interp1d(datetimef, sch_dt_s_arr_pass, fill_value="extrapolate")  # type: ignore
 timedelta_to_datetimef = interp1d(sch_dt_s_arr_pass, datetimef, fill_value="extrapolate")  # type: ignore
@@ -176,17 +180,17 @@ timedelta_to_datetimef = interp1d(sch_dt_s_arr_pass, datetimef, fill_value="extr
 axs[0, 0].secondary_xaxis("top", functions=(datetimef_to_timedelta, timedelta_to_datetimef))
 
 axs[0, 1].plot(
-    sim.detection_config.rx_schedule.stt_tstmp_us,
-    sim.detection_config.rx_schedule.pointing_az,
+    sim.detection_config.param.rx_schedules[0].stt_tstmp_us,
+    sim.detection_config.param.rx_schedules[0].pointing_az,
     "r",
 )
 axs[0, 1].plot(
-    sim.detection_config.rx_schedule.stt_tstmp_us,
-    sim.detection_config.rx_schedule.pointing_el,
+    sim.detection_config.param.rx_schedules[0].stt_tstmp_us,
+    sim.detection_config.param.rx_schedules[0].pointing_el,
     "g",
 )
 
-plt.show() # tmp disabled
+plt.show()  # tmp disabled
 
 ##
 # some vtk plottings
