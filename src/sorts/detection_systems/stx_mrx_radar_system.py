@@ -175,7 +175,6 @@ class StxMrxRadarSystem(DetectionSystemProtocol):
             range_rate=np.full((obs_size,), 1.0, dtype=np.float64),  # TODO: imple
             tx_k=spobj_tx_enu[:3] / range_tx_m,
             rx_k=spobj_rx_enu[:3] / range_rx_m,
-            rcs=np.full((obs_size,), 1.0, dtype=np.float64),  # TODO: imple
         )
 
         return obs
