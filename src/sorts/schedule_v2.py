@@ -26,13 +26,6 @@ class Schedule:
     pointing_az: npt.NDArray[np.float64]
     pointing_el: npt.NDArray[np.float64]
 
-    coh_int_bandwidth: npt.NDArray[np.float64]  # TODO: remove
-    "NOTE: do not use, this proporty will be removed"
-    ipp: npt.NDArray[np.float64]  # TODO: remove
-    "NOTE: do not use, this proporty will be removed"
-    pulse_length: npt.NDArray[np.float64]  # TODO: remove
-    "NOTE: do not use, this proporty will be removed"
-
     def __post_init__(self):
         f_0, *f_rests = fields(self)  # Field objects
         fv_0, *fv_rests = t.cast(
@@ -56,9 +49,6 @@ def filter_schedule_by_mask(schedule: Schedule, mask: npt.NDArray[np.bool]):
         exp_num=schedule.exp_num[mask],
         pointing_az=schedule.pointing_az[mask],
         pointing_el=schedule.pointing_el[mask],
-        coh_int_bandwidth=schedule.coh_int_bandwidth[mask],
-        ipp=schedule.ipp[mask],
-        pulse_length=schedule.pulse_length[mask],
     )
 
     return filtered_sch

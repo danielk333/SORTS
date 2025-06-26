@@ -83,9 +83,6 @@ class RandomUniformScansController:
             exp_num=np.full(self.npoints, self.exp_num),
             pointing_az=np.random.uniform(low=0, high=2 * np.pi, size=self.npoints),
             pointing_el=np.random.uniform(low=min_el, high=np.pi / 2, size=self.npoints),
-            coh_int_bandwidth=np.full(self.npoints, self.coh_int_bandwidth),
-            ipp=np.full(self.npoints, self.ipp),
-            pulse_length=np.full(self.npoints, self.pulse_length),
         )
 
         return {self.radar_station_composite_key: ret_sch}
