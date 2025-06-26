@@ -5,7 +5,7 @@ import numpy as np
 import numpy.typing as npt
 import pyorb
 import sorts
-from sorts import detection_systems as detection_config_
+from sorts import detection_systems
 from sorts.interpolation import Interpolator
 from sorts.types import Float64_as_sec, EcefStates
 
@@ -18,7 +18,7 @@ class SpaceObjectsDtSamplerS(t.Protocol):
     ) -> npt.NDArray[np.float64]: ...
 
 
-Dsys = t.TypeVar("Dsys", bound=detection_config_.DetectionSystemProtocol)
+Dsys = t.TypeVar("Dsys", bound=detection_systems.DetectionSystemProtocol)
 
 
 # TODO: split into 'SimulationConfig' and 'Simulation'?
@@ -68,7 +68,7 @@ class Simulation(t.Generic[Dsys]):
 
     def calculate_observations(self):
         masks: list[list[npt.NDArray[np.bool]]] = []
-        obss: list[list[detection_config_.Observation]] = []
+        obss: list[list[detection_systems.Observation]] = []
 
         spobjs_smpl_dt_s_arr, spobjs_smpl_states = self.propagate_and_sample_space_objects_states()
         spobjs_states_interps = [
@@ -95,7 +95,7 @@ class Simulation(t.Generic[Dsys]):
             ]
 
             # TODO: improvements needed; this is only works for StxSrx case, where calculate_observation gives out 1 element list
-            obs_for_spobj: list[detection_config_.Observation] = [
+            obs_for_spobj: list[detection_systems.Observation] = [
                 obs
                 for mask in masks_for_spobj
                 for obs in self.detection_system.calculate_observation(
