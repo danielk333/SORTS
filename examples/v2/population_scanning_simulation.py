@@ -90,7 +90,7 @@ space_objects_slice = slice(0, 100)  # take only 100 items
 space_objects = space_objects[space_objects_slice]
 print(f"clamped population size: {len(space_objects)}")
 
-sim = sortsV2.Simulation(
+sim = sortsV2.simulation.Simulation(
     epoch=epoch,
     start_time=start_time,
     end_time=end_time,

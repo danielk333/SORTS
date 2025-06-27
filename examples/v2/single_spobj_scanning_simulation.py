@@ -55,7 +55,7 @@ fence_scan_controller = sortsV2.controller.FenceScanController(
 
 (tx_schedule, rx_schedule) = fence_scan_controller.generate(start_time, end_time)
 
-sim = sortsV2.Simulation(
+sim = sortsV2.simulation.Simulation(
     epoch=epoch,
     start_time=start_time,
     end_time=end_time,

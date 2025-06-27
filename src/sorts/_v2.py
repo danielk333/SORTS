@@ -1,9 +1,3 @@
-# TODO: remove?
-from sorts.types import Datetime64_us, Timedelta64_us, Float64_as_sec, Float64_as_m, EcefStates
-
-# TODO: remove?
-from sorts.simulation_v2 import Simulation, SimulationResult, SpaceObjectsDtSamplerS
-
 from sorts import types
 from sorts import simulation_v2 as simulation
 from sorts import scheduler_v2 as scheduler
