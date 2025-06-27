@@ -37,33 +37,37 @@ class Schedule:
                     f"while shape of {f_0.name} is {fv_0.shape} "
                 )
 
+    def create_mask_by_time_range(self, time_range: tuple[Datetime64_us, Datetime64_us]):
+        """
+        Return a mask that filters out schedule entries that are not inside `time_range`.
+        (start time and end time inclusive)
+        """
 
-def filter_schedule_by_mask(schedule: Schedule, mask: npt.NDArray[np.bool]):
-    """Return a slice of the origin schedule based on the `mask`"""
+        start_time, end_time = time_range
 
-    filtered_sch = Schedule(
-        stt_tstmp_us=schedule.stt_tstmp_us[mask],
-        exp_num=schedule.exp_num[mask],
-        pointing_az=schedule.pointing_az[mask],
-        pointing_el=schedule.pointing_el[mask],
-    )
+        sch_dt_s_arr_pass_mask: npt.NDArray[np.bool] = np.logical_and(
+            self.stt_tstmp_us >= start_time,
+            self.stt_tstmp_us <= end_time,
+        )
 
-    return filtered_sch
+        return sch_dt_s_arr_pass_mask
 
+    def filter_by_mask(self, mask: npt.NDArray[np.bool]):
+        """Return a slice of the origin schedule based on the `mask`"""
 
-def get_schedule_mask_by_time_range(
-    schedule: Schedule, time_range: tuple[Datetime64_us, Datetime64_us]
-):
-    """
-    Return a mask that filters out schedule entries that are not inside `time_range`.
-    (start time and end time inclusive)
-    """
+        filtered_sch = Schedule(
+            stt_tstmp_us=self.stt_tstmp_us[mask],
+            exp_num=self.exp_num[mask],
+            pointing_az=self.pointing_az[mask],
+            pointing_el=self.pointing_el[mask],
+        )
 
-    start_time, end_time = time_range
+        return filtered_sch
 
-    sch_dt_s_arr_pass_mask: npt.NDArray[np.bool] = np.logical_and(
-        schedule.stt_tstmp_us >= start_time,
-        schedule.stt_tstmp_us <= end_time,
-    )
+    def filter_by_time_range(self, time_range: tuple[Datetime64_us, Datetime64_us]):
+        """
+        Return a slice of the origin schedule based on the `time_range`
+        (start time and end time inclusive)
+        """
 
-    return sch_dt_s_arr_pass_mask
+        return self.filter_by_mask(self.create_mask_by_time_range(time_range))

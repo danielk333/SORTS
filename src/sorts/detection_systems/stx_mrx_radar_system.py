@@ -69,8 +69,7 @@ class StxMrxRadarSystem(DetectionSystemProtocol):
     def get_schedule_mask_by_time_range(
         self, time_range: tuple[Datetime64_us, Datetime64_us]
     ) -> npt.NDArray[np.bool]:
-        mask = schedule.get_schedule_mask_by_time_range(self.param.tx_schedule, time_range)
-        return mask
+        return self.param.tx_schedule.create_mask_by_time_range(time_range)
 
     # TODO: rename to `calculate_observation_per_station_pass`?
     # TODO: there is a note about assuming the tx and rx time difference is negligible.
@@ -103,8 +102,8 @@ class StxMrxRadarSystem(DetectionSystemProtocol):
         # apply mask if it exists
         if schedule_mask is not None:
             dt_s_arr = dt_s_arr[schedule_mask]
-            tx_schedule = schedule.filter_schedule_by_mask(tx_schedule, schedule_mask)
-            rx_schedule = schedule.filter_schedule_by_mask(rx_schedule, schedule_mask)
+            tx_schedule = tx_schedule.filter_by_mask(schedule_mask)
+            rx_schedule = rx_schedule.filter_by_mask(schedule_mask)
 
         obs_size = len(dt_s_arr)
 

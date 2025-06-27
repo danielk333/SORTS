@@ -96,13 +96,10 @@ sim = sortsV2.Simulation(
 obss = sim.calculate_observations()
 
 obs = obss[0][0]
-rx_sch_pass_mask = sortsV2.schedule.get_schedule_mask_by_time_range(
-    sim.detection_system.param.rx_schedules[0], obs.time_range
+rx_sch_pass_mask = sim.detection_system.param.rx_schedules[0].create_mask_by_time_range(
+    obs.time_range
 )
-rx_sch_pass = sortsV2.schedule.filter_schedule_by_mask(
-    sim.detection_system.param.rx_schedules[0], rx_sch_pass_mask
-)
-
+rx_sch_pass = sim.detection_system.param.rx_schedules[0].filter_by_mask(rx_sch_pass_mask)
 
 ##
 # do some plottings
