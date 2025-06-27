@@ -10,8 +10,8 @@ from sorts.radar.tx_rx import Station
 from sorts.types import Datetime64_us, Float64_as_sec, Float64_as_m, EcefStates
 from sorts import schedule_v2 as schedule
 from sorts import scheduler_v2 as scheduler
-from sorts.detection_systems.observation import Observation
-from sorts.detection_systems.experiment_detail import ExperimentDetail
+from sorts.simulation_v2.observation import Observation
+from sorts.simulation_v2.experiment_detail import ExperimentDetail
 
 
 class StxMrxRadarSystemParamDict(t.TypedDict):

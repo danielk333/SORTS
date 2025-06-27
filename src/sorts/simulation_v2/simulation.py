@@ -5,9 +5,9 @@ import numpy as np
 import numpy.typing as npt
 import pyorb
 import sorts
-from sorts import detection_systems
 from sorts.interpolation import Interpolator
 from sorts.types import Float64_as_sec, EcefStates, Datetime64_us
+from sorts.simulation_v2.observation import Observation
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ class CalculateObservationCallable(t.Protocol):
         epoch: datetime,
         schedule_mask: npt.NDArray[np.bool] | None,
         time_range: tuple[Datetime64_us, Datetime64_us],
-    ) -> list[detection_systems.Observation]: ...
+    ) -> list[Observation]: ...
 
 
 @dataclass(kw_only=True)
@@ -92,8 +92,8 @@ class Simulation:
 
         return spobjs_smpl_dt_s_arr, spobjs_smpl_states
 
-    def calculate_observations(self) -> list[list[detection_systems.Observation]]:
-        obss: list[list[detection_systems.Observation]] = []
+    def calculate_observations(self) -> list[list[Observation]]:
+        obss: list[list[Observation]] = []
 
         spobjs_smpl_dt_s_arr, spobjs_smpl_states = self.propagate_and_sample_space_objects_states()
         spobjs_states_interps = [
@@ -123,7 +123,7 @@ class Simulation:
 
             # TODO: improvements needed; this is only works for StxSrx case, where calculate_observation gives out 1 element list
             # TODO: use for-loop + mutation instead of nested for-comprehension for better readability
-            obs_for_spobj: list[detection_systems.Observation] = [
+            obs_for_spobj: list[Observation] = [
                 obs
                 # TODO: remove enumerate; it was used as tmp replacement for `for mask in masks_for_spobj`
                 for time_range_idx, time_range in enumerate(time_ranges)

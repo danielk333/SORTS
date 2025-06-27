@@ -51,17 +51,17 @@ end_time = t.cast(
 
 eiscat3d = sorts.get_radar("eiscat3d", "stage1-array")
 
-exp_detail = sortsV2.detection_systems.ExperimentDetail(
+exp_detail = sortsV2.simulation.ExperimentDetail(
     coh_int_bandwidth=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
     ipp=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
     pulse_length=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
     # power=5000000.0,
-    power=5e8,  # TODO: tmp 100x higher for debugging; resort the value afterwards
+    power=5e8,  # TODO: tmp 100x higher for debugging; restore the value afterwards
     bandwidth=52.08333333333333,
     duty_cycle=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
     noise_temp=150.0,
 )
-exp_num_map: dict[int, sortsV2.detection_systems.ExperimentDetail] = {0: exp_detail}
+exp_num_map: dict[int, sortsV2.simulation.ExperimentDetail] = {0: exp_detail}
 
 fence_scan_controller = sortsV2.controller.FenceScanController(
     tx_station=eiscat3d.tx[0],
@@ -93,7 +93,7 @@ space_objects_slice = slice(0, 100)  # take only 100 items
 space_objects = space_objects[space_objects_slice]
 print(f"clamped population size: {len(space_objects)}")
 
-detection_system = sortsV2.detection_systems.StxMrxRadarSystem(
+detection_system = sortsV2.simulation.StxMrxRadarSystem(
     {
         "tx_station": eiscat3d.tx[0],
         "tx_schedule": tx_schedule,
@@ -125,7 +125,7 @@ sim = Simulation(
 if Path(pickle_fpath).is_file():
     with open(pickle_fpath, "rb") as f:
         saved_data = pickle.load(f)
-        obss: list[list[sortsV2.detection_systems.Observation]] = saved_data["obss"]
+        obss: list[list[sortsV2.simulation.Observation]] = saved_data["obss"]
         calc_time = saved_data["calc_time"]
         spobjs_states_interps = saved_data["spobjs_states_interps"]
 else:

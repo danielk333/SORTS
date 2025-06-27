@@ -34,7 +34,7 @@ end_time = t.cast(
 
 eiscat3d = sorts.get_radar("eiscat3d", "stage1-array")
 
-exp_detail = sortsV2.detection_systems.ExperimentDetail(
+exp_detail = sortsV2.simulation.ExperimentDetail(
     coh_int_bandwidth=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
     ipp=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
     pulse_length=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
@@ -43,7 +43,7 @@ exp_detail = sortsV2.detection_systems.ExperimentDetail(
     duty_cycle=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
     noise_temp=150.0,
 )
-exp_num_map: dict[int, sortsV2.detection_systems.ExperimentDetail] = {0: exp_detail}
+exp_num_map: dict[int, sortsV2.simulation.ExperimentDetail] = {0: exp_detail}
 
 fence_scan_controller = sortsV2.controller.FenceScanController(
     tx_station=eiscat3d.tx[0],
@@ -59,7 +59,7 @@ fence_scan_controller = sortsV2.controller.FenceScanController(
 
 (tx_schedule, rx_schedule) = fence_scan_controller.generate(start_time, end_time)
 
-detection_system = sortsV2.detection_systems.StxMrxRadarSystem(
+detection_system = sortsV2.simulation.StxMrxRadarSystem(
     {
         "tx_station": eiscat3d.tx[0],
         "tx_schedule": tx_schedule,
