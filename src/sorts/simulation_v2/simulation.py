@@ -66,7 +66,7 @@ class Simulation(t.Generic[Dsys]):
 
         return spobjs_smpl_dt_s_arr, spobjs_smpl_states
 
-    def calculate_observations(self):
+    def calculate_observations(self) -> list[list[detection_systems.Observation]]:
         obss: list[list[detection_systems.Observation]] = []
 
         spobjs_smpl_dt_s_arr, spobjs_smpl_states = self.propagate_and_sample_space_objects_states()

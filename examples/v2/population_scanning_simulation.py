@@ -117,13 +117,12 @@ sim = sortsV2.Simulation(
 if Path(pickle_fpath).is_file():
     with open(pickle_fpath, "rb") as f:
         saved_data = pickle.load(f)
-        obss = saved_data["obss"]
-        masks = saved_data["masks"]
+        obss: list[list[sortsV2.detection_systems.Observation]] = saved_data["obss"]
         calc_time = saved_data["calc_time"]
         spobjs_states_interps = saved_data["spobjs_states_interps"]
 else:
     calc_start_time = time.perf_counter()
-    obss, masks = sim.calculate_observations()
+    obss = sim.calculate_observations()
     calc_time = time.perf_counter() - calc_start_time
     spobjs_states_interps = sim._spobjs_states_interps
 
@@ -131,7 +130,6 @@ else:
         pickle.dump(
             {
                 "obss": obss,
-                "masks": masks,
                 "calc_time": calc_time,
                 "spobjs_states_interps": spobjs_states_interps,
             },
@@ -152,7 +150,13 @@ print(f"space object with observations: {nonempty_obss_idx_ls}")
 target_spobj_idx = nonempty_obss_idx_ls[0]
 
 obs = obss[target_spobj_idx][0]
-sch_dt_s_arr_pass_mask = masks[target_spobj_idx][0]
+rx_sch_pass_mask = sortsV2.schedule.get_schedule_mask_by_time_range(
+    sim.detection_system.param.rx_schedules[0], obs.time_range
+)
+rx_sch_pass = sortsV2.schedule.filter_schedule_by_mask(
+    sim.detection_system.param.rx_schedules[0], rx_sch_pass_mask
+)
+
 spobjs_states_interp = spobjs_states_interps[target_spobj_idx]
 
 fig, axs = plt.subplots(2, 2)
@@ -160,18 +164,16 @@ fig, axs = plt.subplots(2, 2)
 sch_dt_s_arr = (
     sim.detection_system.param.rx_schedules[0].stt_tstmp_us - np.datetime64(sim.epoch)
 ).astype("timedelta64[us]").astype(np.float64) / 1e6
-sch_dt_s_arr_pass = sch_dt_s_arr[sch_dt_s_arr_pass_mask]
+sch_dt_s_arr_pass = sch_dt_s_arr[rx_sch_pass_mask]
 
 axs[0, 0].plot(
-    sim.detection_system.param.rx_schedules[0].stt_tstmp_us[sch_dt_s_arr_pass_mask],
+    rx_sch_pass.stt_tstmp_us,
     np.log10(np.clip(obs.snr, a_min=1, a_max=None)) * 10,
     "r",
 )
 
 # interpolation functions for secondary x-axis
-datetimef = mdates.date2num(
-    sim.detection_system.param.rx_schedules[0].stt_tstmp_us[sch_dt_s_arr_pass_mask]
-)
+datetimef = mdates.date2num(rx_sch_pass.stt_tstmp_us)
 # NOTE: `fill_value="extrapolate"` triggers error but is actually okay
 datetimef_to_timedelta = interp1d(datetimef, sch_dt_s_arr_pass, fill_value="extrapolate")  # type: ignore
 timedelta_to_datetimef = interp1d(sch_dt_s_arr_pass, datetimef, fill_value="extrapolate")  # type: ignore
@@ -190,7 +192,7 @@ axs[0, 1].plot(
     "g",
 )
 
-plt.show()  # tmp disabled
+plt.show()
 
 ##
 # some vtk plottings
