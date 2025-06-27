@@ -112,6 +112,7 @@ fig, axs = plt.subplots(2, 2)
 sch_dt_s_arr = (
     sim.detection_system.param.rx_schedules[0].stt_tstmp_us - np.datetime64(sim.epoch)
 ).astype("timedelta64[us]").astype(np.float64) / 1e6
+sch_dt_s_arr_pass = sch_dt_s_arr[rx_sch_pass_mask]
 
 axs[0, 0].plot(
     rx_sch_pass.stt_tstmp_us,
