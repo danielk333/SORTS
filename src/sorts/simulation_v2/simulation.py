@@ -7,7 +7,7 @@ import pyorb
 import sorts
 from sorts import detection_systems
 from sorts.interpolation import Interpolator
-from sorts.types import Float64_as_sec, EcefStates
+from sorts.types import Float64_as_sec, EcefStates, Datetime64_us
 
 logger = logging.getLogger(__name__)
 
@@ -21,15 +21,36 @@ class SpaceObjectsDtSamplerS(t.Protocol):
 Dsys = t.TypeVar("Dsys", bound=detection_systems.DetectionSystemProtocol)
 
 
-# TODO: split into 'SimulationConfig' and 'Simulation'?
-#   - `Simulation` is evolving into more than just a pure data class
-#   - we can move the pure data part into `SimulationConfig` and retain the top level api as `Simulation`
+class FindPassesTimeRangesCallable(t.Protocol):
+    def __call__(
+        self,
+        dt_s_arr: npt.NDArray[np.float64],
+        space_object_states: npt.NDArray[np.float64],
+        epoch: datetime,
+    ) -> t.Sequence[tuple[Datetime64_us, Datetime64_us]]: ...
+
+
+class GetScheduleMaskByTimeRangeCallable(t.Protocol):
+    def __call__(self, time_range: tuple[Datetime64_us, Datetime64_us]) -> npt.NDArray[np.bool]: ...
+
+
+class CalculateObservationCallable(t.Protocol):
+    def __call__(
+        self,
+        space_object: sorts.SpaceObject,
+        space_object_states_interpolator: Interpolator,
+        epoch: datetime,
+        schedule_mask: npt.NDArray[np.bool] | None,
+        time_range: tuple[Datetime64_us, Datetime64_us],
+    ) -> list[detection_systems.Observation]: ...
+
+
 @dataclass(kw_only=True)
-class Simulation(t.Generic[Dsys]):
+class SimulationParam:
     epoch: datetime
     start_time: datetime
     end_time: datetime
-    detection_system: Dsys  # NOTE: generics is needed to retain the original type
+
     space_objects: list[sorts.SpaceObject]
 
     # TODO: support different sampler for different obj?
@@ -40,7 +61,15 @@ class Simulation(t.Generic[Dsys]):
     # TODO: rename to `space_objects_dt_s_interpolator`
     space_objects_dt_interpolator_s: type[Interpolator]
 
-    def __post_init__(self):
+    find_passes_time_ranges: FindPassesTimeRangesCallable
+    get_schedule_mask_by_time_range: GetScheduleMaskByTimeRangeCallable
+    calculate_observation: CalculateObservationCallable
+
+
+class Simulation:
+    def __init__(self, param: SimulationParam):
+        self.param = param
+
         # TODO: these are short cuts to access internal states of `Simulation` (e.g. for plotting)
         #   need to be removed or exposed more properly
         self._spobjs_states_interps: list[Interpolator] = []
@@ -51,17 +80,17 @@ class Simulation(t.Generic[Dsys]):
         """
 
         spobjs_smpl_dt_s_arr: list[npt.NDArray[Float64_as_sec]] = [
-            self.space_objects_dt_sampler_s(
+            self.param.space_objects_dt_sampler_s(
                 spobj.state,
-                self.start_time,
-                self.end_time,
+                self.param.start_time,
+                self.param.end_time,
             )
-            for spobj in self.space_objects
+            for spobj in self.param.space_objects
         ]
 
         spobjs_smpl_states: list[EcefStates] = [
             spobj.get_state(spobj_smpl_dt_s_arr)
-            for spobj, spobj_smpl_dt_s_arr in zip(self.space_objects, spobjs_smpl_dt_s_arr)
+            for spobj, spobj_smpl_dt_s_arr in zip(self.param.space_objects, spobjs_smpl_dt_s_arr)
         ]
 
         return spobjs_smpl_dt_s_arr, spobjs_smpl_states
@@ -72,7 +101,7 @@ class Simulation(t.Generic[Dsys]):
         spobjs_smpl_dt_s_arr, spobjs_smpl_states = self.propagate_and_sample_space_objects_states()
         spobjs_states_interps = [
             create_space_object_states_interpolator(
-                self.space_objects_dt_interpolator_s, spobj_smpl_states, spobj_smpl_dt_s_arr
+                self.param.space_objects_dt_interpolator_s, spobj_smpl_states, spobj_smpl_dt_s_arr
             )
             for spobj_smpl_dt_s_arr, spobj_smpl_states in zip(
                 spobjs_smpl_dt_s_arr, spobjs_smpl_states
@@ -81,16 +110,18 @@ class Simulation(t.Generic[Dsys]):
         self._spobjs_states_interps = spobjs_states_interps
 
         for spobj, spobj_smpl_dt_s_arr, spobj_smpl_states, spobj_states_interp in zip(
-            self.space_objects, spobjs_smpl_dt_s_arr, spobjs_smpl_states, spobjs_states_interps
+            self.param.space_objects,
+            spobjs_smpl_dt_s_arr,
+            spobjs_smpl_states,
+            spobjs_states_interps,
         ):
-            time_ranges = self.detection_system.find_passes_time_ranges(
+            time_ranges = self.param.find_passes_time_ranges(
                 dt_s_arr=spobj_smpl_dt_s_arr,
                 space_object_states=spobj_smpl_states,
-                epoch=self.epoch,
+                epoch=self.param.epoch,
             )
             masks_for_spobj: list[npt.NDArray[np.bool]] = [
-                self.detection_system.get_schedule_mask_by_time_range(time_range)
-                for time_range in time_ranges
+                self.param.get_schedule_mask_by_time_range(time_range) for time_range in time_ranges
             ]
 
             # TODO: improvements needed; this is only works for StxSrx case, where calculate_observation gives out 1 element list
@@ -99,10 +130,10 @@ class Simulation(t.Generic[Dsys]):
                 obs
                 # TODO: remove enumerate; it was used as tmp replacement for `for mask in masks_for_spobj`
                 for time_range_idx, time_range in enumerate(time_ranges)
-                for obs in self.detection_system.calculate_observation(
+                for obs in self.param.calculate_observation(
                     space_object=spobj,
                     space_object_states_interpolator=spobj_states_interp,
-                    epoch=self.epoch,
+                    epoch=self.param.epoch,
                     schedule_mask=masks_for_spobj[time_range_idx],
                     time_range=time_range,
                 )

@@ -6,7 +6,7 @@ NOTE: WIP; this is currently a testing ground for refactored code
 TODO: complete it and clean up
 """
 
-import pickle, time, typing as t
+import pickle, time, typing as t, argparse
 from datetime import datetime, timezone
 from pathlib import Path
 import numpy as np
@@ -18,7 +18,10 @@ import pyvista as pv
 from pyvista import examples
 import sorts
 from sorts import _v2 as sortsV2
-import argparse
+
+# TODO: switch to normal named imports; these are tmp alias until `_v2` becomes the default namespace
+Simulation = sortsV2.simulation.Simulation
+SimulationParam = sortsV2.simulation.SimulationParam
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -90,28 +93,33 @@ space_objects_slice = slice(0, 100)  # take only 100 items
 space_objects = space_objects[space_objects_slice]
 print(f"clamped population size: {len(space_objects)}")
 
-sim = sortsV2.simulation.Simulation(
-    epoch=epoch,
-    start_time=start_time,
-    end_time=end_time,
-    detection_system=sortsV2.detection_systems.StxMrxRadarSystem(
-        {
-            "tx_station": eiscat3d.tx[0],
-            "tx_schedule": tx_schedule,
-            "rx_stations": [eiscat3d.rx[0]],
-            "rx_schedules": [rx_schedule],
-            "exp_num_map": exp_num_map,
-        }
-    ),
-    space_objects=space_objects,
-    space_objects_dt_sampler_s=lambda orbit, start_time, end_time: sorts.equidistant_sampling(
-        orbit=orbit,
-        start_t=(start_time - epoch).total_seconds(),
-        end_t=(end_time - epoch).total_seconds(),
-        max_dpos=1e3,
-    ),
-    # space_objects_dt_interpolator_s=sorts.interpolation.Legendre8,
-    space_objects_dt_interpolator_s=sorts.interpolation.Linear,
+detection_system = sortsV2.detection_systems.StxMrxRadarSystem(
+    {
+        "tx_station": eiscat3d.tx[0],
+        "tx_schedule": tx_schedule,
+        "rx_stations": [eiscat3d.rx[0]],
+        "rx_schedules": [rx_schedule],
+        "exp_num_map": exp_num_map,
+    }
+)
+sim = Simulation(
+    SimulationParam(
+        epoch=epoch,
+        start_time=start_time,
+        end_time=end_time,
+        space_objects=space_objects,
+        space_objects_dt_sampler_s=lambda orbit, start_time, end_time: sorts.equidistant_sampling(
+            orbit=orbit,
+            start_t=(start_time - epoch).total_seconds(),
+            end_t=(end_time - epoch).total_seconds(),
+            max_dpos=1e3,
+        ),
+        # space_objects_dt_interpolator_s=sorts.interpolation.Legendre8,
+        space_objects_dt_interpolator_s=sorts.interpolation.Linear,
+        find_passes_time_ranges=detection_system.find_passes_time_ranges,
+        get_schedule_mask_by_time_range=detection_system.get_schedule_mask_by_time_range,
+        calculate_observation=detection_system.calculate_observation,
+    )
 )
 
 if Path(pickle_fpath).is_file():
@@ -150,17 +158,15 @@ print(f"space object with observations: {nonempty_obss_idx_ls}")
 target_spobj_idx = nonempty_obss_idx_ls[0]
 
 obs = obss[target_spobj_idx][0]
-rx_sch_pass_mask = sim.detection_system.param.rx_schedules[0].create_mask_by_time_range(
-    obs.time_range
-)
-rx_sch_pass = sim.detection_system.param.rx_schedules[0].filter_by_mask(rx_sch_pass_mask)
+rx_sch_pass_mask = detection_system.param.rx_schedules[0].create_mask_by_time_range(obs.time_range)
+rx_sch_pass = detection_system.param.rx_schedules[0].filter_by_mask(rx_sch_pass_mask)
 
 spobjs_states_interp = spobjs_states_interps[target_spobj_idx]
 
 fig, axs = plt.subplots(2, 2)
 
 sch_dt_s_arr = (
-    sim.detection_system.param.rx_schedules[0].stt_tstmp_us - np.datetime64(sim.epoch)
+    detection_system.param.rx_schedules[0].stt_tstmp_us - np.datetime64(sim.param.epoch)
 ).astype("timedelta64[us]").astype(np.float64) / 1e6
 sch_dt_s_arr_pass = sch_dt_s_arr[rx_sch_pass_mask]
 
@@ -180,13 +186,13 @@ timedelta_to_datetimef = interp1d(sch_dt_s_arr_pass, datetimef, fill_value="extr
 axs[0, 0].secondary_xaxis("top", functions=(datetimef_to_timedelta, timedelta_to_datetimef))
 
 axs[0, 1].plot(
-    sim.detection_system.param.rx_schedules[0].stt_tstmp_us,
-    sim.detection_system.param.rx_schedules[0].pointing_az,
+    detection_system.param.rx_schedules[0].stt_tstmp_us,
+    detection_system.param.rx_schedules[0].pointing_az,
     "r",
 )
 axs[0, 1].plot(
-    sim.detection_system.param.rx_schedules[0].stt_tstmp_us,
-    sim.detection_system.param.rx_schedules[0].pointing_el,
+    detection_system.param.rx_schedules[0].stt_tstmp_us,
+    detection_system.param.rx_schedules[0].pointing_el,
     "g",
 )
 

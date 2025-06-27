@@ -1,1 +1,1 @@
-from .simulation import Simulation, SimulationResult, SpaceObjectsDtSamplerS
+from .simulation import Simulation, SimulationParam, SimulationResult, SpaceObjectsDtSamplerS
