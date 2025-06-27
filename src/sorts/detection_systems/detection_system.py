@@ -31,4 +31,5 @@ class DetectionSystemProtocol(t.Protocol):
         space_object_states_interpolator: Interpolator,
         epoch: datetime,
         schedule_mask: npt.NDArray[np.bool] | None,
+        time_range: tuple[Datetime64_us, Datetime64_us],
     ) -> list[Observation]: ...

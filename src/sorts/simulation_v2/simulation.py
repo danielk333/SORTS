@@ -67,7 +67,6 @@ class Simulation(t.Generic[Dsys]):
         return spobjs_smpl_dt_s_arr, spobjs_smpl_states
 
     def calculate_observations(self):
-        masks: list[list[npt.NDArray[np.bool]]] = []
         obss: list[list[detection_systems.Observation]] = []
 
         spobjs_smpl_dt_s_arr, spobjs_smpl_states = self.propagate_and_sample_space_objects_states()
@@ -95,21 +94,23 @@ class Simulation(t.Generic[Dsys]):
             ]
 
             # TODO: improvements needed; this is only works for StxSrx case, where calculate_observation gives out 1 element list
+            # TODO: use for-loop + mutation instead of nested for-comprehension for better readability
             obs_for_spobj: list[detection_systems.Observation] = [
                 obs
-                for mask in masks_for_spobj
+                # TODO: remove enumerate; it was used as tmp replacement for `for mask in masks_for_spobj`
+                for time_range_idx, time_range in enumerate(time_ranges)
                 for obs in self.detection_system.calculate_observation(
                     space_object=spobj,
                     space_object_states_interpolator=spobj_states_interp,
                     epoch=self.epoch,
-                    schedule_mask=mask,
+                    schedule_mask=masks_for_spobj[time_range_idx],
+                    time_range=time_range,
                 )
             ]
 
-            masks.append(masks_for_spobj)
             obss.append(obs_for_spobj)
 
-        return obss, masks  # TODO: returning `masks` is just a quick tmp workaround
+        return obss
 
     # NOTE: kept for ref until the class is stablized
     # def run(self) -> dict[RadarStationCompositeKey, dict]: ...

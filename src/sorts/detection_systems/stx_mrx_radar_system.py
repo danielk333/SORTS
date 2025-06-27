@@ -72,16 +72,21 @@ class StxMrxRadarSystem(DetectionSystemProtocol):
         mask = schedule.get_schedule_mask_by_time_range(self.param.tx_schedule, time_range)
         return mask
 
+    # TODO: rename to `calculate_observation_per_station_pass`?
+    # TODO: there is a note about assuming the tx and rx time difference is negligible.
+    #   tx-rx time difference is used to calc range so this cannot be true.
+    #   likely it is a related assumption regarding similar terms (e.g. in schedule), and should be cleaned up.
+    # TODO: we need mask per (tx, rx) schedule?
     def calculate_observation_per_rx_station(
         self,
         rx_station_index: int,
         space_object: sorts.SpaceObject,
         space_object_states_interpolator: Interpolator,
         epoch: datetime,
+        # TODO: remove, and calc the mask using `start_time`, `end_time` ?
         schedule_mask: npt.NDArray[np.bool] | None,
-    ):
-        """NOTE: We assume the tx and rx time difference is negligible"""
-
+        time_range: tuple[Datetime64_us, Datetime64_us],
+    ) -> Observation:
         tx_station = self.param.tx_station
         tx_schedule = self.param.tx_schedule
         rx_station = self.param.rx_stations[rx_station_index]
@@ -112,8 +117,6 @@ class StxMrxRadarSystem(DetectionSystemProtocol):
         range_rx_m: npt.NDArray[Float64_as_m] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
 
         snr = np.empty((obs_size,), dtype=np.float64)
-        # rcs = np.empty((obs_size,), dtype=np.float64) # TODO: chk if needed
-
         powers = np.empty((obs_size,), dtype=np.float64)
 
         # pulse_lengths = np.array(
@@ -169,6 +172,7 @@ class StxMrxRadarSystem(DetectionSystemProtocol):
         # TODO: add `blind_ranges:` support
 
         obs = Observation(
+            time_range=time_range,
             snr=snr,
             range=range_tx_m + range_rx_m,
             range_rx=range_rx_m,
@@ -185,6 +189,7 @@ class StxMrxRadarSystem(DetectionSystemProtocol):
         space_object_states_interpolator: Interpolator,
         epoch: datetime,
         schedule_mask: npt.NDArray[np.bool] | None,
+        time_range: tuple[Datetime64_us, Datetime64_us],
     ):
         obss = [
             self.calculate_observation_per_rx_station(
@@ -193,6 +198,7 @@ class StxMrxRadarSystem(DetectionSystemProtocol):
                 space_object_states_interpolator=space_object_states_interpolator,
                 epoch=epoch,
                 schedule_mask=schedule_mask,
+                time_range=time_range,
             )
             for idx in range(len(self.param.rx_stations))
         ]

@@ -93,10 +93,15 @@ sim = sortsV2.Simulation(
 )
 
 # sim.run()
-obss, masks = sim.calculate_observations()
-# target_pass_obj = pass_arr[0][0]
+obss = sim.calculate_observations()
+
 obs = obss[0][0]
-sch_dt_s_arr_pass_mask = masks[0][0]
+rx_sch_pass_mask = sortsV2.schedule.get_schedule_mask_by_time_range(
+    sim.detection_system.param.rx_schedules[0], obs.time_range
+)
+rx_sch_pass = sortsV2.schedule.filter_schedule_by_mask(
+    sim.detection_system.param.rx_schedules[0], rx_sch_pass_mask
+)
 
 
 ##
@@ -107,18 +112,15 @@ fig, axs = plt.subplots(2, 2)
 sch_dt_s_arr = (
     sim.detection_system.param.rx_schedules[0].stt_tstmp_us - np.datetime64(sim.epoch)
 ).astype("timedelta64[us]").astype(np.float64) / 1e6
-sch_dt_s_arr_pass = sch_dt_s_arr[sch_dt_s_arr_pass_mask]
 
 axs[0, 0].plot(
-    sim.detection_system.param.rx_schedules[0].stt_tstmp_us[sch_dt_s_arr_pass_mask],
+    rx_sch_pass.stt_tstmp_us,
     np.log10(np.clip(obs.snr, a_min=1, a_max=None)) * 10,
     "r",
 )
 
 # interpolation functions for secondary x-axis
-datetimef = mdates.date2num(
-    sim.detection_system.param.rx_schedules[0].stt_tstmp_us[sch_dt_s_arr_pass_mask]
-)
+datetimef = mdates.date2num(rx_sch_pass.stt_tstmp_us)
 # NOTE: `fill_value="extrapolate"` triggers error but is actually okay
 datetimef_to_timedelta = interp1d(datetimef, sch_dt_s_arr_pass, fill_value="extrapolate")  # type: ignore
 timedelta_to_datetimef = interp1d(sch_dt_s_arr_pass, datetimef, fill_value="extrapolate")  # type: ignore

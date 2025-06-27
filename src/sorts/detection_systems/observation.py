@@ -1,13 +1,15 @@
 from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
-from sorts.types import Float64_as_deg, NDArray_3d
+from sorts.types import Float64_as_deg, NDArray_3d, Datetime64_us
 
 
 # TODO: re-eval what fields are needed
 @dataclass
 class Observation:
-    # TODO: time, maybe both absolute and relative?
+    time_range: tuple[Datetime64_us, Datetime64_us]
+    """The start time and end time of the observation, inclusive on both ends"""
+
     # TODO: exp_num/ExperimentDetails
 
     snr: npt.NDArray[np.float64]
@@ -27,6 +29,6 @@ class Observation:
     """2-way range rate"""
 
     tx_k: NDArray_3d[Float64_as_deg]
-    """pointing vector in ENU in deg, from tx station to the space object"""
+    """Pointing vector in ENU in deg, from tx station to the space object"""
     rx_k: NDArray_3d[Float64_as_deg]
-    """pointing vector in ENU in deg, from rx station to the space object"""
+    """Pointing vector in ENU in deg, from rx station to the space object"""

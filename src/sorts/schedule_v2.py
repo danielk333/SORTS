@@ -15,10 +15,7 @@ class Schedule:
     """
 
     # TODO: if `end_tstmp_ms` is not needed, this can be renamed to just `tstmp_ms`?
-    stt_tstmp_us: npt.NDArray[np.datetime64]
-
-    # TODO: seems useful to add end_tstmp_ms ?
-    # end_tstmp_ms: npt.NDArray[np.datetime64]
+    stt_tstmp_us: npt.NDArray[Datetime64_us]
 
     # TODO: re-eval the size of `exp_num`
     exp_num: npt.NDArray[np.int64]
@@ -57,6 +54,11 @@ def filter_schedule_by_mask(schedule: Schedule, mask: npt.NDArray[np.bool]):
 def get_schedule_mask_by_time_range(
     schedule: Schedule, time_range: tuple[Datetime64_us, Datetime64_us]
 ):
+    """
+    Return a mask that filters out schedule entries that are not inside `time_range`.
+    (start time and end time inclusive)
+    """
+
     start_time, end_time = time_range
 
     sch_dt_s_arr_pass_mask: npt.NDArray[np.bool] = np.logical_and(
