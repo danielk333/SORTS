@@ -5,7 +5,7 @@ import numpy as np
 import numpy.typing as npt
 import pyorb
 import sorts
-from sorts import detection_config as detection_config_
+from sorts import detection_systems
 from sorts.interpolation import Interpolator
 from sorts.types import Float64_as_sec, EcefStates
 
@@ -18,18 +18,18 @@ class SpaceObjectsDtSamplerS(t.Protocol):
     ) -> npt.NDArray[np.float64]: ...
 
 
-Dcfg = t.TypeVar("Dcfg", bound=detection_config_.DetectionConfigProtocol)
+Dsys = t.TypeVar("Dsys", bound=detection_systems.DetectionSystemProtocol)
 
 
 # TODO: split into 'SimulationConfig' and 'Simulation'?
 #   - `Simulation` is evolving into more than just a pure data class
 #   - we can move the pure data part into `SimulationConfig` and retain the top level api as `Simulation`
 @dataclass(kw_only=True)
-class Simulation(t.Generic[Dcfg]):
+class Simulation(t.Generic[Dsys]):
     epoch: datetime
     start_time: datetime
     end_time: datetime
-    detection_config: Dcfg  # NOTE: generics is needed to retain the original type
+    detection_system: Dsys  # NOTE: generics is needed to retain the original type
     space_objects: list[sorts.SpaceObject]
 
     # TODO: support different sampler for different obj?
@@ -68,7 +68,7 @@ class Simulation(t.Generic[Dcfg]):
 
     def calculate_observations(self):
         masks: list[list[npt.NDArray[np.bool]]] = []
-        obss: list[list[detection_config_.Observation]] = []
+        obss: list[list[detection_systems.Observation]] = []
 
         spobjs_smpl_dt_s_arr, spobjs_smpl_states = self.propagate_and_sample_space_objects_states()
         spobjs_states_interps = [
@@ -84,24 +84,26 @@ class Simulation(t.Generic[Dcfg]):
         for spobj, spobj_smpl_dt_s_arr, spobj_smpl_states, spobj_states_interp in zip(
             self.space_objects, spobjs_smpl_dt_s_arr, spobjs_smpl_states, spobjs_states_interps
         ):
-            time_ranges = self.detection_config.find_passes_time_ranges(
+            time_ranges = self.detection_system.find_passes_time_ranges(
                 dt_s_arr=spobj_smpl_dt_s_arr,
                 space_object_states=spobj_smpl_states,
                 epoch=self.epoch,
             )
             masks_for_spobj: list[npt.NDArray[np.bool]] = [
-                self.detection_config.get_schedule_mask_by_time_range(time_range)
+                self.detection_system.get_schedule_mask_by_time_range(time_range)
                 for time_range in time_ranges
             ]
 
-            obs_for_spobj: list[detection_config_.Observation] = [
-                self.detection_config.calculate_observation(
+            # TODO: improvements needed; this is only works for StxSrx case, where calculate_observation gives out 1 element list
+            obs_for_spobj: list[detection_systems.Observation] = [
+                obs
+                for mask in masks_for_spobj
+                for obs in self.detection_system.calculate_observation(
                     space_object=spobj,
                     space_object_states_interpolator=spobj_states_interp,
                     epoch=self.epoch,
                     schedule_mask=mask,
                 )
-                for mask in masks_for_spobj
             ]
 
             masks.append(masks_for_spobj)

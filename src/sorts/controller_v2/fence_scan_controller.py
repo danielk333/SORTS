@@ -89,9 +89,6 @@ class FenceScanController(ControllerProtocol):
             exp_num=np.full(schedule_size, self.exp_num, dtype=np.int64),
             pointing_az=tx_pointing[0],
             pointing_el=tx_pointing[1],
-            coh_int_bandwidth=np.full(schedule_size, 1.0, dtype=np.float64),
-            ipp=np.full(schedule_size, 1.0, dtype=np.float64),
-            pulse_length=np.full(schedule_size, 1.0, dtype=np.float64),
         )
 
         rx_schedule = Schedule(
@@ -99,9 +96,6 @@ class FenceScanController(ControllerProtocol):
             exp_num=np.full(schedule_size, self.exp_num, dtype=np.int64),
             pointing_az=rx_pointing[0],
             pointing_el=rx_pointing[1],
-            coh_int_bandwidth=np.full(schedule_size, 1.0, dtype=np.float64),
-            ipp=np.full(schedule_size, 1.0, dtype=np.float64),
-            pulse_length=np.full(schedule_size, 1.0, dtype=np.float64),
         )
 
         return (tx_schedule, rx_schedule)
