@@ -18,9 +18,6 @@ class SpaceObjectsDtSamplerS(t.Protocol):
     ) -> npt.NDArray[np.float64]: ...
 
 
-Dsys = t.TypeVar("Dsys", bound=detection_systems.DetectionSystemProtocol)
-
-
 class FindPassesTimeRangesCallable(t.Protocol):
     def __call__(
         self,

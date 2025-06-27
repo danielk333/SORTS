@@ -12,7 +12,6 @@ from sorts import schedule_v2 as schedule
 from sorts import scheduler_v2 as scheduler
 from sorts.detection_systems.observation import Observation
 from sorts.detection_systems.experiment_detail import ExperimentDetail
-from sorts.detection_systems.detection_system import DetectionSystemProtocol
 
 
 class StxMrxRadarSystemParamDict(t.TypedDict):
@@ -38,7 +37,7 @@ class StxMrxRadarSystemParam:
         return StxMrxRadarSystemParam(**d)
 
 
-class StxMrxRadarSystem(DetectionSystemProtocol):
+class StxMrxRadarSystem:
     @t.overload
     def __init__(self, param: StxMrxRadarSystemParam): ...
 
