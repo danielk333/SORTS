@@ -17,11 +17,10 @@ from sorts.simulation_v2.helpers import find_simultaneous_passes_time_ranges
 logger = logging.getLogger(__name__)
 
 
-# TODO: rename to `XxxCallable`
-class SpaceObjectsDtSamplerS(t.Protocol):
+class SpaceObjectDtSampler(t.Protocol):
     def __call__(
         self, orbit: pyorb.Orbit, start_time: datetime, end_time: datetime
-    ) -> npt.NDArray[np.float64]: ...
+    ) -> npt.NDArray[Float64_as_sec]: ...
 
 
 @dataclass(kw_only=True)
@@ -41,8 +40,7 @@ class StxMrxSimulationParam:
 
     # TODO: support different sampler for different obj?
     # TODO: probably taking a function + a args/kwargs obj is more pythonic
-    space_objects_dt_sampler_s: SpaceObjectsDtSamplerS
-    """A function with signature `(start_time: Time, end_time: Time) -> npt.NDArray[np.float64]`"""
+    space_objects_dt_sampler_s: SpaceObjectDtSampler
 
     # TODO: rename to `space_objects_dt_s_interpolator`
     space_objects_dt_interpolator_s: type[Interpolator]
