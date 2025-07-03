@@ -14,7 +14,7 @@ from astropy.time import Time
 
 import sorts
 
-radar = sorts.radars.eiscat_uhf
+radar = sorts.radar.radars.eiscat_uhf
 
 
 class TestCorrelator(unittest.TestCase):

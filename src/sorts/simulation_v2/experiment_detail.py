@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ExperimentDetail:
     coh_int_bandwidth: float
     ipp: float

@@ -15,6 +15,7 @@ class Schedule:
     """
 
     # TODO: if `end_tstmp_ms` is not needed, this can be renamed to just `tstmp_ms`?
+    # TODO: `end_tstmp_ms` is v. likely not needed, rename it to just `time`? (and add docs that this is the start timestamp)
     stt_tstmp_us: npt.NDArray[Datetime64_us]
 
     # TODO: re-eval the size of `exp_num`

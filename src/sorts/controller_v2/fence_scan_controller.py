@@ -16,10 +16,11 @@ class FenceScanController(ControllerProtocol):
     NOTE: `num` refers to the number of pointings within a cycle.
 
     TODO: make it support multi-rx, by taking a list of rx station
+    TODO: should take radar/station `azimuth_deg`, `elevation_deg` limitation into account?
     """
 
-    tx_station: Station
-    rx_station: Station
+    tx_station: Station  # TODO: not used; remove?
+    rx_station: Station  # TODO: not used; remove?
 
     azimuth_deg: float
     min_elevation_deg: float
