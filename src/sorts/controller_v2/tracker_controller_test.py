@@ -58,7 +58,7 @@ def tracker_controller_smoke_test():
         # elevation_range=None,
     )
 
-    result = controller.generate(start_time, end_time)
+    result = controller.generate()
 
     # for k in result:
     #     assert isinstance(result[k], Schedule)

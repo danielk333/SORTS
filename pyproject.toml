@@ -41,6 +41,13 @@ dependencies = [
 
 [project.optional-dependencies]
 spacetrack = ["spacetrack>=1.0.1"]
+plot = [
+    "anywidget>=0.9.18",
+    "jupyterlab>=4.4.4",
+    "panel>=1.7.2",
+    "plotly[express]>=6.2.0",
+    "pyvista>=0.45.2",
+]
 
 [dependency-groups]
 dev = [
@@ -63,10 +70,9 @@ dev = [
     "patchelf>=0.14",
     "sphinx_panels>=0.6.0",
     "hawkmoth>=0.16.0",
+    "watchfiles>=1.1.0",
     "sorts",
 ]
-
-vtk = ["pyvista>=0.45.2"]
 
 [tool.setuptools.package-data]
 sorts = ["py.typed"]

@@ -1,6 +1,5 @@
 import logging, typing as t
 from dataclasses import dataclass
-from datetime import datetime
 import numpy as np
 import numpy.typing as npt
 from astropy.time import Time
@@ -14,6 +13,11 @@ from sorts.controller_v2 import pointing_patterns
 from sorts.simulation_v2.experiment_detail import ExperimentDetail
 
 logger = logging.getLogger(__name__)
+
+
+class TrackerControllerOutput(t.NamedTuple):
+    tx_schedule: Schedule
+    rx_schedules: t.Sequence[Schedule]
 
 
 # TODO: add a version of `TrackerController`
@@ -46,11 +50,10 @@ class TrackerController:
     # min_elevation: Float_as_deg = 0.0
     # max_elevation: Float_as_deg = 90.0
 
-    def generate(
-        self,
-        start_time: Time,
-        end_time: Time,
-    ) -> tuple[Schedule, t.Sequence[Schedule]]:
+    def __post_init__(self):
+        self._cache: TrackerControllerOutput | None = None
+
+    def generate_forced(self) -> TrackerControllerOutput:
         # start_time_np = t.cast(np.datetime64, start_time.to_value("datetime64"))
         # end_time_np = t.cast(np.datetime64, end_time.to_value("datetime64"))
         # start_time_np = t.cast(np.datetime64, start_time.to_value("datetime64")).astype(
@@ -90,7 +93,32 @@ class TrackerController:
             for rx_pointings in rxs_pointings
         ]
 
-        return tx_sch, rx_schs
+        return TrackerControllerOutput(tx_sch, rx_schs)
+
+    def generate(self, use_cache=True) -> TrackerControllerOutput:
+        if use_cache and self._cache is not None:
+            return self._cache
+        else:
+            return self.generate_forced()
+
+    def plot(self):
+        import plotly.express as px
+        import plotly.graph_objects as go
+
+        r = self.generate()
+
+        fig = go.Figure(
+            data=[
+                go.Table(
+                    header=dict(values=["A Scores", "B Scores"]),
+                    # cells=dict(values=[[100, 90, 80, 90], [95, 85, 75, 95]]))
+                    cells=dict(values=[r.tx_schedule.stt_tstmp_us, [95, 85, 75, 95]]),
+                )
+            ]
+        )
+
+        return fig
+        # fig.show()
 
 
 def point_ecef(station: Station, point: EcefCoordinates) -> EnuCoordinates:
