@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from datetime import datetime
 import numpy as np
 from sorts.radar.tx_rx import Station
-from sorts.scheduler_v2 import Schedule
+from sorts.schedule_v2 import Schedule
 from sorts.controller_v2.controller_protocol import ControllerProtocol
 from sorts.controller_v2 import pointing_patterns
 

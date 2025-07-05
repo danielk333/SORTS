@@ -1,8 +1,6 @@
 import logging, typing as t
 from datetime import datetime
 
-# from sorts.scheduler_v2 import Schedule
-
 logger = logging.getLogger(__name__)
 
 

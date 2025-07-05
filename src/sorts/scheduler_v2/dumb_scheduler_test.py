@@ -1,7 +1,7 @@
 from datetime import datetime
-from .. import scheduler_v2 as schr
-from .dumb_scheduler import DumbScheduler
-from ..controller_v2 import RandomUniformScansController
+from sorts.schedule_v2 import Schedule
+from sorts.scheduler_v2.dumb_scheduler import DumbScheduler
+from sorts.controller_v2 import RandomUniformScansController
 
 
 def setup_function():
@@ -22,5 +22,5 @@ def test_DumpScheduler():
         )
     ).generate_schedule(stt_tstmp, end_tstmp)
 
-    assert isinstance(result, schr.Schedule)
+    assert isinstance(result, Schedule)
     return

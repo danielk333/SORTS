@@ -1,6 +1,6 @@
 from datetime import datetime, timezone, timedelta
-from .. import scheduler_v2 as schr
-from .random_uniform_scans_controller import RandomUniformScansController
+from sorts.schedule_v2 import Schedule
+from sorts.controller_v2.random_uniform_scans_controller import RandomUniformScansController
 
 
 def setup_function():
@@ -19,6 +19,6 @@ def random_uniform_scans_controller_smoke_test():
     result = controller.generate(stt_tstmp, end_tstmp)
 
     for k in result:
-        assert isinstance(result[k], schr.Schedule)
+        assert isinstance(result[k], Schedule)
 
     return

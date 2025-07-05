@@ -7,7 +7,7 @@ from sorts.radar.tx_rx import Station
 from sorts.frames import ecef_to_enu
 from sorts.types import EcefStates, Float_as_deg, Datetime64_us, EcefCoordinates, EnuCoordinates
 from sorts.radar.tx_rx import Station
-from sorts.scheduler_v2 import Schedule
+from sorts.schedule_v2 import Schedule
 from sorts.controller_v2.controller_protocol import ControllerProtocol
 from sorts.controller_v2 import pointing_patterns
 from sorts.simulation_v2.experiment_detail import ExperimentDetail
