@@ -42,6 +42,7 @@ exp_detail = sortsV2.simulation.ExperimentDetail(
     bandwidth=52.08333333333333,
     duty_cycle=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
     noise_temp=150.0,
+    slice_duration=np.timedelta64(10_000, "us"),  # 10ms
 )
 exp_num_map: dict[int, sortsV2.simulation.ExperimentDetail] = {0: exp_detail}
 
