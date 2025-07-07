@@ -3,7 +3,8 @@ import logging, typing as t
 from dataclasses import dataclass, fields
 import numpy as np
 import numpy.typing as npt
-from sorts.types import Datetime64_us
+import pandas as pd
+from sorts.types import Datetime64_us, Float64_as_deg
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +12,9 @@ logger = logging.getLogger(__name__)
 @dataclass(kw_only=True)
 class Schedule:
     """
-    a dataclass that holds fields of ndarrays which forms a schedule
+    A collection of "control slices" (or "slices" in short).
+
+    They are stored as columns of fields, each of which is a `ndarray`
     """
 
     # TODO: if `end_tstmp_ms` is not needed, this can be renamed to just `tstmp_ms`?
@@ -21,8 +24,29 @@ class Schedule:
     # TODO: re-eval the size of `exp_num`
     exp_num: npt.NDArray[np.int64]
 
-    pointing_az: npt.NDArray[np.float64]
-    pointing_el: npt.NDArray[np.float64]
+    pointing_az: npt.NDArray[Float64_as_deg]
+    pointing_el: npt.NDArray[Float64_as_deg]
+
+    @classmethod
+    def empty(cls) -> Schedule:
+        """A convenience method for generating an empty schedule"""
+
+        sch = Schedule(
+            stt_tstmp_us=np.empty(0, "datetime64[us]"),
+            exp_num=np.empty(0, np.int64),
+            pointing_az=np.empty(0, Float64_as_deg),
+            pointing_el=np.empty(0, Float64_as_deg),
+        )
+
+        return sch
+
+    @classmethod
+    def from_dataframe(cls, df: pd.DataFrame) -> Schedule:
+        df = df.reset_index()  # put df index back into a df column
+        df_as_dict = {str(name): series.to_numpy() for name, series in df.items()}
+        sch = Schedule(**df_as_dict)
+
+        return sch
 
     def __post_init__(self):
         f_0, *f_rests = fields(self)  # Field objects
@@ -37,6 +61,12 @@ class Schedule:
                     + f"but shape of {f_rests[idx].name} is {fv_rests[idx].shape}, "
                     f"while shape of {f_0.name} is {fv_0.shape} "
                 )
+
+    def as_dataframe(self) -> pd.DataFrame:
+        df = pd.DataFrame({f.name: getattr(self, f.name) for f in fields(Schedule)})
+        df = df.set_index("stt_tstmp_us")
+
+        return df
 
     def create_mask_by_time_range(self, time_range: tuple[Datetime64_us, Datetime64_us]):
         """

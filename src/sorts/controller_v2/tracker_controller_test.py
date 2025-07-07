@@ -6,7 +6,6 @@ from sorts.space_object import SpaceObject
 from sorts.radar.radars import get_radar
 from sorts.types import Datetime64_us, Timedelta64_us, Float64_as_sec
 from sorts.controller_v2.tracker_controller import TrackerController
-from sorts.controller_v2.tracker_controller import TrackerController
 
 
 def setup_function():

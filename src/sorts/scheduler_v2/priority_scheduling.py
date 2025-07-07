@@ -1,0 +1,75 @@
+import logging, typing as t
+import numpy as np
+import pandas as pd
+from sorts.schedule_v2 import Schedule
+from sorts.simulation_v2 import ExperimentDetail
+
+logger = logging.getLogger(__name__)
+
+
+# TODO: should we use a db like sqlite to enable larger than memory processing?
+# TODO: add schedule validation?
+# TODO: return the rows/index of dropped slice?
+# TODO: put `exp_detail_map` inside schedule? (`as_dataframe` will be lossy and `from_dataframe` will need more args)
+def priority_scheduling(schs: t.Sequence[Schedule], exp_detail_map: dict[int, ExperimentDetail]):
+    """
+    Merge a sequence of schedules for a single station into one,
+    schedule with lower index in the sequence is given priority over those with higher index.
+
+    Note: It is assumed (and not checked) that each of the schedule itself does not contain overlapping entries.
+    """
+
+    # The logic of this function:
+    # 1. prepare an empty df as the merge result
+    # 2. for each of the schema passed in
+    #   2.1. merge it into the merge result df
+    #   2.2. fill in the missing `cn_allowed_start_time`, `cn_allowed_end_time` for new rows
+    #   2.3. filter out new rows that conflict with `cn_allowed_start_time`, `cn_allowed_end_time`
+    #   2.3. update `cn_allowed_start_time`, `cn_allowed_end_time`
+
+    # define some df column names
+    cn_end_time = "end_time"
+    cn_allowed_start_time = "allowed_start_time"
+    cn_allowed_end_time = "allowed_end_time"
+
+    # init an empty df for a schedule and add some columns, will be used store merged schedule
+    merged_sch_df = Schedule.empty().as_dataframe()
+    merged_sch_df[cn_end_time] = np.empty(0, "datetime64[us]")
+    merged_sch_df[cn_allowed_start_time] = np.empty(0, "datetime64[us]")
+    merged_sch_df[cn_allowed_end_time] = np.empty(0, "datetime64[us]")
+    for sch in schs:
+        sch_df = sch.as_dataframe()
+
+        # add "end_time" column
+        sch_df[cn_end_time] = sch_df.index + np.array(
+            [exp_detail_map[n].slice_duration for n in sch.exp_num]
+        )
+
+        # merge and then sort the df
+        # we use a "stable" sorting algo to retains relative order,
+        # so the df will be in order of start_time, then priority after sorting
+        merged_sch_df = pd.concat([merged_sch_df, sch_df])
+        merged_sch_df = merged_sch_df.sort_index(kind="stable")
+
+        is_new_rows = merged_sch_df[cn_allowed_start_time].isna()
+
+        # populate `cn_allowed_start_time`, `cn_allowed_end_time` columns
+        # (rows from `sch_df` has null values in them after the merge).
+        # `.isna().all()` check is needed because `.ffill()` will throw exception when all the values are NaT (not a time)
+        if not merged_sch_df[cn_allowed_start_time].isna().all():
+            merged_sch_df[cn_allowed_start_time] = merged_sch_df[cn_allowed_start_time].ffill()
+        if not merged_sch_df[cn_allowed_end_time].isna().all():
+            merged_sch_df[cn_allowed_end_time] = merged_sch_df[cn_allowed_end_time].ffill()
+
+        # remove rows (control slices) that have time clash
+        is_overlaped_mask = (is_new_rows) & (
+            (merged_sch_df.index.to_series() <= merged_sch_df[cn_allowed_end_time])
+            | (merged_sch_df[cn_end_time] <= merged_sch_df[cn_allowed_end_time])
+        )
+        merged_sch_df = merged_sch_df[~is_overlaped_mask]
+
+        # update `cn_allowed_start_time`, `cn_allowed_end_time` columns
+        merged_sch_df[cn_allowed_start_time] = merged_sch_df[cn_end_time].shift(1).bfill()
+        merged_sch_df[cn_allowed_end_time] = merged_sch_df.index.to_series().shift(-1).ffill()
+
+    return merged_sch_df
