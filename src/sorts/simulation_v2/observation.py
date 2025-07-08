@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
-from sorts.types import Float64_as_deg, NDArray_3d1, Datetime64_us
+from sorts.types import Float64_as_deg, NDArray_3x1, Datetime64_us
 
 
 # TODO: re-eval what fields are needed
@@ -29,9 +29,9 @@ class Observation:
     """2-way range rate"""
 
     # TODO: ENU should be a cartesian coordinate, sth seems wrong
-    tx_k: NDArray_3d1[Float64_as_deg]
+    tx_k: NDArray_3x1[Float64_as_deg]
     """Pointing vector in ENU in deg, from tx station to the space object"""
 
     # TODO: ENU should be a cartesian coordinate, sth seems wrong
-    rx_k: NDArray_3d1[Float64_as_deg]
+    rx_k: NDArray_3x1[Float64_as_deg]
     """Pointing vector in ENU in deg, from rx station to the space object"""
