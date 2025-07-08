@@ -69,6 +69,7 @@ def priority_scheduling_smoke_test():
 
     exp_detail_map = {
         0: ExperimentDetail(
+            id=0,
             coh_int_bandwidth=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
             ipp=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
             pulse_length=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
@@ -80,6 +81,7 @@ def priority_scheduling_smoke_test():
             slice_duration=np.timedelta64(10_000, "us"),  # 10ms
         ),
         1: ExperimentDetail(
+            id=1,
             coh_int_bandwidth=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
             ipp=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
             pulse_length=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?

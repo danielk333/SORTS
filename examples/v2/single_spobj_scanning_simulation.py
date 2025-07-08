@@ -35,6 +35,7 @@ end_time = t.cast(
 eiscat3d = sorts.get_radar("eiscat3d", "stage1-array")
 
 exp_detail = sortsV2.simulation.ExperimentDetail(
+    id=0,
     coh_int_bandwidth=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
     ipp=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
     pulse_length=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?

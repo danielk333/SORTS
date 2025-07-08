@@ -5,6 +5,8 @@ from sorts.types import Timedelta64_us
 # TODO: rename to sth like `ControlSliceDetail`?
 @dataclass(kw_only=True)
 class ExperimentDetail:
+    id: int
+
     coh_int_bandwidth: float
     ipp: float
     pulse_length: float
