@@ -49,9 +49,9 @@ class FenceScanController(ControllerProtocol):
         )
 
         self._tx_pts_within_a_cycle = pointing_patterns.fence_pointing(
-            azimuth_deg=self.azimuth_deg,
-            min_elevation_deg=self.min_elevation_deg,
-            num=self.num,
+            azimuth=self.azimuth_deg,
+            min_elevation=self.min_elevation_deg,
+            pointings_per_cycle=self.num,
         )
 
         # TODO: this is a shortcut for tx rx very close togther

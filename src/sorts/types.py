@@ -12,19 +12,19 @@ Float_as_sec = np.float64
 "`float` as second"
 
 Float_as_deg = float
-"`float` as angle in degree"
+"`float` as angle in degrees"
 
 Float64_as_sec = np.float64
-"`numpy` `float64` as second"
+"`numpy` `float64` as seconds"
 
 Float64_as_m = np.float64
-"`numpy` `float64` as meter"
+"`numpy` `float64` as meters"
 
 Float64_as_deg = np.float64
-"`numpy` `float64` as angle in degree"
+"`numpy` `float64` as angle in degrees"
 
 Float64_as_rad = np.float64
-"`numpy` `float64` as angle in radian"
+"`numpy` `float64` as angle in radians"
 
 NDArray_3x1 = npt.NDArray
 "(3,) shaped ndarray (i.e. a single 3D vector)"
@@ -49,6 +49,9 @@ EnuCoordinate = NDArray_3x1[np.float64]
 
 EnuCoordinates = NDArray_3xN[np.float64]
 "ENU cartesian coordinates, a `(3,n)` ndarray of `float64`"
+
+AzelrCoordinates_DegM = NDArray_3xN[np.float64]
+"`(Az, El, R)` spherical coordinates in degrees and meters; a `(3,n)` ndarray of `float64`"
 
 EcefCoordinates = NDArray_3xN[np.float64]
 "ECEF cartesian coordinates, a `(3,n)` ndarray of `float64`"

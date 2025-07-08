@@ -1,22 +1,30 @@
 import logging
 import numpy as np
+from sorts.types import Float_as_deg, AzelrCoordinates_DegM
 
 logger = logging.getLogger(__name__)
 
 
 def fence_pointing(
-    azimuth_deg: float,
-    min_elevation_deg: float,
-    num: int,
-):
-    """Return an `azelr` of type `NDArray[float64]`, shape `(3, num)`"""
+    azimuth: Float_as_deg,
+    min_elevation: Float_as_deg,
+    pointings_per_cycle: int,
+) -> AzelrCoordinates_DegM:
+    """
+    Generate radar pointings that evenly sweep over a symmetrical elevation range, at the given `azimuth`
 
-    el = np.linspace(min_elevation_deg, 180.0 - min_elevation_deg, num=num, dtype=np.float64)
-    el_over_90deg_mask = el > 90.0
+    Note that the sweeping always strokes in the same direction (not back and forth).
+    """
+
+    el = np.linspace(
+        min_elevation, 180.0 - min_elevation, num=pointings_per_cycle, dtype=np.float64
+    )
+    az = np.full(pointings_per_cycle, azimuth, dtype=np.float64)
+
     # make 0 <= el < 90
+    el_over_90deg_mask = el > 90.0
     el[el_over_90deg_mask] = 180.0 - el[el_over_90deg_mask]
 
-    az = np.full(num, azimuth_deg, dtype=np.float64)
     # wrap around az for those with el > 90 deg
     az[el_over_90deg_mask] = np.mod(az[el_over_90deg_mask] + 180.0, 360.0)
 
@@ -24,11 +32,8 @@ def fence_pointing(
         [
             az,
             el,
-            np.full(num, 1.0, dtype=np.float64),
+            np.full(pointings_per_cycle, 1.0, dtype=np.float64),
         ],
     )
 
     return azelr
-
-
-__all__ = ["fence_pointing"]

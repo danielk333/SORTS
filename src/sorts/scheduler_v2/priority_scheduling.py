@@ -72,4 +72,5 @@ def priority_scheduling(schs: t.Sequence[Schedule], exp_detail_map: dict[int, Ex
         merged_sch_df[cn_allowed_start_time] = merged_sch_df[cn_end_time].shift(1).bfill()
         merged_sch_df[cn_allowed_end_time] = merged_sch_df.index.to_series().shift(-1).ffill()
 
+    # TODO: should return a `Schedule` object instead; maybe optionally returns the df for easier debugging/exploration?
     return merged_sch_df
