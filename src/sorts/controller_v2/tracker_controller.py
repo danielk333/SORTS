@@ -51,7 +51,7 @@ class TrackerController:
     # max_elevation: Float_as_deg = 90.0
 
     def __post_init__(self):
-        self._cache: TrackerControllerOutput | None = None
+        self._cached_output: TrackerControllerOutput | None = None
 
     def generate_forced(self) -> TrackerControllerOutput:
         # start_time_np = t.cast(np.datetime64, start_time.to_value("datetime64"))
@@ -96,8 +96,8 @@ class TrackerController:
         return TrackerControllerOutput(tx_sch, rx_schs)
 
     def generate(self, use_cache=True) -> TrackerControllerOutput:
-        if use_cache and self._cache is not None:
-            return self._cache
+        if use_cache and self._cached_output is not None:
+            return self._cached_output
         else:
             return self.generate_forced()
 
