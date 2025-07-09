@@ -64,7 +64,11 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule], meta: dict[int, Experime
 
         # update `cn_allowed_start_time`, `cn_allowed_end_time` columns
         merged_sch_df[cn_allowed_start_time] = merged_sch_df[cn_end_time].shift(1).bfill()
-        merged_sch_df[cn_allowed_end_time] = merged_sch_df.index.to_series().shift(-1).ffill()
+        merged_sch_df.loc[merged_sch_df.index[0], cn_allowed_start_time] = merged_sch_df.index[0]
+        merged_sch_df[cn_allowed_end_time] = merged_sch_df.index.to_series().shift(-1)
+        merged_sch_df.loc[merged_sch_df.index[-1], cn_allowed_end_time] = merged_sch_df.loc[
+            merged_sch_df.index[-1], cn_end_time
+        ]
 
     # TODO: should return a `Schedule` object instead; maybe optionally returns the df for easier debugging/exploration?
     return merged_sch_df
