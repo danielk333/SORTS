@@ -11,12 +11,12 @@ logger = logging.getLogger(__name__)
 # TODO: add schedule validation?
 # TODO: return the rows/index of dropped slice?
 # TODO: put `exp_detail_map` inside schedule? (`as_dataframe` will be lossy and `from_dataframe` will need more args)
-def priority_scheduling(schs: t.Sequence[Schedule], exp_detail_map: dict[int, ExperimentDetail]):
+def _priority_scheduling_df(
+    schs: t.Sequence[Schedule], exp_detail_map: dict[int, ExperimentDetail]
+):
     """
-    Merge a sequence of schedules for a single station into one,
-    schedule with lower index in the sequence is given priority over those with higher index.
-
-    Note: It is assumed (and not checked) that each of the schedule itself does not contain overlapping entries.
+    Same as `priority_scheduling` but returns a pandas `DataFrame`.
+    Used by `priority_scheduling` internally.
     """
 
     # The logic of this function:
@@ -74,3 +74,15 @@ def priority_scheduling(schs: t.Sequence[Schedule], exp_detail_map: dict[int, Ex
 
     # TODO: should return a `Schedule` object instead; maybe optionally returns the df for easier debugging/exploration?
     return merged_sch_df
+
+
+def priority_scheduling(schs: t.Sequence[Schedule], exp_detail_map: dict[int, ExperimentDetail]):
+    """
+    Merge a sequence of schedules for a single station into one,
+    schedule with lower index in the sequence is given priority over those with higher index.
+
+    Note: It is assumed (and not checked) that each of the schedule itself does not contain overlapping entries.
+    """
+
+    df = _priority_scheduling_df(schs, exp_detail_map)
+    return Schedule.from_dataframe(df)

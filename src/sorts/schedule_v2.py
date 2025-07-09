@@ -43,8 +43,8 @@ class Schedule:
     @classmethod
     def from_dataframe(cls, df: pd.DataFrame) -> Schedule:
         df = df.reset_index()  # put df index back into a df column
-        df_as_dict = {str(name): series.to_numpy() for name, series in df.items()}
-        sch = Schedule(**df_as_dict)
+        sch_dict = {f.name: df[f.name].to_numpy() for f in fields(Schedule)}
+        sch = Schedule(**sch_dict)
 
         return sch
 
