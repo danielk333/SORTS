@@ -92,7 +92,7 @@ class FenceScanController:
         return FenceScanControllerOutput(tx_schedule, [rx_schedule])
 
     def generate(
-        self, start_time: Time, end_time: Time, use_cache=True
+        self, start_time: Time, end_time: Time, use_cache=False
     ) -> FenceScanControllerOutput:
         if use_cache and self._cached_output is not None:
             return self._cached_output

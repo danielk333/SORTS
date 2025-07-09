@@ -96,7 +96,7 @@ class TrackerController:
 
         return TrackerControllerOutput(tx_sch, rx_schs)
 
-    def generate(self, use_cache=True) -> TrackerControllerOutput:
+    def generate(self, use_cache=False) -> TrackerControllerOutput:
         if use_cache and self._cached_output is not None:
             return self._cached_output
         else:
