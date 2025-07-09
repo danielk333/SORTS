@@ -27,12 +27,14 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule], meta: dict[int, Experime
     cn_end_time = "end_time"
     cn_allowed_start_time = "allowed_start_time"
     cn_allowed_end_time = "allowed_end_time"
+    cn_is_overlaped = "is_overlaped"
 
     # init an empty df for a schedule and add some columns, will be used store merged schedule
     merged_sch_df = Schedule.empty().as_dataframe()
     merged_sch_df[cn_end_time] = np.empty(0, "datetime64[us]")
     merged_sch_df[cn_allowed_start_time] = np.empty(0, "datetime64[us]")
     merged_sch_df[cn_allowed_end_time] = np.empty(0, "datetime64[us]")
+    merged_sch_df[cn_is_overlaped] = np.empty(0, np.bool)
     for sch in schs:
         sch_df = sch.as_dataframe()
 
@@ -56,11 +58,11 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule], meta: dict[int, Experime
             merged_sch_df[cn_allowed_end_time] = merged_sch_df[cn_allowed_end_time].ffill()
 
         # remove rows (control slices) that have time clash
-        is_overlaped_mask = (is_new_rows) & (
-            (merged_sch_df.index.to_series() <= merged_sch_df[cn_allowed_end_time])
-            | (merged_sch_df[cn_end_time] <= merged_sch_df[cn_allowed_end_time])
+        merged_sch_df[cn_is_overlaped] = (is_new_rows) & (
+            (merged_sch_df.index.to_series() <= merged_sch_df[cn_allowed_start_time])
+            | (merged_sch_df[cn_end_time] >= merged_sch_df[cn_allowed_end_time])
         )
-        merged_sch_df = merged_sch_df[~is_overlaped_mask]
+        merged_sch_df = merged_sch_df[~merged_sch_df[cn_is_overlaped]]
 
         # update `cn_allowed_start_time`, `cn_allowed_end_time` columns
         merged_sch_df[cn_allowed_start_time] = merged_sch_df[cn_end_time].shift(1).bfill()
