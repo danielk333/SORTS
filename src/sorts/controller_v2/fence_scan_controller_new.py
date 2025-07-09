@@ -5,9 +5,8 @@ from astropy.time import Time
 from sorts.radar.tx_rx import Station
 from sorts.types import Float_as_deg, AzelrCoordinates_DegM
 from sorts.utils import astropy_time_to_datetime64_us
-from sorts.schedule_v2 import Schedule
+from sorts.schedule_v2 import Schedule, ExperimentDetail
 from sorts.controller_v2 import pointing_patterns
-from sorts.simulation_v2 import ExperimentDetail
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +72,7 @@ class FenceScanController:
         )[:schedule_size]
 
         tx_schedule = Schedule(
+            meta={self.exp_datail.id: self.exp_datail},
             stt_tstmp_us=start_time_arr,
             exp_num=np.full(schedule_size, self.exp_datail.id, dtype=np.int64),
             pointing_az=tx_pointing[0],
@@ -80,6 +80,7 @@ class FenceScanController:
         )
 
         rx_schedule = Schedule(
+            meta={self.exp_datail.id: self.exp_datail},
             stt_tstmp_us=start_time_arr,
             exp_num=np.full(schedule_size, self.exp_datail.id, dtype=np.int64),
             pointing_az=rx_pointing[0],

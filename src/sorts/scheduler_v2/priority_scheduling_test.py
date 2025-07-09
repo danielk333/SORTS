@@ -5,10 +5,9 @@ from sorts.propagator import SGP4
 from sorts.space_object import SpaceObject
 from sorts.radar.radars import get_radar
 from sorts.types import Datetime64_us, Timedelta64_us, Float64_as_sec
-from sorts.schedule_v2 import Schedule
+from sorts.schedule_v2 import ExperimentDetail
 from sorts.scheduler_v2.priority_scheduling import priority_scheduling
 from sorts.controller_v2 import TrackerController
-from sorts.simulation_v2 import ExperimentDetail
 
 
 def setup_function():
@@ -67,7 +66,7 @@ def priority_scheduling_smoke_test():
     tx_sch_2.stt_tstmp_us = tx_sch_2.stt_tstmp_us + np.timedelta64(int(10e3 / 3), "us")
     tx_sch_2.exp_num = tx_sch_2.exp_num + 1
 
-    exp_detail_map = {
+    sch_meta = {
         0: ExperimentDetail(
             id=0,
             coh_int_bandwidth=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
@@ -94,7 +93,7 @@ def priority_scheduling_smoke_test():
         ),
     }
 
-    merged_sch = priority_scheduling([tx_sch_1, tx_sch_2], exp_detail_map)
+    merged_sch = priority_scheduling([tx_sch_1, tx_sch_2], sch_meta)
 
     print(merged_sch)
     return

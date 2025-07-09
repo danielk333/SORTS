@@ -4,9 +4,26 @@ from dataclasses import dataclass, fields
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from sorts.types import Datetime64_us, Float64_as_deg
+from sorts.types import Timedelta64_us, Datetime64_us, Float64_as_deg
 
 logger = logging.getLogger(__name__)
+
+
+# TODO: rename to sth like `ControlSliceDetail`?
+@dataclass(kw_only=True)
+class ExperimentDetail:
+    id: int
+
+    coh_int_bandwidth: float
+    ipp: float
+    pulse_length: float
+    power: float
+    bandwidth: float
+    duty_cycle: float
+    noise_temp: float
+
+    slice_duration: Timedelta64_us
+    "Duration of a control slice, in micro-second"
 
 
 @dataclass(kw_only=True)
@@ -14,8 +31,11 @@ class Schedule:
     """
     A collection of "control slices" (or "slices" in short).
 
-    They are stored as columns of fields, each of which is a `ndarray`
+    Slice data are stored as columns of fields, each of which is a `ndarray`.
+    Metadata (`ExperimentDetail`s) are stored as a dict inside the `meta` field.
     """
+
+    meta: dict[int, ExperimentDetail]
 
     # TODO: if `end_tstmp_ms` is not needed, this can be renamed to just `tstmp_ms`?
     # TODO: `end_tstmp_ms` is v. likely not needed, rename it to just `time`? (and add docs that this is the start timestamp)
@@ -32,6 +52,7 @@ class Schedule:
         """A convenience method for generating an empty schedule"""
 
         sch = Schedule(
+            meta={},
             stt_tstmp_us=np.empty(0, "datetime64[us]"),
             exp_num=np.empty(0, np.int64),
             pointing_az=np.empty(0, Float64_as_deg),
@@ -41,17 +62,29 @@ class Schedule:
         return sch
 
     @classmethod
-    def from_dataframe(cls, df: pd.DataFrame) -> Schedule:
+    def metadata_fields(cls):
+        return (f for f in fields(cls) if f.name == "meta")
+
+    @classmethod
+    def non_metadata_fields(cls):
+        return (f for f in fields(cls) if not f.name == "meta")
+
+    @classmethod
+    def from_dataframe(cls, df: pd.DataFrame, meta: dict[int, ExperimentDetail]) -> Schedule:
         df = df.reset_index()  # put df index back into a df column
-        sch_dict = {f.name: df[f.name].to_numpy() for f in fields(Schedule)}
-        sch = Schedule(**sch_dict)
+        sch_dict = {
+            f.name: df[f.name].to_numpy()
+            for f in Schedule.non_metadata_fields()
+            if not f.name.startswith("_")
+        }
+        sch = Schedule(**sch_dict, meta=meta)
 
         return sch
 
     def __post_init__(self):
-        f_0, *f_rests = fields(self)  # Field objects
+        f_0, *f_rests = Schedule.non_metadata_fields()
         fv_0, *fv_rests = t.cast(
-            tuple[npt.NDArray, ...], [getattr(self, f.name) for f in fields(self)]
+            tuple[npt.NDArray, ...], [getattr(self, f.name) for f in Schedule.non_metadata_fields()]
         )  # actual value of the fields
 
         for idx, f in enumerate(fv_rests):
@@ -63,7 +96,9 @@ class Schedule:
                 )
 
     def as_dataframe(self) -> pd.DataFrame:
-        df = pd.DataFrame({f.name: getattr(self, f.name) for f in fields(Schedule)})
+        """Convert `Schedule` into a pandas `DataFrame` (metadata field(s) are not included in the resultant `DataFrame`)"""
+
+        df = pd.DataFrame({f.name: getattr(self, f.name) for f in Schedule.non_metadata_fields()})
         df = df.set_index("stt_tstmp_us")
 
         return df
@@ -87,6 +122,7 @@ class Schedule:
         """Return a slice of the origin schedule based on the `mask`"""
 
         filtered_sch = Schedule(
+            meta=self.meta,
             stt_tstmp_us=self.stt_tstmp_us[mask],
             exp_num=self.exp_num[mask],
             pointing_az=self.pointing_az[mask],

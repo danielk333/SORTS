@@ -51,7 +51,7 @@ end_time = t.cast(
 
 eiscat3d = sorts.get_radar("eiscat3d", "stage1-array")
 
-exp_detail = sortsV2.simulation.ExperimentDetail(
+exp_detail = sortsV2.schedule.ExperimentDetail(
     id=0,
     coh_int_bandwidth=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
     ipp=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
@@ -63,7 +63,7 @@ exp_detail = sortsV2.simulation.ExperimentDetail(
     noise_temp=150.0,
     slice_duration=np.timedelta64(10_000, "us"),  # 10ms
 )
-exp_num_map: dict[int, sortsV2.simulation.ExperimentDetail] = {0: exp_detail}
+exp_num_map: dict[int, sortsV2.schedule.ExperimentDetail] = {0: exp_detail}
 
 fence_scan_controller = sortsV2.controller.FenceScanController(
     tx_station=eiscat3d.tx[0],

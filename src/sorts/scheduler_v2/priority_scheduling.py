@@ -1,8 +1,7 @@
 import logging, typing as t
 import numpy as np
 import pandas as pd
-from sorts.schedule_v2 import Schedule
-from sorts.simulation_v2 import ExperimentDetail
+from sorts.schedule_v2 import Schedule, ExperimentDetail
 
 logger = logging.getLogger(__name__)
 
@@ -10,10 +9,7 @@ logger = logging.getLogger(__name__)
 # TODO: should we use a db like sqlite to enable larger than memory processing?
 # TODO: add schedule validation?
 # TODO: return the rows/index of dropped slice?
-# TODO: put `exp_detail_map` inside schedule? (`as_dataframe` will be lossy and `from_dataframe` will need more args)
-def _priority_scheduling_df(
-    schs: t.Sequence[Schedule], exp_detail_map: dict[int, ExperimentDetail]
-):
+def _priority_scheduling_df(schs: t.Sequence[Schedule], meta: dict[int, ExperimentDetail]):
     """
     Same as `priority_scheduling` but returns a pandas `DataFrame`.
     Used by `priority_scheduling` internally.
@@ -41,9 +37,7 @@ def _priority_scheduling_df(
         sch_df = sch.as_dataframe()
 
         # add "end_time" column
-        sch_df[cn_end_time] = sch_df.index + np.array(
-            [exp_detail_map[n].slice_duration for n in sch.exp_num]
-        )
+        sch_df[cn_end_time] = sch_df.index + np.array([meta[n].slice_duration for n in sch.exp_num])
 
         # merge and then sort the df
         # we use a "stable" sorting algo to retains relative order,
@@ -76,7 +70,7 @@ def _priority_scheduling_df(
     return merged_sch_df
 
 
-def priority_scheduling(schs: t.Sequence[Schedule], exp_detail_map: dict[int, ExperimentDetail]):
+def priority_scheduling(schs: t.Sequence[Schedule], meta: dict[int, ExperimentDetail]):
     """
     Merge a sequence of schedules for a single station into one,
     schedule with lower index in the sequence is given priority over those with higher index.
@@ -84,5 +78,5 @@ def priority_scheduling(schs: t.Sequence[Schedule], exp_detail_map: dict[int, Ex
     Note: It is assumed (and not checked) that each of the schedule itself does not contain overlapping entries.
     """
 
-    df = _priority_scheduling_df(schs, exp_detail_map)
-    return Schedule.from_dataframe(df)
+    df = _priority_scheduling_df(schs, meta=meta)
+    return Schedule.from_dataframe(df, meta=meta)

@@ -9,8 +9,7 @@ from sorts.interpolation import Interpolator
 from sorts.radar.tx_rx import Station
 from sorts.types import Float64_as_sec, Float64_as_m, EcefStates, Datetime64_us
 from sorts.simulation_v2.observation import Observation
-from sorts.schedule_v2 import Schedule
-from sorts.simulation_v2.experiment_detail import ExperimentDetail
+from sorts.schedule_v2 import Schedule, ExperimentDetail
 from sorts.simulation_v2.simulation_protocol import SimulationProtocol
 from sorts.simulation_v2.helpers import find_simultaneous_passes_time_ranges
 
