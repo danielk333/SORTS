@@ -62,14 +62,16 @@ class FenceScanController:
         #   `src/sorts/controller/scanner.py`
         self._cached_rx_pointings_of_a_cycle = self._cached_tx_pointings_of_a_cycle.copy()
 
+        # repeat `self._cached_tx_pointings_of_a_cycle` until it is at least the size of `schedule_size`
+        # then trim to exactly `schedule_size` long
         tx_pointing = np.tile(
             self._cached_tx_pointings_of_a_cycle,
             (schedule_size + self.pointings_per_cycle - 1) // self.pointings_per_cycle,
-        )[:schedule_size]
+        )[:, :schedule_size]
         rx_pointing = np.tile(
             self._cached_rx_pointings_of_a_cycle,
             (schedule_size + self.pointings_per_cycle - 1) // self.pointings_per_cycle,
-        )[:schedule_size]
+        )[:, :schedule_size]
 
         tx_schedule = Schedule(
             meta={self.exp_datail.id: self.exp_datail},

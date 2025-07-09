@@ -102,6 +102,7 @@ class TrackerController:
         else:
             return self.generate_forced()
 
+    # TODO: WIP
     def plot(self):
         import plotly.express as px
         import plotly.graph_objects as go

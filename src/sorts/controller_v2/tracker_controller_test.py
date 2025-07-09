@@ -14,7 +14,7 @@ def setup_function():
     print()
 
 
-def tracker_controller_smoke_test():
+def TrackerController_smoke_test():
     """A simple check which compares the pointings from a `TrackerController` against a known dataset"""
 
     epoch = Time(53005.0, format="mjd", scale="utc")  # 2004-01-01 00:00:00Z
