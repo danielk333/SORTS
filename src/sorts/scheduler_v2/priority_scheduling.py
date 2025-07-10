@@ -53,7 +53,7 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule], meta: dict[int, Experime
         # (rows from `sch_df` has null values in them after the merge).
         # `.isna().all()` check is needed because `.ffill()` will throw exception when all the values are NaT (not a time)
         if not merged_sch_df[cn_allowed_start_time].isna().all():
-            merged_sch_df[cn_allowed_start_time] = merged_sch_df[cn_allowed_start_time].ffill()
+            merged_sch_df[cn_allowed_start_time] = merged_sch_df[cn_allowed_start_time].bfill()
         if not merged_sch_df[cn_allowed_end_time].isna().all():
             merged_sch_df[cn_allowed_end_time] = merged_sch_df[cn_allowed_end_time].ffill()
 
@@ -65,7 +65,7 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule], meta: dict[int, Experime
         merged_sch_df = merged_sch_df[~merged_sch_df[cn_is_overlaped]]
 
         # update `cn_allowed_start_time`, `cn_allowed_end_time` columns
-        merged_sch_df[cn_allowed_start_time] = merged_sch_df[cn_end_time].shift(1).bfill()
+        merged_sch_df[cn_allowed_start_time] = merged_sch_df[cn_end_time].shift(1)
         merged_sch_df.loc[merged_sch_df.index[0], cn_allowed_start_time] = merged_sch_df.index[0]
         merged_sch_df[cn_allowed_end_time] = merged_sch_df.index.to_series().shift(-1)
         merged_sch_df.loc[merged_sch_df.index[-1], cn_allowed_end_time] = merged_sch_df.loc[
