@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 # TODO: should we use a db like sqlite to enable larger than memory processing?
 # TODO: add schedule validation?
 # TODO: return the rows/index of dropped slice?
-def _priority_scheduling_df(schs: t.Sequence[Schedule], meta: dict[int, ExperimentDetail]):
+def _priority_scheduling_df(schs: t.Sequence[Schedule]):
     """
     Same as `priority_scheduling` but returns a pandas `DataFrame`.
     Used by `priority_scheduling` internally.
@@ -41,7 +41,7 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule], meta: dict[int, Experime
         # we use a "stable" sorting algo to retains relative order,
         # so the df will be in order of start_time, then priority after sorting
         merged_sch_df = pd.concat([merged_sch_df, sch_df])
-        merged_sch_df = merged_sch_df.sort_index(kind="stable")
+        merged_sch_df = merged_sch_df.sort_values(Cn.start_time, kind="stable")
 
         is_new_rows = merged_sch_df[cn_allowed_start_time].isna()
 
@@ -49,24 +49,26 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule], meta: dict[int, Experime
         # (rows from `sch_df` has null values in them after the merge).
         # `.isna().all()` check is needed because `.ffill()` will throw exception when all the values are NaT (not a time)
         if not merged_sch_df[cn_allowed_start_time].isna().all():
-            merged_sch_df.loc[:, cn_allowed_start_time] = merged_sch_df[
-                cn_allowed_start_time
-            ].bfill()
+            merged_sch_df[cn_allowed_start_time] = merged_sch_df[cn_allowed_start_time].bfill()
         if not merged_sch_df[cn_allowed_end_time].isna().all():
-            merged_sch_df.loc[:, cn_allowed_end_time] = merged_sch_df[cn_allowed_end_time].ffill()
+            merged_sch_df[cn_allowed_end_time] = merged_sch_df[cn_allowed_end_time].ffill()
 
         # remove rows (control slices) that have time clash
-        merged_sch_df.loc[:, cn_is_overlaped] = (is_new_rows) & (
+        merged_sch_df[cn_is_overlaped] = (is_new_rows) & (
             (merged_sch_df[Cn.start_time] <= merged_sch_df[cn_allowed_start_time])
             | (merged_sch_df[Cn.end_time] >= merged_sch_df[cn_allowed_end_time])
         )
         merged_sch_df = merged_sch_df[~merged_sch_df[cn_is_overlaped]]
 
         # update `cn_allowed_start_time`, `cn_allowed_end_time` columns
-        merged_sch_df.loc[:, cn_allowed_start_time] = merged_sch_df[Cn.end_time].shift(1)
-        merged_sch_df.loc[:, cn_allowed_start_time].iloc[0] = merged_sch_df[Cn.start_time].iloc[0]
-        merged_sch_df.loc[:, cn_allowed_end_time] = merged_sch_df[Cn.start_time].shift(-1)
-        merged_sch_df.loc[:, cn_allowed_end_time].iloc[-1] = merged_sch_df[Cn.end_time].iloc[-1]
+        merged_sch_df[cn_allowed_start_time] = merged_sch_df[Cn.end_time].shift(1)
+        merged_sch_df.loc[merged_sch_df.index[0], cn_allowed_start_time] = merged_sch_df[
+            Cn.start_time
+        ].iloc[0]
+        merged_sch_df[cn_allowed_end_time] = merged_sch_df[Cn.start_time].shift(-1)
+        merged_sch_df.loc[merged_sch_df.index[-1], cn_allowed_end_time] = merged_sch_df[
+            Cn.end_time
+        ].iloc[-1]
 
     # TODO: should return a `Schedule` object instead; maybe optionally returns the df for easier debugging/exploration?
     return merged_sch_df
@@ -80,5 +82,5 @@ def priority_scheduling(schs: t.Sequence[Schedule], meta: dict[int, ExperimentDe
     Note: It is assumed (and not checked) that each of the schedule itself does not contain overlapping entries.
     """
 
-    df = _priority_scheduling_df(schs, meta=meta)
+    df = _priority_scheduling_df(schs)
     return Schedule.from_dataframe(df, meta=meta)

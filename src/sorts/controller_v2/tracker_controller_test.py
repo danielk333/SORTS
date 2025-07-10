@@ -5,6 +5,7 @@ from sorts.propagator import SGP4
 from sorts.space_object import SpaceObject
 from sorts.radar.radars import get_radar
 from sorts.types import Datetime64_us, Timedelta64_us, Float64_as_sec
+from sorts.schedule_v2 import ExperimentDetail
 from sorts.controller_v2.tracker_controller import TrackerController
 
 
@@ -16,6 +17,7 @@ def setup_function():
 
 def TrackerController_smoke_test():
     """A simple check which compares the pointings from a `TrackerController` against a known dataset"""
+    # TODO: the test is WIP
 
     epoch = Time(53005.0, format="mjd", scale="utc")  # 2004-01-01 00:00:00Z
     start_time = Time("2025-06-30 00:00:00")
@@ -37,6 +39,18 @@ def TrackerController_smoke_test():
         parameters={"d": 0.1},
     )
 
+    exp_detail = ExperimentDetail(
+        id=0,
+        coh_int_bandwidth=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
+        ipp=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
+        pulse_length=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
+        power=5000000.0,
+        bandwidth=52.08333333333333,
+        duty_cycle=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
+        noise_temp=150.0,
+        slice_duration=control_slice_duration,
+    )
+
     time_arr: npt.NDArray[Datetime64_us] = np.arange(
         start_time.to_value("datetime64").astype("datetime64[us]"),  # type: ignore
         end_time.to_value("datetime64").astype("datetime64[us]"),  # type: ignore
@@ -52,7 +66,7 @@ def TrackerController_smoke_test():
         rx_stations=[],
         time=time_arr,
         space_object_states=ecefs,
-        exp_num=0,
+        exp_detail=exp_detail,
         # azimuth_range=None,
         # elevation_range=None,
     )

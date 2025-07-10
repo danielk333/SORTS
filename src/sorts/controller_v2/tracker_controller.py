@@ -36,23 +36,18 @@ class TrackerController:
 
     tx_station: Station
     rx_stations: t.Sequence[Station]
+    exp_detail: ExperimentDetail
+
     time: npt.NDArray[Datetime64_us]
     space_object_states: EcefStates
-    # experimentDetail: ExperimentDetail
-    exp_num: int  # TODO: remove / replace by `ExperimentDetail` ?
     azimuth_range: tuple[Float_as_deg, Float_as_deg] = (0.0, 360.0)
     elevation_range: tuple[Float_as_deg, Float_as_deg] = (0.0, 90.0)
-
-    # TODO: remove?
-    # min_azimuth: Float_as_deg = 0.0
-    # max_azimuth: Float_as_deg = 360.0
-    # min_elevation: Float_as_deg = 0.0
-    # max_elevation: Float_as_deg = 90.0
 
     def __post_init__(self):
         self._cached_output: TrackerControllerOutput | None = None
 
     def generate_forced(self) -> TrackerControllerOutput:
+        # TODO: remove?
         # start_time_np = t.cast(np.datetime64, start_time.to_value("datetime64"))
         # end_time_np = t.cast(np.datetime64, end_time.to_value("datetime64"))
         # start_time_np = t.cast(np.datetime64, start_time.to_value("datetime64")).astype(
@@ -76,18 +71,18 @@ class TrackerController:
         sch_len = len(self.time)
 
         tx_sch = Schedule(
-            meta={},  # TODO: replace this dummy with actual implementation
+            meta={self.exp_detail.id: self.exp_detail},
             stt_tstmp_us=self.time,
-            exp_num=np.full(sch_len, self.exp_num, dtype=np.int64),
+            exp_num=np.full(sch_len, self.exp_detail.id, dtype=np.int64),
             pointing_az=tx_pointings[0],
             pointing_el=tx_pointings[1],
         )
 
         rx_schs = [
             Schedule(
-                meta={},  # TODO: replace this dummy with actual implementation
+                meta={self.exp_detail.id: self.exp_detail},
                 stt_tstmp_us=self.time,
-                exp_num=np.full(sch_len, self.exp_num, dtype=np.int64),
+                exp_num=np.full(sch_len, self.exp_detail.id, dtype=np.int64),
                 pointing_az=rx_pointings[0],
                 pointing_el=rx_pointings[1],
             )

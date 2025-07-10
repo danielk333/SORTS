@@ -137,7 +137,9 @@ class Schedule:
 
         # add "end_time" column
         df[self.cn.end_time] = df[self.cn.start_time] + np.array(
-            [self.meta[n].slice_duration for n in self.exp_num]
+            [self.meta[n].slice_duration for n in self.exp_num],
+            # NOTE: `dtype` have to be stated explicitly, otherwise numpy will assume `float64` which is incorrect here
+            dtype="timedelta64[us]",
         )
 
         return df
