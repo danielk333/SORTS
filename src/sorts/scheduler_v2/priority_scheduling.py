@@ -1,7 +1,7 @@
 import logging, typing as t
 import numpy as np
 import pandas as pd
-from sorts.schedule_v2 import Schedule, ExperimentDetail
+from sorts.schedule_v2 import Schedule, ExperimentDetail, DataFrameColumnNames as Cn
 
 logger = logging.getLogger(__name__)
 
@@ -24,22 +24,18 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule], meta: dict[int, Experime
     #   2.3. update `cn_allowed_start_time`, `cn_allowed_end_time`
 
     # define some df column names
-    cn_end_time = "end_time"
     cn_allowed_start_time = "allowed_start_time"
     cn_allowed_end_time = "allowed_end_time"
     cn_is_overlaped = "is_overlaped"
 
     # init an empty df for a schedule and add some columns, will be used store merged schedule
     merged_sch_df = Schedule.empty().as_dataframe()
-    merged_sch_df[cn_end_time] = np.empty(0, "datetime64[us]")
+    merged_sch_df[Cn.end_time] = np.empty(0, "datetime64[us]")
     merged_sch_df[cn_allowed_start_time] = np.empty(0, "datetime64[us]")
     merged_sch_df[cn_allowed_end_time] = np.empty(0, "datetime64[us]")
     merged_sch_df[cn_is_overlaped] = np.empty(0, np.bool)
     for sch in schs:
         sch_df = sch.as_dataframe()
-
-        # add "end_time" column
-        sch_df[cn_end_time] = sch_df.index + np.array([meta[n].slice_duration for n in sch.exp_num])
 
         # merge and then sort the df
         # we use a "stable" sorting algo to retains relative order,
@@ -53,24 +49,24 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule], meta: dict[int, Experime
         # (rows from `sch_df` has null values in them after the merge).
         # `.isna().all()` check is needed because `.ffill()` will throw exception when all the values are NaT (not a time)
         if not merged_sch_df[cn_allowed_start_time].isna().all():
-            merged_sch_df[cn_allowed_start_time] = merged_sch_df[cn_allowed_start_time].bfill()
+            merged_sch_df.loc[:, cn_allowed_start_time] = merged_sch_df[
+                cn_allowed_start_time
+            ].bfill()
         if not merged_sch_df[cn_allowed_end_time].isna().all():
-            merged_sch_df[cn_allowed_end_time] = merged_sch_df[cn_allowed_end_time].ffill()
+            merged_sch_df.loc[:, cn_allowed_end_time] = merged_sch_df[cn_allowed_end_time].ffill()
 
         # remove rows (control slices) that have time clash
-        merged_sch_df[cn_is_overlaped] = (is_new_rows) & (
-            (merged_sch_df.index.to_series() <= merged_sch_df[cn_allowed_start_time])
-            | (merged_sch_df[cn_end_time] >= merged_sch_df[cn_allowed_end_time])
+        merged_sch_df.loc[:, cn_is_overlaped] = (is_new_rows) & (
+            (merged_sch_df[Cn.start_time] <= merged_sch_df[cn_allowed_start_time])
+            | (merged_sch_df[Cn.end_time] >= merged_sch_df[cn_allowed_end_time])
         )
         merged_sch_df = merged_sch_df[~merged_sch_df[cn_is_overlaped]]
 
         # update `cn_allowed_start_time`, `cn_allowed_end_time` columns
-        merged_sch_df[cn_allowed_start_time] = merged_sch_df[cn_end_time].shift(1)
-        merged_sch_df.loc[merged_sch_df.index[0], cn_allowed_start_time] = merged_sch_df.index[0]
-        merged_sch_df[cn_allowed_end_time] = merged_sch_df.index.to_series().shift(-1)
-        merged_sch_df.loc[merged_sch_df.index[-1], cn_allowed_end_time] = merged_sch_df.loc[
-            merged_sch_df.index[-1], cn_end_time
-        ]
+        merged_sch_df.loc[:, cn_allowed_start_time] = merged_sch_df[Cn.end_time].shift(1)
+        merged_sch_df.loc[:, cn_allowed_start_time].iloc[0] = merged_sch_df[Cn.start_time].iloc[0]
+        merged_sch_df.loc[:, cn_allowed_end_time] = merged_sch_df[Cn.start_time].shift(-1)
+        merged_sch_df.loc[:, cn_allowed_end_time].iloc[-1] = merged_sch_df[Cn.end_time].iloc[-1]
 
     # TODO: should return a `Schedule` object instead; maybe optionally returns the df for easier debugging/exploration?
     return merged_sch_df
