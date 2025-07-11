@@ -44,7 +44,7 @@ class FenceScanController:
         #         + f"cannot be smaller than the dwell ({self.dwell_s} sec)."
         #     )
 
-    def generate_forced(self, start_time: Time, end_time: Time) -> FenceScanControllerOutput:
+    def generate(self, start_time: Time, end_time: Time) -> FenceScanControllerOutput:
         start_time_np = astropy_time_to_datetime64_us(start_time)
         end_time_np = astropy_time_to_datetime64_us(end_time)
 
@@ -90,11 +90,3 @@ class FenceScanController:
         )
 
         return FenceScanControllerOutput(tx_schedule, [rx_schedule])
-
-    def generate(
-        self, start_time: Time, end_time: Time, use_cache=False
-    ) -> FenceScanControllerOutput:
-        if use_cache and self._cached_output is not None:
-            return self._cached_output
-        else:
-            return self.generate_forced(start_time, end_time)

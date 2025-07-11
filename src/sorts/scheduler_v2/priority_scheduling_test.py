@@ -80,8 +80,8 @@ def priority_scheduling_smoke_test():
         # elevation_range=None,
     )
 
-    tx_sch_1, _rx_schs = controller_1.generate(use_cache=False)
-    tx_sch_2, _rx_schs = controller_2.generate(use_cache=False)
+    tx_sch_1, _rx_schs = controller_1.generate()
+    tx_sch_2, _rx_schs = controller_2.generate()
 
     sch_meta = {
         0: ExperimentDetail(

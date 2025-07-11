@@ -46,7 +46,7 @@ class TrackerController:
     def __post_init__(self):
         self._cached_output: TrackerControllerOutput | None = None
 
-    def generate_forced(self) -> TrackerControllerOutput:
+    def generate(self) -> TrackerControllerOutput:
         # TODO: remove?
         # start_time_np = t.cast(np.datetime64, start_time.to_value("datetime64"))
         # end_time_np = t.cast(np.datetime64, end_time.to_value("datetime64"))
@@ -89,13 +89,8 @@ class TrackerController:
             for rx_pointings in rxs_pointings
         ]
 
-        return TrackerControllerOutput(tx_sch, rx_schs)
-
-    def generate(self, use_cache=False) -> TrackerControllerOutput:
-        if use_cache and self._cached_output is not None:
+        self._cached_output = TrackerControllerOutput(tx_sch, rx_schs)
             return self._cached_output
-        else:
-            return self.generate_forced()
 
     # TODO: WIP
     def plot(self):
