@@ -248,7 +248,12 @@ def ITRS_to_geodetic(x, y, z, degrees=True, ellipsoid=None):
     )
     lon, lat, height = cord.to_geodetic(ellipsoid=ellipsoid)
 
-    llh = np.empty((3,), dtype=np.float64)
+    # TODO: confirm with daniel if the modificaiton is okay (made it work with ndarray instead of just scala)
+    cord_len = len(cord)
+    if cord_len > 1:
+        llh = np.empty((3, cord_len), dtype=np.float64)
+    else:
+        llh = np.empty((3,), dtype=np.float64)
 
     if degrees:
         u_ = units.deg
