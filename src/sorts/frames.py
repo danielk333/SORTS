@@ -5,16 +5,14 @@ Main usage is the :code:`convert` function that wraps Astropy frame transformati
 
 """
 
-# Python standard import
 import logging
 from collections import OrderedDict
-
-# Third party import
 import numpy as np
 import astropy.coordinates as coord
 import astropy.units as units
-
 from astropy.coordinates import EarthLocation
+from sorts.types import GeodeticCoordinates_DegM
+
 
 try:
     from jplephem.spk import SPK
@@ -228,7 +226,7 @@ def geodetic_to_ITRS(lat, lon, alt, degrees=True, ellipsoid=None):
     return pos
 
 
-def ITRS_to_geodetic(x, y, z, degrees=True, ellipsoid=None):
+def ITRS_to_geodetic(x, y, z, degrees=True, ellipsoid=None) -> GeodeticCoordinates_DegM:
     """Use `astropy.coordinates.EarthLocation` to transform from geodetic to ITRS.
 
     :param float x: X-coordinate in ITRS

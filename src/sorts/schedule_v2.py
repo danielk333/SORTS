@@ -118,12 +118,14 @@ class Schedule:
                     f"while shape of {f_0.name} is {fv_0.shape} "
                 )
 
+    # TODO: re-eval the naming, maybe `dfc`/`dfcn`/... is better?
     @property
     def cn(self):
         """A shortcut to return the DataFrameColumnNames class"""
 
         return DataFrameColumnNames
 
+    # TODO: rename to `to_dataframe`?
     def as_dataframe(self) -> pd.DataFrame:
         """
         Convert `Schedule` into a pandas `DataFrame`.

@@ -1,0 +1,74 @@
+"""
+Misc. plots
+"""
+
+import logging
+import numpy as np
+import numpy.typing as npt
+import pandas as pd
+from sorts.plotting_deps import lp
+from sorts.types import EcefStates, Float64_as_deg
+from sorts.frames import ITRS_to_geodetic
+
+logger = logging.getLogger(__name__)
+
+
+def ecef_states_positions_plot(ecefs: EcefStates):
+    """Returns a `Dash` app, use `.run()` method to run it."""
+    # plotly alternative: https://plotly.com/python/lines-on-maps/
+
+    geodetic_coords = ITRS_to_geodetic(ecefs[0], ecefs[1], ecefs[2])
+    lat = geodetic_coords[0]
+    lon = geodetic_coords[1]
+    latlon_df = pd.DataFrame({"lat": lat, "lon": lon})
+    latlon_df = latlon_df.reset_index()
+    latlon_df["lat_head"] = latlon_df["lat"].shift(-1)
+    latlon_df["lon_head"] = latlon_df["lon"].shift(-1)
+
+    # alternatively, `geom_map` can be used instead of `geom_livemap`
+    #   `world_countries = lp_geo_data.geocode_countries().get_boundaries(resolution=1)`
+    #   `lp.geom_map(map=world_countries, projection="epsg3857", fill='gray', color='very_light_grey', size=0.1) # mercator projection`
+    plot = (
+        lp.ggplot(latlon_df, lp.aes(x="lon", y="lat"))
+        # map background
+        + lp.geom_livemap(projection="epsg3857", zoom=1)  # mercator projection
+        # plot data points as point on map
+        + lp.geom_point(size=0.5, tooltips=lp.layer_tooltips().line("#: @index, lat:^y, lon:^x"))
+        # also connect the points using line segments for easier reading
+        + lp.geom_segment(lp.aes(xend="lon_head", yend="lat_head"), size=0.2)
+        # mark the orbit direction on the 1st data point
+        + lp.geom_segment(
+            lp.aes(xend="lon_head", yend="lat_head"),
+            data={"lat": lat[0:1], "lon": lon[0:1], "lat_head": lat[1:2], "lon_head": lon[1:2]},
+            size=1,
+            arrow=lp.arrow(),
+        )
+        # other settings
+        + lp.ggtitle("World Map (In Mercator projection)")
+        + lp.ggsize(800, 600)
+    )
+
+    return plot
+
+
+def azel_polar_plot(azimuths: npt.NDArray[Float64_as_deg], elevations: npt.NDArray[Float64_as_deg]):
+    df = pd.DataFrame({"azimuth": azimuths, "elevation": elevations})
+    plot = (
+        lp.ggplot(df, lp.aes(x="azimuth", y="elevation"))
+        + lp.geom_point()
+        # + lp.geom_bar(aes(fill=as_discrete('v')), size=0, show_legend=False)
+        + lp.scale_x_continuous(
+            breaks=[0, 30, 60, 90, 120, 150, 180, -150, -120, -90, -60, -30],
+            labels=["N", "30", "60", "E", "120", "150", "S", "-150", "-120", "W", "-60", "-30"],
+        )
+        + lp.scale_y_continuous(
+            trans="reverse",
+            breaks=[0, 30, 60, 90],
+            # should ideally be set on coord_polar, but reversed scale does not work well will coord limits atm, see
+            # https://github.com/JetBrains/lets-plot/issues/1365
+            limits=[0, 90],
+        )
+        + lp.coord_polar(theta="x", xlim=[-180, 180], start=np.pi)
+    )
+
+    return plot

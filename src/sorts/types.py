@@ -53,6 +53,14 @@ EnuCoordinates = NDArray_3xN[np.float64]
 AzelrCoordinates_DegM = NDArray_3xN[np.float64]
 "`(Az, El, R)` spherical coordinates in degrees and meters; a `(3,n)` ndarray of `float64`"
 
+GeodeticCoordinates_DegM = NDArray_3xN[np.float64]
+"""
+`(Latitude, Longitude, Height)` geodetic coordinates in degrees and meters; a `(3,n)` ndarray of `float64`
+
+- Latitude should be in [-90, 90]
+- Longitude should be in [-180, 180)
+"""
+
 EcefCoordinates = NDArray_3xN[np.float64]
 "ECEF cartesian coordinates, a `(3,n)` ndarray of `float64`"
 

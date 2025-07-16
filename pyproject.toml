@@ -42,10 +42,10 @@ dependencies = [
 [project.optional-dependencies]
 spacetrack = ["spacetrack>=1.0.1"]
 plot = [
-    "anywidget>=0.9.18",
+    "geodatasets>=2024.8.0",
+    "geopandas>=1.1.1",
     "jupyterlab>=4.4.4",
-    "panel>=1.7.2",
-    "plotly[express]>=6.2.0",
+    "lets-plot>=4.6.2",
     "pyvista>=0.45.2",
 ]
 
