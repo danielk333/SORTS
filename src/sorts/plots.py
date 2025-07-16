@@ -9,8 +9,38 @@ import pandas as pd
 from sorts.plotting_deps import lp
 from sorts.types import EcefStates, Float64_as_deg
 from sorts.frames import ITRS_to_geodetic
+from sorts.schedule_v2 import Schedule
 
 logger = logging.getLogger(__name__)
+
+
+def schedule_plot(schedule: Schedule):
+    df = schedule.as_dataframe()
+
+    # additional column names
+    cn_index = "index"
+    cn_us = "us"
+
+    df = df.reset_index()  # add "index" col
+    df["us"] = df[schedule.cn.start_time].astype("int64") % 1e6  # add "us" col
+    # TODO: `lets-plot` cannot show microseconds so need added an extra column
+    #   but it is not ideal, maybe switch to `bokeh`?
+
+    plot = (
+        lp.ggplot(df, lp.aes(x=schedule.cn.start_time, y=schedule.cn.exp_num))
+        + lp.scale_x_datetime(format="%Y %b %e %H:%M:%S")
+        + lp.scale_y_discrete()
+        # + lp.scale_y_discrete(expand=[0, 0])
+        + lp.geom_linerange(
+            lp.aes(xmin=schedule.cn.start_time, xmax=schedule.cn.end_time),
+            size=50,
+            tooltips=lp.layer_tooltips().line(f"#: @{cn_index}; @{cn_us} us"),
+        )
+        + lp.coord_cartesian(ylim=(-0.5, 1.5))
+        + lp.ggtb()
+    )
+
+    return plot
 
 
 def ecef_states_positions_plot(ecefs: EcefStates):

@@ -16,6 +16,8 @@ def wrapped_lat_lon(
     Wrap latitudes and longitudes so that they stay within [-90, 90] and [-180, 180)
 
     (When a latitude wraps, the corresponding longitude value is flipped (added 180deg).)
+
+    Returns ("wrapped latitudes", "wrapped longitudes") tuple
     """
 
     lat_wrapped = ((lat + 90) % 180) - 90
@@ -23,3 +25,21 @@ def wrapped_lat_lon(
     lon_wrapped = (((lon + 180) + (flips * 180)) % 360) - 180
 
     return (lat_wrapped, lon_wrapped)
+
+
+def wrap_azimuths_elevations(
+    az: npt.NDArray[Float64_as_deg], el: npt.NDArray[Float64_as_deg]
+) -> tuple[npt.NDArray[Float64_as_deg], npt.NDArray[Float64_as_deg]]:
+    """
+    Wrap azimuths and elevations so that they stay within [-180, 180) and [0, 90]
+
+    (When an elevation wraps, the corresponding azimuth value is flipped (added 180deg).)
+
+    Returns ("wrapped azimuths", "wrapped elevations") tuple
+    """
+
+    el_wrapped = (el) % 90
+    flips = (el) // 90
+    az_wrapped = (((az + 180) + (flips * 180)) % 360) - 180
+
+    return (az_wrapped, el_wrapped)

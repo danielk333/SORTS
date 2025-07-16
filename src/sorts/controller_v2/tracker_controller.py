@@ -4,7 +4,6 @@ import numpy as np
 import numpy.typing as npt
 from pyant.coordinates import cart_to_sph
 from sorts.radar.tx_rx import Station
-from sorts.frames import ecef_to_enu
 from sorts.types import (
     EcefStates,
     Float_as_deg,
@@ -13,6 +12,8 @@ from sorts.types import (
     EnuCoordinates,
     AzelrCoordinates_DegM,
 )
+from sorts.utils import wrap_azimuths_elevations
+from sorts.frames import ecef_to_enu
 from sorts.radar.tx_rx import Station
 from sorts.schedule_v2 import Schedule, ExperimentDetail
 from sorts.controller_v2.controller_protocol import ControllerProtocol
@@ -73,10 +74,17 @@ class TrackerController:
         tx_pointings: AzelrCoordinates_DegM = cart_to_sph(
             point_ecef(self.tx_station, self.space_object_states[:3]), degrees=True
         )
+        tx_pointings[0], tx_pointings[1] = wrap_azimuths_elevations(
+            tx_pointings[0], tx_pointings[1]
+        )
         rxs_pointings: list[AzelrCoordinates_DegM] = [
             cart_to_sph(point_ecef(rx_station, self.space_object_states[:3]))
             for rx_station in self.rx_stations
         ]
+        for rx_pointings in rxs_pointings:
+            rx_pointings[0], rx_pointings[1] = wrap_azimuths_elevations(
+                rx_pointings[0], rx_pointings[1]
+            )
 
         sch_len = len(self.time)
 
