@@ -9,7 +9,7 @@ def astropy_time_to_datetime64_us(time: Time) -> Datetime64_us:
     return t.cast(np.datetime64, time.to_value("datetime64")).astype("datetime64[us]")
 
 
-def wrapped_lat_lon(
+def wrap_latitudes_longitudes(
     lat: npt.NDArray[Float64_as_deg], lon: npt.NDArray[Float64_as_deg]
 ) -> tuple[npt.NDArray[Float64_as_deg], npt.NDArray[Float64_as_deg]]:
     """
@@ -17,7 +17,7 @@ def wrapped_lat_lon(
 
     (When a latitude wraps, the corresponding longitude value is flipped (added 180deg).)
 
-    Returns ("wrapped latitudes", "wrapped longitudes") tuple
+    Returns `(wrapped_latitudes, wrapped_longitudes)` tuple
     """
 
     lat_wrapped = ((lat + 90) % 180) - 90
@@ -35,7 +35,7 @@ def wrap_azimuths_elevations(
 
     (When an elevation wraps, the corresponding azimuth value is flipped (added 180deg).)
 
-    Returns ("wrapped azimuths", "wrapped elevations") tuple
+    Returns `(wrapped_azimuths, wrapped_elevations)` tuple
     """
 
     el_wrapped = (el) % 90
