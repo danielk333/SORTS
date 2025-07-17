@@ -43,6 +43,7 @@ def schedule_plot(schedule: Schedule):
     return plot
 
 
+# TODO: add down sampling? radar control slice are in milliseconds, while the simulation are in days or longer
 def ecef_states_positions_plot(ecefs: EcefStates):
     """Returns a `Dash` app, use `.run()` method to run it."""
     # plotly alternative: https://plotly.com/python/lines-on-maps/

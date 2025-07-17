@@ -14,6 +14,9 @@ class DataFrameColumnNames:
     Define the `pandas` `DataFrame` column names of a `Schedule` as class member.
     """
 
+    # NOTE: a simple class with classmethod for iteration is used instead of
+    #   `Enum` class like `class DataFrameColumnNames_(str, Enum)` for simplicity
+
     # TODO: add test to ensure this file up-to-date with `Schedule class
 
     start_time: t.Final = "stt_tstmp_us"

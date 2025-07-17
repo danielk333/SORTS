@@ -15,9 +15,9 @@ def wrap_latitudes_longitudes(
     """
     Wrap latitudes and longitudes so that they stay within [-90, 90] and [-180, 180)
 
-    (When a latitude wraps, the corresponding longitude value is flipped (added 180deg).)
-
     Returns `(wrapped_latitudes, wrapped_longitudes)` tuple
+
+    - When a latitude wraps, the corresponding longitude value is flipped (added 180deg)
     """
 
     lat_wrapped = ((lat + 90) % 180) - 90
@@ -33,10 +33,19 @@ def wrap_azimuths_elevations(
     """
     Wrap azimuths and elevations so that they stay within [-180, 180) and [0, 90]
 
-    (When an elevation wraps, the corresponding azimuth value is flipped (added 180deg).)
-
     Returns `(wrapped_azimuths, wrapped_elevations)` tuple
+
+    - When an elevation wraps, the corresponding azimuth value is flipped (added 180deg)
+    - Negative elevation will trigger exception
     """
+
+    # throw exception if there are negative elevation(s)
+    neg_el_mask = el < 0
+    first_neg_el_idx = np.argmax(neg_el_mask) if np.any(neg_el_mask) else None
+    if first_neg_el_idx is not None:
+        raise RuntimeError(
+            f"There are negative elevation(s), which is invalid. e.g. at [{first_neg_el_idx}]: {el[first_neg_el_idx]}"
+        )
 
     el_wrapped = (el) % 90
     flips = (el) // 90
