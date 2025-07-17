@@ -42,6 +42,7 @@ dependencies = [
 [project.optional-dependencies]
 spacetrack = ["spacetrack>=1.0.1"]
 plot = [
+    "bokeh>=3.7.3",
     "geodatasets>=2024.8.0",
     "geopandas>=1.1.1",
     "jupyterlab>=4.4.4",
