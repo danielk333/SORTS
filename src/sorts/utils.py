@@ -1,8 +1,9 @@
 import typing as t
+from datetime import datetime
 import numpy as np
 import numpy.typing as npt
 from astropy.time import Time
-from sorts.types import Datetime64_us, Float64_as_deg
+from sorts.types import Datetime64_us, Float64_as_deg, Datetime_like
 
 
 def astropy_time_to_datetime64_us(time: Time) -> Datetime64_us:
@@ -52,3 +53,15 @@ def wrap_azimuths_elevations(
     az_wrapped = (((az + 180) + (flips * 180)) % 360) - 180
 
     return (az_wrapped, el_wrapped)
+
+
+def to_datetime64_us(d: Datetime_like) -> Datetime64_us:
+    match d:
+        case np.datetime64():
+            return d
+        case str() | datetime():
+            return np.datetime64(d, "us")
+        case Time():
+            return t.cast(np.datetime64, d.to_value("datetime64")).astype("datetime64[us]")
+        case _:
+            raise RuntimeError(f"Convertion from {type(d)} to `datetime64[us]` is not supported.")

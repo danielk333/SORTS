@@ -1,6 +1,7 @@
 import numpy as np
 import numpy.typing as npt
-
+from datetime import datetime
+from astropy.time import Time
 
 Datetime64_us = np.datetime64
 "`numpy` `datetime64` in `us` resolution"
@@ -8,7 +9,16 @@ Datetime64_us = np.datetime64
 Timedelta64_us = np.timedelta64
 "`numpy` `timedelta64` in `us` resolution"
 
-Float_as_sec = np.float64
+Datetime_like = datetime | Time | Datetime64_us | str
+"""
+One of:
+- python builtin `datetime`,
+- astropy `Time`
+- numpy `timedelta64`
+- ISO 8601 date or datetime string supported by numpy
+"""
+
+Float_as_sec = float
 "`float` as second"
 
 Float_as_deg = float
