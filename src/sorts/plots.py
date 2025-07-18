@@ -2,16 +2,73 @@
 Misc. plots
 """
 
-import logging
+import logging, typing as t
+from datetime import datetime
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from sorts.plotting_deps import lp
+from sorts.plotting_deps import lp, bp, bokeh_models
 from sorts.types import EcefStates, Float64_as_deg
 from sorts.frames import ITRS_to_geodetic
 from sorts.schedule_v2 import Schedule
 
 logger = logging.getLogger(__name__)
+
+
+def schedule_plot_bokeh(
+    schedule: Schedule, start_time: datetime | None = None, end_time: datetime | None = None
+):
+    """
+    Note:
+    Plotting the full schedule can be computationally demanding and lead to application crashes.
+    Limiting the plot range by `start_time` and `end_time` param is recommended.
+
+    A good starting point is a 1 hour time range.
+    """
+
+    df = schedule.as_dataframe()
+
+    start_time = start_time if start_time is not None else df[schedule.cn.start_time].min()
+    end_time = end_time if end_time is not None else df[schedule.cn.start_time].max()
+    df = df[(df[schedule.cn.start_time] >= start_time) & (df[schedule.cn.end_time] <= end_time)]
+
+    # bokeh requires str type for categorical axis
+    df[schedule.cn.exp_num] = df[schedule.cn.exp_num].astype(str)
+
+    bar = bp.figure(
+        y_range=df[schedule.cn.exp_num].unique(),  # type: ignore
+        x_axis_type="datetime",
+        x_axis_location="above",
+        width=800,
+        height=300,
+    )
+    bar.add_tools(bokeh_models.HoverTool())
+
+    bar.hbar(
+        y=df[schedule.cn.exp_num], left=df[schedule.cn.start_time], right=df[schedule.cn.end_time]  # type: ignore
+    )
+
+    minimap = bp.figure(
+        title="Drag the middle and edges of the selection box to change the range above",
+        height=130,
+        width=800,
+        # x_range=bar.x_range,
+        x_axis_type="datetime",
+        y_axis_type=None,
+        tools="",
+        toolbar_location=None,
+    )
+    minimap.x_range.range_padding = 0  # type: ignore
+    minimap.x_range.bounds = "auto"  # type: ignore
+
+    # NOTE: a dummy line is plotted; select tool doesn't work well without any data plotted
+    minimap.line(x=[df[schedule.cn.start_time].min(), df[schedule.cn.start_time].max()], y=[0, 0])
+    minimap_range_tool = bokeh_models.RangeTool(x_range=bar.x_range, start_gesture="pan")
+    minimap.add_tools(minimap_range_tool)
+
+    plot = bp.column(bar, minimap)
+
+    return plot
 
 
 def schedule_plot(schedule: Schedule):
