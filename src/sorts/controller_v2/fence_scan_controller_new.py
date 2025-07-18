@@ -75,7 +75,7 @@ class FenceScanController:
 
         tx_schedule = Schedule(
             meta={self.exp_datail.id: self.exp_datail},
-            stt_tstmp_us=start_time_arr,
+            start_time=start_time_arr,
             exp_num=np.full(schedule_size, self.exp_datail.id, dtype=np.int64),
             pointing_az=tx_pointing[0],
             pointing_el=tx_pointing[1],
@@ -83,7 +83,7 @@ class FenceScanController:
 
         rx_schedule = Schedule(
             meta={self.exp_datail.id: self.exp_datail},
-            stt_tstmp_us=start_time_arr,
+            start_time=start_time_arr,
             exp_num=np.full(schedule_size, self.exp_datail.id, dtype=np.int64),
             pointing_az=rx_pointing[0],
             pointing_el=rx_pointing[1],

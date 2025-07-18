@@ -38,7 +38,7 @@ def Schedule_dataframe_roundtrip_conversion_test():
     # we create the schedule using copies of the field data, so the conversions will not mutate the originals
     sch = Schedule(
         meta=deepcopy(meta),
-        stt_tstmp_us=start_time.copy(),
+        start_time=start_time.copy(),
         exp_num=exp_num.copy(),
         pointing_az=pointing_az.copy(),
         pointing_el=pointing_el.copy(),
@@ -47,7 +47,7 @@ def Schedule_dataframe_roundtrip_conversion_test():
     converted_sch = Schedule.from_dataframe(sch.as_dataframe(), sch.meta)
 
     assert meta == converted_sch.meta
-    assert np.array_equal(start_time, converted_sch.stt_tstmp_us)
+    assert np.array_equal(start_time, converted_sch.start_time)
     assert np.array_equal(exp_num, converted_sch.exp_num)
     assert np.array_equal(pointing_az, converted_sch.pointing_az)
     assert np.array_equal(pointing_el, converted_sch.pointing_el)

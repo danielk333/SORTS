@@ -51,6 +51,6 @@ def FenceScanController_smoke_test():
     schs = fenceScanController.generate(Time(start_time_np), Time(end_time_np))
     expected_sch_len = round((end_time_np - start_time_np) / slice_duration)
 
-    assert len(schs.tx_schedule.stt_tstmp_us) == expected_sch_len
+    assert len(schs.tx_schedule.start_time) == expected_sch_len
 
     return

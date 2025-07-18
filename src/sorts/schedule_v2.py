@@ -19,7 +19,7 @@ class DataFrameColumnNames:
 
     # TODO: add test to ensure this file up-to-date with `Schedule class
 
-    start_time: t.Final = "stt_tstmp_us"
+    start_time: t.Final = "start_time"
     end_time: t.Final = "end_time"
     pointing_az: t.Final = "pointing_az"
     pointing_el: t.Final = "pointing_el"
@@ -73,9 +73,7 @@ class Schedule:
 
     meta: dict[int, ExperimentDetail]
 
-    # TODO: if `end_tstmp_ms` is not needed, this can be renamed to just `tstmp_ms`?
-    # TODO: `end_tstmp_ms` is v. likely not needed, rename it to just `time`? (and add docs that this is the start timestamp)
-    stt_tstmp_us: npt.NDArray[Datetime64_us]
+    start_time: npt.NDArray[Datetime64_us]
 
     # TODO: re-eval the size of `exp_num`
     exp_num: npt.NDArray[np.int64]
@@ -89,7 +87,7 @@ class Schedule:
 
         sch = Schedule(
             meta={},
-            stt_tstmp_us=np.empty(0, "datetime64[us]"),
+            start_time=np.empty(0, "datetime64[us]"),
             exp_num=np.empty(0, np.int64),
             pointing_az=np.empty(0, Float64_as_deg),
             pointing_el=np.empty(0, Float64_as_deg),
@@ -158,8 +156,8 @@ class Schedule:
         start_time, end_time = time_range
 
         sch_dt_s_arr_pass_mask: npt.NDArray[np.bool] = np.logical_and(
-            self.stt_tstmp_us >= start_time,
-            self.stt_tstmp_us <= end_time,
+            self.start_time >= start_time,
+            self.start_time <= end_time,
         )
 
         return sch_dt_s_arr_pass_mask
@@ -169,7 +167,7 @@ class Schedule:
 
         filtered_sch = Schedule(
             meta=self.meta,
-            stt_tstmp_us=self.stt_tstmp_us[mask],
+            start_time=self.start_time[mask],
             exp_num=self.exp_num[mask],
             pointing_az=self.pointing_az[mask],
             pointing_el=self.pointing_el[mask],

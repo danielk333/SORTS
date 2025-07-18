@@ -73,7 +73,7 @@ class RandomUniformScansController:
 
         # TODO: chk the math and add a plot function in test?
         ret_sch = Schedule(
-            stt_tstmp_us=np.arange(
+            start_time=np.arange(
                 stt_tstmp,
                 end_tstmp,
                 np.timedelta64((end_tstmp - stt_tstmp) / self.npoints),

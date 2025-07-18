@@ -87,7 +87,7 @@ class FenceScanController(ControllerProtocol):
 
         tx_schedule = Schedule(
             meta={},  # TODO: replace this dummy with actual implementation
-            stt_tstmp_us=self.start_time_us_arr[time_range_mask],
+            start_time=self.start_time_us_arr[time_range_mask],
             exp_num=np.full(schedule_size, self.exp_num, dtype=np.int64),
             pointing_az=tx_pointing[0],
             pointing_el=tx_pointing[1],
@@ -95,7 +95,7 @@ class FenceScanController(ControllerProtocol):
 
         rx_schedule = Schedule(
             meta={},  # TODO: replace this dummy with actual implementation
-            stt_tstmp_us=self.start_time_us_arr[time_range_mask],
+            start_time=self.start_time_us_arr[time_range_mask],
             exp_num=np.full(schedule_size, self.exp_num, dtype=np.int64),
             pointing_az=rx_pointing[0],
             pointing_el=rx_pointing[1],

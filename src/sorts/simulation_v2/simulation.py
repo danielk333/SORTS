@@ -75,7 +75,7 @@ class StxMrxSimulation(SimulationProtocol):
         rx_schedule = self.param.rx_schedules[rx_station_index]
 
         dt_s_arr: npt.NDArray[Float64_as_sec] = (
-            (rx_schedule.stt_tstmp_us - np.datetime64(epoch))
+            (rx_schedule.start_time - np.datetime64(epoch))
             .astype("timedelta64[us]")
             .astype(np.float64)
         ) * 1e-6
@@ -123,7 +123,7 @@ class StxMrxSimulation(SimulationProtocol):
         # TODO: vectorize
         tx_gain_arr = np.full((obs_size,), 0.0, dtype=np.float64)
         rx_gain_arr = np.full((obs_size,), 0.0, dtype=np.float64)
-        for idx, _ in enumerate(rx_schedule.stt_tstmp_us):
+        for idx, _ in enumerate(rx_schedule.start_time):
             tx_station.beam.sph_point(
                 tx_schedule.pointing_az[idx], tx_schedule.pointing_el[idx], degrees=True
             )
