@@ -15,6 +15,7 @@ from sorts.schedule_v2 import Schedule
 logger = logging.getLogger(__name__)
 
 
+# TODO: add time based binning and aggregation
 def schedule_plot_bokeh(
     schedule: Schedule, start_time: datetime | None = None, end_time: datetime | None = None
 ):
@@ -23,7 +24,7 @@ def schedule_plot_bokeh(
     Plotting the full schedule can be computationally demanding and lead to application crashes.
     Limiting the plot range by `start_time` and `end_time` param is recommended.
 
-    A good starting point is a 1 hour time range.
+    Without aggregations, a good starting point is a 5 minutes time range.
     """
 
     df = schedule.as_dataframe()
@@ -47,6 +48,12 @@ def schedule_plot_bokeh(
     bar.hbar(
         y=df[schedule.cn.exp_num], left=df[schedule.cn.start_time], right=df[schedule.cn.end_time]  # type: ignore
     )
+    bar_xpan_tool = bokeh_models.PanTool(dimensions="width")
+    bar_xwheel_zoom_tool = bokeh_models.WheelZoomTool(dimensions="width")
+    bar.add_tools(bar_xpan_tool)
+    bar.add_tools(bar_xwheel_zoom_tool)
+    bar.toolbar.active_drag = bar_xpan_tool
+    bar.toolbar.active_scroll = bar_xwheel_zoom_tool
 
     minimap = bp.figure(
         title="Drag the middle and edges of the selection box to change the range above",
