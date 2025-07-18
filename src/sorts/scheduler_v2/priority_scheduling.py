@@ -41,7 +41,9 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule]):
         # we use a "stable" sorting algo to retains relative order,
         # so the df will be in order of start_time, then priority after sorting
         merged_sch_df = pd.concat([merged_sch_df, sch_df])
-        merged_sch_df = merged_sch_df.sort_values(Cn.start_time, kind="stable")
+        merged_sch_df = merged_sch_df.sort_values(Cn.start_time, kind="stable").reset_index(
+            drop=True
+        )  # TODO: re-eval if we should use start_time as index
 
         is_new_rows = merged_sch_df[cn_allowed_start_time].isna()
 
@@ -70,11 +72,12 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule]):
             Cn.end_time
         ].iloc[-1]
 
-    # TODO: should return a `Schedule` object instead; maybe optionally returns the df for easier debugging/exploration?
+    merged_sch_df = merged_sch_df.reset_index(drop=True)
+
     return merged_sch_df
 
 
-def priority_scheduling(schs: t.Sequence[Schedule], meta: dict[int, ExperimentDetail]):
+def priority_scheduling(schs: t.Sequence[Schedule], meta: dict[int, ExperimentDetail]) -> Schedule:
     """
     Merge a sequence of schedules for a single station into one,
     schedule with lower index in the sequence is given priority over those with higher index.
