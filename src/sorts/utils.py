@@ -65,3 +65,17 @@ def to_datetime64_us(d: Datetime_like) -> Datetime64_us:
             return t.cast(np.datetime64, d.to_value("datetime64")).astype("datetime64[us]")
         case _:
             raise RuntimeError(f"Convertion from {type(d)} to `datetime64[us]` is not supported.")
+
+
+def to_pydatetime(d: Datetime_like) -> datetime:
+    match d:
+        case datetime():
+            return d
+        case str():
+            return np.datetime64(d, "us").astype(datetime)
+        case datetime():
+            return d.astype(datetime)
+        case Time():
+            return t.cast(datetime, d.to_datetime())
+        case _:
+            raise RuntimeError(f"Convertion from {type(d)} to `datetime64[us]` is not supported.")
