@@ -4,6 +4,8 @@ from sorts.simulation_v2.observation import Observation
 logger = logging.getLogger(__name__)
 
 
+# TODO: maybe this can be removed and just allow simulation to be
+#   flexible on how they should be used and what their output should be
 class SimulationProtocol(t.Protocol):
     """Defines the top level API of a simulation object"""
 
@@ -14,4 +16,4 @@ class SimulationProtocol(t.Protocol):
         """
         ...
 
-    def calculate_observations(self) -> list[list[Observation]]: ...
+    def calculate_observations(self) -> list[Observation]: ...

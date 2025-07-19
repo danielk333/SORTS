@@ -154,6 +154,8 @@ class StxMrxSimulation(SimulationProtocol):
         # TODO: add `blind_ranges:` support
 
         obs = Observation(
+            id=f"{rx_station_index}-{time_range}",  # TODO: revisit
+            space_object_id=space_object.oid,
             time_range=time_range,
             snr=snr,
             range=range_tx_m + range_rx_m,
@@ -186,8 +188,8 @@ class StxMrxSimulation(SimulationProtocol):
 
         return spobjs_smpl_dt_s_arr, spobjs_smpl_states
 
-    def calculate_observations(self) -> list[list[Observation]]:
-        obss: list[list[Observation]] = []
+    def calculate_observations(self) -> list[Observation]:
+        obss: list[Observation] = []
 
         spobjs_smpl_dt_s_arr, spobjs_smpl_states = self.propagate_and_sample_space_objects_states()
         spobjs_states_interps = [
@@ -236,7 +238,7 @@ class StxMrxSimulation(SimulationProtocol):
                 ]
             ]
 
-            obss.append(obs_for_spobj)
+            obss.extend(obs_for_spobj)
 
         return obss
 

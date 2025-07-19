@@ -100,7 +100,7 @@ sim = StxMrxSimulation(
 # sim.run()
 obss = sim.calculate_observations()
 
-obs = obss[0][0]
+obs = obss[0]
 rx_sch_pass_mask = sim.param.rx_schedules[0].create_mask_by_time_range(obs.time_range)
 rx_sch_pass = sim.param.rx_schedules[0].filter_by_mask(rx_sch_pass_mask)
 

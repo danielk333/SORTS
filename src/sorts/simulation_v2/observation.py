@@ -39,6 +39,9 @@ class DataFrameColumnNames:
 # TODO: re-eval what fields are needed
 @dataclass
 class Observation:
+    id: str
+    space_object_id: int
+
     time_range: tuple[Datetime64_us, Datetime64_us]
     """The start time and end time of the observation, inclusive on both ends"""
 

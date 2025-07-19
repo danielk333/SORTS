@@ -121,7 +121,7 @@ sim = StxMrxSimulation(
 if Path(pickle_fpath).is_file():
     with open(pickle_fpath, "rb") as f:
         saved_data = pickle.load(f)
-        obss: list[list[sortsV2.simulation.Observation]] = saved_data["obss"]
+        obss: list[sortsV2.simulation.Observation] = saved_data["obss"]
         calc_time = saved_data["calc_time"]
         spobjs_states_interps = saved_data["spobjs_states_interps"]
 else:
@@ -147,13 +147,11 @@ else:
 ##
 
 # find the index of the space objects which has non-empty observation list
-nonempty_obss_idx_ls = [
-    x[0] for x in filter(lambda x: len(x[1]) != 0, enumerate(obss[space_objects_slice]))
-]
-print(f"space object with observations: {nonempty_obss_idx_ls}")
-target_spobj_idx = nonempty_obss_idx_ls[0]
+nonempty_obss_spobj_idx_ls = [obs.space_object_id for obs in obss]
+print(f"space object with observations: {nonempty_obss_spobj_idx_ls}")
+target_spobj_idx = nonempty_obss_spobj_idx_ls[0]
 
-obs = obss[target_spobj_idx][0]
+obs = next((obs for obs in obss if obs.space_object_id == target_spobj_idx))
 rx_sch_pass_mask = sim.param.rx_schedules[0].create_mask_by_time_range(obs.time_range)
 rx_sch_pass = sim.param.rx_schedules[0].filter_by_mask(rx_sch_pass_mask)
 
@@ -204,9 +202,9 @@ plotter = pv.Plotter()
 dt_s_arr_path = np.arange(-3600, 3600, 60, dtype=np.float64)
 obs_splines: list[pv.PolyData] = []
 path_splines: list[pv.PolyData] = []
-for target_spobj_idx in nonempty_obss_idx_ls[:]:
+for target_spobj_idx in nonempty_obss_spobj_idx_ls[:]:
     # for target_spobj_idx in [nonempty_obss_idx_ls[1]]: # plot just 1 spobj for debugging
-    spobj = space_objects[target_spobj_idx]
+    spobj = next(spobj for spobj in space_objects if spobj.oid == target_spobj_idx)
     spobjs_states_interp = spobjs_states_interps[target_spobj_idx]
 
     path_pts = spobj.get_state(dt_s_arr_path)[:3].T
