@@ -11,6 +11,14 @@ import pyant
 # Local import
 from .. import frames
 
+# TODO: check with daniel on how this work with other parts of the repo
+RadarStationCompositeKey = tuple[str, ...]
+"""
+A structured unique identifer for a station of a radar.
+
+Intended to be used as the uid of a `Station` object.
+"""
+
 
 class Station(object):
     """A radar station.
@@ -35,7 +43,7 @@ class Station(object):
 
     """
 
-    def __init__(self, lat, lon, alt, min_elevation, beam, uid=None):
+    def __init__(self, lat, lon, alt, min_elevation, beam, uid: RadarStationCompositeKey = ()):
         self.lat = lat
         self.lon = lon
         self.alt = alt
@@ -164,7 +172,7 @@ class RX(Station):
     :ivar float noise: Receiver noise in Kelvin, i.e. system temperature.
     """
 
-    def __init__(self, lat, lon, alt, min_elevation, beam, noise, uid=None):
+    def __init__(self, lat, lon, alt, min_elevation, beam, noise, uid: RadarStationCompositeKey = ()):
         super().__init__(lat, lon, alt, min_elevation, beam, uid=uid)
         self.noise = noise
 
@@ -215,7 +223,7 @@ class TX(Station):
         pulse_length=1e-3,
         ipp=10e-3,
         n_ipp=20,
-        uid=None,
+        uid: RadarStationCompositeKey = (),
     ):
         super().__init__(lat, lon, alt, min_elevation, beam, uid=uid)
 

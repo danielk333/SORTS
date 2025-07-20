@@ -2,7 +2,7 @@ import logging, typing as t
 from dataclasses import dataclass, fields
 from datetime import datetime
 import pandas as pd
-from sorts.radar.radars.composite_key import RadarStationCompositeKey
+from sorts.radar.tx_rx import RadarStationCompositeKey
 from sorts.schedule_v2 import Schedule
 from sorts.controller_v2 import ControllerProtocol
 

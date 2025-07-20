@@ -41,8 +41,8 @@ class DataFrameColumnNames:
 
         return [
             t.cast(str, v)
-            for v in vars(DataFrameColumnNames).values()
-            if not isinstance(v, classmethod)
+            for k, v in vars(DataFrameColumnNames).items()
+            if (not k.startswith("__")) and (not isinstance(v, classmethod))
         ]
 
     @classmethod
@@ -104,7 +104,12 @@ class Observation:
 
     def to_flat_dict(self):
         d = {
-            **{c: getattr(self.passage, c) for c in DataFrameColumnNames.all_for_passage()},
+            **{
+                self.dfc.space_object_id: self.passage.space_object.oid,
+                self.dfc.tx_station_id: self.passage.tx_station.uid,
+                self.dfc.rx_station_id: self.passage.rx_station.uid,
+                self.dfc.time_range: self.passage.time_range,
+            },
             **{c: getattr(self, c) for c in DataFrameColumnNames.all_for_observation()},
         }
         return d

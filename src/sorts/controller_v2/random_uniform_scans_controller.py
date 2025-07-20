@@ -2,7 +2,7 @@ import logging, math
 from dataclasses import dataclass
 from datetime import timedelta
 import numpy as np
-from sorts.radar.radars.composite_key import RadarStationCompositeKey
+from sorts.radar.tx_rx import RadarStationCompositeKey
 from sorts.schedule_v2 import Schedule
 
 logger = logging.getLogger(__name__)

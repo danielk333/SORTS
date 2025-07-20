@@ -5,6 +5,6 @@
 """
 
 from .scans import Scan
-from .tx_rx import Station, TX, RX
+from .tx_rx import Station, TX, RX, RadarStationCompositeKey
 
 from .radars import get_radar, list_radars

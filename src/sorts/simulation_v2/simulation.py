@@ -156,7 +156,7 @@ class StxMrxSimulation:
         obs = Observation(
             id=f"{rx_station_index}-{time_range}",  # TODO: revisit
             passage=Passage(
-                space_object_id=space_object.oid,
+                space_object=space_object,
                 tx_station=tx_station,
                 rx_station=rx_station,
                 time_range=time_range,
