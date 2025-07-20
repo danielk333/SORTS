@@ -58,28 +58,32 @@ class StxMrxSimulation:
     #   tx-rx time difference is used to calc range so this cannot be true.
     #   likely it is a related assumption regarding similar terms (e.g. in schedule), and should be cleaned up.
     # TODO: we need mask per (tx, rx) schedule?
-    def calculate_observation_per_rx_station(
+    def calculate_observation_per_passage(
         self,
-        rx_station_index: int,
-        space_object: sorts.SpaceObject,
+        passage: Passage,
         space_object_states_interpolator: Interpolator,
+        # TODO: can be moved inside `Passage`?
         epoch: datetime,
-        # TODO: remove, and calc the mask using `start_time`, `end_time` ?
-        schedule_mask: npt.NDArray[np.bool] | None,
-        time_range: tuple[Datetime64_us, Datetime64_us],
     ) -> Observation:
-        tx_station = self.param.tx_station
+        # TODO: can probably be simplified?
+        rx_station_index = next(
+            (i for i, s in enumerate(self.param.rx_stations) if s.uid == passage.rx_station.uid)
+        )
+
+        tx_station = passage.tx_station
         tx_schedule = self.param.tx_schedule
-        rx_station = self.param.rx_stations[rx_station_index]
+        rx_station = passage.rx_station
         rx_schedule = self.param.rx_schedules[rx_station_index]
+
+        schedule_mask = self.param.rx_schedules[rx_station_index].create_mask_by_time_range(
+            passage.time_range
+        )
 
         dt_s_arr: npt.NDArray[Float64_as_sec] = (
             (rx_schedule.start_time - np.datetime64(epoch))
             .astype("timedelta64[us]")
             .astype(np.float64)
         ) * 1e-6
-        tx_schedule = tx_schedule
-        rx_schedule = rx_schedule
 
         # apply mask if it exists
         if schedule_mask is not None:
@@ -143,22 +147,22 @@ class StxMrxSimulation:
             powers[0],  # TODO: improve: hard-coded from `exp_detail`
             range_tx_m,
             range_rx_m,
-            diameter=space_object.d,
+            diameter=passage.space_object.d,
             bandwidth=bandwidths[0],  # TODO: improve: hard-coded from `exp_detail`
             rx_noise_temp=rx_noise_temps[0],  # TODO: improve: hard-coded from `exp_detail`
-            radar_albedo=space_object.parameters.get("radar_albedo", 1.0),
+            radar_albedo=passage.space_object.parameters.get("radar_albedo", 1.0),
         )
 
         # TODO: add `doppler_spread_integrated_snr:` support
         # TODO: add `blind_ranges:` support
 
         obs = Observation(
-            id=f"{rx_station_index}-{time_range}",  # TODO: revisit
+            id=f"{rx_station_index}-{passage.time_range}",  # TODO: revisit
             passage=Passage(
-                space_object=space_object,
+                space_object=passage.space_object,
                 tx_station=tx_station,
                 rx_station=rx_station,
-                time_range=time_range,
+                time_range=passage.time_range,
             ),
             snr=snr,
             range=range_tx_m + range_rx_m,
@@ -226,18 +230,10 @@ class StxMrxSimulation:
             # TODO: improvements needed; this is only works for StxSrx case, where calculate_observation gives out 1 element list
             # TODO: use for-loop + mutation instead of nested for-comprehension for better readability
             for passage in passages:
-                # TODO: was a tmp solution; this param should probably be removed
-                rx_station_index = int(passage.rx_station.uid[-1])
-
-                obs = self.calculate_observation_per_rx_station(
-                    rx_station_index=rx_station_index,
-                    space_object=spobj,
+                obs = self.calculate_observation_per_passage(
+                    passage=passage,
                     space_object_states_interpolator=spobj_states_interp,
                     epoch=self.param.epoch,
-                    schedule_mask=self.param.rx_schedules[
-                        rx_station_index
-                    ].create_mask_by_time_range(passage.time_range),
-                    time_range=passage.time_range,
                 )
                 obss.append(obs)
 
