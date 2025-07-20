@@ -147,11 +147,11 @@ else:
 ##
 
 # find the index of the space objects which has non-empty observation list
-nonempty_obss_spobj_idx_ls = [obs.passage.space_object_id for obs in obss]
+nonempty_obss_spobj_idx_ls = [obs.passage.space_object.oid for obs in obss]
 print(f"space object with observations: {nonempty_obss_spobj_idx_ls}")
 target_spobj_idx = nonempty_obss_spobj_idx_ls[0]
 
-obs = next((obs for obs in obss if obs.passage.space_object_id == target_spobj_idx))
+obs = next((obs for obs in obss if obs.passage.space_object.oid == target_spobj_idx))
 rx_sch_pass_mask = sim.param.rx_schedules[0].create_mask_by_time_range(obs.passage.time_range)
 rx_sch_pass = sim.param.rx_schedules[0].filter_by_mask(rx_sch_pass_mask)
 
