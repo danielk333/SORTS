@@ -8,10 +8,9 @@ import sorts
 from sorts.interpolation import Interpolator
 from sorts.radar.tx_rx import Station
 from sorts.types import Float64_as_sec, Float64_as_m, EcefStates, Datetime64_us
-from sorts.simulation_v2.passage import Passage
+from sorts.simulation_v2.passage import Passage, find_passages
 from sorts.simulation_v2.observation import Observation
 from sorts.schedule_v2 import Schedule, ExperimentDetail
-from sorts.simulation_v2.helpers import find_simultaneous_passes_time_ranges
 
 logger = logging.getLogger(__name__)
 
@@ -26,8 +25,8 @@ class SpaceObjectDtSampler(t.Protocol):
 class StxMrxSimulationParam:
     tx_station: Station
     tx_schedule: Schedule
-    rx_stations: t.Sequence[Station]
-    rx_schedules: t.Sequence[Schedule]
+    rx_stations: list[Station]
+    rx_schedules: list[Schedule]
 
     exp_num_map: dict[int, ExperimentDetail]
 
@@ -212,37 +211,35 @@ class StxMrxSimulation:
             spobjs_smpl_states,
             spobjs_states_interps,
         ):
-            time_ranges = find_simultaneous_passes_time_ranges(
-                dt_s_arr=spobj_smpl_dt_s_arr,
-                states=spobj_smpl_states,
-                stations=[self.param.tx_station, *self.param.rx_stations],
-                epoch=self.param.epoch,
-            )
-            masks_for_spobj: list[npt.NDArray[np.bool]] = [
-                self.param.tx_schedule.create_mask_by_time_range(time_range)
-                for time_range in time_ranges
-            ]
+            passages: list[Passage] = []
+            for rx_station in self.param.rx_stations:
+                _passages = find_passages(
+                    dts=spobj_smpl_dt_s_arr,
+                    space_object=spobj,
+                    states=spobj_smpl_states,
+                    tx_station=self.param.tx_station,
+                    rx_station=rx_station,
+                    epoch=self.param.epoch,
+                )
+                passages.extend(_passages)
 
             # TODO: improvements needed; this is only works for StxSrx case, where calculate_observation gives out 1 element list
             # TODO: use for-loop + mutation instead of nested for-comprehension for better readability
-            obs_for_spobj: list[Observation] = [
-                obs
-                # TODO: remove enumerate; it was used as tmp replacement for `for mask in masks_for_spobj`
-                for time_range_idx, time_range in enumerate(time_ranges)
-                for obs in [
-                    self.calculate_observation_per_rx_station(
-                        idx,
-                        space_object=spobj,
-                        space_object_states_interpolator=spobj_states_interp,
-                        epoch=self.param.epoch,
-                        schedule_mask=masks_for_spobj[time_range_idx],
-                        time_range=time_range,
-                    )
-                    for idx in range(len(self.param.rx_stations))
-                ]
-            ]
+            for passage in passages:
+                # TODO: was a tmp solution; this param should probably be removed
+                rx_station_index = int(passage.rx_station.uid[-1])
 
-            obss.extend(obs_for_spobj)
+                obs = self.calculate_observation_per_rx_station(
+                    rx_station_index=rx_station_index,
+                    space_object=spobj,
+                    space_object_states_interpolator=spobj_states_interp,
+                    epoch=self.param.epoch,
+                    schedule_mask=self.param.rx_schedules[
+                        rx_station_index
+                    ].create_mask_by_time_range(passage.time_range),
+                    time_range=passage.time_range,
+                )
+                obss.append(obs)
 
         return obss
 

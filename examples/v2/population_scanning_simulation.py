@@ -96,11 +96,16 @@ space_objects = space_objects[space_objects_slice]
 print(f"clamped population size: {len(space_objects)}")
 
 
+tx_station: sorts.Station = eiscat3d.tx[0]
+tx_station.uid = ("eiscat3d", "stage1-array", "tx", "0")
+rx_station: sorts.Station = eiscat3d.rx[0]
+rx_station.uid = ("eiscat3d", "stage1-array", "rx", "0")
+
 sim = StxMrxSimulation(
     StxMrxSimulationParam(
-        tx_station=eiscat3d.tx[0],
+        tx_station=tx_station,
         tx_schedule=tx_schedule,
-        rx_stations=[eiscat3d.rx[0]],
+        rx_stations=[rx_station],
         rx_schedules=[rx_schedule],
         exp_num_map=exp_num_map,
         epoch=epoch,
