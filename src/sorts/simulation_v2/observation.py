@@ -5,6 +5,7 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 from sorts.types import Float64_as_deg, NDArray_3x1, Datetime64_us
+from sorts.simulation_v2.passage import Passage
 
 
 class DataFrameColumnNames:
@@ -18,8 +19,15 @@ class DataFrameColumnNames:
     # TODO: add test to ensure this file up-to-date with `Schedule class
 
     id: t.Final = "id"
+
+    # columns for Passage data
+    # passage_id: t.Final = "passage_id" # TODO: revisit if this is needed
     space_object_id: t.Final = "space_object_id"
+    tx_station_id: t.Final = "tx_station_id"
+    rx_station_id: t.Final = "rx_station_id"
     time_range: t.Final = "time_range"
+
+    # columns for Observation data
     snr: t.Final = "snr"
     range: t.Final = "range"
     range_rx: t.Final = "range_rx"
@@ -33,19 +41,29 @@ class DataFrameColumnNames:
 
         return [
             t.cast(str, v)
-            for k, v in vars(DataFrameColumnNames).items()
-            if (not k.startswith("__")) and (not isinstance(v, classmethod))
+            for v in vars(DataFrameColumnNames).values()
+            if not isinstance(v, classmethod)
         ]
+
+    @classmethod
+    def all_for_passage(cls) -> list[str]:
+        """Return a list of all column names for passage."""
+
+        return [cls.space_object_id, cls.tx_station_id, cls.rx_station_id, cls.time_range]
+
+    @classmethod
+    def all_for_observation(cls) -> list[str]:
+        """Return a list of all column names for observation."""
+
+        return [c for c in cls.all() if c not in cls.all_for_passage()]
 
 
 # TODO: re-eval what fields are needed
-@dataclass
+@dataclass(kw_only=True)
 class Observation:
     id: str
-    space_object_id: int
 
-    time_range: tuple[Datetime64_us, Datetime64_us]
-    """The start time and end time of the observation, inclusive on both ends"""
+    passage: Passage
 
     # TODO: exp_num/ExperimentDetails
 
@@ -75,9 +93,7 @@ class Observation:
 
     @classmethod
     def list_to_dataframe(cls, observations: list[Observation]):
-        df = pd.DataFrame(
-            [{c: getattr(obs, c) for c in DataFrameColumnNames.all()} for obs in observations]
-        )
+        df = pd.DataFrame([obs.to_flat_dict() for obs in observations])
         return df
 
     @property
@@ -86,6 +102,13 @@ class Observation:
 
         return DataFrameColumnNames
 
+    def to_flat_dict(self):
+        d = {
+            **{c: getattr(self.passage, c) for c in DataFrameColumnNames.all_for_passage()},
+            **{c: getattr(self, c) for c in DataFrameColumnNames.all_for_observation()},
+        }
+        return d
+
     def to_dataframe(self):
-        df = pd.DataFrame({c: getattr(self, c) for c in DataFrameColumnNames.all()})
+        df = pd.DataFrame(self.to_flat_dict())
         return df

@@ -8,6 +8,7 @@ import sorts
 from sorts.interpolation import Interpolator
 from sorts.radar.tx_rx import Station
 from sorts.types import Float64_as_sec, Float64_as_m, EcefStates, Datetime64_us
+from sorts.simulation_v2.passage import Passage
 from sorts.simulation_v2.observation import Observation
 from sorts.schedule_v2 import Schedule, ExperimentDetail
 from sorts.simulation_v2.simulation_protocol import SimulationProtocol
@@ -155,8 +156,12 @@ class StxMrxSimulation(SimulationProtocol):
 
         obs = Observation(
             id=f"{rx_station_index}-{time_range}",  # TODO: revisit
-            space_object_id=space_object.oid,
-            time_range=time_range,
+            passage=Passage(
+                space_object_id=space_object.oid,
+                tx_station=tx_station,
+                rx_station=rx_station,
+                time_range=time_range,
+            ),
             snr=snr,
             range=range_tx_m + range_rx_m,
             range_rx=range_rx_m,
