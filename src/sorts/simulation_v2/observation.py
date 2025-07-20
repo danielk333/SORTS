@@ -17,6 +17,8 @@ class DataFrameColumnNames:
 
     # TODO: add test to ensure this file up-to-date with `Schedule class
 
+    id: t.Final = "id"
+    space_object_id: t.Final = "space_object_id"
     time_range: t.Final = "time_range"
     snr: t.Final = "snr"
     range: t.Final = "range"
@@ -70,6 +72,13 @@ class Observation:
     # TODO: ENU should be a cartesian coordinate, sth seems wrong
     rx_k: NDArray_3x1[Float64_as_deg]
     """Pointing vector in ENU in deg, from rx station to the space object"""
+
+    @classmethod
+    def list_to_dataframe(cls, observations: list[Observation]):
+        df = pd.DataFrame(
+            [{c: getattr(obs, c) for c in DataFrameColumnNames.all()} for obs in observations]
+        )
+        return df
 
     @property
     def dfc(self):
