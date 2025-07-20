@@ -11,7 +11,6 @@ from sorts.types import Float64_as_sec, Float64_as_m, EcefStates, Datetime64_us
 from sorts.simulation_v2.passage import Passage
 from sorts.simulation_v2.observation import Observation
 from sorts.schedule_v2 import Schedule, ExperimentDetail
-from sorts.simulation_v2.simulation_protocol import SimulationProtocol
 from sorts.simulation_v2.helpers import find_simultaneous_passes_time_ranges
 
 logger = logging.getLogger(__name__)
@@ -47,7 +46,7 @@ class StxMrxSimulationParam:
 
 
 # TODO: further generalize it into MtxMrx?
-class StxMrxSimulation(SimulationProtocol):
+class StxMrxSimulation:
     def __init__(self, param: StxMrxSimulationParam):
         self.param = param
 
