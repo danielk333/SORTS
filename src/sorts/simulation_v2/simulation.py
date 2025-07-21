@@ -77,20 +77,19 @@ class StxMrxSimulation:
             passage.time_range
         )
 
-        dt_s_arr: npt.NDArray[Float64_as_sec] = (rx_schedule.start_time - passage.epoch).astype(
+        dsec: npt.NDArray[Float64_as_sec] = (rx_schedule.start_time - passage.epoch).astype(
             np.float64
         ) * 1e-6
 
         # apply mask if it exists
         if schedule_mask is not None:
-            dt_s_arr = dt_s_arr[schedule_mask]
+            dsec = dsec[schedule_mask]
             tx_schedule = tx_schedule.filter_by_mask(schedule_mask)
             rx_schedule = rx_schedule.filter_by_mask(schedule_mask)
 
-        obs_size = len(dt_s_arr)
+        obs_size = len(dsec)
 
-        # TODO: can probably be taken from the `simulation.find_passes`
-        spobj_states = space_object_states_interpolator.get_state(dt_s_arr)
+        spobj_states = space_object_states_interpolator.get_state(dsec)
         spobj_tx_enu = tx_station.enu(spobj_states)  # space object in tx station coordinate
         spobj_rx_enu = rx_station.enu(spobj_states)  # space object in rx station coordinate
 
@@ -209,7 +208,7 @@ class StxMrxSimulation:
             passages: list[Passage] = []
             for rx_station in self.param.rx_stations:
                 _passages = find_passages(
-                    dts=spobj_smpl_dt_s_arr,
+                    dt=spobj_smpl_dt_s_arr,
                     space_object=spobj,
                     states=spobj_smpl_states,
                     tx_station=self.param.tx_station,

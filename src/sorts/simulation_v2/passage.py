@@ -24,7 +24,7 @@ class Passage:
 
 
 def find_passages(
-    dts: npt.NDArray[Float64_as_sec],
+    dt: npt.NDArray[Float64_as_sec],
     space_object: SpaceObject,
     states: EcefStates,
     tx_station: Station,
@@ -44,7 +44,7 @@ def find_passages(
         fov_kw = {}
 
     enu = []
-    check = np.full((len(dts),), True, dtype=bool)
+    check = np.full((len(dt),), True, dtype=bool)
     for station in [tx_station, rx_station]:
         enu_st = station.enu(states)
         enu.append(enu_st)
@@ -69,11 +69,11 @@ def find_passages(
             continue
 
         start_time: Datetime64_us = t.cast(
-            np.timedelta64, (dts[ps_inds[0]] * 1e6).astype("timedelta64[us]")
+            np.timedelta64, (dt[ps_inds[0]] * 1e6).astype("timedelta64[us]")
         ) + np.datetime64(epoch)
 
         end_time: Datetime64_us = t.cast(
-            np.timedelta64, (dts[ps_inds[-1]] * 1e6).astype("timedelta64[us]")
+            np.timedelta64, (dt[ps_inds[-1]] * 1e6).astype("timedelta64[us]")
         ) + np.datetime64(epoch)
 
         time_range = (start_time, end_time)
