@@ -64,6 +64,8 @@ def hard_target_snr(
     rx_noise_temp=150.0,
     radar_albedo=1.0,
 ) -> npt.NDArray[np.float64]: ...
+
+
 @t.overload
 def hard_target_snr(
     gain_tx: float,
@@ -77,6 +79,8 @@ def hard_target_snr(
     rx_noise_temp=150.0,
     radar_albedo=1.0,
 ) -> float: ...
+
+
 def hard_target_snr(
     gain_tx: npt.NDArray[np.float64] | float,
     gain_rx: npt.NDArray[np.float64] | float,

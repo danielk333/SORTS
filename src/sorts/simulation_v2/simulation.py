@@ -118,7 +118,11 @@ class StxMrxSimulation:
             [self.param.exp_num_map[n].noise_temp for n in rx_schedule.exp_num], dtype=np.float64
         )
 
-        # TODO: vectorize
+        # TODO: check with daniel on how to vectorize
+        #   passing in a ndarray of pointing will trigger exception when calculating gain
+        #   refs:
+        #   - `pyant/beam.py` `L235` `assert vector_cnt <= max_vectors, "Too many vector valued parameters"`
+        #   - `pyant/models/array.py` `L185` `params, shape = self.get_parameters(ind, named=True, max_vectors=0)`
         tx_gain_arr = np.full((obs_size,), 0.0, dtype=np.float64)
         rx_gain_arr = np.full((obs_size,), 0.0, dtype=np.float64)
         for idx, _ in enumerate(rx_schedule.start_time):
