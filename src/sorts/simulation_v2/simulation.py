@@ -53,8 +53,7 @@ class StxMrxSimulation:
         #   need to be removed or exposed more properly
         self._spobjs_states_interps: list[Interpolator] = []
 
-    # TODO: rename to `calculate_observation_per_station_pass`?
-    # TODO: there is a note about assuming the tx and rx time difference is negligible.
+    # TODO: there was a note about assuming the tx and rx time difference is negligible.
     #   tx-rx time difference is used to calc range so this cannot be true.
     #   likely it is a related assumption regarding similar terms (e.g. in schedule), and should be cleaned up.
     # TODO: we need mask per (tx, rx) schedule?
@@ -220,7 +219,6 @@ class StxMrxSimulation:
                 passages.extend(_passages)
 
             # TODO: improvements needed; this is only works for StxSrx case, where calculate_observation gives out 1 element list
-            # TODO: use for-loop + mutation instead of nested for-comprehension for better readability
             for passage in passages:
                 obs = self.calculate_observation_per_passage(
                     passage=passage,
