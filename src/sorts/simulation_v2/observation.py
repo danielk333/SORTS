@@ -25,6 +25,7 @@ class DataFrameColumnNames:
     space_object_id: t.Final = "space_object_id"
     tx_station_id: t.Final = "tx_station_id"
     rx_station_id: t.Final = "rx_station_id"
+    epoch: t.Final = "epoch"
     time_range: t.Final = "time_range"
 
     # columns for Observation data
@@ -108,6 +109,7 @@ class Observation:
                 self.dfc.space_object_id: self.passage.space_object.oid,
                 self.dfc.tx_station_id: self.passage.tx_station.uid,
                 self.dfc.rx_station_id: self.passage.rx_station.uid,
+                self.dfc.epoch: self.passage.epoch,
                 self.dfc.time_range: self.passage.time_range,
             },
             **{c: getattr(self, c) for c in DataFrameColumnNames.all_for_observation()},

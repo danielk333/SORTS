@@ -3,7 +3,8 @@ from datetime import datetime
 from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
-from sorts.types import Datetime64_us, EcefStates, Float64_as_sec
+from sorts.types import Datetime64_us, EcefStates, Float64_as_sec, Datetime_like
+from sorts.utils import to_datetime64_us
 from sorts.radar.tx_rx import Station
 from sorts.space_object import SpaceObject
 
@@ -16,6 +17,8 @@ class Passage:
     space_object: SpaceObject
     tx_station: Station
     rx_station: Station
+    rx_station: Station
+    epoch: Datetime64_us
     time_range: tuple[Datetime64_us, Datetime64_us]
     """The start time and end time of the passage, inclusive on both ends"""
 
@@ -26,13 +29,15 @@ def find_passages(
     states: EcefStates,
     tx_station: Station,
     rx_station: Station,
-    epoch: datetime,
+    epoch: Datetime_like,
     fov_kw=None,
 ) -> list[Passage]:
     """
     Finds all find_passages that are simultaneously inside a tx-rx station pair's FOV.
     """
     # NOTE: based on the `find_passes` func in `src/sorts/passes.py`
+
+    epoch = to_datetime64_us(epoch)
 
     passages: list[Passage] = []
     if fov_kw is None:
@@ -77,6 +82,7 @@ def find_passages(
                 space_object=space_object,
                 tx_station=tx_station,
                 rx_station=rx_station,
+                epoch=epoch,
                 time_range=time_range,
             )
         )

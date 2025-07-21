@@ -62,8 +62,6 @@ class StxMrxSimulation:
         self,
         passage: Passage,
         space_object_states_interpolator: Interpolator,
-        # TODO: can be moved inside `Passage`?
-        epoch: datetime,
     ) -> Observation:
         # TODO: can probably be simplified?
         rx_station_index = next(
@@ -79,10 +77,8 @@ class StxMrxSimulation:
             passage.time_range
         )
 
-        dt_s_arr: npt.NDArray[Float64_as_sec] = (
-            (rx_schedule.start_time - np.datetime64(epoch))
-            .astype("timedelta64[us]")
-            .astype(np.float64)
+        dt_s_arr: npt.NDArray[Float64_as_sec] = (rx_schedule.start_time - passage.epoch).astype(
+            np.float64
         ) * 1e-6
 
         # apply mask if it exists
@@ -158,12 +154,7 @@ class StxMrxSimulation:
 
         obs = Observation(
             id=f"{rx_station_index}-{passage.time_range}",  # TODO: revisit
-            passage=Passage(
-                space_object=passage.space_object,
-                tx_station=tx_station,
-                rx_station=rx_station,
-                time_range=passage.time_range,
-            ),
+            passage=passage,
             snr=snr,
             range=range_tx_m + range_rx_m,
             range_rx=range_rx_m,
@@ -233,7 +224,6 @@ class StxMrxSimulation:
                 obs = self.calculate_observation_per_passage(
                     passage=passage,
                     space_object_states_interpolator=spobj_states_interp,
-                    epoch=self.param.epoch,
                 )
                 obss.append(obs)
 
