@@ -169,7 +169,7 @@ class StxMrxSimulation:
         Use the sampler the get the delta time of space object within the simulation `start_time` and `end_time`
         """
 
-        spobjs_smpl_dt_s_arr: list[npt.NDArray[Float64_as_sec]] = [
+        spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]] = [
             self.param.space_objects_dt_sampler_s(
                 spobj.state,
                 self.param.start_time,
@@ -179,36 +179,34 @@ class StxMrxSimulation:
         ]
 
         spobjs_smpl_states: list[EcefStates] = [
-            spobj.get_state(spobj_smpl_dt_s_arr)
-            for spobj, spobj_smpl_dt_s_arr in zip(self.param.space_objects, spobjs_smpl_dt_s_arr)
+            spobj.get_state(spobj_smpl_dsec)
+            for spobj, spobj_smpl_dsec in zip(self.param.space_objects, spobjs_smpl_dsec)
         ]
 
-        return spobjs_smpl_dt_s_arr, spobjs_smpl_states
+        return spobjs_smpl_dsec, spobjs_smpl_states
 
     def calculate_observations(self) -> list[Observation]:
         obss: list[Observation] = []
 
-        spobjs_smpl_dt_s_arr, spobjs_smpl_states = self.propagate_and_sample_space_objects_states()
+        spobjs_smpl_dsec, spobjs_smpl_states = self.propagate_and_sample_space_objects_states()
         spobjs_states_interps = [
             create_space_object_states_interpolator(
-                self.param.space_objects_dt_interpolator_s, spobj_smpl_states, spobj_smpl_dt_s_arr
+                self.param.space_objects_dt_interpolator_s, spobj_smpl_states, spobj_smpl_dsec
             )
-            for spobj_smpl_dt_s_arr, spobj_smpl_states in zip(
-                spobjs_smpl_dt_s_arr, spobjs_smpl_states
-            )
+            for spobj_smpl_dsec, spobj_smpl_states in zip(spobjs_smpl_dsec, spobjs_smpl_states)
         ]
         self._spobjs_states_interps = spobjs_states_interps
 
-        for spobj, spobj_smpl_dt_s_arr, spobj_smpl_states, spobj_states_interp in zip(
+        for spobj, spobj_smpl_dsec, spobj_smpl_states, spobj_states_interp in zip(
             self.param.space_objects,
-            spobjs_smpl_dt_s_arr,
+            spobjs_smpl_dsec,
             spobjs_smpl_states,
             spobjs_states_interps,
         ):
             passages: list[Passage] = []
             for rx_station in self.param.rx_stations:
                 _passages = find_passages(
-                    dt=spobj_smpl_dt_s_arr,
+                    dt=spobj_smpl_dsec,
                     space_object=spobj,
                     states=spobj_smpl_states,
                     tx_station=self.param.tx_station,
