@@ -126,8 +126,7 @@ class Schedule:
 
         return DataFrameColumnNames
 
-    # TODO: rename to `to_dataframe`?
-    def as_dataframe(self) -> pd.DataFrame:
+    def to_slices_dataframe(self) -> pd.DataFrame:
         """
         Convert `Schedule` into a pandas `DataFrame`.
 

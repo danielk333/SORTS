@@ -55,7 +55,7 @@ def schedule_plot_bokeh(
     Without aggregations, a good starting point is a 5 minutes time range.
     """
 
-    df = schedule.as_dataframe()
+    df = schedule.to_slices_dataframe()
 
     start_time = start_time if start_time is not None else df[schedule.cn.start_time].min()
     end_time = end_time if end_time is not None else df[schedule.cn.start_time].max()
@@ -107,7 +107,7 @@ def schedule_plot_bokeh(
 
 
 def schedule_plot(schedule: Schedule):
-    df = schedule.as_dataframe()
+    df = schedule.to_slices_dataframe()
 
     # additional column names
     cn_index = "index"
