@@ -55,7 +55,7 @@ class TrackerController:
             point_ecef(self.tx_station, self.space_object_states[:3]), degrees=True
         )
         rxs_pointings: list[AzelrCoordinates_DegM] = [
-            cart_to_sph(point_ecef(rx_station, self.space_object_states[:3]))
+            cart_to_sph(point_ecef(rx_station, self.space_object_states[:3]), degrees=True)
             for rx_station in self.rx_stations
         ]
 
