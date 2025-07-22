@@ -51,6 +51,11 @@ class FenceScanController:
         #         f"The specified time range ({self.start_time.isoformat()} to {self.end_time.isoformat()}) "
         #         + f"cannot be smaller than the dwell ({self.dwell_s} sec)."
         #     )
+
+        if len(self.scan_range) > 1:
+            raise NotImplementedError(
+                "Support for multiple pointings per control slice is not implemented yet."
+            )
         pass
 
     def generate(

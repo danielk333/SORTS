@@ -45,7 +45,8 @@ def FenceScanController_smoke_test():
         azimuth=90,  # sweep from east to west
         min_elevation=30,
         pointings_per_cycle=40,
-        scan_range=np.linspace(300e3, 1000e3, num=10, dtype=np.float64),
+        # scan_range=np.linspace(300e3, 1000e3, num=10, dtype=np.float64),  # Not yet supportted
+        scan_range=np.array([300e3], dtype=np.float64),
     )
 
     schs = fenceScanController.generate(Time(start_time_np), Time(end_time_np))
