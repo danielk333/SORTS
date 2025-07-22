@@ -25,30 +25,30 @@ def wrap_latitudes_longitudes(
 
 
 def wrap_azimuths_elevations(
-    az: npt.NDArray[Float64_as_deg], el: npt.NDArray[Float64_as_deg]
+    az: npt.NDArray[Float64_as_deg],
+    el: npt.NDArray[Float64_as_deg],
+    el_limit: t.Literal[90] | t.Literal[180] = 90,
 ) -> tuple[npt.NDArray[Float64_as_deg], npt.NDArray[Float64_as_deg]]:
     """
-    Wrap azimuths and elevations so that they stay within [-180, 180) and [0, 90]
+    Wrap azimuths and elevations so that they stay within [-180, 180) and [0, 90] (or [0, 180])
 
     Returns `(wrapped_azimuths, wrapped_elevations)` tuple
 
     - When an elevation wraps, the corresponding azimuth value is flipped (added 180deg)
-    - Negative elevation will trigger exception
+    - `el_limit` controls whether elevations are wrapped to [0, 90] or [0, 180]
     """
 
-    # throw exception if there are negative elevation(s)
-    neg_el_mask = el < 0
-    first_neg_el_idx = np.argmax(neg_el_mask) if np.any(neg_el_mask) else None
-    if first_neg_el_idx is not None:
-        raise RuntimeError(
-            f"There are negative elevation(s), which is invalid. e.g. at [{first_neg_el_idx}]: {el[first_neg_el_idx]}"
-        )
+    el = el % 180
 
-    el_wrapped = (el) % 90
-    flips = (el) // 90
-    az_wrapped = (((az + 180) + (flips * 180)) % 360) - 180
+    if el_limit == 180:
+        return (az, el)
 
-    return (az_wrapped, el_wrapped)
+    else:
+        el_wrapped = (el) % 90
+        flips = (el) // 90
+        az_wrapped = (((az + 180) + (flips * 180)) % 360) - 180
+
+        return (az_wrapped, el_wrapped)
 
 
 def to_datetime64_us(d: Datetime_like) -> Datetime64_us:
