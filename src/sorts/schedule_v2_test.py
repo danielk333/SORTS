@@ -44,7 +44,7 @@ def Schedule_dataframe_roundtrip_conversion_test():
         pointing_el=pointing_el.copy(),
     )
 
-    converted_sch = Schedule.from_dataframe(sch.to_slices_dataframe(), sch.meta)
+    converted_sch = Schedule.from_dataframe(sch.to_dataframe(), sch.meta)
 
     assert meta == converted_sch.meta
     assert np.array_equal(start_time, converted_sch.start_time)

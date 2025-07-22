@@ -111,6 +111,6 @@ def priority_scheduling_smoke_test():
     }
 
     merged_sch = priority_scheduling([tx_sch_1, tx_sch_2], sch_meta)
-    merged_sch_df = merged_sch.to_slices_dataframe()
+    merged_sch_df = merged_sch.to_dataframe()
 
     return
