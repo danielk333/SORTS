@@ -66,10 +66,11 @@ class FenceScanController:
         # 0. the pointings are repetitive so we will generate one cycle of them and then repeat the cycle
         # 1. generate the a cycle of pointings of tx station
         # 2. repeat it to form the tx schedule
-        # 3. from the single cycle of tx pointings, we convert it into ECEF coord and extend them by the `scan_range`,
-        #    these will be the rx station pointings of a cycle in ECEF coord
-        # 4. from the rx station pointing targets of a cycle in ECEF coord,
-        #    we convert them back to rx station pointings and repeat them to form a rx schedule, for each rx station
+        # 3. from the single cycle of tx pointings, we convert it into ECEF location coord and extend them by the `scan_range`
+        # 4. using the resultant location coords from previous step,
+        #    we convert them to rx station pointings of a cycle in ECEF coord,
+        #    and then further back to pointings in AzEl coord,
+        #    and finally repeat them to form a rx schedule, for each rx station
 
         start_time_np = to_datetime64_us(start_time)
         end_time_np = to_datetime64_us(end_time)
@@ -112,12 +113,15 @@ class FenceScanController:
             el=tx_pointings_of_a_cycle[1],
             degrees=True,
         )
-        rx_pointings_of_a_cycle_ecef: EcefCoordinates = (
+        rx_pointing_loc_of_a_cycle_ecef: EcefCoordinates = (
             tx_pointings_of_a_cycle_ecef[:, :, np.newaxis] * scan_range[np.newaxis, np.newaxis, :]
             + self.tx_station.ecef[:, np.newaxis, np.newaxis]
         ).reshape((3, -1))
 
         for rx_station in self.rx_stations:
+            rx_pointings_of_a_cycle_ecef: EcefCoordinates = (
+                rx_pointing_loc_of_a_cycle_ecef - rx_station.ecef[:, np.newaxis]
+            )
             rx_pointings_of_a_cycle_enu: EnuCoordinates = ecef_to_enu(
                 lat=rx_station.ecef_lat,
                 lon=rx_station.ecef_lon,
