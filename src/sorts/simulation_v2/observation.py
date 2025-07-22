@@ -50,13 +50,26 @@ class DataFrameColumnNames:
     def all_for_passage(cls) -> list[str]:
         """Return a list of all column names for passage."""
 
-        return [cls.space_object_id, cls.tx_station_id, cls.rx_station_id, cls.time_range]
+        return [
+            cls.space_object_id,
+            cls.tx_station_id,
+            cls.rx_station_id,
+            cls.epoch,
+            cls.time_range,
+        ]
 
     @classmethod
     def all_for_observation(cls) -> list[str]:
         """Return a list of all column names for observation."""
 
-        return [c for c in cls.all() if c not in cls.all_for_passage()]
+        return [
+            cls.snr,
+            cls.range,
+            cls.range_rx,
+            cls.range_rate,
+            cls.tx_k,
+            cls.rx_k,
+        ]
 
 
 # TODO: re-eval what fields are needed
