@@ -6,10 +6,6 @@ from astropy.time import Time
 from sorts.types import Datetime64_us, Float64_as_deg, Datetime_like
 
 
-def astropy_time_to_datetime64_us(time: Time) -> Datetime64_us:
-    return t.cast(np.datetime64, time.to_value("datetime64")).astype("datetime64[us]")
-
-
 def wrap_latitudes_longitudes(
     lat: npt.NDArray[Float64_as_deg], lon: npt.NDArray[Float64_as_deg]
 ) -> tuple[npt.NDArray[Float64_as_deg], npt.NDArray[Float64_as_deg]]:

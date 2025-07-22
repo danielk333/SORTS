@@ -17,9 +17,8 @@ def FenceScanController_smoke_test():
     Check if the `FenceScanController` can be initialize and generate schedule(s) with correct length in a basic settings.
 
     Note: only tx schedule is checked at the moment
-
-    TODO: should also check if other fields are correct
     """
+    # TODO: should also check if other fields are correct
 
     start_time_np = np.datetime64("2025-06-30 00:00:00", "us")
     end_time_np = np.datetime64("2025-06-30 00:00:01", "us")
@@ -41,11 +40,12 @@ def FenceScanController_smoke_test():
 
     fenceScanController = FenceScanController(
         tx_station=eiscat3d.tx[0],
-        rx_station=[],
+        rx_stations=[eiscat3d.tx[0]],
         exp_datail=exp_detail_1,
         azimuth=90,  # sweep from east to west
         min_elevation=30,
         pointings_per_cycle=40,
+        scan_range=np.linspace(300e3, 1000e3, num=10, dtype=np.float64),
     )
 
     schs = fenceScanController.generate(Time(start_time_np), Time(end_time_np))

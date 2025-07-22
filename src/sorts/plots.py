@@ -42,6 +42,8 @@ def space_object_population_table_plot(population: Population):
 
 
 # TODO: add time based binning and aggregation
+# TODO: might not work that well for rx schedule, because they might have multiple pointings per slices
+# TODO: also plot pointings?
 def schedule_plot_bokeh(
     schedule: Schedule, start_time: datetime | None = None, end_time: datetime | None = None
 ):

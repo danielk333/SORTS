@@ -25,8 +25,8 @@ class SpaceObjectDtSampler(t.Protocol):
 class StxMrxSimulationParam:
     tx_station: Station
     tx_schedule: Schedule
-    rx_stations: list[Station]
-    rx_schedules: list[Schedule]
+    rx_stations: t.Sequence[Station]
+    rx_schedules: t.Sequence[Schedule]
 
     exp_num_map: dict[int, ExperimentDetail]
 
@@ -34,7 +34,7 @@ class StxMrxSimulationParam:
     start_time: datetime
     end_time: datetime
 
-    space_objects: list[sorts.SpaceObject]
+    space_objects: t.Sequence[sorts.SpaceObject]
 
     # TODO: support different sampler for different obj?
     # TODO: probably taking a function + a args/kwargs obj is more pythonic

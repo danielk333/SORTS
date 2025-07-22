@@ -1,10 +1,18 @@
 import logging, math, typing as t
 from dataclasses import dataclass
 import numpy as np
+import numpy.typing as npt
 from astropy.time import Time
 from sorts.radar.tx_rx import Station
-from sorts.types import Float_as_deg, AzelrCoordinates_DegM
-from sorts.utils import astropy_time_to_datetime64_us
+from sorts.frames import azel_to_ecef, ecef_to_enu, cart_to_sph
+from sorts.types import (
+    Float_as_deg,
+    AzelrCoordinates_DegM,
+    Float64_as_m,
+    EcefCoordinates,
+    EnuCoordinates,
+)
+from sorts.utils import to_datetime64_us, wrap_azimuths_elevations
 from sorts.schedule_v2 import Schedule, ExperimentDetail
 from sorts.controller_v2 import pointing_patterns
 
@@ -19,23 +27,23 @@ class FenceScanControllerOutput(t.NamedTuple):
 @dataclass(kw_only=True)
 class FenceScanController:
     """
-    TODO: should take radar/station `azimuth_deg`, `elevation_deg` limitation into account?
-    TODO: this is WIP
+    Generate schedule for a fence scaning pattern
     """
 
+    # TODO: the radar station computation capacity poses limit on the size of simutaneous `scan_range`, we should check/validate against it
+    # TODO: should take radar/station `azimuth_deg`, `elevation_deg` limitation into account?
+    # TODO: this is WIP
+
     tx_station: Station
-    rx_station: t.Sequence[Station]
+    rx_stations: t.Sequence[Station]
     exp_datail: ExperimentDetail
 
     azimuth: Float_as_deg
     min_elevation: Float_as_deg
     pointings_per_cycle: int
+    scan_range: npt.NDArray[Float64_as_m]
 
     def __post_init__(self):
-        self._cached_output: FenceScanControllerOutput | None = None
-        self._cached_tx_pointings_of_a_cycle: AzelrCoordinates_DegM | None = None
-        self._cached_rx_pointings_of_a_cycle: AzelrCoordinates_DegM | None = None
-
         # TODO: update/adapt or remove?
         # self._total_duration_s = (self.end_time - self.start_time).total_seconds()
         # if self._total_duration_s < self.dwell_s:
@@ -43,50 +51,99 @@ class FenceScanController:
         #         f"The specified time range ({self.start_time.isoformat()} to {self.end_time.isoformat()}) "
         #         + f"cannot be smaller than the dwell ({self.dwell_s} sec)."
         #     )
+        pass
 
-    def generate(self, start_time: Time, end_time: Time) -> FenceScanControllerOutput:
-        start_time_np = astropy_time_to_datetime64_us(start_time)
-        end_time_np = astropy_time_to_datetime64_us(end_time)
+    def generate(
+        self, start_time: Time, end_time: Time, scan_range: npt.NDArray[Float64_as_m] | None = None
+    ) -> FenceScanControllerOutput:
 
-        start_time_arr = np.arange(start_time_np, end_time_np, self.exp_datail.slice_duration)
-        schedule_size = math.floor((end_time_np - start_time_np) / self.exp_datail.slice_duration)
+        # The logic of this function:
+        # 0. the pointings are repetitive so we will generate one cycle of them and then repeat the cycle
+        # 1. generate the a cycle of pointings of tx station
+        # 2. repeat it to form the tx schedule
+        # 3. from the single cycle of tx pointings, we convert it into ECEF coord and extend them by the `scan_range`,
+        #    these will be the rx station pointings of a cycle in ECEF coord
+        # 4. from the rx station pointing targets of a cycle in ECEF coord,
+        #    we convert them back to rx station pointings and repeat them to form a rx schedule, for each rx station
 
-        self._cached_tx_pointings_of_a_cycle = pointing_patterns.fence_pointing(
+        start_time_np = to_datetime64_us(start_time)
+        end_time_np = to_datetime64_us(end_time)
+        scan_range = scan_range if scan_range is not None else self.scan_range
+
+        tx_slice_start_time = np.arange(start_time_np, end_time_np, self.exp_datail.slice_duration)
+        tx_schedule_size = math.floor(
+            (end_time_np - start_time_np) / self.exp_datail.slice_duration
+        )
+
+        tx_pointings_of_a_cycle = pointing_patterns.fence_pointing(
             azimuth=self.azimuth,
             min_elevation=self.min_elevation,
             pointings_per_cycle=self.pointings_per_cycle,
         )
 
-        # TODO: this is a shortcut for tx rx very close togther
-        #   for generic cases, need to clarify the math in
-        #   `src/sorts/controller/scanner.py`
-        self._cached_rx_pointings_of_a_cycle = self._cached_tx_pointings_of_a_cycle.copy()
-
-        # repeat `self._cached_tx_pointings_of_a_cycle` until it is at least the size of `schedule_size`
-        # then trim to exactly `schedule_size` long
-        tx_pointing = np.tile(
-            self._cached_tx_pointings_of_a_cycle,
-            (schedule_size + self.pointings_per_cycle - 1) // self.pointings_per_cycle,
-        )[:, :schedule_size]
-        rx_pointing = np.tile(
-            self._cached_rx_pointings_of_a_cycle,
-            (schedule_size + self.pointings_per_cycle - 1) // self.pointings_per_cycle,
-        )[:, :schedule_size]
+        # repeat a cycle of pointings until it is at least the size of `tx_schedule_size`
+        # then trim to exactly `tx_schedule_size` long
+        tx_pointing: AzelrCoordinates_DegM = np.tile(
+            tx_pointings_of_a_cycle,
+            (tx_schedule_size + self.pointings_per_cycle - 1) // self.pointings_per_cycle,
+        )[:, :tx_schedule_size]
 
         tx_schedule = Schedule(
             meta={self.exp_datail.id: self.exp_datail},
-            start_time=start_time_arr,
-            exp_num=np.full(schedule_size, self.exp_datail.id, dtype=np.int64),
+            start_time=tx_slice_start_time,
+            exp_num=np.full(tx_schedule_size, self.exp_datail.id, dtype=np.int64),
             pointing_az=tx_pointing[0],
             pointing_el=tx_pointing[1],
         )
 
-        rx_schedule = Schedule(
-            meta={self.exp_datail.id: self.exp_datail},
-            start_time=start_time_arr,
-            exp_num=np.full(schedule_size, self.exp_datail.id, dtype=np.int64),
-            pointing_az=rx_pointing[0],
-            pointing_el=rx_pointing[1],
+        rx_slice_start_time = tx_slice_start_time.repeat(len(scan_range))
+        rx_schedule_size = tx_schedule_size * len(scan_range)
+        rx_schedules: list[Schedule] = []
+        tx_pointings_of_a_cycle_ecef: EcefCoordinates = azel_to_ecef(
+            lat=self.tx_station.ecef_lat,
+            lon=self.tx_station.ecef_lon,
+            alt=self.tx_station.ecef_alt,
+            az=tx_pointings_of_a_cycle[0],
+            el=tx_pointings_of_a_cycle[1],
+            degrees=True,
         )
+        rx_pointings_of_a_cycle_ecef: EcefCoordinates = (
+            tx_pointings_of_a_cycle_ecef[:, :, np.newaxis] * scan_range[np.newaxis, np.newaxis, :]
+            + self.tx_station.ecef[:, np.newaxis, np.newaxis]
+        ).reshape((3, -1))
 
-        return FenceScanControllerOutput(tx_schedule, [rx_schedule])
+        for rx_station in self.rx_stations:
+            rx_pointings_of_a_cycle_enu: EnuCoordinates = ecef_to_enu(
+                lat=rx_station.ecef_lat,
+                lon=rx_station.ecef_lon,
+                alt=rx_station.ecef_alt,
+                ecef=rx_pointings_of_a_cycle_ecef,
+                degrees=True,
+            )
+            # TODO: `cart_to_sph` returns el in [-90, 90]. update `wrap_azimuths_elevations` to handle -ve el (by e.g. `el % 180`)?
+            # TODO: update `wrap_azimuths_elevations` output a single ndarray of (3,n) ?
+            rx_pointings_of_a_cycle: AzelrCoordinates_DegM = cart_to_sph(
+                rx_pointings_of_a_cycle_enu
+            )
+            rx_pointings_of_a_cycle[0], rx_pointings_of_a_cycle[1] = wrap_azimuths_elevations(
+                rx_pointings_of_a_cycle[0], rx_pointings_of_a_cycle[1]
+            )
+
+            # repeat a cycle of pointings until it is at least the size of `rx_schedule_size`
+            # then trim to exactly `rx_schedule_size` long
+            rx_pointing: AzelrCoordinates_DegM = np.tile(
+                rx_pointings_of_a_cycle,
+                (rx_schedule_size + self.pointings_per_cycle - 1) // self.pointings_per_cycle,
+            )[:, :rx_schedule_size]
+
+            rx_schedule = Schedule(
+                meta={self.exp_datail.id: self.exp_datail},
+                start_time=rx_slice_start_time,
+                exp_num=np.full(rx_schedule_size, self.exp_datail.id, dtype=np.int64),
+                pointing_az=rx_pointing[0],
+                pointing_el=rx_pointing[1],
+            )
+
+            rx_schedules.append(rx_schedule)
+
+        return FenceScanControllerOutput(tx_schedule, rx_schedules)
