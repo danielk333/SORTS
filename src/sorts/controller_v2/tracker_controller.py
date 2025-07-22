@@ -70,8 +70,8 @@ class TrackerController:
 
         tx_pointings = tx_pointings[:, ~is_out_of_el_range_mask]
 
-        for rx_pointings in rxs_pointings:
-            rx_pointings = rx_pointings[:, ~is_out_of_el_range_mask]
+        for idx, rx_pointings in enumerate(rxs_pointings):
+            rxs_pointings[idx] = rx_pointings[:, ~is_out_of_el_range_mask]
 
         # apply wrapping
         tx_pointings[0], tx_pointings[1] = wrap_azimuths_elevations(

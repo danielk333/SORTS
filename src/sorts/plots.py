@@ -106,6 +106,7 @@ def schedule_plot_bokeh(
     return plot
 
 
+# TODO: remove?
 def schedule_plot(schedule: Schedule):
     df = schedule.to_dataframe()
 
