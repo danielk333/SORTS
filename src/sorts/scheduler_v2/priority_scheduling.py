@@ -64,6 +64,7 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule]):
 
         # update `cn_allowed_start_time`, `cn_allowed_end_time` columns
         merged_sch_df[cn_allowed_start_time] = merged_sch_df[Cn.end_time].shift(1)
+        # TODO: this line will fail if the input schedule is empty
         merged_sch_df.loc[merged_sch_df.index[0], cn_allowed_start_time] = merged_sch_df[
             Cn.start_time
         ].iloc[0]
