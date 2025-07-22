@@ -63,15 +63,15 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule]):
         merged_sch_df = merged_sch_df[~merged_sch_df[cn_is_overlaped]]
 
         # update `cn_allowed_start_time`, `cn_allowed_end_time` columns
-        merged_sch_df[cn_allowed_start_time] = merged_sch_df[Cn.end_time].shift(1)
-        # TODO: this line will fail if the input schedule is empty
-        merged_sch_df.loc[merged_sch_df.index[0], cn_allowed_start_time] = merged_sch_df[
-            Cn.start_time
-        ].iloc[0]
-        merged_sch_df[cn_allowed_end_time] = merged_sch_df[Cn.start_time].shift(-1)
-        merged_sch_df.loc[merged_sch_df.index[-1], cn_allowed_end_time] = merged_sch_df[
-            Cn.end_time
-        ].iloc[-1]
+        if (len(merged_sch_df)) > 0:
+            merged_sch_df[cn_allowed_start_time] = merged_sch_df[Cn.end_time].shift(1)
+            merged_sch_df.loc[merged_sch_df.index[0], cn_allowed_start_time] = merged_sch_df[
+                Cn.start_time
+            ].iloc[0]
+            merged_sch_df[cn_allowed_end_time] = merged_sch_df[Cn.start_time].shift(-1)
+            merged_sch_df.loc[merged_sch_df.index[-1], cn_allowed_end_time] = merged_sch_df[
+                Cn.end_time
+            ].iloc[-1]
 
     merged_sch_df = merged_sch_df.reset_index(drop=True)
 

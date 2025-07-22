@@ -22,8 +22,15 @@ def setup_function():
 
 def priority_scheduling_smoke_test():
     epoch = Time(53005.0, format="mjd", scale="utc")  # 2004-01-01 00:00:00Z
-    start_time = Time("2025-06-30 00:00:00")
-    end_time = Time("2025-06-30 00:00:01")
+
+    # this start and end time pair should return empty schedule
+    # start_time = Time("2025-06-30 00:00:00")
+    # end_time = Time("2025-06-30 00:00:01")
+
+    # this start and end time pair should return non-empty schedule
+    start_time = Time("2025-01-01 04:04:00")
+    end_time = Time("2025-01-01 04:04:01")
+
     sch_1_slice_duration = np.timedelta64(10_000, "us")  # 10ms
     sch_2_slice_duration = np.timedelta64(10_000 // 3, "us")  # 33.3...ms
 
@@ -51,14 +58,24 @@ def priority_scheduling_smoke_test():
     dsec_arr_1: npt.NDArray[Float64_as_sec] = dt_arr_1.astype(np.float64) / 1e6  # type: ignore
     ecefs_1 = spobj.get_state(dsec_arr_1)
 
+    exp_detail_0 = ExperimentDetail(
+        id=0,
+        coh_int_bandwidth=1.0,
+        ipp=1.0,
+        pulse_length=1.0,
+        power=5e8,
+        bandwidth=52.08333333333333,
+        duty_cycle=1.0,
+        noise_temp=150.0,
+        slice_duration=sch_1_slice_duration,
+    )
+
     controller_1 = TrackerController(
         tx_station=eiscat3d.tx[0],
         rx_stations=[],
         time=time_arr_1,
         space_object_states=ecefs_1,
-        exp_num=0,
-        # azimuth_range=None,
-        # elevation_range=None,
+        exp_detail=exp_detail_0,
     )
 
     time_arr_2: npt.NDArray[Datetime64_us] = np.arange(
@@ -70,47 +87,30 @@ def priority_scheduling_smoke_test():
     dsec_arr_2: npt.NDArray[Float64_as_sec] = dt_arr_2.astype(np.float64) / 1e6  # type: ignore
     ecefs_2 = spobj.get_state(dsec_arr_2)
 
+    exp_detail_1 = ExperimentDetail(
+        id=1,
+        coh_int_bandwidth=1.0,
+        ipp=1.0,
+        pulse_length=1.0,
+        power=5e8,
+        bandwidth=52.08333333333333,
+        duty_cycle=1.0,
+        noise_temp=150.0,
+        slice_duration=sch_2_slice_duration,
+    )
+
     controller_2 = TrackerController(
         tx_station=eiscat3d.tx[0],
         rx_stations=[],
         time=time_arr_2,
         space_object_states=ecefs_2,
-        exp_num=1,
-        # azimuth_range=None,
-        # elevation_range=None,
+        exp_detail=exp_detail_1,
     )
 
     tx_sch_1, _rx_schs = controller_1.generate()
     tx_sch_2, _rx_schs = controller_2.generate()
 
-    sch_meta = {
-        0: ExperimentDetail(
-            id=0,
-            coh_int_bandwidth=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-            ipp=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-            pulse_length=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-            # power=5000000.0,
-            power=5e8,  # TODO: tmp 100x higher for debugging; restore the value afterwards
-            bandwidth=52.08333333333333,
-            duty_cycle=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-            noise_temp=150.0,
-            slice_duration=sch_1_slice_duration,
-        ),
-        1: ExperimentDetail(
-            id=1,
-            coh_int_bandwidth=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-            ipp=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-            pulse_length=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-            # power=5000000.0,
-            power=5e8,  # TODO: tmp 100x higher for debugging; restore the value afterwards
-            bandwidth=52.08333333333333,
-            duty_cycle=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-            noise_temp=150.0,
-            slice_duration=sch_2_slice_duration,
-        ),
-    }
-
-    merged_sch = priority_scheduling([tx_sch_1, tx_sch_2], sch_meta)
+    merged_sch = priority_scheduling([tx_sch_1, tx_sch_2], {0: exp_detail_0, 1: exp_detail_1})
     merged_sch_df = merged_sch.to_dataframe()
 
     return
