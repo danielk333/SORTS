@@ -44,7 +44,7 @@ def space_object_population_table_plot(population: Population):
 # TODO: add time based binning and aggregation
 # TODO: might not work that well for rx schedule, because they might have multiple pointings per slices
 # TODO: also plot pointings?
-def schedule_plot_bokeh(
+def schedule_plot(
     schedule: Schedule, start_time: datetime | None = None, end_time: datetime | None = None
 ):
     """
@@ -102,36 +102,6 @@ def schedule_plot_bokeh(
     minimap.add_tools(minimap_range_tool)
 
     plot = bp.column(bar, minimap)
-
-    return plot
-
-
-# TODO: remove?
-def schedule_plot(schedule: Schedule):
-    df = schedule.to_dataframe()
-
-    # additional column names
-    cn_index = "index"
-    cn_us = "us"
-
-    df = df.reset_index()  # add "index" col
-    df["us"] = df[schedule.cn.start_time].astype("int64") % 1e6  # add "us" col
-    # TODO: `lets-plot` cannot show microseconds so need added an extra column
-    #   but it is not ideal, maybe switch to `bokeh`?
-
-    plot = (
-        lp.ggplot(df, lp.aes(x=schedule.cn.start_time, y=schedule.cn.exp_num))
-        + lp.scale_x_datetime(format="%Y %b %e %H:%M:%S")
-        + lp.scale_y_discrete()
-        # + lp.scale_y_discrete(expand=[0, 0])
-        + lp.geom_linerange(
-            lp.aes(xmin=schedule.cn.start_time, xmax=schedule.cn.end_time),
-            size=50,
-            tooltips=lp.layer_tooltips().line(f"#: @{cn_index}; @{cn_us} us"),
-        )
-        + lp.coord_cartesian(ylim=(-0.5, 1.5))
-        + lp.ggtb()
-    )
 
     return plot
 
