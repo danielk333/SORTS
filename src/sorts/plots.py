@@ -129,8 +129,8 @@ def azel_skyplot(azimuths: npt.NDArray[Float64_as_deg], elevations: npt.NDArray[
     plot.xaxis.ticker = [30, 60, 90]
     plot.xaxis.major_label_overrides = {30: "60", 60: "30", 90: "0"}
     plot.yaxis.ticker = []
-    plot.xaxis.axis_line_color = "lightgray"
-    plot.yaxis.axis_line_color = "lightgray"
+    plot.xaxis.axis_line_alpha = 0  # alternatively, `plot.xaxis.axis_line_color = "lightgray"`
+    plot.yaxis.axis_line_alpha = 0  # alternatively, `plot.yaxis.axis_line_color = "lightgray"`
 
     # disable builtin grid, which is rectangular, we will draw a custom polar grid
     plot.xgrid.visible = False
@@ -213,7 +213,6 @@ def azel_skyplot(azimuths: npt.NDArray[Float64_as_deg], elevations: npt.NDArray[
             tooltips=[
                 ("index", "$index"),
                 ("data (az, el)", f"(@{f_azimuth}, @{f_elevation})"),
-                ("adj data (az, el)", f"(@{f_adj_azimuth}, @{f_adj_elevation})"),
             ],
         )
     )
