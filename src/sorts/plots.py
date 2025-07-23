@@ -300,26 +300,3 @@ def kepler_space_object_on_map(
     plot = ecef_states_positions_plot(ecefs)
 
     return plot
-
-
-def azel_polar_plot(azimuths: npt.NDArray[Float64_as_deg], elevations: npt.NDArray[Float64_as_deg]):
-    df = pd.DataFrame({"azimuth": azimuths, "elevation": elevations})
-    plot = (
-        lp.ggplot(df, lp.aes(x="azimuth", y="elevation"))
-        + lp.geom_point()
-        # + lp.geom_bar(aes(fill=as_discrete('v')), size=0, show_legend=False)
-        + lp.scale_x_continuous(
-            breaks=[0, 30, 60, 90, 120, 150, 180, -150, -120, -90, -60, -30],
-            labels=["N", "30", "60", "E", "120", "150", "S", "-150", "-120", "W", "-60", "-30"],
-        )
-        + lp.scale_y_continuous(
-            trans="reverse",
-            breaks=[0, 30, 60, 90],
-            # should ideally be set on coord_polar, but reversed scale does not work well will coord limits atm, see
-            # https://github.com/JetBrains/lets-plot/issues/1365
-            limits=[0, 90],
-        )
-        + lp.coord_polar(theta="x", xlim=[-180, 180], start=np.pi)
-    )
-
-    return plot
