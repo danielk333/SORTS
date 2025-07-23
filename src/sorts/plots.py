@@ -9,7 +9,7 @@ import numpy.typing as npt
 import pandas as pd
 from sorts.population import Population
 from sorts.space_object import SpaceObject
-from sorts.plotting_deps import lp, bp, bokeh_models
+from sorts.plotting_deps import lp, bp, bokeh_models, pyproj
 from sorts.types import (
     EcefStates,
     Float64_as_deg,
@@ -222,6 +222,60 @@ def azel_skyplot(azimuths: npt.NDArray[Float64_as_deg], elevations: npt.NDArray[
 
 # TODO: add down sampling? radar control slice are in milliseconds, while the simulation are in days or longer
 def ecef_states_positions_plot(ecefs: EcefStates):
+    # define some string const for field names
+    f_lat = "lat"  # geodetic latitude
+    f_lon = "lon"  # geodetic longitude
+    f_wmx = "wmx"  # web mercator x
+    f_wmy = "wmy"  # web mercator y
+
+    geodetic_coords = ITRS_to_geodetic(ecefs[0], ecefs[1], ecefs[2])
+    transformer = pyproj.Transformer.from_crs(
+        "EPSG:4326", "EPSG:3857"
+    )  # World Geodetic System to Web Mercator
+    lat = geodetic_coords[0]
+    lon = geodetic_coords[1]
+    wmx, wmy = transformer.transform(lat, lon)
+
+    plot = bp.figure(
+        x_axis_type="mercator",
+        y_axis_type="mercator",
+    )
+    plot.add_tile("CartoDB Positron", retina=True)
+
+    scatter = plot.scatter(
+        x=f_wmx,  # type: ignore
+        y=f_wmy,  # type: ignore
+        source={
+            f_lat: lat,
+            f_lon: lon,
+            f_wmx: wmx,
+            f_wmy: wmy,
+        },
+    )
+
+    # TODO: Implement a fix for the antimeridian wrapping issue
+    # NOTE: We are not plotting the connecting line segments for now
+    #   because bokeh does not handle correct wrapping of lines crossing antimeridian
+    #   https://discourse.bokeh.org/t/bokeh-tile-antimeridian-problem/6978/3
+    # plot.line(wmx, wmy)
+
+    # add custom tooltips, only for the scatter plot/glyphs
+    plot.add_tools(
+        bokeh_models.HoverTool(
+            renderers=[scatter],
+            tooltips=[
+                ("index", "$index"),
+                ("data (lat, lon)", f"(@{f_lat}, @{f_lon})"),
+            ],
+        )
+    )
+
+    return plot
+
+
+# TODO: remove?
+# TODO: add down sampling? radar control slice are in milliseconds, while the simulation are in days or longer
+def ecef_states_positions_plot_letsplot(ecefs: EcefStates):
     """Returns a `Dash` app, use `.run()` method to run it."""
     # plotly alternative: https://plotly.com/python/lines-on-maps/
 

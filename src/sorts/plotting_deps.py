@@ -7,6 +7,7 @@ has_plotting_deps = False
 try:
     import geopandas as gpd
     import geodatasets
+    import pyproj
     import lets_plot as lp
     import lets_plot.geo_data as lp_geo_data
     import bokeh.plotting as bp
