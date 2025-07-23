@@ -2,8 +2,12 @@ import logging, typing as t
 from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
-from pyant.coordinates import cart_to_sph
+from sorts.frames import ecef_to_enu, cart_to_sph
 from sorts.radar.tx_rx import Station
+from sorts.plotting_deps import (
+    has_plotting_deps,
+    bokeh_layouts,  # TODO: this will break optional plotting import/deps
+)
 from sorts.types import (
     EcefStates,
     Float_as_deg,
@@ -11,10 +15,10 @@ from sorts.types import (
     EcefCoordinates,
     EnuCoordinates,
     AzelrCoordinates_DegM,
+    Datetime_like,
 )
-from sorts.utils import wrap_azimuths_elevations
-from sorts.frames import ecef_to_enu
-from sorts.radar.tx_rx import Station
+from sorts.utils import wrap_azimuths_elevations, to_datetime64_us
+from sorts import plots
 from sorts.schedule_v2 import Schedule, ExperimentDetail
 
 logger = logging.getLogger(__name__)
@@ -107,6 +111,35 @@ class TrackerController:
 
         self._cached_output = TrackerControllerOutput(tx_sch, rx_schs)
         return self._cached_output
+
+    if has_plotting_deps:
+        # TODO: implement `start_time`, `end_time` param
+        def plot(self, start_time: Datetime_like, end_time: Datetime_like):
+            # start_time = to_datetime64_us(start_time)
+            # end_time = to_datetime64_us(end_time)
+            if self._cached_output is None:
+                # TODO: type checker couldn't pickup `self.generate()` `_cached_output` so an assigned is used here
+                self._cached_output = self.generate()
+
+            pos_plot = plots.ecef_states_positions_plot(self.space_object_states)
+            pos_plot.title = "ecef_states_positions_plot"
+
+            rx_skyplot_plots = []
+            for idx, rx_schedule in enumerate(self._cached_output.rx_schedules):
+                rx_skyplot_plot = plots.azel_skyplot(
+                    rx_schedule.pointing_az,
+                    rx_schedule.pointing_el,
+                )
+                rx_skyplot_plot.title = f"rx_skyplot_plot_{idx}"
+                rx_skyplot_plots.append(rx_skyplot_plot)
+
+            plot = bokeh_layouts.layout(
+                [
+                    [pos_plot],
+                    rx_skyplot_plots,
+                ]  # type: ignore
+            )
+            return plot
 
 
 def point_ecef(station: Station, point: EcefCoordinates) -> EnuCoordinates:

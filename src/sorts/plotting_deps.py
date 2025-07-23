@@ -12,6 +12,7 @@ try:
     import lets_plot.geo_data as lp_geo_data
     import bokeh.plotting as bp
     import bokeh.models as bokeh_models
+    import bokeh.layouts as bokeh_layouts
     import panel as pn
 
     lp.LetsPlot.setup_html()
