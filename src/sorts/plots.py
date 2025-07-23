@@ -106,6 +106,121 @@ def schedule_plot(
     return plot
 
 
+def azel_skyplot(azimuths: npt.NDArray[Float64_as_deg], elevations: npt.NDArray[Float64_as_deg]):
+    """
+    A plot similar to a skyplot.
+
+    e.g. in the one in mathlab
+    https://mathworks.com/help/satcom/ref/skyplot.html
+    """
+
+    # define some string const for field names
+    f_azimuth = "azimuth"
+    f_elevation = "elevation"
+    f_adj_azimuth = "adj_azimuth"
+    f_adj_elevation = "adj_elevation"
+
+    # make a plot and set the pixel aspect ratio to equal to the data aspect ratio
+    # (i.e. a circle in data will be a circle on screen)
+    plot = bp.figure(match_aspect=True)
+    # customize axis
+    plot.xaxis.fixed_location = 0
+    plot.yaxis.fixed_location = 0
+    plot.xaxis.ticker = [30, 60, 90]
+    plot.xaxis.major_label_overrides = {30: "60", 60: "30", 90: "0"}
+    plot.yaxis.ticker = []
+    plot.xaxis.axis_line_color = "lightgray"
+    plot.yaxis.axis_line_color = "lightgray"
+
+    # disable builtin grid, which is rectangular, we will draw a custom polar grid
+    plot.xgrid.visible = False
+    plot.ygrid.visible = False
+
+    # add a bit more padding to the plotting region, default is 0.1 (in ratio)
+    plot.x_range.range_padding = 0.15  # type: ignore
+    plot.y_range.range_padding = 0.15  # type: ignore
+
+    # disable per axis zoom when hovered on an axis
+    wheelZoomTool = next(
+        (t for t in plot.toolbar.tools if isinstance(t, bokeh_models.WheelZoomTool))
+    )
+    wheelZoomTool.zoom_on_axis = False
+
+    # draw custom grid
+    ray_angles = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
+    plot.ray(
+        x=[0 for _ in range(len(ray_angles))],
+        y=[0 for _ in range(len(ray_angles))],
+        length=90,
+        angle=ray_angles,
+        angle_units="deg",
+        color="lightgray",
+        line_width=1,
+    )
+    ring_sizes = [0, 30, 60, 90]  # in deg
+    plot.circle(
+        y=[0 for _ in range(len(ring_sizes))],
+        x=[0 for _ in range(len(ring_sizes))],
+        radius=ring_sizes,
+        color="lightgray",
+        fill_alpha=0,
+        line_width=1,
+    )
+
+    # add custom labels
+    for x, y, text, angle in [
+        (0, 100, "N, 0°", 0),
+        (100, 0, "E, 90°", -90),
+        (0, -100, "S, 180°", 0),
+        (-100, 0, "W, -90°", 90),
+    ]:
+        plot.add_layout(
+            bokeh_models.Label(
+                x=x,
+                y=y,
+                anchor="center",  # type: ignore
+                text=text,
+                angle=angle,
+                angle_units="deg",
+            )
+        )
+
+    tf = bokeh_models.PolarTransform(
+        angle=f_adj_azimuth,
+        radius=f_adj_elevation,
+        angle_units="deg",  # type: ignore
+        direction="clock",
+    )
+
+    scatter = plot.scatter(
+        x=tf.x,  # type: ignore
+        y=tf.y,  # type: ignore
+        source={
+            f_azimuth: azimuths,
+            f_elevation: elevations,
+            # we applied simple adjustments before plotting the data to workaround the plotting lib config limitations:
+            # - start the polar 0 deg from +ve y-axis instead of + x-axis
+            # - the radial range should be [90, 0] instead of [0, 90]
+            f_adj_azimuth: azimuths - 90,
+            f_adj_elevation: 90 - elevations,
+        },
+    )
+
+    # add custom tooltips, only for the scatter plot/glyphs
+    plot.add_tools(
+        bokeh_models.HoverTool(
+            renderers=[scatter],
+            tooltips=[
+                ("index", "$index"),
+                ("data (az, el)", f"(@{f_azimuth}, @{f_elevation})"),
+                ("adj data (az, el)", f"(@{f_adj_azimuth}, @{f_adj_elevation})"),
+            ],
+        )
+    )
+
+    return plot
+
+
 # TODO: add down sampling? radar control slice are in milliseconds, while the simulation are in days or longer
 def ecef_states_positions_plot(ecefs: EcefStates):
     """Returns a `Dash` app, use `.run()` method to run it."""
