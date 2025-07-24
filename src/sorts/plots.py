@@ -3,7 +3,6 @@ Misc. plots
 """
 
 import logging, typing as t
-from datetime import datetime
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
@@ -20,7 +19,7 @@ from sorts.types import (
 )
 from sorts.utils import to_datetime64_us
 from sorts.frames import ITRS_to_geodetic
-from sorts.schedule_v2 import Schedule
+from sorts.schedule_v2 import Schedule, DataFrameColumnNames as ScheduleDataFrameColumnNames
 
 logger = logging.getLogger(__name__)
 
@@ -40,31 +39,16 @@ if has_plotting_deps:
 
         return data_table
 
-    # TODO: add time based binning and aggregation
-    # TODO: might not work that well for rx schedule, because they might have multiple pointings per slices
-    # TODO: also plot pointings?
-    def schedule_plot(
-        schedule: Schedule, start_time: datetime | None = None, end_time: datetime | None = None
+    def _schedule_plot_cds(
+        source: bokeh_models.ColumnarDataSource,
+        start_time: Datetime64_us,
+        end_time: Datetime64_us,
+        y_range: t.Sequence[str] | npt.NDArray[np.str_],
     ):
-        """
-        Note:
-        Plotting the full schedule can be computationally demanding and lead to application crashes.
-        Limiting the plot range by `start_time` and `end_time` param is recommended.
-
-        Without aggregations, a good starting point is a 5 minutes time range.
-        """
-
-        df = schedule.to_dataframe()
-
-        start_time = start_time if start_time is not None else df[schedule.cn.start_time].min()
-        end_time = end_time if end_time is not None else df[schedule.cn.start_time].max()
-        df = df[(df[schedule.cn.start_time] >= start_time) & (df[schedule.cn.end_time] <= end_time)]
-
-        # bokeh requires str type for categorical axis
-        df[schedule.cn.exp_num] = df[schedule.cn.exp_num].astype(str)
+        """An internal ver of `schedule_plot` that takes a bokeh `ColumnDataSource`"""
 
         bar = bp.figure(
-            y_range=df[schedule.cn.exp_num].unique(),  # type: ignore
+            y_range=y_range,  # type: ignore
             x_axis_type="datetime",
             x_axis_location="above",
             width=800,
@@ -73,7 +57,10 @@ if has_plotting_deps:
         bar.add_tools(bokeh_models.HoverTool())
 
         bar.hbar(
-            y=df[schedule.cn.exp_num], left=df[schedule.cn.start_time], right=df[schedule.cn.end_time]  # type: ignore
+            y=Schedule.Cn.exp_num,
+            left=Schedule.Cn.start_time,
+            right=Schedule.Cn.end_time,
+            source=source,
         )
         bar_xpan_tool = bokeh_models.PanTool(dimensions="width")
         bar_xwheel_zoom_tool = bokeh_models.WheelZoomTool(dimensions="width")
@@ -97,30 +84,70 @@ if has_plotting_deps:
 
         # NOTE: a dummy line is plotted; select tool doesn't work well without any data plotted
         minimap.line(
-            x=[df[schedule.cn.start_time].min(), df[schedule.cn.start_time].max()], y=[0, 0]
+            x=[start_time, end_time],  # type: ignore
+            y=[0, 0],
         )
         minimap_range_tool = bokeh_models.RangeTool(x_range=bar.x_range, start_gesture="pan")
         minimap.add_tools(minimap_range_tool)
 
         plot = bp.column(bar, minimap)
 
-        return plot
+        return plot, bar, minimap
 
-    def azel_skyplot(
-        azimuths: npt.NDArray[Float64_as_deg], elevations: npt.NDArray[Float64_as_deg]
+    # TODO: add time based binning and aggregation
+    # TODO: might not work that well for rx schedule, because they might have multiple pointings per slices
+    # TODO: also plot pointings?
+    def schedule_plot(
+        schedule: Schedule,
+        start_time: Datetime_like | None = None,
+        end_time: Datetime_like | None = None,
     ):
         """
-        A plot similar to a skyplot.
+        Note:
+        Plotting the full schedule can be computationally demanding and lead to application crashes.
+        Limiting the plot range by `start_time` and `end_time` param is recommended.
 
-        e.g. in the one in mathlab
-        https://mathworks.com/help/satcom/ref/skyplot.html
+        Without aggregations, a good starting point is a 5 minutes time range.
         """
 
-        # define some string const for field names
-        f_azimuth = "azimuth"
-        f_elevation = "elevation"
-        f_adj_azimuth = "adj_azimuth"
-        f_adj_elevation = "adj_elevation"
+        df = schedule.to_dataframe()
+
+        start_time = (
+            to_datetime64_us(start_time)
+            if start_time is not None
+            else df[Schedule.Cn.start_time].min()
+        )
+        end_time = (
+            to_datetime64_us(end_time) if end_time is not None else df[Schedule.Cn.start_time].max()
+        )
+
+        df = df[(df[schedule.cn.start_time] >= start_time) & (df[schedule.cn.end_time] <= end_time)]
+        # bokeh requires str type for categorical axis
+        df[schedule.cn.exp_num] = df[schedule.cn.exp_num].astype(str)
+
+        plot, *_ = _schedule_plot_cds(
+            source=bokeh_models.ColumnDataSource(df),
+            start_time=start_time,
+            end_time=end_time,
+            y_range=df[schedule.cn.exp_num].unique(),
+        )
+
+        return plot
+
+    class AzelSkyplotColumnNames:
+        azimuth: t.Final = "azimuth"
+        elevation: t.Final = "elevation"
+        adj_azimuth: t.Final = "adj_azimuth"
+        adj_elevation: t.Final = "adj_elevation"
+
+    def _azel_skyplot_cds(source: bokeh_models.ColumnarDataSource):
+        """
+        An internal ver of `azel_skyplot` that takes a bokeh `ColumnDataSource`.
+
+        Expect the columns in `AzelSkyplotColumnNames` in the `ColumnDataSource`.
+        """
+
+        Cn = AzelSkyplotColumnNames
 
         # make a plot and set the pixel aspect ratio to equal to the data aspect ratio
         # (i.e. a circle in data will be a circle on screen)
@@ -188,8 +215,8 @@ if has_plotting_deps:
             )
 
         tf = bokeh_models.PolarTransform(
-            angle=f_adj_azimuth,
-            radius=f_adj_elevation,
+            angle=Cn.adj_azimuth,
+            radius=Cn.adj_elevation,
             angle_units="deg",  # type: ignore
             direction="clock",
         )
@@ -197,15 +224,7 @@ if has_plotting_deps:
         scatter = plot.scatter(
             x=tf.x,  # type: ignore
             y=tf.y,  # type: ignore
-            source={
-                f_azimuth: azimuths,
-                f_elevation: elevations,
-                # we applied simple adjustments before plotting the data to workaround the plotting lib config limitations:
-                # - start the polar 0 deg from +ve y-axis instead of + x-axis
-                # - the radial range should be [90, 0] instead of [0, 90]
-                f_adj_azimuth: azimuths - 90,
-                f_adj_elevation: 90 - elevations,
-            },
+            source=source,
         )
 
         # add custom tooltips, only for the scatter plot/glyphs
@@ -214,28 +233,55 @@ if has_plotting_deps:
                 renderers=[scatter],
                 tooltips=[
                     ("index", "$index"),
-                    ("data (az, el)", f"(@{f_azimuth}, @{f_elevation})"),
+                    ("data (az, el)", f"(@{Cn.azimuth}, @{Cn.elevation})"),
                 ],
             )
         )
 
         return plot
 
-    # TODO: add down sampling? radar control slice are in milliseconds, while the simulation are in days or longer
-    def ecef_states_positions_plot(ecefs: EcefStates):
-        # define some string const for field names
-        f_lat = "lat"  # geodetic latitude
-        f_lon = "lon"  # geodetic longitude
-        f_wmx = "wmx"  # web mercator x
-        f_wmy = "wmy"  # web mercator y
+    def azel_skyplot(
+        azimuths: npt.NDArray[Float64_as_deg], elevations: npt.NDArray[Float64_as_deg]
+    ):
+        """
+        A plot similar to a skyplot.
 
-        geodetic_coords = ITRS_to_geodetic(ecefs[0], ecefs[1], ecefs[2])
-        transformer = pyproj.Transformer.from_crs(
-            "EPSG:4326", "EPSG:3857"
-        )  # World Geodetic System to Web Mercator
-        lat = geodetic_coords[0]
-        lon = geodetic_coords[1]
-        wmx, wmy = transformer.transform(lat, lon)
+        e.g. in the one in mathlab
+        https://mathworks.com/help/satcom/ref/skyplot.html
+        """
+
+        Cn = AzelSkyplotColumnNames
+
+        plot = _azel_skyplot_cds(
+            source=bokeh_models.ColumnDataSource(
+                {
+                    Cn.azimuth: azimuths,
+                    Cn.elevation: elevations,
+                    # we applied simple adjustments before plotting the data to workaround the plotting lib config limitations:
+                    # - start the polar 0 deg from +ve y-axis instead of + x-axis
+                    # - the radial range should be [90, 0] instead of [0, 90]
+                    Cn.adj_azimuth: azimuths - 90,
+                    Cn.adj_elevation: 90 - elevations,
+                }
+            )
+        )
+
+        return plot
+
+    class EcefStatesPositionsPlotColumnNames:
+        lat: t.Final = "lat"
+        lon: t.Final = "lon"
+        wmx: t.Final = "wmx"
+        wmy: t.Final = "wmy"
+
+    def _ecef_states_positions_plot_cds(source: bokeh_models.ColumnarDataSource):
+        """
+        An internal ver of `ecef_states_positions_plot` that takes a bokeh `ColumnDataSource`.
+
+        Expect the columns in `EcefStatesPositionsPlotColumnNames` in the `ColumnDataSource`.
+        """
+
+        Cn = EcefStatesPositionsPlotColumnNames
 
         plot = bp.figure(
             x_axis_type="mercator",
@@ -244,14 +290,9 @@ if has_plotting_deps:
         plot.add_tile("CartoDB Positron", retina=True)
 
         scatter = plot.scatter(
-            x=f_wmx,  # type: ignore
-            y=f_wmy,  # type: ignore
-            source={
-                f_lat: lat,
-                f_lon: lon,
-                f_wmx: wmx,
-                f_wmy: wmy,
-            },
+            x=Cn.wmx,  # type: ignore
+            y=Cn.wmy,  # type: ignore
+            source=source,
         )
 
         # TODO: Implement a fix for the antimeridian wrapping issue
@@ -266,8 +307,33 @@ if has_plotting_deps:
                 renderers=[scatter],
                 tooltips=[
                     ("index", "$index"),
-                    ("data (lat, lon)", f"(@{f_lat}, @{f_lon})"),
+                    ("data (lat, lon)", f"(@{Cn.lat}, @{Cn.lon})"),
                 ],
+            )
+        )
+
+        return plot
+
+    # TODO: add down sampling? radar control slice are in milliseconds, while the simulation are in days or longer
+    def ecef_states_positions_plot(ecefs: EcefStates):
+        Cn = EcefStatesPositionsPlotColumnNames
+
+        geodetic_coords = ITRS_to_geodetic(ecefs[0], ecefs[1], ecefs[2])
+        transformer = pyproj.Transformer.from_crs(
+            "EPSG:4326", "EPSG:3857"
+        )  # World Geodetic System to Web Mercator
+        lat = geodetic_coords[0]
+        lon = geodetic_coords[1]
+        wmx, wmy = transformer.transform(lat, lon)
+
+        plot = _ecef_states_positions_plot_cds(
+            source=bokeh_models.ColumnDataSource(
+                {
+                    Cn.lat: lat,
+                    Cn.lon: lon,
+                    Cn.wmx: wmx,
+                    Cn.wmy: wmy,
+                }
             )
         )
 

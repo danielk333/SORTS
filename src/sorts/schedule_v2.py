@@ -71,6 +71,9 @@ class Schedule:
     Metadata (`ExperimentDetail`s) are stored as a dict inside the `meta` field.
     """
 
+    Cn: t.ClassVar = DataFrameColumnNames
+    """A shortcut to return the DataFrameColumnNames class"""
+
     meta: dict[int, ExperimentDetail]
 
     start_time: npt.NDArray[Datetime64_us]
