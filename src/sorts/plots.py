@@ -8,7 +8,7 @@ import numpy.typing as npt
 import pandas as pd
 from sorts.population import Population
 from sorts.space_object import SpaceObject
-from sorts.plotting_deps import has_plotting_deps, lp, bp, bokeh_models, pyproj
+from sorts.plotting_deps import has_plotting_deps, lp, bp, bokeh_models, pyproj, bokeh_layouts
 from sorts.types import (
     EcefStates,
     Float64_as_deg,
@@ -19,7 +19,7 @@ from sorts.types import (
 )
 from sorts.utils import to_datetime64_us
 from sorts.frames import ITRS_to_geodetic
-from sorts.schedule_v2 import Schedule, DataFrameColumnNames as ScheduleDataFrameColumnNames
+from sorts.schedule_v2 import Schedule
 
 logger = logging.getLogger(__name__)
 
@@ -419,5 +419,83 @@ if has_plotting_deps:
 
         ecefs = space_object.get_state(dsec_arr)
         plot = ecef_states_positions_plot(ecefs)
+
+        return plot
+
+    def radar_schedule_ecef_position_plot(
+        ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], schedule: Schedule
+    ):
+        ScheduleCn = schedule.cn
+        SkyplotCn = AzelSkyplotColumnNames
+        EcefPosplotCn = EcefStatesPositionsPlotColumnNames
+
+        df = schedule.to_dataframe()
+
+        # bokeh requires str type for categorical axis
+        df[ScheduleCn.exp_num] = df[ScheduleCn.exp_num].astype(str)
+
+        # insert columns for azel_skyplot
+        azimuths = schedule.pointing_az
+        elevations = schedule.pointing_el
+        df[SkyplotCn.azimuth] = azimuths
+        df[SkyplotCn.elevation] = elevations
+        df[SkyplotCn.adj_azimuth] = azimuths - 90
+        df[SkyplotCn.adj_elevation] = 90 - elevations
+
+        # prepare columns for ecef_states_positions_plot
+        geodetic_coords = ITRS_to_geodetic(ecefs[0], ecefs[1], ecefs[2])
+        transformer = pyproj.Transformer.from_crs(
+            "EPSG:4326", "EPSG:3857"
+        )  # World Geodetic System to Web Mercator
+        lat = geodetic_coords[0]
+        lon = geodetic_coords[1]
+        wmx, wmy = transformer.transform(lat, lon)
+
+        # merging schedule and ecefs into the same dataframe
+        df = pd.merge(
+            df,
+            pd.DataFrame(
+                {
+                    ScheduleCn.start_time: ecefs_time,
+                    EcefPosplotCn.lat: lat,
+                    EcefPosplotCn.lon: lon,
+                    EcefPosplotCn.wmx: wmx,
+                    EcefPosplotCn.wmy: wmy,
+                }
+            ),
+            on=ScheduleCn.start_time,
+            how="outer",
+        )
+
+        cds = bokeh_models.ColumnDataSource(df)
+
+        start_time = df[ScheduleCn.start_time].min()
+        end_time = df[ScheduleCn.end_time].max()
+
+        sch_plot, sch_plot_bar, *_ = _schedule_plot_cds(
+            cds,
+            start_time=start_time,
+            end_time=end_time,
+            y_range=df[ScheduleCn.exp_num].dropna().unique(),
+        )
+        sch_plot_bar_select_tool = bokeh_models.BoxSelectTool()
+        sch_plot_bar.add_tools(sch_plot_bar_select_tool)
+        sch_plot_bar.toolbar.active_drag = sch_plot_bar_select_tool
+
+        skyplot = _azel_skyplot_cds(cds)
+        skyplot_select_tool = bokeh_models.LassoSelectTool()
+        skyplot.add_tools(skyplot_select_tool)
+        skyplot.toolbar.active_drag = skyplot_select_tool
+
+        ecefpos_plot = _ecef_states_positions_plot_cds(cds)
+        ecefpos_plot_select_tool = bokeh_models.LassoSelectTool()
+        ecefpos_plot.add_tools(ecefpos_plot_select_tool)
+
+        plot = bokeh_layouts.layout(
+            [
+                [sch_plot],
+                [skyplot, ecefpos_plot],
+            ]  # type: ignore
+        )
 
         return plot
