@@ -134,13 +134,8 @@ if has_plotting_deps:
 
         return plot
 
-    class AzelSkyplotColumnMap(t.TypedDict):
-        azimuth: str
-        elevation: str
-        adj_azimuth: str
-        adj_elevation: str
-
-    azelSkyplotColumnMapDefault: t.Final[AzelSkyplotColumnMap] = {
+    AzelSkyplotColumnKey = t.Literal["azimuth", "elevation", "adj_azimuth", "adj_elevation"]
+    azelSkyplotColumnMapDefault: t.Final[dict[AzelSkyplotColumnKey, str]] = {
         "azimuth": "azimuth",
         "elevation": "elevation",
         "adj_azimuth": "adj_azimuth",
@@ -149,9 +144,11 @@ if has_plotting_deps:
 
     def _azel_skyplot_cds(
         source: bokeh_models.ColumnarDataSource,
-        cn=azelSkyplotColumnMapDefault,
+        cn: dict[AzelSkyplotColumnKey, str] | None = None,
     ):
         """An internal ver of `azel_skyplot` that takes a bokeh `ColumnDataSource`."""
+
+        cn = azelSkyplotColumnMapDefault | (cn if cn is not None else {})
 
         # make a plot and set the pixel aspect ratio to equal to the data aspect ratio
         # (i.e. a circle in data will be a circle on screen)
@@ -244,6 +241,18 @@ if has_plotting_deps:
 
         return plot
 
+    def _azel_skyplot_cds_cols(
+        azimuths: npt.NDArray[Float64_as_deg], elevations: npt.NDArray[Float64_as_deg]
+    ):
+        cols: dict[AzelSkyplotColumnKey, npt.NDArray] = {
+            "azimuth": azimuths,
+            "elevation": elevations,
+            "adj_azimuth": azimuths - 90,
+            "adj_elevation": 90 - elevations,
+        }
+
+        return cols
+
     def azel_skyplot(
         azimuths: npt.NDArray[Float64_as_deg], elevations: npt.NDArray[Float64_as_deg]
     ):
@@ -254,21 +263,8 @@ if has_plotting_deps:
         https://mathworks.com/help/satcom/ref/skyplot.html
         """
 
-        cn = azelSkyplotColumnMapDefault
-
-        plot = _azel_skyplot_cds(
-            source=bokeh_models.ColumnDataSource(
-                {
-                    cn["azimuth"]: azimuths,
-                    cn["elevation"]: elevations,
-                    # we applied simple adjustments before plotting the data to workaround the plotting lib config limitations:
-                    # - start the polar 0 deg from +ve y-axis instead of + x-axis
-                    # - the radial range should be [90, 0] instead of [0, 90]
-                    cn["adj_azimuth"]: azimuths - 90,
-                    cn["adj_elevation"]: 90 - elevations,
-                }
-            )
-        )
+        cols: dict = _azel_skyplot_cds_cols(azimuths, elevations)
+        plot = _azel_skyplot_cds(source=bokeh_models.ColumnDataSource(cols))
 
         return plot
 
@@ -327,7 +323,7 @@ if has_plotting_deps:
         lon = geodetic_coords[1]
         wmx, wmy = transformer.transform(lat, lon)
 
-        cols: dict[EcefStatesPositionsPlottColumnKey, str] = {
+        cols: dict[EcefStatesPositionsPlottColumnKey, npt.NDArray] = {
             "lat": lat,
             "lon": lon,
             "wmx": wmx,
@@ -338,8 +334,8 @@ if has_plotting_deps:
 
     # TODO: add down sampling? radar control slice are in milliseconds, while the simulation are in days or longer
     def ecef_states_positions_plot(ecefs: EcefStates):
-        cols = _ecef_states_positions_plot_cds_cols(ecefs)
-        plot = _ecef_states_positions_plot_cds(source=bokeh_models.ColumnDataSource(**cols))
+        cols: dict = _ecef_states_positions_plot_cds_cols(ecefs)
+        plot = _ecef_states_positions_plot_cds(source=bokeh_models.ColumnDataSource(cols))
 
         return plot
 
@@ -428,24 +424,18 @@ if has_plotting_deps:
     def radar_schedule_ecef_position_plot(
         ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], schedule: Schedule
     ):
-        skyplot_cn = azelSkyplotColumnMapDefault
-
         df = schedule.to_dataframe()
 
         # bokeh requires str type for categorical axis
         df[Schedule.Cn.exp_num] = df[Schedule.Cn.exp_num].astype(str)
 
         # insert columns for azel_skyplot
-        azimuths = schedule.pointing_az
-        elevations = schedule.pointing_el
-        df[skyplot_cn["azimuth"]] = azimuths
-        df[skyplot_cn["elevation"]] = elevations
-        df[skyplot_cn["adj_azimuth"]] = azimuths - 90
-        df[skyplot_cn["adj_elevation"]] = 90 - elevations
-
-        ecef_pos_plot_cols = _ecef_states_positions_plot_cds_cols(ecefs)
+        azel_skyplot_cols = _azel_skyplot_cds_cols(schedule.pointing_az, schedule.pointing_el)
+        for k, v in azel_skyplot_cols.items():
+            df[k] = v
 
         # merging schedule and ecefs into the same dataframe
+        ecef_pos_plot_cols = _ecef_states_positions_plot_cds_cols(ecefs)
         df = pd.merge(
             df,
             pd.DataFrame({Schedule.Cn.start_time: ecefs_time, **ecef_pos_plot_cols}),
