@@ -112,23 +112,25 @@ if has_plotting_deps:
 
         df = schedule.to_dataframe()
 
-        start_time = (
+        start_time_: Datetime64_us = (
             to_datetime64_us(start_time)
             if start_time is not None
             else df[Schedule.Cn.start_time].min()
         )
-        end_time = (
+        end_time_: Datetime64_us = (
             to_datetime64_us(end_time) if end_time is not None else df[Schedule.Cn.start_time].max()
         )
 
-        df = df[(df[schedule.cn.start_time] >= start_time) & (df[schedule.cn.end_time] <= end_time)]
+        df = df[
+            (df[schedule.cn.start_time] >= start_time_) & (df[schedule.cn.end_time] <= end_time_)
+        ]
         # bokeh requires str type for categorical axis
         df[schedule.cn.exp_num] = df[schedule.cn.exp_num].astype(str)
 
         plot, *_ = _schedule_plot_cds(
             source=bokeh_models.ColumnDataSource(df),
-            start_time=start_time,
-            end_time=end_time,
+            start_time=start_time_,
+            end_time=end_time_,
             y_range=df[schedule.cn.exp_num].unique(),
         )
 
