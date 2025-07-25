@@ -155,7 +155,7 @@ class StxMrxSimulation:
         # TODO: add `blind_ranges:` support
 
         obs = Observation(
-            id=f"{rx_station_index}-{passage.time_range}",  # TODO: revisit
+            id=f"{rx_station_index}-({str(passage.time_range[0])}, {str(passage.time_range[0])})",  # TODO: revisit
             passage=passage,
             snr=snr,
             range=range_tx_m + range_rx_m,
