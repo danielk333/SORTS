@@ -134,20 +134,24 @@ if has_plotting_deps:
 
         return plot
 
-    class AzelSkyplotColumnNames:
-        azimuth: t.Final = "azimuth"
-        elevation: t.Final = "elevation"
-        adj_azimuth: t.Final = "adj_azimuth"
-        adj_elevation: t.Final = "adj_elevation"
+    class AzelSkyplotColumnMap(t.TypedDict):
+        azimuth: str
+        elevation: str
+        adj_azimuth: str
+        adj_elevation: str
 
-    def _azel_skyplot_cds(source: bokeh_models.ColumnarDataSource):
-        """
-        An internal ver of `azel_skyplot` that takes a bokeh `ColumnDataSource`.
+    azelSkyplotColumnMapDefault: t.Final[AzelSkyplotColumnMap] = {
+        "azimuth": "azimuth",
+        "elevation": "elevation",
+        "adj_azimuth": "adj_azimuth",
+        "adj_elevation": "adj_elevation",
+    }
 
-        Expect the columns in `AzelSkyplotColumnNames` in the `ColumnDataSource`.
-        """
-
-        Cn = AzelSkyplotColumnNames
+    def _azel_skyplot_cds(
+        source: bokeh_models.ColumnarDataSource,
+        cn=azelSkyplotColumnMapDefault,
+    ):
+        """An internal ver of `azel_skyplot` that takes a bokeh `ColumnDataSource`."""
 
         # make a plot and set the pixel aspect ratio to equal to the data aspect ratio
         # (i.e. a circle in data will be a circle on screen)
@@ -215,8 +219,8 @@ if has_plotting_deps:
             )
 
         tf = bokeh_models.PolarTransform(
-            angle=Cn.adj_azimuth,
-            radius=Cn.adj_elevation,
+            angle=cn["adj_azimuth"],
+            radius=cn["adj_elevation"],
             angle_units="deg",  # type: ignore
             direction="clock",
         )
@@ -233,7 +237,7 @@ if has_plotting_deps:
                 renderers=[scatter],
                 tooltips=[
                     ("index", "$index"),
-                    ("data (az, el)", f"(@{Cn.azimuth}, @{Cn.elevation})"),
+                    ("data (az, el)", f'(@{cn["azimuth"]}, @{cn["elevation"]})'),
                 ],
             )
         )
@@ -250,38 +254,41 @@ if has_plotting_deps:
         https://mathworks.com/help/satcom/ref/skyplot.html
         """
 
-        Cn = AzelSkyplotColumnNames
+        cn = azelSkyplotColumnMapDefault
 
         plot = _azel_skyplot_cds(
             source=bokeh_models.ColumnDataSource(
                 {
-                    Cn.azimuth: azimuths,
-                    Cn.elevation: elevations,
+                    cn["azimuth"]: azimuths,
+                    cn["elevation"]: elevations,
                     # we applied simple adjustments before plotting the data to workaround the plotting lib config limitations:
                     # - start the polar 0 deg from +ve y-axis instead of + x-axis
                     # - the radial range should be [90, 0] instead of [0, 90]
-                    Cn.adj_azimuth: azimuths - 90,
-                    Cn.adj_elevation: 90 - elevations,
+                    cn["adj_azimuth"]: azimuths - 90,
+                    cn["adj_elevation"]: 90 - elevations,
                 }
             )
         )
 
         return plot
 
-    class EcefStatesPositionsPlotColumnNames:
-        lat: t.Final = "lat"
-        lon: t.Final = "lon"
-        wmx: t.Final = "wmx"
-        wmy: t.Final = "wmy"
+    class EcefStatesPositionsPlottColumnMap(t.TypedDict):
+        lat: str
+        lon: str
+        wmx: str
+        wmy: str
 
-    def _ecef_states_positions_plot_cds(source: bokeh_models.ColumnarDataSource):
-        """
-        An internal ver of `ecef_states_positions_plot` that takes a bokeh `ColumnDataSource`.
+    ecefStatesPositionsPlottColumnMapDefault: t.Final[EcefStatesPositionsPlottColumnMap] = {
+        "lat": "lat",
+        "lon": "lon",
+        "wmx": "wmx",
+        "wmy": "wmy",
+    }
 
-        Expect the columns in `EcefStatesPositionsPlotColumnNames` in the `ColumnDataSource`.
-        """
-
-        Cn = EcefStatesPositionsPlotColumnNames
+    def _ecef_states_positions_plot_cds(
+        source: bokeh_models.ColumnarDataSource, cn=ecefStatesPositionsPlottColumnMapDefault
+    ):
+        """An internal ver of `ecef_states_positions_plot` that takes a bokeh `ColumnDataSource`."""
 
         plot = bp.figure(
             x_axis_type="mercator",
@@ -291,8 +298,8 @@ if has_plotting_deps:
         plot.add_tile("CartoDB Positron", retina=True)
 
         scatter = plot.scatter(
-            x=Cn.wmx,  # type: ignore
-            y=Cn.wmy,  # type: ignore
+            x=cn["wmx"],  # type: ignore
+            y=cn["wmy"],  # type: ignore
             source=source,
         )
 
@@ -308,7 +315,7 @@ if has_plotting_deps:
                 renderers=[scatter],
                 tooltips=[
                     ("index", "$index"),
-                    ("data (lat, lon)", f"(@{Cn.lat}, @{Cn.lon})"),
+                    ("data (lat, lon)", f'(@{cn["lat"]}, @{cn["lon"]})'),
                 ],
             )
         )
@@ -317,7 +324,7 @@ if has_plotting_deps:
 
     # TODO: add down sampling? radar control slice are in milliseconds, while the simulation are in days or longer
     def ecef_states_positions_plot(ecefs: EcefStates):
-        Cn = EcefStatesPositionsPlotColumnNames
+        cn = ecefStatesPositionsPlottColumnMapDefault
 
         geodetic_coords = ITRS_to_geodetic(ecefs[0], ecefs[1], ecefs[2])
         transformer = pyproj.Transformer.from_crs(
@@ -330,10 +337,10 @@ if has_plotting_deps:
         plot = _ecef_states_positions_plot_cds(
             source=bokeh_models.ColumnDataSource(
                 {
-                    Cn.lat: lat,
-                    Cn.lon: lon,
-                    Cn.wmx: wmx,
-                    Cn.wmy: wmy,
+                    cn["lat"]: lat,
+                    cn["lon"]: lon,
+                    cn["wmx"]: wmx,
+                    cn["wmy"]: wmy,
                 }
             )
         )
@@ -426,8 +433,8 @@ if has_plotting_deps:
         ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], schedule: Schedule
     ):
         ScheduleCn = schedule.cn
-        SkyplotCn = AzelSkyplotColumnNames
-        EcefPosplotCn = EcefStatesPositionsPlotColumnNames
+        skyplot_cn = azelSkyplotColumnMapDefault
+        ecef_pos_plot_cn = ecefStatesPositionsPlottColumnMapDefault
 
         df = schedule.to_dataframe()
 
@@ -437,10 +444,10 @@ if has_plotting_deps:
         # insert columns for azel_skyplot
         azimuths = schedule.pointing_az
         elevations = schedule.pointing_el
-        df[SkyplotCn.azimuth] = azimuths
-        df[SkyplotCn.elevation] = elevations
-        df[SkyplotCn.adj_azimuth] = azimuths - 90
-        df[SkyplotCn.adj_elevation] = 90 - elevations
+        df[skyplot_cn["azimuth"]] = azimuths
+        df[skyplot_cn["elevation"]] = elevations
+        df[skyplot_cn["adj_azimuth"]] = azimuths - 90
+        df[skyplot_cn["adj_elevation"]] = 90 - elevations
 
         # prepare columns for ecef_states_positions_plot
         geodetic_coords = ITRS_to_geodetic(ecefs[0], ecefs[1], ecefs[2])
@@ -457,10 +464,10 @@ if has_plotting_deps:
             pd.DataFrame(
                 {
                     ScheduleCn.start_time: ecefs_time,
-                    EcefPosplotCn.lat: lat,
-                    EcefPosplotCn.lon: lon,
-                    EcefPosplotCn.wmx: wmx,
-                    EcefPosplotCn.wmy: wmy,
+                    ecef_pos_plot_cn["lat"]: lat,
+                    ecef_pos_plot_cn["lon"]: lon,
+                    ecef_pos_plot_cn["wmx"]: wmx,
+                    ecef_pos_plot_cn["wmy"]: wmy,
                 }
             ),
             on=ScheduleCn.start_time,
