@@ -432,14 +432,13 @@ if has_plotting_deps:
     def radar_schedule_ecef_position_plot(
         ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], schedule: Schedule
     ):
-        ScheduleCn = schedule.cn
         skyplot_cn = azelSkyplotColumnMapDefault
         ecef_pos_plot_cn = ecefStatesPositionsPlottColumnMapDefault
 
         df = schedule.to_dataframe()
 
         # bokeh requires str type for categorical axis
-        df[ScheduleCn.exp_num] = df[ScheduleCn.exp_num].astype(str)
+        df[Schedule.Cn.exp_num] = df[Schedule.Cn.exp_num].astype(str)
 
         # insert columns for azel_skyplot
         azimuths = schedule.pointing_az
@@ -463,27 +462,27 @@ if has_plotting_deps:
             df,
             pd.DataFrame(
                 {
-                    ScheduleCn.start_time: ecefs_time,
+                    Schedule.Cn.start_time: ecefs_time,
                     ecef_pos_plot_cn["lat"]: lat,
                     ecef_pos_plot_cn["lon"]: lon,
                     ecef_pos_plot_cn["wmx"]: wmx,
                     ecef_pos_plot_cn["wmy"]: wmy,
                 }
             ),
-            on=ScheduleCn.start_time,
+            on=Schedule.Cn.start_time,
             how="outer",
         )
 
         cds = bokeh_models.ColumnDataSource(df)
 
-        start_time = df[ScheduleCn.start_time].min()
-        end_time = df[ScheduleCn.end_time].max()
+        start_time = df[Schedule.Cn.start_time].min()
+        end_time = df[Schedule.Cn.end_time].max()
 
         sch_plot, sch_plot_bar, *_ = _schedule_plot_cds(
             cds,
             start_time=start_time,
             end_time=end_time,
-            y_range=df[ScheduleCn.exp_num].dropna().unique(),
+            y_range=df[Schedule.Cn.exp_num].dropna().unique(),
         )
         sch_plot_bar_select_tool = bokeh_models.BoxSelectTool()
         sch_plot_bar.add_tools(sch_plot_bar_select_tool)
