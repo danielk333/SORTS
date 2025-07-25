@@ -62,6 +62,7 @@ if has_plotting_deps:
             right=Schedule.Cn.end_time,
             source=source,
         )
+        bar.x_range.range_padding = 0  # type: ignore
         bar_xpan_tool = bokeh_models.PanTool(dimensions="width")
         bar_xwheel_zoom_tool = bokeh_models.WheelZoomTool(dimensions="width")
         bar.add_tools(bar_xpan_tool)
@@ -73,13 +74,12 @@ if has_plotting_deps:
             title="Drag the middle and edges of the selection box to change the range above",
             height=130,
             width=800,
-            # x_range=bar.x_range,
             x_axis_type="datetime",
             y_axis_type=None,
             tools="",
             toolbar_location=None,
         )
-        minimap.x_range.range_padding = 0  # type: ignore
+        minimap.x_range.range_padding = 0.05  # type: ignore
         minimap.x_range.bounds = "auto"  # type: ignore
 
         # NOTE: a dummy line is plotted; select tool doesn't work well without any data plotted
@@ -286,6 +286,7 @@ if has_plotting_deps:
         plot = bp.figure(
             x_axis_type="mercator",
             y_axis_type="mercator",
+            match_aspect=True,
         )
         plot.add_tile("CartoDB Positron", retina=True)
 
