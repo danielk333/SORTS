@@ -270,9 +270,9 @@ if has_plotting_deps:
 
         return plot
 
-    EcefStatesPositionsPlottColumnKey = t.Literal["lat", "lon", "wmx", "wmy"]
-    ecefStatesPositionsPlottColumnMapDefault: t.Final[
-        dict[EcefStatesPositionsPlottColumnKey, str]
+    EcefStatesPositionsPlotColumnKey = t.Literal["lat", "lon", "wmx", "wmy"]
+    ecefStatesPositionsPlotColumnMapDefault: t.Final[
+        dict[EcefStatesPositionsPlotColumnKey, str]
     ] = {
         "lat": "lat",
         "lon": "lon",
@@ -282,11 +282,11 @@ if has_plotting_deps:
 
     def _ecef_states_positions_plot_cds(
         source: bokeh_models.ColumnarDataSource,
-        cn: dict[EcefStatesPositionsPlottColumnKey, str] | None = None,
+        cn: dict[EcefStatesPositionsPlotColumnKey, str] | None = None,
     ):
         """An internal ver of `ecef_states_positions_plot` that takes a bokeh `ColumnDataSource`."""
 
-        cn = ecefStatesPositionsPlottColumnMapDefault | (cn if cn is not None else {})
+        cn = ecefStatesPositionsPlotColumnMapDefault | (cn if cn is not None else {})
 
         plot = bp.figure(
             x_axis_type="mercator",
@@ -325,7 +325,7 @@ if has_plotting_deps:
         lon = geodetic_coords[1]
         wmx, wmy = transformer.transform(lat, lon)
 
-        cols: dict[EcefStatesPositionsPlottColumnKey, npt.NDArray] = {
+        cols: dict[EcefStatesPositionsPlotColumnKey, npt.NDArray] = {
             "lat": lat,
             "lon": lon,
             "wmx": wmx,

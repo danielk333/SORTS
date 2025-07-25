@@ -86,7 +86,7 @@ class Observation:
     """2-way range in meters"""
 
     range_rx: npt.NDArray[np.float64]
-    """1-way range in meteres"""
+    """1-way range relative to rx station in meteres"""
 
     # TODO: add this
     # one_way_range_rate: npt.NDArray[np.float64]
@@ -131,6 +131,7 @@ class Observation:
         }
         return d
 
+    # TODO: putting non 1-dim columns (e.g. `tx_k`, `rx_k`) in pandas df is not ideal
     def to_dataframe(self):
         df = pd.DataFrame(self.to_flat_dict())
         return df
