@@ -9,9 +9,7 @@ from sorts.simulation_v2.passage import Passage
 
 
 class DataFrameColumnNames:
-    """
-    Define the `pandas` `DataFrame` column names of `Observation` as class member.
-    """
+    """Define the column names of `Observation` when exported as a `DataFrame` (pandas or alike)."""
 
     # NOTE: a simple class with classmethod for iteration is used instead of
     #   `Enum` class like `class DataFrameColumnNames_(str, Enum)` for simplicity
@@ -63,6 +61,7 @@ class DataFrameColumnNames:
         """Return a list of all column names for observation."""
 
         return [
+            cls.id,
             cls.snr,
             cls.range,
             cls.range_rx,
@@ -105,13 +104,16 @@ class Observation:
     rx_k: NDArray_3x1[Float64_as_deg]
     """Pointing vector in ENU in deg, from rx station to the space object"""
 
+    Cn: t.ClassVar = DataFrameColumnNames
+    """A shortcut to return the DataFrameColumnNames class"""
+
     @classmethod
     def list_to_dataframe(cls, observations: list[Observation]):
         df = pd.DataFrame([obs.to_flat_dict() for obs in observations])
         return df
 
     @property
-    def dfc(self):
+    def cn(self):
         """A shortcut to return the DataFrameColumnNames class"""
 
         return DataFrameColumnNames
@@ -119,11 +121,11 @@ class Observation:
     def to_flat_dict(self):
         d = {
             **{
-                self.dfc.space_object_id: self.passage.space_object.oid,
-                self.dfc.tx_station_id: self.passage.tx_station.uid,
-                self.dfc.rx_station_id: self.passage.rx_station.uid,
-                self.dfc.epoch: self.passage.epoch,
-                self.dfc.time_range: self.passage.time_range,
+                self.cn.space_object_id: self.passage.space_object.oid,
+                self.cn.tx_station_id: self.passage.tx_station.uid,
+                self.cn.rx_station_id: self.passage.rx_station.uid,
+                self.cn.epoch: self.passage.epoch,
+                self.cn.time_range: self.passage.time_range,
             },
             **{c: getattr(self, c) for c in DataFrameColumnNames.all_for_observation()},
         }

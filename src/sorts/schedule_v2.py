@@ -10,9 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class DataFrameColumnNames:
-    """
-    Define the `pandas` `DataFrame` column names of a `Schedule` as class member.
-    """
+    """Define the column names of `Observation` when exported as a `DataFrame` (pandas or alike)."""
 
     # NOTE: a simple class with classmethod for iteration is used instead of
     #   `Enum` class like `class DataFrameColumnNames_(str, Enum)` for simplicity
@@ -71,9 +69,6 @@ class Schedule:
     Metadata (`ExperimentDetail`s) are stored as a dict inside the `meta` field.
     """
 
-    Cn: t.ClassVar = DataFrameColumnNames
-    """A shortcut to return the DataFrameColumnNames class"""
-
     meta: dict[int, ExperimentDetail]
 
     start_time: npt.NDArray[Datetime64_us]
@@ -83,6 +78,9 @@ class Schedule:
 
     pointing_az: npt.NDArray[Float64_as_deg]
     pointing_el: npt.NDArray[Float64_as_deg]
+
+    Cn: t.ClassVar = DataFrameColumnNames
+    """A shortcut to return the DataFrameColumnNames class"""
 
     @classmethod
     def empty(cls) -> Schedule:
@@ -122,7 +120,6 @@ class Schedule:
                     f"while shape of {f_0.name} is {fv_0.shape} "
                 )
 
-    # TODO: re-eval the naming, maybe `dfc`/`dfcn`/... is better?
     @property
     def cn(self):
         """A shortcut to return the DataFrameColumnNames class"""

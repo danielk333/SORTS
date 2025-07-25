@@ -1,7 +1,7 @@
 import logging, typing as t
 import numpy as np
 import pandas as pd
-from sorts.schedule_v2 import Schedule, ExperimentDetail, DataFrameColumnNames as Cn
+from sorts.schedule_v2 import Schedule, ExperimentDetail
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +14,8 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule]):
     Same as `priority_scheduling` but returns a pandas `DataFrame`.
     Used by `priority_scheduling` internally.
     """
+
+    Cn = Schedule.Cn
 
     # The logic of this function:
     # 1. prepare an empty df as the merge result
