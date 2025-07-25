@@ -284,11 +284,11 @@ if has_plotting_deps:
 
     def _ecef_states_positions_plot_cds(
         source: bokeh_models.ColumnarDataSource,
-        cn: dict[EcefStatesPositionsPlottColumnKey, str] = {},
+        cn: dict[EcefStatesPositionsPlottColumnKey, str] | None = None,
     ):
         """An internal ver of `ecef_states_positions_plot` that takes a bokeh `ColumnDataSource`."""
 
-        cn = ecefStatesPositionsPlottColumnMapDefault | cn
+        cn = ecefStatesPositionsPlottColumnMapDefault | (cn if cn is not None else {})
 
         plot = bp.figure(
             x_axis_type="mercator",
