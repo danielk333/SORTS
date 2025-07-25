@@ -272,13 +272,10 @@ if has_plotting_deps:
 
         return plot
 
-    class EcefStatesPositionsPlottColumnMap(t.TypedDict):
-        lat: str
-        lon: str
-        wmx: str
-        wmy: str
-
-    ecefStatesPositionsPlottColumnMapDefault: t.Final[EcefStatesPositionsPlottColumnMap] = {
+    EcefStatesPositionsPlottColumnKey = t.Literal["lat", "lon", "wmx", "wmy"]
+    ecefStatesPositionsPlottColumnMapDefault: t.Final[
+        dict[EcefStatesPositionsPlottColumnKey, str]
+    ] = {
         "lat": "lat",
         "lon": "lon",
         "wmx": "wmx",
@@ -286,9 +283,12 @@ if has_plotting_deps:
     }
 
     def _ecef_states_positions_plot_cds(
-        source: bokeh_models.ColumnarDataSource, cn=ecefStatesPositionsPlottColumnMapDefault
+        source: bokeh_models.ColumnarDataSource,
+        cn: dict[EcefStatesPositionsPlottColumnKey, str] = {},
     ):
         """An internal ver of `ecef_states_positions_plot` that takes a bokeh `ColumnDataSource`."""
+
+        cn = ecefStatesPositionsPlottColumnMapDefault | cn
 
         plot = bp.figure(
             x_axis_type="mercator",
@@ -297,11 +297,7 @@ if has_plotting_deps:
         )
         plot.add_tile("CartoDB Positron", retina=True)
 
-        scatter = plot.scatter(
-            x=cn["wmx"],  # type: ignore
-            y=cn["wmy"],  # type: ignore
-            source=source,
-        )
+        scatter = plot.scatter(x=cn["wmx"], y=cn["wmy"], source=source)
 
         # TODO: Implement a fix for the antimeridian wrapping issue
         # NOTE: We are not plotting the connecting line segments for now
@@ -322,10 +318,7 @@ if has_plotting_deps:
 
         return plot
 
-    # TODO: add down sampling? radar control slice are in milliseconds, while the simulation are in days or longer
-    def ecef_states_positions_plot(ecefs: EcefStates):
-        cn = ecefStatesPositionsPlottColumnMapDefault
-
+    def _ecef_states_positions_plot_cds_cols(ecefs: EcefStates):
         geodetic_coords = ITRS_to_geodetic(ecefs[0], ecefs[1], ecefs[2])
         transformer = pyproj.Transformer.from_crs(
             "EPSG:4326", "EPSG:3857"
@@ -334,16 +327,19 @@ if has_plotting_deps:
         lon = geodetic_coords[1]
         wmx, wmy = transformer.transform(lat, lon)
 
-        plot = _ecef_states_positions_plot_cds(
-            source=bokeh_models.ColumnDataSource(
-                {
-                    cn["lat"]: lat,
-                    cn["lon"]: lon,
-                    cn["wmx"]: wmx,
-                    cn["wmy"]: wmy,
-                }
-            )
-        )
+        cols: dict[EcefStatesPositionsPlottColumnKey, str] = {
+            "lat": lat,
+            "lon": lon,
+            "wmx": wmx,
+            "wmy": wmy,
+        }
+
+        return cols
+
+    # TODO: add down sampling? radar control slice are in milliseconds, while the simulation are in days or longer
+    def ecef_states_positions_plot(ecefs: EcefStates):
+        cols = _ecef_states_positions_plot_cds_cols(ecefs)
+        plot = _ecef_states_positions_plot_cds(source=bokeh_models.ColumnDataSource(**cols))
 
         return plot
 
@@ -433,7 +429,6 @@ if has_plotting_deps:
         ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], schedule: Schedule
     ):
         skyplot_cn = azelSkyplotColumnMapDefault
-        ecef_pos_plot_cn = ecefStatesPositionsPlottColumnMapDefault
 
         df = schedule.to_dataframe()
 
@@ -448,27 +443,12 @@ if has_plotting_deps:
         df[skyplot_cn["adj_azimuth"]] = azimuths - 90
         df[skyplot_cn["adj_elevation"]] = 90 - elevations
 
-        # prepare columns for ecef_states_positions_plot
-        geodetic_coords = ITRS_to_geodetic(ecefs[0], ecefs[1], ecefs[2])
-        transformer = pyproj.Transformer.from_crs(
-            "EPSG:4326", "EPSG:3857"
-        )  # World Geodetic System to Web Mercator
-        lat = geodetic_coords[0]
-        lon = geodetic_coords[1]
-        wmx, wmy = transformer.transform(lat, lon)
+        ecef_pos_plot_cols = _ecef_states_positions_plot_cds_cols(ecefs)
 
         # merging schedule and ecefs into the same dataframe
         df = pd.merge(
             df,
-            pd.DataFrame(
-                {
-                    Schedule.Cn.start_time: ecefs_time,
-                    ecef_pos_plot_cn["lat"]: lat,
-                    ecef_pos_plot_cn["lon"]: lon,
-                    ecef_pos_plot_cn["wmx"]: wmx,
-                    ecef_pos_plot_cn["wmy"]: wmy,
-                }
-            ),
+            pd.DataFrame({Schedule.Cn.start_time: ecefs_time, **ecef_pos_plot_cols}),
             on=Schedule.Cn.start_time,
             how="outer",
         )
