@@ -265,8 +265,8 @@ if has_plotting_deps:
         https://mathworks.com/help/satcom/ref/skyplot.html
         """
 
-        cols: dict = _azel_skyplot_cds_cols(azimuths, elevations)
-        plot = _azel_skyplot_cds(source=bokeh_models.ColumnDataSource(cols))
+        cols = _azel_skyplot_cds_cols(azimuths, elevations)
+        plot = _azel_skyplot_cds(source=bokeh_models.ColumnDataSource(t.cast(dict, cols)))
 
         return plot
 
@@ -336,8 +336,10 @@ if has_plotting_deps:
 
     # TODO: add down sampling? radar control slice are in milliseconds, while the simulation are in days or longer
     def ecef_states_positions_plot(ecefs: EcefStates):
-        cols: dict = _ecef_states_positions_plot_cds_cols(ecefs)
-        plot = _ecef_states_positions_plot_cds(source=bokeh_models.ColumnDataSource(cols))
+        cols = _ecef_states_positions_plot_cds_cols(ecefs)
+        plot = _ecef_states_positions_plot_cds(
+            source=bokeh_models.ColumnDataSource(t.cast(dict, cols))
+        )
 
         return plot
 
