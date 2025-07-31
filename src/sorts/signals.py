@@ -56,12 +56,12 @@ def hard_target_snr(
     gain_tx: npt.NDArray[np.float64],
     gain_rx: npt.NDArray[np.float64],
     wavelength: float,
-    power_tx: float,
+    power_tx: npt.NDArray[np.float64] | float,
     range_tx_m: npt.NDArray[np.float64],
     range_rx_m: npt.NDArray[np.float64],
     diameter=0.01,
-    bandwidth=10.0,
-    rx_noise_temp=150.0,
+    bandwidth: npt.NDArray[np.float64] | float = 10.0,
+    rx_noise_temp: npt.NDArray[np.float64] | float = 150.0,
     radar_albedo=1.0,
 ) -> npt.NDArray[np.float64]: ...
 
@@ -85,12 +85,12 @@ def hard_target_snr(
     gain_tx: npt.NDArray[np.float64] | float,
     gain_rx: npt.NDArray[np.float64] | float,
     wavelength: float,
-    power_tx: float,
+    power_tx: npt.NDArray[np.float64] | float,
     range_tx_m: npt.NDArray[np.float64] | float,
     range_rx_m: npt.NDArray[np.float64] | float,
     diameter=0.01,
-    bandwidth=10.0,
-    rx_noise_temp=150.0,
+    bandwidth: npt.NDArray[np.float64] | float = 10.0,
+    rx_noise_temp: npt.NDArray[np.float64] | float = 150.0,
     radar_albedo=1.0,
 ):
     """

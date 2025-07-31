@@ -142,12 +142,12 @@ class StxMrxSimulation:
             tx_gain_arr,
             rx_gain_arr,
             tx_wavelength,
-            powers[0],  # TODO: improve: hard-coded from `exp_detail`
+            powers,  # TODO: improve: hard-coded from `exp_detail`
             range_tx_m,
             range_rx_m,
             diameter=passage.space_object.d,
-            bandwidth=bandwidths[0],  # TODO: improve: hard-coded from `exp_detail`
-            rx_noise_temp=rx_noise_temps[0],  # TODO: improve: hard-coded from `exp_detail`
+            bandwidth=bandwidths,  # TODO: improve: hard-coded from `exp_detail`
+            rx_noise_temp=rx_noise_temps,  # TODO: improve: hard-coded from `exp_detail`
             radar_albedo=passage.space_object.parameters.get("radar_albedo", 1.0),
         )
 
@@ -155,7 +155,7 @@ class StxMrxSimulation:
         # TODO: add `blind_ranges:` support
 
         obs = Observation(
-            id=f"{rx_station_index}-({str(passage.time_range[0])}, {str(passage.time_range[0])})",  # TODO: revisit
+            id=f"{rx_station_index}-({str(passage.time_range[0])}, {str(passage.time_range[1])})",  # TODO: revisit
             passage=passage,
             snr=snr,
             range=range_tx_m + range_rx_m,
