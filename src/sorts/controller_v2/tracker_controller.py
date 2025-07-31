@@ -56,10 +56,11 @@ class TrackerController:
     def generate(self) -> TrackerControllerOutput:
         # generate pointings
         tx_pointings: AzelrCoordinates_DegM = cart_to_sph(
-            point_ecef(self.tx_station, self.space_object_states[:3]), degrees=True
+            self.tx_station.enu(self.space_object_states[:3]),
+            degrees=True,
         )
         rxs_pointings: list[AzelrCoordinates_DegM] = [
-            cart_to_sph(point_ecef(rx_station, self.space_object_states[:3]), degrees=True)
+            cart_to_sph(rx_station.enu(self.space_object_states[:3]), degrees=True)
             for rx_station in self.rx_stations
         ]
 
@@ -144,6 +145,7 @@ class TrackerController:
 
 def point_ecef(station: Station, point: EcefCoordinates) -> EnuCoordinates:
     """Generate ENU coordinates relative to the radar station from points in ECEF coordinate."""
+    # NOTE: based on `src/sorts/radar/tx_rx.py` `L133` `Station.point_ecef`
 
     k: EnuCoordinates = ecef_to_enu(
         station.ecef_lat,
@@ -155,7 +157,5 @@ def point_ecef(station: Station, point: EcefCoordinates) -> EnuCoordinates:
     k_norm = np.linalg.norm(k, axis=0)
 
     k = k / k_norm
-
-    # self.beam.point(k) # TODO: check if this method call is needed
 
     return k
