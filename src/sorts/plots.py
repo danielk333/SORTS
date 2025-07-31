@@ -425,7 +425,33 @@ if has_plotting_deps:
 
         return plot
 
-    def radar_schedule_ecef_position_plot(
+    # TODO: rethink how to work/integrate with `Schedule.Cn`
+    RadarScheduleColumnKey = t.Literal[
+        "start_time", "end_time", "pointing_az", "pointing_el", "exp_num"
+    ]
+    RadarScheduleEcefPositionPlotColumnKey = t.Union[
+        RadarScheduleColumnKey,
+        AzelSkyplotColumnKey,
+        EcefStatesPositionsPlotColumnKey,
+    ]
+    radarScheduleEcefPositionPlotColumnMapDefault: t.Final[
+        dict[RadarScheduleEcefPositionPlotColumnKey, str]
+    ] = (
+        t.cast(
+            dict[RadarScheduleColumnKey, str],
+            {
+                "start_time": "start_time",
+                "end_time": "end_time",
+                "pointing_az": "pointing_az",
+                "pointing_el": "pointing_el",
+                "exp_num": "exp_num",
+            },
+        )
+        | azelSkyplotColumnMapDefault
+        | ecefStatesPositionsPlotColumnMapDefault
+    )
+
+    def _radar_schedule_ecef_position_plot_cds_df(
         ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], schedule: Schedule
     ):
         df = schedule.to_dataframe()
@@ -445,6 +471,15 @@ if has_plotting_deps:
             pd.DataFrame({Schedule.Cn.start_time: ecefs_time, **ecef_pos_plot_cols}),
             on=Schedule.Cn.start_time,
             how="outer",
+        )
+
+        return df
+
+    def radar_schedule_ecef_position_plot(
+        ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], schedule: Schedule
+    ):
+        df = _radar_schedule_ecef_position_plot_cds_df(
+            ecefs=ecefs, ecefs_time=ecefs_time, schedule=schedule
         )
 
         cds = bokeh_models.ColumnDataSource(df)
