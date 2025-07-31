@@ -39,7 +39,7 @@ if has_plotting_deps:
 
         return data_table
 
-    def _schedule_plot_cds(
+    def _schedule_plot_from_cds(
         source: bokeh_models.ColumnarDataSource,
         start_time: Datetime64_us,
         end_time: Datetime64_us,
@@ -127,7 +127,7 @@ if has_plotting_deps:
         # bokeh requires str type for categorical axis
         df[schedule.cn.exp_num] = df[schedule.cn.exp_num].astype(str)
 
-        plot, *_ = _schedule_plot_cds(
+        plot, *_ = _schedule_plot_from_cds(
             source=bokeh_models.ColumnDataSource(df),
             start_time=start_time_,
             end_time=end_time_,
@@ -144,7 +144,7 @@ if has_plotting_deps:
         "adj_elevation": "adj_elevation",
     }
 
-    def _azel_skyplot_cds(
+    def _azel_skyplot_from_cds(
         source: bokeh_models.ColumnarDataSource,
         cn: dict[AzelSkyplotColumnKey, str] | None = None,
     ):
@@ -266,7 +266,7 @@ if has_plotting_deps:
         """
 
         cols = _azel_skyplot_cds_cols(azimuths, elevations)
-        plot = _azel_skyplot_cds(source=bokeh_models.ColumnDataSource(t.cast(dict, cols)))
+        plot = _azel_skyplot_from_cds(source=bokeh_models.ColumnDataSource(t.cast(dict, cols)))
 
         return plot
 
@@ -280,7 +280,7 @@ if has_plotting_deps:
         "wmy": "wmy",
     }
 
-    def _ecef_states_positions_plot_cds(
+    def _ecef_states_positions_plot_from_cds(
         source: bokeh_models.ColumnarDataSource,
         cn: dict[EcefStatesPositionsPlotColumnKey, str] | None = None,
     ):
@@ -337,7 +337,7 @@ if has_plotting_deps:
     # TODO: add down sampling? radar control slice are in milliseconds, while the simulation are in days or longer
     def ecef_states_positions_plot(ecefs: EcefStates):
         cols = _ecef_states_positions_plot_cds_cols(ecefs)
-        plot = _ecef_states_positions_plot_cds(
+        plot = _ecef_states_positions_plot_from_cds(
             source=bokeh_models.ColumnDataSource(t.cast(dict, cols))
         )
 
@@ -487,7 +487,7 @@ if has_plotting_deps:
         start_time = df[Schedule.Cn.start_time].min()
         end_time = df[Schedule.Cn.end_time].max()
 
-        sch_plot, sch_plot_bar, *_ = _schedule_plot_cds(
+        sch_plot, sch_plot_bar, *_ = _schedule_plot_from_cds(
             cds,
             start_time=start_time,
             end_time=end_time,
@@ -497,12 +497,12 @@ if has_plotting_deps:
         sch_plot_bar.add_tools(sch_plot_bar_select_tool)
         sch_plot_bar.toolbar.active_drag = sch_plot_bar_select_tool
 
-        skyplot = _azel_skyplot_cds(cds)
+        skyplot = _azel_skyplot_from_cds(cds)
         skyplot_select_tool = bokeh_models.LassoSelectTool()
         skyplot.add_tools(skyplot_select_tool)
         skyplot.toolbar.active_drag = skyplot_select_tool
 
-        ecefpos_plot = _ecef_states_positions_plot_cds(cds)
+        ecefpos_plot = _ecef_states_positions_plot_from_cds(cds)
         ecefpos_plot_select_tool = bokeh_models.LassoSelectTool()
         ecefpos_plot.add_tools(ecefpos_plot_select_tool)
 
