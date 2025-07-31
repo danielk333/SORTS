@@ -5,6 +5,9 @@ from sorts.schedule_v2 import Schedule, ExperimentDetail
 
 logger = logging.getLogger(__name__)
 
+max_datetime64_us = np.datetime64(np.iinfo(np.int64).max, "us")
+min_datetime64_us = np.datetime64(0, "us")
+
 
 # TODO: should we use a db like sqlite to enable larger than memory processing?
 # TODO: add schedule validation?
@@ -67,13 +70,9 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule]):
         # update `cn_allowed_start_time`, `cn_allowed_end_time` columns
         if (len(merged_sch_df)) > 0:
             merged_sch_df[cn_allowed_start_time] = merged_sch_df[Cn.end_time].shift(1)
-            merged_sch_df.loc[merged_sch_df.index[0], cn_allowed_start_time] = merged_sch_df[
-                Cn.start_time
-            ].iloc[0]
+            merged_sch_df.loc[merged_sch_df.index[0], cn_allowed_start_time] = min_datetime64_us
             merged_sch_df[cn_allowed_end_time] = merged_sch_df[Cn.start_time].shift(-1)
-            merged_sch_df.loc[merged_sch_df.index[-1], cn_allowed_end_time] = merged_sch_df[
-                Cn.end_time
-            ].iloc[-1]
+            merged_sch_df.loc[merged_sch_df.index[-1], cn_allowed_end_time] = max_datetime64_us
 
     merged_sch_df = merged_sch_df.reset_index(drop=True)
 
