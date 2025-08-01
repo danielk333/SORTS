@@ -125,15 +125,15 @@ def schedule_plot(
         to_datetime64_us(end_time) if end_time is not None else df[Schedule.Cn.start_time].max()
     )
 
-    df = df[(df[schedule.cn.start_time] >= start_time_) & (df[schedule.cn.end_time] <= end_time_)]
+    df = df[(df[schedule.Cn.start_time] >= start_time_) & (df[schedule.Cn.end_time] <= end_time_)]
     # bokeh requires str type for categorical axis
-    df[schedule.cn.exp_num] = df[schedule.cn.exp_num].astype(str)
+    df[schedule.Cn.exp_num] = df[schedule.Cn.exp_num].astype(str)
 
     plot, *_ = _schedule_plot_from_cds(
         source=bokeh_models.ColumnDataSource(df),
         start_time=start_time_,
         end_time=end_time_,
-        y_range=df[schedule.cn.exp_num].unique(),
+        y_range=df[schedule.Cn.exp_num].unique(),
     )
 
     return plot

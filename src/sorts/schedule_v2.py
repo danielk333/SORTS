@@ -121,13 +121,6 @@ class Schedule:
                     f"while shape of {f_0.name} is {fv_0.shape} "
                 )
 
-    # TODO: can be removed? we have the `Cn: t.ClassVar` instead
-    @property
-    def cn(self):
-        """A shortcut to return the DataFrameColumnNames class"""
-
-        return DataFrameColumnNames
-
     def to_dataframe(self) -> pd.DataFrame:
         """
         Convert `Schedule` into a pandas `DataFrame`.
@@ -140,7 +133,7 @@ class Schedule:
         df = pd.DataFrame({c: getattr(self, c) for c in DataFrameColumnNames.all_non_derived()})
 
         # add "end_time" column
-        df[self.cn.end_time] = df[self.cn.start_time] + np.array(
+        df[self.Cn.end_time] = df[self.Cn.start_time] + np.array(
             [self.meta[n].slice_duration for n in self.exp_num],
             # NOTE: `dtype` have to be stated explicitly, otherwise numpy will assume `float64` which is incorrect here
             dtype="timedelta64[us]",

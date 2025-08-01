@@ -111,22 +111,15 @@ class Observation:
         df = pd.DataFrame([obs.to_flat_dict() for obs in observations])
         return df
 
-    # TODO: can be removed? we have the `Cn: t.ClassVar` instead
-    @property
-    def cn(self):
-        """A shortcut to return the DataFrameColumnNames class"""
-
-        return DataFrameColumnNames
-
     def to_flat_dict(self):
         d = {
             **{
-                self.cn.experiment_detail: self.experiment_passage.experiment_detail,
-                self.cn.space_object_id: self.experiment_passage.space_object.oid,
-                self.cn.tx_station_id: self.experiment_passage.tx_station.uid,
-                self.cn.rx_station_id: self.experiment_passage.rx_station.uid,
-                self.cn.epoch: self.experiment_passage.epoch,
-                self.cn.time_range: self.experiment_passage.time_range,
+                self.Cn.experiment_detail: self.experiment_passage.experiment_detail,
+                self.Cn.space_object_id: self.experiment_passage.space_object.oid,
+                self.Cn.tx_station_id: self.experiment_passage.tx_station.uid,
+                self.Cn.rx_station_id: self.experiment_passage.rx_station.uid,
+                self.Cn.epoch: self.experiment_passage.epoch,
+                self.Cn.time_range: self.experiment_passage.time_range,
             },
             **{c: getattr(self, c) for c in DataFrameColumnNames.all_for_observation()},
         }
