@@ -8,7 +8,11 @@ import sorts
 from sorts.interpolation import Interpolator
 from sorts.radar.tx_rx import Station
 from sorts.types import Float64_as_sec, Float64_as_m, EcefStates, Datetime64_us
-from sorts.simulation_v2.passage import Passage, find_passages
+from sorts.simulation_v2.passage import (
+    ExperimentPassage,
+    find_passages,
+    split_passage_by_schedule,
+)
 from sorts.simulation_v2.observation import Observation
 from sorts.schedule_v2 import Schedule, ExperimentDetail
 
@@ -57,34 +61,37 @@ class StxMrxSimulation:
     #   tx-rx time difference is used to calc range so this cannot be true.
     #   likely it is a related assumption regarding similar terms (e.g. in schedule), and should be cleaned up.
     # TODO: we need mask per (tx, rx) schedule?
-    def calculate_observation_per_passage(
+    def calculate_observation_per_experiment_passage(
         self,
-        passage: Passage,
+        experiment_passage: ExperimentPassage,
+        # TODO: move `space_object_states_interpolator` outside? use NamedTuple? maybe even pregenerate the state?
         space_object_states_interpolator: Interpolator,
     ) -> Observation:
         # TODO: can probably be simplified?
         rx_station_index = next(
-            (i for i, s in enumerate(self.param.rx_stations) if s.uid == passage.rx_station.uid)
+            (
+                i
+                for i, s in enumerate(self.param.rx_stations)
+                if s.uid == experiment_passage.rx_station.uid
+            )
         )
 
-        tx_station = passage.tx_station
+        tx_station = experiment_passage.tx_station
         tx_schedule = self.param.tx_schedule
-        rx_station = passage.rx_station
+        rx_station = experiment_passage.rx_station
         rx_schedule = self.param.rx_schedules[rx_station_index]
 
         schedule_mask = self.param.rx_schedules[rx_station_index].create_mask_by_time_range(
-            passage.time_range
+            experiment_passage.time_range
         )
 
-        dsec: npt.NDArray[Float64_as_sec] = (rx_schedule.start_time - passage.epoch).astype(
-            np.float64
-        ) * 1e-6
+        dsec: npt.NDArray[Float64_as_sec] = (
+            rx_schedule.start_time - experiment_passage.epoch
+        ).astype(np.float64) * 1e-6
 
-        # apply mask if it exists
-        if schedule_mask is not None:
-            dsec = dsec[schedule_mask]
-            tx_schedule = tx_schedule.filter_by_mask(schedule_mask)
-            rx_schedule = rx_schedule.filter_by_mask(schedule_mask)
+        dsec = dsec[schedule_mask]
+        tx_schedule = tx_schedule.filter_by_mask(schedule_mask)
+        rx_schedule = rx_schedule.filter_by_mask(schedule_mask)
 
         obs_size = len(dsec)
 
@@ -145,18 +152,18 @@ class StxMrxSimulation:
             powers,  # TODO: improve: hard-coded from `exp_detail`
             range_tx_m,
             range_rx_m,
-            diameter=passage.space_object.d,
+            diameter=experiment_passage.space_object.d,
             bandwidth=bandwidths,  # TODO: improve: hard-coded from `exp_detail`
             rx_noise_temp=rx_noise_temps,  # TODO: improve: hard-coded from `exp_detail`
-            radar_albedo=passage.space_object.parameters.get("radar_albedo", 1.0),
+            radar_albedo=experiment_passage.space_object.parameters.get("radar_albedo", 1.0),
         )
 
         # TODO: add `doppler_spread_integrated_snr:` support
         # TODO: add `blind_ranges:` support
 
         obs = Observation(
-            id=f"{rx_station_index}-({str(passage.time_range[0])}, {str(passage.time_range[1])})",  # TODO: revisit
-            passage=passage,
+            id=f"{rx_station_index}-({str(experiment_passage.time_range[0])}, {str(experiment_passage.time_range[1])})",  # TODO: revisit
+            experiment_passage=experiment_passage,
             snr=snr,
             range=range_tx_m + range_rx_m,
             range_rx=range_rx_m,
@@ -206,9 +213,9 @@ class StxMrxSimulation:
             spobjs_smpl_states,
             spobjs_states_interps,
         ):
-            passages: list[Passage] = []
-            for rx_station in self.param.rx_stations:
-                _passages = find_passages(
+            exp_passages: list[ExperimentPassage] = []
+            for rx_station, rx_schedule in zip(self.param.rx_stations, self.param.rx_schedules):
+                passages = find_passages(
                     dt=spobj_smpl_dsec,
                     space_object=spobj,
                     states=spobj_smpl_states,
@@ -216,12 +223,20 @@ class StxMrxSimulation:
                     rx_station=rx_station,
                     epoch=self.param.epoch,
                 )
-                passages.extend(_passages)
+
+                for passage in passages:
+                    exp_passages_ = split_passage_by_schedule(
+                        passage=passage,
+                        schedule=rx_schedule,
+                        exp_num_map=self.param.exp_num_map,
+                    )
+
+                    exp_passages.extend(exp_passages_)
 
             # TODO: improvements needed; this is only works for StxSrx case, where calculate_observation gives out 1 element list
-            for passage in passages:
-                obs = self.calculate_observation_per_passage(
-                    passage=passage,
+            for exp_passage in exp_passages:
+                obs = self.calculate_observation_per_experiment_passage(
+                    experiment_passage=exp_passage,
                     space_object_states_interpolator=spobj_states_interp,
                 )
                 obss.append(obs)

@@ -121,6 +121,7 @@ class Schedule:
                     f"while shape of {f_0.name} is {fv_0.shape} "
                 )
 
+    # TODO: can be removed? we have the `Cn: t.ClassVar` instead
     @property
     def cn(self):
         """A shortcut to return the DataFrameColumnNames class"""

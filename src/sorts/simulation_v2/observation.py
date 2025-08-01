@@ -4,8 +4,8 @@ from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from sorts.types import Float64_as_deg, NDArray_3x1, Datetime64_us
-from sorts.simulation_v2.passage import Passage
+from sorts.types import Float64_as_deg, NDArray_3x1
+from sorts.simulation_v2.passage import ExperimentPassage
 
 
 class DataFrameColumnNames:
@@ -18,8 +18,9 @@ class DataFrameColumnNames:
 
     id: t.Final = "id"
 
-    # columns for Passage data
+    # columns for ExperimentPassage data
     # passage_id: t.Final = "passage_id" # TODO: revisit if this is needed
+    experiment_detail: t.Final = "experiment_detail"
     space_object_id: t.Final = "space_object_id"
     tx_station_id: t.Final = "tx_station_id"
     rx_station_id: t.Final = "rx_station_id"
@@ -76,9 +77,7 @@ class DataFrameColumnNames:
 class Observation:
     id: str
 
-    passage: Passage
-
-    # TODO: exp_num/ExperimentDetails
+    experiment_passage: ExperimentPassage
 
     snr: npt.NDArray[np.float64]
 
@@ -112,6 +111,7 @@ class Observation:
         df = pd.DataFrame([obs.to_flat_dict() for obs in observations])
         return df
 
+    # TODO: can be removed? we have the `Cn: t.ClassVar` instead
     @property
     def cn(self):
         """A shortcut to return the DataFrameColumnNames class"""
@@ -121,11 +121,12 @@ class Observation:
     def to_flat_dict(self):
         d = {
             **{
-                self.cn.space_object_id: self.passage.space_object.oid,
-                self.cn.tx_station_id: self.passage.tx_station.uid,
-                self.cn.rx_station_id: self.passage.rx_station.uid,
-                self.cn.epoch: self.passage.epoch,
-                self.cn.time_range: self.passage.time_range,
+                self.cn.experiment_detail: self.experiment_passage.experiment_detail,
+                self.cn.space_object_id: self.experiment_passage.space_object.oid,
+                self.cn.tx_station_id: self.experiment_passage.tx_station.uid,
+                self.cn.rx_station_id: self.experiment_passage.rx_station.uid,
+                self.cn.epoch: self.experiment_passage.epoch,
+                self.cn.time_range: self.experiment_passage.time_range,
             },
             **{c: getattr(self, c) for c in DataFrameColumnNames.all_for_observation()},
         }

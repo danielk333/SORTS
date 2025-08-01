@@ -7,6 +7,7 @@ from sorts.types import Datetime64_us, EcefStates, Float64_as_sec, Datetime_like
 from sorts.utils import to_datetime64_us
 from sorts.radar.tx_rx import Station
 from sorts.space_object import SpaceObject
+from sorts.schedule_v2 import Schedule, ExperimentDetail
 
 
 @dataclass(kw_only=True)
@@ -17,6 +18,17 @@ class Passage:
     space_object: SpaceObject
     tx_station: Station
     rx_station: Station
+    epoch: Datetime64_us
+    time_range: tuple[Datetime64_us, Datetime64_us]
+    """The start time and end time of the passage, inclusive on both ends"""
+
+
+@dataclass(kw_only=True)
+class ExperimentPassage:
+    experiment_detail: ExperimentDetail
+
+    space_object: SpaceObject
+    tx_station: Station
     rx_station: Station
     epoch: Datetime64_us
     time_range: tuple[Datetime64_us, Datetime64_us]
@@ -88,3 +100,30 @@ def find_passages(
         )
 
     return passages
+
+
+def split_passage_by_schedule(
+    passage: Passage, schedule: Schedule, exp_num_map: dict[int, ExperimentDetail]
+) -> list[ExperimentPassage]:
+    df = schedule.filter_by_time_range(passage.time_range).to_dataframe()
+
+    # identify where `exp_num` changes
+    change_points = df[schedule.Cn.exp_num] != df[schedule.Cn.exp_num].shift()
+    split_ids = change_points.cumsum()
+
+    exp_passages = [
+        ExperimentPassage(
+            experiment_detail=exp_num_map[df_split[schedule.Cn.exp_num].iloc[0]],
+            time_range=(
+                df_split[schedule.Cn.start_time].iloc[0],
+                df_split[schedule.Cn.end_time].iloc[-1],
+            ),
+            space_object=passage.space_object,
+            tx_station=passage.tx_station,
+            rx_station=passage.rx_station,
+            epoch=passage.epoch,
+        )
+        for _, df_split in df.groupby(split_ids)
+    ]
+
+    return exp_passages
