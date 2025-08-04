@@ -62,9 +62,9 @@ def _schedule_plot_from_cds(
     bar.add_tools(bokeh_models.HoverTool())
 
     bar.hbar(
-        y=Schedule.Cn.exp_num,
-        left=Schedule.Cn.start_time,
-        right=Schedule.Cn.end_time,
+        y=Schedule.Cn["exp_num"],
+        left=Schedule.Cn["start_time"],
+        right=Schedule.Cn["end_time"],
         source=source,
     )
     bar.x_range.range_padding = 0  # type: ignore
@@ -119,21 +119,25 @@ def schedule_plot(
     df = schedule.to_dataframe()
 
     start_time_: Datetime64_us = (
-        to_datetime64_us(start_time) if start_time is not None else df[Schedule.Cn.start_time].min()
+        to_datetime64_us(start_time)
+        if start_time is not None
+        else df[Schedule.Cn["start_time"]].min()
     )
     end_time_: Datetime64_us = (
-        to_datetime64_us(end_time) if end_time is not None else df[Schedule.Cn.start_time].max()
+        to_datetime64_us(end_time) if end_time is not None else df[Schedule.Cn["start_time"]].max()
     )
 
-    df = df[(df[schedule.Cn.start_time] >= start_time_) & (df[schedule.Cn.end_time] <= end_time_)]
+    df = df[
+        (df[schedule.Cn["start_time"]] >= start_time_) & (df[schedule.Cn["end_time"]] <= end_time_)
+    ]
     # bokeh requires str type for categorical axis
-    df[schedule.Cn.exp_num] = df[schedule.Cn.exp_num].astype(str)
+    df[schedule.Cn["exp_num"]] = df[schedule.Cn["exp_num"]].astype(str)
 
     plot, *_ = _schedule_plot_from_cds(
         source=bokeh_models.ColumnDataSource(df),
         start_time=start_time_,
         end_time=end_time_,
-        y_range=df[schedule.Cn.exp_num].unique(),
+        y_range=df[schedule.Cn["exp_num"]].unique(),
     )
 
     return plot
@@ -426,11 +430,20 @@ def kepler_space_object_on_map(
 RadarScheduleColumnKey = t.Literal[
     "start_time", "end_time", "pointing_az", "pointing_el", "exp_num"
 ]
-RadarScheduleEcefPositionPlotColumnKey = t.Union[
-    RadarScheduleColumnKey,
-    AzelSkyplotColumnKey,
-    EcefStatesPositionsPlotColumnKey,
+# fmt: off
+RadarScheduleEcefPositionPlotColumnKey = t.Literal[
+    "start_time", "end_time", "pointing_az", "pointing_el", "exp_num", # RadarScheduleColumnKey
+    "azimuth", "elevation", "adj_azimuth", "adj_elevation", # AzelSkyplotColumnKey
+    "lat", "lon", "wmx", "wmy", # EcefStatesPositionsPlotColumnKey
 ]
+# fmt: on
+assert set(t.get_args(RadarScheduleEcefPositionPlotColumnKey)) == set(
+    [
+        *t.get_args(RadarScheduleColumnKey),
+        *t.get_args(AzelSkyplotColumnKey),
+        *t.get_args(EcefStatesPositionsPlotColumnKey),
+    ]
+)
 
 
 def _radar_schedule_ecef_position_plot_cds_df(
@@ -439,7 +452,7 @@ def _radar_schedule_ecef_position_plot_cds_df(
     df = schedule.to_dataframe()
 
     # bokeh requires str type for categorical axis
-    df[Schedule.Cn.exp_num] = df[Schedule.Cn.exp_num].astype(str)
+    df[Schedule.Cn["exp_num"]] = df[Schedule.Cn["exp_num"]].astype(str)
 
     # insert columns for azel_skyplot
     azel_skyplot_cols = _azel_skyplot_cds_cols(schedule.pointing_az, schedule.pointing_el)
@@ -450,8 +463,8 @@ def _radar_schedule_ecef_position_plot_cds_df(
     ecef_pos_plot_cols = _ecef_states_positions_plot_cds_cols(ecefs)
     df = pd.merge(
         df,
-        pd.DataFrame({Schedule.Cn.start_time: ecefs_time, **ecef_pos_plot_cols}),
-        on=Schedule.Cn.start_time,
+        pd.DataFrame({Schedule.Cn["start_time"]: ecefs_time, **ecef_pos_plot_cols}),
+        on=Schedule.Cn["start_time"],
         how="outer",
     )
 
@@ -467,14 +480,14 @@ def radar_schedule_ecef_position_plot(
 
     cds = bokeh_models.ColumnDataSource(df)
 
-    start_time = df[Schedule.Cn.start_time].min()
-    end_time = df[Schedule.Cn.end_time].max()
+    start_time = df[Schedule.Cn["start_time"]].min()
+    end_time = df[Schedule.Cn["end_time"]].max()
 
     sch_plot, sch_plot_bar, *_ = _schedule_plot_from_cds(
         cds,
         start_time=start_time,
         end_time=end_time,
-        y_range=df[Schedule.Cn.exp_num].dropna().unique(),
+        y_range=df[Schedule.Cn["exp_num"]].dropna().unique(),
     )
     sch_plot_bar_select_tool = bokeh_models.BoxSelectTool()
     sch_plot_bar.add_tools(sch_plot_bar_select_tool)

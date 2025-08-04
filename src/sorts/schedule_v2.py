@@ -9,38 +9,28 @@ from sorts.types import Timedelta64_us, Datetime64_us, Float64_as_deg
 logger = logging.getLogger(__name__)
 
 
-class DataFrameColumnNames:
-    """Define the column names of `Observation` when exported as a `DataFrame` (pandas or alike)."""
+ScheduleFieldKey = t.Literal["meta", "start_time", "pointing_az", "pointing_el", "exp_num"]
 
-    # NOTE: a simple class with classmethod for iteration is used instead of
-    #   `Enum` class like `class DataFrameColumnNames_(str, Enum)` for simplicity
+# Define the column names used when exported as a `DataFrame` (pandas or alike)
+NonDerivedDataFrameColumnName = t.Literal["start_time", "pointing_az", "pointing_el", "exp_num"]
+DerivedDataFrameColumnName = t.Literal["end_time"]
+DataFrameColumnName = t.Literal["start_time", "end_time", "pointing_az", "pointing_el", "exp_num"]
 
-    # TODO: add test to ensure this file up-to-date with `Schedule class
+assert all((n in t.get_args(ScheduleFieldKey) for n in t.get_args(NonDerivedDataFrameColumnName)))
+assert set(t.get_args(DataFrameColumnName)) == set(
+    [*t.get_args(NonDerivedDataFrameColumnName), *t.get_args(DerivedDataFrameColumnName)]
+)
 
-    start_time: t.Final = "start_time"
-    end_time: t.Final = "end_time"
-    pointing_az: t.Final = "pointing_az"
-    pointing_el: t.Final = "pointing_el"
-    exp_num: t.Final = "exp_num"
 
-    @classmethod
-    def all(cls) -> list[str]:
-        """Return a list of all column names."""
+data_frame_column_names: t.Final[dict[DataFrameColumnName, str]] = {
+    n: n for n in t.get_args(DataFrameColumnName)
+}
+"""A dict of `DataFrameColumnName` as string key-value pair for convenience."""
 
-        return [
-            t.cast(str, v)
-            for k, v in vars(DataFrameColumnNames).items()
-            if (not k.startswith("__")) and (not isinstance(v, classmethod))
-        ]
-
-    @classmethod
-    def all_non_derived(cls) -> list[str]:
-        """
-        Return a list of all non-derived column names.
-        (i.e. It is not generated and has a corresponding field in the `Schedule` dataclass)
-        """
-
-        return [c for c in cls.all() if c not in [cls.end_time]]
+Cn = DataFrameColumnName
+"""An alias of `DataFrameColumnName`"""
+cns = data_frame_column_names
+"""An alias of `data_frame_column_names`"""
 
 
 # TODO: rename to sth like `ControlSliceDetail`?
@@ -80,8 +70,8 @@ class Schedule:
     pointing_az: npt.NDArray[Float64_as_deg]
     pointing_el: npt.NDArray[Float64_as_deg]
 
-    Cn: t.ClassVar = DataFrameColumnNames
-    """A shortcut to return the DataFrameColumnNames class"""
+    Cn: t.ClassVar = data_frame_column_names
+    """A shortcut to `data_frame_column_names`"""
 
     @classmethod
     def empty(cls) -> Schedule:
@@ -99,18 +89,18 @@ class Schedule:
 
     @classmethod
     def from_dataframe(cls, df: pd.DataFrame, meta: dict[int, ExperimentDetail]) -> Schedule:
-        sch_dict = {c: df[c].to_numpy() for c in DataFrameColumnNames.all_non_derived()}
+        sch_dict = {c: df[c].to_numpy() for c in t.get_args(NonDerivedDataFrameColumnName)}
         sch = Schedule(**sch_dict, meta=meta)
 
         return sch
 
     def __post_init__(self):
         f_0, *f_rests = [
-            f for f in fields(Schedule) if f.name in DataFrameColumnNames.all_non_derived()
+            f for f in fields(Schedule) if f.name in t.get_args(NonDerivedDataFrameColumnName)
         ]
         fv_0, *fv_rests = t.cast(
             tuple[npt.NDArray, ...],
-            [getattr(self, c) for c in DataFrameColumnNames.all_non_derived()],
+            [getattr(self, c) for c in t.get_args(NonDerivedDataFrameColumnName)],
         )  # actual value of the fields
 
         for idx, f in enumerate(fv_rests):
@@ -130,10 +120,10 @@ class Schedule:
         Handy for manipulation and plotting.
         """
 
-        df = pd.DataFrame({c: getattr(self, c) for c in DataFrameColumnNames.all_non_derived()})
+        df = pd.DataFrame({c: getattr(self, c) for c in t.get_args(NonDerivedDataFrameColumnName)})
 
         # add "end_time" column
-        df[self.Cn.end_time] = df[self.Cn.start_time] + np.array(
+        df[self.Cn["end_time"]] = df[self.Cn["start_time"]] + np.array(
             [self.meta[n].slice_duration for n in self.exp_num],
             # NOTE: `dtype` have to be stated explicitly, otherwise numpy will assume `float64` which is incorrect here
             dtype="timedelta64[us]",
