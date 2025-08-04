@@ -23,6 +23,7 @@ from sorts.types import (
 )
 from sorts.utils import to_datetime64_us
 from sorts.frames import ITRS_to_geodetic
+import sorts.schedule_v2 as sorts_sch
 from sorts.schedule_v2 import Schedule
 
 logger = logging.getLogger(__name__)
@@ -426,20 +427,16 @@ def kepler_space_object_on_map(
     return plot
 
 
-# TODO: rethink how to work/integrate with `Schedule.Cn`
-RadarScheduleColumnKey = t.Literal[
-    "start_time", "end_time", "pointing_az", "pointing_el", "exp_num"
-]
 # fmt: off
 RadarScheduleEcefPositionPlotColumnKey = t.Literal[
-    "start_time", "end_time", "pointing_az", "pointing_el", "exp_num", # RadarScheduleColumnKey
+    "start_time", "end_time", "pointing_az", "pointing_el", "exp_num", # sorts.schedule_v2.DataFrameColumnName
     "azimuth", "elevation", "adj_azimuth", "adj_elevation", # AzelSkyplotColumnKey
     "lat", "lon", "wmx", "wmy", # EcefStatesPositionsPlotColumnKey
 ]
 # fmt: on
 assert set(t.get_args(RadarScheduleEcefPositionPlotColumnKey)) == set(
     [
-        *t.get_args(RadarScheduleColumnKey),
+        *t.get_args(sorts_sch.DataFrameColumnName),
         *t.get_args(AzelSkyplotColumnKey),
         *t.get_args(EcefStatesPositionsPlotColumnKey),
     ]
