@@ -18,6 +18,7 @@ import pyvista as pv
 from pyvista import examples
 import sorts
 from sorts import _v2 as sortsV2
+from sorts.utils import to_pydatetime
 
 # TODO: switch to normal named imports; these are tmp alias until `_v2` becomes the default namespace
 StxMrxSimulation = sortsV2.simulation.StxMrxSimulation
@@ -37,17 +38,9 @@ output_folder = Path(args.output_folder)
 pickle_fpath = output_folder / f"{Path(__file__).name}.pickle"
 
 # TODO: might be if `epoch`, `start_time`, `end_time` can be integrated into some config or dataclass ?
-epoch = t.cast(
-    datetime, Time(53005.0, format="mjd", scale="utc").to_datetime(timezone=timezone.utc)
-)  # 2004-01-01 00:00:00Z
-start_time = t.cast(
-    datetime,
-    Time("2004-01-01 00:00:00Z", format="iso", scale="utc").to_datetime(timezone=timezone.utc),
-)
-end_time = t.cast(
-    datetime,
-    Time("2004-01-01 00:10:00Z", format="iso", scale="utc").to_datetime(timezone=timezone.utc),
-)  # 600 sec after start time
+epoch = Time(53005.0, format="mjd", scale="utc")  # 2004-01-01 00:00:00Z
+start_time = Time("2004-01-01 00:00:00Z", format="iso", scale="utc")
+end_time = Time("2004-01-01 00:10:00Z", format="iso", scale="utc")  # 600 sec after start time
 
 eiscat3d = sorts.get_radar("eiscat3d", "stage1-array")
 
@@ -65,19 +58,22 @@ exp_detail = sortsV2.schedule.ExperimentDetail(
 )
 exp_num_map: dict[int, sortsV2.schedule.ExperimentDetail] = {0: exp_detail}
 
+tx_station: sorts.Station = eiscat3d.tx[0]
+tx_station.uid = ("eiscat3d", "stage1-array", "tx", "0")
+rx_station: sorts.Station = eiscat3d.rx[0]
+rx_station.uid = ("eiscat3d", "stage1-array", "rx", "0")
+
 fence_scan_controller = sortsV2.controller.FenceScanController(
-    tx_station=eiscat3d.tx[0],
-    rx_station=eiscat3d.rx[0],
-    azimuth_deg=90,
-    min_elevation_deg=30,
-    dwell_s=0.1,
-    num=40,
-    start_time=start_time,
-    end_time=end_time,
-    exp_num=0,
+    tx_station=tx_station,
+    rx_stations=[rx_station],
+    exp_datail=exp_detail,
+    azimuth=90,  # sweep from east to west
+    min_elevation=30,
+    pointings_per_cycle=40,
+    scan_range=np.array([300e3], dtype=np.float64),
 )
 
-(tx_schedule, rx_schedule) = fence_scan_controller.generate(start_time, end_time)
+(tx_schedule, rx_schedules) = fence_scan_controller.generate(start_time, end_time)
 
 _pop = sorts.population.master_catalog(
     catalog_fpath,
@@ -95,27 +91,21 @@ space_objects_slice = slice(0, 100)  # take only 100 items
 space_objects = space_objects[space_objects_slice]
 print(f"clamped population size: {len(space_objects)}")
 
-
-tx_station: sorts.Station = eiscat3d.tx[0]
-tx_station.uid = ("eiscat3d", "stage1-array", "tx", "0")
-rx_station: sorts.Station = eiscat3d.rx[0]
-rx_station.uid = ("eiscat3d", "stage1-array", "rx", "0")
-
 sim = StxMrxSimulation(
     StxMrxSimulationParam(
         tx_station=tx_station,
         tx_schedule=tx_schedule,
         rx_stations=[rx_station],
-        rx_schedules=[rx_schedule],
+        rx_schedules=rx_schedules,
         exp_num_map=exp_num_map,
-        epoch=epoch,
-        start_time=start_time,
-        end_time=end_time,
+        epoch=to_pydatetime(epoch),
+        start_time=to_pydatetime(start_time),
+        end_time=to_pydatetime(end_time),
         space_objects=space_objects,
         space_objects_dt_sampler_s=lambda orbit, start_time, end_time: sorts.equidistant_sampling(
             orbit=orbit,
-            start_t=(start_time - epoch).total_seconds(),
-            end_t=(end_time - epoch).total_seconds(),
+            start_t=(to_pydatetime(start_time) - to_pydatetime(epoch)).total_seconds(),
+            end_t=(to_pydatetime(end_time) - to_pydatetime(epoch)).total_seconds(),
             max_dpos=1e3,
         ),
         # space_objects_dt_interpolator_s=sorts.interpolation.Legendre8,
@@ -152,19 +142,21 @@ else:
 ##
 
 # find the index of the space objects which has non-empty observation list
-nonempty_obss_spobj_idx_ls = [obs.passage.space_object.oid for obs in obss]
+nonempty_obss_spobj_idx_ls = [obs.experiment_passage.space_object.oid for obs in obss]
 print(f"space object with observations: {nonempty_obss_spobj_idx_ls}")
 target_spobj_idx = nonempty_obss_spobj_idx_ls[0]
 
-obs = next((obs for obs in obss if obs.passage.space_object.oid == target_spobj_idx))
-rx_sch_pass_mask = sim.param.rx_schedules[0].create_mask_by_time_range(obs.passage.time_range)
-rx_sch_pass = sim.param.rx_schedules[0].filter_by_mask(rx_sch_pass_mask)
+obs = next((obs for obs in obss if obs.experiment_passage.space_object.oid == target_spobj_idx))
+rx_sch_pass_mask = sim.param["rx_schedules"][0].create_mask_by_time_range(
+    obs.experiment_passage.time_range
+)
+rx_sch_pass = sim.param["rx_schedules"][0].filter_by_mask(rx_sch_pass_mask)
 
 spobjs_states_interp = spobjs_states_interps[target_spobj_idx]
 
 fig, axs = plt.subplots(2, 2)
 
-sch_dt_s_arr = (sim.param.rx_schedules[0].start_time - np.datetime64(sim.param.epoch)).astype(
+sch_dt_s_arr = (sim.param["rx_schedules"][0].start_time - np.datetime64(sim.param["epoch"])).astype(
     "timedelta64[us]"
 ).astype(np.float64) / 1e6
 sch_dt_s_arr_pass = sch_dt_s_arr[rx_sch_pass_mask]
@@ -185,13 +177,13 @@ timedelta_to_datetimef = interp1d(sch_dt_s_arr_pass, datetimef, fill_value="extr
 axs[0, 0].secondary_xaxis("top", functions=(datetimef_to_timedelta, timedelta_to_datetimef))
 
 axs[0, 1].plot(
-    sim.param.rx_schedules[0].start_time,
-    sim.param.rx_schedules[0].pointing_az,
+    sim.param["rx_schedules"][0].start_time,
+    sim.param["rx_schedules"][0].pointing_az,
     "r",
 )
 axs[0, 1].plot(
-    sim.param.rx_schedules[0].start_time,
-    sim.param.rx_schedules[0].pointing_el,
+    sim.param["rx_schedules"][0].start_time,
+    sim.param["rx_schedules"][0].pointing_el,
     "g",
 )
 

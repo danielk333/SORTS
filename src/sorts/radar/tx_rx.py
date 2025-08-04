@@ -12,6 +12,7 @@ import pyant
 from .. import frames
 
 # TODO: check with daniel on how this work with other parts of the repo
+#   (the change/enforcement of `uid` to be of type `RadarStationCompositeKey`)
 RadarStationCompositeKey = tuple[str, ...]
 """
 A structured unique identifer for a station of a radar.
@@ -172,7 +173,9 @@ class RX(Station):
     :ivar float noise: Receiver noise in Kelvin, i.e. system temperature.
     """
 
-    def __init__(self, lat, lon, alt, min_elevation, beam, noise, uid: RadarStationCompositeKey = ()):
+    def __init__(
+        self, lat, lon, alt, min_elevation, beam, noise, uid: RadarStationCompositeKey = ()
+    ):
         super().__init__(lat, lon, alt, min_elevation, beam, uid=uid)
         self.noise = noise
 

@@ -1,5 +1,5 @@
 from . import pointing_patterns
 from .controller_protocol import ControllerProtocol
 from .random_uniform_scans_controller import RandomUniformScansController
-from .fence_scan_controller import FenceScanController
+from .fence_scan_controller_new import FenceScanController
 from .tracker_controller import TrackerController

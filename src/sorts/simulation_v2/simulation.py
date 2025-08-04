@@ -25,8 +25,9 @@ class SpaceObjectDtSampler(t.Protocol):
     ) -> npt.NDArray[Float64_as_sec]: ...
 
 
-@dataclass(kw_only=True)
-class StxMrxSimulationParam:
+class StxMrxSimulationParam(t.TypedDict):
+    """A TypedDict of params"""
+
     tx_station: Station
     tx_schedule: Schedule
     rx_stations: t.Sequence[Station]
@@ -71,17 +72,17 @@ class StxMrxSimulation:
         rx_station_index = next(
             (
                 i
-                for i, s in enumerate(self.param.rx_stations)
+                for i, s in enumerate(self.param["rx_stations"])
                 if s.uid == experiment_passage.rx_station.uid
             )
         )
 
         tx_station = experiment_passage.tx_station
-        tx_schedule = self.param.tx_schedule
+        tx_schedule = self.param["tx_schedule"]
         rx_station = experiment_passage.rx_station
-        rx_schedule = self.param.rx_schedules[rx_station_index]
+        rx_schedule = self.param["rx_schedules"][rx_station_index]
 
-        schedule_mask = self.param.rx_schedules[rx_station_index].create_mask_by_time_range(
+        schedule_mask = self.param["rx_schedules"][rx_station_index].create_mask_by_time_range(
             experiment_passage.time_range
         )
 
@@ -106,22 +107,22 @@ class StxMrxSimulation:
         powers = np.empty((obs_size,), dtype=np.float64)
 
         # pulse_lengths = np.array(
-        #     [self.param.exp_num_map[n].pulse_length for n in tx_schedule.exp_num], dtype=np.float64
+        #     [self.param["exp_num_map"][n].pulse_length for n in tx_schedule.exp_num], dtype=np.float64
         # )  # TODO: chk if needed
         # ipps = np.array(
-        #     [self.param.exp_num_map[n].ipp for n in tx_schedule.exp_num], dtype=np.float64
+        #     [self.param["exp_num_map"][n].ipp for n in tx_schedule.exp_num], dtype=np.float64
         # )  # TODO: chk if needed
         powers = np.array(
-            [self.param.exp_num_map[n].power for n in tx_schedule.exp_num], dtype=np.float64
+            [self.param["exp_num_map"][n].power for n in tx_schedule.exp_num], dtype=np.float64
         )
         bandwidths = np.array(
-            [self.param.exp_num_map[n].bandwidth for n in tx_schedule.exp_num], dtype=np.float64
+            [self.param["exp_num_map"][n].bandwidth for n in tx_schedule.exp_num], dtype=np.float64
         )
         # duty_cycles = np.array(
-        #     [self.param.exp_num_map[n].duty_cycle for n in tx_schedule.exp_num], dtype=np.float64
+        #     [self.param["exp_num_map"][n].duty_cycle for n in tx_schedule.exp_num], dtype=np.float64
         # )  # TODO: chk if needed
         rx_noise_temps = np.array(
-            [self.param.exp_num_map[n].noise_temp for n in rx_schedule.exp_num], dtype=np.float64
+            [self.param["exp_num_map"][n].noise_temp for n in rx_schedule.exp_num], dtype=np.float64
         )
 
         # TODO: check with daniel on how to vectorize
@@ -180,17 +181,17 @@ class StxMrxSimulation:
         """
 
         spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]] = [
-            self.param.space_objects_dt_sampler_s(
+            self.param["space_objects_dt_sampler_s"](
                 spobj.state,
-                self.param.start_time,
-                self.param.end_time,
+                self.param["start_time"],
+                self.param["end_time"],
             )
-            for spobj in self.param.space_objects
+            for spobj in self.param["space_objects"]
         ]
 
         spobjs_smpl_states: list[EcefStates] = [
             spobj.get_state(spobj_smpl_dsec)
-            for spobj, spobj_smpl_dsec in zip(self.param.space_objects, spobjs_smpl_dsec)
+            for spobj, spobj_smpl_dsec in zip(self.param["space_objects"], spobjs_smpl_dsec)
         ]
 
         return spobjs_smpl_dsec, spobjs_smpl_states
@@ -201,34 +202,36 @@ class StxMrxSimulation:
         spobjs_smpl_dsec, spobjs_smpl_states = self.propagate_and_sample_space_objects_states()
         spobjs_states_interps = [
             create_space_object_states_interpolator(
-                self.param.space_objects_dt_interpolator_s, spobj_smpl_states, spobj_smpl_dsec
+                self.param["space_objects_dt_interpolator_s"], spobj_smpl_states, spobj_smpl_dsec
             )
             for spobj_smpl_dsec, spobj_smpl_states in zip(spobjs_smpl_dsec, spobjs_smpl_states)
         ]
         self._spobjs_states_interps = spobjs_states_interps
 
         for spobj, spobj_smpl_dsec, spobj_smpl_states, spobj_states_interp in zip(
-            self.param.space_objects,
+            self.param["space_objects"],
             spobjs_smpl_dsec,
             spobjs_smpl_states,
             spobjs_states_interps,
         ):
             exp_passages: list[ExperimentPassage] = []
-            for rx_station, rx_schedule in zip(self.param.rx_stations, self.param.rx_schedules):
+            for rx_station, rx_schedule in zip(
+                self.param["rx_stations"], self.param["rx_schedules"]
+            ):
                 passages = find_passages(
                     dt=spobj_smpl_dsec,
                     space_object=spobj,
                     states=spobj_smpl_states,
-                    tx_station=self.param.tx_station,
+                    tx_station=self.param["tx_station"],
                     rx_station=rx_station,
-                    epoch=self.param.epoch,
+                    epoch=self.param["epoch"],
                 )
 
                 for passage in passages:
                     exp_passages_ = split_passage_by_schedule(
                         passage=passage,
                         schedule=rx_schedule,
-                        exp_num_map=self.param.exp_num_map,
+                        exp_num_map=self.param["exp_num_map"],
                     )
 
                     exp_passages.extend(exp_passages_)

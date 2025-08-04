@@ -77,6 +77,7 @@ class DataFrameColumnNames:
 class Observation:
     id: str
 
+    # TODO: re-think this naming
     experiment_passage: ExperimentPassage
 
     snr: npt.NDArray[np.float64]
