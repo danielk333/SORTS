@@ -11,6 +11,7 @@ from sorts.types import (
     Float64_as_m,
     EcefCoordinates,
     EnuCoordinates,
+    Datetime_like,
 )
 from sorts.utils import to_datetime64_us, wrap_azimuths_elevations
 from sorts.schedule_v2 import Schedule, ExperimentDetail
@@ -59,7 +60,10 @@ class FenceScanController:
         pass
 
     def generate(
-        self, start_time: Time, end_time: Time, scan_range: npt.NDArray[Float64_as_m] | None = None
+        self,
+        start_time: Datetime_like,
+        end_time: Datetime_like,
+        scan_range: npt.NDArray[Float64_as_m] | None = None,
     ) -> FenceScanControllerOutput:
 
         # The logic of this function:

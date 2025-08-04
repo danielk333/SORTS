@@ -154,7 +154,7 @@ def _azel_skyplot_from_cds(
 ):
     """An internal ver of `azel_skyplot` that takes a bokeh `ColumnDataSource`."""
 
-    cn = azelSkyplotColumnMapDefault | (cn if cn is not None else {})
+    cn = {} | azelSkyplotColumnMapDefault | (cn if cn is not None else {})
 
     # make a plot and set the pixel aspect ratio to equal to the data aspect ratio
     # (i.e. a circle in data will be a circle on screen)
@@ -290,7 +290,7 @@ def _ecef_states_positions_plot_from_cds(
 ):
     """An internal ver of `ecef_states_positions_plot` that takes a bokeh `ColumnDataSource`."""
 
-    cn = ecefStatesPositionsPlotColumnMapDefault | (cn if cn is not None else {})
+    cn = {} | ecefStatesPositionsPlotColumnMapDefault | (cn if cn is not None else {})
 
     plot = bp.figure(
         x_axis_type="mercator",
