@@ -189,6 +189,11 @@ axs[0, 1].plot(
 
 plt.show()
 
+
+# TODO: the vtk plottings became super slow for some reason
+#   we will just early exit and skip them for now and debug later
+exit()
+
 ##
 # some vtk plottings
 #
