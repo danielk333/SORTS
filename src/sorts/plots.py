@@ -140,12 +140,6 @@ def schedule_plot(
 
 
 AzelSkyplotColumnKey = t.Literal["azimuth", "elevation", "adj_azimuth", "adj_elevation"]
-azelSkyplotColumnMapDefault: t.Final[dict[AzelSkyplotColumnKey, str]] = {
-    "azimuth": "azimuth",
-    "elevation": "elevation",
-    "adj_azimuth": "adj_azimuth",
-    "adj_elevation": "adj_elevation",
-}
 
 
 def _azel_skyplot_from_cds(
@@ -154,7 +148,7 @@ def _azel_skyplot_from_cds(
 ):
     """An internal ver of `azel_skyplot` that takes a bokeh `ColumnDataSource`."""
 
-    cn = {} | azelSkyplotColumnMapDefault | (cn if cn is not None else {})
+    cn = {k: k for k in t.get_args(AzelSkyplotColumnKey)} | (cn if cn is not None else {})
 
     # make a plot and set the pixel aspect ratio to equal to the data aspect ratio
     # (i.e. a circle in data will be a circle on screen)
@@ -276,12 +270,6 @@ def azel_skyplot(azimuths: npt.NDArray[Float64_as_deg], elevations: npt.NDArray[
 
 
 EcefStatesPositionsPlotColumnKey = t.Literal["lat", "lon", "wmx", "wmy"]
-ecefStatesPositionsPlotColumnMapDefault: t.Final[dict[EcefStatesPositionsPlotColumnKey, str]] = {
-    "lat": "lat",
-    "lon": "lon",
-    "wmx": "wmx",
-    "wmy": "wmy",
-}
 
 
 def _ecef_states_positions_plot_from_cds(
@@ -290,7 +278,9 @@ def _ecef_states_positions_plot_from_cds(
 ):
     """An internal ver of `ecef_states_positions_plot` that takes a bokeh `ColumnDataSource`."""
 
-    cn = {} | ecefStatesPositionsPlotColumnMapDefault | (cn if cn is not None else {})
+    cn = {k: k for k in t.get_args(EcefStatesPositionsPlotColumnKey)} | (
+        cn if cn is not None else {}
+    )
 
     plot = bp.figure(
         x_axis_type="mercator",
@@ -441,22 +431,6 @@ RadarScheduleEcefPositionPlotColumnKey = t.Union[
     AzelSkyplotColumnKey,
     EcefStatesPositionsPlotColumnKey,
 ]
-radarScheduleEcefPositionPlotColumnMapDefault: t.Final[
-    dict[RadarScheduleEcefPositionPlotColumnKey, str]
-] = (
-    t.cast(
-        dict[RadarScheduleColumnKey, str],
-        {
-            "start_time": "start_time",
-            "end_time": "end_time",
-            "pointing_az": "pointing_az",
-            "pointing_el": "pointing_el",
-            "exp_num": "exp_num",
-        },
-    )
-    | azelSkyplotColumnMapDefault
-    | ecefStatesPositionsPlotColumnMapDefault
-)
 
 
 def _radar_schedule_ecef_position_plot_cds_df(
