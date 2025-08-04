@@ -3,7 +3,7 @@ import numpy.typing as npt
 from astropy.time import Time
 from sorts.radar.radars import get_radar
 from sorts.schedule_v2 import ExperimentDetail
-from sorts.controller_v2.fence_scan_controller_new import FenceScanController
+from sorts.controller_v2.fence_scan_controller import FenceScanController
 
 
 def setup_function():
