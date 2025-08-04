@@ -28,6 +28,7 @@ def wrap_azimuths_elevations(
     az: npt.NDArray[Float64_as_deg],
     el: npt.NDArray[Float64_as_deg],
     el_limit: t.Literal[90] | t.Literal[180] = 90,
+    allow_negative_elevations=False,
 ) -> tuple[npt.NDArray[Float64_as_deg], npt.NDArray[Float64_as_deg]]:
     """
     Wrap azimuths and elevations so that they stay within [-180, 180) and [0, 90] (or [0, 180])
@@ -36,7 +37,17 @@ def wrap_azimuths_elevations(
 
     - When an elevation wraps, the corresponding azimuth value is flipped (added 180deg)
     - `el_limit` controls whether elevations are wrapped to [0, 90] or [0, 180]
+    - Negative elevations will trigger exception by default, controlled by `allow_negative_elevations`
     """
+
+    # throw exception if there are negative elevation(s)
+    if not allow_negative_elevations:
+        neg_el_mask = el < 0
+        first_neg_el_idx = np.argmax(neg_el_mask) if np.any(neg_el_mask) else None
+        if first_neg_el_idx is not None:
+            raise RuntimeError(
+                f"There are negative elevation(s), which is invalid. e.g. at [{first_neg_el_idx}]: {el[first_neg_el_idx]}"
+            )
 
     el = el % 180
 

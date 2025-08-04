@@ -236,7 +236,7 @@ def ITRS_to_geodetic(x, y, z, degrees=True, ellipsoid=None) -> GeodeticCoordinat
     :param str/None ellipsoid: Name of the ellipsoid model used for geodetic
     coordinates, for default value see Astropy `EarthLocation`.
     :rtype: numpy.ndarray
-    :return: (3,) array of longitude, latitude and height above ellipsoid
+    :return: (3,) array of (latitude, longitude, height) above ellipsoid
     """
 
     cord = EarthLocation.from_geocentric(
