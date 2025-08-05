@@ -2,7 +2,6 @@ import logging, math, typing as t
 from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
-from astropy.time import Time
 from sorts.radar.tx_rx import Station
 from sorts.frames import azel_to_ecef, ecef_to_enu, cart_to_sph
 from sorts.types import (
@@ -80,9 +79,11 @@ class FenceScanController:
         end_time_np = to_datetime64_us(end_time)
         scan_range = scan_range if scan_range is not None else self.scan_range
 
-        tx_slice_start_time = np.arange(start_time_np, end_time_np, self.exp_datail.slice_duration)
+        tx_slice_start_time = np.arange(
+            start_time_np, end_time_np, self.exp_datail["slice_duration"]
+        )
         tx_schedule_size = math.floor(
-            (end_time_np - start_time_np) / self.exp_datail.slice_duration
+            (end_time_np - start_time_np) / self.exp_datail["slice_duration"]
         )
 
         tx_pointings_of_a_cycle = pointing_patterns.fence_pointing(
@@ -99,9 +100,9 @@ class FenceScanController:
         )[:, :tx_schedule_size]
 
         tx_schedule = Schedule(
-            meta={self.exp_datail.id: self.exp_datail},
+            meta={self.exp_datail["id"]: self.exp_datail},
             start_time=tx_slice_start_time,
-            exp_num=np.full(tx_schedule_size, self.exp_datail.id, dtype=np.int64),
+            exp_num=np.full(tx_schedule_size, self.exp_datail["id"], dtype=np.int64),
             pointing_az=tx_pointing[0],
             pointing_el=tx_pointing[1],
         )
@@ -150,9 +151,9 @@ class FenceScanController:
             )[:, :rx_schedule_size]
 
             rx_schedule = Schedule(
-                meta={self.exp_datail.id: self.exp_datail},
+                meta={self.exp_datail["id"]: self.exp_datail},
                 start_time=rx_slice_start_time,
-                exp_num=np.full(rx_schedule_size, self.exp_datail.id, dtype=np.int64),
+                exp_num=np.full(rx_schedule_size, self.exp_datail["id"], dtype=np.int64),
                 pointing_az=rx_pointing[0],
                 pointing_el=rx_pointing[1],
             )

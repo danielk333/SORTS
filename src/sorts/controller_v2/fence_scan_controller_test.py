@@ -2,7 +2,6 @@ import numpy as np
 import numpy.typing as npt
 from astropy.time import Time
 from sorts.radar.radars import get_radar
-from sorts.schedule_v2 import ExperimentDetail
 from sorts.controller_v2.fence_scan_controller import FenceScanController
 
 
@@ -26,22 +25,20 @@ def FenceScanController_smoke_test():
 
     eiscat3d = get_radar("eiscat3d", "stage1-array")
 
-    exp_detail_1 = ExperimentDetail(
-        id=1,
-        coh_int_bandwidth=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-        ipp=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-        pulse_length=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-        power=5000000.0,
-        bandwidth=52.08333333333333,
-        duty_cycle=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-        noise_temp=150.0,
-        slice_duration=slice_duration,
-    )
-
     fenceScanController = FenceScanController(
         tx_station=eiscat3d.tx[0],
         rx_stations=[eiscat3d.tx[0]],
-        exp_datail=exp_detail_1,
+        exp_datail={
+            "id": 1,
+            "coh_int_bandwidth": 1.0,
+            "ipp": 1.0,
+            "pulse_length": 1.0,
+            "power": 5000000.0,
+            "bandwidth": 52.08333333333333,
+            "duty_cycle": 1.0,
+            "noise_temp": 150.0,
+            "slice_duration": slice_duration,
+        },
         azimuth=90,  # sweep from east to west
         min_elevation=30,
         pointings_per_cycle=40,

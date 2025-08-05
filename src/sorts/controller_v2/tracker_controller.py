@@ -89,18 +89,18 @@ class TrackerController:
         sch_len = len(sch_time)
 
         tx_sch = Schedule(
-            meta={self.exp_detail.id: self.exp_detail},
+            meta={self.exp_detail["id"]: self.exp_detail},
             start_time=sch_time,
-            exp_num=np.full(sch_len, self.exp_detail.id, dtype=np.int64),
+            exp_num=np.full(sch_len, self.exp_detail["id"], dtype=np.int64),
             pointing_az=tx_pointings[0],
             pointing_el=tx_pointings[1],
         )
 
         rx_schs = [
             Schedule(
-                meta={self.exp_detail.id: self.exp_detail},
+                meta={self.exp_detail["id"]: self.exp_detail},
                 start_time=sch_time,
-                exp_num=np.full(sch_len, self.exp_detail.id, dtype=np.int64),
+                exp_num=np.full(sch_len, self.exp_detail["id"], dtype=np.int64),
                 pointing_az=rx_pointings[0],
                 pointing_el=rx_pointings[1],
             )

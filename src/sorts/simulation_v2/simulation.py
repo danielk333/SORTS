@@ -107,22 +107,24 @@ class StxMrxSimulation:
         powers = np.empty((obs_size,), dtype=np.float64)
 
         # pulse_lengths = np.array(
-        #     [self.param["exp_num_map"][n].pulse_length for n in tx_schedule.exp_num], dtype=np.float64
+        #     [self.param["exp_num_map"][n]["pulse_length"] for n in tx_schedule.exp_num], dtype=np.float64
         # )  # TODO: chk if needed
         # ipps = np.array(
-        #     [self.param["exp_num_map"][n].ipp for n in tx_schedule.exp_num], dtype=np.float64
+        #     [self.param["exp_num_map"][n]["ipp"] for n in tx_schedule.exp_num], dtype=np.float64
         # )  # TODO: chk if needed
         powers = np.array(
-            [self.param["exp_num_map"][n].power for n in tx_schedule.exp_num], dtype=np.float64
+            [self.param["exp_num_map"][n]["power"] for n in tx_schedule.exp_num], dtype=np.float64
         )
         bandwidths = np.array(
-            [self.param["exp_num_map"][n].bandwidth for n in tx_schedule.exp_num], dtype=np.float64
+            [self.param["exp_num_map"][n]["bandwidth"] for n in tx_schedule.exp_num],
+            dtype=np.float64,
         )
         # duty_cycles = np.array(
-        #     [self.param["exp_num_map"][n].duty_cycle for n in tx_schedule.exp_num], dtype=np.float64
+        #     [self.param["exp_num_map"][n]["duty_cycle"] for n in tx_schedule.exp_num], dtype=np.float64
         # )  # TODO: chk if needed
         rx_noise_temps = np.array(
-            [self.param["exp_num_map"][n].noise_temp for n in rx_schedule.exp_num], dtype=np.float64
+            [self.param["exp_num_map"][n]["noise_temp"] for n in rx_schedule.exp_num],
+            dtype=np.float64,
         )
 
         # TODO: check with daniel on how to vectorize
@@ -150,12 +152,12 @@ class StxMrxSimulation:
             tx_gain_arr,
             rx_gain_arr,
             tx_wavelength,
-            powers,  # TODO: improve: hard-coded from `exp_detail`
+            powers,
             range_tx_m,
             range_rx_m,
             diameter=experiment_passage.space_object.d,
-            bandwidth=bandwidths,  # TODO: improve: hard-coded from `exp_detail`
-            rx_noise_temp=rx_noise_temps,  # TODO: improve: hard-coded from `exp_detail`
+            bandwidth=bandwidths,
+            rx_noise_temp=rx_noise_temps,
             radar_albedo=experiment_passage.space_object.parameters.get("radar_albedo", 1.0),
         )
 

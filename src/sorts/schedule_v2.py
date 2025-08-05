@@ -34,16 +34,15 @@ cns = data_frame_column_names
 
 
 # TODO: rename to sth like `ControlSliceDetail`?
-@dataclass(kw_only=True)
-class ExperimentDetail:
+class ExperimentDetail(t.TypedDict):
     id: int
 
-    coh_int_bandwidth: float
-    ipp: float
-    pulse_length: float
+    coh_int_bandwidth: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
+    ipp: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
+    pulse_length: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
     power: float
     bandwidth: float
-    duty_cycle: float
+    duty_cycle: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
     noise_temp: float
 
     slice_duration: Timedelta64_us
@@ -124,7 +123,7 @@ class Schedule:
 
         # add "end_time" column
         df[self.Cn["end_time"]] = df[self.Cn["start_time"]] + np.array(
-            [self.meta[n].slice_duration for n in self.exp_num],
+            [self.meta[n]["slice_duration"] for n in self.exp_num],
             # NOTE: `dtype` have to be stated explicitly, otherwise numpy will assume `float64` which is incorrect here
             dtype="timedelta64[us]",
         )

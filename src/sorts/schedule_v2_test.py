@@ -11,17 +11,17 @@ def setup_function():
 
 def Schedule_dataframe_roundtrip_conversion_test():
     meta: dict[int, ExperimentDetail] = {
-        0: ExperimentDetail(
-            id=0,
-            coh_int_bandwidth=1.0,
-            ipp=1.0,
-            pulse_length=1.0,
-            power=1.0,
-            bandwidth=1.0,
-            duty_cycle=1.0,
-            noise_temp=1.0,
-            slice_duration=np.timedelta64(10_000, "us"),
-        )
+        0: {
+            "id": 0,
+            "coh_int_bandwidth": 1.0,
+            "ipp": 1.0,
+            "pulse_length": 1.0,
+            "power": 1.0,
+            "bandwidth": 1.0,
+            "duty_cycle": 1.0,
+            "noise_temp": 1.0,
+            "slice_duration": np.timedelta64(10_000, "us"),
+        }
     }
 
     start_time = np.arange(

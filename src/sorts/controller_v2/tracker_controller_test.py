@@ -39,18 +39,6 @@ def TrackerController_smoke_test():
         parameters={"d": 0.1},
     )
 
-    exp_detail = ExperimentDetail(
-        id=0,
-        coh_int_bandwidth=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-        ipp=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-        pulse_length=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-        power=5000000.0,
-        bandwidth=52.08333333333333,
-        duty_cycle=1.0,  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-        noise_temp=150.0,
-        slice_duration=control_slice_duration,
-    )
-
     time_arr: npt.NDArray[Datetime64_us] = np.arange(
         start_time.to_value("datetime64").astype("datetime64[us]"),  # type: ignore
         end_time.to_value("datetime64").astype("datetime64[us]"),  # type: ignore
@@ -66,7 +54,17 @@ def TrackerController_smoke_test():
         rx_stations=[],
         time=time_arr,
         space_object_states=ecefs,
-        exp_detail=exp_detail,
+        exp_detail={
+            "id": 0,
+            "coh_int_bandwidth": 1.0,
+            "ipp": 1.0,
+            "pulse_length": 1.0,
+            "power": 5000000.0,
+            "bandwidth": 52.08333333333333,
+            "duty_cycle": 1.0,
+            "noise_temp": 150.0,
+            "slice_duration": control_slice_duration,
+        },
         # azimuth_range=None,
         # elevation_range=None,
     )
