@@ -10,8 +10,7 @@ from sorts.space_object import SpaceObject
 from sorts.schedule_v2 import Schedule, ExperimentDetail
 
 
-@dataclass(kw_only=True)
-class Passage:
+class Passage(t.TypedDict):
     # id: int # TODO: revisit if this is needed
     # TODO: add ENU and/or ECEF states?
 
@@ -89,13 +88,13 @@ def find_passages(
 
         time_range = (start_time, end_time)
         passages.append(
-            Passage(
-                space_object=space_object,
-                tx_station=tx_station,
-                rx_station=rx_station,
-                epoch=epoch,
-                time_range=time_range,
-            )
+            {
+                "space_object": space_object,
+                "tx_station": tx_station,
+                "rx_station": rx_station,
+                "epoch": epoch,
+                "time_range": time_range,
+            }
         )
 
     return passages
@@ -104,7 +103,7 @@ def find_passages(
 def split_passage_by_schedule(
     passage: Passage, schedule: Schedule, exp_num_map: dict[int, ExperimentDetail]
 ) -> list[ExperimentPassage]:
-    df = schedule.filter_by_time_range(passage.time_range).to_dataframe()
+    df = schedule.filter_by_time_range(passage["time_range"]).to_dataframe()
 
     # identify where `exp_num` changes
     change_points = df[schedule.Cn["exp_num"]] != df[schedule.Cn["exp_num"]].shift()
