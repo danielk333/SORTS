@@ -252,12 +252,6 @@ class StxMrxSimulation:
     # def run(self) -> dict[RadarStationCompositeKey, dict]: ...
 
 
-# TODO: implement or remove
-@dataclass(kw_only=True)
-class SimulationResult:
-    pass
-
-
 def create_space_object_states_interpolator(
     interpolator: type[Interpolator],
     states: EcefStates,
