@@ -73,21 +73,21 @@ class StxMrxSimulation:
             (
                 i
                 for i, s in enumerate(self.param["rx_stations"])
-                if s.uid == experiment_passage.rx_station.uid
+                if s.uid == experiment_passage["rx_station"].uid
             )
         )
 
-        tx_station = experiment_passage.tx_station
+        tx_station = experiment_passage["tx_station"]
         tx_schedule = self.param["tx_schedule"]
-        rx_station = experiment_passage.rx_station
+        rx_station = experiment_passage["rx_station"]
         rx_schedule = self.param["rx_schedules"][rx_station_index]
 
         schedule_mask = self.param["rx_schedules"][rx_station_index].create_mask_by_time_range(
-            experiment_passage.time_range
+            experiment_passage["time_range"]
         )
 
         dsec: npt.NDArray[Float64_as_sec] = (
-            rx_schedule.start_time - experiment_passage.epoch
+            rx_schedule.start_time - experiment_passage["epoch"]
         ).astype(np.float64) * 1e-6
 
         dsec = dsec[schedule_mask]
@@ -155,17 +155,17 @@ class StxMrxSimulation:
             powers,
             range_tx_m,
             range_rx_m,
-            diameter=experiment_passage.space_object.d,
+            diameter=experiment_passage["space_object"].d,
             bandwidth=bandwidths,
             rx_noise_temp=rx_noise_temps,
-            radar_albedo=experiment_passage.space_object.parameters.get("radar_albedo", 1.0),
+            radar_albedo=experiment_passage["space_object"].parameters.get("radar_albedo", 1.0),
         )
 
         # TODO: add `doppler_spread_integrated_snr:` support
         # TODO: add `blind_ranges:` support
 
         obs = Observation(
-            id=f"{rx_station_index}-({str(experiment_passage.time_range[0])}, {str(experiment_passage.time_range[1])})",  # TODO: revisit
+            id=f'{rx_station_index}-({str(experiment_passage["time_range"][0])}, {str(experiment_passage["time_range"][1])})',  # TODO: revisit
             experiment_passage=experiment_passage,
             snr=snr,
             range=range_tx_m + range_rx_m,

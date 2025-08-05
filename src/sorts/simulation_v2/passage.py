@@ -23,8 +23,7 @@ class Passage:
     """The start time and end time of the passage, inclusive on both ends"""
 
 
-@dataclass(kw_only=True)
-class ExperimentPassage:
+class ExperimentPassage(t.TypedDict):
     experiment_detail: ExperimentDetail
 
     space_object: SpaceObject
@@ -111,18 +110,18 @@ def split_passage_by_schedule(
     change_points = df[schedule.Cn["exp_num"]] != df[schedule.Cn["exp_num"]].shift()
     split_ids = change_points.cumsum()
 
-    exp_passages = [
-        ExperimentPassage(
-            experiment_detail=exp_num_map[df_split[schedule.Cn["exp_num"]].iloc[0]],
-            time_range=(
+    exp_passages: list[ExperimentPassage] = [
+        {
+            "experiment_detail": exp_num_map[df_split[schedule.Cn["exp_num"]].iloc[0]],
+            "time_range": (
                 df_split[schedule.Cn["start_time"]].iloc[0],
                 df_split[schedule.Cn["end_time"]].iloc[-1],
             ),
-            space_object=passage.space_object,
-            tx_station=passage.tx_station,
-            rx_station=passage.rx_station,
-            epoch=passage.epoch,
-        )
+            "space_object": passage["space_object"],
+            "tx_station": passage["tx_station"],
+            "rx_station": passage["rx_station"],
+            "epoch": passage["epoch"],
+        }
         for _, df_split in df.groupby(split_ids)
     ]
 
