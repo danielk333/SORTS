@@ -7,7 +7,7 @@ from sorts.radar.radars import get_radar
 from sorts.types import Datetime64_us, Timedelta64_us, Float64_as_sec
 from sorts.schedule_v2 import ExperimentDetail
 from sorts.scheduler_v2.priority_scheduling import priority_scheduling
-from sorts.controller_v2 import TrackerController
+from sorts.controller_v2 import tracker_controller
 
 
 def setup_function():
@@ -70,13 +70,13 @@ def priority_scheduling_smoke_test():
         slice_duration=sch_1_slice_duration,
     )
 
-    controller_1 = TrackerController(
-        tx_station=eiscat3d.tx[0],
-        rx_stations=[],
-        time=time_arr_1,
-        space_object_states=ecefs_1,
-        exp_detail=exp_detail_0,
-    )
+    controller_1: tracker_controller.State = {
+        "tx_station": eiscat3d.tx[0],
+        "rx_stations": [],
+        "spobj_time": time_arr_1,
+        "spobj_states": ecefs_1,
+        "exp_detail": exp_detail_0,
+    }
 
     time_arr_2: npt.NDArray[Datetime64_us] = np.arange(
         start_time.to_value("datetime64").astype("datetime64[us]"),  # type: ignore
@@ -99,16 +99,16 @@ def priority_scheduling_smoke_test():
         slice_duration=sch_2_slice_duration,
     )
 
-    controller_2 = TrackerController(
-        tx_station=eiscat3d.tx[0],
-        rx_stations=[],
-        time=time_arr_2,
-        space_object_states=ecefs_2,
-        exp_detail=exp_detail_1,
-    )
+    controller_2: tracker_controller.State = {
+        "tx_station": eiscat3d.tx[0],
+        "rx_stations": [],
+        "spobj_time": time_arr_2,
+        "spobj_states": ecefs_2,
+        "exp_detail": exp_detail_1,
+    }
 
-    tx_sch_1, _rx_schs = controller_1.generate()
-    tx_sch_2, _rx_schs = controller_2.generate()
+    tx_sch_1, _rx_schs = tracker_controller.generate_from_state(controller_1)
+    tx_sch_2, _rx_schs = tracker_controller.generate_from_state(controller_2)
 
     merged_sch = priority_scheduling([tx_sch_1, tx_sch_2], {0: exp_detail_0, 1: exp_detail_1})
     merged_sch_df = merged_sch.to_dataframe()

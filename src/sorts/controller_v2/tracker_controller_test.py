@@ -5,8 +5,7 @@ from sorts.propagator import SGP4
 from sorts.space_object import SpaceObject
 from sorts.radar.radars import get_radar
 from sorts.types import Datetime64_us, Timedelta64_us, Float64_as_sec
-from sorts.schedule_v2 import ExperimentDetail
-from sorts.controller_v2.tracker_controller import TrackerController
+from sorts.controller_v2 import tracker_controller
 
 
 def setup_function():
@@ -49,12 +48,12 @@ def TrackerController_smoke_test():
 
     ecefs = spobj.get_state(dsec_arr)
 
-    controller = TrackerController(
-        tx_station=eiscat3d.tx[0],
-        rx_stations=[],
-        time=time_arr,
-        space_object_states=ecefs,
-        exp_detail={
+    ctrl_state: tracker_controller.State = {
+        "tx_station": eiscat3d.tx[0],
+        "rx_stations": [],
+        "spobj_time": time_arr,
+        "spobj_states": ecefs,
+        "exp_detail": {
             "id": 0,
             "coh_int_bandwidth": 1.0,
             "ipp": 1.0,
@@ -65,13 +64,8 @@ def TrackerController_smoke_test():
             "noise_temp": 150.0,
             "slice_duration": control_slice_duration,
         },
-        # azimuth_range=None,
-        # elevation_range=None,
-    )
+    }
 
-    result = controller.generate()
-
-    # for k in result:
-    #     assert isinstance(result[k], Schedule)
+    result = tracker_controller.generate_from_state(ctrl_state)
 
     return
