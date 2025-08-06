@@ -192,7 +192,6 @@ class FenceScanController:
 
         return ctrl
 
-    # TODO: add this to `TrackerController`
     def update_state_from_partial_state(self):
         self.state = t.cast(State, {k: self._partial_state[k] for k in t.get_args(StateKey)})
         return self

@@ -183,6 +183,10 @@ class TrackerController:
 
         return ctrl
 
+    def update_state_from_partial_state(self):
+        self.state = t.cast(State, {k: self._partial_state[k] for k in t.get_args(StateKey)})
+        return self
+
     def compute_ecef_states(
         self, start_time: Datetime_like, end_time: Datetime_like, epoch: Datetime_like
     ):
@@ -199,30 +203,37 @@ class TrackerController:
         dsec = t.cast(npt.NDArray[Float64_as_sec], dt.astype(np.float64) / 1e6)
         ecefs = self._partial_state["spobj"].get_state(dsec)
 
-        state: State = {
-            "tx_station": self._partial_state["tx_station"],
-            "rx_stations": self._partial_state["rx_stations"],
-            "exp_detail": self._partial_state["exp_detail"],
-            "spobj_time": time,
-            "spobj_states": ecefs,
-        }
-        self.state = state
+        self._partial_state.update(
+            {
+                "spobj_time": time,
+                "spobj_states": ecefs,
+            }
+        )
+        self.update_state_from_partial_state()
 
         return self
 
-    def generate(self, start_time: Datetime_like, end_time: Datetime_like) -> Output:
+    def generate(
+        self, start_time: Datetime_like | None = None, end_time: Datetime_like | None = None
+    ) -> Output:
         """
         Generate the schedules.
-        `start_time` and `end_time` can be omitted if this instance is created from `TrackerController.from_ecef_states`
+        `start_time` and `end_time` should be omitted if this instance is created from `TrackerController.from_ecef_states`
         """
 
         global generate_from_state
 
         # TODO: should regenerate anyway if `start_time` and `end_time` are explicitly passed
-        if self.state is None:
+        if start_time is not None and end_time is not None:
             epoch: Datetime_like = self._partial_state["epoch"]
             self.compute_ecef_states(start_time, end_time, epoch)
             state = t.cast(State, self.state)
+        elif self.state is None:
+            raise RuntimeError(
+                "Cannot plot generate without valid state property."
+                + " Please either provide the `start_time` and `end_time` param"
+                + " or ensure it is set correctly using methods like `compute_ecef_states` or proper constructors."
+            )
         else:
             state = self.state
 
@@ -242,8 +253,8 @@ class TrackerController:
             else:
                 raise RuntimeError(
                     "Cannot plot TrackerController without valid state property."
-                    + " Please either call method `compute_ecef_states` beforehand"
-                    + " or provide the `start_time` and `end_time` param"
+                    + " Please either provide the `start_time` and `end_time` param"
+                    + " or ensure it is set correctly using methods like `compute_ecef_states` or proper constructors."
                 )
         else:
             state = self.state
@@ -255,8 +266,8 @@ class TrackerController:
             else:
                 raise RuntimeError(
                     "Cannot plot TrackerController without valid output cache."
-                    + " Please either call method `generate` beforehand"
-                    + " or provide the `start_time` and `end_time` param"
+                    + " Please either provide the `start_time` and `end_time` param"
+                    + " or ensure it is set correctly using methods like `compute_ecef_states` or proper constructors."
                 )
         else:
             cached_output = self._cached_output
