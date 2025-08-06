@@ -108,7 +108,6 @@ def generate_from_state(state: State) -> Output:
             ecef=rx_pointings_of_a_cycle_ecef,
             degrees=True,
         )
-        # TODO: `cart_to_sph` returns el in [-90, 90]. update `wrap_azimuths_elevations` to handle -ve el (by e.g. `el % 180`)?
         # TODO: update `wrap_azimuths_elevations` output a single ndarray of (3,n) ?
         rx_pointings_of_a_cycle: AzelrCoordinates_DegM = cart_to_sph(
             rx_pointings_of_a_cycle_enu, degrees=True
