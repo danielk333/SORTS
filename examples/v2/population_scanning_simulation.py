@@ -92,16 +92,16 @@ space_objects_slice = slice(0, 100)  # take only 100 items
 space_objects = space_objects[space_objects_slice]
 print(f"clamped population size: {len(space_objects)}")
 
-sim = StxMrxSimulation(
+sim = StxMrxSimulation.from_spec(
     {
         "tx_station": tx_station,
         "tx_schedule": tx_schedule,
         "rx_stations": [rx_station],
         "rx_schedules": rx_schedules,
         "exp_num_map": exp_num_map,
-        "epoch": to_pydatetime(epoch),
-        "start_time": to_pydatetime(start_time),
-        "end_time": to_pydatetime(end_time),
+        "epoch": epoch,
+        "start_time": start_time,
+        "end_time": end_time,
         "space_objects": space_objects,
         "space_objects_dt_sampler_s": lambda orbit, start_time, end_time: sorts.equidistant_sampling(
             orbit=orbit,
@@ -124,7 +124,7 @@ else:
     calc_start_time = time.perf_counter()
     obss = sim.calculate_observations()
     calc_time = time.perf_counter() - calc_start_time
-    spobjs_states_interps = sim._spobjs_states_interps
+    spobjs_states_interps = sim.state["_spobjs_states_interps"]
 
     with open(pickle_fpath, "wb") as f:
         pickle.dump(
@@ -150,16 +150,16 @@ target_spobj_idx = nonempty_obss_spobj_idx_ls[0]
 obs = next(
     (obs for obs in obss if obs["experiment_passage"]["space_object"].oid == target_spobj_idx)
 )
-rx_sch_pass_mask = sim.param["rx_schedules"][0].create_mask_by_time_range(
+rx_sch_pass_mask = sim.state["rx_schedules"][0].create_mask_by_time_range(
     obs["experiment_passage"]["time_range"]
 )
-rx_sch_pass = sim.param["rx_schedules"][0].filter_by_mask(rx_sch_pass_mask)
+rx_sch_pass = sim.state["rx_schedules"][0].filter_by_mask(rx_sch_pass_mask)
 
 spobjs_states_interp = spobjs_states_interps[target_spobj_idx]
 
 fig, axs = plt.subplots(2, 2)
 
-sch_dt_s_arr = (sim.param["rx_schedules"][0].start_time - np.datetime64(sim.param["epoch"])).astype(
+sch_dt_s_arr = (sim.state["rx_schedules"][0].start_time - np.datetime64(sim.state["epoch"])).astype(
     "timedelta64[us]"
 ).astype(np.float64) / 1e6
 sch_dt_s_arr_pass = sch_dt_s_arr[rx_sch_pass_mask]
@@ -180,13 +180,13 @@ timedelta_to_datetimef = interp1d(sch_dt_s_arr_pass, datetimef, fill_value="extr
 axs[0, 0].secondary_xaxis("top", functions=(datetimef_to_timedelta, timedelta_to_datetimef))
 
 axs[0, 1].plot(
-    sim.param["rx_schedules"][0].start_time,
-    sim.param["rx_schedules"][0].pointing_az,
+    sim.state["rx_schedules"][0].start_time,
+    sim.state["rx_schedules"][0].pointing_az,
     "r",
 )
 axs[0, 1].plot(
-    sim.param["rx_schedules"][0].start_time,
-    sim.param["rx_schedules"][0].pointing_el,
+    sim.state["rx_schedules"][0].start_time,
+    sim.state["rx_schedules"][0].pointing_el,
     "g",
 )
 

@@ -5,8 +5,6 @@ NOTE: WIP; this is currently a testing ground for refactored code
 TODO: complete it and clean up
 """
 
-import typing as t
-from datetime import datetime, timezone
 import numpy as np
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
@@ -58,16 +56,16 @@ fence_scan_controller = sortsV2.controller.FenceScanController.from_scan_spec(
 
 (tx_schedule, rx_schedules) = fence_scan_controller.generate(start_time, end_time)
 
-sim = StxMrxSimulation(
+sim = StxMrxSimulation.from_spec(
     {
         "tx_station": tx_station,
         "tx_schedule": tx_schedule,
         "rx_stations": [rx_station],
         "rx_schedules": rx_schedules,
         "exp_num_map": exp_num_map,
-        "epoch": to_pydatetime(epoch),
-        "start_time": to_pydatetime(start_time),
-        "end_time": to_pydatetime(end_time),
+        "epoch": epoch,
+        "start_time": start_time,
+        "end_time": end_time,
         "space_objects": [
             sorts.SpaceObject(
                 sorts.propagator.SGP4,
@@ -97,17 +95,17 @@ sim = StxMrxSimulation(
 obss = sim.calculate_observations()
 
 obs = obss[0]
-rx_sch_pass_mask = sim.param["rx_schedules"][0].create_mask_by_time_range(
+rx_sch_pass_mask = sim.state["rx_schedules"][0].create_mask_by_time_range(
     obs["experiment_passage"]["time_range"]
 )
-rx_sch_pass = sim.param["rx_schedules"][0].filter_by_mask(rx_sch_pass_mask)
+rx_sch_pass = sim.state["rx_schedules"][0].filter_by_mask(rx_sch_pass_mask)
 
 ##
 # do some plottings
 ##
 fig, axs = plt.subplots(2, 2)
 
-sch_dt_s_arr = (sim.param["rx_schedules"][0].start_time - np.datetime64(sim.param["epoch"])).astype(
+sch_dt_s_arr = (sim.state["rx_schedules"][0].start_time - np.datetime64(sim.state["epoch"])).astype(
     "timedelta64[us]"
 ).astype(np.float64) / 1e6
 sch_dt_s_arr_pass = sch_dt_s_arr[rx_sch_pass_mask]
@@ -128,13 +126,13 @@ timedelta_to_datetimef = interp1d(sch_dt_s_arr_pass, datetimef, fill_value="extr
 axs[0, 0].secondary_xaxis("top", functions=(datetimef_to_timedelta, timedelta_to_datetimef))
 
 axs[0, 1].plot(
-    sim.param["rx_schedules"][0].start_time,
-    sim.param["rx_schedules"][0].pointing_az,
+    sim.state["rx_schedules"][0].start_time,
+    sim.state["rx_schedules"][0].pointing_az,
     "r",
 )
 axs[0, 1].plot(
-    sim.param["rx_schedules"][0].start_time,
-    sim.param["rx_schedules"][0].pointing_el,
+    sim.state["rx_schedules"][0].start_time,
+    sim.state["rx_schedules"][0].pointing_el,
     "g",
 )
 
