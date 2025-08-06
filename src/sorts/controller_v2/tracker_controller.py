@@ -29,7 +29,7 @@ class State(t.TypedDict):
     spobj_states: EcefStates
 
 
-# a workaround to get reference to TypedDict keys
+# a workaround to get reference to TypedDict keys as type
 StateKey = t.Literal["tx_station", "rx_stations", "exp_detail", "spobj_time", "spobj_states"]
 assert set(t.get_args(StateKey)) == State.__annotations__.keys()
 
@@ -130,16 +130,18 @@ class TrackerController:
     """
     Generate pointing schedule that tracks a space object.
 
-    The preferred way to create instances of this class is via its class methods (e.g. `TrackerController.from_space_object`).
+    - The preferred way to create instances of this class is via its class methods (e.g. `TrackerController.from_space_object`).
+    - This class serve as a frontend to the `State` type in this module
     """
 
     def __init__(self, state: State | None = None):
-        self.state = state
+        self.state: State | None = state
 
         self._partial_state: dict[t.Union[StateKey, str], t.Any] = {}
         """A partial `self.state` with potentially extra fields for internal manipulations"""
 
         self._cached_output: Output | None = None
+        """A cache of the latest `Output`, handy for plotting"""
 
     @classmethod
     def from_ecef_states(
@@ -181,10 +183,10 @@ class TrackerController:
 
         return ctrl
 
-    def compute_state_from_time_range(
+    def compute_ecef_states(
         self, start_time: Datetime_like, end_time: Datetime_like, epoch: Datetime_like
     ):
-        """Update the `state` and return `self`."""
+        """Do the computation then update the `state` property and return `self`."""
 
         exp_detail: ExperimentDetail = self._partial_state["exp_detail"]
 
@@ -204,17 +206,22 @@ class TrackerController:
             "spobj_time": time,
             "spobj_states": ecefs,
         }
-
         self.state = state
 
         return self
 
     def generate(self, start_time: Datetime_like, end_time: Datetime_like) -> Output:
+        """
+        Generate the schedules.
+        `start_time` and `end_time` can be omitted if this instance is created from `TrackerController.from_ecef_states`
+        """
+
         global generate_from_state
 
+        # TODO: should regenerate anyway if `start_time` and `end_time` are explicitly passed
         if self.state is None:
             epoch: Datetime_like = self._partial_state["epoch"]
-            self.compute_state_from_time_range(start_time, end_time, epoch)
+            self.compute_ecef_states(start_time, end_time, epoch)
             state = t.cast(State, self.state)
         else:
             state = self.state
@@ -230,12 +237,12 @@ class TrackerController:
         if self.state is None:
             if start_time is not None and end_time is not None:
                 epoch: Datetime_like = self._partial_state["epoch"]
-                self.compute_state_from_time_range(start_time, end_time, epoch)
+                self.compute_ecef_states(start_time, end_time, epoch)
                 state = t.cast(State, self.state)
             else:
                 raise RuntimeError(
                     "Cannot plot TrackerController without valid state property."
-                    + " Please either call method `compute_state_from_time_range` beforehand"
+                    + " Please either call method `compute_ecef_states` beforehand"
                     + " or provide the `start_time` and `end_time` param"
                 )
         else:
