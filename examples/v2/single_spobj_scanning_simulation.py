@@ -98,7 +98,7 @@ obss = sim.calculate_observations()
 
 obs = obss[0]
 rx_sch_pass_mask = sim.param["rx_schedules"][0].create_mask_by_time_range(
-    obs.experiment_passage.time_range
+    obs["experiment_passage"]["time_range"]
 )
 rx_sch_pass = sim.param["rx_schedules"][0].filter_by_mask(rx_sch_pass_mask)
 
@@ -114,7 +114,7 @@ sch_dt_s_arr_pass = sch_dt_s_arr[rx_sch_pass_mask]
 
 axs[0, 0].plot(
     rx_sch_pass.start_time,
-    np.log10(np.clip(obs.snr, a_min=1, a_max=None)) * 10,
+    np.log10(np.clip(obs["snr"], a_min=1, a_max=None)) * 10,
     "r",
 )
 

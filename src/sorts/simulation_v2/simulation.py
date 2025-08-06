@@ -1,13 +1,12 @@
 import logging, typing as t
 from datetime import datetime
-from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 import pyorb
 import sorts
 from sorts.interpolation import Interpolator
 from sorts.radar.tx_rx import Station
-from sorts.types import Float64_as_sec, Float64_as_m, EcefStates, Datetime64_us
+from sorts.types import Float64_as_sec, Float64_as_m, EcefStates
 from sorts.simulation_v2.passage import (
     ExperimentPassage,
     find_passages,

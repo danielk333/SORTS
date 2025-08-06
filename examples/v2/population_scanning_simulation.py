@@ -93,25 +93,25 @@ space_objects = space_objects[space_objects_slice]
 print(f"clamped population size: {len(space_objects)}")
 
 sim = StxMrxSimulation(
-    StxMrxSimulationParam(
-        tx_station=tx_station,
-        tx_schedule=tx_schedule,
-        rx_stations=[rx_station],
-        rx_schedules=rx_schedules,
-        exp_num_map=exp_num_map,
-        epoch=to_pydatetime(epoch),
-        start_time=to_pydatetime(start_time),
-        end_time=to_pydatetime(end_time),
-        space_objects=space_objects,
-        space_objects_dt_sampler_s=lambda orbit, start_time, end_time: sorts.equidistant_sampling(
+    {
+        "tx_station": tx_station,
+        "tx_schedule": tx_schedule,
+        "rx_stations": [rx_station],
+        "rx_schedules": rx_schedules,
+        "exp_num_map": exp_num_map,
+        "epoch": to_pydatetime(epoch),
+        "start_time": to_pydatetime(start_time),
+        "end_time": to_pydatetime(end_time),
+        "space_objects": space_objects,
+        "space_objects_dt_sampler_s": lambda orbit, start_time, end_time: sorts.equidistant_sampling(
             orbit=orbit,
             start_t=(to_pydatetime(start_time) - to_pydatetime(epoch)).total_seconds(),
             end_t=(to_pydatetime(end_time) - to_pydatetime(epoch)).total_seconds(),
             max_dpos=1e3,
         ),
-        # space_objects_dt_interpolator_s=sorts.interpolation.Legendre8,
-        space_objects_dt_interpolator_s=sorts.interpolation.Linear,
-    )
+        # "space_objects_dt_interpolator_s":sorts.interpolation.Legendre8,
+        "space_objects_dt_interpolator_s": sorts.interpolation.Linear,
+    }
 )
 
 if Path(pickle_fpath).is_file():
@@ -143,13 +143,15 @@ else:
 ##
 
 # find the index of the space objects which has non-empty observation list
-nonempty_obss_spobj_idx_ls = [obs.experiment_passage.space_object.oid for obs in obss]
+nonempty_obss_spobj_idx_ls = [obs["experiment_passage"]["space_object"].oid for obs in obss]
 print(f"space object with observations: {nonempty_obss_spobj_idx_ls}")
 target_spobj_idx = nonempty_obss_spobj_idx_ls[0]
 
-obs = next((obs for obs in obss if obs.experiment_passage.space_object.oid == target_spobj_idx))
+obs = next(
+    (obs for obs in obss if obs["experiment_passage"]["space_object"].oid == target_spobj_idx)
+)
 rx_sch_pass_mask = sim.param["rx_schedules"][0].create_mask_by_time_range(
-    obs.experiment_passage.time_range
+    obs["experiment_passage"]["time_range"]
 )
 rx_sch_pass = sim.param["rx_schedules"][0].filter_by_mask(rx_sch_pass_mask)
 
@@ -164,7 +166,7 @@ sch_dt_s_arr_pass = sch_dt_s_arr[rx_sch_pass_mask]
 
 axs[0, 0].plot(
     rx_sch_pass.start_time,
-    np.log10(np.clip(obs.snr, a_min=1, a_max=None)) * 10,
+    np.log10(np.clip(obs["snr"], a_min=1, a_max=None)) * 10,
     "r",
 )
 
