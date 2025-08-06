@@ -46,10 +46,10 @@ tx_station.uid = ("eiscat3d", "stage1-array", "tx", "0")
 rx_station: sorts.Station = eiscat3d.rx[0]
 rx_station.uid = ("eiscat3d", "stage1-array", "rx", "0")
 
-fence_scan_controller = sortsV2.controller.FenceScanController(
+fence_scan_controller = sortsV2.controller.FenceScanController.from_scan_spec(
     tx_station=tx_station,
     rx_stations=[rx_station],
-    exp_datail=exp_num_map[0],
+    exp_detail=exp_num_map[0],
     azimuth=90,  # sweep from east to west
     min_elevation=30,
     pointings_per_cycle=40,

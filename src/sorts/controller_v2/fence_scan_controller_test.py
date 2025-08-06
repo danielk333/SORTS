@@ -25,10 +25,10 @@ def FenceScanController_smoke_test():
 
     eiscat3d = get_radar("eiscat3d", "stage1-array")
 
-    fenceScanController = FenceScanController(
+    fenceScanController = FenceScanController.from_scan_spec(
         tx_station=eiscat3d.tx[0],
         rx_stations=[eiscat3d.tx[0]],
-        exp_datail={
+        exp_detail={
             "id": 1,
             "coh_int_bandwidth": 1.0,
             "ipp": 1.0,

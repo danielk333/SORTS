@@ -49,6 +49,7 @@ class StxMrxSimulationParam(t.TypedDict):
     space_objects_dt_interpolator_s: type[Interpolator]
 
 
+# TODO: add constructor to take Datetime_like for datetime params in StxMrxSimulationParam
 # TODO: further generalize it into MtxMrx?
 class StxMrxSimulation:
     def __init__(self, param: StxMrxSimulationParam):
