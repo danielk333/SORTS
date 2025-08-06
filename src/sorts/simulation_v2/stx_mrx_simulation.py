@@ -24,7 +24,7 @@ class SpaceObjectDtSampler(t.Protocol):
     ) -> npt.NDArray[Float64_as_sec]: ...
 
 
-class StxMrxSimulationParam(t.TypedDict):
+class Spec(t.TypedDict):
     """A TypedDict of params"""
 
     tx_station: Station
@@ -48,10 +48,10 @@ class StxMrxSimulationParam(t.TypedDict):
     space_objects_dt_interpolator_s: type[Interpolator]
 
 
-# TODO: add constructor to take Datetime_like for datetime params in StxMrxSimulationParam
+# TODO: add constructor to take Datetime_like for datetime type in `Param`
 # TODO: further generalize it into MtxMrx?
 class StxMrxSimulation:
-    def __init__(self, param: StxMrxSimulationParam):
+    def __init__(self, param: Spec):
         self.param = param
 
         # TODO: these are short cuts to access internal states of `Simulation` (e.g. for plotting)

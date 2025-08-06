@@ -1,2 +1,2 @@
 from .observation import Observation
-from .simulation import StxMrxSimulationParam, StxMrxSimulation
+from .stx_mrx_simulation import Spec, StxMrxSimulation

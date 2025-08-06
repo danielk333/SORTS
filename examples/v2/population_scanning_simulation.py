@@ -22,7 +22,7 @@ from sorts.utils import to_pydatetime
 
 # TODO: switch to normal named imports; these are tmp alias until `_v2` becomes the default namespace
 StxMrxSimulation = sortsV2.simulation.StxMrxSimulation
-StxMrxSimulationParam = sortsV2.simulation.StxMrxSimulationParam
+StxMrxSimulationParam = sortsV2.simulation.Spec
 
 parser = argparse.ArgumentParser()
 parser.add_argument(

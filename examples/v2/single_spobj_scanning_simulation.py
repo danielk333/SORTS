@@ -18,7 +18,7 @@ from sorts.utils import to_pydatetime
 
 # TODO: switch to normal named imports; these are tmp alias until `_v2` becomes the default namespace
 StxMrxSimulation = sortsV2.simulation.StxMrxSimulation
-StxMrxSimulationParam = sortsV2.simulation.StxMrxSimulationParam
+StxMrxSimulationParam = sortsV2.simulation.Spec
 
 # TODO: might be if `epoch`, `start_time`, `end_time` can be integrated into some config or dataclass ?
 epoch = Time(53005.0, format="mjd", scale="utc")  # 2004-01-01 00:00:00Z
