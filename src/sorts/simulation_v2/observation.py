@@ -33,6 +33,8 @@ DataFrameColumnName = t.Literal[
 
 # TODO: re-eval what fields are needed
 class Observation(t.TypedDict):
+    """A TypedDict of params"""
+
     id: str
 
     # TODO: re-think this naming

@@ -35,6 +35,8 @@ cns = data_frame_column_names
 
 # TODO: rename to sth like `ControlSliceDetail`?
 class ExperimentDetail(t.TypedDict):
+    """A TypedDict of params"""
+
     id: int
 
     coh_int_bandwidth: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?

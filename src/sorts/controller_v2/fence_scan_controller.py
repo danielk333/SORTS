@@ -21,6 +21,8 @@ logger = logging.getLogger(__name__)
 
 
 class State(t.TypedDict):
+    """A TypedDict of params"""
+
     tx_station: Station
     rx_stations: t.Sequence[Station]
     exp_detail: ExperimentDetail

@@ -11,6 +11,8 @@ from sorts.schedule_v2 import Schedule, ExperimentDetail
 
 
 class Passage(t.TypedDict):
+    """A TypedDict of params"""
+
     # id: int # TODO: revisit if this is needed
     # TODO: add ENU and/or ECEF states?
 
@@ -23,6 +25,8 @@ class Passage(t.TypedDict):
 
 
 class ExperimentPassage(t.TypedDict):
+    """A TypedDict of params"""
+
     experiment_detail: ExperimentDetail
 
     space_object: SpaceObject

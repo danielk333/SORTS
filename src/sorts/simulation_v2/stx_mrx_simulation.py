@@ -27,6 +27,8 @@ class SpaceObjectDtSampler(t.Protocol):
 
 
 class State(t.TypedDict):
+    """A TypedDict of params"""
+
     tx_station: Station
     tx_schedule: Schedule
     rx_stations: t.Sequence[Station]
