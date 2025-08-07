@@ -91,15 +91,6 @@ def sample_and_propagate_pace_objects_states(
     return spobjs_smpl_dsec, spobjs_smpl_states
 
 
-def create_space_object_states_interpolator(
-    interpolator: type[Interpolator],
-    states: EcefStates,
-    sample_dt_s_arr: npt.NDArray[Float64_as_sec],
-):
-    states_interp = interpolator(states, sample_dt_s_arr)
-    return states_interp
-
-
 # TODO: there was a note about assuming the tx and rx time difference is negligible.
 #   tx-rx time difference is used to calc range so this cannot be true.
 #   likely it is a related assumption regarding similar terms (e.g. in schedule), and should be cleaned up.
@@ -230,9 +221,7 @@ def calculate_observations(spec: Spec, state: State) -> list[Observation]:
         end_time=to_datetime64_us(spec["end_time"]),
     )
     spobjs_states_interps = [
-        create_space_object_states_interpolator(
-            state["space_objects_dt_interpolator_s"], spobj_smpl_states, spobj_smpl_dsec
-        )
+        spec["space_objects_dt_interpolator_s"](spobj_smpl_states, spobj_smpl_dsec)
         for spobj_smpl_dsec, spobj_smpl_states in zip(spobjs_smpl_dsec, spobjs_smpl_states)
     ]
     state["_spobjs_states_interps"] = spobjs_states_interps
