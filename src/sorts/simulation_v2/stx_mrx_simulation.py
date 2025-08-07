@@ -46,11 +46,6 @@ class Spec(t.TypedDict):
 class State(t.TypedDict):
     """A TypedDict of params"""
 
-    tx_station: Station
-    tx_schedule: Schedule
-    rx_stations: t.Sequence[Station]
-    rx_schedules: t.Sequence[Schedule]
-
     # TODO: these are short cuts to access internal states of `Simulation` (e.g. for plotting)
     #   need to be removed or exposed more properly
     _spobjs_states_interps: list[Interpolator]
@@ -83,7 +78,6 @@ def sample_and_propagate_pace_objects_states(
 # TODO: we need mask per (tx, rx) schedule?
 def calculate_observation_per_experiment_passage(
     spec: Spec,
-    state: State,
     experiment_passage: ExperimentPassage,
     # TODO: move `space_object_states_interpolator` outside? use NamedTuple? maybe even pregenerate the state?
     space_object_states_interpolator: Interpolator,
@@ -92,17 +86,17 @@ def calculate_observation_per_experiment_passage(
     rx_station_index = next(
         (
             i
-            for i, s in enumerate(state["rx_stations"])
+            for i, s in enumerate(spec["rx_stations"])
             if s.uid == experiment_passage["rx_station"].uid
         )
     )
 
     tx_station = experiment_passage["tx_station"]
-    tx_schedule = state["tx_schedule"]
+    tx_schedule = spec["tx_schedule"]
     rx_station = experiment_passage["rx_station"]
-    rx_schedule = state["rx_schedules"][rx_station_index]
+    rx_schedule = spec["rx_schedules"][rx_station_index]
 
-    schedule_mask = state["rx_schedules"][rx_station_index].create_mask_by_time_range(
+    schedule_mask = spec["rx_schedules"][rx_station_index].create_mask_by_time_range(
         experiment_passage["time_range"]
     )
 
@@ -220,12 +214,12 @@ def calculate_observations(spec: Spec, state: State) -> list[Observation]:
         spobjs_states_interps,
     ):
         exp_passages: list[ExperimentPassage] = []
-        for rx_station, rx_schedule in zip(state["rx_stations"], state["rx_schedules"]):
+        for rx_station, rx_schedule in zip(spec["rx_stations"], spec["rx_schedules"]):
             passages = find_passages(
                 dt=spobj_smpl_dsec,
                 space_object=spobj,
                 states=spobj_smpl_states,
-                tx_station=state["tx_station"],
+                tx_station=spec["tx_station"],
                 rx_station=rx_station,
                 epoch=spec["epoch"],
             )
@@ -243,7 +237,6 @@ def calculate_observations(spec: Spec, state: State) -> list[Observation]:
         for exp_passage in exp_passages:
             obs = calculate_observation_per_experiment_passage(
                 spec=spec,
-                state=state,
                 experiment_passage=exp_passage,
                 space_object_states_interpolator=spobj_states_interp,
             )
@@ -262,10 +255,6 @@ class StxMrxSimulation:
         sim = StxMrxSimulation(
             spec=spec,
             state={
-                "tx_station": spec["tx_station"],
-                "tx_schedule": spec["tx_schedule"],
-                "rx_stations": spec["rx_stations"],
-                "rx_schedules": spec["rx_schedules"],
                 "_spobjs_states_interps": [],
             },
         )
