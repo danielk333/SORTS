@@ -33,6 +33,7 @@ cns = data_frame_column_names
 """An alias of `data_frame_column_names`"""
 
 
+# TODO: relocate to its own file
 # TODO: rename to sth like `ControlSliceDetail`?
 class ExperimentDetail(t.TypedDict):
     """A TypedDict of params"""
@@ -49,6 +50,27 @@ class ExperimentDetail(t.TypedDict):
 
     slice_duration: Timedelta64_us
     "Duration of a control slice, in micro-second"
+
+
+def empty() -> Schedule:
+    """A convenience method for generating an empty schedule"""
+
+    sch = Schedule(
+        meta={},
+        start_time=np.empty(0, "datetime64[us]"),
+        exp_num=np.empty(0, np.int64),
+        pointing_az=np.empty(0, Float64_as_deg),
+        pointing_el=np.empty(0, Float64_as_deg),
+    )
+
+    return sch
+
+
+def from_dataframe(df: pd.DataFrame, meta: dict[int, ExperimentDetail]) -> Schedule:
+    sch_dict = {c: df[c].to_numpy() for c in t.get_args(NonDerivedDataFrameColumnName)}
+    sch = Schedule(**sch_dict, meta=meta)
+
+    return sch
 
 
 @dataclass(kw_only=True)
@@ -73,27 +95,6 @@ class Schedule:
 
     Cn: t.ClassVar = data_frame_column_names
     """A shortcut to `data_frame_column_names`"""
-
-    @classmethod
-    def empty(cls) -> Schedule:
-        """A convenience method for generating an empty schedule"""
-
-        sch = Schedule(
-            meta={},
-            start_time=np.empty(0, "datetime64[us]"),
-            exp_num=np.empty(0, np.int64),
-            pointing_az=np.empty(0, Float64_as_deg),
-            pointing_el=np.empty(0, Float64_as_deg),
-        )
-
-        return sch
-
-    @classmethod
-    def from_dataframe(cls, df: pd.DataFrame, meta: dict[int, ExperimentDetail]) -> Schedule:
-        sch_dict = {c: df[c].to_numpy() for c in t.get_args(NonDerivedDataFrameColumnName)}
-        sch = Schedule(**sch_dict, meta=meta)
-
-        return sch
 
     def __post_init__(self):
         f_0, *f_rests = [

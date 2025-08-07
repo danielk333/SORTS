@@ -1,5 +1,6 @@
 from copy import deepcopy
 import numpy as np
+from sorts import schedule_v2 as schedule
 from sorts.schedule_v2 import Schedule, ExperimentDetail
 
 
@@ -44,7 +45,7 @@ def Schedule_dataframe_roundtrip_conversion_test():
         pointing_el=pointing_el.copy(),
     )
 
-    converted_sch = Schedule.from_dataframe(sch.to_dataframe(), sch.meta)
+    converted_sch = schedule.from_dataframe(sch.to_dataframe(), sch.meta)
 
     assert meta == converted_sch.meta
     assert np.array_equal(start_time, converted_sch.start_time)

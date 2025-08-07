@@ -1,6 +1,7 @@
 import logging, typing as t
 import numpy as np
 import pandas as pd
+from sorts import schedule_v2 as schedule
 from sorts.schedule_v2 import Schedule, ExperimentDetail
 
 logger = logging.getLogger(__name__)
@@ -34,7 +35,7 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule]):
     cn_is_overlaped = "is_overlaped"
 
     # init an empty df for a schedule and add some columns, will be used store merged schedule
-    merged_sch_df = Schedule.empty().to_dataframe()
+    merged_sch_df = schedule.empty().to_dataframe()
     merged_sch_df[Cn["end_time"]] = np.empty(0, "datetime64[us]")
     merged_sch_df[cn_allowed_start_time] = np.empty(0, "datetime64[us]")
     merged_sch_df[cn_allowed_end_time] = np.empty(0, "datetime64[us]")
