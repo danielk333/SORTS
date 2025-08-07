@@ -44,7 +44,10 @@ class Spec(t.TypedDict):
 class State(t.TypedDict):
     """A TypedDict of params"""
 
+    space_object_sample_dsec: list[npt.NDArray[Float64_as_sec]]
+    space_object_sample_states: list[EcefStates]
     space_object_interpolators: list[Interpolator]
+    observations: list[Observation]
 
 
 def sample_and_propagate_pace_objects_states(
@@ -78,7 +81,7 @@ def sample_and_propagate_pace_objects_states(
 def calculate_observation_per_experiment_passage(
     spec: Spec,
     experiment_passage: ExperimentPassage,
-    space_object_interpolator: Interpolator,
+    spobj_interpolator: Interpolator,
 ) -> Observation:
     # TODO: can probably be simplified?
     rx_station_index = next(
@@ -108,7 +111,7 @@ def calculate_observation_per_experiment_passage(
 
     obs_size = len(dsec)
 
-    spobj_states = space_object_interpolator.get_state(dsec)
+    spobj_states = spobj_interpolator.get_state(dsec)
     spobj_tx_enu = tx_station.enu(spobj_states)  # space object in tx station coordinate
     spobj_rx_enu = rx_station.enu(spobj_states)  # space object in rx station coordinate
 
@@ -190,32 +193,23 @@ def calculate_observation_per_experiment_passage(
     return obs
 
 
-def calculate_observations(spec: Spec, state: State) -> tuple[list[Observation], State]:
+def calculate_observations(
+    spec: Spec,
+    spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]],
+    spobjs_smpl_states: list[EcefStates],
+    spobjs_interpolators: list[Interpolator],
+) -> list[Observation]:
     """
     Calculate the observations.
-
-    Returns a list of `Observation` and the mutated `State`.
     """
 
     obss: list[Observation] = []
-
-    spobjs_smpl_dsec, spobjs_smpl_states = sample_and_propagate_pace_objects_states(
-        sampler=spec["dsec_sampler"],
-        spobjs=spec["space_objects"],
-        start_time=to_datetime64_us(spec["start_time"]),
-        end_time=to_datetime64_us(spec["end_time"]),
-    )
-    space_object_interpolators = [
-        spec["interpolator_class"](spobj_smpl_states, spobj_smpl_dsec)
-        for spobj_smpl_dsec, spobj_smpl_states in zip(spobjs_smpl_dsec, spobjs_smpl_states)
-    ]
-    state["space_object_interpolators"] = space_object_interpolators
 
     for spobj, spobj_smpl_dsec, spobj_smpl_states, spobj_states_interp in zip(
         spec["space_objects"],
         spobjs_smpl_dsec,
         spobjs_smpl_states,
-        space_object_interpolators,
+        spobjs_interpolators,
     ):
         exp_passages: list[ExperimentPassage] = []
         for rx_station, rx_schedule in zip(spec["rx_stations"], spec["rx_schedules"]):
@@ -242,11 +236,11 @@ def calculate_observations(spec: Spec, state: State) -> tuple[list[Observation],
             obs = calculate_observation_per_experiment_passage(
                 spec=spec,
                 experiment_passage=exp_passage,
-                space_object_interpolator=spobj_states_interp,
+                spobj_interpolator=spobj_states_interp,
             )
             obss.append(obs)
 
-    return obss, state
+    return obss
 
 
 class StxMrxSimulation:
@@ -259,19 +253,34 @@ class StxMrxSimulation:
         sim = StxMrxSimulation(
             spec=spec,
             state={
+                "space_object_sample_dsec": [],
+                "space_object_sample_states": [],
                 "space_object_interpolators": [],
+                "observations": [],
             },
         )
 
         return sim
 
-    def calculate_observations(self):
-        global calculate_observations
+    def run(self):
+        spobjs_smpl_dsec, spobjs_smpl_states = sample_and_propagate_pace_objects_states(
+            sampler=self.spec["dsec_sampler"],
+            spobjs=self.spec["space_objects"],
+            start_time=to_datetime64_us(self.spec["start_time"]),
+            end_time=to_datetime64_us(self.spec["end_time"]),
+        )
+        spobjs_interpolators = [
+            self.spec["interpolator_class"](spobj_smpl_states, spobj_smpl_dsec)
+            for spobj_smpl_dsec, spobj_smpl_states in zip(spobjs_smpl_dsec, spobjs_smpl_states)
+        ]
 
-        if self.state is None:
-            raise RuntimeError("Cannot calculate observations when `state` prop is `None`")
-        else:
-            obss, state = calculate_observations(self.spec, self.state)
-            self.state = state
+        self.state["space_object_sample_dsec"] = spobjs_smpl_dsec
+        self.state["space_object_sample_states"] = spobjs_smpl_states
+        self.state["space_object_interpolators"] = spobjs_interpolators
 
-            return obss
+        obss = calculate_observations(
+            self.spec, spobjs_smpl_dsec, spobjs_smpl_states, spobjs_interpolators
+        )
+        self.state["observations"] = obss
+
+        return obss

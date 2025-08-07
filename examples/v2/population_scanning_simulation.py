@@ -127,7 +127,7 @@ if Path(pickle_fpath).is_file():
         calc_time = saved_data["calc_time"]
 else:
     calc_start_time = time.perf_counter()
-    obss = sim.calculate_observations()
+    obss = sim.run()
     calc_time = time.perf_counter() - calc_start_time
 
     with open(pickle_fpath, "wb") as f:
