@@ -103,29 +103,29 @@ def dsec_sampler(orbit, start_time, end_time):
     )
 
 
-sim = StxMrxSimulation.from_spec(
-    {
-        "tx_station": tx_station,
-        "tx_schedule": tx_schedule,
-        "rx_stations": [rx_station],
-        "rx_schedules": rx_schedules,
-        "exp_num_map": exp_num_map,
-        "epoch": epoch,
-        "start_time": start_time,
-        "end_time": end_time,
-        "space_objects": space_objects,
-        "dsec_sampler": dsec_sampler,
-        # "interpolator_class":sorts.interpolation.Legendre8,
-        "interpolator_class": sorts.interpolation.Linear,
-    }
-)
-
 if Path(pickle_fpath).is_file():
     with open(pickle_fpath, "rb") as f:
         saved_data = pickle.load(f)
-        obss: list[sortsV2.simulation.Observation] = saved_data["obss"]
-        calc_time = saved_data["calc_time"]
+        sim: StxMrxSimulation = saved_data["sim"]
+        obss = sim.state["observations"]
+        calc_time: float = saved_data["calc_time"]
 else:
+    sim = StxMrxSimulation.from_spec(
+        {
+            "tx_station": tx_station,
+            "tx_schedule": tx_schedule,
+            "rx_stations": [rx_station],
+            "rx_schedules": rx_schedules,
+            "exp_num_map": exp_num_map,
+            "epoch": epoch,
+            "start_time": start_time,
+            "end_time": end_time,
+            "space_objects": space_objects,
+            "dsec_sampler": dsec_sampler,
+            # "interpolator_class":sorts.interpolation.Legendre8,
+            "interpolator_class": sorts.interpolation.Linear,
+        }
+    )
     calc_start_time = time.perf_counter()
     obss = sim.run()
     calc_time = time.perf_counter() - calc_start_time
@@ -134,7 +134,6 @@ else:
         pickle.dump(
             {
                 "sim": sim,
-                "obss": obss,
                 "calc_time": calc_time,
             },
             f,
