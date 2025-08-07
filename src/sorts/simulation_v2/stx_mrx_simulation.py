@@ -39,7 +39,7 @@ class Spec(t.TypedDict):
     end_time: Datetime_like
     space_objects: t.Sequence[sorts.SpaceObject]
     spobj_dsec_sampler: SpaceObjectDsecSampler
-    space_objects_dt_interpolator_s: type[Interpolator]
+    space_object_interpolator_class: type[Interpolator]
 
 
 # TODO: reduce duplication with `Spec`
@@ -61,9 +61,6 @@ class State(t.TypedDict):
 
     # TODO: support different sampler for different obj?
     space_objects_dt_sampler_s: SpaceObjectDsecSampler
-
-    # TODO: rename to `space_objects_dt_s_interpolator`
-    space_objects_dt_interpolator_s: type[Interpolator]
 
     # TODO: these are short cuts to access internal states of `Simulation` (e.g. for plotting)
     #   need to be removed or exposed more properly
@@ -221,7 +218,7 @@ def calculate_observations(spec: Spec, state: State) -> list[Observation]:
         end_time=to_datetime64_us(spec["end_time"]),
     )
     spobjs_states_interps = [
-        spec["space_objects_dt_interpolator_s"](spobj_smpl_states, spobj_smpl_dsec)
+        spec["space_object_interpolator_class"](spobj_smpl_states, spobj_smpl_dsec)
         for spobj_smpl_dsec, spobj_smpl_states in zip(spobjs_smpl_dsec, spobjs_smpl_states)
     ]
     state["_spobjs_states_interps"] = spobjs_states_interps
@@ -284,7 +281,6 @@ class StxMrxSimulation:
                 "end_time": to_pydatetime(spec["end_time"]),
                 "space_objects": spec["space_objects"],
                 "space_objects_dt_sampler_s": spec["spobj_dsec_sampler"],
-                "space_objects_dt_interpolator_s": spec["space_objects_dt_interpolator_s"],
                 "_spobjs_states_interps": [],
             },
         )

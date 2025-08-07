@@ -109,8 +109,8 @@ sim = StxMrxSimulation.from_spec(
             end_t=(to_pydatetime(end_time) - to_pydatetime(epoch)).total_seconds(),
             max_dpos=1e3,
         ),
-        # "space_objects_dt_interpolator_s":sorts.interpolation.Legendre8,
-        "space_objects_dt_interpolator_s": sorts.interpolation.Linear,
+        # "space_object_interpolator_class":sorts.interpolation.Legendre8,
+        "space_object_interpolator_class": sorts.interpolation.Linear,
     }
 )
 
