@@ -14,6 +14,7 @@ from sorts.simulation_v2.passage import (
     split_passage_by_schedule,
 )
 from sorts.simulation_v2.observation import Observation
+from sorts import schedule_v2 as schedule
 from sorts.schedule_v2 import Schedule, ExperimentDetail
 
 logger = logging.getLogger(__name__)
@@ -97,8 +98,8 @@ def calculate_observation_per_experiment_passage(
     rx_station = experiment_passage["rx_station"]
     rx_schedule = spec["rx_schedules"][rx_station_index]
 
-    schedule_mask = spec["rx_schedules"][rx_station_index].create_mask_by_time_range(
-        experiment_passage["time_range"]
+    schedule_mask = schedule.create_mask_by_time_range(
+        spec["rx_schedules"][rx_station_index], experiment_passage["time_range"]
     )
 
     dsec: npt.NDArray[Float64_as_sec] = (
@@ -106,8 +107,8 @@ def calculate_observation_per_experiment_passage(
     ).astype(np.float64) * 1e-6
 
     dsec = dsec[schedule_mask]
-    tx_schedule = tx_schedule.filter_by_mask(schedule_mask)
-    rx_schedule = rx_schedule.filter_by_mask(schedule_mask)
+    tx_schedule = schedule.filter_by_mask(tx_schedule, schedule_mask)
+    rx_schedule = schedule.filter_by_mask(rx_schedule, schedule_mask)
 
     obs_size = len(dsec)
 
@@ -225,7 +226,7 @@ def calculate_observations(
             for passage in passages:
                 exp_passages_ = split_passage_by_schedule(
                     passage=passage,
-                    schedule=rx_schedule,
+                    sch=rx_schedule,
                     exp_num_map=spec["exp_num_map"],
                 )
 

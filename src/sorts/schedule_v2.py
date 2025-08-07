@@ -73,6 +73,49 @@ def from_dataframe(df: pd.DataFrame, meta: dict[int, ExperimentDetail]) -> Sched
     return sch
 
 
+def create_mask_by_time_range(
+    sch: Schedule, time_range: tuple[Datetime64_us, Datetime64_us]
+) -> npt.NDArray[np.bool]:
+    """
+    Return a mask that filters out schedule entries that are not inside `time_range`.
+    (start time and end time inclusive)
+    """
+
+    start_time, end_time = time_range
+
+    sch_dt_s_arr_pass_mask: npt.NDArray[np.bool] = np.logical_and(
+        sch.start_time >= start_time,
+        sch.start_time <= end_time,
+    )
+
+    return sch_dt_s_arr_pass_mask
+
+
+def filter_by_mask(sch: Schedule, mask: npt.NDArray[np.bool]) -> Schedule:
+    """Return a slice of the origin schedule based on the `mask`"""
+
+    filtered_sch = Schedule(
+        meta=sch.meta,
+        start_time=sch.start_time[mask],
+        exp_num=sch.exp_num[mask],
+        pointing_az=sch.pointing_az[mask],
+        pointing_el=sch.pointing_el[mask],
+    )
+
+    return filtered_sch
+
+
+def filter_by_time_range(
+    sch: Schedule, time_range: tuple[Datetime64_us, Datetime64_us]
+) -> Schedule:
+    """
+    Return a slice of the origin schedule based on the `time_range`
+    (start time and end time inclusive)
+    """
+
+    return filter_by_mask(sch, create_mask_by_time_range(sch, time_range))
+
+
 @dataclass(kw_only=True)
 class Schedule:
     """
@@ -132,39 +175,3 @@ class Schedule:
         )
 
         return df
-
-    def create_mask_by_time_range(self, time_range: tuple[Datetime64_us, Datetime64_us]):
-        """
-        Return a mask that filters out schedule entries that are not inside `time_range`.
-        (start time and end time inclusive)
-        """
-
-        start_time, end_time = time_range
-
-        sch_dt_s_arr_pass_mask: npt.NDArray[np.bool] = np.logical_and(
-            self.start_time >= start_time,
-            self.start_time <= end_time,
-        )
-
-        return sch_dt_s_arr_pass_mask
-
-    def filter_by_mask(self, mask: npt.NDArray[np.bool]):
-        """Return a slice of the origin schedule based on the `mask`"""
-
-        filtered_sch = Schedule(
-            meta=self.meta,
-            start_time=self.start_time[mask],
-            exp_num=self.exp_num[mask],
-            pointing_az=self.pointing_az[mask],
-            pointing_el=self.pointing_el[mask],
-        )
-
-        return filtered_sch
-
-    def filter_by_time_range(self, time_range: tuple[Datetime64_us, Datetime64_us]):
-        """
-        Return a slice of the origin schedule based on the `time_range`
-        (start time and end time inclusive)
-        """
-
-        return self.filter_by_mask(self.create_mask_by_time_range(time_range))

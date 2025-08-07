@@ -1,12 +1,11 @@
 import typing as t
-from datetime import datetime
-from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 from sorts.types import Datetime64_us, EcefStates, Float64_as_sec, Datetime_like
 from sorts.utils import to_datetime64_us
 from sorts.radar.tx_rx import Station
 from sorts.space_object import SpaceObject
+from sorts import schedule_v2 as schedule
 from sorts.schedule_v2 import Schedule, ExperimentDetail
 
 
@@ -105,20 +104,20 @@ def find_passages(
 
 
 def split_passage_by_schedule(
-    passage: Passage, schedule: Schedule, exp_num_map: dict[int, ExperimentDetail]
+    passage: Passage, sch: Schedule, exp_num_map: dict[int, ExperimentDetail]
 ) -> list[ExperimentPassage]:
-    df = schedule.filter_by_time_range(passage["time_range"]).to_dataframe()
+    df = schedule.filter_by_time_range(sch, passage["time_range"]).to_dataframe()
 
     # identify where `exp_num` changes
-    change_points = df[schedule.Cn["exp_num"]] != df[schedule.Cn["exp_num"]].shift()
+    change_points = df[sch.Cn["exp_num"]] != df[sch.Cn["exp_num"]].shift()
     split_ids = change_points.cumsum()
 
     exp_passages: list[ExperimentPassage] = [
         {
-            "experiment_detail": exp_num_map[df_split[schedule.Cn["exp_num"]].iloc[0]],
+            "experiment_detail": exp_num_map[df_split[sch.Cn["exp_num"]].iloc[0]],
             "time_range": (
-                df_split[schedule.Cn["start_time"]].iloc[0],
-                df_split[schedule.Cn["end_time"]].iloc[-1],
+                df_split[sch.Cn["start_time"]].iloc[0],
+                df_split[sch.Cn["end_time"]].iloc[-1],
             ),
             "space_object": passage["space_object"],
             "tx_station": passage["tx_station"],

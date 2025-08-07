@@ -17,6 +17,7 @@ import pyvista as pv
 from pyvista import examples
 import sorts
 from sorts import _v2 as sortsV2
+from sorts import schedule_v2 as schedule
 from sorts.utils import to_pydatetime, to_datetime64_us
 
 # TODO: switch to normal named imports; these are tmp alias until `_v2` becomes the default namespace
@@ -153,10 +154,10 @@ target_spobj_idx = nonempty_obss_spobj_idx_ls[0]
 obs = next(
     (obs for obs in obss if obs["experiment_passage"]["space_object"].oid == target_spobj_idx)
 )
-rx_sch_pass_mask = sim.spec["rx_schedules"][0].create_mask_by_time_range(
-    obs["experiment_passage"]["time_range"]
+rx_sch_pass_mask = schedule.create_mask_by_time_range(
+    sim.spec["rx_schedules"][0], obs["experiment_passage"]["time_range"]
 )
-rx_sch_pass = sim.spec["rx_schedules"][0].filter_by_mask(rx_sch_pass_mask)
+rx_sch_pass = schedule.filter_by_mask(sim.spec["rx_schedules"][0], rx_sch_pass_mask)
 
 spobjs_states_interp = sim.state["space_object_interpolators"][target_spobj_idx]
 

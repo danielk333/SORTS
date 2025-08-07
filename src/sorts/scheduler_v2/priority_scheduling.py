@@ -89,4 +89,4 @@ def priority_scheduling(schs: t.Sequence[Schedule], meta: dict[int, ExperimentDe
     """
 
     df = _priority_scheduling_df(schs)
-    return Schedule.from_dataframe(df, meta=meta)
+    return schedule.from_dataframe(df, meta=meta)
