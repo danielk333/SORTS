@@ -38,7 +38,7 @@ class Spec(t.TypedDict):
     start_time: Datetime_like
     end_time: Datetime_like
     space_objects: t.Sequence[sorts.SpaceObject]
-    spobj_dsec_sampler: SpaceObjectDsecSampler
+    spobj_dsec_sampler: SpaceObjectDsecSampler  # TODO: support different sampler for different obj?
     space_object_interpolator_class: type[Interpolator]
 
 
@@ -58,9 +58,6 @@ class State(t.TypedDict):
     end_time: datetime
 
     space_objects: t.Sequence[sorts.SpaceObject]
-
-    # TODO: support different sampler for different obj?
-    space_objects_dt_sampler_s: SpaceObjectDsecSampler
 
     # TODO: these are short cuts to access internal states of `Simulation` (e.g. for plotting)
     #   need to be removed or exposed more properly
@@ -280,7 +277,6 @@ class StxMrxSimulation:
                 "start_time": to_pydatetime(spec["start_time"]),
                 "end_time": to_pydatetime(spec["end_time"]),
                 "space_objects": spec["space_objects"],
-                "space_objects_dt_sampler_s": spec["spobj_dsec_sampler"],
                 "_spobjs_states_interps": [],
             },
         )
