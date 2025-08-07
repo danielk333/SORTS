@@ -75,8 +75,7 @@ def sample_and_propagate_pace_objects_states(
 def calculate_observation_per_experiment_passage(
     spec: Spec,
     experiment_passage: ExperimentPassage,
-    # TODO: move `space_object_states_interpolator` outside? use NamedTuple? maybe even pregenerate the state?
-    space_object_states_interpolator: Interpolator,
+    space_object_interpolator: Interpolator,
 ) -> Observation:
     # TODO: can probably be simplified?
     rx_station_index = next(
@@ -106,7 +105,7 @@ def calculate_observation_per_experiment_passage(
 
     obs_size = len(dsec)
 
-    spobj_states = space_object_states_interpolator.get_state(dsec)
+    spobj_states = space_object_interpolator.get_state(dsec)
     spobj_tx_enu = tx_station.enu(spobj_states)  # space object in tx station coordinate
     spobj_rx_enu = rx_station.enu(spobj_states)  # space object in rx station coordinate
 
@@ -188,7 +187,9 @@ def calculate_observation_per_experiment_passage(
     return obs
 
 
-def calculate_observations(spec: Spec, state: State) -> list[Observation]:
+def calculate_observations(spec: Spec, state: State) -> tuple[list[Observation], State]:
+    """Calculate the observations, returns a list of `Observation` and the mutated `State`."""
+
     obss: list[Observation] = []
 
     spobjs_smpl_dsec, spobjs_smpl_states = sample_and_propagate_pace_objects_states(
@@ -234,11 +235,11 @@ def calculate_observations(spec: Spec, state: State) -> list[Observation]:
             obs = calculate_observation_per_experiment_passage(
                 spec=spec,
                 experiment_passage=exp_passage,
-                space_object_states_interpolator=spobj_states_interp,
+                space_object_interpolator=spobj_states_interp,
             )
             obss.append(obs)
 
-    return obss
+    return obss, state
 
 
 class StxMrxSimulation:
@@ -263,4 +264,7 @@ class StxMrxSimulation:
         if self.state is None:
             raise RuntimeError("Cannot calculate observations when `state` prop is `None`")
         else:
-            return calculate_observations(self.spec, self.state)
+            obss, state = calculate_observations(self.spec, self.state)
+            self.state = state
+
+            return obss
