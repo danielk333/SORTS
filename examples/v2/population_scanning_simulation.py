@@ -118,19 +118,17 @@ if Path(pickle_fpath).is_file():
         saved_data = pickle.load(f)
         obss: list[sortsV2.simulation.Observation] = saved_data["obss"]
         calc_time = saved_data["calc_time"]
-        space_object_interpolators = saved_data["space_object_interpolators"]
 else:
     calc_start_time = time.perf_counter()
     obss = sim.calculate_observations()
     calc_time = time.perf_counter() - calc_start_time
-    space_object_interpolators = sim.state["space_object_interpolators"]
 
     with open(pickle_fpath, "wb") as f:
         pickle.dump(
             {
+                "sim": sim,
                 "obss": obss,
                 "calc_time": calc_time,
-                "space_object_interpolators": space_object_interpolators,
             },
             f,
         )
@@ -154,7 +152,7 @@ rx_sch_pass_mask = sim.spec["rx_schedules"][0].create_mask_by_time_range(
 )
 rx_sch_pass = sim.spec["rx_schedules"][0].filter_by_mask(rx_sch_pass_mask)
 
-spobjs_states_interp = space_object_interpolators[target_spobj_idx]
+spobjs_states_interp = sim.state["space_object_interpolators"][target_spobj_idx]
 
 fig, axs = plt.subplots(2, 2)
 
