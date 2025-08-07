@@ -118,19 +118,19 @@ if Path(pickle_fpath).is_file():
         saved_data = pickle.load(f)
         obss: list[sortsV2.simulation.Observation] = saved_data["obss"]
         calc_time = saved_data["calc_time"]
-        spobjs_states_interps = saved_data["spobjs_states_interps"]
+        space_object_interpolators = saved_data["space_object_interpolators"]
 else:
     calc_start_time = time.perf_counter()
     obss = sim.calculate_observations()
     calc_time = time.perf_counter() - calc_start_time
-    spobjs_states_interps = sim.state["_spobjs_states_interps"]
+    space_object_interpolators = sim.state["space_object_interpolators"]
 
     with open(pickle_fpath, "wb") as f:
         pickle.dump(
             {
                 "obss": obss,
                 "calc_time": calc_time,
-                "spobjs_states_interps": spobjs_states_interps,
+                "space_object_interpolators": space_object_interpolators,
             },
             f,
         )
@@ -154,7 +154,7 @@ rx_sch_pass_mask = sim.spec["rx_schedules"][0].create_mask_by_time_range(
 )
 rx_sch_pass = sim.spec["rx_schedules"][0].filter_by_mask(rx_sch_pass_mask)
 
-spobjs_states_interp = spobjs_states_interps[target_spobj_idx]
+spobjs_states_interp = space_object_interpolators[target_spobj_idx]
 
 fig, axs = plt.subplots(2, 2)
 
@@ -209,7 +209,7 @@ path_splines: list[pv.PolyData] = []
 for target_spobj_idx in nonempty_obss_spobj_idx_ls[:]:
     # for target_spobj_idx in [nonempty_obss_idx_ls[1]]: # plot just 1 spobj for debugging
     spobj = next(spobj for spobj in space_objects if spobj.oid == target_spobj_idx)
-    spobjs_states_interp = spobjs_states_interps[target_spobj_idx]
+    spobjs_states_interp = space_object_interpolators[target_spobj_idx]
 
     path_pts = spobj.get_state(dt_s_arr_path)[:3].T
     spline = pv.Spline(path_pts, 1000)  # generate a spline with n interpolation points

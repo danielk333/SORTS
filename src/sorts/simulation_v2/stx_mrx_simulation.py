@@ -1,13 +1,12 @@
 from __future__ import annotations
 import logging, typing as t
-from datetime import datetime
 import numpy as np
 import numpy.typing as npt
 import pyorb
 import sorts
 from sorts.interpolation import Interpolator
 from sorts.radar.tx_rx import Station
-from sorts.utils import to_pydatetime, to_datetime64_us
+from sorts.utils import to_datetime64_us
 from sorts.types import Datetime_like, Float64_as_sec, Float64_as_m, EcefStates, Datetime64_us
 from sorts.simulation_v2.passage import (
     ExperimentPassage,
@@ -42,13 +41,10 @@ class Spec(t.TypedDict):
     interpolator_class: type[Interpolator]
 
 
-# TODO: reduce duplication with `Spec`
 class State(t.TypedDict):
     """A TypedDict of params"""
 
-    # TODO: these are short cuts to access internal states of `Simulation` (e.g. for plotting)
-    #   need to be removed or exposed more properly
-    _spobjs_states_interps: list[Interpolator]
+    space_object_interpolators: list[Interpolator]
 
 
 def sample_and_propagate_pace_objects_states(
@@ -201,17 +197,17 @@ def calculate_observations(spec: Spec, state: State) -> list[Observation]:
         start_time=to_datetime64_us(spec["start_time"]),
         end_time=to_datetime64_us(spec["end_time"]),
     )
-    spobjs_states_interps = [
+    space_object_interpolators = [
         spec["interpolator_class"](spobj_smpl_states, spobj_smpl_dsec)
         for spobj_smpl_dsec, spobj_smpl_states in zip(spobjs_smpl_dsec, spobjs_smpl_states)
     ]
-    state["_spobjs_states_interps"] = spobjs_states_interps
+    state["space_object_interpolators"] = space_object_interpolators
 
     for spobj, spobj_smpl_dsec, spobj_smpl_states, spobj_states_interp in zip(
         spec["space_objects"],
         spobjs_smpl_dsec,
         spobjs_smpl_states,
-        spobjs_states_interps,
+        space_object_interpolators,
     ):
         exp_passages: list[ExperimentPassage] = []
         for rx_station, rx_schedule in zip(spec["rx_stations"], spec["rx_schedules"]):
@@ -255,7 +251,7 @@ class StxMrxSimulation:
         sim = StxMrxSimulation(
             spec=spec,
             state={
-                "_spobjs_states_interps": [],
+                "space_object_interpolators": [],
             },
         )
 
