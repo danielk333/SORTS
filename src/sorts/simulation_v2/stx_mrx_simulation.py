@@ -51,14 +51,6 @@ class State(t.TypedDict):
     rx_stations: t.Sequence[Station]
     rx_schedules: t.Sequence[Schedule]
 
-    exp_num_map: dict[int, ExperimentDetail]
-
-    epoch: datetime
-    start_time: datetime
-    end_time: datetime
-
-    space_objects: t.Sequence[sorts.SpaceObject]
-
     # TODO: these are short cuts to access internal states of `Simulation` (e.g. for plotting)
     #   need to be removed or exposed more properly
     _spobjs_states_interps: list[Interpolator]
@@ -90,6 +82,7 @@ def sample_and_propagate_pace_objects_states(
 #   likely it is a related assumption regarding similar terms (e.g. in schedule), and should be cleaned up.
 # TODO: we need mask per (tx, rx) schedule?
 def calculate_observation_per_experiment_passage(
+    spec: Spec,
     state: State,
     experiment_passage: ExperimentPassage,
     # TODO: move `space_object_states_interpolator` outside? use NamedTuple? maybe even pregenerate the state?
@@ -134,23 +127,23 @@ def calculate_observation_per_experiment_passage(
     powers = np.empty((obs_size,), dtype=np.float64)
 
     # pulse_lengths = np.array(
-    #     [state["exp_num_map"][n]["pulse_length"] for n in tx_schedule.exp_num], dtype=np.float64
+    #     [spec["exp_num_map"][n]["pulse_length"] for n in tx_schedule.exp_num], dtype=np.float64
     # )  # TODO: chk if needed
     # ipps = np.array(
-    #     [state["exp_num_map"][n]["ipp"] for n in tx_schedule.exp_num], dtype=np.float64
+    #     [spec["exp_num_map"][n]["ipp"] for n in tx_schedule.exp_num], dtype=np.float64
     # )  # TODO: chk if needed
     powers = np.array(
-        [state["exp_num_map"][n]["power"] for n in tx_schedule.exp_num], dtype=np.float64
+        [spec["exp_num_map"][n]["power"] for n in tx_schedule.exp_num], dtype=np.float64
     )
     bandwidths = np.array(
-        [state["exp_num_map"][n]["bandwidth"] for n in tx_schedule.exp_num],
+        [spec["exp_num_map"][n]["bandwidth"] for n in tx_schedule.exp_num],
         dtype=np.float64,
     )
     # duty_cycles = np.array(
-    #     [state["exp_num_map"][n]["duty_cycle"] for n in tx_schedule.exp_num], dtype=np.float64
+    #     [spec["exp_num_map"][n]["duty_cycle"] for n in tx_schedule.exp_num], dtype=np.float64
     # )  # TODO: chk if needed
     rx_noise_temps = np.array(
-        [state["exp_num_map"][n]["noise_temp"] for n in rx_schedule.exp_num],
+        [spec["exp_num_map"][n]["noise_temp"] for n in rx_schedule.exp_num],
         dtype=np.float64,
     )
 
@@ -221,7 +214,7 @@ def calculate_observations(spec: Spec, state: State) -> list[Observation]:
     state["_spobjs_states_interps"] = spobjs_states_interps
 
     for spobj, spobj_smpl_dsec, spobj_smpl_states, spobj_states_interp in zip(
-        state["space_objects"],
+        spec["space_objects"],
         spobjs_smpl_dsec,
         spobjs_smpl_states,
         spobjs_states_interps,
@@ -234,14 +227,14 @@ def calculate_observations(spec: Spec, state: State) -> list[Observation]:
                 states=spobj_smpl_states,
                 tx_station=state["tx_station"],
                 rx_station=rx_station,
-                epoch=state["epoch"],
+                epoch=spec["epoch"],
             )
 
             for passage in passages:
                 exp_passages_ = split_passage_by_schedule(
                     passage=passage,
                     schedule=rx_schedule,
-                    exp_num_map=state["exp_num_map"],
+                    exp_num_map=spec["exp_num_map"],
                 )
 
                 exp_passages.extend(exp_passages_)
@@ -249,7 +242,8 @@ def calculate_observations(spec: Spec, state: State) -> list[Observation]:
         # TODO: improvements needed; this only works for StxSrx case, where calculate_observation gives out 1 element list
         for exp_passage in exp_passages:
             obs = calculate_observation_per_experiment_passage(
-                state,
+                spec=spec,
+                state=state,
                 experiment_passage=exp_passage,
                 space_object_states_interpolator=spobj_states_interp,
             )
@@ -272,11 +266,6 @@ class StxMrxSimulation:
                 "tx_schedule": spec["tx_schedule"],
                 "rx_stations": spec["rx_stations"],
                 "rx_schedules": spec["rx_schedules"],
-                "exp_num_map": spec["exp_num_map"],
-                "epoch": to_pydatetime(spec["epoch"]),
-                "start_time": to_pydatetime(spec["start_time"]),
-                "end_time": to_pydatetime(spec["end_time"]),
-                "space_objects": spec["space_objects"],
                 "_spobjs_states_interps": [],
             },
         )

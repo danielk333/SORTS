@@ -7,7 +7,6 @@ TODO: complete it and clean up
 """
 
 import pickle, time, typing as t, argparse
-from datetime import datetime, timezone
 from pathlib import Path
 import numpy as np
 from scipy.interpolate import interp1d
@@ -18,7 +17,7 @@ import pyvista as pv
 from pyvista import examples
 import sorts
 from sorts import _v2 as sortsV2
-from sorts.utils import to_pydatetime
+from sorts.utils import to_pydatetime, to_datetime64_us
 
 # TODO: switch to normal named imports; these are tmp alias until `_v2` becomes the default namespace
 StxMrxSimulation = sortsV2.simulation.StxMrxSimulation
@@ -159,9 +158,9 @@ spobjs_states_interp = spobjs_states_interps[target_spobj_idx]
 
 fig, axs = plt.subplots(2, 2)
 
-sch_dt_s_arr = (sim.state["rx_schedules"][0].start_time - np.datetime64(sim.state["epoch"])).astype(
-    "timedelta64[us]"
-).astype(np.float64) / 1e6
+sch_dt_s_arr = (
+    sim.state["rx_schedules"][0].start_time - to_datetime64_us(sim.spec["epoch"])
+).astype("timedelta64[us]").astype(np.float64) / 1e6
 sch_dt_s_arr_pass = sch_dt_s_arr[rx_sch_pass_mask]
 
 axs[0, 0].plot(
