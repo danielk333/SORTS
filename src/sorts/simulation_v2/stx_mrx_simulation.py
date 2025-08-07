@@ -38,8 +38,8 @@ class Spec(t.TypedDict):
     start_time: Datetime_like
     end_time: Datetime_like
     space_objects: t.Sequence[sorts.SpaceObject]
-    spobj_dsec_sampler: SpaceObjectDsecSampler  # TODO: support different sampler for different obj?
-    space_object_interpolator_class: type[Interpolator]
+    dsec_sampler: SpaceObjectDsecSampler  # TODO: support different sampler for different obj?
+    interpolator_class: type[Interpolator]
 
 
 # TODO: reduce duplication with `Spec`
@@ -209,13 +209,13 @@ def calculate_observations(spec: Spec, state: State) -> list[Observation]:
     obss: list[Observation] = []
 
     spobjs_smpl_dsec, spobjs_smpl_states = sample_and_propagate_pace_objects_states(
-        sampler=spec["spobj_dsec_sampler"],
+        sampler=spec["dsec_sampler"],
         spobjs=spec["space_objects"],
         start_time=to_datetime64_us(spec["start_time"]),
         end_time=to_datetime64_us(spec["end_time"]),
     )
     spobjs_states_interps = [
-        spec["space_object_interpolator_class"](spobj_smpl_states, spobj_smpl_dsec)
+        spec["interpolator_class"](spobj_smpl_states, spobj_smpl_dsec)
         for spobj_smpl_dsec, spobj_smpl_states in zip(spobjs_smpl_dsec, spobjs_smpl_states)
     ]
     state["_spobjs_states_interps"] = spobjs_states_interps

@@ -103,14 +103,14 @@ sim = StxMrxSimulation.from_spec(
         "start_time": start_time,
         "end_time": end_time,
         "space_objects": space_objects,
-        "spobj_dsec_sampler": lambda orbit, start_time, end_time: sorts.equidistant_sampling(
+        "dsec_sampler": lambda orbit, start_time, end_time: sorts.equidistant_sampling(
             orbit=orbit,
             start_t=(to_pydatetime(start_time) - to_pydatetime(epoch)).total_seconds(),
             end_t=(to_pydatetime(end_time) - to_pydatetime(epoch)).total_seconds(),
             max_dpos=1e3,
         ),
-        # "space_object_interpolator_class":sorts.interpolation.Legendre8,
-        "space_object_interpolator_class": sorts.interpolation.Linear,
+        # "interpolator_class":sorts.interpolation.Legendre8,
+        "interpolator_class": sorts.interpolation.Linear,
     }
 )
 
