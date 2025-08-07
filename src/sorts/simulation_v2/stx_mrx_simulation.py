@@ -54,7 +54,10 @@ def sample_and_propagate_pace_objects_states(
     end_time: Datetime64_us,
 ) -> tuple[list[npt.NDArray[Float64_as_sec]], list[EcefStates]]:
     """
-    Use the sampler the get the delta time of space object within the simulation `start_time` and `end_time`
+    Use the sampler to get the delta time of space object within the simulation `start_time` and `end_time`,
+    then get the space object states at those delta time using the propagator in the space object.
+
+    Returns a list of sampled delta seconds and a list of corresponding states.
     """
 
     spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]] = [
@@ -188,7 +191,11 @@ def calculate_observation_per_experiment_passage(
 
 
 def calculate_observations(spec: Spec, state: State) -> tuple[list[Observation], State]:
-    """Calculate the observations, returns a list of `Observation` and the mutated `State`."""
+    """
+    Calculate the observations.
+
+    Returns a list of `Observation` and the mutated `State`.
+    """
 
     obss: list[Observation] = []
 
