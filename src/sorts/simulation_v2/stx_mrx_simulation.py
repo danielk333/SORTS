@@ -7,8 +7,8 @@ import pyorb
 import sorts
 from sorts.interpolation import Interpolator
 from sorts.radar.tx_rx import Station
-from sorts.utils import to_pydatetime
-from sorts.types import Datetime_like, Float64_as_sec, Float64_as_m, EcefStates
+from sorts.utils import to_pydatetime, to_datetime64_us
+from sorts.types import Datetime_like, Float64_as_sec, Float64_as_m, EcefStates, Datetime64_us
 from sorts.simulation_v2.passage import (
     ExperimentPassage,
     find_passages,
@@ -20,12 +20,29 @@ from sorts.schedule_v2 import Schedule, ExperimentDetail
 logger = logging.getLogger(__name__)
 
 
-class SpaceObjectDtSampler(t.Protocol):
+class SpaceObjectDsecSampler(t.Protocol):
     def __call__(
-        self, orbit: pyorb.Orbit, start_time: datetime, end_time: datetime
+        self, orbit: pyorb.Orbit, start_time: Datetime_like, end_time: Datetime_like
     ) -> npt.NDArray[Float64_as_sec]: ...
 
 
+class Spec(t.TypedDict):
+    """A TypedDict of params"""
+
+    tx_station: Station
+    tx_schedule: Schedule
+    rx_stations: t.Sequence[Station]
+    rx_schedules: t.Sequence[Schedule]
+    exp_num_map: dict[int, ExperimentDetail]
+    epoch: Datetime_like
+    start_time: Datetime_like
+    end_time: Datetime_like
+    space_objects: t.Sequence[sorts.SpaceObject]
+    spobj_dsec_sampler: SpaceObjectDsecSampler
+    space_objects_dt_interpolator_s: type[Interpolator]
+
+
+# TODO: reduce duplication with `Spec`
 class State(t.TypedDict):
     """A TypedDict of params"""
 
@@ -43,8 +60,7 @@ class State(t.TypedDict):
     space_objects: t.Sequence[sorts.SpaceObject]
 
     # TODO: support different sampler for different obj?
-    # TODO: probably taking a function + a args/kwargs obj is more pythonic
-    space_objects_dt_sampler_s: SpaceObjectDtSampler
+    space_objects_dt_sampler_s: SpaceObjectDsecSampler
 
     # TODO: rename to `space_objects_dt_s_interpolator`
     space_objects_dt_interpolator_s: type[Interpolator]
@@ -54,23 +70,22 @@ class State(t.TypedDict):
     _spobjs_states_interps: list[Interpolator]
 
 
-def propagate_and_sample_space_objects_states(state: State):
+def sample_and_propagate_pace_objects_states(
+    sampler: SpaceObjectDsecSampler,
+    spobjs: t.Sequence[sorts.SpaceObject],
+    start_time: Datetime64_us,
+    end_time: Datetime64_us,
+) -> tuple[list[npt.NDArray[Float64_as_sec]], list[EcefStates]]:
     """
     Use the sampler the get the delta time of space object within the simulation `start_time` and `end_time`
     """
 
     spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]] = [
-        state["space_objects_dt_sampler_s"](
-            spobj.state,
-            state["start_time"],
-            state["end_time"],
-        )
-        for spobj in state["space_objects"]
+        sampler(spobj.state, start_time, end_time) for spobj in spobjs
     ]
 
     spobjs_smpl_states: list[EcefStates] = [
-        spobj.get_state(spobj_smpl_dsec)
-        for spobj, spobj_smpl_dsec in zip(state["space_objects"], spobjs_smpl_dsec)
+        spobj.get_state(spobj_smpl_dsec) for spobj, spobj_smpl_dsec in zip(spobjs, spobjs_smpl_dsec)
     ]
 
     return spobjs_smpl_dsec, spobjs_smpl_states
@@ -205,10 +220,15 @@ def calculate_observation_per_experiment_passage(
     return obs
 
 
-def calculate_observations(state: State) -> list[Observation]:
+def calculate_observations(spec: Spec, state: State) -> list[Observation]:
     obss: list[Observation] = []
 
-    spobjs_smpl_dsec, spobjs_smpl_states = propagate_and_sample_space_objects_states(state)
+    spobjs_smpl_dsec, spobjs_smpl_states = sample_and_propagate_pace_objects_states(
+        sampler=spec["spobj_dsec_sampler"],
+        spobjs=spec["space_objects"],
+        start_time=to_datetime64_us(spec["start_time"]),
+        end_time=to_datetime64_us(spec["end_time"]),
+    )
     spobjs_states_interps = [
         create_space_object_states_interpolator(
             state["space_objects_dt_interpolator_s"], spobj_smpl_states, spobj_smpl_dsec
@@ -255,30 +275,16 @@ def calculate_observations(state: State) -> list[Observation]:
     return obss
 
 
-class Spec(t.TypedDict):
-    """A TypedDict of params"""
-
-    tx_station: Station
-    tx_schedule: Schedule
-    rx_stations: t.Sequence[Station]
-    rx_schedules: t.Sequence[Schedule]
-    exp_num_map: dict[int, ExperimentDetail]
-    epoch: Datetime_like
-    start_time: Datetime_like
-    end_time: Datetime_like
-    space_objects: t.Sequence[sorts.SpaceObject]
-    space_objects_dt_sampler_s: SpaceObjectDtSampler
-    space_objects_dt_interpolator_s: type[Interpolator]
-
-
 class StxMrxSimulation:
-    def __init__(self, state: State):
+    def __init__(self, spec: Spec, state: State):
+        self.spec: Spec = spec
         self.state: State = state
 
     @classmethod
     def from_spec(cls, spec: Spec) -> StxMrxSimulation:
         sim = StxMrxSimulation(
-            {
+            spec=spec,
+            state={
                 "tx_station": spec["tx_station"],
                 "tx_schedule": spec["tx_schedule"],
                 "rx_stations": spec["rx_stations"],
@@ -288,10 +294,10 @@ class StxMrxSimulation:
                 "start_time": to_pydatetime(spec["start_time"]),
                 "end_time": to_pydatetime(spec["end_time"]),
                 "space_objects": spec["space_objects"],
-                "space_objects_dt_sampler_s": spec["space_objects_dt_sampler_s"],
+                "space_objects_dt_sampler_s": spec["spobj_dsec_sampler"],
                 "space_objects_dt_interpolator_s": spec["space_objects_dt_interpolator_s"],
                 "_spobjs_states_interps": [],
-            }
+            },
         )
 
         return sim
@@ -302,4 +308,4 @@ class StxMrxSimulation:
         if self.state is None:
             raise RuntimeError("Cannot calculate observations when `state` prop is `None`")
         else:
-            return calculate_observations(self.state)
+            return calculate_observations(self.spec, self.state)

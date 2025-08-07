@@ -80,7 +80,7 @@ sim = StxMrxSimulation.from_spec(
                 parameters={"d": 0.1},
             )
         ],
-        "space_objects_dt_sampler_s": lambda orbit, start_time, end_time: sorts.equidistant_sampling(
+        "spobj_dsec_sampler": lambda orbit, start_time, end_time: sorts.equidistant_sampling(
             orbit=orbit,
             start_t=(to_pydatetime(start_time) - to_pydatetime(epoch)).total_seconds(),
             end_t=(to_pydatetime(end_time) - to_pydatetime(epoch)).total_seconds(),
