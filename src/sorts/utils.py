@@ -80,7 +80,7 @@ def to_pydatetime(d: Datetime_like) -> datetime:
             return d
         case str():
             return np.datetime64(d, "us").astype(datetime)
-        case datetime():
+        case np.datetime64():
             return d.astype(datetime)
         case Time():
             return t.cast(datetime, d.to_datetime())
