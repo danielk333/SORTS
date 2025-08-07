@@ -91,6 +91,18 @@ space_objects_slice = slice(0, 100)  # take only 100 items
 space_objects = space_objects[space_objects_slice]
 print(f"clamped population size: {len(space_objects)}")
 
+
+# we can also use a lambda function, but we cannot pickle the whole simulation in that case
+#  (python's pickle does not support lambda function)
+def dsec_sampler(orbit, start_time, end_time):
+    return sorts.equidistant_sampling(
+        orbit=orbit,
+        start_t=(to_pydatetime(start_time) - to_pydatetime(epoch)).total_seconds(),
+        end_t=(to_pydatetime(end_time) - to_pydatetime(epoch)).total_seconds(),
+        max_dpos=1e3,
+    )
+
+
 sim = StxMrxSimulation.from_spec(
     {
         "tx_station": tx_station,
@@ -102,12 +114,7 @@ sim = StxMrxSimulation.from_spec(
         "start_time": start_time,
         "end_time": end_time,
         "space_objects": space_objects,
-        "dsec_sampler": lambda orbit, start_time, end_time: sorts.equidistant_sampling(
-            orbit=orbit,
-            start_t=(to_pydatetime(start_time) - to_pydatetime(epoch)).total_seconds(),
-            end_t=(to_pydatetime(end_time) - to_pydatetime(epoch)).total_seconds(),
-            max_dpos=1e3,
-        ),
+        "dsec_sampler": dsec_sampler,
         # "interpolator_class":sorts.interpolation.Legendre8,
         "interpolator_class": sorts.interpolation.Linear,
     }
