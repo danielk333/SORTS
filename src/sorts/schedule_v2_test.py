@@ -44,13 +44,14 @@ def Schedule_dataframe_roundtrip_conversion_test():
         pointing_az=pointing_az.copy(),
         pointing_el=pointing_el.copy(),
     )
+    schedule.validate_schedule_length(sch)
 
-    converted_sch = schedule.from_dataframe(schedule.to_dataframe(sch), sch.meta)
+    converted_sch = schedule.from_dataframe(schedule.to_dataframe(sch), sch["meta"])
 
-    assert meta == converted_sch.meta
-    assert np.array_equal(start_time, converted_sch.start_time)
-    assert np.array_equal(exp_num, converted_sch.exp_num)
-    assert np.array_equal(pointing_az, converted_sch.pointing_az)
-    assert np.array_equal(pointing_el, converted_sch.pointing_el)
+    assert meta == converted_sch["meta"]
+    assert np.array_equal(start_time, converted_sch["start_time"])
+    assert np.array_equal(exp_num, converted_sch["exp_num"])
+    assert np.array_equal(pointing_az, converted_sch["pointing_az"])
+    assert np.array_equal(pointing_el, converted_sch["pointing_el"])
 
     return

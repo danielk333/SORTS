@@ -16,6 +16,7 @@ from sorts.types import (
 )
 from sorts.utils import wrap_azimuths_elevations, to_datetime64_us
 from sorts import plots
+from sorts import schedule_v2 as schedule
 from sorts.schedule_v2 import Schedule, ExperimentDetail
 
 logger = logging.getLogger(__name__)
@@ -87,14 +88,17 @@ def generate_from_state(state: State) -> Output:
         pointing_az=tx_pointings[0],
         pointing_el=tx_pointings[1],
     )
+    schedule.validate_schedule_length(tx_sch)
 
     rx_schs = [
-        Schedule(
-            meta={state["exp_detail"]["id"]: state["exp_detail"]},
-            start_time=sch_time,
-            exp_num=np.full(sch_len, state["exp_detail"]["id"], dtype=np.int64),
-            pointing_az=rx_pointings[0],
-            pointing_el=rx_pointings[1],
+        schedule.validate_schedule_length(
+            Schedule(
+                meta={state["exp_detail"]["id"]: state["exp_detail"]},
+                start_time=sch_time,
+                exp_num=np.full(sch_len, state["exp_detail"]["id"], dtype=np.int64),
+                pointing_az=rx_pointings[0],
+                pointing_el=rx_pointings[1],
+            )
         )
         for rx_pointings in rxs_pointings
     ]
@@ -113,8 +117,8 @@ def plot_state_and_output(
     rx_skyplot_plots = []
     for idx, rx_schedule in enumerate(output.rx_schedules):
         rx_skyplot_plot = plots.azel_skyplot(
-            rx_schedule.pointing_az,
-            rx_schedule.pointing_el,
+            rx_schedule["pointing_az"],
+            rx_schedule["pointing_el"],
         )
         rx_skyplot_plot.title = f"rx_skyplot_plot_{idx}"
         rx_skyplot_plots.append(rx_skyplot_plot)

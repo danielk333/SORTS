@@ -19,7 +19,7 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule]):
     Used by `priority_scheduling` internally.
     """
 
-    Cn = Schedule.Cn
+    cn = schedule.cn
 
     # The logic of this function:
     # 1. prepare an empty df as the merge result
@@ -36,7 +36,7 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule]):
 
     # init an empty df for a schedule and add some columns, will be used store merged schedule
     merged_sch_df = schedule.to_dataframe(schedule.empty())
-    merged_sch_df[Cn["end_time"]] = np.empty(0, "datetime64[us]")
+    merged_sch_df[cn["end_time"]] = np.empty(0, "datetime64[us]")
     merged_sch_df[cn_allowed_start_time] = np.empty(0, "datetime64[us]")
     merged_sch_df[cn_allowed_end_time] = np.empty(0, "datetime64[us]")
     merged_sch_df[cn_is_overlaped] = np.empty(0, np.bool)
@@ -47,7 +47,7 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule]):
         # we use a "stable" sorting algo to retains relative order,
         # so the df will be in order of start_time, then priority after sorting
         merged_sch_df = pd.concat([merged_sch_df, sch_df])
-        merged_sch_df = merged_sch_df.sort_values(Cn["start_time"], kind="stable").reset_index(
+        merged_sch_df = merged_sch_df.sort_values(cn["start_time"], kind="stable").reset_index(
             drop=True
         )  # TODO: re-eval if we should use start_time as index
 
@@ -63,16 +63,16 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule]):
 
         # remove rows (control slices) that have time clash
         merged_sch_df[cn_is_overlaped] = (is_new_rows) & (
-            (merged_sch_df[Cn["start_time"]] <= merged_sch_df[cn_allowed_start_time])
-            | (merged_sch_df[Cn["end_time"]] >= merged_sch_df[cn_allowed_end_time])
+            (merged_sch_df[cn["start_time"]] <= merged_sch_df[cn_allowed_start_time])
+            | (merged_sch_df[cn["end_time"]] >= merged_sch_df[cn_allowed_end_time])
         )
         merged_sch_df = merged_sch_df[~merged_sch_df[cn_is_overlaped]]
 
         # update `cn_allowed_start_time`, `cn_allowed_end_time` columns
         if (len(merged_sch_df)) > 0:
-            merged_sch_df[cn_allowed_start_time] = merged_sch_df[Cn["end_time"]].shift(1)
+            merged_sch_df[cn_allowed_start_time] = merged_sch_df[cn["end_time"]].shift(1)
             merged_sch_df.loc[merged_sch_df.index[0], cn_allowed_start_time] = min_datetime64_us
-            merged_sch_df[cn_allowed_end_time] = merged_sch_df[Cn["start_time"]].shift(-1)
+            merged_sch_df[cn_allowed_end_time] = merged_sch_df[cn["start_time"]].shift(-1)
             merged_sch_df.loc[merged_sch_df.index[-1], cn_allowed_end_time] = max_datetime64_us
 
     merged_sch_df = merged_sch_df.reset_index(drop=True)

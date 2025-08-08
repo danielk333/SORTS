@@ -1,6 +1,5 @@
 from __future__ import annotations
 import logging, typing as t
-from dataclasses import dataclass, fields
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
@@ -27,9 +26,7 @@ data_frame_column_names: t.Final[dict[DataFrameColumnName, str]] = {
 }
 """A dict of `DataFrameColumnName` as string key-value pair for convenience."""
 
-Cn = DataFrameColumnName
-"""An alias of `DataFrameColumnName`"""
-cns = data_frame_column_names
+cn = data_frame_column_names
 """An alias of `data_frame_column_names`"""
 
 
@@ -52,6 +49,50 @@ class ExperimentDetail(t.TypedDict):
     "Duration of a control slice, in micro-second"
 
 
+class Schedule(t.TypedDict):
+    """
+    A TypedDict, stores a collection of "control slices" (or "slices" in short).
+
+    - Slice data are stored as columns of fields, each of which is a `ndarray`.
+    - Metadata (`ExperimentDetail`s) are stored as a dict inside the `meta` field.
+    """
+
+    # TODO: add `Station` into this class, maybe inside `meta`
+    meta: dict[int, ExperimentDetail]
+
+    start_time: npt.NDArray[Datetime64_us]
+
+    # TODO: re-eval the size of `exp_num`
+    exp_num: npt.NDArray[np.int64]
+
+    pointing_az: npt.NDArray[Float64_as_deg]
+    pointing_el: npt.NDArray[Float64_as_deg]
+
+
+def validate_schedule_length(sch: Schedule) -> Schedule:
+    """
+    Throw exception if schedule fields are not consistent (same length).
+
+    Returns the schedule itself.
+    """
+
+    k_0, *k_rests = [k for k in sch if k in t.get_args(NonDerivedDataFrameColumnName)]
+    field_0, *field_rests = t.cast(
+        tuple[npt.NDArray, ...],
+        [sch[k] for k in t.get_args(NonDerivedDataFrameColumnName)],
+    )  # actual value of the fields
+
+    for k, f in zip(k_rests, field_rests):
+        if f.shape != field_0.shape:
+            raise RuntimeError(
+                "fields of a `Schedule` must have equal lengths. "
+                + f"but shape of {k} is {f.shape}, "
+                f"while shape of {k_0} is {field_0.shape} "
+            )
+
+    return sch
+
+
 def empty() -> Schedule:
     """A convenience method for generating an empty schedule"""
 
@@ -62,13 +103,16 @@ def empty() -> Schedule:
         pointing_az=np.empty(0, Float64_as_deg),
         pointing_el=np.empty(0, Float64_as_deg),
     )
+    validate_schedule_length(sch)
 
     return sch
 
 
 def from_dataframe(df: pd.DataFrame, meta: dict[int, ExperimentDetail]) -> Schedule:
-    sch_dict = {c: df[c].to_numpy() for c in t.get_args(NonDerivedDataFrameColumnName)}
-    sch = Schedule(**sch_dict, meta=meta)
+    sch = Schedule(
+        **{k: df[k].to_numpy() for k in t.get_args(NonDerivedDataFrameColumnName)},
+        meta=meta,
+    )
 
     return sch
 
@@ -82,11 +126,11 @@ def to_dataframe(sch: Schedule) -> pd.DataFrame:
     Handy for manipulation and plotting.
     """
 
-    df = pd.DataFrame({c: getattr(sch, c) for c in t.get_args(NonDerivedDataFrameColumnName)})
+    df = pd.DataFrame({k: sch[k] for k in t.get_args(NonDerivedDataFrameColumnName)})
 
     # add "end_time" column
-    df[sch.Cn["end_time"]] = df[sch.Cn["start_time"]] + np.array(
-        [sch.meta[n]["slice_duration"] for n in sch.exp_num],
+    df[cn["end_time"]] = df[cn["start_time"]] + np.array(
+        [sch["meta"][n]["slice_duration"] for n in sch["exp_num"]],
         # NOTE: `dtype` have to be stated explicitly, otherwise numpy will assume `float64` which is incorrect here
         dtype="timedelta64[us]",
     )
@@ -105,8 +149,8 @@ def create_mask_by_time_range(
     start_time, end_time = time_range
 
     sch_dt_s_arr_pass_mask: npt.NDArray[np.bool] = np.logical_and(
-        sch.start_time >= start_time,
-        sch.start_time <= end_time,
+        sch["start_time"] >= start_time,
+        sch["start_time"] <= end_time,
     )
 
     return sch_dt_s_arr_pass_mask
@@ -116,11 +160,11 @@ def filter_by_mask(sch: Schedule, mask: npt.NDArray[np.bool]) -> Schedule:
     """Return a slice of the origin schedule based on the `mask`"""
 
     filtered_sch = Schedule(
-        meta=sch.meta,
-        start_time=sch.start_time[mask],
-        exp_num=sch.exp_num[mask],
-        pointing_az=sch.pointing_az[mask],
-        pointing_el=sch.pointing_el[mask],
+        meta=sch["meta"],
+        start_time=sch["start_time"][mask],
+        exp_num=sch["exp_num"][mask],
+        pointing_az=sch["pointing_az"][mask],
+        pointing_el=sch["pointing_el"][mask],
     )
 
     return filtered_sch
@@ -135,44 +179,3 @@ def filter_by_time_range(
     """
 
     return filter_by_mask(sch, create_mask_by_time_range(sch, time_range))
-
-
-@dataclass(kw_only=True)
-class Schedule:
-    """
-    A collection of "control slices" (or "slices" in short).
-
-    Slice data are stored as columns of fields, each of which is a `ndarray`.
-    Metadata (`ExperimentDetail`s) are stored as a dict inside the `meta` field.
-    """
-
-    # TODO: add `Station` into this class, maybe inside `meta`
-    meta: dict[int, ExperimentDetail]
-
-    start_time: npt.NDArray[Datetime64_us]
-
-    # TODO: re-eval the size of `exp_num`
-    exp_num: npt.NDArray[np.int64]
-
-    pointing_az: npt.NDArray[Float64_as_deg]
-    pointing_el: npt.NDArray[Float64_as_deg]
-
-    Cn: t.ClassVar = data_frame_column_names
-    """A shortcut to `data_frame_column_names`"""
-
-    def __post_init__(self):
-        f_0, *f_rests = [
-            f for f in fields(Schedule) if f.name in t.get_args(NonDerivedDataFrameColumnName)
-        ]
-        fv_0, *fv_rests = t.cast(
-            tuple[npt.NDArray, ...],
-            [getattr(self, c) for c in t.get_args(NonDerivedDataFrameColumnName)],
-        )  # actual value of the fields
-
-        for idx, f in enumerate(fv_rests):
-            if f.shape != fv_0.shape:
-                raise RuntimeError(
-                    "fields of a `Schedule` must have equal lengths. "
-                    + f"but shape of {f_rests[idx].name} is {fv_rests[idx].shape}, "
-                    f"while shape of {f_0.name} is {fv_0.shape} "
-                )

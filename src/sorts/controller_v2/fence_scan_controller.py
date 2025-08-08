@@ -14,6 +14,7 @@ from sorts.types import (
     Datetime_like,
 )
 from sorts.utils import to_datetime64_us, wrap_azimuths_elevations
+from sorts import schedule_v2 as schedule
 from sorts.schedule_v2 import Schedule, ExperimentDetail
 from sorts.controller_v2 import pointing_patterns
 
@@ -81,6 +82,7 @@ def generate_from_state(state: State) -> Output:
         pointing_az=tx_pointing[0],
         pointing_el=tx_pointing[1],
     )
+    schedule.validate_schedule_length(tx_schedule)
 
     rx_slice_start_time = tx_slice_start_time.repeat(len(state["scan_range"]))
     rx_schedule_size = state["tx_schedule_size"] * len(state["scan_range"])
@@ -132,6 +134,7 @@ def generate_from_state(state: State) -> Output:
             pointing_az=rx_pointing[0],
             pointing_el=rx_pointing[1],
         )
+        schedule.validate_schedule_length(rx_schedule)
 
         rx_schedules.append(rx_schedule)
 

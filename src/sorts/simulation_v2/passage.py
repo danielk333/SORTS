@@ -110,15 +110,15 @@ def split_passage_by_schedule(
     df = schedule.to_dataframe(sch)
 
     # identify where `exp_num` changes
-    change_points = df[sch.Cn["exp_num"]] != df[sch.Cn["exp_num"]].shift()
+    change_points = df[schedule.cn["exp_num"]] != df[schedule.cn["exp_num"]].shift()
     split_ids = change_points.cumsum()
 
     exp_passages: list[ExperimentPassage] = [
         {
-            "experiment_detail": exp_num_map[df_split[sch.Cn["exp_num"]].iloc[0]],
+            "experiment_detail": exp_num_map[df_split[schedule.cn["exp_num"]].iloc[0]],
             "time_range": (
-                df_split[sch.Cn["start_time"]].iloc[0],
-                df_split[sch.Cn["end_time"]].iloc[-1],
+                df_split[schedule.cn["start_time"]].iloc[0],
+                df_split[schedule.cn["end_time"]].iloc[-1],
             ),
             "space_object": passage["space_object"],
             "tx_station": passage["tx_station"],

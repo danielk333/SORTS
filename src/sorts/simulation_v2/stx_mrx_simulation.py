@@ -103,7 +103,7 @@ def calculate_observation_per_experiment_passage(
     )
 
     dsec: npt.NDArray[Float64_as_sec] = (
-        rx_schedule.start_time - experiment_passage["epoch"]
+        rx_schedule["start_time"] - experiment_passage["epoch"]
     ).astype(np.float64) * 1e-6
 
     dsec = dsec[schedule_mask]
@@ -123,23 +123,23 @@ def calculate_observation_per_experiment_passage(
     powers = np.empty((obs_size,), dtype=np.float64)
 
     # pulse_lengths = np.array(
-    #     [spec["exp_num_map"][n]["pulse_length"] for n in tx_schedule.exp_num], dtype=np.float64
+    #     [spec["exp_num_map"][n]["pulse_length"] for n in tx_schedule["exp_num"]], dtype=np.float64
     # )  # TODO: chk if needed
     # ipps = np.array(
-    #     [spec["exp_num_map"][n]["ipp"] for n in tx_schedule.exp_num], dtype=np.float64
+    #     [spec["exp_num_map"][n]["ipp"] for n in tx_schedule["exp_num"]], dtype=np.float64
     # )  # TODO: chk if needed
     powers = np.array(
-        [spec["exp_num_map"][n]["power"] for n in tx_schedule.exp_num], dtype=np.float64
+        [spec["exp_num_map"][n]["power"] for n in tx_schedule["exp_num"]], dtype=np.float64
     )
     bandwidths = np.array(
-        [spec["exp_num_map"][n]["bandwidth"] for n in tx_schedule.exp_num],
+        [spec["exp_num_map"][n]["bandwidth"] for n in tx_schedule["exp_num"]],
         dtype=np.float64,
     )
     # duty_cycles = np.array(
-    #     [spec["exp_num_map"][n]["duty_cycle"] for n in tx_schedule.exp_num], dtype=np.float64
+    #     [spec["exp_num_map"][n]["duty_cycle"] for n in tx_schedule["exp_num"]], dtype=np.float64
     # )  # TODO: chk if needed
     rx_noise_temps = np.array(
-        [spec["exp_num_map"][n]["noise_temp"] for n in rx_schedule.exp_num],
+        [spec["exp_num_map"][n]["noise_temp"] for n in rx_schedule["exp_num"]],
         dtype=np.float64,
     )
 
@@ -150,14 +150,14 @@ def calculate_observation_per_experiment_passage(
     #   - `pyant/models/array.py` `L185` `params, shape = self.get_parameters(ind, named=True, max_vectors=0)`
     tx_gain_arr = np.full((obs_size,), 0.0, dtype=np.float64)
     rx_gain_arr = np.full((obs_size,), 0.0, dtype=np.float64)
-    for idx, _ in enumerate(rx_schedule.start_time):
+    for idx, _ in enumerate(rx_schedule["start_time"]):
         tx_station.beam.sph_point(
-            tx_schedule.pointing_az[idx], tx_schedule.pointing_el[idx], degrees=True
+            tx_schedule["pointing_az"][idx], tx_schedule["pointing_el"][idx], degrees=True
         )
         tx_gain_arr[idx] = tx_station.beam.gain(spobj_tx_enu[:3, idx])
 
         rx_station.beam.sph_point(
-            rx_schedule.pointing_az[idx], tx_schedule.pointing_el[idx], degrees=True
+            rx_schedule["pointing_az"][idx], tx_schedule["pointing_el"][idx], degrees=True
         )
         rx_gain_arr[idx] = rx_station.beam.gain(spobj_rx_enu[:3, idx])
 
