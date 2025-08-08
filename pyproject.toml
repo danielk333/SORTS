@@ -78,6 +78,7 @@ dev = [
     "hawkmoth>=0.16.0",
     "watchfiles>=1.1.0",
     "sorts",
+    "mkdocs>=1.6.1",
 ]
 
 [tool.setuptools.package-data]
