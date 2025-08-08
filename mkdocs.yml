@@ -1,0 +1,16 @@
+docs_dir: docs_mkdocs
+
+theme:
+  name: readthedocs
+
+site_name: Space Object Radar Tracking Simulator (SORTS)
+nav:
+
+  # - introduction.md
+  # - installation.md
+  # - configuration.md
+  # - tutorial.md
+  # - manual.md
+  # - api.md
+  # - index.md
+  - development/introduction.md
