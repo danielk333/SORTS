@@ -35,13 +35,13 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule]):
     cn_is_overlaped = "is_overlaped"
 
     # init an empty df for a schedule and add some columns, will be used store merged schedule
-    merged_sch_df = schedule.empty().to_dataframe()
+    merged_sch_df = schedule.to_dataframe(schedule.empty())
     merged_sch_df[Cn["end_time"]] = np.empty(0, "datetime64[us]")
     merged_sch_df[cn_allowed_start_time] = np.empty(0, "datetime64[us]")
     merged_sch_df[cn_allowed_end_time] = np.empty(0, "datetime64[us]")
     merged_sch_df[cn_is_overlaped] = np.empty(0, np.bool)
     for sch in schs:
-        sch_df = sch.to_dataframe()
+        sch_df = schedule.to_dataframe(sch)
 
         # merge and then sort the df
         # we use a "stable" sorting algo to retains relative order,

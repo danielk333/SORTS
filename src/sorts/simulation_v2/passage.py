@@ -106,7 +106,8 @@ def find_passages(
 def split_passage_by_schedule(
     passage: Passage, sch: Schedule, exp_num_map: dict[int, ExperimentDetail]
 ) -> list[ExperimentPassage]:
-    df = schedule.filter_by_time_range(sch, passage["time_range"]).to_dataframe()
+    sch = schedule.filter_by_time_range(sch, passage["time_range"])
+    df = schedule.to_dataframe(sch)
 
     # identify where `exp_num` changes
     change_points = df[sch.Cn["exp_num"]] != df[sch.Cn["exp_num"]].shift()

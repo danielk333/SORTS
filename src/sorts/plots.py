@@ -23,7 +23,7 @@ from sorts.types import (
 )
 from sorts.utils import to_datetime64_us
 from sorts.frames import ITRS_to_geodetic
-import sorts.schedule_v2 as sorts_sch
+import sorts.schedule_v2 as schedule
 from sorts.schedule_v2 import Schedule
 
 logger = logging.getLogger(__name__)
@@ -105,7 +105,7 @@ def _schedule_plot_from_cds(
 # TODO: might not work that well for rx schedule, because they might have multiple pointings per slices
 # TODO: also plot pointings?
 def schedule_plot(
-    schedule: Schedule,
+    sch: Schedule,
     start_time: Datetime_like | None = None,
     end_time: Datetime_like | None = None,
 ):
@@ -117,7 +117,7 @@ def schedule_plot(
     Without aggregations, a good starting point is a 5 minutes time range.
     """
 
-    df = schedule.to_dataframe()
+    df = schedule.to_dataframe(sch)
 
     start_time_: Datetime64_us = (
         to_datetime64_us(start_time)
@@ -128,17 +128,15 @@ def schedule_plot(
         to_datetime64_us(end_time) if end_time is not None else df[Schedule.Cn["start_time"]].max()
     )
 
-    df = df[
-        (df[schedule.Cn["start_time"]] >= start_time_) & (df[schedule.Cn["end_time"]] <= end_time_)
-    ]
+    df = df[(df[sch.Cn["start_time"]] >= start_time_) & (df[sch.Cn["end_time"]] <= end_time_)]
     # bokeh requires str type for categorical axis
-    df[schedule.Cn["exp_num"]] = df[schedule.Cn["exp_num"]].astype(str)
+    df[sch.Cn["exp_num"]] = df[sch.Cn["exp_num"]].astype(str)
 
     plot, *_ = _schedule_plot_from_cds(
         source=bokeh_models.ColumnDataSource(df),
         start_time=start_time_,
         end_time=end_time_,
-        y_range=df[schedule.Cn["exp_num"]].unique(),
+        y_range=df[sch.Cn["exp_num"]].unique(),
     )
 
     return plot
@@ -436,7 +434,7 @@ RadarScheduleEcefPositionPlotColumnKey = t.Literal[
 # fmt: on
 assert set(t.get_args(RadarScheduleEcefPositionPlotColumnKey)) == set(
     [
-        *t.get_args(sorts_sch.DataFrameColumnName),
+        *t.get_args(schedule.DataFrameColumnName),
         *t.get_args(AzelSkyplotColumnKey),
         *t.get_args(EcefStatesPositionsPlotColumnKey),
     ]
@@ -444,15 +442,15 @@ assert set(t.get_args(RadarScheduleEcefPositionPlotColumnKey)) == set(
 
 
 def _radar_schedule_ecef_position_plot_cds_df(
-    ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], schedule: Schedule
+    ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], sch: Schedule
 ):
-    df = schedule.to_dataframe()
+    df = schedule.to_dataframe(sch)
 
     # bokeh requires str type for categorical axis
     df[Schedule.Cn["exp_num"]] = df[Schedule.Cn["exp_num"]].astype(str)
 
     # insert columns for azel_skyplot
-    azel_skyplot_cols = _azel_skyplot_cds_cols(schedule.pointing_az, schedule.pointing_el)
+    azel_skyplot_cols = _azel_skyplot_cds_cols(sch.pointing_az, sch.pointing_el)
     for k, v in azel_skyplot_cols.items():
         df[k] = v
 
@@ -471,9 +469,7 @@ def _radar_schedule_ecef_position_plot_cds_df(
 def radar_schedule_ecef_position_plot(
     ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], schedule: Schedule
 ):
-    df = _radar_schedule_ecef_position_plot_cds_df(
-        ecefs=ecefs, ecefs_time=ecefs_time, schedule=schedule
-    )
+    df = _radar_schedule_ecef_position_plot_cds_df(ecefs=ecefs, ecefs_time=ecefs_time, sch=schedule)
 
     cds = bokeh_models.ColumnDataSource(df)
 

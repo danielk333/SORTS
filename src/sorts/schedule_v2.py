@@ -73,6 +73,27 @@ def from_dataframe(df: pd.DataFrame, meta: dict[int, ExperimentDetail]) -> Sched
     return sch
 
 
+def to_dataframe(sch: Schedule) -> pd.DataFrame:
+    """
+    Convert `Schedule` into a pandas `DataFrame`.
+
+    Some extra derived columns are generated in the resultant `DataFrame`, while metadata field(s) are not included.
+
+    Handy for manipulation and plotting.
+    """
+
+    df = pd.DataFrame({c: getattr(sch, c) for c in t.get_args(NonDerivedDataFrameColumnName)})
+
+    # add "end_time" column
+    df[sch.Cn["end_time"]] = df[sch.Cn["start_time"]] + np.array(
+        [sch.meta[n]["slice_duration"] for n in sch.exp_num],
+        # NOTE: `dtype` have to be stated explicitly, otherwise numpy will assume `float64` which is incorrect here
+        dtype="timedelta64[us]",
+    )
+
+    return df
+
+
 def create_mask_by_time_range(
     sch: Schedule, time_range: tuple[Datetime64_us, Datetime64_us]
 ) -> npt.NDArray[np.bool]:
@@ -155,23 +176,3 @@ class Schedule:
                     + f"but shape of {f_rests[idx].name} is {fv_rests[idx].shape}, "
                     f"while shape of {f_0.name} is {fv_0.shape} "
                 )
-
-    def to_dataframe(self) -> pd.DataFrame:
-        """
-        Convert `Schedule` into a pandas `DataFrame`.
-
-        Some extra derived columns are generated in the resultant `DataFrame`, while metadata field(s) are not included.
-
-        Handy for manipulation and plotting.
-        """
-
-        df = pd.DataFrame({c: getattr(self, c) for c in t.get_args(NonDerivedDataFrameColumnName)})
-
-        # add "end_time" column
-        df[self.Cn["end_time"]] = df[self.Cn["start_time"]] + np.array(
-            [self.meta[n]["slice_duration"] for n in self.exp_num],
-            # NOTE: `dtype` have to be stated explicitly, otherwise numpy will assume `float64` which is incorrect here
-            dtype="timedelta64[us]",
-        )
-
-        return df
