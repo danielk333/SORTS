@@ -1,0 +1,33 @@
+docs_dir: docs_mkdocs
+
+theme:
+  name: readthedocs
+
+site_name: Space Object Radar Tracking Simulator (SORTS)
+nav:
+- introduction.md
+- installation.md
+- configuration.md
+- tutorial.md
+- manual.md
+- API Reference: api_reference/
+- Development:
+  - Introduction: development/introduction.md
+
+plugins:
+- search
+- gen-files:
+    scripts:
+    - scripts/gen_api_ref_pages.py
+- literate-nav:
+    nav_file: nav.md
+- section-index
+- mkdocstrings:
+    default_handler: python
+    handlers:
+      python:
+        options:
+          separate_signature: true
+          show_signature_annotations: true
+          signature_crossrefs: true
+          show_overloads: true

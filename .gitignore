@@ -122,3 +122,6 @@ tests/tmp_test_data/*
 #do not version control some data
 data/spice/*.bsp
 data/spice/*.tls
+
+# mkdocs generate api reference pages
+/docs_mkdocs/api_reference/
