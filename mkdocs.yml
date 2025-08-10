@@ -24,3 +24,10 @@ plugins:
 - section-index
 - mkdocstrings:
     default_handler: python
+    handlers:
+      python:
+        options:
+          separate_signature: true
+          show_signature_annotations: true
+          signature_crossrefs: true
+          show_overloads: true
