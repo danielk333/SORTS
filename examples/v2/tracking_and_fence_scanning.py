@@ -1,4 +1,5 @@
 import pickle, time
+from datetime import datetime
 from pathlib import Path
 import numpy as np
 import numpy.typing as npt
@@ -155,41 +156,38 @@ rx_master_schs = [
 ]
 
 output_folder = Path(__file__).parent / ".." / ".." / "local_data"
-pickle_fpath = output_folder / f"{Path(__file__).name}.pickle"
-if Path(pickle_fpath).is_file():
-    with open(pickle_fpath, "rb") as f:
-        saved_data = pickle.load(f)
-        sim: StxMrxSimulation = saved_data["sim"]
-        calc_time: float = saved_data["calc_time"]
-else:
-    sim = StxMrxSimulation.from_spec(
+pickle_fpath = (
+    output_folder / f'{datetime.now().strftime("%Y%m%dT%H%M%S")}-{Path(__file__).name}.pickle'
+)
+
+sim = StxMrxSimulation.from_spec(
+    {
+        "tx_station": tx_station,
+        "tx_schedule": tx_master_sch,
+        "rx_stations": [rx_station_0, rx_station_1],
+        "rx_schedules": rx_master_schs,
+        "exp_num_map": exp_detail_map,
+        "epoch": epoch,
+        "start_time": start_time,
+        "end_time": end_time,
+        "space_objects": spobjs,
+        # "space_objects": [
+        #     o for i, o in enumerate(spobjs) if i in [0, 4, 5, 17]
+        # ],  # just picked a few from the whole list for now
+        "dsec_sampler": dsec_sampler,
+        "interpolator_class": Linear,
+    }
+)
+
+calc_start_time = time.perf_counter()
+obss = sim.run()
+calc_time = time.perf_counter() - calc_start_time
+
+with open(pickle_fpath, "wb") as f:
+    pickle.dump(
         {
-            "tx_station": tx_station,
-            "tx_schedule": tx_master_sch,
-            "rx_stations": [rx_station_0, rx_station_1],
-            "rx_schedules": rx_master_schs,
-            "exp_num_map": exp_detail_map,
-            "epoch": epoch,
-            "start_time": start_time,
-            "end_time": end_time,
-            "space_objects": spobjs,
-            # "space_objects": [
-            #     o for i, o in enumerate(spobjs) if i in [0, 4, 5, 17]
-            # ],  # just picked a few from the whole list for now
-            "dsec_sampler": dsec_sampler,
-            "interpolator_class": Linear,
-        }
+            "sim": sim,
+            "calc_time": calc_time,
+        },
+        f,
     )
-
-    calc_start_time = time.perf_counter()
-    obss = sim.run()
-    calc_time = time.perf_counter() - calc_start_time
-
-    with open(pickle_fpath, "wb") as f:
-        pickle.dump(
-            {
-                "sim": sim,
-                "calc_time": calc_time,
-            },
-            f,
-        )
