@@ -106,18 +106,18 @@ rx_sch_pass = schedule.filter_by_mask(sim.spec["rx_schedules"][0], rx_sch_pass_m
 fig, axs = plt.subplots(2, 2)
 
 sch_dt_s_arr = (
-    sim.spec["rx_schedules"][0].start_time - to_datetime64_us(sim.spec["epoch"])
+    sim.spec["rx_schedules"][0]["start_time"] - to_datetime64_us(sim.spec["epoch"])
 ).astype("timedelta64[us]").astype(np.float64) / 1e6
 sch_dt_s_arr_pass = sch_dt_s_arr[rx_sch_pass_mask]
 
 axs[0, 0].plot(
-    rx_sch_pass.start_time,
+    rx_sch_pass["start_time"],
     np.log10(np.clip(obs["snr"], a_min=1, a_max=None)) * 10,
     "r",
 )
 
 # interpolation functions for secondary x-axis
-datetimef = mdates.date2num(rx_sch_pass.start_time)
+datetimef = mdates.date2num(rx_sch_pass["start_time"])
 # NOTE: `fill_value="extrapolate"` triggers error but is actually okay
 datetimef_to_timedelta = interp1d(datetimef, sch_dt_s_arr_pass, fill_value="extrapolate")  # type: ignore
 timedelta_to_datetimef = interp1d(sch_dt_s_arr_pass, datetimef, fill_value="extrapolate")  # type: ignore
@@ -126,13 +126,13 @@ timedelta_to_datetimef = interp1d(sch_dt_s_arr_pass, datetimef, fill_value="extr
 axs[0, 0].secondary_xaxis("top", functions=(datetimef_to_timedelta, timedelta_to_datetimef))
 
 axs[0, 1].plot(
-    sim.spec["rx_schedules"][0].start_time,
-    sim.spec["rx_schedules"][0].pointing_az,
+    sim.spec["rx_schedules"][0]["start_time"],
+    sim.spec["rx_schedules"][0]["pointing_az"],
     "r",
 )
 axs[0, 1].plot(
-    sim.spec["rx_schedules"][0].start_time,
-    sim.spec["rx_schedules"][0].pointing_el,
+    sim.spec["rx_schedules"][0]["start_time"],
+    sim.spec["rx_schedules"][0]["pointing_el"],
     "g",
 )
 
