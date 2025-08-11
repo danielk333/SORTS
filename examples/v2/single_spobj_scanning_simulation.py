@@ -26,7 +26,7 @@ end_time = Time("2004-01-01 00:10:00Z", format="iso", scale="utc")  # 600 sec af
 
 eiscat3d = sorts.get_radar("eiscat3d", "stage1-array")
 
-exp_num_map: dict[int, sortsV2.schedule.ExperimentDetail] = {
+exp_detail_map: dict[int, sortsV2.schedule.ExperimentDetail] = {
     0: {
         "id": 0,
         "coh_int_bandwidth": 1.0,
@@ -48,7 +48,7 @@ rx_station.uid = ("eiscat3d", "stage1-array", "rx", "0")
 fence_scan_controller = sortsV2.controller.FenceScanController.from_scan_spec(
     tx_station=tx_station,
     rx_stations=[rx_station],
-    exp_detail=exp_num_map[0],
+    exp_detail=exp_detail_map[0],
     azimuth=90,  # sweep from east to west
     min_elevation=30,
     pointings_per_cycle=40,
@@ -63,7 +63,7 @@ sim = StxMrxSimulation.from_spec(
         "tx_schedule": tx_schedule,
         "rx_stations": [rx_station],
         "rx_schedules": rx_schedules,
-        "exp_num_map": exp_num_map,
+        "exp_detail_map": exp_detail_map,
         "epoch": epoch,
         "start_time": start_time,
         "end_time": end_time,

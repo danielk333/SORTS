@@ -174,7 +174,7 @@ sim = StxMrxSimulation.from_spec(
         "tx_schedule": tx_master_sch,
         "rx_stations": [rx_station_0, rx_station_1],
         "rx_schedules": rx_master_schs,
-        "exp_num_map": exp_detail_map,
+        "exp_detail_map": exp_detail_map,
         "epoch": epoch,
         "start_time": start_time,
         "end_time": end_time,

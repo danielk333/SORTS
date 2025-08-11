@@ -33,7 +33,7 @@ class Spec(t.TypedDict):
     tx_schedule: Schedule
     rx_stations: t.Sequence[Station]
     rx_schedules: t.Sequence[Schedule]
-    exp_num_map: dict[int, ExperimentDetail]
+    exp_detail_map: dict[int, ExperimentDetail]
     epoch: Datetime_like
     start_time: Datetime_like
     end_time: Datetime_like
@@ -123,23 +123,23 @@ def calculate_observation_per_experiment_passage(
     powers = np.empty((obs_size,), dtype=np.float64)
 
     # pulse_lengths = np.array(
-    #     [spec["exp_num_map"][n]["pulse_length"] for n in tx_schedule["exp_num"]], dtype=np.float64
+    #     [spec["exp_detail_map"][n]["pulse_length"] for n in tx_schedule["exp_num"]], dtype=np.float64
     # )  # TODO: chk if needed
     # ipps = np.array(
-    #     [spec["exp_num_map"][n]["ipp"] for n in tx_schedule["exp_num"]], dtype=np.float64
+    #     [spec["exp_detail_map"][n]["ipp"] for n in tx_schedule["exp_num"]], dtype=np.float64
     # )  # TODO: chk if needed
     powers = np.array(
-        [spec["exp_num_map"][n]["power"] for n in tx_schedule["exp_num"]], dtype=np.float64
+        [spec["exp_detail_map"][n]["power"] for n in tx_schedule["exp_num"]], dtype=np.float64
     )
     bandwidths = np.array(
-        [spec["exp_num_map"][n]["bandwidth"] for n in tx_schedule["exp_num"]],
+        [spec["exp_detail_map"][n]["bandwidth"] for n in tx_schedule["exp_num"]],
         dtype=np.float64,
     )
     # duty_cycles = np.array(
-    #     [spec["exp_num_map"][n]["duty_cycle"] for n in tx_schedule["exp_num"]], dtype=np.float64
+    #     [spec["exp_detail_map"][n]["duty_cycle"] for n in tx_schedule["exp_num"]], dtype=np.float64
     # )  # TODO: chk if needed
     rx_noise_temps = np.array(
-        [spec["exp_num_map"][n]["noise_temp"] for n in rx_schedule["exp_num"]],
+        [spec["exp_detail_map"][n]["noise_temp"] for n in rx_schedule["exp_num"]],
         dtype=np.float64,
     )
 
@@ -227,7 +227,7 @@ def calculate_observations(
                 exp_passages_ = split_passage_by_schedule(
                     passage=passage,
                     sch=rx_schedule,
-                    exp_num_map=spec["exp_num_map"],
+                    exp_detail_map=spec["exp_detail_map"],
                 )
 
                 exp_passages.extend(exp_passages_)
