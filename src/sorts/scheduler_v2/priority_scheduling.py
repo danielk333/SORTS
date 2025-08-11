@@ -88,9 +88,9 @@ def priority_scheduling(schs: t.Sequence[Schedule]) -> Schedule:
     Note: It is assumed (and not checked) that each of the schedule itself does not contain overlapping entries.
     """
 
-    meta: dict[int, ExperimentDetail] = {}
+    exp_detail_map: dict[int, ExperimentDetail] = {}
     for sch in reversed(schs):
-        meta.update(sch["meta"])
+        exp_detail_map.update(sch["exp_detail_map"])
 
     df = _priority_scheduling_df(schs)
-    return schedule.from_dataframe(df, meta=meta)
+    return schedule.from_dataframe(df, meta=exp_detail_map)

@@ -70,7 +70,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
     )[:, : state["tx_schedule_size"]]
 
     tx_schedule = Schedule(
-        meta={spec["exp_detail"]["id"]: spec["exp_detail"]},
+        exp_detail_map={spec["exp_detail"]["id"]: spec["exp_detail"]},
         start_time=tx_slice_start_time,
         exp_num=np.full(state["tx_schedule_size"], spec["exp_detail"]["id"], dtype=np.int64),
         pointing_az=tx_pointing[0],
@@ -122,7 +122,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
         )[:, :rx_schedule_size]
 
         rx_schedule = Schedule(
-            meta={spec["exp_detail"]["id"]: spec["exp_detail"]},
+            exp_detail_map={spec["exp_detail"]["id"]: spec["exp_detail"]},
             start_time=rx_slice_start_time,
             exp_num=np.full(rx_schedule_size, spec["exp_detail"]["id"], dtype=np.int64),
             pointing_az=rx_pointing[0],

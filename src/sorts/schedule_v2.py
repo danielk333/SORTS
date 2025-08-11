@@ -8,7 +8,9 @@ from sorts.types import Timedelta64_us, Datetime64_us, Float64_as_deg
 logger = logging.getLogger(__name__)
 
 
-ScheduleFieldKey = t.Literal["meta", "start_time", "pointing_az", "pointing_el", "exp_num"]
+ScheduleFieldKey = t.Literal[
+    "exp_detail_map", "start_time", "pointing_az", "pointing_el", "exp_num"
+]
 
 # Define the column names used when exported as a `DataFrame` (pandas or alike)
 NonDerivedDataFrameColumnName = t.Literal["start_time", "pointing_az", "pointing_el", "exp_num"]
@@ -30,8 +32,6 @@ cn = data_frame_column_names
 """An alias of `data_frame_column_names`"""
 
 
-# TODO: relocate to its own file
-# TODO: rename to sth like `ControlSliceDetail`?
 class ExperimentDetail(t.TypedDict):
     """A TypedDict of params"""
 
@@ -57,8 +57,8 @@ class Schedule(t.TypedDict):
     - Metadata (`ExperimentDetail`s) are stored as a dict inside the `meta` field.
     """
 
-    # TODO: add `Station` into this class, maybe inside `meta`
-    meta: dict[int, ExperimentDetail]
+    # TODO: add `Station` into this class?
+    exp_detail_map: dict[int, ExperimentDetail]
 
     start_time: npt.NDArray[Datetime64_us]
 
@@ -97,7 +97,7 @@ def empty() -> Schedule:
     """A convenience method for generating an empty schedule"""
 
     sch = Schedule(
-        meta={},
+        exp_detail_map={},
         start_time=np.empty(0, "datetime64[us]"),
         exp_num=np.empty(0, np.int64),
         pointing_az=np.empty(0, Float64_as_deg),
@@ -111,7 +111,7 @@ def empty() -> Schedule:
 def from_dataframe(df: pd.DataFrame, meta: dict[int, ExperimentDetail]) -> Schedule:
     sch = Schedule(
         **{k: df[k].to_numpy() for k in t.get_args(NonDerivedDataFrameColumnName)},
-        meta=meta,
+        exp_detail_map=meta,
     )
 
     return sch
@@ -130,7 +130,7 @@ def to_dataframe(sch: Schedule) -> pd.DataFrame:
 
     # add "end_time" column
     df[cn["end_time"]] = df[cn["start_time"]] + np.array(
-        [sch["meta"][n]["slice_duration"] for n in sch["exp_num"]],
+        [sch["exp_detail_map"][n]["slice_duration"] for n in sch["exp_num"]],
         # NOTE: `dtype` have to be stated explicitly, otherwise numpy will assume `float64` which is incorrect here
         dtype="timedelta64[us]",
     )
@@ -160,7 +160,7 @@ def filter_by_mask(sch: Schedule, mask: npt.NDArray[np.bool]) -> Schedule:
     """Return a slice of the origin schedule based on the `mask`"""
 
     filtered_sch = Schedule(
-        meta=sch["meta"],
+        exp_detail_map=sch["exp_detail_map"],
         start_time=sch["start_time"][mask],
         exp_num=sch["exp_num"][mask],
         pointing_az=sch["pointing_az"][mask],

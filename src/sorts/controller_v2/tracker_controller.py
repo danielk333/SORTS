@@ -84,7 +84,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
     sch_len = len(sch_time)
 
     tx_sch = Schedule(
-        meta={spec["exp_detail"]["id"]: spec["exp_detail"]},
+        exp_detail_map={spec["exp_detail"]["id"]: spec["exp_detail"]},
         start_time=sch_time,
         exp_num=np.full(sch_len, spec["exp_detail"]["id"], dtype=np.int64),
         pointing_az=tx_pointings[0],
@@ -95,7 +95,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
     rx_schs = [
         schedule.validate_schedule_length(
             Schedule(
-                meta={spec["exp_detail"]["id"]: spec["exp_detail"]},
+                exp_detail_map={spec["exp_detail"]["id"]: spec["exp_detail"]},
                 start_time=sch_time,
                 exp_num=np.full(sch_len, spec["exp_detail"]["id"], dtype=np.int64),
                 pointing_az=rx_pointings[0],
