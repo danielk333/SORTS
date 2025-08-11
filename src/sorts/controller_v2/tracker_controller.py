@@ -22,19 +22,21 @@ from sorts.schedule_v2 import Schedule, ExperimentDetail
 logger = logging.getLogger(__name__)
 
 
-class State(t.TypedDict):
+class Spec(t.TypedDict):
     """A TypedDict of params"""
 
     tx_station: Station
     rx_stations: t.Sequence[Station]
     exp_detail: ExperimentDetail
+    spobj: t.NotRequired[SpaceObject]
+    epoch: t.NotRequired[Datetime_like]
+
+
+class State(t.TypedDict):
+    """A TypedDict of params"""
+
     spobj_time: npt.NDArray[Datetime64_us]
     spobj_states: EcefStates
-
-
-# a workaround to get reference to TypedDict keys as type
-StateKey = t.Literal["tx_station", "rx_stations", "exp_detail", "spobj_time", "spobj_states"]
-assert set(t.get_args(StateKey)) == State.__annotations__.keys()
 
 
 class Output(t.NamedTuple):
@@ -44,22 +46,22 @@ class Output(t.NamedTuple):
     rx_schedules: t.Sequence[Schedule]
 
 
-def generate_from_state(state: State) -> Output:
+def generate_from_state(spec: Spec, state: State) -> Output:
     # generate pointings
     tx_pointings: AzelrCoordinates_DegM = cart_to_sph(
-        state["tx_station"].enu(state["spobj_states"][:3]),
+        spec["tx_station"].enu(state["spobj_states"][:3]),
         degrees=True,
     )
     rxs_pointings: list[AzelrCoordinates_DegM] = [
         cart_to_sph(rx_station.enu(state["spobj_states"][:3]), degrees=True)
-        for rx_station in state["rx_stations"]
+        for rx_station in spec["rx_stations"]
     ]
 
     # filter out invalid values
-    is_out_of_tx_el_range_mask = tx_pointings[1] < state["tx_station"].min_elevation
+    is_out_of_tx_el_range_mask = tx_pointings[1] < spec["tx_station"].min_elevation
     is_out_of_rxs_el_range_mask = [
         ((rx_pointings[1] < rx_station.min_elevation))
-        for rx_station, rx_pointings in zip(state["rx_stations"], rxs_pointings)
+        for rx_station, rx_pointings in zip(spec["rx_stations"], rxs_pointings)
     ]
     is_out_of_el_range_mask = np.logical_and.reduce(
         [is_out_of_tx_el_range_mask, *is_out_of_rxs_el_range_mask]
@@ -82,9 +84,9 @@ def generate_from_state(state: State) -> Output:
     sch_len = len(sch_time)
 
     tx_sch = Schedule(
-        meta={state["exp_detail"]["id"]: state["exp_detail"]},
+        meta={spec["exp_detail"]["id"]: spec["exp_detail"]},
         start_time=sch_time,
-        exp_num=np.full(sch_len, state["exp_detail"]["id"], dtype=np.int64),
+        exp_num=np.full(sch_len, spec["exp_detail"]["id"], dtype=np.int64),
         pointing_az=tx_pointings[0],
         pointing_el=tx_pointings[1],
     )
@@ -93,9 +95,9 @@ def generate_from_state(state: State) -> Output:
     rx_schs = [
         schedule.validate_schedule_length(
             Schedule(
-                meta={state["exp_detail"]["id"]: state["exp_detail"]},
+                meta={spec["exp_detail"]["id"]: spec["exp_detail"]},
                 start_time=sch_time,
-                exp_num=np.full(sch_len, state["exp_detail"]["id"], dtype=np.int64),
+                exp_num=np.full(sch_len, spec["exp_detail"]["id"], dtype=np.int64),
                 pointing_az=rx_pointings[0],
                 pointing_el=rx_pointings[1],
             )
@@ -140,11 +142,9 @@ class TrackerController:
     - This class serve as a frontend to the `State` type in this module
     """
 
-    def __init__(self, state: State | None = None):
+    def __init__(self, spec: Spec, state: State | None = None):
+        self.spec: Spec = spec
         self.state: State | None = state
-
-        self._partial_state: dict[t.Union[StateKey, str], t.Any] = {}
-        """A partial `self.state` with potentially extra fields for internal manipulations"""
 
         self._cached_output: Output | None = None
         """A cache of the latest `Output`, handy for plotting"""
@@ -159,13 +159,15 @@ class TrackerController:
         exp_detail: ExperimentDetail,
     ) -> TrackerController:
         ctrl = TrackerController(
-            {
+            spec={
                 "tx_station": tx_station,
                 "rx_stations": rx_stations,
                 "exp_detail": exp_detail,
+            },
+            state={
                 "spobj_time": time,
                 "spobj_states": space_object_states,
-            }
+            },
         )
 
         return ctrl
@@ -179,43 +181,47 @@ class TrackerController:
         rx_stations: t.Sequence[Station],
         exp_detail: ExperimentDetail,
     ) -> TrackerController:
-        ctrl = TrackerController()
-
-        ctrl._partial_state["spobj"] = spobj
-        ctrl._partial_state["epoch"] = epoch
-        ctrl._partial_state["tx_station"] = tx_station
-        ctrl._partial_state["rx_stations"] = rx_stations
-        ctrl._partial_state["exp_detail"] = exp_detail
+        ctrl = TrackerController(
+            spec={
+                "tx_station": tx_station,
+                "rx_stations": rx_stations,
+                "exp_detail": exp_detail,
+                "spobj": spobj,
+                "epoch": epoch,
+            },
+            state=None,
+        )
 
         return ctrl
 
-    def update_state_from_partial_state(self):
-        self.state = t.cast(State, {k: self._partial_state[k] for k in t.get_args(StateKey)})
-        return self
-
-    def compute_ecef_states(
-        self, start_time: Datetime_like, end_time: Datetime_like, epoch: Datetime_like
-    ):
+    def compute_ecef_states(self, start_time: Datetime_like, end_time: Datetime_like):
         """Do the computation then update the `state` property and return `self`."""
 
-        exp_detail: ExperimentDetail = self._partial_state["exp_detail"]
+        if "spobj" not in self.spec:
+            raise RuntimeError(
+                "Cannot compute space object ECEF states without `spobj` in the `spec` prop."
+            )
+        if "epoch" not in self.spec:
+            raise RuntimeError(
+                "Cannot compute space object ECEF states without `epoch` in the `spec` prop."
+            )
+
+        exp_detail: ExperimentDetail = self.spec["exp_detail"]
 
         time: npt.NDArray[Datetime64_us] = np.arange(
             to_datetime64_us(start_time),
             to_datetime64_us(end_time),
             exp_detail["slice_duration"],
         )
-        dt: npt.NDArray[Timedelta64_us] = time - to_datetime64_us(epoch)
+        dt: npt.NDArray[Timedelta64_us] = time - to_datetime64_us(self.spec["epoch"])
         dsec = t.cast(npt.NDArray[Float64_as_sec], dt.astype(np.float64) / 1e6)
-        ecefs = self._partial_state["spobj"].get_state(dsec)
 
-        self._partial_state.update(
-            {
-                "spobj_time": time,
-                "spobj_states": ecefs,
-            }
-        )
-        self.update_state_from_partial_state()
+        ecefs = self.spec["spobj"].get_state(dsec)
+
+        self.state = {
+            "spobj_time": time,
+            "spobj_states": ecefs,
+        }
 
         return self
 
@@ -229,21 +235,19 @@ class TrackerController:
 
         global generate_from_state
 
-        # TODO: should regenerate anyway if `start_time` and `end_time` are explicitly passed
         if start_time is not None and end_time is not None:
-            epoch: Datetime_like = self._partial_state["epoch"]
-            self.compute_ecef_states(start_time, end_time, epoch)
+            self.compute_ecef_states(start_time, end_time)
             state = t.cast(State, self.state)
         elif self.state is None:
             raise RuntimeError(
-                "Cannot plot generate without valid state property."
+                "Cannot generate without valid state property."
                 + " Please either provide the `start_time` and `end_time` param"
                 + " or ensure it is set correctly using methods like `compute_ecef_states` or proper constructors."
             )
         else:
             state = self.state
 
-        output = generate_from_state(state)
+        output = generate_from_state(spec=self.spec, state=state)
         self._cached_output = output
 
         return output
@@ -253,8 +257,7 @@ class TrackerController:
 
         if self.state is None:
             if start_time is not None and end_time is not None:
-                epoch: Datetime_like = self._partial_state["epoch"]
-                self.compute_ecef_states(start_time, end_time, epoch)
+                self.compute_ecef_states(start_time, end_time)
                 state = t.cast(State, self.state)
             else:
                 raise RuntimeError(
