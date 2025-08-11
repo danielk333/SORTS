@@ -76,9 +76,6 @@ coverage.xml
 *.mo
 *.pot
 
- # Sphinx documentation
-docs/_build/
-
 # PyBuilder
 target/
 
@@ -124,4 +121,7 @@ data/spice/*.bsp
 data/spice/*.tls
 
 # mkdocs generate api reference pages
-/docs_mkdocs/api_reference/
+/docs/api_reference/
+
+#mkdocs output
+site
