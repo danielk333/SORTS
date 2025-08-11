@@ -6,7 +6,7 @@ from mkdocs_gen_files.nav import Nav
 
 project_root = Path(__file__).parent.parent
 
-docs_dname = "docs_mkdocs"
+docs_dname = "docs"
 src_dname = "src"
 
 docs_dpath = project_root / docs_dname
