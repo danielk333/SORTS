@@ -93,4 +93,4 @@ def priority_scheduling(schs: t.Sequence[Schedule]) -> Schedule:
         exp_detail_map.update(sch["exp_detail_map"])
 
     df = _priority_scheduling_df(schs)
-    return schedule.from_dataframe(df, meta=exp_detail_map)
+    return schedule.from_dataframe(df, exp_detail_map=exp_detail_map)

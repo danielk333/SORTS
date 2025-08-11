@@ -108,10 +108,10 @@ def empty() -> Schedule:
     return sch
 
 
-def from_dataframe(df: pd.DataFrame, meta: dict[int, ExperimentDetail]) -> Schedule:
+def from_dataframe(df: pd.DataFrame, exp_detail_map: dict[int, ExperimentDetail]) -> Schedule:
     sch = Schedule(
         **{k: df[k].to_numpy() for k in t.get_args(NonDerivedDataFrameColumnName)},
-        exp_detail_map=meta,
+        exp_detail_map=exp_detail_map,
     )
 
     return sch
