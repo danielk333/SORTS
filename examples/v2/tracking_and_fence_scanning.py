@@ -152,7 +152,7 @@ fence_schs = fence_scan_ctrl.generate(start_time, end_time)
 
 exp_detail_map = {
     tracker_ctrl.spec["exp_detail"]["id"]: tracker_ctrl.spec["exp_detail"],
-    fence_scan_ctrl.state["exp_detail"]["id"]: fence_scan_ctrl.state["exp_detail"],
+    fence_scan_ctrl.spec["exp_detail"]["id"]: fence_scan_ctrl.spec["exp_detail"],
 }
 
 tx_master_sch = priority_scheduling(

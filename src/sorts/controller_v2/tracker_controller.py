@@ -142,7 +142,7 @@ class TrackerController:
     - This class serve as a frontend to the `State` type in this module
     """
 
-    def __init__(self, spec: Spec, state: State | None = None):
+    def __init__(self, spec: Spec, state: State | None):
         self.spec: Spec = spec
         self.state: State | None = state
 
