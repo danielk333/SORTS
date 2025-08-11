@@ -36,12 +36,21 @@ pd.set_option("display.expand_frame_repr", False)
 
 epoch = Time(53005.0, format="mjd", scale="utc")  # 2004-01-01 00:00:00Z
 
-# an extended duration which expands around from the 1 sec period above
+# 93min runtime
 # the `control_slice_duration` is much longer than normal, practical radar `control_slice_duration`
 # for easier debugging, inspection of scheduling/schedules
+# start_time = Time("2025-01-01 02:45:00")
+# end_time = Time("2025-01-01 06:15:00")
+# control_slice_duration = np.timedelta64(int(60 * 1e6), "us")
+
+# 115min runtime
+# start_time = Time("2025-01-01 02:45:00")
+# end_time = Time("2025-01-01 03:00:00")
+# control_slice_duration = np.timedelta64(10_000, "us")  # 10ms
+
 start_time = Time("2025-01-01 02:45:00")
-end_time = Time("2025-01-01 06:15:00")
-control_slice_duration = np.timedelta64(int(60 * 1e6), "us")
+end_time = Time("2025-01-01 03:45:00")
+control_slice_duration = np.timedelta64(10_000, "us")  # 10ms
 
 # same as above, but use more realistic 10ms `control_slice_duration`
 # start_time = Time("2025-01-01 02:45:00")
