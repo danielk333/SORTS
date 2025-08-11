@@ -155,12 +155,10 @@ exp_detail_map = {
     fence_scan_ctrl.spec["exp_detail"]["id"]: fence_scan_ctrl.spec["exp_detail"],
 }
 
-tx_master_sch = priority_scheduling(
-    [tracker_schs.tx_schedule, fence_schs.tx_schedule], exp_detail_map
-)
+tx_master_sch = priority_scheduling([tracker_schs.tx_schedule, fence_schs.tx_schedule])
 
 rx_master_schs = [
-    priority_scheduling(rx_schs, exp_detail_map)
+    priority_scheduling(rx_schs)
     for rx_schs in zip(tracker_schs.rx_schedules, fence_schs.rx_schedules)
 ]
 

@@ -80,13 +80,17 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule]):
     return merged_sch_df
 
 
-def priority_scheduling(schs: t.Sequence[Schedule], meta: dict[int, ExperimentDetail]) -> Schedule:
+def priority_scheduling(schs: t.Sequence[Schedule]) -> Schedule:
     """
     Merge a sequence of schedules for a single station into one,
     schedule with lower index in the sequence is given priority over those with higher index.
 
     Note: It is assumed (and not checked) that each of the schedule itself does not contain overlapping entries.
     """
+
+    meta: dict[int, ExperimentDetail] = {}
+    for sch in reversed(schs):
+        meta.update(sch["meta"])
 
     df = _priority_scheduling_df(schs)
     return schedule.from_dataframe(df, meta=meta)

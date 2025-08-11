@@ -71,14 +71,6 @@ def priority_scheduling_smoke_test():
         slice_duration=sch_1_slice_duration,
     )
 
-    controller_1: tracker_controller.State = {
-        "tx_station": eiscat3d.tx[0],
-        "rx_stations": [],
-        "spobj_time": time_arr_1,
-        "spobj_states": ecefs_1,
-        "exp_detail": exp_detail_0,
-    }
-
     time_arr_2: npt.NDArray[Datetime64_us] = np.arange(
         start_time.to_value("datetime64").astype("datetime64[us]"),  # type: ignore
         end_time.to_value("datetime64").astype("datetime64[us]"),  # type: ignore
@@ -100,18 +92,30 @@ def priority_scheduling_smoke_test():
         slice_duration=sch_2_slice_duration,
     )
 
-    controller_2: tracker_controller.State = {
-        "tx_station": eiscat3d.tx[0],
-        "rx_stations": [],
-        "spobj_time": time_arr_2,
-        "spobj_states": ecefs_2,
-        "exp_detail": exp_detail_1,
-    }
+    tx_sch_1, _rx_schs = tracker_controller.generate_from_state(
+        spec={
+            "tx_station": eiscat3d.tx[0],
+            "rx_stations": [],
+            "exp_detail": exp_detail_0,
+        },
+        state={
+            "spobj_time": time_arr_1,
+            "spobj_states": ecefs_1,
+        },
+    )
+    tx_sch_2, _rx_schs = tracker_controller.generate_from_state(
+        spec={
+            "tx_station": eiscat3d.tx[0],
+            "rx_stations": [],
+            "exp_detail": exp_detail_1,
+        },
+        state={
+            "spobj_time": time_arr_2,
+            "spobj_states": ecefs_2,
+        },
+    )
 
-    tx_sch_1, _rx_schs = tracker_controller.generate_from_state(controller_1)
-    tx_sch_2, _rx_schs = tracker_controller.generate_from_state(controller_2)
-
-    merged_sch = priority_scheduling([tx_sch_1, tx_sch_2], {0: exp_detail_0, 1: exp_detail_1})
+    merged_sch = priority_scheduling([tx_sch_1, tx_sch_2])
     merged_sch_df = schedule.to_dataframe(merged_sch)
 
     return
