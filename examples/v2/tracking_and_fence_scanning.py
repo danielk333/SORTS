@@ -1,5 +1,5 @@
 import pickle, time
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 import numpy as np
 import numpy.typing as npt
@@ -157,7 +157,8 @@ rx_master_schs = [
 
 output_folder = Path(__file__).parent / ".." / ".." / "local_data"
 pickle_fpath = (
-    output_folder / f'{datetime.now().strftime("%Y%m%dT%H%M%S")}-{Path(__file__).name}.pickle'
+    output_folder
+    / f'{datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")}-{Path(__file__).name}.pickle'
 )
 
 sim = StxMrxSimulation.from_spec(
