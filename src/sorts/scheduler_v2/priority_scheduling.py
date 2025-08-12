@@ -97,9 +97,9 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule]):
         #   which we rely on atm to keep track on new new rows.
         # TODO: see if delaying `reset_index` can eliminate the need of setting `min_datetime64_us`, `max_datetime64_us`
         if (len(merged_sch_df)) > 0:
-            merged_sch_df[cn_allowed_start_time] = merged_sch_df[cn["end_time"]].shift(1)
+            merged_sch_df.loc[:, cn_allowed_start_time] = merged_sch_df[cn["end_time"]].shift(1)
             merged_sch_df.loc[merged_sch_df.index[0], cn_allowed_start_time] = min_datetime64_us
-            merged_sch_df[cn_allowed_end_time] = merged_sch_df[cn["start_time"]].shift(-1)
+            merged_sch_df.loc[:, cn_allowed_end_time] = merged_sch_df[cn["start_time"]].shift(-1)
             merged_sch_df.loc[merged_sch_df.index[-1], cn_allowed_end_time] = max_datetime64_us
 
     merged_sch_df = merged_sch_df.reset_index(drop=True)
