@@ -15,9 +15,11 @@ min_datetime64_us = np.datetime64(
 # TODO: should we use a db like sqlite to enable larger than memory processing?
 # TODO: add schedule validation?
 # TODO: return the rows/index of dropped slice?
-def _priority_scheduling_df(schs: t.Sequence[Schedule]):
+def priority_scheduling_df(sch_dfs: t.Sequence[pd.DataFrame]):
     """
-    Same as `priority_scheduling` but returns a pandas `DataFrame`.
+    Same as `priority_scheduling` but takes and returns `Schedule` in pandas `DataFrame` form
+    (see also `schedule.from_dataframe`, `schedule.to_dataframe`).
+
     Used by `priority_scheduling` internally.
     """
 
@@ -42,9 +44,7 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule]):
     merged_sch_df[cn_allowed_start_time] = np.empty(0, "datetime64[us]")
     merged_sch_df[cn_allowed_end_time] = np.empty(0, "datetime64[us]")
     merged_sch_df[cn_is_overlaped] = np.empty(0, np.bool)
-    for sch in schs:
-        sch_df = schedule.to_dataframe(sch)
-
+    for sch_df in sch_dfs:
         # merge and then sort the df
         # we use a "stable" sorting algo to retains relative order,
         # so the df will be in order of start_time, then priority after sorting
@@ -119,5 +119,5 @@ def priority_scheduling(schs: t.Sequence[Schedule]) -> Schedule:
     for sch in reversed(schs):
         exp_detail_map.update(sch["exp_detail_map"])
 
-    df = _priority_scheduling_df(schs)
+    df = priority_scheduling_df([schedule.to_dataframe(sch) for sch in schs])
     return schedule.from_dataframe(df, exp_detail_map=exp_detail_map)
