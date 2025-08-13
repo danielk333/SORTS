@@ -171,11 +171,6 @@ class FenceScanController:
         #         + f"cannot be smaller than the dwell ({self.dwell_s} sec)."
         #     )
 
-        if len(scan_range) > 1:
-            raise NotImplementedError(
-                "Support for multiple pointings per control slice is not implemented yet."
-            )
-
         ctrl = FenceScanController(
             spec={
                 "tx_station": tx_station,
