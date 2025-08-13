@@ -124,7 +124,7 @@ def schedule_plot(
         to_datetime64_us(start_time) if start_time is not None else df[cn["start_time"]].min()
     )
     end_time_: Datetime64_us = (
-        to_datetime64_us(end_time) if end_time is not None else df[cn["start_time"]].max()
+        to_datetime64_us(end_time) if end_time is not None else df[cn["end_time"]].max()
     )
 
     df = df[(df[cn["start_time"]] >= start_time_) & (df[cn["end_time"]] <= end_time_)]
