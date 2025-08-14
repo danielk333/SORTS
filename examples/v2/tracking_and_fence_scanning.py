@@ -34,11 +34,9 @@ from sorts import plots
 # disable pandas table wrapping
 pd.set_option("display.expand_frame_repr", False)
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("example")
 logger.info("starting example")
-
-epoch = Time(53005.0, format="mjd", scale="utc")  # 2004-01-01 00:00:00Z
 
 # 93min runtime
 # the `control_slice_duration` is much longer than normal, practical radar `control_slice_duration`
@@ -61,7 +59,7 @@ control_slice_duration = np.timedelta64(10_000, "us")  # 10ms
 # end_time = Time("2025-01-01 06:15:00")
 # control_slice_duration = np.timedelta64(10_000, "us")  # 10ms
 
-eiscat3d = get_radar("eiscat3d", "stage1-array")
+eiscat3d = get_radar("nostra", "example1")
 # TODO: these patching of station prop should be integrated into codebase
 tx_station: Station = eiscat3d.tx[0]
 tx_station.uid = ("eiscat3d", "stage1-array", "tx", "0")
@@ -81,7 +79,7 @@ tracked_spobj = SpaceObject(
     raan=86,
     aop=0,
     mu0=60,
-    epoch=epoch,
+    epoch=start_time,
     parameters={"d": 0.1},
 )
 
@@ -114,7 +112,7 @@ def dsec_sampler(orbit, start_time, end_time):
 
 tracker_ctrl = TrackerController.from_space_object(
     spobj=tracked_spobj,
-    epoch=epoch,
+    epoch=start_time,
     tx_station=eiscat3d.tx[0],
     # rx_stations=eiscat3d.rx[0:1],
     rx_stations=eiscat3d.rx[0:2],
@@ -181,7 +179,7 @@ sim = StxMrxSimulation.from_spec(
         "rx_stations": [rx_station_0, rx_station_1],
         "rx_schedules": rx_master_schs,
         "exp_detail_map": exp_detail_map,
-        "epoch": epoch,
+        "epoch": start_time,
         "start_time": start_time,
         "end_time": end_time,
         "space_objects": spobjs,
@@ -200,7 +198,7 @@ calc_time = time.perf_counter() - calc_start_time
 with open(pickle_fpath, "wb") as f:
     pickle.dump(
         {
-            "sim": sim,
+            "obss": obss,
             "calc_time": calc_time,
         },
         f,
