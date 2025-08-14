@@ -3,7 +3,8 @@ import logging, typing as t
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from sorts.types import Timedelta64_us, Datetime64_us, Float64_as_deg
+from sorts.types import Timedelta64_us, Datetime64_us, Float64_as_deg, Timedelta_Like
+from sorts.utils import to_timedelta64_us
 
 logger = logging.getLogger(__name__)
 
@@ -148,12 +149,12 @@ def create_mask_by_time_range(
 
     start_time, end_time = time_range
 
-    sch_dt_s_arr_pass_mask: npt.NDArray[np.bool] = np.logical_and(
+    mask: npt.NDArray[np.bool] = np.logical_and(
         sch["start_time"] >= start_time,
         sch["start_time"] <= end_time,
     )
 
-    return sch_dt_s_arr_pass_mask
+    return mask
 
 
 def filter_by_mask(sch: Schedule, mask: npt.NDArray[np.bool]) -> Schedule:
@@ -179,3 +180,23 @@ def filter_by_time_range(
     """
 
     return filter_by_mask(sch, create_mask_by_time_range(sch, time_range))
+
+
+def chunk_by_duration(sch: Schedule, duration: Timedelta_Like) -> t.Generator[Schedule, None, None]:
+    start_time: Datetime64_us = sch["start_time"][0]
+    duration_ = to_timedelta64_us(duration)
+
+    chunk_grp_keys = (sch["start_time"] - start_time) // duration_
+
+    for k in np.unique(chunk_grp_keys):
+        chunk_mask: npt.NDArray[np.bool] = chunk_grp_keys == k
+
+        sch_chunk = Schedule(
+            exp_detail_map=sch["exp_detail_map"],
+            start_time=sch["start_time"][chunk_mask],
+            exp_num=sch["exp_num"][chunk_mask],
+            pointing_az=sch["pointing_az"][chunk_mask],
+            pointing_el=sch["pointing_el"][chunk_mask],
+        )
+
+        yield sch_chunk
