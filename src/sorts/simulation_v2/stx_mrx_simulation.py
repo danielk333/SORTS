@@ -207,6 +207,7 @@ def calculate_observations(
 
     obss: list[Observation] = []
 
+    pbar = tqdm(desc="simulating observation", total=len(spec["space_objects"]))
     for spobj, spobj_smpl_dsec, spobj_smpl_states, spobj_states_interp in zip(
         spec["space_objects"],
         spobjs_smpl_dsec,
@@ -242,6 +243,8 @@ def calculate_observations(
                 spobj_interpolator=spobj_states_interp,
             )
             obss.append(obs)
+        pbar.update(1)
+    pbar.close()
 
     return obss
 
