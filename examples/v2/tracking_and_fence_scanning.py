@@ -5,6 +5,7 @@ import numpy as np
 import numpy.typing as npt
 from pathlib import Path
 from astropy.time import Time
+import logging
 import sorts
 from sorts import equidistant_sampling
 from sorts.interpolation import Legendre8, Linear
@@ -33,6 +34,9 @@ from sorts import plots
 # disable pandas table wrapping
 pd.set_option("display.expand_frame_repr", False)
 
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger("example")
+logger.info("starting example")
 
 epoch = Time(53005.0, format="mjd", scale="utc")  # 2004-01-01 00:00:00Z
 
@@ -97,13 +101,15 @@ spobjs = [tracked_spobj, *[spobj_pop.get_object(i) for i in range(spobj_pop.shap
 
 # we can also use a lambda function, but we cannot pickle the whole simulation in that case
 #  (python's pickle does not support lambda function)
+# def dsec_sampler(orbit, start_time, end_time):
+#     return sorts.equidistant_sampling(
+#         orbit=orbit,
+#         start_t=(to_pydatetime(start_time) - to_pydatetime(epoch)).total_seconds(),
+#         end_t=(to_pydatetime(end_time) - to_pydatetime(epoch)).total_seconds(),
+#         max_dpos=1e3,
+#     )
 def dsec_sampler(orbit, start_time, end_time):
-    return sorts.equidistant_sampling(
-        orbit=orbit,
-        start_t=(to_pydatetime(start_time) - to_pydatetime(epoch)).total_seconds(),
-        end_t=(to_pydatetime(end_time) - to_pydatetime(epoch)).total_seconds(),
-        max_dpos=1e3,
-    )
+    return np.arange(0, (end_time - start_time) / np.timedelta64(1,'s'), 120, dtype=np.float64)
 
 
 tracker_ctrl = TrackerController.from_space_object(

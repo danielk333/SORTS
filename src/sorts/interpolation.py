@@ -53,9 +53,10 @@ class Linear(Interpolator):
     def get_state(self, t):
         st_t = self.t.flatten()
         in_t = np.atleast_1d(t).flatten()
-        t_mat = st_t[:, None] - in_t[None, :]
-
-        inds = np.argmax(t_mat > 0, axis=0) - 1
+        inds = np.empty(in_t.shape, dtype=np.int64)
+        for ind in range(len(in_t)):
+            t_mat = st_t - in_t[ind]
+            inds[ind] = np.argmax(t_mat > 0) - 1
 
         dts = -t_mat[inds, np.arange(len(t))]
         frac = dts / self.t_diffs[inds]
