@@ -12,7 +12,7 @@ from sorts.types import (
     Timedelta64_us,
     Float64_as_sec,
     AzelrCoordinates_DegM,
-    Datetime_like,
+    Datetime_Like,
 )
 from sorts.utils import wrap_azimuths_elevations, to_datetime64_us
 from sorts import plots
@@ -29,7 +29,7 @@ class Spec(t.TypedDict):
     rx_stations: t.Sequence[Station]
     exp_detail: ExperimentDetail
     spobj: t.NotRequired[SpaceObject]
-    epoch: t.NotRequired[Datetime_like]
+    epoch: t.NotRequired[Datetime_Like]
 
 
 class State(t.TypedDict):
@@ -176,7 +176,7 @@ class TrackerController:
     def from_space_object(
         cls,
         spobj: SpaceObject,
-        epoch: Datetime_like,
+        epoch: Datetime_Like,
         tx_station: Station,
         rx_stations: t.Sequence[Station],
         exp_detail: ExperimentDetail,
@@ -194,7 +194,7 @@ class TrackerController:
 
         return ctrl
 
-    def compute_ecef_states(self, start_time: Datetime_like, end_time: Datetime_like):
+    def compute_ecef_states(self, start_time: Datetime_Like, end_time: Datetime_Like):
         """Do the computation then update the `state` property and return `self`."""
 
         if "spobj" not in self.spec:
@@ -226,7 +226,7 @@ class TrackerController:
         return self
 
     def generate(
-        self, start_time: Datetime_like | None = None, end_time: Datetime_like | None = None
+        self, start_time: Datetime_Like | None = None, end_time: Datetime_Like | None = None
     ) -> Output:
         """
         Generate the schedules.
@@ -252,7 +252,7 @@ class TrackerController:
 
         return output
 
-    def plot(self, start_time: Datetime_like | None = None, end_time: Datetime_like | None = None):
+    def plot(self, start_time: Datetime_Like | None = None, end_time: Datetime_Like | None = None):
         global plot_state_and_output
 
         if self.state is None:

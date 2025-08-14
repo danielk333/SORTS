@@ -16,7 +16,7 @@ import bokeh.layouts as bokeh_layouts
 from sorts.types import (
     EcefStates,
     Float64_as_deg,
-    Datetime_like,
+    Datetime_Like,
     Datetime64_us,
     Timedelta64_us,
     Float64_as_sec,
@@ -106,8 +106,8 @@ def _schedule_plot_from_cds(
 # TODO: also plot pointings?
 def schedule_plot(
     sch: Schedule,
-    start_time: Datetime_like | None = None,
-    end_time: Datetime_like | None = None,
+    start_time: Datetime_Like | None = None,
+    end_time: Datetime_Like | None = None,
 ):
     """
     Note:
@@ -384,10 +384,10 @@ def ecef_states_positions_plot_letsplot(ecefs: EcefStates):
 
 def kepler_space_object_on_map(
     space_object: SpaceObject,
-    epoch: Datetime_like,
+    epoch: Datetime_Like,
     num_points=500,
-    start_time: Datetime_like | None = None,
-    end_time: Datetime_like | None = None,
+    start_time: Datetime_Like | None = None,
+    end_time: Datetime_Like | None = None,
 ):
     """Plot a space object with keplerian orbit on a map in mercator projection"""
 

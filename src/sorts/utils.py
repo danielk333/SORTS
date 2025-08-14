@@ -3,7 +3,7 @@ from datetime import datetime
 import numpy as np
 import numpy.typing as npt
 from astropy.time import Time
-from sorts.types import Datetime64_us, Float64_as_deg, Datetime_like
+from sorts.types import Datetime64_us, Float64_as_deg, Datetime_Like
 
 
 def wrap_latitudes_longitudes(
@@ -62,7 +62,7 @@ def wrap_azimuths_elevations(
         return (az_wrapped, el_wrapped)
 
 
-def to_datetime64_us(d: Datetime_like) -> Datetime64_us:
+def to_datetime64_us(d: Datetime_Like) -> Datetime64_us:
     match d:
         case np.datetime64():
             return d
@@ -74,7 +74,7 @@ def to_datetime64_us(d: Datetime_like) -> Datetime64_us:
             raise RuntimeError(f"Convertion from {type(d)} to `datetime64[us]` is not supported.")
 
 
-def to_pydatetime(d: Datetime_like) -> datetime:
+def to_pydatetime(d: Datetime_Like) -> datetime:
     match d:
         case datetime():
             return d

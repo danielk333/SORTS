@@ -11,7 +11,7 @@ from sorts.types import (
     Float64_as_m,
     EcefCoordinates,
     EnuCoordinates,
-    Datetime_like,
+    Datetime_Like,
 )
 from sorts.utils import to_datetime64_us, wrap_azimuths_elevations
 from sorts import schedule_v2 as schedule
@@ -186,7 +186,7 @@ class FenceScanController:
 
         return ctrl
 
-    def compute_single_cycle_pointings(self, start_time: Datetime_like, end_time: Datetime_like):
+    def compute_single_cycle_pointings(self, start_time: Datetime_Like, end_time: Datetime_Like):
         """Do the computation then update the `state` property and return `self`."""
 
         exp_detail: ExperimentDetail = self.spec["exp_detail"]
@@ -210,7 +210,7 @@ class FenceScanController:
 
         return self
 
-    def generate(self, start_time: Datetime_like, end_time: Datetime_like) -> Output:
+    def generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> Output:
         global generate_from_state
 
         self.compute_single_cycle_pointings(start_time, end_time)

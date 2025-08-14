@@ -9,7 +9,7 @@ Datetime64_us = np.datetime64
 Timedelta64_us = np.timedelta64
 "`numpy` `timedelta64` in `us` resolution"
 
-Datetime_like = datetime | Time | Datetime64_us | str
+Datetime_Like = datetime | Time | Datetime64_us | str
 """
 One of:
 - python builtin `datetime`,

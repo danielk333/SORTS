@@ -7,7 +7,7 @@ import sorts
 from sorts.interpolation import Interpolator
 from sorts.radar.tx_rx import Station
 from sorts.utils import to_datetime64_us
-from sorts.types import Datetime_like, Float64_as_sec, Float64_as_m, EcefStates, Datetime64_us
+from sorts.types import Datetime_Like, Float64_as_sec, Float64_as_m, EcefStates, Datetime64_us
 from sorts.simulation_v2.passage import (
     ExperimentPassage,
     find_passages,
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 class SpaceObjectDsecSampler(t.Protocol):
     def __call__(
-        self, orbit: pyorb.Orbit, start_time: Datetime_like, end_time: Datetime_like
+        self, orbit: pyorb.Orbit, start_time: Datetime_Like, end_time: Datetime_Like
     ) -> npt.NDArray[Float64_as_sec]: ...
 
 
@@ -34,9 +34,9 @@ class Spec(t.TypedDict):
     rx_stations: t.Sequence[Station]
     rx_schedules: t.Sequence[Schedule]
     exp_detail_map: dict[int, ExperimentDetail]
-    epoch: Datetime_like
-    start_time: Datetime_like
-    end_time: Datetime_like
+    epoch: Datetime_Like
+    start_time: Datetime_Like
+    end_time: Datetime_Like
     space_objects: t.Sequence[sorts.SpaceObject]
     dsec_sampler: SpaceObjectDsecSampler  # TODO: support different sampler for different obj?
     interpolator_class: type[Interpolator]
