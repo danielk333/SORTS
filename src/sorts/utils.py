@@ -1,9 +1,9 @@
 import typing as t
-from datetime import datetime
+from datetime import datetime, timedelta
 import numpy as np
 import numpy.typing as npt
-from astropy.time import Time
-from sorts.types import Datetime64_us, Float64_as_deg, Datetime_Like
+from astropy.time import Time, TimeDelta
+from sorts.types import Datetime64_us, Float64_as_deg, Datetime_Like, Timedelta64_us, Timedelta_Like
 
 
 def wrap_latitudes_longitudes(
@@ -65,7 +65,7 @@ def wrap_azimuths_elevations(
 def to_datetime64_us(d: Datetime_Like) -> Datetime64_us:
     match d:
         case np.datetime64():
-            return d
+            return d.astype("datetime64[us]")
         case str() | datetime():
             return np.datetime64(d, "us")
         case Time():
@@ -86,3 +86,15 @@ def to_pydatetime(d: Datetime_Like) -> datetime:
             return t.cast(datetime, d.to_datetime())
         case _:
             raise RuntimeError(f"Convertion from {type(d)} to `datetime64[us]` is not supported.")
+
+
+def to_timedelta64_us(d: Timedelta_Like) -> Timedelta64_us:
+    match d:
+        case np.timedelta64():
+            return d.astype("timedelta64[us]")
+        case int() | timedelta():
+            return np.timedelta64(d, "us")
+        case TimeDelta():
+            return np.timedelta64(int(t.cast(np.float64, d.to_value("us"))), "us")
+        case _:
+            raise RuntimeError(f"Convertion from {type(d)} to `timedelta64[us]` is not supported.")

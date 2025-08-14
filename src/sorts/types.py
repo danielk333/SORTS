@@ -1,7 +1,7 @@
 import numpy as np
 import numpy.typing as npt
-from datetime import datetime
-from astropy.time import Time
+from datetime import datetime, timedelta
+from astropy.time import Time, TimeDelta
 
 Datetime64_us = np.datetime64
 "`numpy` `datetime64` in `us` resolution"
@@ -16,6 +16,15 @@ One of:
 - astropy `Time`
 - numpy `timedelta64`
 - ISO 8601 date or datetime string supported by numpy
+"""
+
+Timedelta_Like = timedelta | TimeDelta | Timedelta64_us | int
+"""
+One of:
+- python builtin `timedelta`,
+- astropy `TimeDelta`
+- numpy `timedelta64`
+- `int`, the length of the duration in `us` resolution
 """
 
 Float_as_sec = float
