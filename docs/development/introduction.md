@@ -12,5 +12,5 @@ uv sync --all-extras`
 
 # the sorts bundling info does not work well with `uv` at the moment
 # so a separate install using `pip` sorts itself is needed.
-uv pip install -e . --group dev
+pip install -e .
 ```
