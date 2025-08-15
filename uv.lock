@@ -188,6 +188,20 @@ wheels = [
 ]
 
 [[package]]
+name = "backrefs"
+version = "5.9"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/eb/a7/312f673df6a79003279e1f55619abbe7daebbb87c17c976ddc0345c04c7b/backrefs-5.9.tar.gz", hash = "sha256:808548cb708d66b82ee231f962cb36faaf4f2baab032f2fbb783e9c2fdddaa59", size = 5765857, upload-time = "2025-06-22T19:34:13.97Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/19/4d/798dc1f30468134906575156c089c492cf79b5a5fd373f07fe26c4d046bf/backrefs-5.9-py310-none-any.whl", hash = "sha256:db8e8ba0e9de81fcd635f440deab5ae5f2591b54ac1ebe0550a2ca063488cd9f", size = 380267, upload-time = "2025-06-22T19:34:05.252Z" },
+    { url = "https://files.pythonhosted.org/packages/55/07/f0b3375bf0d06014e9787797e6b7cc02b38ac9ff9726ccfe834d94e9991e/backrefs-5.9-py311-none-any.whl", hash = "sha256:6907635edebbe9b2dc3de3a2befff44d74f30a4562adbb8b36f21252ea19c5cf", size = 392072, upload-time = "2025-06-22T19:34:06.743Z" },
+    { url = "https://files.pythonhosted.org/packages/9d/12/4f345407259dd60a0997107758ba3f221cf89a9b5a0f8ed5b961aef97253/backrefs-5.9-py312-none-any.whl", hash = "sha256:7fdf9771f63e6028d7fee7e0c497c81abda597ea45d6b8f89e8ad76994f5befa", size = 397947, upload-time = "2025-06-22T19:34:08.172Z" },
+    { url = "https://files.pythonhosted.org/packages/10/bf/fa31834dc27a7f05e5290eae47c82690edc3a7b37d58f7fb35a1bdbf355b/backrefs-5.9-py313-none-any.whl", hash = "sha256:cc37b19fa219e93ff825ed1fed8879e47b4d89aa7a1884860e2db64ccd7c676b", size = 399843, upload-time = "2025-06-22T19:34:09.68Z" },
+    { url = "https://files.pythonhosted.org/packages/fc/24/b29af34b2c9c41645a9f4ff117bae860291780d73880f449e0b5d948c070/backrefs-5.9-py314-none-any.whl", hash = "sha256:df5e169836cc8acb5e440ebae9aad4bf9d15e226d3bad049cf3f6a5c20cc8dc9", size = 411762, upload-time = "2025-06-22T19:34:11.037Z" },
+    { url = "https://files.pythonhosted.org/packages/41/ff/392bff89415399a979be4a65357a41d92729ae8580a66073d8ec8d810f98/backrefs-5.9-py39-none-any.whl", hash = "sha256:f48ee18f6252b8f5777a22a00a09a85de0ca931658f1dd96d4406a34f3748c60", size = 380265, upload-time = "2025-06-22T19:34:12.405Z" },
+]
+
+[[package]]
 name = "beautifulsoup4"
 version = "4.13.3"
 source = { registry = "https://pypi.org/simple" }
@@ -780,18 +794,6 @@ wheels = [
 ]
 
 [[package]]
-name = "hawkmoth"
-version = "0.19.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "sphinx" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/e6/1e/86cf62d3464001724ed8b3d35eca4b0bd0b1135e3e682f5cfe6637149b01/hawkmoth-0.19.0.tar.gz", hash = "sha256:3718d2520fd9ce7b80288b736dcfec2276466d0c492d7cb41cbc822f12caf32a", size = 24975, upload-time = "2024-10-26T09:13:20.986Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/9d/69/9a37ef58947a9aab54e6196ec7d2f9507320886e70802bc90ef75eb0483f/hawkmoth-0.19.0-py3-none-any.whl", hash = "sha256:7eb42a235274ea5ed383af9c2ea4b4a53466152ec8c3af90f145b731d493814f", size = 31021, upload-time = "2024-10-26T09:13:19.315Z" },
-]
-
-[[package]]
 name = "httpcore"
 version = "1.0.7"
 source = { registry = "https://pypi.org/simple" }
@@ -1269,6 +1271,22 @@ wheels = [
 ]
 
 [[package]]
+name = "jupytext"
+version = "1.17.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "markdown-it-py" },
+    { name = "mdit-py-plugins" },
+    { name = "nbformat" },
+    { name = "packaging" },
+    { name = "pyyaml" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/30/ce/0bd5290ca4978777154e2683413dca761781aacf57f7dc0146f5210df8b1/jupytext-1.17.2.tar.gz", hash = "sha256:772d92898ac1f2ded69106f897b34af48ce4a85c985fa043a378ff5a65455f02", size = 3748577, upload-time = "2025-06-01T21:31:48.231Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ed/f1/82ea8e783433707cafd9790099a2d19f113c22f32a31c8bb5abdc7a61dbb/jupytext-1.17.2-py3-none-any.whl", hash = "sha256:4f85dc43bb6a24b75491c5c434001ad5ef563932f68f15dd3e1c8ce12a4a426b", size = 164401, upload-time = "2025-06-01T21:31:46.319Z" },
+]
+
+[[package]]
 name = "keyring"
 version = "25.6.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1668,6 +1686,23 @@ wheels = [
 ]
 
 [[package]]
+name = "mkdocs-jupyter"
+version = "0.25.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "ipykernel" },
+    { name = "jupytext" },
+    { name = "mkdocs" },
+    { name = "mkdocs-material" },
+    { name = "nbconvert" },
+    { name = "pygments" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/6c/23/6ffb8d2fd2117aa860a04c6fe2510b21bc3c3c085907ffdd851caba53152/mkdocs_jupyter-0.25.1.tar.gz", hash = "sha256:0e9272ff4947e0ec683c92423a4bfb42a26477c103ab1a6ab8277e2dcc8f7afe", size = 1626747, upload-time = "2024-10-15T14:56:32.373Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/08/37/5f1fd5c3f6954b3256f8126275e62af493b96fb6aef6c0dbc4ee326032ad/mkdocs_jupyter-0.25.1-py3-none-any.whl", hash = "sha256:3f679a857609885d322880e72533ef5255561bbfdb13cfee2a1e92ef4d4ad8d8", size = 1456197, upload-time = "2024-10-15T14:56:29.854Z" },
+]
+
+[[package]]
 name = "mkdocs-literate-nav"
 version = "0.6.2"
 source = { registry = "https://pypi.org/simple" }
@@ -1677,6 +1712,37 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/f6/5f/99aa379b305cd1c2084d42db3d26f6de0ea9bf2cc1d10ed17f61aff35b9a/mkdocs_literate_nav-0.6.2.tar.gz", hash = "sha256:760e1708aa4be86af81a2b56e82c739d5a8388a0eab1517ecfd8e5aa40810a75", size = 17419, upload-time = "2025-03-18T21:53:09.711Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/8a/84/b5b14d2745e4dd1a90115186284e9ee1b4d0863104011ab46abb7355a1c3/mkdocs_literate_nav-0.6.2-py3-none-any.whl", hash = "sha256:0a6489a26ec7598477b56fa112056a5e3a6c15729f0214bea8a4dbc55bd5f630", size = 13261, upload-time = "2025-03-18T21:53:08.1Z" },
+]
+
+[[package]]
+name = "mkdocs-material"
+version = "9.6.16"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "babel" },
+    { name = "backrefs" },
+    { name = "colorama" },
+    { name = "jinja2" },
+    { name = "markdown" },
+    { name = "mkdocs" },
+    { name = "mkdocs-material-extensions" },
+    { name = "paginate" },
+    { name = "pygments" },
+    { name = "pymdown-extensions" },
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/dd/84/aec27a468c5e8c27689c71b516fb5a0d10b8fca45b9ad2dd9d6e43bc4296/mkdocs_material-9.6.16.tar.gz", hash = "sha256:d07011df4a5c02ee0877496d9f1bfc986cfb93d964799b032dd99fe34c0e9d19", size = 4028828, upload-time = "2025-07-26T15:53:47.542Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/65/f4/90ad67125b4dd66e7884e4dbdfab82e3679eb92b751116f8bb25ccfe2f0c/mkdocs_material-9.6.16-py3-none-any.whl", hash = "sha256:8d1a1282b892fe1fdf77bfeb08c485ba3909dd743c9ba69a19a40f637c6ec18c", size = 9223743, upload-time = "2025-07-26T15:53:44.236Z" },
+]
+
+[[package]]
+name = "mkdocs-material-extensions"
+version = "1.3.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/79/9b/9b4c96d6593b2a541e1cb8b34899a6d021d208bb357042823d4d2cabdbe7/mkdocs_material_extensions-1.3.1.tar.gz", hash = "sha256:10c9511cea88f568257f960358a467d12b970e1f7b2c0e5fb2bb48cab1928443", size = 11847, upload-time = "2023-11-22T19:09:45.208Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5b/54/662a4743aa81d9582ee9339d4ffa3c8fd40a4965e033d77b9da9774d3960/mkdocs_material_extensions-1.3.1-py3-none-any.whl", hash = "sha256:adff8b62700b25cb77b53358dad940f3ef973dd6db797907c49e3c2ef3ab4e31", size = 8728, upload-time = "2023-11-22T19:09:43.465Z" },
 ]
 
 [[package]]
@@ -1807,23 +1873,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/6d/fd/91545e604bc3dad7dca9ed03284086039b294c6b3d75c0d2fa45f9e9caf3/nbformat-5.10.4.tar.gz", hash = "sha256:322168b14f937a5d11362988ecac2a4952d3d8e3a2cbeb2319584631226d5b3a", size = 142749, upload-time = "2024-04-04T11:20:37.371Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a9/82/0340caa499416c78e5d8f5f05947ae4bc3cba53c9f038ab6e9ed964e22f1/nbformat-5.10.4-py3-none-any.whl", hash = "sha256:3b48d6c8fbca4b299bf3982ea7db1af21580e4fec269ad087b9e81588891200b", size = 78454, upload-time = "2024-04-04T11:20:34.895Z" },
-]
-
-[[package]]
-name = "nbsphinx"
-version = "0.9.3"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "docutils" },
-    { name = "jinja2" },
-    { name = "nbconvert" },
-    { name = "nbformat" },
-    { name = "sphinx" },
-    { name = "traitlets" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/51/31/85cb6129d22c75722d1e1a8db0cdaf36ab7e1e7a59189bfa275445c8ab2d/nbsphinx-0.9.3.tar.gz", hash = "sha256:ec339c8691b688f8676104a367a4b8cf3ea01fd089dc28d24dec22d563b11562", size = 171956, upload-time = "2023-08-27T10:58:10.535Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a3/a0/ca4aeb2f7f2608a483459a3bb486da250a7eb23eb76c9a0af154395f0cb2/nbsphinx-0.9.3-py3-none-any.whl", hash = "sha256:6e805e9627f4a358bd5720d5cbf8bf48853989c79af557afd91a5f22e163029f", size = 31039, upload-time = "2023-08-27T10:58:08.017Z" },
 ]
 
 [[package]]
@@ -1976,6 +2025,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/d0/63/68dbb6eb2de9cb10ee4c9c14a0148804425e13c4fb20d61cce69f53106da/packaging-24.2.tar.gz", hash = "sha256:c228a6dc5e932d346bc5739379109d49e8853dd8223571c7c5b55260edc0b97f", size = 163950, upload-time = "2024-11-08T09:47:47.202Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/88/ef/eb23f262cca3c0c4eb7ab1933c3b1f03d021f2c48f54763065b6f0e321be/packaging-24.2-py3-none-any.whl", hash = "sha256:09abb1bccd265c01f4a3aa3f7a7db064b36514d2cba19a2f694fe6150451a759", size = 65451, upload-time = "2024-11-08T09:47:44.722Z" },
+]
+
+[[package]]
+name = "paginate"
+version = "0.5.7"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ec/46/68dde5b6bc00c1296ec6466ab27dddede6aec9af1b99090e1107091b3b84/paginate-0.5.7.tar.gz", hash = "sha256:22bd083ab41e1a8b4f3690544afb2c60c25e5c9a63a30fa2f483f6c60c8e5945", size = 19252, upload-time = "2024-08-25T14:17:24.139Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/90/96/04b8e52da071d28f5e21a805b19cb9390aa17a47462ac87f5e2696b9566d/paginate-0.5.7-py2.py3-none-any.whl", hash = "sha256:b885e2af73abcf01d9559fd5216b57ef722f8c42affbb63942377668e35c7591", size = 13746, upload-time = "2024-08-25T14:17:22.55Z" },
 ]
 
 [[package]]
@@ -3076,6 +3134,30 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
+dev = [
+    { name = "auditwheel" },
+    { name = "black" },
+    { name = "build" },
+    { name = "flake8" },
+    { name = "ipykernel" },
+    { name = "jupytext" },
+    { name = "matplotlib" },
+    { name = "mkdocs" },
+    { name = "mkdocs-gen-files" },
+    { name = "mkdocs-jupyter" },
+    { name = "mkdocs-literate-nav" },
+    { name = "mkdocs-section-index" },
+    { name = "mkdocstrings", extra = ["python"] },
+    { name = "numpydoc" },
+    { name = "patchelf" },
+    { name = "pre-commit" },
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "radon" },
+    { name = "twine" },
+    { name = "watchfiles" },
+    { name = "wheel" },
+]
 jupyter = [
     { name = "ipykernel" },
     { name = "ipywidgets" },
@@ -3086,97 +3168,59 @@ spacetrack = [
     { name = "spacetrack" },
 ]
 
-[package.dev-dependencies]
-dev = [
-    { name = "auditwheel" },
-    { name = "black" },
-    { name = "build" },
-    { name = "flake8" },
-    { name = "hawkmoth" },
-    { name = "ipykernel" },
-    { name = "matplotlib" },
-    { name = "mkdocs" },
-    { name = "mkdocs-gen-files" },
-    { name = "mkdocs-literate-nav" },
-    { name = "mkdocs-section-index" },
-    { name = "mkdocstrings", extra = ["python"] },
-    { name = "nbsphinx" },
-    { name = "numpydoc" },
-    { name = "patchelf" },
-    { name = "pre-commit" },
-    { name = "pytest" },
-    { name = "pytest-cov" },
-    { name = "radon" },
-    { name = "sorts" },
-    { name = "sphinx" },
-    { name = "sphinx-gallery" },
-    { name = "sphinx-panels" },
-    { name = "twine" },
-    { name = "watchfiles" },
-    { name = "wheel" },
-]
-
 [package.metadata]
 requires-dist = [
     { name = "astropy", specifier = ">=4.1" },
+    { name = "auditwheel", marker = "extra == 'dev'", specifier = ">=5.4.0" },
+    { name = "black", marker = "extra == 'dev'", specifier = ">=23.3.0" },
     { name = "bokeh", specifier = ">=3.7.3" },
+    { name = "build", marker = "extra == 'dev'", specifier = ">=0.7.0" },
+    { name = "flake8", marker = "extra == 'dev'", specifier = ">=4.0.1" },
     { name = "h5py", specifier = ">=3.2.1" },
+    { name = "ipykernel", marker = "extra == 'dev'", specifier = ">=6.9.1" },
     { name = "ipykernel", marker = "extra == 'jupyter'", specifier = ">=6.29.5" },
     { name = "ipywidgets", marker = "extra == 'jupyter'", specifier = ">=8.1.7" },
     { name = "jupyter-bokeh", specifier = ">=4.0.5" },
     { name = "jupyter-bokeh", marker = "extra == 'jupyter'", specifier = ">=4.0.5" },
     { name = "jupyterlab", specifier = ">=4.4.4" },
     { name = "jupyterlab", marker = "extra == 'jupyter'", specifier = ">=4.4.4" },
+    { name = "jupytext", marker = "extra == 'dev'", specifier = ">=1.17.2" },
     { name = "lets-plot", specifier = ">=4.6.2" },
     { name = "matplotlib", specifier = ">=2.2.2" },
+    { name = "matplotlib", marker = "extra == 'dev'", specifier = ">=3.5.1" },
+    { name = "mkdocs", marker = "extra == 'dev'", specifier = ">=1.6.1" },
+    { name = "mkdocs-gen-files", marker = "extra == 'dev'", specifier = ">=0.5.0" },
+    { name = "mkdocs-jupyter", marker = "extra == 'dev'", specifier = ">=0.25.1" },
+    { name = "mkdocs-literate-nav", marker = "extra == 'dev'", specifier = ">=0.6.2" },
+    { name = "mkdocs-section-index", marker = "extra == 'dev'", specifier = ">=0.3.10" },
+    { name = "mkdocstrings", extras = ["python"], marker = "extra == 'dev'", specifier = ">=0.30.0" },
     { name = "numpy", specifier = ">=1.14.3" },
+    { name = "numpydoc", marker = "extra == 'dev'", specifier = ">=1.2" },
     { name = "pandas", specifier = ">=2.2.3" },
     { name = "panel", specifier = ">=1.7.4" },
+    { name = "patchelf", marker = "extra == 'dev'", specifier = ">=0.14" },
+    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">3.0.0" },
     { name = "pyant", specifier = ">=0.11.0" },
     { name = "pyorb", specifier = ">=0.5.4" },
     { name = "pyproj", specifier = ">=3.7.1" },
     { name = "pyqt6", specifier = ">=6.8.1" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=6.2.5" },
+    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.1.0" },
     { name = "pyvista", specifier = ">=0.45.2" },
+    { name = "radon", marker = "extra == 'dev'", specifier = ">=5.1.0" },
     { name = "requests", specifier = ">=2.32.3" },
     { name = "scipy", specifier = ">=1.1.0" },
     { name = "sgp4", specifier = ">=2.7" },
     { name = "spacetrack", marker = "extra == 'spacetrack'", specifier = ">=1.0.1" },
     { name = "tabulate", specifier = ">=0.8.7" },
     { name = "tqdm", specifier = ">=4.46.0" },
+    { name = "twine", marker = "extra == 'dev'", specifier = ">=3.4.2" },
+    { name = "watchfiles", marker = "extra == 'dev'", specifier = ">=1.1.0" },
+    { name = "wheel", marker = "extra == 'dev'", specifier = ">=0.37.0" },
     { name = "xmlschema", specifier = ">=1.5.1" },
     { name = "yappi", specifier = ">=1.4.0" },
 ]
-provides-extras = ["spacetrack", "jupyter"]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "auditwheel", specifier = ">=5.4.0" },
-    { name = "black", specifier = ">=23.3.0" },
-    { name = "build", specifier = ">=0.7.0" },
-    { name = "flake8", specifier = ">=4.0.1" },
-    { name = "hawkmoth", specifier = ">=0.16.0" },
-    { name = "ipykernel", specifier = ">=6.9.1" },
-    { name = "matplotlib", specifier = ">=3.5.1" },
-    { name = "mkdocs", specifier = ">=1.6.1" },
-    { name = "mkdocs-gen-files", specifier = ">=0.5.0" },
-    { name = "mkdocs-literate-nav", specifier = ">=0.6.2" },
-    { name = "mkdocs-section-index", specifier = ">=0.3.10" },
-    { name = "mkdocstrings", extras = ["python"], specifier = ">=0.30.0" },
-    { name = "nbsphinx", specifier = ">=0.8.8" },
-    { name = "numpydoc", specifier = ">=1.2" },
-    { name = "patchelf", specifier = ">=0.14" },
-    { name = "pre-commit", specifier = ">3.0.0" },
-    { name = "pytest", specifier = ">=6.2.5" },
-    { name = "pytest-cov", specifier = ">=4.1.0" },
-    { name = "radon", specifier = ">=5.1.0" },
-    { name = "sorts", virtual = "." },
-    { name = "sphinx", specifier = ">=4.2.0" },
-    { name = "sphinx-gallery", specifier = ">=0.3.1" },
-    { name = "sphinx-panels", specifier = ">=0.6.0" },
-    { name = "twine", specifier = ">=3.4.2" },
-    { name = "watchfiles", specifier = ">=1.1.0" },
-    { name = "wheel", specifier = ">=0.37.0" },
-]
+provides-extras = ["spacetrack", "jupyter", "dev"]
 
 [[package]]
 name = "soupsieve"
@@ -3231,32 +3275,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/d5/b9/b831ea20dde3c3b726e41403eaee92cc448083cef310790c31c6ccfb22e3/Sphinx-4.5.0.tar.gz", hash = "sha256:7bf8ca9637a4ee15af412d1a1d9689fec70523a68ca9bb9127c2f3eeb344e2e6", size = 6698212, upload-time = "2022-03-27T15:56:51.618Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/91/96/9cbbc7103fb482d5809fe4976ecb9b627058210d02817fcbfeebeaa8f762/Sphinx-4.5.0-py3-none-any.whl", hash = "sha256:ebf612653238bcc8f4359627a9b7ce44ede6fdd75d9d30f68255c7383d3a6226", size = 3099508, upload-time = "2022-03-27T15:56:46.437Z" },
-]
-
-[[package]]
-name = "sphinx-gallery"
-version = "0.16.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pillow" },
-    { name = "sphinx" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/b6/c2/32ce2530a8d287e33c4aff911a3ac0e239ac94c89dfd9ef9215c78e13ea9/sphinx_gallery-0.16.0.tar.gz", hash = "sha256:3912765bc5e7b5451dc471ad50ead808a9752280b23fd2ec4277719a5ef68e42", size = 432247, upload-time = "2024-04-28T00:04:44.55Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/2d/7a/64d176f78baaed269ae809e9386710064feedf3723ba910ef247530ea3d8/sphinx_gallery-0.16.0-py3-none-any.whl", hash = "sha256:f5456514f4efb230a6f1db6241667774ca3ee8f15e9a7456678f1d1815118e60", size = 413548, upload-time = "2024-04-28T00:04:42.787Z" },
-]
-
-[[package]]
-name = "sphinx-panels"
-version = "0.6.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "docutils" },
-    { name = "sphinx" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/d7/7b/ddb37819993d7328a743acc838220eb25032b501d5f6beeb6c59924e2e9e/sphinx-panels-0.6.0.tar.gz", hash = "sha256:d36dcd26358117e11888f7143db4ac2301ebe90873ac00627bf1fe526bf0f058", size = 84961, upload-time = "2021-06-03T21:37:06.613Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/8a/5a/7232e77ac35af925fc231ec8b4242f8a26d7242da9b511a5605f1a091d4b/sphinx_panels-0.6.0-py3-none-any.whl", hash = "sha256:bd64afaf85c07f8096d21c8247fc6fd757e339d1be97832c8832d6ae5ed2e61d", size = 87719, upload-time = "2021-06-03T21:37:05.41Z" },
 ]
 
 [[package]]

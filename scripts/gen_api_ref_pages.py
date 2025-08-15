@@ -4,16 +4,12 @@ from pathlib import Path
 import mkdocs_gen_files
 from mkdocs_gen_files.nav import Nav
 
-project_root = Path(__file__).parent.parent
+project_root_dpath = Path(__file__).parent.parent
+docs_dpath = project_root_dpath / "docs"
+src_dpath = project_root_dpath / "src"
+root_mod_dpath = src_dpath / "sorts"
 
-docs_dname = "docs_mkdocs"
-src_dname = "src"
-
-docs_dpath = project_root / docs_dname
-src_dpath = project_root / src_dname
-root_mod_dpath = project_root / src_dname / "sorts"
 output_dpath = docs_dpath / "api_reference"
-
 output_dpath.mkdir(exist_ok=True)
 
 nav = Nav()
@@ -39,17 +35,15 @@ for mod_path in target_mod_paths:
 
 for fpath in sorted(resultant_fpaths):
     mod_path = fpath.relative_to(src_dpath).with_suffix("")
-    doc_path = fpath.relative_to(root_mod_dpath).with_suffix(".md")
-    full_doc_path = output_dpath / doc_path
+    doc_path = fpath.relative_to(src_dpath).with_suffix(".md")
+    full_doc_path = Path(output_dpath.parts[-1]) / doc_path
 
     mod_id_parts = tuple(mod_path.parts)
     if mod_id_parts[-1] == "__init__":
         mod_id_parts = mod_id_parts[:-1]
 
-        # TODO: this seems to generate empty sub-section
-        # doc_path = doc_path.with_name("index.md")
-        # full_doc_path = full_doc_path.with_name("index.md")
-
+        doc_path = doc_path.with_name("index.md")
+        full_doc_path = full_doc_path.with_name("index.md")
     elif mod_id_parts[-1] == "__main__":
         continue
     elif mod_id_parts[-1].endswith("_test"):
@@ -61,8 +55,8 @@ for fpath in sorted(resultant_fpaths):
             identifier = ".".join(mod_id_parts)
             fd.write(f"::: {identifier}")
 
-        mkdocs_gen_files.set_edit_path(full_doc_path, fpath.relative_to(project_root))
+        mkdocs_gen_files.set_edit_path(full_doc_path, fpath.relative_to(project_root_dpath))
 
 
-with mkdocs_gen_files.open(output_dpath / "nav.md", "w") as nav_file:
+with mkdocs_gen_files.open(Path(output_dpath.parts[-1]) / "nav.md", "w") as nav_file:
     nav_file.writelines(nav.build_literate_nav())

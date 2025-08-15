@@ -1,7 +1,8 @@
-docs_dir: docs_mkdocs
-
 theme:
   name: readthedocs
+  # NOTE: syntax highlighting interfers with `signature_crossrefs` settings so we need to disable it, see:
+  #   - https://github.com/mkdocstrings/mkdocstrings/issues/754
+  highlightjs: false
 
 site_name: Space Object Radar Tracking Simulator (SORTS)
 nav:
@@ -10,6 +11,7 @@ nav:
 - configuration.md
 - tutorial.md
 - manual.md
+- Examples: examples/
 - API Reference: api_reference/
 - Development:
   - Introduction: development/introduction.md
@@ -19,6 +21,7 @@ plugins:
 - gen-files:
     scripts:
     - scripts/gen_api_ref_pages.py
+    - scripts/gen_examples_nav.py
 - literate-nav:
     nav_file: nav.md
 - section-index
@@ -31,3 +34,8 @@ plugins:
           show_signature_annotations: true
           signature_crossrefs: true
           show_overloads: true
+- mkdocs-jupyter:
+    execute: false # NOTE: tmp setting; for fast doc compilation until we actually work on examples
+    include_source: True
+    include: ["*.py","*.ipynb"]
+    ignore: ["_wip*"]
