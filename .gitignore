@@ -122,5 +122,3 @@ data/spice/*.tls
 
 # mkdocs output
 site
-# TODO: this should not be needed
-docs/api_reference
