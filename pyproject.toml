@@ -54,8 +54,6 @@ jupyter = [
     "jupyter-bokeh>=4.0.5",
     "jupyterlab>=4.4.4",
 ]
-
-# [dependency-groups]
 dev = [
     "pytest>=6.2.5",
     "flake8>=4.0.1",
@@ -77,6 +75,8 @@ dev = [
     "mkdocstrings[python]>=0.30.0",
     "mkdocs-section-index>=0.3.10",
     "mkdocs-literate-nav>=0.6.2",
+    "jupytext>=1.17.2",
+    "mkdocs-jupyter>=0.25.1",
 ]
 
 [tool.setuptools.package-data]
