@@ -39,15 +39,14 @@ for mod_path in target_mod_paths:
 
 for fpath in sorted(resultant_fpaths):
     mod_path = fpath.relative_to(src_dpath).with_suffix("")
+    # NOTE: this affects the doc webpages url paths
     doc_path = fpath.relative_to(root_mod_dpath).with_suffix(".md")
-    full_doc_path = output_dpath / doc_path
+    full_doc_path = Path(output_dpath.parts[-1]) / doc_path
 
     mod_id_parts = tuple(mod_path.parts)
     if mod_id_parts[-1] == "__init__":
         mod_id_parts = mod_id_parts[:-1]
 
-        # TODO: this seems to generate empty sub-section
-        # - this is to also catch documentation in __init__ files
         doc_path = doc_path.with_name("index.md")
         full_doc_path = full_doc_path.with_name("index.md")
     elif mod_id_parts[-1] == "__main__":
@@ -64,5 +63,5 @@ for fpath in sorted(resultant_fpaths):
         mkdocs_gen_files.set_edit_path(full_doc_path, fpath.relative_to(project_root))
 
 
-with mkdocs_gen_files.open(output_dpath / "nav.md", "w") as nav_file:
+with mkdocs_gen_files.open(Path(output_dpath.parts[-1]) / "nav.md", "w") as nav_file:
     nav_file.writelines(nav.build_literate_nav())

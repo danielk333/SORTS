@@ -1,5 +1,8 @@
 theme:
   name: readthedocs
+  # NOTE: syntax highlighting interfers with `signature_crossrefs` settings so we need to disable it, see:
+  #   - https://github.com/mkdocstrings/mkdocstrings/issues/754
+  highlightjs: false
 
 site_name: Space Object Radar Tracking Simulator (SORTS)
 nav:
