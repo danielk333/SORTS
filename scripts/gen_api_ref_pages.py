@@ -6,7 +6,7 @@ from mkdocs_gen_files.nav import Nav
 
 project_root = Path(__file__).parent.parent
 
-docs_dname = "docs_mkdocs"
+docs_dname = "docs"
 src_dname = "src"
 
 docs_dpath = project_root / docs_dname
@@ -47,9 +47,9 @@ for fpath in sorted(resultant_fpaths):
         mod_id_parts = mod_id_parts[:-1]
 
         # TODO: this seems to generate empty sub-section
-        # doc_path = doc_path.with_name("index.md")
-        # full_doc_path = full_doc_path.with_name("index.md")
-
+        # - this is to also catch documentation in __init__ files
+        doc_path = doc_path.with_name("index.md")
+        full_doc_path = full_doc_path.with_name("index.md")
     elif mod_id_parts[-1] == "__main__":
         continue
     elif mod_id_parts[-1].endswith("_test"):
