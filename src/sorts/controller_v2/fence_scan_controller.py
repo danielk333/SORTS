@@ -11,7 +11,7 @@ from sorts.types import (
     Float64_as_m,
     EcefCoordinates,
     EnuCoordinates,
-    Datetime_like,
+    Datetime_Like,
 )
 from sorts.utils import to_datetime64_us, wrap_azimuths_elevations
 from sorts import schedule_v2 as schedule
@@ -21,31 +21,25 @@ from sorts.controller_v2 import pointing_patterns
 logger = logging.getLogger(__name__)
 
 
-class State(t.TypedDict):
+class Spec(t.TypedDict):
     """A TypedDict of params"""
 
     tx_station: Station
     rx_stations: t.Sequence[Station]
+    azimuth: Float_as_deg
+    min_elevation: Float_as_deg
+    pointings_per_cycle: int
+    scan_range: npt.NDArray[Float64_as_m]
     exp_detail: ExperimentDetail
+
+
+class State(t.TypedDict):
+    """A TypedDict of params"""
+
     start_time: Datetime64_us
     end_time: Datetime64_us
     tx_schedule_size: int
-    scan_range: npt.NDArray[Float64_as_m]
     tx_pointings_of_a_cycle: AzelrCoordinates_DegM
-
-
-# a workaround to get reference to TypedDict keys as type
-StateKey = t.Literal[
-    "tx_station",
-    "rx_stations",
-    "exp_detail",
-    "start_time",
-    "end_time",
-    "tx_schedule_size",
-    "scan_range",
-    "tx_pointings_of_a_cycle",
-]
-assert set(t.get_args(StateKey)) == State.__annotations__.keys()
 
 
 class Output(t.NamedTuple):
@@ -53,7 +47,7 @@ class Output(t.NamedTuple):
     rx_schedules: t.Sequence[Schedule]
 
 
-def generate_from_state(state: State) -> Output:
+def generate_from_state(spec: Spec, state: State) -> Output:
     # The logic of this function:
     # 1. repeat the cycle of tx pointings from state to form the tx schedule
     # 2. from the single cycle of tx pointings, we convert it into ECEF location coord and extend them by the `scan_range`
@@ -65,7 +59,7 @@ def generate_from_state(state: State) -> Output:
     pointings_per_cycle = len(state["tx_pointings_of_a_cycle"])
 
     tx_slice_start_time = np.arange(
-        state["start_time"], state["end_time"], state["exp_detail"]["slice_duration"]
+        state["start_time"], state["end_time"], spec["exp_detail"]["slice_duration"]
     )
 
     # repeat a cycle of pointings until it is at least the size of `tx_schedule_size`
@@ -76,32 +70,32 @@ def generate_from_state(state: State) -> Output:
     )[:, : state["tx_schedule_size"]]
 
     tx_schedule = Schedule(
-        meta={state["exp_detail"]["id"]: state["exp_detail"]},
+        exp_detail_map={spec["exp_detail"]["id"]: spec["exp_detail"]},
         start_time=tx_slice_start_time,
-        exp_num=np.full(state["tx_schedule_size"], state["exp_detail"]["id"], dtype=np.int64),
+        exp_num=np.full(state["tx_schedule_size"], spec["exp_detail"]["id"], dtype=np.int64),
         pointing_az=tx_pointing[0],
         pointing_el=tx_pointing[1],
     )
     schedule.validate_schedule_length(tx_schedule)
 
-    rx_slice_start_time = tx_slice_start_time.repeat(len(state["scan_range"]))
-    rx_schedule_size = state["tx_schedule_size"] * len(state["scan_range"])
+    rx_slice_start_time = tx_slice_start_time.repeat(len(spec["scan_range"]))
+    rx_schedule_size = state["tx_schedule_size"] * len(spec["scan_range"])
     rx_schedules: list[Schedule] = []
     tx_pointings_of_a_cycle_ecef: EcefCoordinates = azel_to_ecef(
-        lat=state["tx_station"].ecef_lat,
-        lon=state["tx_station"].ecef_lon,
-        alt=state["tx_station"].ecef_alt,
+        lat=spec["tx_station"].ecef_lat,
+        lon=spec["tx_station"].ecef_lon,
+        alt=spec["tx_station"].ecef_alt,
         az=state["tx_pointings_of_a_cycle"][0],
         el=state["tx_pointings_of_a_cycle"][1],
         degrees=True,
     )
     rx_pointing_loc_of_a_cycle_ecef: EcefCoordinates = (
         tx_pointings_of_a_cycle_ecef[:, :, np.newaxis]
-        * state["scan_range"][np.newaxis, np.newaxis, :]
-        + state["tx_station"].ecef[:, np.newaxis, np.newaxis]
+        * spec["scan_range"][np.newaxis, np.newaxis, :]
+        + spec["tx_station"].ecef[:, np.newaxis, np.newaxis]
     ).reshape((3, -1))
 
-    for rx_station in state["rx_stations"]:
+    for rx_station in spec["rx_stations"]:
         rx_pointings_of_a_cycle_ecef: EcefCoordinates = (
             rx_pointing_loc_of_a_cycle_ecef - rx_station.ecef[:, np.newaxis]
         )
@@ -128,9 +122,9 @@ def generate_from_state(state: State) -> Output:
         )[:, :rx_schedule_size]
 
         rx_schedule = Schedule(
-            meta={state["exp_detail"]["id"]: state["exp_detail"]},
+            exp_detail_map={spec["exp_detail"]["id"]: spec["exp_detail"]},
             start_time=rx_slice_start_time,
-            exp_num=np.full(rx_schedule_size, state["exp_detail"]["id"], dtype=np.int64),
+            exp_num=np.full(rx_schedule_size, spec["exp_detail"]["id"], dtype=np.int64),
             pointing_az=rx_pointing[0],
             pointing_el=rx_pointing[1],
         )
@@ -152,11 +146,9 @@ class FenceScanController:
     # TODO: the radar station computation capacity poses limit on the size of simutaneous `scan_range`, we should check/validate against it
     # TODO: should take radar/station `azimuth_deg`, `elevation_deg` limitation into account?
 
-    def __init__(self, state: State | None = None):
+    def __init__(self, spec: Spec, state: State | None):
+        self.spec: Spec = spec
         self.state: State | None = state
-
-        self._partial_state: dict[t.Union[StateKey, str], t.Any] = {}
-        """A partial `self.state` with potentially extra fields for internal manipulations"""
 
         self._cached_output: Output | None = None
 
@@ -179,61 +171,52 @@ class FenceScanController:
         #         + f"cannot be smaller than the dwell ({self.dwell_s} sec)."
         #     )
 
-        if len(scan_range) > 1:
-            raise NotImplementedError(
-                "Support for multiple pointings per control slice is not implemented yet."
-            )
-
-        ctrl = FenceScanController()
-
-        ctrl._partial_state["tx_station"] = tx_station
-        ctrl._partial_state["rx_stations"] = rx_stations
-        ctrl._partial_state["azimuth"] = azimuth
-        ctrl._partial_state["min_elevation"] = min_elevation
-        ctrl._partial_state["pointings_per_cycle"] = pointings_per_cycle
-        ctrl._partial_state["scan_range"] = scan_range
-        ctrl._partial_state["exp_detail"] = exp_detail
+        ctrl = FenceScanController(
+            spec={
+                "tx_station": tx_station,
+                "rx_stations": rx_stations,
+                "azimuth": azimuth,
+                "min_elevation": min_elevation,
+                "pointings_per_cycle": pointings_per_cycle,
+                "scan_range": scan_range,
+                "exp_detail": exp_detail,
+            },
+            state=None,
+        )
 
         return ctrl
 
-    def update_state_from_partial_state(self):
-        self.state = t.cast(State, {k: self._partial_state[k] for k in t.get_args(StateKey)})
-        return self
-
-    def compute_single_cycle_pointings(self, start_time: Datetime_like, end_time: Datetime_like):
+    def compute_single_cycle_pointings(self, start_time: Datetime_Like, end_time: Datetime_Like):
         """Do the computation then update the `state` property and return `self`."""
 
-        exp_detail: ExperimentDetail = self._partial_state["exp_detail"]
+        exp_detail: ExperimentDetail = self.spec["exp_detail"]
 
         start_time_np = to_datetime64_us(start_time)
         end_time_np = to_datetime64_us(end_time)
         tx_schedule_size = math.floor((end_time_np - start_time_np) / exp_detail["slice_duration"])
 
         tx_pointings_of_a_cycle = pointing_patterns.fence_pointing(
-            azimuth=self._partial_state["azimuth"],
-            min_elevation=self._partial_state["min_elevation"],
-            pointings_per_cycle=self._partial_state["pointings_per_cycle"],
+            azimuth=self.spec["azimuth"],
+            min_elevation=self.spec["min_elevation"],
+            pointings_per_cycle=self.spec["pointings_per_cycle"],
         )
 
-        self._partial_state.update(
-            {
-                "start_time": start_time_np,
-                "end_time": end_time_np,
-                "tx_schedule_size": tx_schedule_size,
-                "tx_pointings_of_a_cycle": tx_pointings_of_a_cycle,
-            }
-        )
-        self.update_state_from_partial_state()
+        self.state = {
+            "start_time": start_time_np,
+            "end_time": end_time_np,
+            "tx_schedule_size": tx_schedule_size,
+            "tx_pointings_of_a_cycle": tx_pointings_of_a_cycle,
+        }
 
         return self
 
-    def generate(self, start_time: Datetime_like, end_time: Datetime_like) -> Output:
+    def generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> Output:
         global generate_from_state
 
         self.compute_single_cycle_pointings(start_time, end_time)
         state = t.cast(State, self.state)
 
-        output = generate_from_state(state)
+        output = generate_from_state(spec=self.spec, state=state)
         self._cached_output = output
 
         return output

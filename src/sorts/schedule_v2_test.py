@@ -11,7 +11,7 @@ def setup_function():
 
 
 def Schedule_dataframe_roundtrip_conversion_test():
-    meta: dict[int, ExperimentDetail] = {
+    exp_detail_map: dict[int, ExperimentDetail] = {
         0: {
             "id": 0,
             "coh_int_bandwidth": 1.0,
@@ -38,7 +38,7 @@ def Schedule_dataframe_roundtrip_conversion_test():
 
     # we create the schedule using copies of the field data, so the conversions will not mutate the originals
     sch = Schedule(
-        meta=deepcopy(meta),
+        exp_detail_map=deepcopy(exp_detail_map),
         start_time=start_time.copy(),
         exp_num=exp_num.copy(),
         pointing_az=pointing_az.copy(),
@@ -46,9 +46,9 @@ def Schedule_dataframe_roundtrip_conversion_test():
     )
     schedule.validate_schedule_length(sch)
 
-    converted_sch = schedule.from_dataframe(schedule.to_dataframe(sch), sch["meta"])
+    converted_sch = schedule.from_dataframe(schedule.to_dataframe(sch), sch["exp_detail_map"])
 
-    assert meta == converted_sch["meta"]
+    assert exp_detail_map == converted_sch["exp_detail_map"]
     assert np.array_equal(start_time, converted_sch["start_time"])
     assert np.array_equal(exp_num, converted_sch["exp_num"])
     assert np.array_equal(pointing_az, converted_sch["pointing_az"])

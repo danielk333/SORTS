@@ -3,12 +3,15 @@ import logging, typing as t
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from sorts.types import Timedelta64_us, Datetime64_us, Float64_as_deg
+from sorts.types import Timedelta64_us, Datetime64_us, Float64_as_deg, Timedelta_Like
+from sorts.utils import to_timedelta64_us
 
 logger = logging.getLogger(__name__)
 
 
-ScheduleFieldKey = t.Literal["meta", "start_time", "pointing_az", "pointing_el", "exp_num"]
+ScheduleFieldKey = t.Literal[
+    "exp_detail_map", "start_time", "pointing_az", "pointing_el", "exp_num"
+]
 
 # Define the column names used when exported as a `DataFrame` (pandas or alike)
 NonDerivedDataFrameColumnName = t.Literal["start_time", "pointing_az", "pointing_el", "exp_num"]
@@ -30,8 +33,6 @@ cn = data_frame_column_names
 """An alias of `data_frame_column_names`"""
 
 
-# TODO: relocate to its own file
-# TODO: rename to sth like `ControlSliceDetail`?
 class ExperimentDetail(t.TypedDict):
     """A TypedDict of params"""
 
@@ -57,8 +58,8 @@ class Schedule(t.TypedDict):
     - Metadata (`ExperimentDetail`s) are stored as a dict inside the `meta` field.
     """
 
-    # TODO: add `Station` into this class, maybe inside `meta`
-    meta: dict[int, ExperimentDetail]
+    # TODO: add `Station` into this class?
+    exp_detail_map: dict[int, ExperimentDetail]
 
     start_time: npt.NDArray[Datetime64_us]
 
@@ -97,7 +98,7 @@ def empty() -> Schedule:
     """A convenience method for generating an empty schedule"""
 
     sch = Schedule(
-        meta={},
+        exp_detail_map={},
         start_time=np.empty(0, "datetime64[us]"),
         exp_num=np.empty(0, np.int64),
         pointing_az=np.empty(0, Float64_as_deg),
@@ -108,10 +109,10 @@ def empty() -> Schedule:
     return sch
 
 
-def from_dataframe(df: pd.DataFrame, meta: dict[int, ExperimentDetail]) -> Schedule:
+def from_dataframe(df: pd.DataFrame, exp_detail_map: dict[int, ExperimentDetail]) -> Schedule:
     sch = Schedule(
         **{k: df[k].to_numpy() for k in t.get_args(NonDerivedDataFrameColumnName)},
-        meta=meta,
+        exp_detail_map=exp_detail_map,
     )
 
     return sch
@@ -130,7 +131,7 @@ def to_dataframe(sch: Schedule) -> pd.DataFrame:
 
     # add "end_time" column
     df[cn["end_time"]] = df[cn["start_time"]] + np.array(
-        [sch["meta"][n]["slice_duration"] for n in sch["exp_num"]],
+        [sch["exp_detail_map"][n]["slice_duration"] for n in sch["exp_num"]],
         # NOTE: `dtype` have to be stated explicitly, otherwise numpy will assume `float64` which is incorrect here
         dtype="timedelta64[us]",
     )
@@ -148,19 +149,19 @@ def create_mask_by_time_range(
 
     start_time, end_time = time_range
 
-    sch_dt_s_arr_pass_mask: npt.NDArray[np.bool] = np.logical_and(
+    mask: npt.NDArray[np.bool] = np.logical_and(
         sch["start_time"] >= start_time,
         sch["start_time"] <= end_time,
     )
 
-    return sch_dt_s_arr_pass_mask
+    return mask
 
 
 def filter_by_mask(sch: Schedule, mask: npt.NDArray[np.bool]) -> Schedule:
     """Return a slice of the origin schedule based on the `mask`"""
 
     filtered_sch = Schedule(
-        meta=sch["meta"],
+        exp_detail_map=sch["exp_detail_map"],
         start_time=sch["start_time"][mask],
         exp_num=sch["exp_num"][mask],
         pointing_az=sch["pointing_az"][mask],
@@ -179,3 +180,23 @@ def filter_by_time_range(
     """
 
     return filter_by_mask(sch, create_mask_by_time_range(sch, time_range))
+
+
+def chunk_by_duration(sch: Schedule, duration: Timedelta_Like) -> t.Generator[Schedule, None, None]:
+    start_time: Datetime64_us = sch["start_time"][0]
+    duration_ = to_timedelta64_us(duration)
+
+    chunk_grp_keys = (sch["start_time"] - start_time) // duration_
+
+    for k in np.unique(chunk_grp_keys):
+        chunk_mask: npt.NDArray[np.bool] = chunk_grp_keys == k
+
+        sch_chunk = Schedule(
+            exp_detail_map=sch["exp_detail_map"],
+            start_time=sch["start_time"][chunk_mask],
+            exp_num=sch["exp_num"][chunk_mask],
+            pointing_az=sch["pointing_az"][chunk_mask],
+            pointing_el=sch["pointing_el"][chunk_mask],
+        )
+
+        yield sch_chunk

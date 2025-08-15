@@ -7,15 +7,19 @@ from sorts.schedule_v2 import Schedule, ExperimentDetail
 logger = logging.getLogger(__name__)
 
 max_datetime64_us = np.datetime64(np.iinfo(np.int64).max, "us")
-min_datetime64_us = np.datetime64(0, "us")
+min_datetime64_us = np.datetime64(
+    np.iinfo(np.int64).min + 1, "us"
+)  # +1 is needed, otherwise it will be NaT
 
 
 # TODO: should we use a db like sqlite to enable larger than memory processing?
 # TODO: add schedule validation?
 # TODO: return the rows/index of dropped slice?
-def _priority_scheduling_df(schs: t.Sequence[Schedule]):
+def priority_scheduling_df(sch_dfs: t.Sequence[pd.DataFrame]):
     """
-    Same as `priority_scheduling` but returns a pandas `DataFrame`.
+    Same as `priority_scheduling` but takes and returns `Schedule` in pandas `DataFrame` form
+    (see also `schedule.from_dataframe`, `schedule.to_dataframe`).
+
     Used by `priority_scheduling` internally.
     """
 
@@ -40,9 +44,7 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule]):
     merged_sch_df[cn_allowed_start_time] = np.empty(0, "datetime64[us]")
     merged_sch_df[cn_allowed_end_time] = np.empty(0, "datetime64[us]")
     merged_sch_df[cn_is_overlaped] = np.empty(0, np.bool)
-    for sch in schs:
-        sch_df = schedule.to_dataframe(sch)
-
+    for sch_df in sch_dfs:
         # merge and then sort the df
         # we use a "stable" sorting algo to retains relative order,
         # so the df will be in order of start_time, then priority after sorting
@@ -54,14 +56,35 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule]):
         is_new_rows = merged_sch_df[cn_allowed_start_time].isna()
 
         # populate `cn_allowed_start_time`, `cn_allowed_end_time` columns
-        # (rows from `sch_df` has null values in them after the merge).
-        # `.isna().all()` check is needed because `.ffill()` will throw exception when all the values are NaT (not a time)
-        if not merged_sch_df[cn_allowed_start_time].isna().all():
-            merged_sch_df[cn_allowed_start_time] = merged_sch_df[cn_allowed_start_time].bfill()
-        if not merged_sch_df[cn_allowed_end_time].isna().all():
-            merged_sch_df[cn_allowed_end_time] = merged_sch_df[cn_allowed_end_time].ffill()
+        # (rows from `sch_df` has NA values in them after the merge).
+        # - the allowed_start_time NA chunks heads is filled by the end_time of previous row, then ffill the rest
+        # - the allowed_end_time NA chunks tail is filled by the start_time of next row, then bfill the rest
+        allowed_start_time_na_heads_mask = (
+            merged_sch_df[cn_allowed_start_time].isna()
+            & merged_sch_df[cn_allowed_start_time]
+            .shift(1, fill_value=np.datetime64(0, "us"))
+            .notna()
+        )
+        merged_sch_df.loc[allowed_start_time_na_heads_mask, cn_allowed_start_time] = (
+            merged_sch_df.shift(1).loc[allowed_start_time_na_heads_mask, cn["end_time"]]
+        )
+        merged_sch_df[cn_allowed_start_time] = merged_sch_df[cn_allowed_start_time].ffill()
+
+        allowed_end_time_na_tails_mask = (
+            merged_sch_df[cn_allowed_end_time].isna()
+            & merged_sch_df[cn_allowed_end_time]
+            .shift(-1, fill_value=np.datetime64(0, "us"))
+            .notna()
+        )
+        merged_sch_df.loc[allowed_end_time_na_tails_mask, cn_allowed_end_time] = (
+            merged_sch_df.shift(-1).loc[allowed_end_time_na_tails_mask, cn["start_time"]]
+        )
+        merged_sch_df[cn_allowed_end_time] = merged_sch_df[cn_allowed_end_time].bfill()
 
         # remove rows (control slices) that have time clash
+        # NOTE: we checked for is_overlaped instead of is_allowed
+        #   so that it is safe agaisnt comparison with `NaT`, which always return false
+        #   (and we assume `NaT` mean "no restructions" for both allowed_start_time and allowed_end_time)
         merged_sch_df[cn_is_overlaped] = (is_new_rows) & (
             (merged_sch_df[cn["start_time"]] <= merged_sch_df[cn_allowed_start_time])
             | (merged_sch_df[cn["end_time"]] >= merged_sch_df[cn_allowed_end_time])
@@ -69,10 +92,14 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule]):
         merged_sch_df = merged_sch_df[~merged_sch_df[cn_is_overlaped]]
 
         # update `cn_allowed_start_time`, `cn_allowed_end_time` columns
+        # NOTE: we fill in `min_datetime64_us`, `max_datetime64_us` at the df top and end of allowed_start_time, allowed_end_time
+        #   so that resolved rows always have non NA values in that two column,
+        #   which we rely on atm to keep track on new new rows.
+        # TODO: see if delaying `reset_index` can eliminate the need of setting `min_datetime64_us`, `max_datetime64_us`
         if (len(merged_sch_df)) > 0:
-            merged_sch_df[cn_allowed_start_time] = merged_sch_df[cn["end_time"]].shift(1)
+            merged_sch_df.loc[:, cn_allowed_start_time] = merged_sch_df[cn["end_time"]].shift(1)
             merged_sch_df.loc[merged_sch_df.index[0], cn_allowed_start_time] = min_datetime64_us
-            merged_sch_df[cn_allowed_end_time] = merged_sch_df[cn["start_time"]].shift(-1)
+            merged_sch_df.loc[:, cn_allowed_end_time] = merged_sch_df[cn["start_time"]].shift(-1)
             merged_sch_df.loc[merged_sch_df.index[-1], cn_allowed_end_time] = max_datetime64_us
 
     merged_sch_df = merged_sch_df.reset_index(drop=True)
@@ -80,7 +107,7 @@ def _priority_scheduling_df(schs: t.Sequence[Schedule]):
     return merged_sch_df
 
 
-def priority_scheduling(schs: t.Sequence[Schedule], meta: dict[int, ExperimentDetail]) -> Schedule:
+def priority_scheduling(schs: t.Sequence[Schedule]) -> Schedule:
     """
     Merge a sequence of schedules for a single station into one,
     schedule with lower index in the sequence is given priority over those with higher index.
@@ -88,5 +115,9 @@ def priority_scheduling(schs: t.Sequence[Schedule], meta: dict[int, ExperimentDe
     Note: It is assumed (and not checked) that each of the schedule itself does not contain overlapping entries.
     """
 
-    df = _priority_scheduling_df(schs)
-    return schedule.from_dataframe(df, meta=meta)
+    exp_detail_map: dict[int, ExperimentDetail] = {}
+    for sch in reversed(schs):
+        exp_detail_map.update(sch["exp_detail_map"])
+
+    df = priority_scheduling_df([schedule.to_dataframe(sch) for sch in schs])
+    return schedule.from_dataframe(df, exp_detail_map=exp_detail_map)
