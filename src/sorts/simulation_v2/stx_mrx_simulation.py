@@ -4,6 +4,7 @@ import numpy as np
 import numpy.typing as npt
 import pyorb
 import sorts
+from tqdm import tqdm
 from sorts.interpolation import Interpolator
 from sorts.radar.tx_rx import Station
 from sorts.utils import to_datetime64_us
@@ -64,13 +65,13 @@ def sample_and_propagate_pace_objects_states(
     Returns a list of sampled delta seconds and a list of corresponding states.
     """
 
-    spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]] = [
-        sampler(spobj.state, start_time, end_time) for spobj in spobjs
-    ]
+    spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]] = []
+    for spobj in tqdm(spobjs, total=len(spobjs)):
+        spobjs_smpl_dsec.append(sampler(spobj.state, start_time, end_time))
 
-    spobjs_smpl_states: list[EcefStates] = [
-        spobj.get_state(spobj_smpl_dsec) for spobj, spobj_smpl_dsec in zip(spobjs, spobjs_smpl_dsec)
-    ]
+    spobjs_smpl_states: list[EcefStates] = []
+    for spobj, spobj_smpl_dsec in tqdm(zip(spobjs, spobjs_smpl_dsec), total=len(spobjs)):
+        spobjs_smpl_states.append(spobj.get_state(spobj_smpl_dsec))
 
     return spobjs_smpl_dsec, spobjs_smpl_states
 
@@ -206,12 +207,14 @@ def calculate_observations(
 
     obss: list[Observation] = []
 
+    pbar = tqdm(desc="simulating observation", total=len(spec["space_objects"]))
     for spobj, spobj_smpl_dsec, spobj_smpl_states, spobj_states_interp in zip(
         spec["space_objects"],
         spobjs_smpl_dsec,
         spobjs_smpl_states,
         spobjs_interpolators,
     ):
+        logger.debug(f"{spobj} calculating")
         exp_passages: list[ExperimentPassage] = []
         for rx_station, rx_schedule in zip(spec["rx_stations"], spec["rx_schedules"]):
             passages = find_passages(
@@ -240,6 +243,8 @@ def calculate_observations(
                 spobj_interpolator=spobj_states_interp,
             )
             obss.append(obs)
+        pbar.update(1)
+    pbar.close()
 
     return obss
 
@@ -264,16 +269,19 @@ class StxMrxSimulation:
         return sim
 
     def run(self):
+        logger.debug("starting stx mrx sim")
         spobjs_smpl_dsec, spobjs_smpl_states = sample_and_propagate_pace_objects_states(
             sampler=self.spec["dsec_sampler"],
             spobjs=self.spec["space_objects"],
             start_time=to_datetime64_us(self.spec["start_time"]),
             end_time=to_datetime64_us(self.spec["end_time"]),
         )
+        logger.debug("sample and propagate done")
         spobjs_interpolators = [
             self.spec["interpolator_class"](spobj_smpl_states, spobj_smpl_dsec)
             for spobj_smpl_dsec, spobj_smpl_states in zip(spobjs_smpl_dsec, spobjs_smpl_states)
         ]
+        logger.debug("interpolators done")
 
         self.state["space_object_sample_dsec"] = spobjs_smpl_dsec
         self.state["space_object_sample_states"] = spobjs_smpl_states
@@ -282,6 +290,7 @@ class StxMrxSimulation:
         obss = calculate_observations(
             self.spec, spobjs_smpl_dsec, spobjs_smpl_states, spobjs_interpolators
         )
+        logger.debug("calc obs done")
         self.state["observations"] = obss
 
         return obss
