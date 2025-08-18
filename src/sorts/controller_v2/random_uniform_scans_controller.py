@@ -8,7 +8,7 @@ from sorts.schedule_v2 import Schedule
 logger = logging.getLogger(__name__)
 
 
-# TODO: this controller need some rework so it can inherit from `ControllerProtocol` again
+# TODO: this controller's pattern and typing is out of date and need some rework
 @dataclass(kw_only=True)
 class RandomUniformScansController:
     """
