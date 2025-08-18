@@ -59,7 +59,8 @@ control_slice_duration = np.timedelta64(10_000, "us")  # 10ms
 # end_time = Time("2025-01-01 06:15:00")
 # control_slice_duration = np.timedelta64(10_000, "us")  # 10ms
 
-eiscat3d = get_radar("nostra", "example1")
+eiscat3d = get_radar("eiscat3d", "stage1-array")
+# eiscat3d = get_radar("nostra", "example1")
 # TODO: these patching of station prop should be integrated into codebase
 tx_station: Station = eiscat3d.tx[0]
 tx_station.uid = ("eiscat3d", "stage1-array", "tx", "0")
@@ -107,7 +108,7 @@ spobjs = [tracked_spobj, *[spobj_pop.get_object(i) for i in range(spobj_pop.shap
 #         max_dpos=1e3,
 #     )
 def dsec_sampler(orbit, start_time, end_time):
-    return np.arange(0, (end_time - start_time) / np.timedelta64(1,'s'), 120, dtype=np.float64)
+    return np.arange(0, (end_time - start_time) / np.timedelta64(1, "s"), 120, dtype=np.float64)
 
 
 tracker_ctrl = TrackerController.from_space_object(
@@ -199,6 +200,7 @@ with open(pickle_fpath, "wb") as f:
     pickle.dump(
         {
             "obss": obss,
+            # "sim": sim, # TODO: picking the whole sim is not working: seems `dsec_sampler` is causing issues
             "calc_time": calc_time,
         },
         f,
