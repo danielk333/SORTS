@@ -211,8 +211,6 @@ class FenceScanController:
         return self
 
     def generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> Output:
-        global generate_from_state
-
         self.compute_single_cycle_pointings(start_time, end_time)
         state = t.cast(State, self.state)
 

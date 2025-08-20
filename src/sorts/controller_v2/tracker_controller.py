@@ -233,8 +233,6 @@ class TrackerController:
         `start_time` and `end_time` should be omitted if this instance is created from `TrackerController.from_ecef_states`
         """
 
-        global generate_from_state
-
         if start_time is not None and end_time is not None:
             self.compute_ecef_states(start_time, end_time)
             state = t.cast(State, self.state)
