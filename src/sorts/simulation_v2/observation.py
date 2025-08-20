@@ -2,7 +2,7 @@ import typing as t
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from sorts.types import Float64_as_deg, NDArray_3x1
+from sorts.types import EnuCoordinates
 from sorts.simulation_v2.passage import ExperimentPassage
 
 
@@ -56,13 +56,11 @@ class Observation(t.TypedDict):
     range_rate: npt.NDArray[np.float64]
     """2-way range rate"""
 
-    # TODO: ENU should be a cartesian coordinate, sth seems wrong
-    tx_k: NDArray_3x1[Float64_as_deg]
-    """Pointing vector in ENU in deg, from tx station to the space object"""
+    tx_k: EnuCoordinates
+    """Pointing vector in ENU, from tx station to the space object"""
 
-    # TODO: ENU should be a cartesian coordinate, sth seems wrong
-    rx_k: NDArray_3x1[Float64_as_deg]
-    """Pointing vector in ENU in deg, from rx station to the space object"""
+    rx_k: EnuCoordinates
+    """Pointing vector in ENU, from rx station to the space object"""
 
 
 def to_flat_dict(observation: Observation):

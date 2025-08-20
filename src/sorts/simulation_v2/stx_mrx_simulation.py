@@ -117,8 +117,8 @@ def calculate_observation_per_experiment_passage(
     spobj_tx_enu = tx_station.enu(spobj_states)  # space object in tx station coordinate
     spobj_rx_enu = rx_station.enu(spobj_states)  # space object in rx station coordinate
 
-    range_tx_m: npt.NDArray[Float64_as_m] = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
-    range_rx_m: npt.NDArray[Float64_as_m] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
+    range_tx: npt.NDArray[Float64_as_m] = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
+    range_rx: npt.NDArray[Float64_as_m] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
 
     snr = np.empty((obs_size,), dtype=np.float64)
     powers = np.empty((obs_size,), dtype=np.float64)
@@ -170,8 +170,8 @@ def calculate_observation_per_experiment_passage(
         rx_gain_arr,
         tx_wavelength,
         powers,
-        range_tx_m,
-        range_rx_m,
+        range_tx,
+        range_rx,
         diameter=experiment_passage["space_object"].d,
         bandwidth=bandwidths,
         rx_noise_temp=rx_noise_temps,
@@ -185,11 +185,11 @@ def calculate_observation_per_experiment_passage(
         id=f'{rx_station_index}-({str(experiment_passage["time_range"][0])}, {str(experiment_passage["time_range"][1])})',  # TODO: revisit
         experiment_passage=experiment_passage,
         snr=snr,
-        range=range_tx_m + range_rx_m,
-        range_rx=range_rx_m,
+        range=range_tx + range_rx,
+        range_rx=range_rx,
         range_rate=np.full((obs_size,), 1.0, dtype=np.float64),  # TODO: imple
-        tx_k=spobj_tx_enu[:3] / range_tx_m,
-        rx_k=spobj_rx_enu[:3] / range_rx_m,
+        tx_k=spobj_tx_enu[:3] / range_tx,
+        rx_k=spobj_rx_enu[:3] / range_rx,
     )
 
     return obs
