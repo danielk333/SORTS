@@ -2,7 +2,7 @@ import typing as t
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from sorts.types import EnuCoordinates
+from sorts.types import EnuCoordinates, Datetime64_us, Float64_as_m
 from sorts.simulation_v2.passage import ExperimentPassage
 
 
@@ -31,7 +31,6 @@ DataFrameColumnName = t.Literal[
 ]
 
 
-# TODO: re-eval what fields are needed
 class Observation(t.TypedDict):
     """A TypedDict of params"""
 
@@ -40,12 +39,20 @@ class Observation(t.TypedDict):
     # TODO: re-think this naming
     experiment_passage: ExperimentPassage
 
+    tx_time: npt.NDArray[Datetime64_us]
+    rx_time: npt.NDArray[Datetime64_us]
+    """
+    NOTE: if there multiple simutaneous pointings, `rx_time` will contains all the time slices.
+      (becase it is calculated by filtering the full schedule by ExperimentPassage time_range)
+    """
+    # TODO: re-eval the purpose/necessity of having both `tx_time` and `rx_time`
+
     snr: npt.NDArray[np.float64]
 
-    range: npt.NDArray[np.float64]
+    range: npt.NDArray[Float64_as_m]
     """2-way range in meters"""
 
-    range_rx: npt.NDArray[np.float64]
+    range_rx: npt.NDArray[Float64_as_m]
     """1-way range relative to rx station in meteres"""
 
     # TODO: add this

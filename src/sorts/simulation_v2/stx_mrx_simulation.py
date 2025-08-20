@@ -184,6 +184,12 @@ def calculate_observation_per_experiment_passage(
     obs = Observation(
         id=f'{rx_station_index}-({str(experiment_passage["time_range"][0])}, {str(experiment_passage["time_range"][1])})',  # TODO: revisit
         experiment_passage=experiment_passage,
+        tx_time=schedule.filter_by_time_range(tx_schedule, experiment_passage["time_range"])[
+            "start_time"
+        ],
+        rx_time=schedule.filter_by_time_range(rx_schedule, experiment_passage["time_range"])[
+            "start_time"
+        ],
         snr=snr,
         range=range_tx + range_rx,
         range_rx=range_rx,
