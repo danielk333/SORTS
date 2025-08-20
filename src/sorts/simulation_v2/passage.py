@@ -23,17 +23,14 @@ class Passage(t.TypedDict):
     """The start time and end time of the passage, inclusive on both ends"""
 
 
-class ExperimentPassage(t.TypedDict):
-    """A TypedDict of params"""
+class ExperimentPassage(Passage):
+    """
+    A TypedDict of params.
+
+    Added the field `experiment_detail` on top of TypedDict `Passage`
+    """
 
     experiment_detail: ExperimentDetail
-
-    space_object: SpaceObject
-    tx_station: Station
-    rx_station: Station
-    epoch: Datetime64_us
-    time_range: tuple[Datetime64_us, Datetime64_us]
-    """The start time and end time of the passage, inclusive on both ends"""
 
 
 def find_passages(
