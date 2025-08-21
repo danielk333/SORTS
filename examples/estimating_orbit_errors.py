@@ -86,10 +86,7 @@ class Schedule(
     ):
     pass
 
-p = sorts.Profiler()
-p.start('total')
-
-sched = Schedule(radar = radar, controllers=[track], profiler=p)
+sched = Schedule(radar = radar, controllers=[track])
 
 
 #Now we load the error model
@@ -149,9 +146,6 @@ Sigma_orb = np.linalg.inv(np.transpose(J) @ Sigma_m_inv @ J + Sigma_p_inv)
 
 print('Measurement Jacobian size')
 print(J.shape)
-
-p.stop('total')
-print('\n'+p.fmt(normalize='total'))
 
 print(f'\nLinear orbit estimator covariance [SI-units] (shape={Sigma_orb.shape}):')
 

@@ -5,7 +5,6 @@ Observing a set of passes
 ================================
 
 '''
-import pathlib
 from tabulate import tabulate
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,7 +14,6 @@ eiscat3d = sorts.radars.eiscat3d
 from sorts.controller import Tracker
 from sorts.scheduler import StaticList, ObservedParameters
 from sorts import SpaceObject
-from sorts.profiling import Profiler
 
 from sorts.propagator import SGP4
 Prop_cls = SGP4
@@ -72,12 +70,10 @@ e3d_tracker.meta['target'] = 'Cool object 1'
 
 class MyStaticList(StaticList, ObservedParameters):
 
-    def __init__(self, radar, controllers, profiler=None, logger=None):
+    def __init__(self, radar, controllers):
         super().__init__(
             radar=radar, 
             controllers=controllers, 
-            profiler=profiler,
-            logger=logger,
         )
 
     def generate_schedule(self, t, generator):
@@ -97,9 +93,7 @@ class MyStaticList(StaticList, ObservedParameters):
         return data
 
 
-p = Profiler()
-
-scheduler = MyStaticList(radar = eiscat3d, controllers=[e3d_tracker], profiler=p)
+scheduler = MyStaticList(radar = eiscat3d, controllers=[e3d_tracker])
 
 sched_data = scheduler.schedule()
 
@@ -108,10 +102,7 @@ sched_tab = tabulate(sched_data, headers=["t [s]"] + rx_head + ['Controller', 'T
 
 print(sched_tab)
 
-p.start('total')
 data0 = scheduler.observe_passes(passes0, space_object = objs[0], snr_limit=False)
-p.stop('total')
-print(p.fmt(normalize='total'))
 
 data1 = scheduler.observe_passes(passes1, space_object = objs[1], snr_limit=False)
 

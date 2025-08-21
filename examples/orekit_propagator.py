@@ -20,7 +20,7 @@ pth = pth / 'data' / 'orekit-data-master.zip'
 
 
 if not pth.is_file():
-    sorts.propagator.Orekit.download_quickstart_data(pth, verbose=True)
+    Orekit.download_quickstart_data(pth, verbose=True)
 
 prop = Orekit(
     orekit_data = pth, 

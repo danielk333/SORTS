@@ -10,26 +10,14 @@ import pathlib
 
 import matplotlib.pyplot as plt
 
-from sorts import plotting
-from sorts.population import master_catalog, master_catalog_factor
+import sorts
 
+path = pathlib.Path('/home/danielk/data/master_2009/celn_20090501_00.sim')
 
-try:
-    base_pth = pathlib.Path(__file__).parents[1].resolve()
-except NameError:
-    base_pth = pathlib.Path('.').parents[1].resolve()
+pop = sorts.population.master_catalog(path)
+pop_factor = sorts.population.master_catalog_factor(pop, treshhold = 0.1)
 
-config = configparser.ConfigParser(interpolation=None)
-config.read([base_pth / 'example_config.conf'])
-master_path = pathlib.Path(config.get('master_population.py', 'master_catalog'))
-
-if not master_path.is_absolute():
-    master_path = base_pth / master_path.relative_to('.')
-
-pop = master_catalog(master_path)
-pop_factor = master_catalog_factor(pop, treshhold = 0.1)
-
-plotting.orbits(
+sorts.plotting.kepler_scatter(
     pop.get_states(named=False),
     title =  "Orbit distribution of Master catalog",
     axis_labels = 'earth-orbit',

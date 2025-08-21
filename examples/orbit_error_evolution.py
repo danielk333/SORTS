@@ -88,10 +88,7 @@ class Schedule(
     ):
     pass
 
-p = sorts.Profiler()
-p.start('total')
-
-sched = Schedule(radar = radar, controllers=controllers, profiler=p)
+sched = Schedule(radar = radar, controllers=controllers)
 
 variables = ['x','y','z','vx','vy','vz','A']
 
@@ -123,7 +120,6 @@ for pgi, pass_group in enumerate(passes[0]):
     # if depoch > 3600.0: #more then 1h then we change epoch
     #     obj0.propagate(depoch)
 
-    p.start('orbit_determination_covariance')
     Sigma_orb, datas = errors.orbit_determination_covariance(
         pass_group,
         sched, 
@@ -131,7 +127,6 @@ for pgi, pass_group in enumerate(passes[0]):
         variables = variables,
         prior_cov_inv = Sigma_p_inv,
     )
-    p.stop('orbit_determination_covariance')
     #the passes were not observable
     if Sigma_orb is None:
         continue
@@ -140,7 +135,6 @@ for pgi, pass_group in enumerate(passes[0]):
 
     Sigma_p_inv = np.linalg.inv(Sigma_orb)
 
-    p.start('covariance_propagation')
     r_diff_stdev, _ = errors.covariance_propagation(
         obj0, 
         Sigma_orb, 
@@ -148,9 +142,7 @@ for pgi, pass_group in enumerate(passes[0]):
         variables = variables, 
         samples = 500, 
     )
-    p.stop('covariance_propagation')
 
-    p.start('covariance_propagation+drag')
     r_diff_stdev_drag, _ = errors.covariance_propagation(
         obj0, 
         Sigma_orb, 
@@ -160,7 +152,6 @@ for pgi, pass_group in enumerate(passes[0]):
         perturbation_cov=np.array([[0.1]]), 
         perturbed_variables=['C_D'], 
     )
-    p.stop('covariance_propagation+drag')
 
     tc_start = tc_end
 
@@ -176,8 +167,6 @@ for pgi, pass_group in enumerate(passes[0]):
 if r_diff_stdev_all is None:
     raise Exception('The object could not be observed at all')
 
-p.stop('total')
-print('\n'+p.fmt(normalize='total'))
 
 fig = plt.figure()
 ax = fig.add_subplot(111)

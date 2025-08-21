@@ -15,7 +15,7 @@ from astropy.time import Time
 
 from sorts.propagator import Orekit
 from sorts import SpaceObject
-
+import sorts
 
 try:
     pth = pathlib.Path(__file__).parent.resolve()

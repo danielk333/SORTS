@@ -68,7 +68,7 @@ class TestScanner(unittest.TestCase):
         sc = MyScan()
 
         radar = sorts.radars.mock
-        rc = ctrl.Scanner(radar, sc, profiler=None, logger=None, return_copy=False)
+        rc = ctrl.Scanner(radar, sc, return_copy=False)
 
 
     def test_call(self):
@@ -94,7 +94,7 @@ class TestScanner(unittest.TestCase):
         sc = MyScan()
 
         radar = sorts.radars.mock
-        rc = ctrl.Scanner(radar, sc, profiler=None, logger=None, return_copy=False)
+        rc = ctrl.Scanner(radar, sc, return_copy=False)
 
         tt = np.array([5.0,10.0,20.0])
         for ind, mrad in zip(range(len(tt)), rc(tt)):

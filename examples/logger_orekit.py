@@ -5,12 +5,12 @@ Profiling components
 ======================
 
 '''
-import pathlib
+import pathlib, logging
 import numpy as np
 
 import sorts
 
-logger = sorts.profiling.get_logger('orekit')
+logger = logging.getLogger(__name__)
 
 
 try:
@@ -32,7 +32,6 @@ def run_prop():
             drag_force = False,
             radiation_pressure = False,
         ),
-        logger = logger,
     )
 
     state0 = np.array([-7100297.113,-3897715.442,18568433.707,86.771,-3407.231,2961.571])
