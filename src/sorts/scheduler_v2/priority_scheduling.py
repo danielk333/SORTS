@@ -86,7 +86,7 @@ def priority_scheduling_df(sch_dfs: t.Sequence[pd.DataFrame]):
         #   so that it is safe agaisnt comparison with `NaT`, which always return false
         #   (and we assume `NaT` mean "no restructions" for both allowed_start_time and allowed_end_time)
         merged_sch_df[cn_is_overlaped] = (is_new_rows) & (
-            (merged_sch_df[cn["start_time"]] <= merged_sch_df[cn_allowed_start_time])
+            (merged_sch_df[cn["start_time"]] < merged_sch_df[cn_allowed_start_time])
             | (merged_sch_df[cn["end_time"]] >= merged_sch_df[cn_allowed_end_time])
         )
         merged_sch_df = merged_sch_df[~merged_sch_df[cn_is_overlaped]]

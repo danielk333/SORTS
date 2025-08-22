@@ -56,10 +56,15 @@ def generate_from_state(spec: Spec, state: State) -> Output:
     #    and then further back to pointings in AzEl coord,
     #    and finally repeat them to form a rx schedule, for each rx station
 
-    pointings_per_cycle = len(state["tx_pointings_of_a_cycle"])
+    pointings_per_cycle = state["tx_pointings_of_a_cycle"].shape[1]
 
+    # NOTE: for `np.arange` `stop` param,
+    #   - we subtract `spec["exp_detail"]["slice_duration"]` so that only full slice are included
+    #   - and add `+1` so that slice with time range `[state["end_time"] - spec["exp_detail"]["slice_duration"], state["end_time"])` is included
     tx_slice_start_time = np.arange(
-        state["start_time"], state["end_time"], spec["exp_detail"]["slice_duration"]
+        state["start_time"],
+        state["end_time"] - spec["exp_detail"]["slice_duration"] + 1,
+        spec["exp_detail"]["slice_duration"],
     )
 
     # repeat a cycle of pointings until it is at least the size of `tx_schedule_size`

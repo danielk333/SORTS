@@ -20,7 +20,7 @@ class Passage(t.TypedDict):
     rx_station: Station
     epoch: Datetime64_us
     time_range: tuple[Datetime64_us, Datetime64_us]
-    """The start time and end time of the passage, inclusive on both ends"""
+    """The start time and end time of the passage, a right-open interval"""
 
 
 class ExperimentPassage(Passage):

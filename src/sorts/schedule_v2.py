@@ -144,11 +144,14 @@ def create_mask_by_time_range(
 ) -> npt.NDArray[np.bool]:
     """
     Return a mask that filters out schedule entries that are not inside `time_range`.
-    (start time and end time inclusive)
+    (a right-open interval)
+
+    NOTE: right now it only check against `start_time`
     """
 
     start_time, end_time = time_range
 
+    # TODO: better include end_time in the schedule and check against that
     mask: npt.NDArray[np.bool] = np.logical_and(
         sch["start_time"] >= start_time,
         sch["start_time"] <= end_time,
@@ -176,7 +179,7 @@ def filter_by_time_range(
 ) -> Schedule:
     """
     Return a slice of the origin schedule based on the `time_range`
-    (start time and end time inclusive)
+    (a right-open interval)
     """
 
     return filter_by_mask(sch, create_mask_by_time_range(sch, time_range))
