@@ -7,23 +7,20 @@ We check against an imaginary circular orbit which
 
 # TODO: should add more description/explanation of the setup
 
-import time, logging
+import logging
 import numpy as np
-import numpy.typing as npt
 from astropy.time import Time
 from astropy.constants import R_earth  # type: ignore
 from pyant import Beam
 import pyorb
-from sorts.types import Float64_as_sec, Float64_as_deg, Datetime64_us
+from sorts.types import Float64_as_sec, Float64_as_deg, Float_as_sec
 from sorts.utils import to_datetime64_us
 from sorts.interpolation import Legendre8
 from sorts.propagator import Kepler
 from sorts.space_object import SpaceObject
 from sorts.radar.tx_rx import Station
 from sorts.controller_v2.tracker_controller import TrackerController
-from sorts.controller_v2.fence_scan_controller import FenceScanController
 from sorts.scheduler_v2.priority_scheduling import priority_scheduling
-from sorts.simulation_v2 import observation
 from sorts.simulation_v2 import StxMrxSimulation
 
 logging.basicConfig(level=logging.INFO)
@@ -38,17 +35,13 @@ def setup_function():
     print()
 
 
-# TODO: check with Daniel for the sensible value to use
-#   using 1e-3 for now because a test will fail otherwise
-#   ```py
-#   :> abs(obs["tx_k"][1].max() - 1.0)
-#   -> np.float64(4.000375513191212e-05)
-#   ```
-float_equality_thld = 1e-3
+float_equality_thld = 1e-9
+# NOTE: this is much more lenient than `float_equality_thld`, because pointing calc involves trigs and other less precise funcs
+pointing_equality_thld = 1e-3
 dt_equality_thld = np.timedelta64(5_000, "us")  # 5ms, half of control_slice_duration (10ms)
+dsec_sampling_intv: Float_as_sec = 30
 
 
-# TODO: this wip
 def south_to_north_circular_orbit_test():
     earth_radius: np.float64 = R_earth.value  # in meters
     spobj_orbital_radius = 7000e3  # in meters
@@ -111,7 +104,12 @@ def south_to_north_circular_orbit_test():
     control_slice_duration = np.timedelta64(10_000, "us")  # 10ms
 
     def dsec_sampler(orbit, start_time, end_time):
-        return np.arange(0, (end_time - start_time) / np.timedelta64(1, "s"), 30, dtype=np.float64)
+        return np.arange(
+            0,
+            (end_time - start_time) / np.timedelta64(1, "s"),
+            dsec_sampling_intv,
+            dtype=np.float64,
+        )
 
     tracker_ctrl = TrackerController.from_space_object(
         spobj=spobj,
@@ -131,49 +129,15 @@ def south_to_north_circular_orbit_test():
         },
     )
 
-    # fence_scan_ctrl = FenceScanController.from_scan_spec(
-    #     tx_station=test_stn,
-    #     rx_stations=[test_stn],
-    #     exp_detail={
-    #         "id": 1,
-    #         "coh_int_bandwidth": 1.0,
-    #         "ipp": 1.0,
-    #         "pulse_length": 1.0,
-    #         "power": 5000000.0,
-    #         "bandwidth": 52.08333333333333,
-    #         "duty_cycle": 1.0,
-    #         "noise_temp": 150.0,
-    #         "slice_duration": control_slice_duration,
-    #     },
-    #     azimuth=90,  # sweep from east to west
-    #     min_elevation=0,
-    #     pointings_per_cycle=40,
-    #     # scan_range=np.linspace(300e3, 1000e3, num=10, dtype=np.float64),
-    #     scan_range=np.array([300e3], dtype=np.float64),
-    # )
-
     tracker_schs = tracker_ctrl.generate(start_time, end_time)
-    # fence_schs = fence_scan_ctrl.generate(start_time, end_time)
 
     exp_detail_map = {
         tracker_ctrl.spec["exp_detail"]["id"]: tracker_ctrl.spec["exp_detail"],
-        # fence_scan_ctrl.spec["exp_detail"]["id"]: fence_scan_ctrl.spec["exp_detail"],
     }
 
-    tx_master_sch = priority_scheduling(
-        [
-            tracker_schs.tx_schedule,
-            #  fence_schs.tx_schedule
-        ]
-    )
+    tx_master_sch = priority_scheduling([tracker_schs.tx_schedule])
 
-    rx_master_schs = [
-        priority_scheduling(rx_schs)
-        for rx_schs in zip(
-            tracker_schs.rx_schedules,
-            #    fence_schs.rx_schedules
-        )
-    ]
+    rx_master_schs = [priority_scheduling(rx_schs) for rx_schs in zip(tracker_schs.rx_schedules)]
 
     sim = StxMrxSimulation.from_spec(
         {
@@ -201,8 +165,8 @@ def south_to_north_circular_orbit_test():
     assert np.all(obs["tx_k"][0] < float_equality_thld)
 
     # assert `N` componend of tx pointings in ENU swing between -1 and 1
-    assert abs(obs["tx_k"][1].max() - 1.0) < float_equality_thld
-    assert abs(obs["tx_k"][1].min() + 1.0) < float_equality_thld
+    assert abs(obs["tx_k"][1].max() - 1.0) < pointing_equality_thld
+    assert abs(obs["tx_k"][1].min() + 1.0) < pointing_equality_thld
 
     # assert the max snr time is roughly at half orbital period
     assert (
@@ -216,6 +180,13 @@ def south_to_north_circular_orbit_test():
         < dt_equality_thld
     )
 
-    # obss_df = observation.list_to_dataframe(obss)
+    # assert the start and end time of the observation is as expected
+    # TODO: this can offset pretty large when we have large sampling time interval, is there better way to test it?
+    assert abs(
+        obs["experiment_passage"]["time_range"][0] - expected_passage_start_time
+    ) < np.timedelta64(int(dsec_sampling_intv), "s")
+    assert abs(
+        obs["experiment_passage"]["time_range"][1] - expected_passage_end_time
+    ) < np.timedelta64(int(dsec_sampling_intv), "s")
 
     return
