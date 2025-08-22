@@ -131,9 +131,7 @@ def south_to_north_circular_orbit_test():
 
     tracker_schs = tracker_ctrl.generate(start_time, end_time)
 
-    exp_detail_map = {
-        tracker_ctrl.spec["exp_detail"]["id"]: tracker_ctrl.spec["exp_detail"],
-    }
+    exp_detail_map = {tracker_ctrl.spec["exp_detail"]["id"]: tracker_ctrl.spec["exp_detail"]}
 
     tx_master_sch = priority_scheduling([tracker_schs.tx_schedule])
 
