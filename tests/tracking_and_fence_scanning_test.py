@@ -16,7 +16,7 @@ from pyant import Beam
 import pyorb
 from sorts.types import Float64_as_sec, Float64_as_deg, Datetime64_us
 from sorts.utils import to_datetime64_us
-from sorts.interpolation import Linear
+from sorts.interpolation import Legendre8
 from sorts.propagator import Kepler
 from sorts.space_object import SpaceObject
 from sorts.radar.tx_rx import Station
@@ -110,12 +110,8 @@ def south_to_north_circular_orbit_test():
 
     control_slice_duration = np.timedelta64(10_000, "us")  # 10ms
 
-    # TODO: discuss with Daniel on what timestep for sampler should we use
     def dsec_sampler(orbit, start_time, end_time):
-        # return np.arange(0, (end_time - start_time) / np.timedelta64(1, "s"), 120, dtype=np.float64)
-        # return np.arange(0, (end_time - start_time) / np.timedelta64(1, "s"), 30, dtype=np.float64)
-        # return np.arange(0, (end_time - start_time) / np.timedelta64(1, "s"), 1, dtype=np.float64)
-        return np.arange(0, (end_time - start_time) / np.timedelta64(1, "s"), 0.1, dtype=np.float64)
+        return np.arange(0, (end_time - start_time) / np.timedelta64(1, "s"), 30, dtype=np.float64)
 
     tracker_ctrl = TrackerController.from_space_object(
         spobj=spobj,
@@ -191,7 +187,7 @@ def south_to_north_circular_orbit_test():
             "end_time": end_time,
             "space_objects": [spobj],
             "dsec_sampler": dsec_sampler,
-            "interpolator_class": Linear,
+            "interpolator_class": Legendre8,
         }
     )
 
