@@ -69,6 +69,14 @@ EnuCoordinate = NDArray_3x1[np.float64]
 EnuCoordinates = NDArray_3xN[np.float64]
 "ENU cartesian coordinates, a `(3,n)` ndarray of `float64`"
 
+AzelCoordinates_DegM = NDArray_3xN[np.float64]
+"""
+`(Azimuth, Elevation)` spherical coordinates in degrees; a `(2,n)` ndarray of `float64`
+
+- Azimuth should be in [-180, 180)
+- Elevation should be in [0, 90]
+"""
+
 AzelrCoordinates_DegM = NDArray_3xN[np.float64]
 """
 `(Azimuth, Elevation, Range)` spherical coordinates in degrees and meters; a `(3,n)` ndarray of `float64`

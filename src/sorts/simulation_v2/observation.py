@@ -2,7 +2,7 @@ import typing as t
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from sorts.types import EnuCoordinates, Datetime64_us, Float64_as_m
+from sorts.types import AzelCoordinates_DegM, Datetime64_us, Float64_as_m
 from sorts.simulation_v2.passage import ExperimentPassage
 
 
@@ -63,11 +63,11 @@ class Observation(t.TypedDict):
     range_rate: npt.NDArray[np.float64]
     """2-way range rate"""
 
-    tx_k: EnuCoordinates
-    """Pointing vector in ENU, from tx station to the space object"""
+    tx_k: AzelCoordinates_DegM
+    """Pointing vector in local (Az, El) coordinates, from tx station to the space object"""
 
-    rx_k: EnuCoordinates
-    """Pointing vector in ENU, from rx station to the space object"""
+    rx_k: AzelCoordinates_DegM
+    """Pointing vector in local (Az, El) coordinates, from rx station to the space object"""
 
 
 def to_flat_dict(observation: Observation):

@@ -180,22 +180,18 @@ def calculate_observation_per_experiment_passage(
 
     # TODO: add `doppler_spread_integrated_snr:` support
     # TODO: add `blind_ranges:` support
-
     obs = Observation(
         id=f'{rx_station_index}-({str(experiment_passage["time_range"][0])}, {str(experiment_passage["time_range"][1])})',  # TODO: revisit
         experiment_passage=experiment_passage,
-        tx_time=schedule.filter_by_time_range(tx_schedule, experiment_passage["time_range"])[
-            "start_time"
-        ],
-        rx_time=schedule.filter_by_time_range(rx_schedule, experiment_passage["time_range"])[
-            "start_time"
-        ],
+        tx_time=tx_schedule["start_time"],
+        rx_time=rx_schedule["start_time"],
         snr=snr,
         range=range_tx + range_rx,
         range_rx=range_rx,
-        range_rate=np.full((obs_size,), 1.0, dtype=np.float64),  # TODO: imple
-        tx_k=spobj_tx_enu[:3] / range_tx,
-        rx_k=spobj_rx_enu[:3] / range_rx,
+        range_rate=np.full((obs_size,), 1.0, dtype=np.float64),  # TODO: implement
+        # TODO: maybe we should use a single field in `tx_schedule` to store the pointings? (use `xarray`? better for scheduling as well)
+        tx_k=np.array([tx_schedule["pointing_az"], tx_schedule["pointing_el"]]),
+        rx_k=np.array([rx_schedule["pointing_az"], rx_schedule["pointing_el"]]),
     )
 
     return obs

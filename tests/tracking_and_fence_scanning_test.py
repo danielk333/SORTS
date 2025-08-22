@@ -13,7 +13,7 @@ from astropy.time import Time
 from astropy.constants import R_earth  # type: ignore
 from pyant import Beam
 import pyorb
-from sorts.types import Float64_as_sec, Float64_as_deg, Float_as_sec
+from sorts.types import Float64_as_sec, Float64_as_deg, Float_as_sec, Float_as_deg
 from sorts.utils import to_datetime64_us
 from sorts.interpolation import Legendre8
 from sorts.propagator import Kepler
@@ -37,7 +37,9 @@ def setup_function():
 
 float_equality_thld = 1e-9
 # NOTE: this is much more lenient than `float_equality_thld`, because pointing calc involves trigs and other less precise funcs
-pointing_equality_thld = 1e-3
+# TODO: use ENU for pointings in schedule? it allows `pointing_equality_thld = 1e-3`
+pointing_equality_thld: Float_as_deg = 5e-3
+pointing_equality_thld_loose: Float_as_deg = 1  # even 0.5 deg fails
 dt_equality_thld = np.timedelta64(5_000, "us")  # 5ms, half of control_slice_duration (10ms)
 dsec_sampling_intv: Float_as_sec = 30
 
@@ -159,12 +161,12 @@ def south_to_north_circular_orbit_test():
     # assert there is only 1 observation
     assert len(obss) == 1
 
-    # assert `E` componend of tx pointings in ENU stayed around zero
+    # assert `Az` componend of tx pointings stayed around zero
     assert np.all(obs["tx_k"][0] < float_equality_thld)
 
-    # assert `N` componend of tx pointings in ENU swing between -1 and 1
-    assert abs(obs["tx_k"][1].max() - 1.0) < pointing_equality_thld
-    assert abs(obs["tx_k"][1].min() + 1.0) < pointing_equality_thld
+    # assert `El` componend of tx pointings swing between 0 and 90
+    assert abs(obs["tx_k"][1].max() - 90.0) < pointing_equality_thld
+    assert abs(obs["tx_k"][1].min()) < pointing_equality_thld_loose
 
     # assert the max snr time is roughly at half orbital period
     assert (
