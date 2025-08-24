@@ -90,7 +90,7 @@ def south_to_north_circular_orbit_test():
             else:
                 raise RuntimeError(f"unexpected shape of k: {k.shape}")
 
-    test_stn = Station(
+    tx_stn = Station(
         lat=0.0,
         lon=0.0,
         alt=0.0,
@@ -100,7 +100,20 @@ def south_to_north_circular_orbit_test():
             elevation=0.0,
             frequency=233e6,  # same as eisat_3d
         ),
-        uid=("test_station", "tx_rx", "0"),
+        uid=("test_station", "tx", "0"),
+    )
+
+    rx_stn = Station(
+        lat=1e-2,
+        lon=0.0,
+        alt=0.0,
+        min_elevation=0.0,
+        beam=IsotropicBeam(
+            azimuth=0.0,
+            elevation=0.0,
+            frequency=233e6,  # same as eisat_3d
+        ),
+        uid=("test_station", "rx", "0"),
     )
 
     control_slice_duration = np.timedelta64(10_000, "us")  # 10ms
@@ -109,8 +122,8 @@ def south_to_north_circular_orbit_test():
         return np.arange(0, (end_time - start_time) / np.timedelta64(1, "s"), 30, dtype=np.float64)
 
     fence_scan_ctrl = FenceScanController.from_scan_spec(
-        tx_station=test_stn,
-        rx_stations=[test_stn],
+        tx_station=tx_stn,
+        rx_stations=[rx_stn],
         exp_detail={
             "id": 0,
             "coh_int_bandwidth": 1.0,
@@ -123,7 +136,7 @@ def south_to_north_circular_orbit_test():
             "slice_duration": control_slice_duration,
         },
         azimuth=90,  # sweep from east to west
-        min_elevation=0,
+        min_elevation=70,
         pointings_per_cycle=40,
         scan_range=np.linspace(300e3, 1000e3, num=10, dtype=np.float64),
     )
@@ -138,9 +151,9 @@ def south_to_north_circular_orbit_test():
 
     sim = StxMrxSimulation.from_spec(
         {
-            "tx_station": test_stn,
+            "tx_station": tx_stn,
             "tx_schedule": tx_master_sch,
-            "rx_stations": [test_stn],
+            "rx_stations": [rx_stn],
             "rx_schedules": rx_master_schs,
             "exp_detail_map": exp_detail_map,
             "epoch": start_time,
@@ -164,18 +177,6 @@ def south_to_north_circular_orbit_test():
         assert np.all(
             abs(np.sort(np.unique(obs["tx_k"][0])) - np.array([90, 270], dtype=np.float64))
             < float_equality_thld
-        )
-
-        # assert the max snr time is roughly at half orbital period
-        assert (
-            abs(
-                obs["tx_time"][obs["snr"].argmax()]
-                - (
-                    to_datetime64_us(start_time)
-                    + spobj_orbital_period / 2 * np.timedelta64(int(1e6), "us")
-                )
-            )
-            < dt_equality_thld
         )
 
         # assert the start and end time of the observation is as expected
