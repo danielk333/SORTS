@@ -95,21 +95,13 @@ def calculate_observation_per_experiment_passage(
     )
 
     tx_station = experiment_passage["tx_station"]
-    tx_schedule = spec["tx_schedule"]
+    tx_schedule = experiment_passage["tx_schedule"]
     rx_station = experiment_passage["rx_station"]
-    rx_schedule = spec["rx_schedules"][rx_station_index]
-
-    schedule_mask = schedule.create_mask_by_time_range(
-        spec["rx_schedules"][rx_station_index], experiment_passage["time_range"]
-    )
+    rx_schedule = experiment_passage["rx_schedule"]
 
     dsec: npt.NDArray[Float64_as_sec] = (
         rx_schedule["start_time"] - experiment_passage["epoch"]
     ).astype(np.float64) * 1e-6
-
-    dsec = dsec[schedule_mask]
-    tx_schedule = schedule.filter_by_mask(tx_schedule, schedule_mask)
-    rx_schedule = schedule.filter_by_mask(rx_schedule, schedule_mask)
 
     obs_size = len(dsec)
 
@@ -231,7 +223,8 @@ def calculate_observations(
             for passage in passages:
                 exp_passages_ = split_passage_by_schedule(
                     passage=passage,
-                    sch=rx_schedule,
+                    tx_schedule=spec["tx_schedule"],
+                    rx_schedule=rx_schedule,
                     exp_detail_map=spec["exp_detail_map"],
                 )
 

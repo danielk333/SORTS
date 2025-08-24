@@ -10,7 +10,9 @@ from sorts.schedule_v2 import Schedule, ExperimentDetail
 
 
 class Passage(t.TypedDict):
-    """A TypedDict of params"""
+    """
+    A TypedDict of params. Represent a passage of a space object over the field of view of a TX-RX radar station pair.
+    """
 
     # id: int # TODO: revisit if this is needed
     # TODO: add ENU and/or ECEF states?
@@ -23,14 +25,22 @@ class Passage(t.TypedDict):
     """The start time and end time of the passage, a right-open interval"""
 
 
+# TODO: rename to `MeasurementPassage`?
 class ExperimentPassage(Passage):
     """
     A TypedDict of params.
+    Represent a passage of a space object over the field of view of a TX-RX radar station pair,
+    with additional data that facilitate the measurement calculations.
 
-    Added the field `experiment_detail` on top of TypedDict `Passage`
+    Contain these fields in addition to those in TypedDict `Passage`:
+    - `experiment_detail`
+    - `tx_schedule` (The TX schedule during the passage.)
+    - `rx_schedule` (The RX schedule during the passage.)
     """
 
     experiment_detail: ExperimentDetail
+    tx_schedule: Schedule
+    rx_schedule: Schedule
 
 
 def find_passages(
@@ -101,28 +111,45 @@ def find_passages(
 
 
 def split_passage_by_schedule(
-    passage: Passage, sch: Schedule, exp_detail_map: dict[int, ExperimentDetail]
+    passage: Passage,
+    tx_schedule: Schedule,
+    rx_schedule: Schedule,
+    exp_detail_map: dict[int, ExperimentDetail],
 ) -> list[ExperimentPassage]:
-    sch = schedule.filter_by_time_range(sch, passage["time_range"])
-    df = schedule.to_dataframe(sch)
+    tx_schedule = schedule.filter_by_time_range(tx_schedule, passage["time_range"])
+    rx_schedule = schedule.filter_by_time_range(rx_schedule, passage["time_range"])
+    df = schedule.to_dataframe(rx_schedule)
 
     # identify where `exp_num` changes
     change_points = df[schedule.cn["exp_num"]] != df[schedule.cn["exp_num"]].shift()
     split_ids = change_points.cumsum()
 
-    exp_passages: list[ExperimentPassage] = [
-        {
-            "experiment_detail": exp_detail_map[df_split[schedule.cn["exp_num"]].iloc[0]],
-            "time_range": (
-                df_split[schedule.cn["start_time"]].iloc[0],
-                df_split[schedule.cn["end_time"]].iloc[-1],
-            ),
-            "space_object": passage["space_object"],
-            "tx_station": passage["tx_station"],
-            "rx_station": passage["rx_station"],
-            "epoch": passage["epoch"],
-        }
-        for _, df_split in df.groupby(split_ids)
-    ]
+    exp_passages: list[ExperimentPassage] = []
+
+    for _, df_split in df.groupby(split_ids):
+        # further spliting according to number of simutaneous rx pointings
+        num_simu_k = exp_detail_map[df_split[schedule.cn["exp_num"]].iloc[0]].get(
+            "num_simutaneous_pointings", len(df_split)
+        )
+        dfs = [df_split[df_split.index % num_simu_k == i] for i in range(num_simu_k)]
+
+        _exp_passages: list[ExperimentPassage] = [
+            {
+                "experiment_detail": exp_detail_map[_df[schedule.cn["exp_num"]].iloc[0]],
+                "tx_schedule": tx_schedule,
+                "rx_schedule": schedule.from_dataframe(_df, exp_detail_map),
+                "time_range": (
+                    _df[schedule.cn["start_time"]].iloc[0],
+                    _df[schedule.cn["end_time"]].iloc[-1],
+                ),
+                "space_object": passage["space_object"],
+                "tx_station": passage["tx_station"],
+                "rx_station": passage["rx_station"],
+                "epoch": passage["epoch"],
+            }
+            for _df in dfs
+        ]
+
+        exp_passages.extend(_exp_passages)
 
     return exp_passages

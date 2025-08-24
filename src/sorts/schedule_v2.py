@@ -49,6 +49,9 @@ class ExperimentDetail(t.TypedDict):
     slice_duration: Timedelta64_us
     "Duration of a control slice, in micro-second"
 
+    # TODO: this is a temp workaround to get multiple simutaneous rx pointings working
+    num_simutaneous_pointings: t.NotRequired[int]
+
 
 class Schedule(t.TypedDict):
     """

@@ -125,8 +125,7 @@ def south_to_north_circular_orbit_test():
         azimuth=90,  # sweep from east to west
         min_elevation=0,
         pointings_per_cycle=40,
-        # scan_range=np.linspace(300e3, 1000e3, num=10, dtype=np.float64),
-        scan_range=np.array([300e3], dtype=np.float64),
+        scan_range=np.linspace(300e3, 1000e3, num=10, dtype=np.float64),
     )
 
     fence_schs = fence_scan_ctrl.generate(start_time, end_time)
@@ -156,35 +155,36 @@ def south_to_north_circular_orbit_test():
     obss = sim.run()
     obs = obss[0]
 
-    # assert there is only 1 observation
-    assert len(obss) == 1
+    # assert there is 10 observation
+    assert len(obss) == len(fence_scan_ctrl.spec["scan_range"])
 
-    # TODO: assert `El` componend of tx pointings swing between 0 and 90? or we can check it in pointing generation unit test instead
-    # assert `Az` componend of tx pointings is 90 or 270
-    assert np.all(
-        abs(np.sort(np.unique(obs["tx_k"][0])) - np.array([90, 270], dtype=np.float64))
-        < float_equality_thld
-    )
-
-    # assert the max snr time is roughly at half orbital period
-    assert (
-        abs(
-            obs["tx_time"][obs["snr"].argmax()]
-            - (
-                to_datetime64_us(start_time)
-                + spobj_orbital_period / 2 * np.timedelta64(int(1e6), "us")
-            )
+    for obs in obss:
+        # TODO: assert `El` componend of tx pointings swing between 0 and 90? or we can check it in pointing generation unit test instead
+        # assert `Az` componend of tx pointings is 90 or 270
+        assert np.all(
+            abs(np.sort(np.unique(obs["tx_k"][0])) - np.array([90, 270], dtype=np.float64))
+            < float_equality_thld
         )
-        < dt_equality_thld
-    )
 
-    # assert the start and end time of the observation is as expected
-    # TODO: this can offset pretty large when we have large sampling time interval, is there better way to test it?
-    assert abs(
-        obs["experiment_passage"]["time_range"][0] - expected_passage_start_time
-    ) < np.timedelta64(int(dsec_sampling_intv), "s")
-    assert abs(
-        obs["experiment_passage"]["time_range"][1] - expected_passage_end_time
-    ) < np.timedelta64(int(dsec_sampling_intv), "s")
+        # assert the max snr time is roughly at half orbital period
+        assert (
+            abs(
+                obs["tx_time"][obs["snr"].argmax()]
+                - (
+                    to_datetime64_us(start_time)
+                    + spobj_orbital_period / 2 * np.timedelta64(int(1e6), "us")
+                )
+            )
+            < dt_equality_thld
+        )
+
+        # assert the start and end time of the observation is as expected
+        # TODO: this can offset pretty large when we have large sampling time interval, is there better way to test it?
+        assert abs(
+            obs["experiment_passage"]["time_range"][0] - expected_passage_start_time
+        ) < np.timedelta64(int(dsec_sampling_intv), "s")
+        assert abs(
+            obs["experiment_passage"]["time_range"][1] - expected_passage_end_time
+        ) < np.timedelta64(int(dsec_sampling_intv), "s")
 
     return
