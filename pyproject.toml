@@ -44,6 +44,7 @@ dependencies = [
     "panel>=1.7.4",
     "pyproj>=3.7.1",
     "pyvista>=0.45.2",
+    "xarray>=2025.8.0",
 ]
 
 [project.optional-dependencies]
