@@ -86,12 +86,8 @@ def calculate_observation_per_experiment_passage(
     spobj_interpolator: Interpolator,
 ) -> Observation:
     # TODO: can probably be simplified?
-    rx_station_index = next(
-        (
-            i
-            for i, s in enumerate(spec["rx_stations"])
-            if s.uid == experiment_passage["rx_station"].uid
-        )
+    rx_station_index = [s.uid for s in spec["rx_stations"]].index(
+        experiment_passage["rx_station"].uid
     )
 
     tx_station = experiment_passage["tx_station"]
@@ -99,9 +95,12 @@ def calculate_observation_per_experiment_passage(
     rx_station = experiment_passage["rx_station"]
     rx_schedule = experiment_passage["rx_schedule"]
 
+    # TODO: use np.unique and its inverse to optimize this for getting states only once at a unique
+    # time
     dsec: npt.NDArray[Float64_as_sec] = (
         rx_schedule["start_time"] - experiment_passage["epoch"]
     ).astype(np.float64) * 1e-6
+    # dsec_unique, _, dsec_inverse_inds, _ = np.unique(dsec)
 
     obs_size = len(dsec)
 
