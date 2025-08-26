@@ -54,6 +54,7 @@ class ExperimentDetail(t.TypedDict):
     num_simutaneous_pointings: t.NotRequired[int]
 
 
+# TODO: rename to just `Schedule` when xarray adoptation is done?
 ScheduleXrds = xr.Dataset
 
 
@@ -90,7 +91,7 @@ def to_schedule_ndarray_dict(sch: ScheduleXrds) -> ScheduleNdarrayDict:
     return sch_dict
 
 
-# TODO: can be removed? will be automatically enforced by xarray
+# TODO: can be removed? will be automatically enforced by xarray dataset class
 def validate_schedule_length(sch: ScheduleNdarrayDict) -> ScheduleNdarrayDict:
     """
     Throw exception if schedule fields are not consistent (same length).
@@ -115,7 +116,29 @@ def validate_schedule_length(sch: ScheduleNdarrayDict) -> ScheduleNdarrayDict:
     return sch
 
 
-def empty() -> ScheduleNdarrayDict:
+def empty() -> ScheduleXrds:
+    """A convenience method for generating an empty schedule"""
+
+    sch = xr.Dataset(
+        coords={
+            "start_time": np.empty(0, dtype="datetime64[us]"),
+            "azelr": ["az", "el", "r"],
+        },
+        data_vars={
+            "pointing": (("azelr", "start_time"), []),
+            "exp_num": (
+                "start_time",
+                np.empty(0, dtype=np.int64),
+            ),
+        },
+        attrs={},
+    )
+
+    return sch
+
+
+# TODO: remove its usage, then remove this func
+def empty_npardict() -> ScheduleNdarrayDict:
     """A convenience method for generating an empty schedule"""
 
     sch = ScheduleNdarrayDict(
@@ -130,6 +153,7 @@ def empty() -> ScheduleNdarrayDict:
     return sch
 
 
+# TODO: can be removed? xarray dataset class is already dataframe like, and have pandas conversion methods
 def from_dataframe(
     df: pd.DataFrame, exp_detail_map: dict[int, ExperimentDetail]
 ) -> ScheduleNdarrayDict:
@@ -141,6 +165,7 @@ def from_dataframe(
     return sch
 
 
+# TODO: can be removed? xarray dataset class is already dataframe like, and have pandas conversion methods
 def to_dataframe(sch: ScheduleNdarrayDict) -> pd.DataFrame:
     """
     Convert `Schedule` into a pandas `DataFrame`.
