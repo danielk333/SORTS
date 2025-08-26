@@ -7,7 +7,7 @@ from sorts.radar.radars import get_radar
 from sorts.types import Datetime64_us, Timedelta64_us, Float64_as_sec
 from sorts import schedule_v2 as schedule
 from sorts.schedule_v2 import ExperimentDetail
-from sorts.scheduler_v2.priority_scheduling import priority_scheduling
+from sorts.scheduler_v2.priority_scheduling import priority_scheduling_npardict
 from sorts.controller_v2 import tracker_controller
 
 
@@ -115,7 +115,7 @@ def priority_scheduling_smoke_test():
         },
     )
 
-    merged_sch = priority_scheduling([tx_sch_1, tx_sch_2])
+    merged_sch = priority_scheduling_npardict([tx_sch_1, tx_sch_2])
     merged_sch_df = schedule.to_dataframe(merged_sch)
 
     return

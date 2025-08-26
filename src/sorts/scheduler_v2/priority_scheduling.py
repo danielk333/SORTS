@@ -107,7 +107,7 @@ def priority_scheduling_df(sch_dfs: t.Sequence[pd.DataFrame]):
     return merged_sch_df
 
 
-def priority_scheduling(schs: t.Sequence[ScheduleNdarrayDict]) -> ScheduleNdarrayDict:
+def priority_scheduling_npardict(schs: t.Sequence[ScheduleNdarrayDict]) -> ScheduleNdarrayDict:
     """
     Merge a sequence of schedules for a single station into one,
     schedule with lower index in the sequence is given priority over those with higher index.

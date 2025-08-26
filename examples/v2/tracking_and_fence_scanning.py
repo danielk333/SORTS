@@ -21,7 +21,7 @@ from sorts.controller_v2.tracker_controller import TrackerController
 from sorts.controller_v2.fence_scan_controller import FenceScanController
 from sorts import schedule_v2 as schedule
 from sorts.schedule_v2 import ScheduleNdarrayDict, ExperimentDetail
-from sorts.scheduler_v2.priority_scheduling import priority_scheduling
+from sorts.scheduler_v2.priority_scheduling import priority_scheduling_npardict
 from sorts.simulation_v2 import StxMrxSimulation
 from sorts.simulation_v2.observation import list_to_dataframe
 
@@ -160,10 +160,10 @@ exp_detail_map = {
     fence_scan_ctrl.spec["exp_detail"]["id"]: fence_scan_ctrl.spec["exp_detail"],
 }
 
-tx_master_sch = priority_scheduling([tracker_schs.tx_schedule, fence_schs.tx_schedule])
+tx_master_sch = priority_scheduling_npardict([tracker_schs.tx_schedule, fence_schs.tx_schedule])
 
 rx_master_schs = [
-    priority_scheduling(rx_schs)
+    priority_scheduling_npardict(rx_schs)
     for rx_schs in zip(tracker_schs.rx_schedules, fence_schs.rx_schedules)
 ]
 

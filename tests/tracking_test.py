@@ -20,7 +20,7 @@ from sorts.propagator import Kepler
 from sorts.space_object import SpaceObject
 from sorts.radar.tx_rx import Station
 from sorts.controller_v2.tracker_controller import TrackerController
-from sorts.scheduler_v2.priority_scheduling import priority_scheduling
+from sorts.scheduler_v2.priority_scheduling import priority_scheduling_npardict
 from sorts.simulation_v2 import StxMrxSimulation
 
 logging.basicConfig(level=logging.INFO)
@@ -135,9 +135,11 @@ def south_to_north_circular_orbit_test():
 
     exp_detail_map = {tracker_ctrl.spec["exp_detail"]["id"]: tracker_ctrl.spec["exp_detail"]}
 
-    tx_master_sch = priority_scheduling([tracker_schs.tx_schedule])
+    tx_master_sch = priority_scheduling_npardict([tracker_schs.tx_schedule])
 
-    rx_master_schs = [priority_scheduling(rx_schs) for rx_schs in zip(tracker_schs.rx_schedules)]
+    rx_master_schs = [
+        priority_scheduling_npardict(rx_schs) for rx_schs in zip(tracker_schs.rx_schedules)
+    ]
 
     sim = StxMrxSimulation.from_spec(
         {
