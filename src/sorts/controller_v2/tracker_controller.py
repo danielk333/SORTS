@@ -17,7 +17,7 @@ from sorts.types import (
 from sorts.utils import wrap_azimuths_elevations, to_datetime64_us
 from sorts import plots
 from sorts import schedule_v2 as schedule
-from sorts.schedule_v2 import ScheduleData, ExperimentDetail
+from sorts.schedule_v2 import ScheduleNdarrayDict, ExperimentDetail
 
 logger = logging.getLogger(__name__)
 
@@ -42,8 +42,8 @@ class State(t.TypedDict):
 class Output(t.NamedTuple):
     """tuple of `(tx_schedule, [rx_schedule, ...])`"""
 
-    tx_schedule: ScheduleData
-    rx_schedules: t.Sequence[ScheduleData]
+    tx_schedule: ScheduleNdarrayDict
+    rx_schedules: t.Sequence[ScheduleNdarrayDict]
 
 
 def generate_from_state(spec: Spec, state: State) -> Output:
@@ -83,7 +83,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
     sch_time = state["spobj_time"][~is_out_of_el_range_mask]
     sch_len = len(sch_time)
 
-    tx_sch = ScheduleData(
+    tx_sch = ScheduleNdarrayDict(
         exp_detail_map={spec["exp_detail"]["id"]: spec["exp_detail"]},
         start_time=sch_time,
         exp_num=np.full(sch_len, spec["exp_detail"]["id"], dtype=np.int64),
@@ -94,7 +94,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
 
     rx_schs = [
         schedule.validate_schedule_length(
-            ScheduleData(
+            ScheduleNdarrayDict(
                 exp_detail_map={spec["exp_detail"]["id"]: spec["exp_detail"]},
                 start_time=sch_time,
                 exp_num=np.full(sch_len, spec["exp_detail"]["id"], dtype=np.int64),

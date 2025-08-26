@@ -24,7 +24,7 @@ from sorts.types import (
 from sorts.utils import to_datetime64_us
 from sorts.frames import ITRS_to_geodetic
 import sorts.schedule_v2 as schedule
-from sorts.schedule_v2 import ScheduleData
+from sorts.schedule_v2 import ScheduleNdarrayDict
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +105,7 @@ def _schedule_plot_from_cds(
 # TODO: might not work that well for rx schedule, because they might have multiple pointings per slices
 # TODO: also plot pointings?
 def schedule_plot(
-    sch: ScheduleData,
+    sch: ScheduleNdarrayDict,
     start_time: Datetime_Like | None = None,
     end_time: Datetime_Like | None = None,
 ):
@@ -441,7 +441,7 @@ assert set(t.get_args(RadarScheduleEcefPositionPlotColumnKey)) == set(
 
 
 def _radar_schedule_ecef_position_plot_cds_df(
-    ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], sch: ScheduleData
+    ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], sch: ScheduleNdarrayDict
 ):
     df = schedule.to_dataframe(sch)
 
@@ -466,7 +466,7 @@ def _radar_schedule_ecef_position_plot_cds_df(
 
 
 def radar_schedule_ecef_position_plot(
-    ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], sch: ScheduleData
+    ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], sch: ScheduleNdarrayDict
 ):
     df = _radar_schedule_ecef_position_plot_cds_df(ecefs=ecefs, ecefs_time=ecefs_time, sch=sch)
 
