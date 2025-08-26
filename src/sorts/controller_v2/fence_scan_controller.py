@@ -16,7 +16,7 @@ from sorts.types import (
 )
 from sorts.utils import to_datetime64_us, wrap_azimuths_elevations
 from sorts import schedule_v2 as schedule
-from sorts.schedule_v2 import ScheduleNdarrayDict, ScheduleDataSet, ExperimentDetail
+from sorts.schedule_v2 import ScheduleNdarrayDict, ScheduleXrds, ExperimentDetail
 from sorts.controller_v2 import pointing_patterns
 
 logger = logging.getLogger(__name__)
@@ -49,8 +49,8 @@ class Output(t.NamedTuple):
 
 
 class OutputXrds(t.NamedTuple):
-    tx_schedule: ScheduleDataSet
-    rx_schedules: t.Sequence[ScheduleDataSet]
+    tx_schedule: ScheduleXrds
+    rx_schedules: t.Sequence[ScheduleXrds]
 
 
 def generate_xrds_from_state(spec: Spec, state: State) -> OutputXrds:
@@ -80,7 +80,7 @@ def generate_xrds_from_state(spec: Spec, state: State) -> OutputXrds:
         (state["tx_schedule_size"] + pointings_per_cycle - 1) // pointings_per_cycle,
     )[:, : state["tx_schedule_size"]]
 
-    tx_schedule = ScheduleDataSet(
+    tx_schedule = ScheduleXrds(
         coords={
             "start_time": tx_slice_start_time,
             "azelr": ["az", "el", "r"],
@@ -100,7 +100,7 @@ def generate_xrds_from_state(spec: Spec, state: State) -> OutputXrds:
 
     rx_slice_start_time = tx_slice_start_time.repeat(len(spec["scan_range"]))
     rx_schedule_size = state["tx_schedule_size"] * len(spec["scan_range"])
-    rx_schedules: list[ScheduleDataSet] = []
+    rx_schedules: list[ScheduleXrds] = []
     tx_pointings_of_a_cycle_ecef: EcefCoordinates = azel_to_ecef(
         lat=spec["tx_station"].ecef_lat,
         lon=spec["tx_station"].ecef_lon,
@@ -141,7 +141,7 @@ def generate_xrds_from_state(spec: Spec, state: State) -> OutputXrds:
             (rx_schedule_size + pointings_per_cycle - 1) // pointings_per_cycle,
         )[:, :rx_schedule_size]
 
-        rx_schedule = ScheduleDataSet(
+        rx_schedule = ScheduleXrds(
             coords={
                 "start_time": rx_slice_start_time,
                 "azelr": ["az", "el", "r"],

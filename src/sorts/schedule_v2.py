@@ -54,13 +54,16 @@ class ExperimentDetail(t.TypedDict):
     num_simutaneous_pointings: t.NotRequired[int]
 
 
-# TODO: rename to just `Data`?
+ScheduleXrds = xr.Dataset
+
+
+# TODO: try to remove/dissolve this class?
 class ScheduleNdarrayDict(t.TypedDict):
     """
     A TypedDict, stores a collection of "control slices" (or "slices" in short).
 
     - Slice data are stored as columns of fields, each of which is a `ndarray`.
-    - Metadata (`ExperimentDetail`s) are stored as a dict inside the `meta` field.
+    - Metadata (`ExperimentDetail`s) are stored as a dict inside the `exp_detail_map` field.
     """
 
     # TODO: add `Station` into this class?
@@ -75,9 +78,19 @@ class ScheduleNdarrayDict(t.TypedDict):
     pointing_el: npt.NDArray[Float64_as_deg]
 
 
-ScheduleDataSet = xr.Dataset
+def to_schedule_ndarray_dict(sch: ScheduleXrds) -> ScheduleNdarrayDict:
+    sch_dict = ScheduleNdarrayDict(
+        exp_detail_map=sch.attrs["exp_detail_map"],
+        start_time=sch["start_time"].to_numpy(),
+        exp_num=sch["exp_num"].to_numpy(),
+        pointing_az=sch["pointing"].to_numpy()[0],
+        pointing_el=sch["pointing"].to_numpy()[1],
+    )
+
+    return sch_dict
 
 
+# TODO: can be removed? will be automatically enforced by xarray
 def validate_schedule_length(sch: ScheduleNdarrayDict) -> ScheduleNdarrayDict:
     """
     Throw exception if schedule fields are not consistent (same length).
