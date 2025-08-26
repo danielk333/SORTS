@@ -6,31 +6,6 @@ from sorts.types import AzelCoordinates_DegM, Datetime64_us, Float64_as_m
 from sorts.simulation_v2.passage import ExperimentPassage
 
 
-DataFrameColumnName = t.Literal[
-    "id",
-    # columns for ExperimentPassage data
-    # "passage_id" # TODO: revisit if this is needed
-    "expps_experiment_detail",
-    "expps_space_object",
-    "expps_tx_station",
-    "expps_rx_station",
-    "expps_epoch",
-    "expps_time_range",
-    # columns for Observation data
-    "snr",
-    "range",
-    "range_rx",
-    "range_rate",
-    "tx_k",
-    "rx_ksnr",
-    "range",
-    "range_rx",
-    "range_rate",
-    "tx_k",
-    "rx_k",
-]
-
-
 class Observation(t.TypedDict):
     """A TypedDict of params"""
 
