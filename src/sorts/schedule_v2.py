@@ -187,6 +187,7 @@ def to_dataframe(sch: ScheduleNdarrayDict) -> pd.DataFrame:
     return df
 
 
+# TODO: remove its usage, then remove this func
 def create_mask_by_time_range(
     sch: ScheduleNdarrayDict, time_range: tuple[Datetime64_us, Datetime64_us]
 ) -> npt.NDArray[np.bool]:
@@ -208,6 +209,7 @@ def create_mask_by_time_range(
     return mask
 
 
+# TODO: remove its usage, then remove this func
 def filter_by_mask(sch: ScheduleNdarrayDict, mask: npt.NDArray[np.bool]) -> ScheduleNdarrayDict:
     """Return a slice of the origin schedule based on the `mask`"""
 
@@ -222,6 +224,7 @@ def filter_by_mask(sch: ScheduleNdarrayDict, mask: npt.NDArray[np.bool]) -> Sche
     return filtered_sch
 
 
+# TODO: remove its usage, then remove this func
 def filter_by_time_range(
     sch: ScheduleNdarrayDict, time_range: tuple[Datetime64_us, Datetime64_us]
 ) -> ScheduleNdarrayDict:
@@ -231,25 +234,3 @@ def filter_by_time_range(
     """
 
     return filter_by_mask(sch, create_mask_by_time_range(sch, time_range))
-
-
-def chunk_by_duration(
-    sch: ScheduleNdarrayDict, duration: Timedelta_Like
-) -> t.Generator[ScheduleNdarrayDict, None, None]:
-    start_time: Datetime64_us = sch["start_time"][0]
-    duration_ = to_timedelta64_us(duration)
-
-    chunk_grp_keys = (sch["start_time"] - start_time) // duration_
-
-    for k in np.unique(chunk_grp_keys):
-        chunk_mask: npt.NDArray[np.bool] = chunk_grp_keys == k
-
-        sch_chunk = ScheduleNdarrayDict(
-            exp_detail_map=sch["exp_detail_map"],
-            start_time=sch["start_time"][chunk_mask],
-            exp_num=sch["exp_num"][chunk_mask],
-            pointing_az=sch["pointing_az"][chunk_mask],
-            pointing_el=sch["pointing_el"][chunk_mask],
-        )
-
-        yield sch_chunk
