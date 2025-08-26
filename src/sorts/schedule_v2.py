@@ -2,6 +2,7 @@ from __future__ import annotations
 import logging, typing as t
 import numpy as np
 import numpy.typing as npt
+import xarray as xr
 import pandas as pd
 from sorts.types import Timedelta64_us, Datetime64_us, Float64_as_deg, Timedelta_Like
 from sorts.utils import to_timedelta64_us
@@ -71,6 +72,9 @@ class Schedule(t.TypedDict):
 
     pointing_az: npt.NDArray[Float64_as_deg]
     pointing_el: npt.NDArray[Float64_as_deg]
+
+
+ScheduleDataSet = xr.Dataset
 
 
 def validate_schedule_length(sch: Schedule) -> Schedule:
