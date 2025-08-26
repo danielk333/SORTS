@@ -1,7 +1,7 @@
 from copy import deepcopy
 import numpy as np
 from sorts import schedule_v2 as schedule
-from sorts.schedule_v2 import Schedule, ExperimentDetail
+from sorts.schedule_v2 import ScheduleData, ExperimentDetail
 
 
 def setup_function():
@@ -37,7 +37,7 @@ def Schedule_dataframe_roundtrip_conversion_test():
     pointing_el = np.linspace(0, 90, sch_len, dtype=np.float64)
 
     # we create the schedule using copies of the field data, so the conversions will not mutate the originals
-    sch = Schedule(
+    sch = ScheduleData(
         exp_detail_map=deepcopy(exp_detail_map),
         start_time=start_time.copy(),
         exp_num=exp_num.copy(),

@@ -54,7 +54,8 @@ class ExperimentDetail(t.TypedDict):
     num_simutaneous_pointings: t.NotRequired[int]
 
 
-class Schedule(t.TypedDict):
+# TODO: rename to just `Data`?
+class ScheduleData(t.TypedDict):
     """
     A TypedDict, stores a collection of "control slices" (or "slices" in short).
 
@@ -77,7 +78,7 @@ class Schedule(t.TypedDict):
 ScheduleDataSet = xr.Dataset
 
 
-def validate_schedule_length(sch: Schedule) -> Schedule:
+def validate_schedule_length(sch: ScheduleData) -> ScheduleData:
     """
     Throw exception if schedule fields are not consistent (same length).
 
@@ -101,10 +102,10 @@ def validate_schedule_length(sch: Schedule) -> Schedule:
     return sch
 
 
-def empty() -> Schedule:
+def empty() -> ScheduleData:
     """A convenience method for generating an empty schedule"""
 
-    sch = Schedule(
+    sch = ScheduleData(
         exp_detail_map={},
         start_time=np.empty(0, "datetime64[us]"),
         exp_num=np.empty(0, np.int64),
@@ -116,8 +117,8 @@ def empty() -> Schedule:
     return sch
 
 
-def from_dataframe(df: pd.DataFrame, exp_detail_map: dict[int, ExperimentDetail]) -> Schedule:
-    sch = Schedule(
+def from_dataframe(df: pd.DataFrame, exp_detail_map: dict[int, ExperimentDetail]) -> ScheduleData:
+    sch = ScheduleData(
         **{k: df[k].to_numpy() for k in t.get_args(NonDerivedDataFrameColumnName)},
         exp_detail_map=exp_detail_map,
     )
@@ -125,7 +126,7 @@ def from_dataframe(df: pd.DataFrame, exp_detail_map: dict[int, ExperimentDetail]
     return sch
 
 
-def to_dataframe(sch: Schedule) -> pd.DataFrame:
+def to_dataframe(sch: ScheduleData) -> pd.DataFrame:
     """
     Convert `Schedule` into a pandas `DataFrame`.
 
@@ -147,7 +148,7 @@ def to_dataframe(sch: Schedule) -> pd.DataFrame:
 
 
 def create_mask_by_time_range(
-    sch: Schedule, time_range: tuple[Datetime64_us, Datetime64_us]
+    sch: ScheduleData, time_range: tuple[Datetime64_us, Datetime64_us]
 ) -> npt.NDArray[np.bool]:
     """
     Return a mask that filters out schedule entries that are not inside `time_range`.
@@ -167,10 +168,10 @@ def create_mask_by_time_range(
     return mask
 
 
-def filter_by_mask(sch: Schedule, mask: npt.NDArray[np.bool]) -> Schedule:
+def filter_by_mask(sch: ScheduleData, mask: npt.NDArray[np.bool]) -> ScheduleData:
     """Return a slice of the origin schedule based on the `mask`"""
 
-    filtered_sch = Schedule(
+    filtered_sch = ScheduleData(
         exp_detail_map=sch["exp_detail_map"],
         start_time=sch["start_time"][mask],
         exp_num=sch["exp_num"][mask],
@@ -182,8 +183,8 @@ def filter_by_mask(sch: Schedule, mask: npt.NDArray[np.bool]) -> Schedule:
 
 
 def filter_by_time_range(
-    sch: Schedule, time_range: tuple[Datetime64_us, Datetime64_us]
-) -> Schedule:
+    sch: ScheduleData, time_range: tuple[Datetime64_us, Datetime64_us]
+) -> ScheduleData:
     """
     Return a slice of the origin schedule based on the `time_range`
     (a right-open interval)
@@ -192,7 +193,9 @@ def filter_by_time_range(
     return filter_by_mask(sch, create_mask_by_time_range(sch, time_range))
 
 
-def chunk_by_duration(sch: Schedule, duration: Timedelta_Like) -> t.Generator[Schedule, None, None]:
+def chunk_by_duration(
+    sch: ScheduleData, duration: Timedelta_Like
+) -> t.Generator[ScheduleData, None, None]:
     start_time: Datetime64_us = sch["start_time"][0]
     duration_ = to_timedelta64_us(duration)
 
@@ -201,7 +204,7 @@ def chunk_by_duration(sch: Schedule, duration: Timedelta_Like) -> t.Generator[Sc
     for k in np.unique(chunk_grp_keys):
         chunk_mask: npt.NDArray[np.bool] = chunk_grp_keys == k
 
-        sch_chunk = Schedule(
+        sch_chunk = ScheduleData(
             exp_detail_map=sch["exp_detail_map"],
             start_time=sch["start_time"][chunk_mask],
             exp_num=sch["exp_num"][chunk_mask],

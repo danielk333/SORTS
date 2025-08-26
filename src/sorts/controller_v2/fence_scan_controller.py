@@ -16,7 +16,7 @@ from sorts.types import (
 )
 from sorts.utils import to_datetime64_us, wrap_azimuths_elevations
 from sorts import schedule_v2 as schedule
-from sorts.schedule_v2 import Schedule, ScheduleDataSet, ExperimentDetail
+from sorts.schedule_v2 import ScheduleData, ScheduleDataSet, ExperimentDetail
 from sorts.controller_v2 import pointing_patterns
 
 logger = logging.getLogger(__name__)
@@ -44,8 +44,8 @@ class State(t.TypedDict):
 
 
 class Output(t.NamedTuple):
-    tx_schedule: Schedule
-    rx_schedules: t.Sequence[Schedule]
+    tx_schedule: ScheduleData
+    rx_schedules: t.Sequence[ScheduleData]
 
 
 class OutputXrds(t.NamedTuple):
@@ -191,7 +191,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
         (state["tx_schedule_size"] + pointings_per_cycle - 1) // pointings_per_cycle,
     )[:, : state["tx_schedule_size"]]
 
-    tx_schedule = Schedule(
+    tx_schedule = ScheduleData(
         exp_detail_map={spec["exp_detail"]["id"]: spec["exp_detail"]},
         start_time=tx_slice_start_time,
         exp_num=np.full(state["tx_schedule_size"], spec["exp_detail"]["id"], dtype=np.int64),
@@ -202,7 +202,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
 
     rx_slice_start_time = tx_slice_start_time.repeat(len(spec["scan_range"]))
     rx_schedule_size = state["tx_schedule_size"] * len(spec["scan_range"])
-    rx_schedules: list[Schedule] = []
+    rx_schedules: list[ScheduleData] = []
     tx_pointings_of_a_cycle_ecef: EcefCoordinates = azel_to_ecef(
         lat=spec["tx_station"].ecef_lat,
         lon=spec["tx_station"].ecef_lon,
@@ -243,7 +243,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
             (rx_schedule_size + pointings_per_cycle - 1) // pointings_per_cycle,
         )[:, :rx_schedule_size]
 
-        rx_schedule = Schedule(
+        rx_schedule = ScheduleData(
             exp_detail_map={spec["exp_detail"]["id"]: spec["exp_detail"]},
             start_time=rx_slice_start_time,
             exp_num=np.full(rx_schedule_size, spec["exp_detail"]["id"], dtype=np.int64),

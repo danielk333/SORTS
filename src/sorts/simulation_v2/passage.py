@@ -6,7 +6,7 @@ from sorts.utils import to_datetime64_us
 from sorts.radar.tx_rx import Station
 from sorts.space_object import SpaceObject
 from sorts import schedule_v2 as schedule
-from sorts.schedule_v2 import Schedule, ExperimentDetail
+from sorts.schedule_v2 import ScheduleData, ExperimentDetail
 
 
 class Passage(t.TypedDict):
@@ -39,8 +39,8 @@ class ExperimentPassage(Passage):
     """
 
     experiment_detail: ExperimentDetail
-    tx_schedule: Schedule
-    rx_schedule: Schedule
+    tx_schedule: ScheduleData
+    rx_schedule: ScheduleData
 
 
 def find_passages(
@@ -112,8 +112,8 @@ def find_passages(
 
 def split_passage_by_schedule(
     passage: Passage,
-    tx_schedule: Schedule,
-    rx_schedule: Schedule,
+    tx_schedule: ScheduleData,
+    rx_schedule: ScheduleData,
     exp_detail_map: dict[int, ExperimentDetail],
 ) -> list[ExperimentPassage]:
     tx_schedule = schedule.filter_by_time_range(tx_schedule, passage["time_range"])

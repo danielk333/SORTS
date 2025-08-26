@@ -16,7 +16,7 @@ from sorts.simulation_v2.passage import (
 )
 from sorts.simulation_v2.observation import Observation
 from sorts import schedule_v2 as schedule
-from sorts.schedule_v2 import Schedule, ExperimentDetail
+from sorts.schedule_v2 import ScheduleData, ExperimentDetail
 
 logger = logging.getLogger(__name__)
 
@@ -31,9 +31,9 @@ class Spec(t.TypedDict):
     """A TypedDict of params"""
 
     tx_station: Station
-    tx_schedule: Schedule
+    tx_schedule: ScheduleData
     rx_stations: t.Sequence[Station]
-    rx_schedules: t.Sequence[Schedule]
+    rx_schedules: t.Sequence[ScheduleData]
     exp_detail_map: dict[int, ExperimentDetail]
     epoch: Datetime_Like
     start_time: Datetime_Like

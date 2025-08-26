@@ -2,7 +2,7 @@ import logging, typing as t
 import numpy as np
 import pandas as pd
 from sorts import schedule_v2 as schedule
-from sorts.schedule_v2 import Schedule, ExperimentDetail
+from sorts.schedule_v2 import ScheduleData, ExperimentDetail
 
 logger = logging.getLogger(__name__)
 
@@ -107,7 +107,7 @@ def priority_scheduling_df(sch_dfs: t.Sequence[pd.DataFrame]):
     return merged_sch_df
 
 
-def priority_scheduling(schs: t.Sequence[Schedule]) -> Schedule:
+def priority_scheduling(schs: t.Sequence[ScheduleData]) -> ScheduleData:
     """
     Merge a sequence of schedules for a single station into one,
     schedule with lower index in the sequence is given priority over those with higher index.
