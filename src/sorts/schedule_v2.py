@@ -292,7 +292,7 @@ class Schedule:
 
         return sch
 
-    def to_ndarrays(self) -> ScheduleNdarrayDict2:
+    def to_ndarrays_2(self) -> ScheduleNdarrayDict2:
         arr_dict: ScheduleNdarrayDict2 = {
             "exp_detail_map": self.data.attrs[self.attr_keys["exp_detail_map"]],
             "start_time": self.data[self.coord_keys["start_time"]].to_numpy(),

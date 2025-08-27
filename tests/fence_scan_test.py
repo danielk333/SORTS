@@ -146,11 +146,11 @@ def south_to_north_circular_orbit_test():
     exp_detail_map = {fence_scan_ctrl.spec["exp_detail"]["id"]: fence_scan_ctrl.spec["exp_detail"]}
 
     # TODO: cleanup; `to_ndarrays()` is a tmp workaround during xarray adoption
-    tx_master_sch = priority_scheduling_npardict([fence_schs.tx_schedule.to_ndarrays()])
+    tx_master_sch = priority_scheduling_npardict([fence_schs.tx_schedule.to_ndarrays_2()])
 
     # TODO: cleanup; `to_ndarrays()` is a tmp workaround during xarray adoption
     rx_master_schs = [
-        priority_scheduling_npardict([sch.to_ndarrays() for sch in fence_schs.rx_schedules])
+        priority_scheduling_npardict([sch.to_ndarrays_2() for sch in fence_schs.rx_schedules])
     ]
 
     sim = StxMrxSimulation.from_spec(

@@ -50,6 +50,6 @@ def FenceScanController_smoke_test():
     expected_sch_len = round((end_time_np - start_time_np) / slice_duration)
 
     # TODO: cleanup; `to_ndarrays()` is a tmp workaround during xarray adoption
-    assert len(schs.tx_schedule.to_ndarrays()["start_time"]) == expected_sch_len
+    assert len(schs.tx_schedule.to_ndarrays_2()["start_time"]) == expected_sch_len
 
     return

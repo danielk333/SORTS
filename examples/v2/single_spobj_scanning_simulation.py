@@ -58,8 +58,8 @@ fence_scan_controller = sortsV2.controller.FenceScanController.from_scan_spec(
 (tx_schedule, rx_schedules) = fence_scan_controller.generate(start_time, end_time)
 
 # TODO: cleanup; `to_ndarrays()` is a tmp workaround during xarray adoption
-tx_schedule = tx_schedule.to_ndarrays()
-rx_schedules = [sch.to_ndarrays() for sch in rx_schedules]
+tx_schedule = tx_schedule.to_ndarrays_2()
+rx_schedules = [sch.to_ndarrays_2() for sch in rx_schedules]
 
 sim = StxMrxSimulation.from_spec(
     {
