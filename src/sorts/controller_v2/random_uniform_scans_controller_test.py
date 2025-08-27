@@ -1,5 +1,5 @@
 from datetime import datetime, timezone, timedelta
-from sorts.schedule_v2 import ScheduleNdarrayDict
+from sorts.schedule_v2 import ScheduleNdarrayDict2
 from sorts.controller_v2.random_uniform_scans_controller import RandomUniformScansController
 
 
@@ -19,6 +19,6 @@ def random_uniform_scans_controller_smoke_test():
     result = controller.generate(stt_tstmp, end_tstmp)
 
     for k in result:
-        assert isinstance(result[k], ScheduleNdarrayDict)
+        assert isinstance(result[k], ScheduleNdarrayDict2)
 
     return

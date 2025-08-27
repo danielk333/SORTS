@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from datetime import timedelta
 import numpy as np
 from sorts.radar.tx_rx import RadarStationCompositeKey
-from sorts.schedule_v2 import ScheduleNdarrayDict
+from sorts.schedule_v2 import ScheduleNdarrayDict2
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ class RandomUniformScansController:
         stt_tstmp,
         end_tstmp,
         res_us=1000,
-    ) -> dict[RadarStationCompositeKey, ScheduleNdarrayDict]:
+    ) -> dict[RadarStationCompositeKey, ScheduleNdarrayDict2]:
         """
         Parameters
         ---
@@ -72,7 +72,7 @@ class RandomUniformScansController:
         min_el = np.radians(self.min_elevation_deg)
 
         # TODO: chk the math and add a plot function in test?
-        ret_sch = ScheduleNdarrayDict(
+        ret_sch = ScheduleNdarrayDict2(
             start_time=np.arange(
                 stt_tstmp,
                 end_tstmp,

@@ -20,7 +20,7 @@ from sorts.controller_v2 import tracker_controller
 from sorts.controller_v2.tracker_controller import TrackerController
 from sorts.controller_v2.fence_scan_controller import FenceScanController
 from sorts import schedule_v2 as schedule
-from sorts.schedule_v2 import ScheduleNdarrayDict, ExperimentDetail
+from sorts.schedule_v2 import ScheduleNdarrayDict2, ExperimentDetail
 from sorts.scheduler_v2.priority_scheduling import priority_scheduling_npardict
 from sorts.simulation_v2 import StxMrxSimulation
 from sorts.simulation_v2.observation import list_to_dataframe

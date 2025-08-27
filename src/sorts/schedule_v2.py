@@ -67,7 +67,7 @@ ScheduleXrds = xr.Dataset
 
 
 # TODO: try to remove/dissolve this class?
-class ScheduleNdarrayDict(t.TypedDict):
+class ScheduleNdarrayDict2(t.TypedDict):
     """
     A TypedDict, stores a collection of "control slices" (or "slices" in short).
 
@@ -108,7 +108,7 @@ class ScheduleNdarrayDict1(t.TypedDict):
 
 
 # TODO: can be removed? will be automatically enforced by xarray dataset class
-def validate_schedule_length(sch: ScheduleNdarrayDict) -> ScheduleNdarrayDict:
+def validate_schedule_length(sch: ScheduleNdarrayDict2) -> ScheduleNdarrayDict2:
     """
     Throw exception if schedule fields are not consistent (same length).
 
@@ -154,10 +154,10 @@ def empty() -> ScheduleXrds:
 
 
 # TODO: remove its usage, then remove this func
-def empty_npardict() -> ScheduleNdarrayDict:
+def empty_npardict() -> ScheduleNdarrayDict2:
     """A convenience method for generating an empty schedule"""
 
-    sch = ScheduleNdarrayDict(
+    sch = ScheduleNdarrayDict2(
         exp_detail_map={},
         start_time=np.empty(0, "datetime64[us]"),
         exp_num=np.empty(0, np.int64),
@@ -172,8 +172,8 @@ def empty_npardict() -> ScheduleNdarrayDict:
 # TODO: can be removed? xarray dataset class is already dataframe like, and have pandas conversion methods
 def from_dataframe(
     df: pd.DataFrame, exp_detail_map: dict[int, ExperimentDetail]
-) -> ScheduleNdarrayDict:
-    sch = ScheduleNdarrayDict(
+) -> ScheduleNdarrayDict2:
+    sch = ScheduleNdarrayDict2(
         **{k: df[k].to_numpy() for k in t.get_args(NonDerivedDataFrameColumnName)},
         exp_detail_map=exp_detail_map,
     )
@@ -182,7 +182,7 @@ def from_dataframe(
 
 
 # TODO: can be removed? xarray dataset class is already dataframe like, and have pandas conversion methods
-def to_dataframe(sch: ScheduleNdarrayDict) -> pd.DataFrame:
+def to_dataframe(sch: ScheduleNdarrayDict2) -> pd.DataFrame:
     """
     Convert `Schedule` into a pandas `DataFrame`.
 
@@ -205,7 +205,7 @@ def to_dataframe(sch: ScheduleNdarrayDict) -> pd.DataFrame:
 
 # TODO: remove its usage, then remove this func
 def create_mask_by_time_range(
-    sch: ScheduleNdarrayDict, time_range: tuple[Datetime64_us, Datetime64_us]
+    sch: ScheduleNdarrayDict2, time_range: tuple[Datetime64_us, Datetime64_us]
 ) -> npt.NDArray[np.bool]:
     """
     Return a mask that filters out schedule entries that are not inside `time_range`.
@@ -226,10 +226,10 @@ def create_mask_by_time_range(
 
 
 # TODO: remove its usage, then remove this func
-def filter_by_mask(sch: ScheduleNdarrayDict, mask: npt.NDArray[np.bool]) -> ScheduleNdarrayDict:
+def filter_by_mask(sch: ScheduleNdarrayDict2, mask: npt.NDArray[np.bool]) -> ScheduleNdarrayDict2:
     """Return a slice of the origin schedule based on the `mask`"""
 
-    filtered_sch = ScheduleNdarrayDict(
+    filtered_sch = ScheduleNdarrayDict2(
         exp_detail_map=sch["exp_detail_map"],
         start_time=sch["start_time"][mask],
         exp_num=sch["exp_num"][mask],
@@ -242,8 +242,8 @@ def filter_by_mask(sch: ScheduleNdarrayDict, mask: npt.NDArray[np.bool]) -> Sche
 
 # TODO: remove its usage, then remove this func
 def filter_by_time_range(
-    sch: ScheduleNdarrayDict, time_range: tuple[Datetime64_us, Datetime64_us]
-) -> ScheduleNdarrayDict:
+    sch: ScheduleNdarrayDict2, time_range: tuple[Datetime64_us, Datetime64_us]
+) -> ScheduleNdarrayDict2:
     """
     Return a slice of the origin schedule based on the `time_range`
     (a right-open interval)
@@ -292,8 +292,8 @@ class Schedule:
 
         return sch
 
-    def to_ndarrays(self) -> ScheduleNdarrayDict:
-        arr_dict: ScheduleNdarrayDict = {
+    def to_ndarrays(self) -> ScheduleNdarrayDict2:
+        arr_dict: ScheduleNdarrayDict2 = {
             "exp_detail_map": self.data.attrs[self.attr_keys["exp_detail_map"]],
             "start_time": self.data[self.coord_keys["start_time"]].to_numpy(),
             "exp_num": self.data[self.data_keys["exp_num"]].to_numpy(),
