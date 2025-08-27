@@ -160,11 +160,17 @@ exp_detail_map = {
     fence_scan_ctrl.spec["exp_detail"]["id"]: fence_scan_ctrl.spec["exp_detail"],
 }
 
-tx_master_sch = priority_scheduling_npardict([tracker_schs.tx_schedule, fence_schs.tx_schedule])
+# TODO: cleanup; `to_ndarrays()` is a tmp workaround during xarray adoption
+tx_master_sch = priority_scheduling_npardict(
+    [tracker_schs.tx_schedule, fence_schs.tx_schedule.to_ndarrays()]
+)
 
+# TODO: cleanup; `to_ndarrays()` is a tmp workaround during xarray adoption
 rx_master_schs = [
     priority_scheduling_npardict(rx_schs)
-    for rx_schs in zip(tracker_schs.rx_schedules, fence_schs.rx_schedules)
+    for rx_schs in zip(
+        tracker_schs.rx_schedules, [sch.to_ndarrays() for sch in fence_schs.rx_schedules]
+    )
 ]
 
 output_folder = Path(__file__).parent / ".." / ".." / "local_data"

@@ -49,6 +49,7 @@ def FenceScanController_smoke_test():
     schs = fenceScanController.generate(Time(start_time_np), Time(end_time_np))
     expected_sch_len = round((end_time_np - start_time_np) / slice_duration)
 
-    assert len(schs.tx_schedule.start_time) == expected_sch_len
+    # TODO: cleanup; `to_ndarrays()` is a tmp workaround during xarray adoption
+    assert len(schs.tx_schedule.to_ndarrays()["start_time"]) == expected_sch_len
 
     return

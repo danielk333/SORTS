@@ -4,12 +4,11 @@ import numpy as np
 import numpy.typing as npt
 import xarray as xr
 import pandas as pd
-from sorts.types import Timedelta64_us, Datetime64_us, Float64_as_deg, Timedelta_Like
-from sorts.utils import to_timedelta64_us
+from sorts.types import Timedelta64_us, Datetime64_us, Float64_as_deg, AzelrCoordinates_DegM
 
 logger = logging.getLogger(__name__)
 
-
+# TODO: move it, superseded by `ScheduleDataKey`, `ScheduleCoordKey`, `ScheduleAttrKey`
 ScheduleFieldKey = t.Literal[
     "exp_detail_map", "start_time", "pointing_az", "pointing_el", "exp_num"
 ]
@@ -23,6 +22,14 @@ assert all((n in t.get_args(ScheduleFieldKey) for n in t.get_args(NonDerivedData
 assert set(t.get_args(DataFrameColumnName)) == set(
     [*t.get_args(NonDerivedDataFrameColumnName), *t.get_args(DerivedDataFrameColumnName)]
 )
+
+ScheduleDataKey = t.Literal["pointing", "exp_num"]
+ScheduleCoordKey = t.Literal["start_time"]
+ScheduleAttrKey = t.Literal["exp_detail_map"]
+
+schedule_data_keys: dict[ScheduleDataKey, str] = {k: k for k in t.get_args(ScheduleDataKey)}
+schedule_coord_keys: dict[ScheduleCoordKey, str] = {k: k for k in t.get_args(ScheduleCoordKey)}
+schedule_attr_keys: dict[ScheduleAttrKey, str] = {k: k for k in t.get_args(ScheduleAttrKey)}
 
 
 data_frame_column_names: t.Final[dict[DataFrameColumnName, str]] = {
@@ -56,6 +63,7 @@ class ExperimentDetail(t.TypedDict):
 
 # TODO: rename to just `ScheduleData` when xarray adoptation is done?
 ScheduleXrds = xr.Dataset
+"""An xarray `Dataset` that contains the schedule data"""
 
 
 # TODO: try to remove/dissolve this class?
@@ -79,16 +87,24 @@ class ScheduleNdarrayDict(t.TypedDict):
     pointing_el: npt.NDArray[Float64_as_deg]
 
 
-def to_schedule_ndarray_dict(sch: ScheduleXrds) -> ScheduleNdarrayDict:
-    sch_dict = ScheduleNdarrayDict(
-        exp_detail_map=sch.attrs["exp_detail_map"],
-        start_time=sch["start_time"].to_numpy(),
-        exp_num=sch["exp_num"].to_numpy(),
-        pointing_az=sch["pointing"].to_numpy()[0],
-        pointing_el=sch["pointing"].to_numpy()[1],
-    )
+# TODO: better naming / remove the `1` suffix
+class ScheduleNdarrayDict1(t.TypedDict):
+    """
+    A TypedDict, stores a collection of "control slices" (or "slices" in short).
 
-    return sch_dict
+    - Slice data are stored as columns of fields, each of which is a `ndarray`.
+    - Metadata (`ExperimentDetail`s) are stored as a dict inside the `exp_detail_map` field.
+    """
+
+    # TODO: add `Station` into this class?
+    exp_detail_map: dict[int, ExperimentDetail]
+
+    start_time: npt.NDArray[Datetime64_us]
+
+    # TODO: re-eval the size of `exp_num`
+    exp_num: npt.NDArray[np.int64]
+
+    pointing: AzelrCoordinates_DegM
 
 
 # TODO: can be removed? will be automatically enforced by xarray dataset class
@@ -131,7 +147,7 @@ def empty() -> ScheduleXrds:
                 np.empty(0, dtype=np.int64),
             ),
         },
-        attrs={},
+        attrs={"exp_detail_map": {}},
     )
 
     return sch
@@ -238,14 +254,51 @@ def filter_by_time_range(
 
 class Schedule:
     """
-    A class that provides an OOP interface for manipuating the schedule data.
+    Provides methods for manipuating the schedule data and enforce that the require columns/data are set.
 
     Schedule data is stored in the `data` attribute, and some additional helper metadata are stored in other attributes.
 
     Methods of this class are mostly just redirection to equivalent module level functions.
     """
 
-    # NOTE: this class also act as a encapsulation for us to adj the backing data structure / implementation later if needed.
+    data_keys = schedule_data_keys
+    """shortcut to `schedule_data_keys`"""
+    coord_keys = schedule_coord_keys
+    """shortcut to `schedule_coord_keys`"""
+    attr_keys = schedule_attr_keys
+    """shortcut to `schedule_attr_keys`"""
 
     def __init__(self, data: ScheduleXrds):
         self.data: ScheduleXrds = data
+
+    @classmethod
+    def from_ndarrays1(cls, data: ScheduleNdarrayDict1) -> Schedule:
+        sch = Schedule(
+            data=xr.Dataset(
+                coords={
+                    "start_time": data["start_time"],
+                    "azelr": ["az", "el", "r"],
+                },
+                data_vars={
+                    "pointing": (
+                        ("azelr", "start_time"),
+                        data["pointing"],
+                    ),
+                    "exp_num": data["exp_num"],
+                },
+                attrs={"exp_detail_map": data["exp_detail_map"]},
+            )
+        )
+
+        return sch
+
+    def to_ndarrays(self) -> ScheduleNdarrayDict:
+        arr_dict: ScheduleNdarrayDict = {
+            "exp_detail_map": self.data.attrs[self.attr_keys["exp_detail_map"]],
+            "start_time": self.data[self.coord_keys["start_time"]].to_numpy(),
+            "exp_num": self.data[self.data_keys["exp_num"]].to_numpy(),
+            "pointing_az": self.data[self.data_keys["pointing"]].to_numpy()[0],
+            "pointing_el": self.data[self.data_keys["pointing"]].to_numpy()[1],
+        }
+
+        return arr_dict
