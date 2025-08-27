@@ -74,7 +74,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
         (state["tx_schedule_size"] + pointings_per_cycle - 1) // pointings_per_cycle,
     )[:, : state["tx_schedule_size"]]
 
-    tx_schedule = Schedule.from_ndarrays1(
+    tx_schedule = Schedule.from_ndarrays(
         {
             "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
             "start_time": tx_slice_start_time,
@@ -126,7 +126,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
             (rx_schedule_size + pointings_per_cycle - 1) // pointings_per_cycle,
         )[:, :rx_schedule_size]
 
-        rx_schedule = Schedule.from_ndarrays1(
+        rx_schedule = Schedule.from_ndarrays(
             {
                 "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
                 "start_time": rx_slice_start_time,

@@ -88,7 +88,7 @@ class ScheduleNdarrayDict2(t.TypedDict):
 
 
 # TODO: better naming / remove the `1` suffix
-class ScheduleNdarrayDict1(t.TypedDict):
+class ScheduleNdarrayDict(t.TypedDict):
     """
     A TypedDict, stores a collection of "control slices" (or "slices" in short).
 
@@ -272,7 +272,7 @@ class Schedule:
         self.data: ScheduleXrds = data
 
     @classmethod
-    def from_ndarrays1(cls, data: ScheduleNdarrayDict1) -> Schedule:
+    def from_ndarrays(cls, data: ScheduleNdarrayDict) -> Schedule:
         sch = Schedule(
             data=xr.Dataset(
                 coords={
