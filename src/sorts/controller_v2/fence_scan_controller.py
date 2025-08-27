@@ -43,6 +43,8 @@ class State(t.TypedDict):
 
 
 class Output(t.NamedTuple):
+    """tuple of `(tx_schedule, [rx_schedule, ...])`"""
+
     tx_schedule: Schedule
     rx_schedules: t.Sequence[Schedule]
 
