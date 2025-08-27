@@ -54,7 +54,7 @@ class ExperimentDetail(t.TypedDict):
     num_simutaneous_pointings: t.NotRequired[int]
 
 
-# TODO: rename to just `Schedule` when xarray adoptation is done?
+# TODO: rename to just `ScheduleData` when xarray adoptation is done?
 ScheduleXrds = xr.Dataset
 
 
@@ -234,3 +234,18 @@ def filter_by_time_range(
     """
 
     return filter_by_mask(sch, create_mask_by_time_range(sch, time_range))
+
+
+class Schedule:
+    """
+    A class that provides an OOP interface for manipuating the schedule data.
+
+    Schedule data is stored in the `data` attribute, and some additional helper metadata are stored in other attributes.
+
+    Methods of this class are mostly just redirection to equivalent module level functions.
+    """
+
+    # NOTE: this class also act as a encapsulation for us to adj the backing data structure / implementation later if needed.
+
+    def __init__(self, data: ScheduleXrds):
+        self.data: ScheduleXrds = data
