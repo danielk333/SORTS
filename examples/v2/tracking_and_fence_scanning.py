@@ -162,14 +162,15 @@ exp_detail_map = {
 
 # TODO: cleanup; `to_ndarrays()` is a tmp workaround during xarray adoption
 tx_master_sch = priority_scheduling_npardict(
-    [tracker_schs.tx_schedule, fence_schs.tx_schedule.to_ndarrays_2()]
+    [tracker_schs.tx_schedule.to_ndarrays_2(), fence_schs.tx_schedule.to_ndarrays_2()]
 )
 
 # TODO: cleanup; `to_ndarrays()` is a tmp workaround during xarray adoption
 rx_master_schs = [
     priority_scheduling_npardict(rx_schs)
     for rx_schs in zip(
-        tracker_schs.rx_schedules, [sch.to_ndarrays_2() for sch in fence_schs.rx_schedules]
+        [sch.to_ndarrays_2() for sch in tracker_schs.rx_schedules],
+        [sch.to_ndarrays_2() for sch in fence_schs.rx_schedules],
     )
 ]
 

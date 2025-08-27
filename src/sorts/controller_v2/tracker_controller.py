@@ -16,8 +16,7 @@ from sorts.types import (
 )
 from sorts.utils import wrap_azimuths_elevations, to_datetime64_us
 from sorts import plots
-from sorts import schedule_v2 as schedule
-from sorts.schedule_v2 import ScheduleNdarrayDict2, ExperimentDetail
+from sorts.schedule_v2 import Schedule, ExperimentDetail
 
 logger = logging.getLogger(__name__)
 
@@ -42,8 +41,8 @@ class State(t.TypedDict):
 class Output(t.NamedTuple):
     """tuple of `(tx_schedule, [rx_schedule, ...])`"""
 
-    tx_schedule: ScheduleNdarrayDict2
-    rx_schedules: t.Sequence[ScheduleNdarrayDict2]
+    tx_schedule: Schedule
+    rx_schedules: t.Sequence[Schedule]
 
 
 def generate_from_state(spec: Spec, state: State) -> Output:
@@ -83,24 +82,23 @@ def generate_from_state(spec: Spec, state: State) -> Output:
     sch_time = state["spobj_time"][~is_out_of_el_range_mask]
     sch_len = len(sch_time)
 
-    tx_sch = ScheduleNdarrayDict2(
-        exp_detail_map={spec["exp_detail"]["id"]: spec["exp_detail"]},
-        start_time=sch_time,
-        exp_num=np.full(sch_len, spec["exp_detail"]["id"], dtype=np.int64),
-        pointing_az=tx_pointings[0],
-        pointing_el=tx_pointings[1],
+    tx_sch = Schedule.from_ndarrays(
+        {
+            "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
+            "start_time": sch_time,
+            "exp_num": np.full(sch_len, spec["exp_detail"]["id"], dtype=np.int64),
+            "pointing": tx_pointings,
+        }
     )
-    schedule.validate_schedule_length(tx_sch)
 
     rx_schs = [
-        schedule.validate_schedule_length(
-            ScheduleNdarrayDict2(
-                exp_detail_map={spec["exp_detail"]["id"]: spec["exp_detail"]},
-                start_time=sch_time,
-                exp_num=np.full(sch_len, spec["exp_detail"]["id"], dtype=np.int64),
-                pointing_az=rx_pointings[0],
-                pointing_el=rx_pointings[1],
-            )
+        Schedule.from_ndarrays(
+            {
+                "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
+                "start_time": sch_time,
+                "exp_num": np.full(sch_len, spec["exp_detail"]["id"], dtype=np.int64),
+                "pointing": rx_pointings,
+            }
         )
         for rx_pointings in rxs_pointings
     ]
@@ -118,9 +116,10 @@ def plot_state_and_output(
 
     rx_skyplot_plots = []
     for idx, rx_schedule in enumerate(output.rx_schedules):
+        rx_sch_dict = rx_schedule.to_ndarrays()
         rx_skyplot_plot = plots.azel_skyplot(
-            rx_schedule["pointing_az"],
-            rx_schedule["pointing_el"],
+            rx_sch_dict["pointing"][0],
+            rx_sch_dict["pointing"][1],
         )
         rx_skyplot_plot.title = f"rx_skyplot_plot_{idx}"
         rx_skyplot_plots.append(rx_skyplot_plot)
