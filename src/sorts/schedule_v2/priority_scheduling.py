@@ -57,7 +57,6 @@ def to_dataframe(ds: xr.Dataset):
     return df
 
 
-# TODO: add schedule validation?
 def priority_scheduling(sch_datas: t.Sequence[ScheduleXrds]) -> ScheduleXrds:
     # The logic of this function:
     # 1. prepare an empty schedule data as the merge result
@@ -76,7 +75,7 @@ def priority_scheduling(sch_datas: t.Sequence[ScheduleXrds]) -> ScheduleXrds:
     keys: dict[DsVarKey, str] = {k: k for k in t.get_args(DsVarKey)}
 
     # init an empty dataset for a schedule and add some columns, will be used store merged schedule
-    merged_sch_data = empty().data
+    merged_sch_data = empty()
     merged_sch_data[keys["allowed_start_time"]] = (
         keys["start_time"],
         np.empty(0, "datetime64[us]"),

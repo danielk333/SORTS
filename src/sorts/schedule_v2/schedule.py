@@ -173,6 +173,7 @@ def filter_by_time_range(
     return filter_by_mask(sch, create_mask_by_time_range(sch, time_range))
 
 
+# TODO: add schedule validation?
 class Schedule:
     """
     Provides methods for manipuating the schedule data and enforce that the require columns/data are set.
