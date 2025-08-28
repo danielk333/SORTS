@@ -2,7 +2,6 @@ from __future__ import annotations
 import logging, typing as t
 import numpy as np
 import numpy.typing as npt
-import xarray as xr
 import pandas as pd
 from sorts.types import Datetime64_us, Float64_as_deg
 from sorts.schedule_v2.types import (
@@ -15,6 +14,7 @@ from sorts.schedule_v2.types import (
     schedule_keys,
 )
 from sorts.schedule_v2.schedule_data import ScheduleXrds, from_ndarrays, from_ndarrays_2, empty
+from sorts.schedule_v2.priority_scheduling import priority_scheduling
 
 logger = logging.getLogger(__name__)
 
@@ -191,24 +191,21 @@ class Schedule:
 
     @classmethod
     def from_ndarrays(cls, data: ScheduleNdarrayDict) -> Schedule:
-        global from_ndarrays
         return Schedule(data=from_ndarrays(data))
 
     # TODO: remove its usage, then remove this method
     @classmethod
     def from_ndarrays_2(cls, data: ScheduleNdarrayDict2) -> Schedule:
-        global from_ndarrays_2
         return Schedule(data=from_ndarrays_2(data))
 
     @classmethod
     def empty(cls) -> Schedule:
-        global empty
         return Schedule(data=empty())
 
     @classmethod
-    def priority_scheduling(cls):
-        # TODO: implement
-        raise NotImplementedError()
+    def priority_scheduling(cls, schs: list[Schedule]):
+        resultant_sch_data = priority_scheduling([sch.data for sch in schs])
+        return Schedule(data=resultant_sch_data)
 
     def to_ndarrays(self) -> ScheduleNdarrayDict:
         arr_dict: ScheduleNdarrayDict = {
