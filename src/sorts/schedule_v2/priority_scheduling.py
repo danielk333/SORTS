@@ -4,8 +4,7 @@ import pandas as pd
 import xarray as xr
 
 from sorts.schedule_v2.types import ScheduleKey, ExperimentDetail, ScheduleNdarrayDict2
-from sorts.schedule_v2.schedule_data import ScheduleXrds
-from sorts.schedule_v2.schedule import Schedule
+from sorts.schedule_v2.schedule_data import ScheduleXrds, empty, from_ndarrays_2
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +77,7 @@ def priority_scheduling(sch_datas: t.Sequence[ScheduleXrds]) -> ScheduleXrds:
     keys: dict[DsVarKey, str] = {k: k for k in t.get_args(DsVarKey)}
 
     # init an empty dataset for a schedule and add some columns, will be used store merged schedule
-    merged_sch_data = Schedule.empty().data
+    merged_sch_data = empty().data
     merged_sch_data[keys["allowed_start_time"]] = (
         keys["start_time"],
         np.empty(0, "datetime64[us]"),
@@ -182,7 +181,7 @@ def priority_scheduling_npardict(schs: t.Sequence[ScheduleNdarrayDict2]) -> Sche
     for sch in reversed(schs):
         exp_detail_map.update(sch["exp_detail_map"])
 
-    resultant_sch = priority_scheduling([Schedule.from_ndarrays_2(sch).data for sch in schs])
+    resultant_sch = priority_scheduling([from_ndarrays_2(sch).data for sch in schs])
 
     logger.debug("priority_scheduling done")
     return resultant_sch.to_ndarrays_2()
