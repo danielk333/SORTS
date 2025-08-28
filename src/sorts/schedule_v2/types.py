@@ -5,16 +5,6 @@ from sorts.types import Timedelta64_us, Datetime64_us, Float64_as_deg, AzelrCoor
 
 logger = logging.getLogger(__name__)
 
-ScheduleDataKey = t.Literal["pointing", "exp_num"]
-ScheduleCoordKey = t.Literal["start_time", "end_time"]
-ScheduleAttrKey = t.Literal["exp_detail_map"]
-ScheduleKey = t.Literal[ScheduleDataKey, ScheduleCoordKey, ScheduleAttrKey]
-
-schedule_data_keys: dict[ScheduleDataKey, str] = {k: k for k in t.get_args(ScheduleDataKey)}
-schedule_coord_keys: dict[ScheduleCoordKey, str] = {k: k for k in t.get_args(ScheduleCoordKey)}
-schedule_attr_keys: dict[ScheduleAttrKey, str] = {k: k for k in t.get_args(ScheduleAttrKey)}
-schedule_keys: dict[ScheduleKey, str] = {k: k for k in t.get_args(ScheduleKey)}
-
 
 class ExperimentDetail(t.TypedDict):
     """A TypedDict of params"""

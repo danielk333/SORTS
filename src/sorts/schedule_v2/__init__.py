@@ -1,4 +1,9 @@
 from .types import (
+    ExperimentDetail,
+    ScheduleNdarrayDict2,
+)
+from . import schedule_data
+from .schedule_data import (
     ScheduleDataKey,
     ScheduleCoordKey,
     ScheduleAttrKey,
@@ -7,10 +12,8 @@ from .types import (
     schedule_coord_keys,
     schedule_attr_keys,
     schedule_keys,
-    ExperimentDetail,
-    ScheduleNdarrayDict2,
+    ScheduleXrds,
 )
-from .schedule_data import ScheduleXrds
 from .schedule import (
     ScheduleFieldKey,
     NonDerivedDataFrameColumnName,
@@ -26,12 +29,6 @@ from .schedule import (
     Schedule,
 )
 from .priority_scheduling import (
-    priority_scheduling,
-    max_datetime64_us,
-    min_datetime64_us,
-    DsIntermediateVarKey,
-    DsVarKey,
-    to_dataframe,
     priority_scheduling,
     priority_scheduling_npardict,
 )

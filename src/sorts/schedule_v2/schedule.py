@@ -4,16 +4,12 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 from sorts.types import Datetime64_us, Float64_as_deg
-from sorts.schedule_v2.types import (
-    ExperimentDetail,
-    ScheduleNdarrayDict,
-    ScheduleNdarrayDict2,
+from sorts.schedule_v2.types import ExperimentDetail, ScheduleNdarrayDict, ScheduleNdarrayDict2
+from sorts.schedule_v2.schedule_data import (
     schedule_data_keys,
     schedule_coord_keys,
     schedule_attr_keys,
     schedule_keys,
-)
-from sorts.schedule_v2.schedule_data import (
     ScheduleXrds,
     from_ndarrays,
     from_ndarrays_2,

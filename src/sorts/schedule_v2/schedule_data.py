@@ -3,9 +3,19 @@ import logging, typing as t
 import numpy as np
 import pandas as pd
 import xarray as xr
-from sorts.schedule_v2.types import ScheduleNdarrayDict, ScheduleNdarrayDict2, schedule_keys
+from sorts.schedule_v2.types import ScheduleNdarrayDict, ScheduleNdarrayDict2
 
 logger = logging.getLogger(__name__)
+
+ScheduleDataKey = t.Literal["pointing", "exp_num"]
+ScheduleCoordKey = t.Literal["start_time", "end_time"]
+ScheduleAttrKey = t.Literal["exp_detail_map"]
+ScheduleKey = t.Literal[ScheduleDataKey, ScheduleCoordKey, ScheduleAttrKey]
+
+schedule_data_keys: dict[ScheduleDataKey, str] = {k: k for k in t.get_args(ScheduleDataKey)}
+schedule_coord_keys: dict[ScheduleCoordKey, str] = {k: k for k in t.get_args(ScheduleCoordKey)}
+schedule_attr_keys: dict[ScheduleAttrKey, str] = {k: k for k in t.get_args(ScheduleAttrKey)}
+schedule_keys: dict[ScheduleKey, str] = {k: k for k in t.get_args(ScheduleKey)}
 
 # TODO: rename to just `ScheduleData` when xarray adoptation is done?
 ScheduleXrds = xr.Dataset
