@@ -1,3 +1,4 @@
+from .schedule_data import ScheduleXrds
 from .schedule import (
     ScheduleFieldKey,
     NonDerivedDataFrameColumnName,
@@ -14,7 +15,6 @@ from .schedule import (
     data_frame_column_names,
     cn,
     ExperimentDetail,
-    ScheduleXrds,
     ScheduleNdarrayDict2,
     ScheduleNdarrayDict,
     validate_schedule_length,

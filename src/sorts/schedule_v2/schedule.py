@@ -5,6 +5,7 @@ import numpy.typing as npt
 import xarray as xr
 import pandas as pd
 from sorts.types import Timedelta64_us, Datetime64_us, Float64_as_deg, AzelrCoordinates_DegM
+from sorts.schedule_v2.schedule_data import ScheduleXrds
 
 logger = logging.getLogger(__name__)
 
@@ -61,11 +62,6 @@ class ExperimentDetail(t.TypedDict):
 
     # TODO: this is a temp workaround to get multiple simutaneous rx pointings working
     num_simutaneous_pointings: t.NotRequired[int]
-
-
-# TODO: rename to just `ScheduleData` when xarray adoptation is done?
-ScheduleXrds = xr.Dataset
-"""An xarray `Dataset` that contains the schedule data"""
 
 
 # TODO: try to remove/dissolve this class?
