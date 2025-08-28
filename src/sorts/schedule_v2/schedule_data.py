@@ -1,9 +1,9 @@
 from __future__ import annotations
-import logging
+import logging, typing as t
 import numpy as np
+import pandas as pd
 import xarray as xr
-import xarray as xr
-from sorts.schedule_v2.types import ScheduleNdarrayDict, ScheduleNdarrayDict2
+from sorts.schedule_v2.types import ScheduleNdarrayDict, ScheduleNdarrayDict2, schedule_keys
 
 logger = logging.getLogger(__name__)
 
@@ -71,3 +71,22 @@ def empty() -> ScheduleXrds:
     )
 
     return sch_data
+
+
+def to_dataframe(ds: xr.Dataset) -> pd.DataFrame:
+    # define some column names/keys
+    keys = schedule_keys
+
+    df = pd.concat(
+        t.cast(
+            list[pd.DataFrame],
+            [
+                ds[keys["end_time"]].transpose().to_pandas(),
+                ds[keys["pointing"]].transpose().to_pandas(),
+            ],
+        ),
+        axis=1,
+        copy=False,
+    )
+
+    return df

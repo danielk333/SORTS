@@ -34,7 +34,7 @@ from .priority_scheduling import (
     min_datetime64_us,
     DsIntermediateVarKey,
     DsVarKey,
-    to_df,
+    to_dataframe,
     priority_scheduling,
     priority_scheduling_npardict,
 )

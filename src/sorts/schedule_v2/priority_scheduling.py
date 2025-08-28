@@ -4,7 +4,7 @@ import pandas as pd
 import xarray as xr
 
 from sorts.schedule_v2.types import ScheduleKey, ExperimentDetail, ScheduleNdarrayDict2
-from sorts.schedule_v2.schedule_data import ScheduleXrds, empty, from_ndarrays_2
+from sorts.schedule_v2.schedule_data import ScheduleXrds, empty, from_ndarrays_2, to_dataframe
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ DsIntermediateVarKey = t.Literal["allowed_start_time", "allowed_end_time", "is_o
 DsVarKey = t.Literal[ScheduleKey, DsIntermediateVarKey]
 
 
-def to_df(ds: xr.Dataset):
+def to_dataframe(ds: xr.Dataset):
     """
     Convert schedule data in xarray dataset to pandas dataframe.
     A helper method for debugging.
@@ -32,8 +32,7 @@ def to_df(ds: xr.Dataset):
         t.cast(
             list[pd.DataFrame],
             [
-                ds[keys["end_time"]].transpose().to_pandas(),
-                ds[keys["pointing"]].transpose().to_pandas(),
+                to_dataframe(ds),
                 (
                     ds[keys["allowed_start_time"]].transpose().to_pandas()
                     if keys["allowed_start_time"] in ds

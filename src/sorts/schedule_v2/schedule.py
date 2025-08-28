@@ -13,7 +13,13 @@ from sorts.schedule_v2.types import (
     schedule_attr_keys,
     schedule_keys,
 )
-from sorts.schedule_v2.schedule_data import ScheduleXrds, from_ndarrays, from_ndarrays_2, empty
+from sorts.schedule_v2.schedule_data import (
+    ScheduleXrds,
+    from_ndarrays,
+    from_ndarrays_2,
+    empty,
+    to_dataframe as to_dataframe_,
+)
 from sorts.schedule_v2.priority_scheduling import priority_scheduling
 
 logger = logging.getLogger(__name__)
@@ -229,3 +235,6 @@ class Schedule:
         }
 
         return arr_dict
+
+    def to_dataframe(self) -> pd.DataFrame:
+        return to_dataframe_(self.data)
