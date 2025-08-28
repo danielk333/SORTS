@@ -16,7 +16,7 @@ from sorts.simulation_v2.passage import (
 )
 from sorts.simulation_v2.observation import Observation
 from sorts import schedule_v2 as schedule
-from sorts.schedule_v2 import ScheduleNdarrayDict2, ExperimentDetail
+from sorts.schedule_v2.schedule import ScheduleNdarrayDict2, ExperimentDetail
 
 logger = logging.getLogger(__name__)
 

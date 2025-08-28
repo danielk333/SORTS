@@ -16,7 +16,7 @@ from sorts.types import (
 )
 from sorts.utils import wrap_azimuths_elevations, to_datetime64_us
 from sorts import plots
-from sorts.schedule_v2 import Schedule, ExperimentDetail
+from sorts.schedule_v2.schedule import Schedule, ExperimentDetail
 
 logger = logging.getLogger(__name__)
 

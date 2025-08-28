@@ -6,7 +6,7 @@ from sorts.utils import to_datetime64_us
 from sorts.radar.tx_rx import Station
 from sorts.space_object import SpaceObject
 from sorts import schedule_v2 as schedule
-from sorts.schedule_v2 import ScheduleNdarrayDict2, ExperimentDetail
+from sorts.schedule_v2.schedule import ScheduleNdarrayDict2, ExperimentDetail
 
 
 class Passage(t.TypedDict):
