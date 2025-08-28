@@ -19,8 +19,7 @@ target_mod_paths: list[Path] = [
     root_mod_dpath / "types.py",
     root_mod_dpath / "utils.py",
     root_mod_dpath / "controller_v2",
-    root_mod_dpath / "schedule_v2.py",
-    root_mod_dpath / "scheduler_v2",
+    root_mod_dpath / "schedule_v2",
     root_mod_dpath / "simulation_v2",
 ]
 

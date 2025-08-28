@@ -63,7 +63,7 @@ def to_df(ds: xr.Dataset):
 
 
 # TODO: add schedule validation?
-def priority_scheduling(sch_datas: t.Sequence[ScheduleXrds]):
+def priority_scheduling(sch_datas: t.Sequence[ScheduleXrds]) -> ScheduleXrds:
     # The logic of this function:
     # 1. prepare an empty schedule data as the merge result
     # 2. for each of the schedule passed in

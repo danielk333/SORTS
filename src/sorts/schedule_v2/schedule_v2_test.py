@@ -1,7 +1,7 @@
 from copy import deepcopy
 import numpy as np
 from sorts import schedule_v2 as schedule
-from sorts.schedule_v2 import ScheduleNdarrayDict2, ExperimentDetail
+from sorts.schedule_v2.schedule import ScheduleNdarrayDict2, ExperimentDetail
 
 
 def setup_function():
@@ -10,6 +10,7 @@ def setup_function():
     print()
 
 
+# TODO: update or remove
 def Schedule_dataframe_roundtrip_conversion_test():
     exp_detail_map: dict[int, ExperimentDetail] = {
         0: {

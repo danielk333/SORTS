@@ -20,7 +20,7 @@ from sorts.propagator import Kepler
 from sorts.space_object import SpaceObject
 from sorts.radar.tx_rx import Station
 from sorts.controller_v2.tracker_controller import TrackerController
-from sorts.scheduler_v2.priority_scheduling import priority_scheduling_npardict
+from sorts.schedule_v2.priority_scheduling import priority_scheduling_npardict
 from sorts.simulation_v2 import StxMrxSimulation
 
 logging.basicConfig(level=logging.INFO)
