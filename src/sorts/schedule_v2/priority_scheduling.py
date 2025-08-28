@@ -2,13 +2,14 @@ import logging, typing as t
 import numpy as np
 import pandas as pd
 import xarray as xr
-from sorts.schedule_v2.schedule import (
-    Schedule,
+
+from sorts.schedule_v2.schedule_data import (
     ScheduleKey,
-    ScheduleNdarrayDict2,
     ExperimentDetail,
+    ScheduleNdarrayDict2,
+    ScheduleXrds,
 )
-from sorts.schedule_v2.schedule_data import ScheduleXrds
+from sorts.schedule_v2.schedule import Schedule
 
 logger = logging.getLogger(__name__)
 
