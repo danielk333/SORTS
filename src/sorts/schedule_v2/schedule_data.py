@@ -93,6 +93,7 @@ def to_dataframe(ds: xr.Dataset) -> pd.DataFrame:
             [
                 ds[keys["end_time"]].transpose().to_pandas(),
                 ds[keys["pointing"]].transpose().to_pandas(),
+                ds[keys["exp_num"]].transpose().to_pandas(),
             ],
         ),
         axis=1,
