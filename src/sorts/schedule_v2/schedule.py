@@ -4,16 +4,17 @@ import numpy as np
 import numpy.typing as npt
 import xarray as xr
 import pandas as pd
-from sorts.types import Datetime64_us, Float64_as_deg, AzelrCoordinates_DegM
+from sorts.types import Datetime64_us, Float64_as_deg
 from sorts.schedule_v2.types import (
     ExperimentDetail,
+    ScheduleNdarrayDict,
     ScheduleNdarrayDict2,
     schedule_data_keys,
     schedule_coord_keys,
     schedule_attr_keys,
     schedule_keys,
 )
-from sorts.schedule_v2.schedule_data import ScheduleXrds
+from sorts.schedule_v2.schedule_data import ScheduleXrds, from_ndarrays, from_ndarrays_2, empty
 
 logger = logging.getLogger(__name__)
 
@@ -40,26 +41,6 @@ data_frame_column_names: t.Final[dict[DataFrameColumnName, str]] = {
 
 cn = data_frame_column_names
 """An alias of `data_frame_column_names`"""
-
-
-class ScheduleNdarrayDict(t.TypedDict):
-    """
-    A TypedDict, stores a collection of "control slices" (or "slices" in short).
-
-    - Slice data are stored as columns of fields, each of which is a `ndarray`.
-    - Metadata (`ExperimentDetail`s) are stored as a dict inside the `exp_detail_map` field.
-    """
-
-    # TODO: add `Station` into this class?
-    exp_detail_map: dict[int, ExperimentDetail]
-
-    start_time: npt.NDArray[Datetime64_us]
-    end_time: npt.NDArray[Datetime64_us]
-
-    # TODO: re-eval the size of `exp_num`
-    exp_num: npt.NDArray[np.int64]
-
-    pointing: AzelrCoordinates_DegM
 
 
 # TODO: can be removed? will be automatically enforced by xarray dataset class
@@ -210,68 +191,19 @@ class Schedule:
 
     @classmethod
     def from_ndarrays(cls, data: ScheduleNdarrayDict) -> Schedule:
-        sch = Schedule(
-            data=xr.Dataset(
-                coords={
-                    "start_time": data["start_time"],
-                    "end_time": ("start_time", data["end_time"]),
-                    "azelr": ["az", "el", "r"],
-                },
-                data_vars={
-                    "pointing": (
-                        ("azelr", "start_time"),
-                        data["pointing"],
-                    ),
-                    "exp_num": ("start_time", data["exp_num"]),
-                },
-                attrs={"exp_detail_map": data["exp_detail_map"]},
-            )
-        )
-
-        return sch
+        global from_ndarrays
+        return Schedule(data=from_ndarrays(data))
 
     # TODO: remove its usage, then remove this method
     @classmethod
     def from_ndarrays_2(cls, data: ScheduleNdarrayDict2) -> Schedule:
-        sch = Schedule(
-            data=xr.Dataset(
-                coords={
-                    "start_time": data["start_time"],
-                    "end_time": ("start_time", data["start_time"]),
-                    "azelr": ["az", "el", "r"],
-                },
-                data_vars={
-                    "pointing": (
-                        ("azelr", "start_time"),
-                        np.array(
-                            [
-                                data["pointing_az"],
-                                data["pointing_el"],
-                                np.full(len(data["pointing_az"]), 1.0, dtype=np.float64),
-                            ]
-                        ),
-                    ),
-                    "exp_num": ("start_time", data["exp_num"]),
-                },
-                attrs={"exp_detail_map": data["exp_detail_map"]},
-            )
-        )
-
-        return sch
+        global from_ndarrays_2
+        return Schedule(data=from_ndarrays_2(data))
 
     @classmethod
     def empty(cls) -> Schedule:
-        sch = Schedule.from_ndarrays(
-            {
-                "exp_detail_map": {},
-                "start_time": np.empty(0, dtype="datetime64[us]"),
-                "end_time": np.empty(0, dtype="datetime64[us]"),
-                "exp_num": np.empty(0, dtype=np.int64),
-                "pointing": np.empty((3, 0), dtype=np.float64),
-            }
-        )
-
-        return sch
+        global empty
+        return Schedule(data=empty())
 
     @classmethod
     def priority_scheduling(cls):
@@ -289,6 +221,7 @@ class Schedule:
 
         return arr_dict
 
+    # TODO: remove its usage, then remove this method
     def to_ndarrays_2(self) -> ScheduleNdarrayDict2:
         arr_dict: ScheduleNdarrayDict2 = {
             "exp_detail_map": self.data.attrs[self.attr_keys["exp_detail_map"]],
