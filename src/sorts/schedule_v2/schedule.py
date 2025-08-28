@@ -3,7 +3,7 @@ import logging, typing as t
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from sorts.types import Datetime64_us, Float64_as_deg
+from sorts.types import Datetime64_us
 from sorts.schedule_v2.types import ExperimentDetail, ScheduleNdarrayDict, ScheduleNdarrayDict2
 from sorts.schedule_v2.schedule_data import (
     schedule_data_keys,
@@ -14,7 +14,7 @@ from sorts.schedule_v2.schedule_data import (
     from_ndarrays,
     from_ndarrays_2,
     empty,
-    to_dataframe as to_dataframe_,
+    to_dataframe,
 )
 from sorts.schedule_v2.priority_scheduling import priority_scheduling
 
@@ -171,4 +171,4 @@ class Schedule:
         return arr_dict
 
     def to_dataframe(self) -> pd.DataFrame:
-        return to_dataframe_(self.data)
+        return to_dataframe(self.data)
