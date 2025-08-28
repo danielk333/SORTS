@@ -22,7 +22,6 @@ from .schedule import (
     validate_schedule_length,
     empty_npardict,
     from_dataframe,
-    to_dataframe,
     create_mask_by_time_range,
     filter_by_mask,
     filter_by_time_range,

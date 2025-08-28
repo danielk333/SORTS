@@ -102,28 +102,6 @@ def from_dataframe(
     return sch
 
 
-# TODO: can be removed? xarray dataset class is already dataframe like, and have pandas conversion methods
-def to_dataframe(sch: ScheduleNdarrayDict2) -> pd.DataFrame:
-    """
-    Convert `Schedule` into a pandas `DataFrame`.
-
-    Some extra derived columns are generated in the resultant `DataFrame`, while metadata field(s) are not included.
-
-    Handy for manipulation and plotting.
-    """
-
-    df = pd.DataFrame({k: sch[k] for k in t.get_args(NonDerivedDataFrameColumnName)})
-
-    # add "end_time" column
-    df[cn["end_time"]] = df[cn["start_time"]] + np.array(
-        [sch["exp_detail_map"][n]["slice_duration"] for n in sch["exp_num"]],
-        # NOTE: `dtype` have to be stated explicitly, otherwise numpy will assume `float64` which is incorrect here
-        dtype="timedelta64[us]",
-    )
-
-    return df
-
-
 # TODO: remove its usage, then remove this func
 def create_mask_by_time_range(
     sch: ScheduleNdarrayDict2, time_range: tuple[Datetime64_us, Datetime64_us]

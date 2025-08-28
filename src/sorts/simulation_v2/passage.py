@@ -6,7 +6,7 @@ from sorts.utils import to_datetime64_us
 from sorts.radar.tx_rx import Station
 from sorts.space_object import SpaceObject
 from sorts import schedule_v2 as schedule
-from sorts.schedule_v2.schedule import ScheduleNdarrayDict2, ExperimentDetail
+from sorts.schedule_v2.schedule import Schedule, ScheduleNdarrayDict2, ExperimentDetail
 
 
 class Passage(t.TypedDict):
@@ -118,7 +118,7 @@ def split_passage_by_schedule(
 ) -> list[ExperimentPassage]:
     tx_schedule = schedule.filter_by_time_range(tx_schedule, passage["time_range"])
     rx_schedule = schedule.filter_by_time_range(rx_schedule, passage["time_range"])
-    df = schedule.to_dataframe(rx_schedule)
+    df = Schedule.from_ndarrays_2(rx_schedule).to_dataframe()
 
     # identify where `exp_num` changes
     change_points = df[schedule.cn["exp_num"]] != df[schedule.cn["exp_num"]].shift()

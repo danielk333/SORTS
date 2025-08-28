@@ -24,7 +24,8 @@ from sorts.types import (
 from sorts.utils import to_datetime64_us
 from sorts.frames import ITRS_to_geodetic
 import sorts.schedule_v2 as schedule
-from sorts.schedule_v2 import ScheduleNdarrayDict2
+from sorts.schedule_v2.types import ScheduleNdarrayDict2
+from sorts.schedule_v2.schedule import Schedule
 
 logger = logging.getLogger(__name__)
 
@@ -118,7 +119,7 @@ def schedule_plot(
     """
 
     cn = schedule.cn
-    df = schedule.to_dataframe(sch)
+    df = Schedule.from_ndarrays_2(sch).to_dataframe()
 
     start_time_: Datetime64_us = (
         to_datetime64_us(start_time) if start_time is not None else df[cn["start_time"]].min()
@@ -443,7 +444,7 @@ assert set(t.get_args(RadarScheduleEcefPositionPlotColumnKey)) == set(
 def _radar_schedule_ecef_position_plot_cds_df(
     ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], sch: ScheduleNdarrayDict2
 ):
-    df = schedule.to_dataframe(sch)
+    df = Schedule.from_ndarrays_2(sch).to_dataframe()
 
     # bokeh requires str type for categorical axis
     df[schedule.cn["exp_num"]] = df[schedule.cn["exp_num"]].astype(str)
