@@ -17,6 +17,9 @@ min_datetime64_us = np.datetime64(
     np.iinfo(np.int64).min + 1, "us"
 )  # +1 is needed, otherwise it will be NaT
 
+DsIntermediateVarKey = t.Literal["allowed_start_time", "allowed_end_time", "is_overlaped"]
+DsVarKey = t.Literal[ScheduleKey, DsIntermediateVarKey]
+
 
 def to_df(ds: xr.Dataset):
     """
@@ -24,39 +27,34 @@ def to_df(ds: xr.Dataset):
     A helper method for debugging.
     """
 
-    # define some df column names
-    keys = {
-        k: k
-        for k in [
-            *t.get_args(ScheduleKey),
-            "allowed_start_time",
-            "allowed_end_time",
-            "is_overlaped",
-        ]
-    }
+    # define some column names/keys
+    keys: dict[DsVarKey, str] = {k: k for k in t.get_args(DsVarKey)}
 
     empty_df = pd.DataFrame()
 
     df = pd.concat(
-        [
-            ds[keys["end_time"]].transpose().to_pandas(),
-            ds[keys["pointing"]].transpose().to_pandas(),
-            (
-                ds[keys["allowed_start_time"]].transpose().to_pandas()
-                if keys["allowed_start_time"] in ds
-                else empty_df
-            ),
-            (
-                ds[keys["allowed_end_time"]].transpose().to_pandas()
-                if keys["allowed_end_time"] in ds
-                else empty_df
-            ),
-            (
-                ds[keys["is_overlaped"]].transpose().to_pandas()
-                if keys["is_overlaped"] in ds
-                else empty_df
-            ),
-        ],
+        t.cast(
+            list[pd.DataFrame],
+            [
+                ds[keys["end_time"]].transpose().to_pandas(),
+                ds[keys["pointing"]].transpose().to_pandas(),
+                (
+                    ds[keys["allowed_start_time"]].transpose().to_pandas()
+                    if keys["allowed_start_time"] in ds
+                    else empty_df
+                ),
+                (
+                    ds[keys["allowed_end_time"]].transpose().to_pandas()
+                    if keys["allowed_end_time"] in ds
+                    else empty_df
+                ),
+                (
+                    ds[keys["is_overlaped"]].transpose().to_pandas()
+                    if keys["is_overlaped"] in ds
+                    else empty_df
+                ),
+            ],
+        ),
         axis=1,
         copy=False,
     )
@@ -80,15 +78,7 @@ def priority_scheduling(sch_datas: t.Sequence[ScheduleXrds]):
     min_datetime64_us = np.datetime64(np.iinfo(np.int64).min + 1, "us")
 
     # define some column names/keys
-    keys = {
-        k: k
-        for k in [
-            *t.get_args(ScheduleKey),
-            "allowed_start_time",
-            "allowed_end_time",
-            "is_overlaped",
-        ]
-    }
+    keys: dict[DsVarKey, str] = {k: k for k in t.get_args(DsVarKey)}
 
     # init an empty dataset for a schedule and add some columns, will be used store merged schedule
     merged_sch_data = Schedule.empty().data
