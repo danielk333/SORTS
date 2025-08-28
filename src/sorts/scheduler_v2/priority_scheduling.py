@@ -35,13 +35,27 @@ def to_df(ds: xr.Dataset):
         ]
     }
 
+    empty_df = pd.DataFrame()
+
     df = pd.concat(
         [
             ds[keys["end_time"]].transpose().to_pandas(),
             ds[keys["pointing"]].transpose().to_pandas(),
-            ds[keys["allowed_start_time"]].transpose().to_pandas(),
-            ds[keys["allowed_end_time"]].transpose().to_pandas(),
-            ds[keys["is_overlaped"]].transpose().to_pandas(),
+            (
+                ds[keys["allowed_start_time"]].transpose().to_pandas()
+                if keys["allowed_start_time"] in ds
+                else empty_df
+            ),
+            (
+                ds[keys["allowed_end_time"]].transpose().to_pandas()
+                if keys["allowed_end_time"] in ds
+                else empty_df
+            ),
+            (
+                ds[keys["is_overlaped"]].transpose().to_pandas()
+                if keys["is_overlaped"] in ds
+                else empty_df
+            ),
         ],
         axis=1,
         copy=False,
@@ -160,6 +174,10 @@ def priority_scheduling(sch_datas: t.Sequence[ScheduleXrds]):
         merged_sch_data[keys["allowed_end_time"]] = merged_sch_data[keys["start_time"]].shift(
             {keys["start_time"]: -1}, fill_value=max_datetime64_us
         )
+
+    merged_sch_data = merged_sch_data.drop_vars(
+        [keys["allowed_start_time"], keys["allowed_end_time"], keys["is_overlaped"]]
+    )
 
     return merged_sch_data
 
