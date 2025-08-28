@@ -49,47 +49,6 @@ cn = data_frame_column_names
 """An alias of `data_frame_column_names`"""
 
 
-# TODO: can be removed? will be automatically enforced by xarray dataset class
-def validate_schedule_length(sch: ScheduleNdarrayDict2) -> ScheduleNdarrayDict2:
-    """
-    Throw exception if schedule fields are not consistent (same length).
-
-    Returns the schedule itself.
-    """
-
-    k_0, *k_rests = [k for k in sch if k in t.get_args(NonDerivedDataFrameColumnName)]
-    field_0, *field_rests = t.cast(
-        tuple[npt.NDArray, ...],
-        [sch[k] for k in t.get_args(NonDerivedDataFrameColumnName)],
-    )  # actual value of the fields
-
-    for k, f in zip(k_rests, field_rests):
-        if f.shape != field_0.shape:
-            raise RuntimeError(
-                "fields of a `Schedule` must have equal lengths. "
-                + f"but shape of {k} is {f.shape}, "
-                f"while shape of {k_0} is {field_0.shape} "
-            )
-
-    return sch
-
-
-# TODO: remove its usage, then remove this func
-def empty_npardict() -> ScheduleNdarrayDict2:
-    """A convenience method for generating an empty schedule"""
-
-    sch = ScheduleNdarrayDict2(
-        exp_detail_map={},
-        start_time=np.empty(0, "datetime64[us]"),
-        exp_num=np.empty(0, np.int64),
-        pointing_az=np.empty(0, Float64_as_deg),
-        pointing_el=np.empty(0, Float64_as_deg),
-    )
-    validate_schedule_length(sch)
-
-    return sch
-
-
 # TODO: can be removed? xarray dataset class is already dataframe like, and have pandas conversion methods
 def from_dataframe(
     df: pd.DataFrame, exp_detail_map: dict[int, ExperimentDetail]
