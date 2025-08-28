@@ -1,8 +1,14 @@
 import logging, typing as t
 import numpy as np
 import pandas as pd
-from sorts import schedule_v2 as schedule
-from sorts.schedule_v2 import ScheduleNdarrayDict2, ExperimentDetail
+import xarray as xr
+from sorts.schedule_v2 import (
+    Schedule,
+    ScheduleXrds,
+    ScheduleKey,
+    ScheduleNdarrayDict2,
+    ExperimentDetail,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -12,101 +18,153 @@ min_datetime64_us = np.datetime64(
 )  # +1 is needed, otherwise it will be NaT
 
 
-# TODO: should we use a db like sqlite to enable larger than memory processing?
-# TODO: add schedule validation?
-# TODO: return the rows/index of dropped slice?
-def priority_scheduling_df(sch_dfs: t.Sequence[pd.DataFrame]):
+def to_df(ds: xr.Dataset):
     """
-    Same as `priority_scheduling` but takes and returns `Schedule` in pandas `DataFrame` form
-    (see also `schedule.from_dataframe`, `schedule.to_dataframe`).
-
-    Used by `priority_scheduling` internally.
+    Convert schedule data in xarray dataset to pandas dataframe.
+    A helper method for debugging.
     """
-
-    cn = schedule.cn
-
-    # The logic of this function:
-    # 1. prepare an empty df as the merge result
-    # 2. for each of the schema passed in
-    #   2.1. merge it into the merge result df
-    #   2.2. fill in the missing `cn_allowed_start_time`, `cn_allowed_end_time` for new rows
-    #   2.3. filter out new rows that conflict with `cn_allowed_start_time`, `cn_allowed_end_time`
-    #   2.3. update `cn_allowed_start_time`, `cn_allowed_end_time`
 
     # define some df column names
-    cn_allowed_start_time = "allowed_start_time"
-    cn_allowed_end_time = "allowed_end_time"
-    cn_is_overlaped = "is_overlaped"
+    keys = {
+        k: k
+        for k in [
+            *t.get_args(ScheduleKey),
+            "allowed_start_time",
+            "allowed_end_time",
+            "is_overlaped",
+        ]
+    }
 
-    # init an empty df for a schedule and add some columns, will be used store merged schedule
-    merged_sch_df = schedule.to_dataframe(schedule.empty_npardict())
-    merged_sch_df[cn["end_time"]] = np.empty(0, "datetime64[us]")
-    merged_sch_df[cn_allowed_start_time] = np.empty(0, "datetime64[us]")
-    merged_sch_df[cn_allowed_end_time] = np.empty(0, "datetime64[us]")
-    merged_sch_df[cn_is_overlaped] = np.empty(0, np.bool)
-    for sch_df in sch_dfs:
-        # merge and then sort the df
+    df = pd.concat(
+        [
+            ds[keys["end_time"]].transpose().to_pandas(),
+            ds[keys["pointing"]].transpose().to_pandas(),
+            ds[keys["allowed_start_time"]].transpose().to_pandas(),
+            ds[keys["allowed_end_time"]].transpose().to_pandas(),
+            ds[keys["is_overlaped"]].transpose().to_pandas(),
+        ],
+        axis=1,
+        copy=False,
+    )
+
+    return df
+
+
+# TODO: add schedule validation?
+def priority_scheduling(sch_datas: t.Sequence[ScheduleXrds]):
+    # The logic of this function:
+    # 1. prepare an empty schedule data as the merge result
+    # 2. for each of the schedule passed in
+    #   2.1. merge it into the merge result
+    #   2.2. populate `allowed_start_time`, `allowed_end_time` for new rows
+    #   2.3. filter out new rows that conflict with `allowed_start_time`, `allowed_end_time`
+    #   2.3. update `allowed_start_time`, `allowed_end_time`
+
+    # define some const
+    # +1 is needed for `min_datetime64_us`, otherwise it will be NaT
+    max_datetime64_us = np.datetime64(np.iinfo(np.int64).max, "us")
+    min_datetime64_us = np.datetime64(np.iinfo(np.int64).min + 1, "us")
+
+    # define some column names/keys
+    keys = {
+        k: k
+        for k in [
+            *t.get_args(ScheduleKey),
+            "allowed_start_time",
+            "allowed_end_time",
+            "is_overlaped",
+        ]
+    }
+
+    # init an empty dataset for a schedule and add some columns, will be used store merged schedule
+    merged_sch_data = Schedule.empty().data
+    merged_sch_data[keys["allowed_start_time"]] = (
+        keys["start_time"],
+        np.empty(0, "datetime64[us]"),
+    )
+    merged_sch_data[keys["allowed_end_time"]] = (keys["start_time"], np.empty(0, "datetime64[us]"))
+    merged_sch_data[keys["is_overlaped"]] = (keys["start_time"], np.empty(0, np.bool))
+    for sch_data in sch_datas:
+        # init `allowed_start_time`, `allowed_end_time`, `is_overlaped` fields in `sch_data`
+        sch_data[keys["allowed_start_time"]] = xr.full_like(
+            sch_data[keys["start_time"]], np.datetime64("NaT"), dtype="datetime64[us]"
+        )
+        sch_data[keys["allowed_end_time"]] = xr.full_like(
+            sch_data[keys["start_time"]], np.datetime64("NaT"), dtype="datetime64[us]"
+        )
+        sch_data[keys["is_overlaped"]] = xr.full_like(
+            sch_data[keys["start_time"]], False, dtype=np.bool
+        )
+
+        # merge and then sort the schedule
         # we use a "stable" sorting algo to retains relative order,
         # so the df will be in order of start_time, then priority after sorting
-        merged_sch_df = pd.concat([merged_sch_df, sch_df])
-        merged_sch_df = merged_sch_df.sort_values(cn["start_time"], kind="stable").reset_index(
-            drop=True
-        )  # TODO: re-eval if we should use start_time as index
+        merged_sch_data = xr.concat([merged_sch_data, sch_data], dim=keys["start_time"])
+        merged_sch_data = merged_sch_data.sortby(keys["start_time"])
 
-        is_new_rows = merged_sch_df[cn_allowed_start_time].isna()
+        # populate `allowed_start_time`, `allowed_end_time` columns entries that have NaT values
+        # - the `end_time` of entries which have non-NaT `allowed_start_time` will be the `allowed_start_time` of its next and ffill rows
+        # - the `start_time` of entries which have non-NaT `allowed_end_time` will be the `allowed_end_time` of its previous and bfill rows
+        allowed_start_time_mask = ~xr.ufuncs.isnat(
+            merged_sch_data[keys["allowed_start_time"]]
+        ).shift({keys["start_time"]: 1}, fill_value=False)
+        merged_sch_data[keys["allowed_start_time"]].loc[allowed_start_time_mask] = (
+            merged_sch_data[keys["end_time"]]
+            .shift({keys["start_time"]: 1}, fill_value=min_datetime64_us)
+            .loc[allowed_start_time_mask]
+        )
+        merged_sch_data[keys["allowed_start_time"]] = merged_sch_data[
+            keys["allowed_start_time"]
+        ].ffill(keys["start_time"])
 
-        # populate `cn_allowed_start_time`, `cn_allowed_end_time` columns
-        # (rows from `sch_df` has NA values in them after the merge).
-        # - the allowed_start_time NA chunks heads is filled by the end_time of previous row, then ffill the rest
-        # - the allowed_end_time NA chunks tail is filled by the start_time of next row, then bfill the rest
-        allowed_start_time_na_heads_mask = (
-            merged_sch_df[cn_allowed_start_time].isna()
-            & merged_sch_df[cn_allowed_start_time]
-            .shift(1, fill_value=np.datetime64(0, "us"))
-            .notna()
+        allowed_end_time_mask = ~xr.ufuncs.isnat(merged_sch_data[keys["allowed_end_time"]]).shift(
+            {keys["start_time"]: -1}, fill_value=False
         )
-        merged_sch_df.loc[allowed_start_time_na_heads_mask, cn_allowed_start_time] = (
-            merged_sch_df.shift(1).loc[allowed_start_time_na_heads_mask, cn["end_time"]]
+        merged_sch_data[keys["allowed_end_time"]].loc[allowed_end_time_mask] = (
+            merged_sch_data[keys["start_time"]]
+            .shift({keys["start_time"]: -1}, fill_value=max_datetime64_us)
+            .loc[allowed_end_time_mask]
         )
-        merged_sch_df[cn_allowed_start_time] = merged_sch_df[cn_allowed_start_time].ffill()
+        merged_sch_data[keys["allowed_end_time"]] = merged_sch_data[keys["allowed_end_time"]].bfill(
+            keys["start_time"]
+        )
 
-        allowed_end_time_na_tails_mask = (
-            merged_sch_df[cn_allowed_end_time].isna()
-            & merged_sch_df[cn_allowed_end_time]
-            .shift(-1, fill_value=np.datetime64(0, "us"))
-            .notna()
-        )
-        merged_sch_df.loc[allowed_end_time_na_tails_mask, cn_allowed_end_time] = (
-            merged_sch_df.shift(-1).loc[allowed_end_time_na_tails_mask, cn["start_time"]]
-        )
-        merged_sch_df[cn_allowed_end_time] = merged_sch_df[cn_allowed_end_time].bfill()
+        # TODO: the `ffill`, `bfill` plus `shift` with `fill_value` should have left no `NaT`, investigate why it is not
+        # NOTE: we fill in `min_datetime64_us`, `max_datetime64_us` for the remaining NaT in `allowed_start_time`, `allowed_end_time`
+        #   so that resolved rows always have non NA values in that two column.
+        #   (they are likely at the tops and bottoms)
+        merged_sch_data[keys["allowed_start_time"]] = merged_sch_data[
+            keys["allowed_start_time"]
+        ].fillna(min_datetime64_us)
+        merged_sch_data[keys["allowed_end_time"]] = merged_sch_data[
+            keys["allowed_end_time"]
+        ].fillna(max_datetime64_us)
 
         # remove rows (control slices) that have time clash
         # NOTE: we checked for is_overlaped instead of is_allowed
         #   so that it is safe agaisnt comparison with `NaT`, which always return false
         #   (and we assume `NaT` mean "no restructions" for both allowed_start_time and allowed_end_time)
-        merged_sch_df[cn_is_overlaped] = (is_new_rows) & (
-            (merged_sch_df[cn["start_time"]] < merged_sch_df[cn_allowed_start_time])
-            | (merged_sch_df[cn["end_time"]] >= merged_sch_df[cn_allowed_end_time])
+        merged_sch_data[keys["is_overlaped"]] = (
+            merged_sch_data[keys["start_time"]] < merged_sch_data[keys["allowed_start_time"]]
+        ) | (merged_sch_data[keys["end_time"]] > merged_sch_data[keys["allowed_end_time"]])
+        merged_sch_data = merged_sch_data.loc[
+            {keys["start_time"]: ~merged_sch_data[keys["is_overlaped"]]}
+        ]
+
+        # update `allowed_start_time`, `allowed_end_time` columns
+        # - the `allowed_start_time` has the `end_time` of previous row
+        # - the `allowed_end_time` has the `start_time` of next row
+        merged_sch_data[keys["allowed_start_time"]] = merged_sch_data[keys["end_time"]].shift(
+            {keys["start_time"]: 1}, fill_value=min_datetime64_us
         )
-        merged_sch_df = merged_sch_df[~merged_sch_df[cn_is_overlaped]]
+        merged_sch_data[keys["allowed_end_time"]] = merged_sch_data[keys["start_time"]].shift(
+            {keys["start_time"]: -1}, fill_value=max_datetime64_us
+        )
 
-        # update `cn_allowed_start_time`, `cn_allowed_end_time` columns
-        # NOTE: we fill in `min_datetime64_us`, `max_datetime64_us` at the df top and end of allowed_start_time, allowed_end_time
-        #   so that resolved rows always have non NA values in that two column,
-        #   which we rely on atm to keep track on new new rows.
-        # TODO: see if delaying `reset_index` can eliminate the need of setting `min_datetime64_us`, `max_datetime64_us`
-        if (len(merged_sch_df)) > 0:
-            merged_sch_df.loc[:, cn_allowed_start_time] = merged_sch_df[cn["end_time"]].shift(1)
-            merged_sch_df.loc[merged_sch_df.index[0], cn_allowed_start_time] = min_datetime64_us
-            merged_sch_df.loc[:, cn_allowed_end_time] = merged_sch_df[cn["start_time"]].shift(-1)
-            merged_sch_df.loc[merged_sch_df.index[-1], cn_allowed_end_time] = max_datetime64_us
-
-    merged_sch_df = merged_sch_df.reset_index(drop=True)
-
-    return merged_sch_df
+    return merged_sch_data
 
 
+# TODO: remove its usage, then remove this func
 def priority_scheduling_npardict(schs: t.Sequence[ScheduleNdarrayDict2]) -> ScheduleNdarrayDict2:
     """
     Merge a sequence of schedules for a single station into one,
@@ -119,7 +177,7 @@ def priority_scheduling_npardict(schs: t.Sequence[ScheduleNdarrayDict2]) -> Sche
     for sch in reversed(schs):
         exp_detail_map.update(sch["exp_detail_map"])
 
-    df = priority_scheduling_df([schedule.to_dataframe(sch) for sch in schs])
+    resultant_sch = priority_scheduling([Schedule.from_ndarrays_2(sch).data for sch in schs])
 
     logger.debug("priority_scheduling done")
-    return schedule.from_dataframe(df, exp_detail_map=exp_detail_map)
+    return resultant_sch.to_ndarrays_2()

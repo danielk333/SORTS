@@ -63,7 +63,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
     # NOTE: for `np.arange` `stop` param,
     #   - we subtract `spec["exp_detail"]["slice_duration"]` so that only full slice are included
     #   - and add `+1` so that slice with time range `[state["end_time"] - spec["exp_detail"]["slice_duration"], state["end_time"])` is included
-    tx_slice_start_time = np.arange(
+    tx_slice_start_time: npt.NDArray[Datetime64_us] = np.arange(
         state["start_time"],
         state["end_time"] - spec["exp_detail"]["slice_duration"] + 1,
         spec["exp_detail"]["slice_duration"],
@@ -80,6 +80,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
         {
             "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
             "start_time": tx_slice_start_time,
+            "end_time": tx_slice_start_time + spec["exp_detail"]["slice_duration"],
             "exp_num": np.full(state["tx_schedule_size"], spec["exp_detail"]["id"], dtype=np.int64),
             "pointing": tx_pointing,
         }
@@ -132,6 +133,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
             {
                 "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
                 "start_time": rx_slice_start_time,
+                "end_time": tx_slice_start_time + spec["exp_detail"]["slice_duration"],
                 "exp_num": np.full(rx_schedule_size, spec["exp_detail"]["id"], dtype=np.int64),
                 "pointing": rx_pointing,
             }

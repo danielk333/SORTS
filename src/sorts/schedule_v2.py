@@ -24,12 +24,14 @@ assert set(t.get_args(DataFrameColumnName)) == set(
 )
 
 ScheduleDataKey = t.Literal["pointing", "exp_num"]
-ScheduleCoordKey = t.Literal["start_time"]
+ScheduleCoordKey = t.Literal["start_time", "end_time"]
 ScheduleAttrKey = t.Literal["exp_detail_map"]
+ScheduleKey = t.Literal[ScheduleDataKey, ScheduleCoordKey, ScheduleAttrKey]
 
 schedule_data_keys: dict[ScheduleDataKey, str] = {k: k for k in t.get_args(ScheduleDataKey)}
 schedule_coord_keys: dict[ScheduleCoordKey, str] = {k: k for k in t.get_args(ScheduleCoordKey)}
 schedule_attr_keys: dict[ScheduleAttrKey, str] = {k: k for k in t.get_args(ScheduleAttrKey)}
+schedule_keys: dict[ScheduleKey, str] = {k: k for k in t.get_args(ScheduleKey)}
 
 
 data_frame_column_names: t.Final[dict[DataFrameColumnName, str]] = {
@@ -87,7 +89,6 @@ class ScheduleNdarrayDict2(t.TypedDict):
     pointing_el: npt.NDArray[Float64_as_deg]
 
 
-# TODO: better naming / remove the `1` suffix
 class ScheduleNdarrayDict(t.TypedDict):
     """
     A TypedDict, stores a collection of "control slices" (or "slices" in short).
@@ -100,6 +101,7 @@ class ScheduleNdarrayDict(t.TypedDict):
     exp_detail_map: dict[int, ExperimentDetail]
 
     start_time: npt.NDArray[Datetime64_us]
+    end_time: npt.NDArray[Datetime64_us]
 
     # TODO: re-eval the size of `exp_num`
     exp_num: npt.NDArray[np.int64]
@@ -128,27 +130,6 @@ def validate_schedule_length(sch: ScheduleNdarrayDict2) -> ScheduleNdarrayDict2:
                 + f"but shape of {k} is {f.shape}, "
                 f"while shape of {k_0} is {field_0.shape} "
             )
-
-    return sch
-
-
-def empty() -> ScheduleXrds:
-    """A convenience method for generating an empty schedule"""
-
-    sch = xr.Dataset(
-        coords={
-            "start_time": np.empty(0, dtype="datetime64[us]"),
-            "azelr": ["az", "el", "r"],
-        },
-        data_vars={
-            "pointing": (("azelr", "start_time"), []),
-            "exp_num": (
-                "start_time",
-                np.empty(0, dtype=np.int64),
-            ),
-        },
-        attrs={"exp_detail_map": {}},
-    )
 
     return sch
 
@@ -262,11 +243,14 @@ class Schedule:
     """
 
     data_keys = schedule_data_keys
-    """shortcut to `schedule_data_keys`"""
+    """shortcut to module attribute `schedule_data_keys`"""
     coord_keys = schedule_coord_keys
-    """shortcut to `schedule_coord_keys`"""
+    """shortcut to module attribute `schedule_coord_keys`"""
     attr_keys = schedule_attr_keys
-    """shortcut to `schedule_attr_keys`"""
+    """shortcut to module attribute `schedule_attr_keys`"""
+
+    keys = schedule_keys
+    """shortcut to module attribute `schedule_keys`"""
 
     def __init__(self, data: ScheduleXrds):
         self.data: ScheduleXrds = data
@@ -277,6 +261,7 @@ class Schedule:
             data=xr.Dataset(
                 coords={
                     "start_time": data["start_time"],
+                    "end_time": ("start_time", data["end_time"]),
                     "azelr": ["az", "el", "r"],
                 },
                 data_vars={
@@ -284,10 +269,53 @@ class Schedule:
                         ("azelr", "start_time"),
                         data["pointing"],
                     ),
-                    "exp_num": data["exp_num"],
+                    "exp_num": ("start_time", data["exp_num"]),
                 },
                 attrs={"exp_detail_map": data["exp_detail_map"]},
             )
+        )
+
+        return sch
+
+    # TODO: remove its usage, then remove this method
+    @classmethod
+    def from_ndarrays_2(cls, data: ScheduleNdarrayDict2) -> Schedule:
+        sch = Schedule(
+            data=xr.Dataset(
+                coords={
+                    "start_time": data["start_time"],
+                    "end_time": ("start_time", data["start_time"]),
+                    "azelr": ["az", "el", "r"],
+                },
+                data_vars={
+                    "pointing": (
+                        ("azelr", "start_time"),
+                        np.array(
+                            [
+                                data["pointing_az"],
+                                data["pointing_el"],
+                                np.full(len(data["pointing_az"]), 1.0, dtype=np.float64),
+                            ]
+                        ),
+                    ),
+                    "exp_num": ("start_time", data["exp_num"]),
+                },
+                attrs={"exp_detail_map": data["exp_detail_map"]},
+            )
+        )
+
+        return sch
+
+    @classmethod
+    def empty(cls) -> Schedule:
+        sch = Schedule.from_ndarrays(
+            {
+                "exp_detail_map": {},
+                "start_time": np.empty(0, dtype="datetime64[us]"),
+                "end_time": np.empty(0, dtype="datetime64[us]"),
+                "exp_num": np.empty(0, dtype=np.int64),
+                "pointing": np.empty((3, 0), dtype=np.float64),
+            }
         )
 
         return sch
@@ -296,6 +324,7 @@ class Schedule:
         arr_dict: ScheduleNdarrayDict = {
             "exp_detail_map": self.data.attrs[self.attr_keys["exp_detail_map"]],
             "start_time": self.data[self.coord_keys["start_time"]].to_numpy(),
+            "end_time": self.data[self.coord_keys["end_time"]].to_numpy(),
             "exp_num": self.data[self.data_keys["exp_num"]].to_numpy(),
             "pointing": self.data[self.data_keys["pointing"]].to_numpy(),
         }

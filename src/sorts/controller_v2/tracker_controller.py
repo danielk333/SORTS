@@ -86,6 +86,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
         {
             "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
             "start_time": sch_time,
+            "end_time": sch_time + spec["exp_detail"]["slice_duration"],
             "exp_num": np.full(sch_len, spec["exp_detail"]["id"], dtype=np.int64),
             "pointing": tx_pointings,
         }
@@ -96,6 +97,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
             {
                 "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
                 "start_time": sch_time,
+                "end_time": sch_time + spec["exp_detail"]["slice_duration"],
                 "exp_num": np.full(sch_len, spec["exp_detail"]["id"], dtype=np.int64),
                 "pointing": rx_pointings,
             }
