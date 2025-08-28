@@ -4,9 +4,8 @@ import numpy as np
 import numpy.typing as npt
 import xarray as xr
 import pandas as pd
-from sorts.types import Timedelta64_us, Datetime64_us, Float64_as_deg, AzelrCoordinates_DegM
-from sorts.schedule_v2.schedule_data import (
-    ScheduleXrds,
+from sorts.types import Datetime64_us, Float64_as_deg, AzelrCoordinates_DegM
+from sorts.schedule_v2.types import (
     ExperimentDetail,
     ScheduleNdarrayDict2,
     schedule_data_keys,
@@ -14,6 +13,7 @@ from sorts.schedule_v2.schedule_data import (
     schedule_attr_keys,
     schedule_keys,
 )
+from sorts.schedule_v2.schedule_data import ScheduleXrds
 
 logger = logging.getLogger(__name__)
 

@@ -1,4 +1,4 @@
-from .schedule_data import (
+from .types import (
     ScheduleDataKey,
     ScheduleCoordKey,
     ScheduleAttrKey,
@@ -9,8 +9,8 @@ from .schedule_data import (
     schedule_keys,
     ExperimentDetail,
     ScheduleNdarrayDict2,
-    ScheduleXrds,
 )
+from .schedule_data import ScheduleXrds
 from .schedule import (
     ScheduleFieldKey,
     NonDerivedDataFrameColumnName,
