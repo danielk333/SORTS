@@ -12,6 +12,7 @@ from .schedule_data import (
     schedule_coord_keys,
     schedule_attr_keys,
     schedule_keys,
+    ScheduleNdarrayDict,
     ScheduleXrds,
 )
 from .schedule import (
@@ -21,7 +22,6 @@ from .schedule import (
     DataFrameColumnName,
     data_frame_column_names,
     cn,
-    ScheduleNdarrayDict,
     from_dataframe,
     create_mask_by_time_range,
     filter_by_mask,

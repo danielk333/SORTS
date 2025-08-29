@@ -1,9 +1,11 @@
 from __future__ import annotations
 import logging, typing as t
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 import xarray as xr
-from sorts.schedule_v2.types import ScheduleNdarrayDict, ScheduleNdarrayDict2
+from sorts.types import Datetime64_us, AzelrCoordinates_DegM
+from sorts.schedule_v2.types import ExperimentDetail, ScheduleNdarrayDict2
 
 logger = logging.getLogger(__name__)
 
@@ -17,9 +19,32 @@ schedule_coord_keys: dict[ScheduleCoordKey, str] = {k: k for k in t.get_args(Sch
 schedule_attr_keys: dict[ScheduleAttrKey, str] = {k: k for k in t.get_args(ScheduleAttrKey)}
 schedule_keys: dict[ScheduleKey, str] = {k: k for k in t.get_args(ScheduleKey)}
 
+
+class ScheduleNdarrayDict(t.TypedDict):
+    """
+    A TypedDict, stores a collection of "control slices" (or "slices" in short).
+
+    - Slice data are stored as columns of fields, each of which is a `ndarray`.
+    - Metadata (`ExperimentDetail`s) are stored as a dict inside the `exp_detail_map` field.
+    """
+
+    # TODO: add `Station` into this class?
+    exp_detail_map: dict[int, ExperimentDetail]
+
+    start_time: npt.NDArray[Datetime64_us]
+    end_time: npt.NDArray[Datetime64_us]
+
+    # TODO: re-eval the size of `exp_num`
+    exp_num: npt.NDArray[np.int64]
+
+    pointing: AzelrCoordinates_DegM
+
+
 # TODO: rename to just `ScheduleData` when xarray adoptation is done?
 ScheduleXrds = xr.Dataset
 """An xarray `Dataset` that contains the schedule data"""
+
+# TODO: add a validation function which assure the expected coord/data_key/label are there
 
 
 def from_ndarrays(data: ScheduleNdarrayDict) -> ScheduleXrds:
