@@ -11,7 +11,7 @@ import pyant
 # Local import
 from .. import frames
 
-RadarStationCompositeKey = str
+StationId = str
 """A unique string that identifies a radar station"""
 
 """
@@ -51,7 +51,7 @@ class Station(object):
         alt,
         min_elevation,
         beam,
-        uid: RadarStationCompositeKey = "__DEFAULT_STN_ID__",
+        uid: StationId = "__DEFAULT_STN_ID__",
     ):
         self.lat = lat
         self.lon = lon
@@ -189,7 +189,7 @@ class RX(Station):
         min_elevation,
         beam,
         noise,
-        uid: RadarStationCompositeKey = "__DEFAULT_RX_STN_ID__",
+        uid: StationId = "__DEFAULT_RX_STN_ID__",
     ):
         super().__init__(lat, lon, alt, min_elevation, beam, uid=uid)
         self.noise = noise
@@ -241,7 +241,7 @@ class TX(Station):
         pulse_length=1e-3,
         ipp=10e-3,
         n_ipp=20,
-        uid: RadarStationCompositeKey = "__DEFAULT_TX_STN_ID__",
+        uid: StationId = "__DEFAULT_TX_STN_ID__",
     ):
         super().__init__(lat, lon, alt, min_elevation, beam, uid=uid)
 

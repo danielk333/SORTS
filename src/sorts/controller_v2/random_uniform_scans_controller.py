@@ -2,7 +2,7 @@ import logging, math
 from dataclasses import dataclass
 from datetime import timedelta
 import numpy as np
-from sorts.radar.tx_rx import RadarStationCompositeKey
+from sorts.radar.tx_rx import StationId
 from sorts.schedule_v2 import ScheduleNdarrayDict2
 
 logger = logging.getLogger(__name__)
@@ -15,7 +15,7 @@ class RandomUniformScansController:
     a controller that generate random uniform scans
     """
 
-    radar_station_composite_key: RadarStationCompositeKey
+    radar_station_composite_key: StationId
     exp_num: int = 0
     min_elevation_deg: float = 30.0
     time_slice_us: float = 1.0 * 10_000  # ipp * npoints
@@ -42,7 +42,7 @@ class RandomUniformScansController:
         stt_tstmp,
         end_tstmp,
         res_us=1000,
-    ) -> dict[RadarStationCompositeKey, ScheduleNdarrayDict2]:
+    ) -> dict[StationId, ScheduleNdarrayDict2]:
         """
         Parameters
         ---

@@ -4,6 +4,7 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import xarray as xr
+from sorts.radar.tx_rx import StationId
 from sorts.types import Datetime64_us, AzelrCoordinates_DegM
 from sorts.schedule_v2.types import ExperimentDetail, ScheduleNdarrayDict2
 
@@ -28,7 +29,7 @@ class ScheduleNdarrayDict(t.TypedDict):
     - Metadata (`ExperimentDetail`s) are stored as a dict inside the `exp_detail_map` field.
     """
 
-    stn_id: str
+    stn_id: StationId
 
     exp_detail_map: dict[int, ExperimentDetail]
 

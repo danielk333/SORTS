@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 
-"""Defines the required properties of a radar system and its components, including predefined instances.
-
-"""
+"""Defines the required properties of a radar system and its components, including predefined instances."""
 
 from .scans import Scan
-from .tx_rx import Station, TX, RX, RadarStationCompositeKey
+from .tx_rx import Station, TX, RX, StationId
 
 from .radars import get_radar, list_radars
