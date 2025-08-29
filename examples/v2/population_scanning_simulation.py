@@ -60,9 +60,9 @@ exp_detail_map: dict[int, sortsV2.schedule.ExperimentDetail] = {
 }
 
 tx_station: sorts.Station = eiscat3d.tx[0]
-tx_station.uid = ("eiscat3d", "stage1-array", "tx", "0")
+tx_station.uid = "eiscat3d, stage1-array, tx, 0"
 rx_station: sorts.Station = eiscat3d.rx[0]
-rx_station.uid = ("eiscat3d", "stage1-array", "rx", "0")
+rx_station.uid = "eiscat3d, stage1-array, rx, 0"
 
 fence_scan_controller = sortsV2.controller.FenceScanController.from_scan_spec(
     tx_station=tx_station,

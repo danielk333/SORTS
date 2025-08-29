@@ -39,7 +39,7 @@ class State(t.TypedDict):
 
 
 class Output(t.NamedTuple):
-    """tuple of `(tx_schedule, [rx_schedule, ...])`"""
+    """A named tuple of `(tx_schedule, [rx_schedule, ...])`"""
 
     tx_schedule: Schedule
     rx_schedules: t.Sequence[Schedule]
@@ -84,6 +84,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
 
     tx_sch = Schedule.from_ndarrays(
         {
+            "stn_id": spec["tx_station"].uid,
             "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
             "start_time": sch_time,
             "end_time": sch_time + spec["exp_detail"]["slice_duration"],
@@ -95,6 +96,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
     rx_schs = [
         Schedule.from_ndarrays(
             {
+                "stn_id": spec["rx_stations"][idx].uid,
                 "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
                 "start_time": sch_time,
                 "end_time": sch_time + spec["exp_detail"]["slice_duration"],
@@ -102,7 +104,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
                 "pointing": rx_pointings,
             }
         )
-        for rx_pointings in rxs_pointings
+        for idx, rx_pointings in enumerate(rxs_pointings)
     ]
 
     output = Output(tx_sch, rx_schs)

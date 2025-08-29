@@ -62,11 +62,11 @@ eiscat3d = get_radar("eiscat3d", "stage1-array")
 # eiscat3d = get_radar("nostra", "example1")
 # TODO: these patching of station prop should be integrated into codebase
 tx_station: Station = eiscat3d.tx[0]
-tx_station.uid = ("eiscat3d", "stage1-array", "tx", "0")
+tx_station.uid = "eiscat3d, stage1-array, tx, 0"
 rx_station_0: Station = eiscat3d.rx[0]
-rx_station_0.uid = ("eiscat3d", "stage1-array", "rx", "0")
+rx_station_0.uid = "eiscat3d, stage1-array, rx, 0"
 rx_station_1: Station = eiscat3d.rx[1]
-rx_station_1.uid = ("eiscat3d", "stage1-array", "rx", "1")
+rx_station_1.uid = "eiscat3d, stage1-array, rx, 1"
 
 
 tracked_spobj = SpaceObject(
