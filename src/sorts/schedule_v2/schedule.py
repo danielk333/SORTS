@@ -168,6 +168,7 @@ class Schedule:
     # TODO: remove its usage, then remove this method
     def to_ndarrays_2(self) -> ScheduleNdarrayDict2:
         arr_dict: ScheduleNdarrayDict2 = {
+            "stn_id": self.data.attrs[self.attr_keys["stn_id"]],
             "exp_detail_map": self.data.attrs[self.attr_keys["exp_detail_map"]],
             "start_time": self.data[self.coord_keys["start_time"]].to_numpy(),
             "exp_num": self.data[self.data_keys["exp_num"]].to_numpy(),
