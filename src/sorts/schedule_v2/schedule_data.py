@@ -5,7 +5,7 @@ import numpy.typing as npt
 import pandas as pd
 import xarray as xr
 from sorts.radar.tx_rx import StationId
-from sorts.types import Datetime64_us, AzelrCoordinates_DegM
+from sorts.types import Datetime64_us, AzelrCoordinates_DegM, TimeRange_us
 from sorts.schedule_v2.types import ExperimentDetail, ScheduleNdarrayDict2
 
 logger = logging.getLogger(__name__)
@@ -152,3 +152,13 @@ def merge_attrs(attrs_dicts: list[dict[ScheduleAttrKey, t.Any]]) -> dict:
                 result["exp_detail_map"].update(attrs_dict["exp_detail_map"])
 
     return result
+
+
+def filter_by_time_range(ds: ScheduleXrds, time_range: TimeRange_us) -> ScheduleXrds:
+    mask = (ds[schedule_keys["start_time"]] >= time_range[0]) & (
+        ds[schedule_keys["start_time"]] <= time_range[1]
+    )
+
+    ds_masked = ds[{schedule_keys["start_time"]: mask}]
+
+    return ds_masked

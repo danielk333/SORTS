@@ -4,7 +4,9 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 from sorts.types import Datetime64_us
+from sorts.types import Datetime64_us, TimeRange_us
 from sorts.schedule_v2.types import ExperimentDetail, ScheduleNdarrayDict2
+import sorts.schedule_v2.schedule_data as schedule_data
 from sorts.schedule_v2.schedule_data import (
     schedule_data_keys,
     schedule_coord_keys,
@@ -107,6 +109,7 @@ def filter_by_time_range(
     return filter_by_mask(sch, create_mask_by_time_range(sch, time_range))
 
 
+
 # TODO: add schedule validation?
 class Schedule:
     """
@@ -152,6 +155,10 @@ class Schedule:
 
     def __repr__(self):
         return f"<sorts.Schedule> with data:\n{self.data.__repr__()}"
+
+    def filter_by_time_range(self, time_range: TimeRange_us) -> Schedule:
+        filtered_data = schedule_data.filter_by_time_range(self.data, time_range)
+        return Schedule(data=filtered_data)
 
     def to_ndarrays(self) -> ScheduleNdarrayDict:
         arr_dict: ScheduleNdarrayDict = {
