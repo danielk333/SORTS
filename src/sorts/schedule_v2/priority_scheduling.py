@@ -85,6 +85,8 @@ def priority_scheduling(sch_datas: t.Sequence[ScheduleXrds]) -> ScheduleXrds:
 
     # init an empty dataset for a schedule and add some columns, will be used store merged schedule
     merged_sch_data = empty()
+    if len(sch_datas) > 0:
+        merged_sch_data.attrs = sch_datas[0].attrs
     merged_sch_data[keys["allowed_start_time"]] = (
         keys["start_time"],
         np.empty(0, "datetime64[us]"),

@@ -86,5 +86,6 @@ def priority_scheduling_interleaved_schedule_test():
     resultant_sch_data = priority_scheduling([sch_a.data, sch_b.data])
 
     assert all(xr.ufuncs.equal(resultant_sch_data[keys["exp_num"]], [0, 1] * 12))
+    assert resultant_sch_data.attrs[keys["stn_id"]] == "stn_a"
 
     return
