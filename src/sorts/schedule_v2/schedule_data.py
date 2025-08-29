@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 ScheduleDataKey = t.Literal["pointing", "exp_num"]
 ScheduleCoordKey = t.Literal["start_time", "end_time"]
-ScheduleAttrKey = t.Literal["exp_detail_map"]
+ScheduleAttrKey = t.Literal["stn_id", "exp_detail_map"]
 ScheduleKey = t.Literal[ScheduleDataKey, ScheduleCoordKey, ScheduleAttrKey]
 
 schedule_data_keys: dict[ScheduleDataKey, str] = {k: k for k in t.get_args(ScheduleDataKey)}
@@ -28,7 +28,8 @@ class ScheduleNdarrayDict(t.TypedDict):
     - Metadata (`ExperimentDetail`s) are stored as a dict inside the `exp_detail_map` field.
     """
 
-    # TODO: add `Station` into this class?
+    stn_id: str
+
     exp_detail_map: dict[int, ExperimentDetail]
 
     start_time: npt.NDArray[Datetime64_us]
@@ -61,7 +62,10 @@ def from_ndarrays(data: ScheduleNdarrayDict) -> ScheduleXrds:
             ),
             "exp_num": ("start_time", data["exp_num"]),
         },
-        attrs={"exp_detail_map": data["exp_detail_map"]},
+        attrs={
+            "stn_id": data["stn_id"],
+            "exp_detail_map": data["exp_detail_map"],
+        },
     )
 
     return sch_data
@@ -88,7 +92,10 @@ def from_ndarrays_2(data: ScheduleNdarrayDict2) -> ScheduleXrds:
             ),
             "exp_num": ("start_time", data["exp_num"]),
         },
-        attrs={"exp_detail_map": data["exp_detail_map"]},
+        attrs={
+            "stn_id": data.get("stn_id", "__NO_STN_ID__"),
+            "exp_detail_map": data["exp_detail_map"],
+        },
     )
 
     return sch_data
@@ -97,6 +104,7 @@ def from_ndarrays_2(data: ScheduleNdarrayDict2) -> ScheduleXrds:
 def empty() -> ScheduleXrds:
     sch_data = from_ndarrays(
         {
+            "stn_id": "__EMPTY_ID__",
             "exp_detail_map": {},
             "start_time": np.empty(0, dtype="datetime64[us]"),
             "end_time": np.empty(0, dtype="datetime64[us]"),
@@ -108,7 +116,7 @@ def empty() -> ScheduleXrds:
     return sch_data
 
 
-def to_dataframe(ds: xr.Dataset) -> pd.DataFrame:
+def to_dataframe(ds: ScheduleXrds) -> pd.DataFrame:
     # define some column names/keys
     keys = schedule_keys
 
@@ -126,3 +134,20 @@ def to_dataframe(ds: xr.Dataset) -> pd.DataFrame:
     )
 
     return df
+
+
+def merge_attrs(attrs_dicts: list[dict[ScheduleAttrKey, t.Any]]) -> dict:
+    """Merging attrs dict, latter attrs dict will override former attrs dict, just like `.update()` method of `dict`"""
+
+    match len(attrs_dicts):
+        case 0:
+            return {}
+        case 1:
+            return attrs_dicts[0]
+        case _:
+            result: dict[ScheduleAttrKey, t.Any] = attrs_dicts[0]
+            for attrs_dict in attrs_dicts[0:]:
+                result["stn_id"] = attrs_dict["stn_id"]
+                result["exp_detail_map"].update(attrs_dict["exp_detail_map"])
+
+    return result

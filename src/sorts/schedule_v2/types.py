@@ -45,3 +45,5 @@ class ScheduleNdarrayDict2(t.TypedDict):
 
     pointing_az: npt.NDArray[Float64_as_deg]
     pointing_el: npt.NDArray[Float64_as_deg]
+
+    stn_id: t.NotRequired[str]

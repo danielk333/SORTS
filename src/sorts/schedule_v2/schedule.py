@@ -114,7 +114,9 @@ class Schedule:
 
     Schedule data is stored in the `data` attribute, and some additional helper metadata are stored in other attributes.
 
-    Methods of this class are mostly just redirection to equivalent module level functions.
+    NOTE:
+        We are still evaluating which backing data structure to use,
+        so the type of `.data` attriute (`xarray.Dataset` atm), might change in the future
     """
 
     data_keys = schedule_data_keys
@@ -153,6 +155,7 @@ class Schedule:
 
     def to_ndarrays(self) -> ScheduleNdarrayDict:
         arr_dict: ScheduleNdarrayDict = {
+            "stn_id": self.data.attrs[self.attr_keys["stn_id"]],
             "exp_detail_map": self.data.attrs[self.attr_keys["exp_detail_map"]],
             "start_time": self.data[self.coord_keys["start_time"]].to_numpy(),
             "end_time": self.data[self.coord_keys["end_time"]].to_numpy(),

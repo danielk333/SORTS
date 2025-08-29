@@ -10,6 +10,7 @@ from sorts.schedule_v2.schedule_data import (
     empty,
     from_ndarrays_2,
     to_dataframe,
+    merge_attrs,
 )
 
 logger = logging.getLogger(__name__)
@@ -26,7 +27,9 @@ DsVarKey = t.Literal[ScheduleKey, DsIntermediateVarKey]
 def to_dataframe(ds: xr.Dataset):
     """
     Convert schedule data in xarray dataset to pandas dataframe.
+
     A helper method for debugging.
+    Includes extra intermediate columns used in function `priority_scheduling`.
     """
 
     # define some column names/keys
@@ -103,6 +106,9 @@ def priority_scheduling(sch_datas: t.Sequence[ScheduleXrds]) -> ScheduleXrds:
         # merge and then sort the schedule
         # we use a "stable" sorting algo to retains relative order,
         # so the df will be in order of start_time, then priority after sorting
+        # also note that attrs merged in the way that former schedule has higher priority than latter,
+        # consistent with the func `priority_scheduling`
+        merged_sch_data.attrs = merge_attrs([sch_data.attrs, merged_sch_data.attrs])
         merged_sch_data = xr.concat([merged_sch_data, sch_data], dim=keys["start_time"])
         merged_sch_data = merged_sch_data.sortby(keys["start_time"])
 
