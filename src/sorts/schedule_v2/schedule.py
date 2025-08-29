@@ -147,6 +147,9 @@ class Schedule:
         resultant_sch_data = priority_scheduling([sch.data for sch in schs])
         return Schedule(data=resultant_sch_data)
 
+    def __repr__(self):
+        return f"<sorts.Schedule> with data:\n{self.data.__repr__()}"
+
     def to_ndarrays(self) -> ScheduleNdarrayDict:
         arr_dict: ScheduleNdarrayDict = {
             "exp_detail_map": self.data.attrs[self.attr_keys["exp_detail_map"]],
