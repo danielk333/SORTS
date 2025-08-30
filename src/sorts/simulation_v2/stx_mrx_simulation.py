@@ -198,7 +198,7 @@ def derive_observation_indexers(
     k = Schedule.keys
 
     rx_schedule_map: dict[str, Schedule] = {
-        sch.data.attrs[sch.attr_keys["stn_id"]]: sch for sch in rx_schs
+        sch._data.attrs[sch.attr_keys["stn_id"]]: sch for sch in rx_schs
     }
 
     for passage in passages:
@@ -211,8 +211,8 @@ def derive_observation_indexers(
             for rx_sch_obs in rx_sch_obss:
                 obs_indexers.append(
                     {
-                        "tx_indexer": tx_sch_obs.data[k["start_time"]],
-                        "rx_indexer": rx_sch_obs.data[k["start_time"]],
+                        "tx_indexer": tx_sch_obs._data[k["start_time"]],
+                        "rx_indexer": rx_sch_obs._data[k["start_time"]],
                     }
                 )
 

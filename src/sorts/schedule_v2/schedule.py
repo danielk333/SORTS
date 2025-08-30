@@ -122,11 +122,10 @@ class Schedule:
     """
     Provides methods for manipuating the schedule data and enforce that the require columns/data are set.
 
-    Schedule data is stored in the `data` attribute, and some additional helper metadata are stored in other attributes.
+    Schedule data is stored in a private attribute `_data` attribute, and some additional helper metadata are stored in other attributes.
 
     NOTE:
-        We are still evaluating which backing data structure to use,
-        so the type of `.data` attriute (`xarray.Dataset` atm), might change in the future
+        We are still evaluating which backing data structure to use and is subject to change
     """
 
     DataKey = ScheduleDataKey
@@ -148,7 +147,7 @@ class Schedule:
     """shortcut to module attribute"""
 
     def __init__(self, data: ScheduleXrds):
-        self.data: ScheduleXrds = data
+        self._data: ScheduleXrds = data
 
     @classmethod
     def from_ndarrays(cls, data: ScheduleNdarrayDict) -> t.Self:
@@ -165,20 +164,20 @@ class Schedule:
 
     @classmethod
     def priority_scheduling(cls, schs: list[Schedule]):
-        resultant_sch_data = priority_scheduling([sch.data for sch in schs])
+        resultant_sch_data = priority_scheduling([sch._data for sch in schs])
         return cls(data=resultant_sch_data)
 
     def __repr__(self):
-        return f"<sorts.Schedule> with data:\n{self.data.__repr__()}"
+        return f"<sorts.Schedule> with data:\n{self._data.__repr__()}"
 
     def to_ndarrays(self) -> ScheduleNdarrayDict:
         arr_dict: ScheduleNdarrayDict = {
-            "stn_id": self.data.attrs[self.attr_keys["stn_id"]],
-            "exp_detail_map": self.data.attrs[self.attr_keys["exp_detail_map"]],
-            "start_time": self.data[self.coord_keys["start_time"]].to_numpy(),
-            "end_time": self.data[self.coord_keys["end_time"]].to_numpy(),
-            "exp_num": self.data[self.data_keys["exp_num"]].to_numpy(),
-            "pointing": self.data[self.data_keys["pointing"]].to_numpy(),
+            "stn_id": self._data.attrs[self.attr_keys["stn_id"]],
+            "exp_detail_map": self._data.attrs[self.attr_keys["exp_detail_map"]],
+            "start_time": self._data[self.coord_keys["start_time"]].to_numpy(),
+            "end_time": self._data[self.coord_keys["end_time"]].to_numpy(),
+            "exp_num": self._data[self.data_keys["exp_num"]].to_numpy(),
+            "pointing": self._data[self.data_keys["pointing"]].to_numpy(),
         }
 
         return arr_dict
@@ -186,25 +185,25 @@ class Schedule:
     # TODO: remove its usage, then remove this method
     def to_ndarrays_2(self) -> ScheduleNdarrayDict2:
         arr_dict: ScheduleNdarrayDict2 = {
-            "stn_id": self.data.attrs[self.attr_keys["stn_id"]],
-            "exp_detail_map": self.data.attrs[self.attr_keys["exp_detail_map"]],
-            "start_time": self.data[self.coord_keys["start_time"]].to_numpy(),
-            "exp_num": self.data[self.data_keys["exp_num"]].to_numpy(),
-            "pointing_az": self.data[self.data_keys["pointing"]].to_numpy()[0],
-            "pointing_el": self.data[self.data_keys["pointing"]].to_numpy()[1],
+            "stn_id": self._data.attrs[self.attr_keys["stn_id"]],
+            "exp_detail_map": self._data.attrs[self.attr_keys["exp_detail_map"]],
+            "start_time": self._data[self.coord_keys["start_time"]].to_numpy(),
+            "exp_num": self._data[self.data_keys["exp_num"]].to_numpy(),
+            "pointing_az": self._data[self.data_keys["pointing"]].to_numpy()[0],
+            "pointing_el": self._data[self.data_keys["pointing"]].to_numpy()[1],
         }
 
         return arr_dict
 
     def to_dataframe(self) -> pd.DataFrame:
-        return to_dataframe(self.data)
+        return to_dataframe(self._data)
 
     def filter_by_time_range(self, time_range: TimeRange_us) -> t.Self:
         cls = type(self)
-        filtered_data = schedule_data.filter_by_time_range(self.data, time_range)
+        filtered_data = schedule_data.filter_by_time_range(self._data, time_range)
         return cls(data=filtered_data)
 
     def split_by_measurements(self) -> list[t.Self]:
         cls = type(self)
-        schs = [cls(data=d) for d in schedule_data.split_by_measurements(self.data)]
+        schs = [cls(data=d) for d in schedule_data.split_by_measurements(self._data)]
         return schs

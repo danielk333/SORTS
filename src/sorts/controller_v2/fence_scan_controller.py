@@ -84,7 +84,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
             "end_time": tx_slice_start_time + spec["exp_detail"]["slice_duration"],
             "exp_num": np.full(state["tx_schedule_size"], spec["exp_detail"]["id"], dtype=np.int64),
             "pointing": tx_pointing,
-        }
+        },
     )
 
     rx_slice_start_time = tx_slice_start_time.repeat(len(spec["scan_range"]))
