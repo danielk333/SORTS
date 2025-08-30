@@ -14,9 +14,7 @@ from sorts.simulation_v2.passage import (
     find_passages,
     split_passage_by_schedule,
 )
-from sorts.simulation_v2.observation import Observation
-from sorts import schedule_v2 as schedule
-from sorts.schedule_v2.schedule import ScheduleNdarrayDict2, ExperimentDetail
+from sorts.simulation_v2.observation import Observation, ObservationIndexer
 
 logger = logging.getLogger(__name__)
 
@@ -188,6 +186,39 @@ def calculate_observation_per_experiment_passage(
     return obs
 
 
+def derive_observation_indexers(
+    passages: list[Passage],
+    tx_sch: Schedule,
+    rx_schs: list[Schedule],
+) -> list[ObservationIndexer]:
+    """Derive an indexer for each observation"""
+
+    obs_indexers: list[ObservationIndexer] = []
+
+    k = Schedule.keys
+
+    rx_schedule_map: dict[str, Schedule] = {
+        sch.data.attrs[sch.attr_keys["stn_id"]]: sch for sch in rx_schs
+    }
+
+    for passage in passages:
+        tx_sch_obss = tx_sch.filter_by_time_range(passage["time_range"]).split_by_measurements()
+
+        rx_sch = rx_schedule_map[passage["rx_station"].uid]
+        rx_sch_obss = rx_sch.filter_by_time_range(passage["time_range"]).split_by_measurements()
+
+        for tx_sch_obs in tx_sch_obss:
+            for rx_sch_obs in rx_sch_obss:
+                obs_indexers.append(
+                    {
+                        "tx_indexer": tx_sch_obs.data[k["start_time"]],
+                        "rx_indexer": rx_sch_obs.data[k["start_time"]],
+                    }
+                )
+
+    return obs_indexers
+
+
 def calculate_observations(
     spec: Spec,
     spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]],
@@ -229,6 +260,7 @@ def calculate_observations(
 
                 exp_passages.extend(exp_passages_)
 
+        # TODO: maybe using numpy/xarray indexing/slicing instead of python loop is better there?
         # TODO: improvements needed; this only works for StxSrx case, where calculate_observation gives out 1 element list
         for exp_passage in exp_passages:
             obs = calculate_observation_per_experiment_passage(
@@ -243,6 +275,8 @@ def calculate_observations(
     return obss
 
 
+# TODO: we need to enforce each station to has a unique id (`.uid` prop)
+#   either in the simulation class or in related station getter like `get_radar`
 class StxMrxSimulation:
     def __init__(self, spec: Spec, state: State):
         self.spec: Spec = spec

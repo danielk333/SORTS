@@ -3,7 +3,7 @@ import logging, typing as t
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from sorts.types import Datetime64_us
+import xarray as xr
 from sorts.types import Datetime64_us, TimeRange_us
 from sorts.schedule_v2.types import ExperimentDetail, ScheduleNdarrayDict2
 import sorts.schedule_v2.schedule_data as schedule_data
@@ -112,6 +112,9 @@ def filter_by_time_range(
 
     return filter_by_mask(sch, create_mask_by_time_range(sch, time_range))
 
+
+XrDataArrayIndexer = xr.DataArray
+"""Contains info to get a subset of entries from a `Schedule`"""
 
 
 # TODO: add schedule validation?

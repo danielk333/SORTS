@@ -3,13 +3,27 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 from sorts.types import AzelCoordinates_DegM, Datetime64_us, Float64_as_m
+from sorts.schedule_v2.schedule import XrDataArrayIndexer
 from sorts.simulation_v2.passage import ExperimentPassage
+
+
+class ObservationIndexer(t.TypedDict):
+    """
+    A TypedDict.
+    Contains info to get a subset of entries from a `Schedule`, that corresponds to an observation.
+    """
+
+    tx_indexer: XrDataArrayIndexer
+    rx_indexer: XrDataArrayIndexer
 
 
 class Observation(t.TypedDict):
     """A TypedDict of params"""
 
     id: str
+
+    # TODO: uncomment and update the call sites of `Observation`
+    # observationIndexer: ObservationIndexer
 
     # TODO: re-think this naming
     experiment_passage: ExperimentPassage
