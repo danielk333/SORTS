@@ -151,22 +151,22 @@ class Schedule:
         self.data: ScheduleXrds = data
 
     @classmethod
-    def from_ndarrays(cls, data: ScheduleNdarrayDict) -> Schedule:
-        return Schedule(data=from_ndarrays(data))
+    def from_ndarrays(cls, data: ScheduleNdarrayDict) -> t.Self:
+        return cls(data=from_ndarrays(data))
 
     # TODO: remove its usage, then remove this method
     @classmethod
-    def from_ndarrays_2(cls, data: ScheduleNdarrayDict2) -> Schedule:
-        return Schedule(data=from_ndarrays_2(data))
+    def from_ndarrays_2(cls, data: ScheduleNdarrayDict2) -> t.Self:
+        return cls(data=from_ndarrays_2(data))
 
     @classmethod
-    def empty(cls) -> Schedule:
-        return Schedule(data=empty())
+    def empty(cls) -> t.Self:
+        return cls(data=empty())
 
     @classmethod
     def priority_scheduling(cls, schs: list[Schedule]):
         resultant_sch_data = priority_scheduling([sch.data for sch in schs])
-        return Schedule(data=resultant_sch_data)
+        return cls(data=resultant_sch_data)
 
     def __repr__(self):
         return f"<sorts.Schedule> with data:\n{self.data.__repr__()}"
@@ -199,10 +199,12 @@ class Schedule:
     def to_dataframe(self) -> pd.DataFrame:
         return to_dataframe(self.data)
 
-    def filter_by_time_range(self, time_range: TimeRange_us) -> Schedule:
+    def filter_by_time_range(self, time_range: TimeRange_us) -> t.Self:
+        cls = type(self)
         filtered_data = schedule_data.filter_by_time_range(self.data, time_range)
-        return Schedule(data=filtered_data)
+        return cls(data=filtered_data)
 
-    def split_by_measurements(self) -> list[Schedule]:
-        schs = [Schedule(data=d) for d in schedule_data.split_by_measurements(self.data)]
+    def split_by_measurements(self) -> list[t.Self]:
+        cls = type(self)
+        schs = [cls(data=d) for d in schedule_data.split_by_measurements(self.data)]
         return schs
