@@ -8,6 +8,10 @@ from sorts.types import Datetime64_us, TimeRange_us
 from sorts.schedule_v2.types import ExperimentDetail, ScheduleNdarrayDict2
 import sorts.schedule_v2.schedule_data as schedule_data
 from sorts.schedule_v2.schedule_data import (
+    ScheduleDataKey,
+    ScheduleCoordKey,
+    ScheduleAttrKey,
+    ScheduleKey,
     schedule_data_keys,
     schedule_coord_keys,
     schedule_attr_keys,
@@ -122,15 +126,23 @@ class Schedule:
         so the type of `.data` attriute (`xarray.Dataset` atm), might change in the future
     """
 
-    data_keys = schedule_data_keys
-    """shortcut to module attribute `schedule_data_keys`"""
-    coord_keys = schedule_coord_keys
-    """shortcut to module attribute `schedule_coord_keys`"""
-    attr_keys = schedule_attr_keys
-    """shortcut to module attribute `schedule_attr_keys`"""
+    DataKey = ScheduleDataKey
+    """shortcut to module attribute"""
+    CoordKey = ScheduleCoordKey
+    """shortcut to module attribute"""
+    AttrKey = ScheduleAttrKey
+    """shortcut to module attribute"""
+    Key = ScheduleKey
+    """shortcut to module attribute"""
 
+    data_keys = schedule_data_keys
+    """shortcut to module attribute"""
+    coord_keys = schedule_coord_keys
+    """shortcut to module attribute"""
+    attr_keys = schedule_attr_keys
+    """shortcut to module attribute"""
     keys = schedule_keys
-    """shortcut to module attribute `schedule_keys`"""
+    """shortcut to module attribute"""
 
     def __init__(self, data: ScheduleXrds):
         self.data: ScheduleXrds = data
@@ -155,10 +167,6 @@ class Schedule:
 
     def __repr__(self):
         return f"<sorts.Schedule> with data:\n{self.data.__repr__()}"
-
-    def filter_by_time_range(self, time_range: TimeRange_us) -> Schedule:
-        filtered_data = schedule_data.filter_by_time_range(self.data, time_range)
-        return Schedule(data=filtered_data)
 
     def to_ndarrays(self) -> ScheduleNdarrayDict:
         arr_dict: ScheduleNdarrayDict = {
@@ -187,3 +195,11 @@ class Schedule:
 
     def to_dataframe(self) -> pd.DataFrame:
         return to_dataframe(self.data)
+
+    def filter_by_time_range(self, time_range: TimeRange_us) -> Schedule:
+        filtered_data = schedule_data.filter_by_time_range(self.data, time_range)
+        return Schedule(data=filtered_data)
+
+    def split_by_measurements(self) -> list[Schedule]:
+        schs = [Schedule(data=d) for d in schedule_data.split_by_measurements(self.data)]
+        return schs

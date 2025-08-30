@@ -162,3 +162,28 @@ def filter_by_time_range(ds: ScheduleXrds, time_range: TimeRange_us) -> Schedule
     ds_masked = ds[{schedule_keys["start_time"]: mask}]
 
     return ds_masked
+
+
+def split_by_measurements(ds: ScheduleXrds) -> list[ScheduleXrds]:
+    """
+    Split a schedule data by measurements.
+
+    i.e. By `exp_num` and per each of the simutaneous pointings
+    """
+
+    k = schedule_keys
+
+    # identify where `exp_num` changes
+    chg_pts = ds[k["exp_num"]] != ds[k["exp_num"]].shift({k["start_time"]: 1})
+    split_ids = chg_pts.cumsum()
+
+    exp_detail_map: dict[int, ExperimentDetail] = ds.attrs[k["exp_detail_map"]]
+    dss: list[ScheduleXrds] = []
+    for _, ds_split in ds.groupby(split_ids):
+        # further spliting according to number of simutaneous rx pointings
+        simu_cnt = exp_detail_map[ds_split[k["exp_num"]][0].item()].get(
+            "num_simutaneous_pointings", 1
+        )
+        dss.append(ds_split.loc[{k["start_time"]: slice(0, None, simu_cnt)}])
+
+    return dss
