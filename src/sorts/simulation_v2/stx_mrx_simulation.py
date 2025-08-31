@@ -97,7 +97,7 @@ def derive_schedule_indexers_per_tx_rx_station_pair(
 
 
 def derive_observation_indexers(
-    passages: t.Sequence[Passage],
+    passage: Passage,
     tx_sch: Schedule,
     rx_schs: t.Sequence[Schedule],
 ) -> list[ObservationIndexer]:
@@ -105,30 +105,22 @@ def derive_observation_indexers(
 
     obs_indexers: list[ObservationIndexer] = []
 
-    k = Schedule.keys
-
     rx_schedule_map: dict[str, Schedule] = {
         sch._data.attrs[sch.attr_keys["stn_id"]]: sch for sch in rx_schs
     }
 
-    for passage in passages:
-        tx_sch_obss = tx_sch.filter_by_time_range(passage["time_range"]).split_by_measurements(
-            is_split_simu=False
-        )
+    tx_obs_idxers = tx_sch.filter_by_time_range(passage["time_range"]).get_indexer_per_measurement(
+        is_split_simu=False
+    )
 
-        rx_sch = rx_schedule_map[passage["rx_station"].uid]
-        rx_sch_obss = rx_sch.filter_by_time_range(passage["time_range"]).split_by_measurements(
-            is_split_simu=True
-        )
+    rx_sch = rx_schedule_map[passage["rx_station"].uid]
+    rx_obs_idxers = rx_sch.filter_by_time_range(passage["time_range"]).get_indexer_per_measurement(
+        is_split_simu=True
+    )
 
-        for tx_sch_obs in tx_sch_obss:
-            for rx_sch_obs in rx_sch_obss:
-                obs_indexers.append(
-                    {
-                        "tx_indexer": tx_sch_obs._data[k["start_time"]],
-                        "rx_indexer": rx_sch_obs._data[k["start_time"]],
-                    }
-                )
+    for tx_obs_idxer in tx_obs_idxers:
+        for rx_obs_idxer in rx_obs_idxers:
+            obs_indexers.append({"tx_indexer": tx_obs_idxer, "rx_indexer": rx_obs_idxer})
 
     return obs_indexers
 
@@ -139,7 +131,7 @@ def calculate_observations(
     spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]],
     spobjs_smpl_states: list[EcefStates],
     spobjs_interpolators: list[Interpolator],
-) -> tuple[list[SimulationUnit], list[ObservationIndexer]]:
+):
     """
     Calculate the observations.
     """
@@ -189,12 +181,18 @@ def calculate_observations(
     pbar.close()
 
     # TODO: update `Observation` class, (and return list of `Observation` here?)
-    obs_idxers = derive_observation_indexers(
-        passages=passages,
-        tx_sch=spec["tx_schedule"],
-        rx_schs=spec["rx_schedules"],
-    )
-    return sim_units, obs_idxers
+    passage_obs_idxers_pairs = [
+        (
+            passage,
+            derive_observation_indexers(
+                passage=passage,
+                tx_sch=spec["tx_schedule"],
+                rx_schs=spec["rx_schedules"],
+            ),
+        )
+        for passage in passages
+    ]
+    return sim_units, passage_obs_idxers_pairs
 
 
 # TODO: we need to enforce each station to has a unique id (`.uid` prop)

@@ -156,7 +156,7 @@ def south_to_north_circular_orbit_test():
         }
     )
 
-    sim_units, obs_idxers = sim.run()
+    sim_units, passage_obs_idxers_pairs = sim.run()
     sim_unit = sim_units[0]
 
     # assert there is only 1 observation

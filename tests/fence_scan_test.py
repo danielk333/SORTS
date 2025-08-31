@@ -13,7 +13,7 @@ from astropy.time import Time
 from astropy.constants import R_earth  # type: ignore
 from pyant import Beam
 import pyorb
-from sorts.types import Float64_as_sec, Float64_as_deg, Float_as_sec, Float_as_deg
+from sorts.types import Float64_as_sec, Float64_as_deg, Float_as_sec, Float_as_deg, Float_as_m
 from sorts.utils import to_datetime64_us
 from sorts.interpolation import Legendre8
 from sorts.propagator import Kepler
@@ -40,6 +40,8 @@ float_equality_thld = 1e-9
 # TODO: use ENU for pointings in schedule? it allows `pointing_equality_thld = 1e-3`
 pointing_equality_thld: Float_as_deg = 5e-3
 pointing_equality_thld_loose: Float_as_deg = 1  # even 0.5 deg fails
+# TODO: re-eval this threshold after converting schedule data to use ENU instead of Azelr
+pointing_range_equality_thld: Float_as_m = 5.0
 
 # TODO: re-eval the `control_slice_duration` value, need to be fast but still accurate enough for testing
 # control_slice_duration = np.timedelta64(10_000, "us")  # 10ms
@@ -48,6 +50,7 @@ control_slice_duration = np.timedelta64(1_000_000, "us")  # 1s
 dt_equality_thld = control_slice_duration
 dsec_sampling_intv: Float_as_sec = 30
 simu_num = 3
+scan_ranges = np.linspace(300e3, 1000e3, num=simu_num, dtype=np.float64)
 
 _SuK = SimulationUnit._K
 
@@ -144,7 +147,7 @@ def south_to_north_circular_orbit_test():
         azimuth=90,  # sweep from east to west
         min_elevation=70,
         pointings_per_cycle=40,
-        scan_range=np.linspace(300e3, 1000e3, num=simu_num, dtype=np.float64),
+        scan_range=scan_ranges,
     )
 
     fence_schs = fence_scan_ctrl.generate(start_time, end_time)
@@ -167,11 +170,27 @@ def south_to_north_circular_orbit_test():
         }
     )
 
-    sim_units, obs_idxers = sim.run()
+    sim_units, passage_obs_idxers_pairs = sim.run()
     sim_unit = sim_units[0]
 
-    # assert there is `simu_num` number of observations
-    assert len(obs_idxers) == simu_num
+    # assert there is 1 passage and `simu_num` number of observations
+    assert len(passage_obs_idxers_pairs) == 1
+    assert len(passage_obs_idxers_pairs[0][1]) == simu_num
+
+    # TODO: simplify the indexer/simulation output so indexing into the observation is less cryptic
+    # assert we are getting observations with the intended scan ranges
+    for i, scan_range in enumerate(scan_ranges):
+        assert (
+            (
+                fence_schs.rx_schedules[0]
+                .filter_by_time_range(passage_obs_idxers_pairs[0][0]["time_range"])
+                ._data.loc[{"start_time": passage_obs_idxers_pairs[0][1][i]["rx_indexer"]}][
+                    "pointing"
+                ]
+                .loc["r"][0]
+            )
+            - scan_range
+        ) < pointing_range_equality_thld
 
     for sim_unit in sim_units:
         # TODO: assert `El` componend of tx pointings swing between 0 and 90? or we can check it in pointing generation unit test instead

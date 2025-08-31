@@ -212,7 +212,5 @@ class Schedule:
         return cls(data=filtered_data)
 
     # TODO: we can probably inject the schedule is tx or rx into `Schedule` class and remove param `is_split_simu`
-    def split_by_measurements(self, is_split_simu: bool) -> list[t.Self]:
-        cls = type(self)
-        schs = [cls(data=d) for d in schedule_data.split_by_measurements(self._data, is_split_simu)]
-        return schs
+    def get_indexer_per_measurement(self, is_split_simu: bool) -> list[XrDataArrayIndexer]:
+        return schedule_data.get_indexer_per_measurement(self._data, is_split_simu)

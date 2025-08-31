@@ -34,6 +34,9 @@ TimeRange_us = tuple[Datetime64_us, Datetime64_us]
 Float_as_sec = float
 "`float` as second"
 
+Float_as_m = float
+"`float` as meters"
+
 Float_as_deg = float
 "`float` as angle in degrees"
 

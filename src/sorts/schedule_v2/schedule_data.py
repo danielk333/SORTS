@@ -179,7 +179,8 @@ def filter_by_time_range(ds: ScheduleXrds, time_range: TimeRange_us) -> Schedule
     return ds_masked
 
 
-def split_by_measurements(ds: ScheduleXrds, is_split_simu: bool) -> list[ScheduleXrds]:
+# TODO: maybe saving a `simu_grp` number in schedule is more memory efficient
+def get_indexer_per_measurement(ds: ScheduleXrds, is_split_simu: bool) -> list[xr.DataArray]:
     """
     Split a schedule data by measurements.
 
@@ -193,7 +194,7 @@ def split_by_measurements(ds: ScheduleXrds, is_split_simu: bool) -> list[Schedul
     split_ids = chg_pts.cumsum()
 
     exp_detail_map: dict[int, ExperimentDetail] = ds.attrs[k["exp_detail_map"]]
-    dss: list[ScheduleXrds] = []
+    idxers: list[xr.DataArray] = []
     for _, ds_split in ds.groupby(split_ids):
         if is_split_simu:
             # further spliting according to number of simutaneous rx pointings
@@ -201,8 +202,18 @@ def split_by_measurements(ds: ScheduleXrds, is_split_simu: bool) -> list[Schedul
                 "num_simutaneous_pointings", 1
             )
             for i in range(simu_num):
-                dss.append(ds_split[{k["start_time"]: slice(i, None, simu_num)}])
+                idxers.append(
+                    xr.DataArray(
+                        (np.arange(len(ds_split[k["start_time"]])) - i) % simu_num == 0,
+                        dims=k["start_time"],
+                    )
+                )
         else:
-            dss.append(ds_split)
+            idxers.append(
+                xr.DataArray(
+                    np.full(len(ds_split[k["start_time"]]), True, dtype=np.bool),
+                    dims=k["start_time"],
+                )
+            )
 
-    return dss
+    return idxers
