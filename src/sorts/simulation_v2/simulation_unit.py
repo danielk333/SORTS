@@ -19,14 +19,8 @@ DataKey = t.Literal[
     "exp_num",
     "gain_tx",
     "gain_rx",
-    "wavelength",
-    "power_tx",
     "range_tx_m",
     "range_rx_m",
-    "diameter",
-    "bandwidth",
-    "rx_noise_temp",
-    "radar_albedo",
     "snr",
 ]
 AttrKey = t.Literal["stn_id"]
@@ -46,14 +40,8 @@ class _K:
     exp_num: t.Final = "exp_num"
     gain_tx: t.Final = "gain_tx"
     gain_rx: t.Final = "gain_rx"
-    wavelength: t.Final = "wavelength"
-    power_tx: t.Final = "power_tx"
     range_tx_m: t.Final = "range_tx_m"
     range_rx_m: t.Final = "range_rx_m"
-    diameter: t.Final = "diameter"
-    bandwidth: t.Final = "bandwidth"
-    rx_noise_temp: t.Final = "rx_noise_temp"
-    radar_albedo: t.Final = "radar_albedo"
     snr: t.Final = "snr"
     stn_id: t.Final = "stn_id"
 
@@ -84,18 +72,20 @@ def calc_gain(
     rx_gain_arr = np.full(size, 0.0, dtype=np.float64)
     for idx in range(len(state_data[_K.time])):
         tx_stn.beam.sph_point(
-            state_data[_K.tx_pointing][_K.az, idx],
-            state_data[_K.tx_pointing][_K.el, idx],
+            state_data[_K.tx_pointing].loc[_K.az][idx],
+            state_data[_K.tx_pointing].loc[_K.el][idx],
             degrees=True,
         )
         tx_gain_arr[idx] = tx_stn.beam.gain(spobj_tx_enu[:3, idx])
 
         rx_stn.beam.sph_point(
-            state_data[_K.rx_pointing][_K.az, idx],
-            state_data[_K.rx_pointing][_K.el, idx],
+            state_data[_K.rx_pointing].loc[_K.az][idx],
+            state_data[_K.rx_pointing].loc[_K.el][idx],
             degrees=True,
         )
         rx_gain_arr[idx] = rx_stn.beam.gain(spobj_rx_enu[:3, idx])
+    state_data[_K.gain_tx] = (_K.time, tx_gain_arr)
+    state_data[_K.gain_rx] = (_K.time, rx_gain_arr)
 
     return state_data
 
@@ -148,20 +138,23 @@ class SimulationUnit:
         # TODO: do we need `ipps`?
         # TODO: do we need `duty_cycles`?
         self.powers = np.array(
-            [tx_sch._data.attrs[_SK.exp_detail_map][n]["power"] for n in state_data[_K.exp_num]],
+            [
+                tx_sch._data.attrs[_SK.exp_detail_map][n]["power"]
+                for n in state_data[_K.exp_num].to_numpy()
+            ],
             dtype=np.float64,
         )
         self.bandwidths = np.array(
             [
                 tx_sch._data.attrs[_SK.exp_detail_map][n]["bandwidth"]
-                for n in state_data[_K.exp_num]
+                for n in state_data[_K.exp_num].to_numpy()
             ],
             dtype=np.float64,
         )
         self.rx_noise_temps = np.array(
             [
                 rx_sch._data.attrs[_SK.exp_detail_map][n]["noise_temp"]
-                for n in state_data[_K.exp_num]
+                for n in state_data[_K.exp_num].to_numpy()
             ],
             dtype=np.float64,
         )
@@ -226,12 +219,19 @@ class SimulationUnit:
 
         state_data = xr.Dataset(
             coords={
-                _K.time: time,
+                _K.time: (_K.time, time.to_numpy()),
                 _K.azelr: [_K.az, _K.el, _K.r],
             },
             data_vars={
-                _K.tx_pointing: ((_K.azelr, _K.time), tx_sch._data[_SK.pointing].loc[:, time]),
-                _K.rx_pointing: ((_K.azelr, _K.time), rx_sch._data[_SK.pointing].loc[:, time]),
+                _K.tx_pointing: (
+                    (_K.azelr, _K.time),
+                    tx_sch._data[_SK.pointing].loc[:, time].to_numpy(),
+                ),
+                _K.rx_pointing: (
+                    (_K.azelr, _K.time),
+                    rx_sch._data[_SK.pointing].loc[:, time].to_numpy(),
+                ),
+                _K.exp_num: (_K.time, tx_sch._data[_SK.exp_num].loc[time].to_numpy()),
             },
             attrs={
                 _K.stn_id: tx_sch._data.attrs[_SK.stn_id],
@@ -264,12 +264,12 @@ class SimulationUnit:
             gain_rx=self._state_data[_K.gain_rx].to_numpy(),
             wavelength=self.tx_station.beam.wavelength,
             power_tx=self.powers,
-            range_tx_m=self._state_data[_K.range_tx_m].to_numpy(),
-            range_rx_m=self._state_data[_K.range_rx_m].to_numpy(),
+            range_tx_m=self.range_tx,
+            range_rx_m=self.range_rx,
             diameter=self.space_object.d,
             bandwidth=self.bandwidths,
             rx_noise_temp=self.rx_noise_temps,
             radar_albedo=self.space_object.parameters.get("radar_albedo", 1.0),
         )
 
-        self._state_data[_K.snr] = snr
+        self._state_data[_K.snr] = (_K.time, snr)

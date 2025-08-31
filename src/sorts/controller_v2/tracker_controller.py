@@ -253,6 +253,7 @@ class TrackerController:
 
         return output
 
+    # TODO: can be removed?
     def plot(self, start_time: Datetime_Like | None = None, end_time: Datetime_Like | None = None):
         global plot_state_and_output
 

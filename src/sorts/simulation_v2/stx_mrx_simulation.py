@@ -32,9 +32,9 @@ class Spec(t.TypedDict):
     """A TypedDict of params"""
 
     tx_station: Station
-    tx_schedule: ScheduleNdarrayDict2
+    tx_schedule: Schedule
     rx_stations: t.Sequence[Station]
-    rx_schedules: t.Sequence[ScheduleNdarrayDict2]
+    rx_schedules: t.Sequence[Schedule]
     exp_detail_map: dict[int, ExperimentDetail]
     epoch: Datetime_Like
     start_time: Datetime_Like
@@ -174,8 +174,8 @@ def calculate_observations(
                 spobj_interp=spobj_states_interp,
                 tx_stn=spec["tx_station"],
                 rx_stn=spec["rx_stations"][rx_stn_idx],
-                tx_sch=Schedule.from_ndarrays_2(spec["tx_schedule"]),
-                rx_sch=Schedule.from_ndarrays_2(spec["rx_schedules"][rx_stn_idx]),
+                tx_sch=spec["tx_schedule"],
+                rx_sch=spec["rx_schedules"][rx_stn_idx],
             )
             sim_unit.simulate()
 
