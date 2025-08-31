@@ -8,19 +8,15 @@ from tqdm import tqdm
 from sorts.interpolation import Interpolator
 from sorts.radar.tx_rx import Station, StationId
 from sorts.utils import to_datetime64_us
-from sorts.types import Datetime_Like, Float64_as_sec, Float64_as_m, EcefStates, Datetime64_us
+from sorts.types import Datetime_Like, Float64_as_sec, EcefStates, Datetime64_us
 from sorts.schedule_v2.schedule import (
     Schedule,
     TimeRangeIndexer,
     ScheduleNdarrayDict2,
     ExperimentDetail,
 )
-from sorts.simulation_v2.passage import (
-    Passage,
-    ExperimentPassage,
-    find_passages,
-    split_passage_by_schedule,
-)
+from sorts.simulation_v2.passage import Passage, find_passages
+from sorts.simulation_v2.simulation_unit import SimulationUnit
 from sorts.simulation_v2.observation import Observation, ObservationIndexer
 
 logger = logging.getLogger(__name__)
@@ -81,118 +77,6 @@ def sample_and_propagate_pace_objects_states(
     return spobjs_smpl_dsec, spobjs_smpl_states
 
 
-# TODO: there was a note about assuming the tx and rx time difference is negligible.
-#   tx-rx time difference is used to calc range so this cannot be true.
-#   likely it is a related assumption regarding similar terms (e.g. in schedule), and should be cleaned up.
-# TODO: we need mask per (tx, rx) schedule?
-def calculate_observation_per_experiment_passage(
-    spec: Spec,
-    experiment_passage: ExperimentPassage,
-    spobj_interpolator: Interpolator,
-) -> Observation:
-    # TODO: can probably be simplified?
-    rx_station_index = [s.uid for s in spec["rx_stations"]].index(
-        experiment_passage["rx_station"].uid
-    )
-
-    tx_station = experiment_passage["tx_station"]
-    tx_schedule = experiment_passage["tx_schedule"]
-    rx_station = experiment_passage["rx_station"]
-    rx_schedule = experiment_passage["rx_schedule"]
-
-    # TODO: use np.unique and its inverse to optimize this for getting states only once at a unique
-    # time
-    dsec: npt.NDArray[Float64_as_sec] = (
-        rx_schedule["start_time"] - experiment_passage["epoch"]
-    ).astype(np.float64) * 1e-6
-    # dsec_unique, _, dsec_inverse_inds, _ = np.unique(dsec)
-
-    obs_size = len(dsec)
-
-    spobj_states = spobj_interpolator.get_state(dsec)
-    spobj_tx_enu = tx_station.enu(spobj_states)  # space object in tx station coordinate
-    spobj_rx_enu = rx_station.enu(spobj_states)  # space object in rx station coordinate
-
-    range_tx: npt.NDArray[Float64_as_m] = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
-    range_rx: npt.NDArray[Float64_as_m] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
-
-    snr = np.empty((obs_size,), dtype=np.float64)
-    powers = np.empty((obs_size,), dtype=np.float64)
-
-    # pulse_lengths = np.array(
-    #     [spec["exp_detail_map"][n]["pulse_length"] for n in tx_schedule["exp_num"]], dtype=np.float64
-    # )  # TODO: chk if needed
-    # ipps = np.array(
-    #     [spec["exp_detail_map"][n]["ipp"] for n in tx_schedule["exp_num"]], dtype=np.float64
-    # )  # TODO: chk if needed
-    powers = np.array(
-        [spec["exp_detail_map"][n]["power"] for n in tx_schedule["exp_num"]], dtype=np.float64
-    )
-    bandwidths = np.array(
-        [spec["exp_detail_map"][n]["bandwidth"] for n in tx_schedule["exp_num"]],
-        dtype=np.float64,
-    )
-    # duty_cycles = np.array(
-    #     [spec["exp_detail_map"][n]["duty_cycle"] for n in tx_schedule["exp_num"]], dtype=np.float64
-    # )  # TODO: chk if needed
-    rx_noise_temps = np.array(
-        [spec["exp_detail_map"][n]["noise_temp"] for n in rx_schedule["exp_num"]],
-        dtype=np.float64,
-    )
-
-    # TODO: check with daniel on how to vectorize
-    #   passing in a ndarray of pointing will trigger exception when calculating gain
-    #   refs:
-    #   - `pyant/beam.py` `L235` `assert vector_cnt <= max_vectors, "Too many vector valued parameters"`
-    #   - `pyant/models/array.py` `L185` `params, shape = self.get_parameters(ind, named=True, max_vectors=0)`
-    tx_gain_arr = np.full((obs_size,), 0.0, dtype=np.float64)
-    rx_gain_arr = np.full((obs_size,), 0.0, dtype=np.float64)
-    for idx, _ in enumerate(rx_schedule["start_time"]):
-        tx_station.beam.sph_point(
-            tx_schedule["pointing_az"][idx], tx_schedule["pointing_el"][idx], degrees=True
-        )
-        tx_gain_arr[idx] = tx_station.beam.gain(spobj_tx_enu[:3, idx])
-
-        rx_station.beam.sph_point(
-            rx_schedule["pointing_az"][idx], tx_schedule["pointing_el"][idx], degrees=True
-        )
-        rx_gain_arr[idx] = rx_station.beam.gain(spobj_rx_enu[:3, idx])
-
-    tx_wavelength: float = tx_station.beam.wavelength
-    # rx_wavelength: float = rx_station.beam.wavelength # TODO: chk if needed
-
-    snr = sorts.signals.hard_target_snr(
-        tx_gain_arr,
-        rx_gain_arr,
-        tx_wavelength,
-        powers,
-        range_tx,
-        range_rx,
-        diameter=experiment_passage["space_object"].d,
-        bandwidth=bandwidths,
-        rx_noise_temp=rx_noise_temps,
-        radar_albedo=experiment_passage["space_object"].parameters.get("radar_albedo", 1.0),
-    )
-
-    # TODO: add `doppler_spread_integrated_snr:` support
-    # TODO: add `blind_ranges:` support
-    obs = Observation(
-        id=f'{rx_station_index}-({str(experiment_passage["time_range"][0])}, {str(experiment_passage["time_range"][1])})',  # TODO: revisit
-        experiment_passage=experiment_passage,
-        tx_time=tx_schedule["start_time"],
-        rx_time=rx_schedule["start_time"],
-        snr=snr,
-        range=range_tx + range_rx,
-        range_rx=range_rx,
-        range_rate=np.full((obs_size,), 1.0, dtype=np.float64),  # TODO: implement
-        # TODO: maybe we should use a single field in `tx_schedule` to store the pointings? (use `xarray`? better for scheduling as well)
-        tx_k=np.array([tx_schedule["pointing_az"], tx_schedule["pointing_el"]]),
-        rx_k=np.array([rx_schedule["pointing_az"], rx_schedule["pointing_el"]]),
-    )
-
-    return obs
-
-
 def derive_schedule_indexers_per_tx_rx_station_pair(
     passages: list[Passage],
 ) -> dict[tuple[StationId, StationId], list[TimeRangeIndexer]]:
@@ -245,17 +129,19 @@ def derive_observation_indexers(
     return obs_indexers
 
 
+# TODO: can be dissolved?
 def calculate_observations(
     spec: Spec,
     spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]],
     spobjs_smpl_states: list[EcefStates],
     spobjs_interpolators: list[Interpolator],
-) -> list[Observation]:
+) -> list[SimulationUnit]:
     """
     Calculate the observations.
     """
 
-    obss: list[Observation] = []
+    passages: list[Passage] = []
+    sim_units: list[SimulationUnit] = []
 
     pbar = tqdm(desc="simulating observation", total=len(spec["space_objects"]))
     for spobj, spobj_smpl_dsec, spobj_smpl_states, spobj_states_interp in zip(
@@ -265,9 +151,8 @@ def calculate_observations(
         spobjs_interpolators,
     ):
         logger.debug(f"{spobj} calculating")
-        exp_passages: list[ExperimentPassage] = []
-        for rx_station, rx_schedule in zip(spec["rx_stations"], spec["rx_schedules"]):
-            passages = find_passages(
+        for rx_station in spec["rx_stations"]:
+            found_passages = find_passages(
                 dt=spobj_smpl_dsec,
                 space_object=spobj,
                 states=spobj_smpl_states,
@@ -275,30 +160,33 @@ def calculate_observations(
                 rx_station=rx_station,
                 epoch=spec["epoch"],
             )
+            passages.extend(found_passages)
 
-            for passage in passages:
-                exp_passages_ = split_passage_by_schedule(
-                    passage=passage,
-                    tx_schedule=spec["tx_schedule"],
-                    rx_schedule=rx_schedule,
-                    exp_detail_map=spec["exp_detail_map"],
-                )
+        indexers_dict = derive_schedule_indexers_per_tx_rx_station_pair(passages)
 
-                exp_passages.extend(exp_passages_)
+        # TODO: minor cleanup needed, old code for schedule is making is a bit more messy than needed
+        for stn_id_pair, indexers in indexers_dict.items():
+            rx_stn_idx = [stn.uid for stn in spec["rx_stations"]].index(stn_id_pair[1])
 
-        # TODO: maybe using numpy/xarray indexing/slicing instead of python loop is better there?
-        # TODO: improvements needed; this only works for StxSrx case, where calculate_observation gives out 1 element list
-        for exp_passage in exp_passages:
-            obs = calculate_observation_per_experiment_passage(
-                spec=spec,
-                experiment_passage=exp_passage,
-                spobj_interpolator=spobj_states_interp,
+            sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(
+                indexers=indexers,
+                spobj=spobj,
+                spobj_interp=spobj_states_interp,
+                tx_stn=spec["tx_station"],
+                rx_stn=spec["rx_stations"][rx_stn_idx],
+                tx_sch=Schedule.from_ndarrays_2(spec["tx_schedule"]),
+                rx_sch=Schedule.from_ndarrays_2(spec["rx_schedules"][rx_stn_idx]),
             )
-            obss.append(obs)
+            sim_unit.simulate()
+
+            sim_units.append(sim_unit)
+
         pbar.update(1)
     pbar.close()
 
-    return obss
+    # TODO: update `Observation` class, (and return list of `Observation` here?)
+    # TODO: call `derive_observation_indexers`
+    return sim_units
 
 
 # TODO: we need to enforce each station to has a unique id (`.uid` prop)
@@ -341,10 +229,10 @@ class StxMrxSimulation:
         self.state["space_object_sample_states"] = spobjs_smpl_states
         self.state["space_object_interpolators"] = spobjs_interpolators
 
-        obss = calculate_observations(
+        sim_units = calculate_observations(
             self.spec, spobjs_smpl_dsec, spobjs_smpl_states, spobjs_interpolators
         )
         logger.debug("calc obs done")
-        self.state["observations"] = obss
+        # self.state["observations"] = obss
 
-        return obss
+        return sim_units
