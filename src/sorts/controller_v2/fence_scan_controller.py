@@ -135,7 +135,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
                 "stn_id": rx_station.uid,
                 "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
                 "start_time": rx_slice_start_time,
-                "end_time": tx_slice_start_time + spec["exp_detail"]["slice_duration"],
+                "end_time": rx_slice_start_time + spec["exp_detail"]["slice_duration"],
                 "exp_num": np.full(rx_schedule_size, spec["exp_detail"]["id"], dtype=np.int64),
                 "pointing": rx_pointing,
             }

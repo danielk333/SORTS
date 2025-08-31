@@ -97,9 +97,9 @@ def derive_schedule_indexers_per_tx_rx_station_pair(
 
 
 def derive_observation_indexers(
-    passages: list[Passage],
+    passages: t.Sequence[Passage],
     tx_sch: Schedule,
-    rx_schs: list[Schedule],
+    rx_schs: t.Sequence[Schedule],
 ) -> list[ObservationIndexer]:
     """Derive an indexer for each observation"""
 
@@ -112,10 +112,14 @@ def derive_observation_indexers(
     }
 
     for passage in passages:
-        tx_sch_obss = tx_sch.filter_by_time_range(passage["time_range"]).split_by_measurements()
+        tx_sch_obss = tx_sch.filter_by_time_range(passage["time_range"]).split_by_measurements(
+            is_split_simu=False
+        )
 
         rx_sch = rx_schedule_map[passage["rx_station"].uid]
-        rx_sch_obss = rx_sch.filter_by_time_range(passage["time_range"]).split_by_measurements()
+        rx_sch_obss = rx_sch.filter_by_time_range(passage["time_range"]).split_by_measurements(
+            is_split_simu=True
+        )
 
         for tx_sch_obs in tx_sch_obss:
             for rx_sch_obs in rx_sch_obss:
@@ -135,7 +139,7 @@ def calculate_observations(
     spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]],
     spobjs_smpl_states: list[EcefStates],
     spobjs_interpolators: list[Interpolator],
-) -> list[SimulationUnit]:
+) -> tuple[list[SimulationUnit], list[ObservationIndexer]]:
     """
     Calculate the observations.
     """
@@ -185,8 +189,12 @@ def calculate_observations(
     pbar.close()
 
     # TODO: update `Observation` class, (and return list of `Observation` here?)
-    # TODO: call `derive_observation_indexers`
-    return sim_units
+    obs_idxers = derive_observation_indexers(
+        passages=passages,
+        tx_sch=spec["tx_schedule"],
+        rx_schs=spec["rx_schedules"],
+    )
+    return sim_units, obs_idxers
 
 
 # TODO: we need to enforce each station to has a unique id (`.uid` prop)
@@ -229,10 +237,10 @@ class StxMrxSimulation:
         self.state["space_object_sample_states"] = spobjs_smpl_states
         self.state["space_object_interpolators"] = spobjs_interpolators
 
-        sim_units = calculate_observations(
+        result = calculate_observations(
             self.spec, spobjs_smpl_dsec, spobjs_smpl_states, spobjs_interpolators
         )
         logger.debug("calc obs done")
         # self.state["observations"] = obss
 
-        return sim_units
+        return result

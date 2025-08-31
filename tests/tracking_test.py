@@ -41,6 +41,7 @@ float_equality_thld = 1e-9
 pointing_equality_thld: Float_as_deg = 5e-3
 pointing_equality_thld_loose: Float_as_deg = 1  # even 0.5 deg fails
 
+# TODO: re-eval the `control_slice_duration` value, need to be fast but still accurate enough for testing
 # control_slice_duration = np.timedelta64(10_000, "us")  # 10ms
 control_slice_duration = np.timedelta64(1_000_000, "us")  # 1s
 
@@ -155,8 +156,8 @@ def south_to_north_circular_orbit_test():
         }
     )
 
-    sim_units = sim.run()
-    sim_unit_0 = sim_units[0]
+    sim_units, obs_idxers = sim.run()
+    sim_unit = sim_units[0]
 
     # assert there is only 1 observation
     assert len(sim_units) == 1
@@ -172,9 +173,7 @@ def south_to_north_circular_orbit_test():
     # assert the max snr time is roughly at half orbital period
     assert (
         abs(
-            sim_unit_0._state_data[_SuK.time][
-                {_SuK.time: sim_unit_0._state_data[_SuK.snr].argmax()}
-            ]
+            sim_unit._state_data[_SuK.time][{_SuK.time: sim_unit._state_data[_SuK.snr].argmax()}]
             - (
                 to_datetime64_us(start_time)
                 + spobj_orbital_period / 2 * np.timedelta64(int(1e6), "us")

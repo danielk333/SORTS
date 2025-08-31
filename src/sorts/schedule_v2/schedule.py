@@ -211,7 +211,8 @@ class Schedule:
         filtered_data = schedule_data.filter_by_time_range(self._data, time_range)
         return cls(data=filtered_data)
 
-    def split_by_measurements(self) -> list[t.Self]:
+    # TODO: we can probably inject the schedule is tx or rx into `Schedule` class and remove param `is_split_simu`
+    def split_by_measurements(self, is_split_simu: bool) -> list[t.Self]:
         cls = type(self)
-        schs = [cls(data=d) for d in schedule_data.split_by_measurements(self._data)]
+        schs = [cls(data=d) for d in schedule_data.split_by_measurements(self._data, is_split_simu)]
         return schs

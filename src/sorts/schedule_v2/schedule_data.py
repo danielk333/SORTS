@@ -179,11 +179,11 @@ def filter_by_time_range(ds: ScheduleXrds, time_range: TimeRange_us) -> Schedule
     return ds_masked
 
 
-def split_by_measurements(ds: ScheduleXrds) -> list[ScheduleXrds]:
+def split_by_measurements(ds: ScheduleXrds, is_split_simu: bool) -> list[ScheduleXrds]:
     """
     Split a schedule data by measurements.
 
-    i.e. By `exp_num` and per each of the simutaneous pointings
+    i.e. By `exp_num` and optionally per each of the simutaneous pointings (controlled by `is_split_simu`)
     """
 
     k = schedule_keys
@@ -195,10 +195,14 @@ def split_by_measurements(ds: ScheduleXrds) -> list[ScheduleXrds]:
     exp_detail_map: dict[int, ExperimentDetail] = ds.attrs[k["exp_detail_map"]]
     dss: list[ScheduleXrds] = []
     for _, ds_split in ds.groupby(split_ids):
-        # further spliting according to number of simutaneous rx pointings
-        simu_cnt = exp_detail_map[ds_split[k["exp_num"]][0].item()].get(
-            "num_simutaneous_pointings", 1
-        )
-        dss.append(ds_split.loc[{k["start_time"]: slice(0, None, simu_cnt)}])
+        if is_split_simu:
+            # further spliting according to number of simutaneous rx pointings
+            simu_num = exp_detail_map[ds_split[k["exp_num"]][0].item()].get(
+                "num_simutaneous_pointings", 1
+            )
+            for i in range(simu_num):
+                dss.append(ds_split[{k["start_time"]: slice(i, None, simu_num)}])
+        else:
+            dss.append(ds_split)
 
     return dss

@@ -207,7 +207,7 @@ class SimulationUnit:
         if len(indexers) == 0:
             raise NotImplementedError()
 
-        time_mask: xr.DataArray = reduce(
+        rx_time_mask: xr.DataArray = reduce(
             xr.ufuncs.logical_and,
             [
                 (rx_sch._data[_SK.start_time] >= idxer[0])
@@ -215,7 +215,7 @@ class SimulationUnit:
                 for idxer in indexers
             ],
         )
-        time = rx_sch._data[_SK.start_time][time_mask]
+        time = rx_sch._data[_SK.start_time][rx_time_mask]
 
         state_data = xr.Dataset(
             coords={
@@ -223,13 +223,16 @@ class SimulationUnit:
                 _K.azelr: [_K.az, _K.el, _K.r],
             },
             data_vars={
+                # we expand pointings from `tx_sch` here by re-indexing using `.loc[:, time]`
+                # `xarray` allow it because `tx_sch` `start_time` is an unique index
                 _K.tx_pointing: (
                     (_K.azelr, _K.time),
                     tx_sch._data[_SK.pointing].loc[:, time].to_numpy(),
                 ),
+                # for pointings from `rx_sch`, we just apply the `rx_time_mask`
                 _K.rx_pointing: (
                     (_K.azelr, _K.time),
-                    rx_sch._data[_SK.pointing].loc[:, time].to_numpy(),
+                    rx_sch._data[_SK.pointing].loc[:, rx_time_mask].to_numpy(),
                 ),
                 _K.exp_num: (_K.time, tx_sch._data[_SK.exp_num].loc[time].to_numpy()),
             },
