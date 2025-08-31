@@ -16,6 +16,7 @@ from sorts.schedule_v2.schedule_data import (
     schedule_coord_keys,
     schedule_attr_keys,
     schedule_keys,
+    _K,
     ScheduleNdarrayDict,
     ScheduleXrds,
     from_ndarrays,
@@ -113,6 +114,9 @@ def filter_by_time_range(
     return filter_by_mask(sch, create_mask_by_time_range(sch, time_range))
 
 
+TimeRangeIndexer = TimeRange_us
+"""Contains info to get a subset of entries from a `Schedule`"""
+
 XrDataArrayIndexer = xr.DataArray
 """Contains info to get a subset of entries from a `Schedule`"""
 
@@ -128,6 +132,7 @@ class Schedule:
         We are still evaluating which backing data structure to use and is subject to change
     """
 
+    # TODO: remove these and replace their usage by `_K` class
     DataKey = ScheduleDataKey
     """shortcut to module attribute"""
     CoordKey = ScheduleCoordKey
@@ -144,6 +149,9 @@ class Schedule:
     attr_keys = schedule_attr_keys
     """shortcut to module attribute"""
     keys = schedule_keys
+    """shortcut to module attribute"""
+
+    _K = _K
     """shortcut to module attribute"""
 
     def __init__(self, data: ScheduleXrds):

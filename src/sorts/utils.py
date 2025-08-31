@@ -98,3 +98,18 @@ def to_timedelta64_us(d: Timedelta_Like) -> Timedelta64_us:
             return np.timedelta64(int(t.cast(np.float64, d.to_value("us"))), "us")
         case _:
             raise RuntimeError(f"Convertion from {type(d)} to `timedelta64[us]` is not supported.")
+
+
+def assert_class_attributes_equal_to(cls, values: t.Sequence):
+    """
+    Class attributes on classes are used as container for string constant in this code base.
+
+    This is helper function to assure the class attributes are equal to what we expect.
+    """
+
+    class_attributes = [
+        v for k, v in vars(cls).items() if not k.startswith("__") and not callable(v)
+    ]
+    assert set(class_attributes) == set(values)
+
+    return True

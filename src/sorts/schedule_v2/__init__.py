@@ -26,6 +26,8 @@ from .schedule import (
     create_mask_by_time_range,
     filter_by_mask,
     filter_by_time_range,
+    TimeRangeIndexer,
+    XrDataArrayIndexer,
     Schedule,
 )
 from .priority_scheduling import (
