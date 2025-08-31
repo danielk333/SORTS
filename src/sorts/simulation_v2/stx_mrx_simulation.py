@@ -6,10 +6,17 @@ import pyorb
 import sorts
 from tqdm import tqdm
 from sorts.interpolation import Interpolator
-from sorts.radar.tx_rx import Station
+from sorts.radar.tx_rx import Station, StationId
 from sorts.utils import to_datetime64_us
 from sorts.types import Datetime_Like, Float64_as_sec, Float64_as_m, EcefStates, Datetime64_us
+from sorts.schedule_v2.schedule import (
+    Schedule,
+    TimeRangeIndexer,
+    ScheduleNdarrayDict2,
+    ExperimentDetail,
+)
 from sorts.simulation_v2.passage import (
+    Passage,
     ExperimentPassage,
     find_passages,
     split_passage_by_schedule,
@@ -184,6 +191,25 @@ def calculate_observation_per_experiment_passage(
     )
 
     return obs
+
+
+def derive_schedule_indexers_per_tx_rx_station_pair(
+    passages: list[Passage],
+) -> dict[tuple[StationId, StationId], list[TimeRangeIndexer]]:
+    """Derive a list of schedule indexer for each tx-rx station pair found in the give passages"""
+
+    sch_indexers: dict[tuple[StationId, StationId], list[TimeRangeIndexer]] = {}
+
+    for passage in passages:
+        tx_station_id = passage["tx_station"].uid
+        rx_station_id = passage["rx_station"].uid
+
+        if (tx_station_id, rx_station_id) in sch_indexers:
+            sch_indexers[(tx_station_id, rx_station_id)].append(passage["time_range"])
+        else:
+            sch_indexers[(tx_station_id, rx_station_id)] = [passage["time_range"]]
+
+    return sch_indexers
 
 
 def derive_observation_indexers(
