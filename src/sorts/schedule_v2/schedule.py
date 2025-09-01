@@ -69,7 +69,7 @@ def schedule_data_to_dataframe(ds: ScheduleData) -> pd.DataFrame:
         ),
         axis=1,
         copy=False,
-    )
+    ).reset_index()
 
     return df
 
@@ -198,8 +198,10 @@ XrDataArrayIndexer = xr.DataArray
 class Schedule:
     """
     Provides methods for manipuating the schedule data and enforce that the require columns/data are set.
+    Also contains some related metadata.
 
-    Schedule data is stored in a private attribute `_data` attribute, and some additional helper metadata are stored in other attributes.
+    Schedule data is stored in the private attribute `_data`,
+    and is not intended for consumption from outside of the library.
 
     NOTE:
         We are still evaluating which backing data structure to use and is subject to change

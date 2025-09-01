@@ -23,7 +23,6 @@ from sorts.types import (
 )
 from sorts.utils import to_datetime64_us, assert_class_attributes_equal_to
 from sorts.frames import ITRS_to_geodetic
-import sorts.schedule_v2 as schedule
 from sorts.schedule_v2.types import ScheduleNdarrayDict2
 from sorts.schedule_v2.schedule import Schedule
 
@@ -105,10 +104,8 @@ def _schedule_plot_from_cds(
 
 
 # TODO: add time based binning and aggregation
-# TODO: might not work that well for rx schedule, because they might have multiple pointings per slices
-# TODO: also plot pointings?
 def schedule_plot(
-    sch: ScheduleNdarrayDict2,
+    sch: Schedule,
     start_time: Datetime_Like | None = None,
     end_time: Datetime_Like | None = None,
 ):
@@ -122,7 +119,7 @@ def schedule_plot(
 
     _SK = Schedule._K
 
-    df = Schedule.from_ndarrays_2(sch).to_dataframe()
+    df = sch.to_dataframe()
 
     start_time_: Datetime64_us = (
         to_datetime64_us(start_time) if start_time is not None else df[_SK.start_time].min()
