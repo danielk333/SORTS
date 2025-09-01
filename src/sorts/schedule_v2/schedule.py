@@ -6,7 +6,6 @@ import pandas as pd
 import xarray as xr
 from sorts.types import Datetime64_us, TimeRange_us
 from sorts.schedule_v2.types import ExperimentDetail, ScheduleNdarrayDict2
-import sorts.schedule_v2.schedule_data as schedule_data
 from sorts.schedule_v2.schedule_data import (
     ScheduleDataKey,
     ScheduleCoordKey,
@@ -19,10 +18,7 @@ from sorts.schedule_v2.schedule_data import (
     _K,
     ScheduleNdarrayDict,
     ScheduleXrds,
-    from_ndarrays,
     from_ndarrays_2,
-    empty,
-    to_dataframe,
 )
 from sorts.schedule_v2.priority_scheduling import priority_scheduling
 
@@ -65,6 +61,53 @@ def from_dataframe(
     return sch
 
 
+def schedule_data_to_dataframe(ds: ScheduleXrds) -> pd.DataFrame:
+    # define some column names/keys
+    keys = schedule_keys
+
+    df = pd.concat(
+        t.cast(
+            list[pd.DataFrame],
+            [
+                ds[keys["end_time"]].transpose().to_pandas(),
+                ds[keys["pointing"]].transpose().to_pandas(),
+                ds[keys["exp_num"]].transpose().to_pandas(),
+            ],
+        ),
+        axis=1,
+        copy=False,
+    )
+
+    return df
+
+
+def merge_attrs(attrs_dicts: list[dict[ScheduleAttrKey, t.Any]]) -> dict:
+    """Merging attrs dict, latter attrs dict will override former attrs dict, just like `.update()` method of `dict`"""
+
+    match len(attrs_dicts):
+        case 0:
+            return {}
+        case 1:
+            return attrs_dicts[0]
+        case _:
+            result: dict[ScheduleAttrKey, t.Any] = attrs_dicts[0]
+            for attrs_dict in attrs_dicts[0:]:
+                result["stn_id"] = attrs_dict["stn_id"]
+                result["exp_detail_map"].update(attrs_dict["exp_detail_map"])
+
+    return result
+
+
+def filter_schedule_data_by_time_range(ds: ScheduleXrds, time_range: TimeRange_us) -> ScheduleXrds:
+    mask = (ds[schedule_keys["start_time"]] >= time_range[0]) & (
+        ds[schedule_keys["start_time"]] <= time_range[1]
+    )
+
+    ds_masked = ds[{schedule_keys["start_time"]: mask}]
+
+    return ds_masked
+
+
 # TODO: remove its usage, then remove this func
 def create_mask_by_time_range(
     sch: ScheduleNdarrayDict2, time_range: tuple[Datetime64_us, Datetime64_us]
@@ -85,6 +128,47 @@ def create_mask_by_time_range(
     )
 
     return mask
+
+
+# TODO: maybe saving a `simu_grp` number in schedule is more memory efficient?
+#   (or not, because measurement is very sparse over schedule)
+def get_indexer_per_measurement(ds: ScheduleXrds, is_split_simu: bool) -> list[xr.DataArray]:
+    """
+    Split a schedule data by measurements.
+
+    i.e. By `exp_num` and optionally per each of the simutaneous pointings (controlled by `is_split_simu`)
+    """
+
+    k = schedule_keys
+
+    # identify where `exp_num` changes
+    chg_pts = ds[k["exp_num"]] != ds[k["exp_num"]].shift({k["start_time"]: 1})
+    split_ids = chg_pts.cumsum()
+
+    exp_detail_map: dict[int, ExperimentDetail] = ds.attrs[k["exp_detail_map"]]
+    idxers: list[xr.DataArray] = []
+    for _, ds_split in ds.groupby(split_ids):
+        if is_split_simu:
+            # further spliting according to number of simutaneous rx pointings
+            simu_num = exp_detail_map[ds_split[k["exp_num"]][0].item()].get(
+                "num_simutaneous_pointings", 1
+            )
+            for i in range(simu_num):
+                idxers.append(
+                    xr.DataArray(
+                        (np.arange(len(ds_split[k["start_time"]])) - i) % simu_num == 0,
+                        dims=k["start_time"],
+                    )
+                )
+        else:
+            idxers.append(
+                xr.DataArray(
+                    np.full(len(ds_split[k["start_time"]]), True, dtype=np.bool),
+                    dims=k["start_time"],
+                )
+            )
+
+    return idxers
 
 
 # TODO: remove its usage, then remove this func
@@ -159,7 +243,26 @@ class Schedule:
 
     @classmethod
     def from_ndarrays(cls, data: ScheduleNdarrayDict) -> t.Self:
-        return cls(data=from_ndarrays(data))
+        sch_data = xr.Dataset(
+            coords={
+                "start_time": data["start_time"],
+                "end_time": ("start_time", data["end_time"]),
+                "azelr": ["az", "el", "r"],
+            },
+            data_vars={
+                "pointing": (
+                    ("azelr", "start_time"),
+                    data["pointing"],
+                ),
+                "exp_num": ("start_time", data["exp_num"]),
+            },
+            attrs={
+                "stn_id": data["stn_id"],
+                "exp_detail_map": data["exp_detail_map"],
+            },
+        )
+
+        return cls(data=sch_data)
 
     # TODO: remove its usage, then remove this method
     @classmethod
@@ -168,10 +271,26 @@ class Schedule:
 
     @classmethod
     def empty(cls) -> t.Self:
-        return cls(data=empty())
+        return cls.from_ndarrays(
+            {
+                "stn_id": "__EMPTY_ID__",
+                "exp_detail_map": {},
+                "start_time": np.empty(0, dtype="datetime64[us]"),
+                "end_time": np.empty(0, dtype="datetime64[us]"),
+                "exp_num": np.empty(0, dtype=np.int64),
+                "pointing": np.empty((3, 0), dtype=np.float64),
+            }
+        )
 
     @classmethod
-    def priority_scheduling(cls, schs: list[Schedule]):
+    def priority_scheduling(cls, schs: t.Sequence[Schedule]):
+        """
+        Merge a sequence of schedules for a single station into one,
+        schedule with smaller index in the sequence is given priority over those with larger index.
+
+        Note: It is assumed (and not checked) that each of the schedule itself does not contain overlapping entries.
+        """
+
         resultant_sch_data = priority_scheduling([sch._data for sch in schs])
         return cls(data=resultant_sch_data)
 
@@ -204,13 +323,13 @@ class Schedule:
         return arr_dict
 
     def to_dataframe(self) -> pd.DataFrame:
-        return to_dataframe(self._data)
+        return schedule_data_to_dataframe(self._data)
 
     def filter_by_time_range(self, time_range: TimeRange_us) -> t.Self:
         cls = type(self)
-        filtered_data = schedule_data.filter_by_time_range(self._data, time_range)
+        filtered_data = filter_schedule_data_by_time_range(self._data, time_range)
         return cls(data=filtered_data)
 
     # TODO: we can probably inject the schedule is tx or rx into `Schedule` class and remove param `is_split_simu`
     def get_indexer_per_measurement(self, is_split_simu: bool) -> list[XrDataArrayIndexer]:
-        return schedule_data.get_indexer_per_measurement(self._data, is_split_simu)
+        return get_indexer_per_measurement(self._data, is_split_simu)

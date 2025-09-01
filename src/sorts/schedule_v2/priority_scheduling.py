@@ -7,10 +7,7 @@ from sorts.schedule_v2.types import ExperimentDetail, ScheduleNdarrayDict2
 from sorts.schedule_v2.schedule_data import (
     ScheduleKey,
     ScheduleXrds,
-    empty,
     from_ndarrays_2,
-    to_dataframe,
-    merge_attrs,
 )
 
 logger = logging.getLogger(__name__)
@@ -32,6 +29,9 @@ def to_dataframe(ds: xr.Dataset):
     Includes extra intermediate columns used in function `priority_scheduling`.
     """
 
+    # NOTE: lazy import here to avoid circular import, `Schedule` ref `priority_scheduling` in its classmethod
+    from sorts.schedule_v2.schedule import schedule_data_to_dataframe
+
     # define some column names/keys
     keys: dict[DsVarKey, str] = {k: k for k in t.get_args(DsVarKey)}
 
@@ -41,7 +41,7 @@ def to_dataframe(ds: xr.Dataset):
         t.cast(
             list[pd.DataFrame],
             [
-                to_dataframe(ds),
+                schedule_data_to_dataframe(ds),
                 (
                     ds[keys["allowed_start_time"]].transpose().to_pandas()
                     if keys["allowed_start_time"] in ds
@@ -67,6 +67,16 @@ def to_dataframe(ds: xr.Dataset):
 
 
 def priority_scheduling(sch_datas: t.Sequence[ScheduleXrds]) -> ScheduleXrds:
+    """
+    Merge a sequence of schedule data for a single station into one,
+    schedule with smaller index in the sequence is given priority over those with larger index.
+
+    Note: It is assumed (and not checked) that each of the schedule itself does not contain overlapping entries.
+    """
+
+    # NOTE: lazy import here to avoid circular import, `Schedule` ref `priority_scheduling` in its classmethod
+    from sorts.schedule_v2.schedule import Schedule, merge_attrs
+
     # The logic of this function:
     # 1. prepare an empty schedule data as the merge result
     # 2. for each of the schedule passed in
@@ -84,7 +94,7 @@ def priority_scheduling(sch_datas: t.Sequence[ScheduleXrds]) -> ScheduleXrds:
     keys: dict[DsVarKey, str] = {k: k for k in t.get_args(DsVarKey)}
 
     # init an empty dataset for a schedule and add some columns, will be used store merged schedule
-    merged_sch_data = empty()
+    merged_sch_data = Schedule.empty()._data
     if len(sch_datas) > 0:
         merged_sch_data.attrs = sch_datas[0].attrs
     merged_sch_data[keys["allowed_start_time"]] = (
@@ -178,22 +188,3 @@ def priority_scheduling(sch_datas: t.Sequence[ScheduleXrds]) -> ScheduleXrds:
     )
 
     return merged_sch_data
-
-
-# TODO: remove its usage, then remove this func
-def priority_scheduling_npardict(schs: t.Sequence[ScheduleNdarrayDict2]) -> ScheduleNdarrayDict2:
-    """
-    Merge a sequence of schedules for a single station into one,
-    schedule with lower index in the sequence is given priority over those with higher index.
-
-    Note: It is assumed (and not checked) that each of the schedule itself does not contain overlapping entries.
-    """
-    logger.debug("resolving schedule")
-    exp_detail_map: dict[int, ExperimentDetail] = {}
-    for sch in reversed(schs):
-        exp_detail_map.update(sch["exp_detail_map"])
-
-    resultant_sch = priority_scheduling([from_ndarrays_2(sch).data for sch in schs])
-
-    logger.debug("priority_scheduling done")
-    return resultant_sch.to_ndarrays_2()

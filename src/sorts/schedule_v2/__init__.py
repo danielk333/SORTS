@@ -30,7 +30,3 @@ from .schedule import (
     XrDataArrayIndexer,
     Schedule,
 )
-from .priority_scheduling import (
-    priority_scheduling,
-    priority_scheduling_npardict,
-)

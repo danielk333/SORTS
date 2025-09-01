@@ -14,15 +14,10 @@ from sorts.propagator import SGP4
 from sorts.space_object import SpaceObject
 from sorts.radar.tx_rx import Station
 from sorts.radar.radars import get_radar
-from sorts.types import Datetime64_us, Timedelta64_us, Float64_as_sec
 from sorts.utils import to_datetime64_us, to_pydatetime
-from sorts.controller_v2 import tracker_controller
-from sorts.controller_v2.tracker_controller import TrackerController
-from sorts.controller_v2.fence_scan_controller import FenceScanController
-from sorts import schedule_v2 as schedule
-from sorts.schedule_v2 import ScheduleNdarrayDict2, ExperimentDetail, priority_scheduling_npardict
+from sorts.controller_v2 import TrackerController, FenceScanController
+from sorts.schedule_v2 import Schedule
 from sorts.simulation_v2 import StxMrxSimulation
-from sorts.simulation_v2.observation import list_to_dataframe
 
 # import for plottings
 from IPython.display import display
@@ -159,18 +154,12 @@ exp_detail_map = {
     fence_scan_ctrl.spec["exp_detail"]["id"]: fence_scan_ctrl.spec["exp_detail"],
 }
 
-# TODO: cleanup; `to_ndarrays()` is a tmp workaround during xarray adoption
-tx_master_sch = priority_scheduling_npardict(
-    [tracker_schs.tx_schedule.to_ndarrays_2(), fence_schs.tx_schedule.to_ndarrays_2()]
-)
 
-# TODO: cleanup; `to_ndarrays()` is a tmp workaround during xarray adoption
+tx_master_sch = Schedule.priority_scheduling([tracker_schs.tx_schedule, fence_schs.tx_schedule])
+
 rx_master_schs = [
-    priority_scheduling_npardict(rx_schs)
-    for rx_schs in zip(
-        [sch.to_ndarrays_2() for sch in tracker_schs.rx_schedules],
-        [sch.to_ndarrays_2() for sch in fence_schs.rx_schedules],
-    )
+    Schedule.priority_scheduling(rx_schs)
+    for rx_schs in zip(tracker_schs.rx_schedules, fence_schs.rx_schedules)
 ]
 
 output_folder = Path(__file__).parent / ".." / ".." / "local_data"
