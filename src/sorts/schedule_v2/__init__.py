@@ -2,16 +2,13 @@ from .types import (
     ExperimentDetail,
     ScheduleNdarrayDict2,
 )
-from . import schedule_data
-from .schedule_data import (
-    ScheduleNdarrayDict,
-    ScheduleXrds,
-)
 from .schedule import (
     ScheduleDataKey,
     ScheduleCoordKey,
     ScheduleAttrKey,
     ScheduleKey,
+    ScheduleNdarrayDict,
+    ScheduleXrds,
     ScheduleFieldKey,
     NonDerivedDataFrameColumnName,
     DerivedDataFrameColumnName,

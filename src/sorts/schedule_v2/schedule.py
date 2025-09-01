@@ -4,10 +4,11 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import xarray as xr
+from sorts.types import Datetime64_us, TimeRange_us, AzelrCoordinates_DegM
 from sorts.utils import assert_class_attributes_equal_to
-from sorts.types import Datetime64_us, TimeRange_us
+from sorts.radar.tx_rx import StationId
 from sorts.schedule_v2.types import ExperimentDetail, ScheduleNdarrayDict2
-from sorts.schedule_v2.schedule_data import ScheduleNdarrayDict, ScheduleXrds, from_ndarrays_2
+from sorts.schedule_v2.schedule_data import from_ndarrays_2
 from sorts.schedule_v2.priority_scheduling import priority_scheduling
 
 logger = logging.getLogger(__name__)
@@ -57,6 +58,32 @@ class _K:
 
 
 assert_class_attributes_equal_to(_K, t.get_args(ScheduleKey))
+
+
+class ScheduleNdarrayDict(t.TypedDict):
+    """
+    A TypedDict, stores a collection of "control slices" (or "slices" in short).
+
+    - Slice data are stored as columns of fields, each of which is a `ndarray`.
+    - Metadata (`ExperimentDetail`s) are stored as a dict inside the `exp_detail_map` field.
+    """
+
+    stn_id: StationId
+
+    exp_detail_map: dict[int, ExperimentDetail]
+
+    start_time: npt.NDArray[Datetime64_us]
+    end_time: npt.NDArray[Datetime64_us]
+
+    # TODO: re-eval the size of `exp_num`
+    exp_num: npt.NDArray[np.int64]
+
+    pointing: AzelrCoordinates_DegM
+
+
+# TODO: rename to just `ScheduleData` when xarray adoptation is done?
+ScheduleXrds = xr.Dataset
+"""An xarray `Dataset` that contains the schedule data"""
 
 
 # TODO: can be removed? xarray dataset class is already dataframe like, and have pandas conversion methods
