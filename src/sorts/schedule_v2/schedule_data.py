@@ -41,6 +41,22 @@ assert_class_attributes_equal_to(_K, t.get_args(Key))
 
 
 ScheduleData = xr.Dataset
+"""
+A xarray `Dataset` with:
+  ```
+  Dimensions:     (azelr: 3, start_time: n)
+  Coordinates:
+  * start_time  (start_time) datetime64[us]
+      end_time    (start_time) datetime64[us]
+  * azelr       (azelr) <U2 24B 'az' 'el' 'r'
+  Data variables:
+      pointing    (azelr, start_time) float64
+      exp_num     (start_time) int64
+  Attributes:
+      stn_id:          str
+      exp_detail_map:  dict[int, ExperimentDetail]
+  ```
+"""
 
 
 def to_dataframe(ds: ScheduleData) -> pd.DataFrame:
