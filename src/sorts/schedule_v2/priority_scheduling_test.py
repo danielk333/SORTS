@@ -2,7 +2,7 @@ import typing as t
 import numpy as np
 import xarray as xr
 from sorts.schedule_v2.schedule import Schedule
-from sorts.schedule_v2.priority_scheduling import priority_scheduling, DsVarKey
+from sorts.schedule_v2.priority_scheduling import priority_scheduling
 
 
 def setup_function():
@@ -16,8 +16,7 @@ def setup_function():
 
 
 def priority_scheduling_interleaved_schedule_test():
-    # define some column names/keys
-    keys: dict[DsVarKey, str] = {k: k for k in t.get_args(DsVarKey)}
+    _SK = Schedule._K
 
     # 1hr long, 2hr intv
     sch_a = Schedule.from_ndarrays(
@@ -85,7 +84,7 @@ def priority_scheduling_interleaved_schedule_test():
 
     resultant_sch_data = priority_scheduling([sch_a._data, sch_b._data])
 
-    assert all(xr.ufuncs.equal(resultant_sch_data[keys["exp_num"]], [0, 1] * 12))
-    assert resultant_sch_data.attrs[keys["stn_id"]] == "stn_a"
+    assert all(xr.ufuncs.equal(resultant_sch_data[_SK.exp_num], [0, 1] * 12))
+    assert resultant_sch_data.attrs[_SK.stn_id] == "stn_a"
 
     return
