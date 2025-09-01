@@ -441,17 +441,19 @@ def kepler_space_object_on_map(
 
 
 def _radar_schedule_ecef_position_plot_cds_df(
-    ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], sch: ScheduleNdarrayDict2
+    ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], sch: Schedule
 ):
     _SK = Schedule._K
 
-    df = Schedule.from_ndarrays_2(sch).to_dataframe()
+    df = sch.to_dataframe()
 
     # bokeh requires str type for categorical axis
     df[_SK.exp_num] = df[_SK.exp_num].astype(str)
 
     # insert columns for azel_skyplot
-    azel_skyplot_cols = _azel_skyplot_cds_cols(sch["pointing_az"], sch["pointing_el"])
+    azel_skyplot_cols = _azel_skyplot_cds_cols(
+        sch._data[_SK.pointing][0].to_numpy(), sch._data[_SK.pointing][1].to_numpy()
+    )
     for k, v in azel_skyplot_cols.items():
         df[k] = v
 
@@ -468,7 +470,7 @@ def _radar_schedule_ecef_position_plot_cds_df(
 
 
 def radar_schedule_ecef_position_plot(
-    ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], sch: ScheduleNdarrayDict2
+    ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], sch: Schedule
 ):
     _SK = Schedule._K
 
