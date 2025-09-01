@@ -4,10 +4,12 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from sorts.utils import assert_class_attributes_equal_to
-
-if t.TYPE_CHECKING:
-    from sorts.schedule_v2.schedule import ScheduleData
-
+from sorts.schedule_v2.schedule import (
+    Schedule,
+    ScheduleData,
+    merge_attrs,
+    schedule_data_to_dataframe,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -37,9 +39,6 @@ def to_dataframe(ds: xr.Dataset):
     A helper method for debugging.
     Includes extra intermediate columns used in function `priority_scheduling`.
     """
-
-    # NOTE: lazy import here to avoid circular import, `Schedule` ref `priority_scheduling` in its classmethod
-    from sorts.schedule_v2.schedule import schedule_data_to_dataframe
 
     empty_df = pd.DataFrame()
 
@@ -79,9 +78,6 @@ def priority_scheduling(sch_datas: t.Sequence[ScheduleData]) -> ScheduleData:
 
     Note: It is assumed (and not checked) that each of the schedule itself does not contain overlapping entries.
     """
-
-    # NOTE: lazy import here to avoid circular import, `Schedule` ref `priority_scheduling` in its classmethod
-    from sorts.schedule_v2.schedule import Schedule, merge_attrs
 
     # The logic of this function:
     # 1. prepare an empty schedule data as the merge result

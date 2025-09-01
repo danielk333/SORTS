@@ -9,7 +9,6 @@ from sorts.utils import assert_class_attributes_equal_to
 from sorts.radar.tx_rx import StationId
 from sorts.schedule_v2.types import ExperimentDetail, ScheduleNdarrayDict2
 from sorts.schedule_v2.schedule_data import from_ndarrays_2
-from sorts.schedule_v2.priority_scheduling import priority_scheduling
 
 logger = logging.getLogger(__name__)
 
@@ -261,6 +260,9 @@ class Schedule:
 
         Note: It is assumed (and not checked) that each of the schedule itself does not contain overlapping entries.
         """
+
+        # NOTE: used lazy import here to avoid circular import
+        from sorts.schedule_v2.priority_scheduling import priority_scheduling
 
         resultant_sch_data = priority_scheduling([sch._data for sch in schs])
         return cls(data=resultant_sch_data)
