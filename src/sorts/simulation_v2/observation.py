@@ -56,19 +56,3 @@ class Observation(t.TypedDict):
 
     rx_k: AzelCoordinates_DegM
     """Pointing vector in local (Az, El) coordinates, from rx station to the space object"""
-
-
-def to_flat_dict(observation: Observation):
-    d = {
-        # TODO: putting normal python object in pandas df is not ideal
-        # **{
-        #     f"expps_{k}": observation["experiment_passage"][k]
-        #     for k in ExperimentPassage.__annotations__.keys()
-        # },
-        **{
-            k: observation[k]
-            for k in Observation.__annotations__.keys()
-            if k not in ["experiment_passage"]
-        },
-    }
-    return d
