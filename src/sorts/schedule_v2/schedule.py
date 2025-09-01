@@ -4,33 +4,34 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import xarray as xr
-from sorts.types import Datetime64_us, TimeRange_us, AzelrCoordinates_DegM
-from sorts.utils import assert_class_attributes_equal_to
+from sorts.types import Datetime64_us, TimeRange_us, Timedelta64_us, AzelrCoordinates_DegM
 from sorts.radar.tx_rx import StationId
-from sorts.schedule_v2.types import ExperimentDetail
+from sorts.schedule_v2 import schedule_data
 
 
 logger = logging.getLogger(__name__)
 
-
-ScheduleDataKey = t.Literal["pointing", "exp_num"]
-ScheduleCoordKey = t.Literal["start_time", "end_time"]
-ScheduleAttrKey = t.Literal["stn_id", "exp_detail_map"]
-ScheduleKey = t.Literal[ScheduleDataKey, ScheduleCoordKey, ScheduleAttrKey]
+_K = schedule_data._K
 
 
-class _K:
-    """Internal helper class for accessing string keys consistently"""
+class ExperimentDetail(t.TypedDict):
+    """A TypedDict of params"""
 
-    pointing: t.Final = "pointing"
-    exp_num: t.Final = "exp_num"
-    start_time: t.Final = "start_time"
-    end_time: t.Final = "end_time"
-    stn_id: t.Final = "stn_id"
-    exp_detail_map: t.Final = "exp_detail_map"
+    id: int
 
+    coh_int_bandwidth: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
+    ipp: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
+    pulse_length: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
+    power: float
+    bandwidth: float
+    duty_cycle: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
+    noise_temp: float
 
-assert_class_attributes_equal_to(_K, t.get_args(ScheduleKey))
+    slice_duration: Timedelta64_us
+    "Duration of a control slice, in micro-second"
+
+    # TODO: this is a temp workaround to get multiple simutaneous rx pointings working
+    num_simutaneous_pointings: t.NotRequired[int]
 
 
 class ScheduleNdarrayDict(t.TypedDict):
@@ -54,90 +55,6 @@ class ScheduleNdarrayDict(t.TypedDict):
     pointing: AzelrCoordinates_DegM
 
 
-ScheduleData = xr.Dataset
-
-
-def schedule_data_to_dataframe(ds: ScheduleData) -> pd.DataFrame:
-    df = pd.concat(
-        t.cast(
-            list[pd.DataFrame],
-            [
-                ds[_K.end_time].transpose().to_pandas(),
-                ds[_K.pointing].transpose().to_pandas(),
-                ds[_K.exp_num].transpose().to_pandas(),
-            ],
-        ),
-        axis=1,
-        copy=False,
-    ).reset_index()
-
-    return df
-
-
-def merge_attrs(attrs_dicts: list[dict[ScheduleAttrKey, t.Any]]) -> dict:
-    """Merging attrs dict, latter attrs dict will override former attrs dict, just like `.update()` method of `dict`"""
-
-    match len(attrs_dicts):
-        case 0:
-            return {}
-        case 1:
-            return attrs_dicts[0]
-        case _:
-            result: dict[ScheduleAttrKey, t.Any] = attrs_dicts[0]
-            for attrs_dict in attrs_dicts[0:]:
-                result[_K.stn_id] = attrs_dict[_K.stn_id]
-                result[_K.exp_detail_map].update(attrs_dict[_K.exp_detail_map])
-
-    return result
-
-
-def filter_schedule_data_by_time_range(ds: ScheduleData, time_range: TimeRange_us) -> ScheduleData:
-    mask = (ds[_K.start_time] >= time_range[0]) & (ds[_K.start_time] <= time_range[1])
-
-    ds_masked = ds[{_K.start_time: mask}]
-
-    return ds_masked
-
-
-# TODO: maybe saving a `simu_grp` number in schedule is more memory efficient?
-#   (or not, because measurement is very sparse over schedule)
-def get_indexer_per_measurement(ds: ScheduleData, is_split_simu: bool) -> list[xr.DataArray]:
-    """
-    Split a schedule data by measurements.
-
-    i.e. By `exp_num` and optionally per each of the simutaneous pointings (controlled by `is_split_simu`)
-    """
-
-    # identify where `exp_num` changes
-    chg_pts = ds[_K.exp_num] != ds[_K.exp_num].shift({_K.start_time: 1})
-    split_ids = chg_pts.cumsum()
-
-    exp_detail_map: dict[int, ExperimentDetail] = ds.attrs[_K.exp_detail_map]
-    idxers: list[xr.DataArray] = []
-    for _, ds_split in ds.groupby(split_ids):
-        if is_split_simu:
-            # further spliting according to number of simutaneous rx pointings
-            simu_num = exp_detail_map[ds_split[_K.exp_num][0].item()].get(
-                "num_simutaneous_pointings", 1
-            )
-            for i in range(simu_num):
-                idxers.append(
-                    xr.DataArray(
-                        (np.arange(len(ds_split[_K.start_time])) - i) % simu_num == 0,
-                        dims=_K.start_time,
-                    )
-                )
-        else:
-            idxers.append(
-                xr.DataArray(
-                    np.full(len(ds_split[_K.start_time]), True, dtype=np.bool),
-                    dims=_K.start_time,
-                )
-            )
-
-    return idxers
-
-
 TimeRangeIndexer = TimeRange_us
 """Contains info to get a subset of entries from a `Schedule`"""
 
@@ -158,11 +75,11 @@ class Schedule:
         We are still evaluating which backing data structure to use and is subject to change
     """
 
-    _K = _K
+    _K = schedule_data._K
     """shortcut to module attribute"""
 
-    def __init__(self, data: ScheduleData):
-        self._data: ScheduleData = data
+    def __init__(self, data: schedule_data.ScheduleData):
+        self._data: schedule_data.ScheduleData = data
 
     @classmethod
     def from_ndarrays(cls, data: ScheduleNdarrayDict) -> t.Self:
@@ -231,13 +148,13 @@ class Schedule:
         return arr_dict
 
     def to_dataframe(self) -> pd.DataFrame:
-        return schedule_data_to_dataframe(self._data)
+        return schedule_data.schedule_data_to_dataframe(self._data)
 
     def filter_by_time_range(self, time_range: TimeRange_us) -> t.Self:
         cls = type(self)
-        filtered_data = filter_schedule_data_by_time_range(self._data, time_range)
+        filtered_data = schedule_data.filter_schedule_data_by_time_range(self._data, time_range)
         return cls(data=filtered_data)
 
     # TODO: we can probably inject the schedule is tx or rx into `Schedule` class and remove param `is_split_simu`
     def get_indexer_per_measurement(self, is_split_simu: bool) -> list[XrDataArrayIndexer]:
-        return get_indexer_per_measurement(self._data, is_split_simu)
+        return schedule_data.get_indexer_per_measurement(self._data, is_split_simu)

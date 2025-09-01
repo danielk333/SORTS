@@ -4,12 +4,8 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from sorts.utils import assert_class_attributes_equal_to
-from sorts.schedule_v2.schedule import (
-    Schedule,
-    ScheduleData,
-    merge_attrs,
-    schedule_data_to_dataframe,
-)
+from sorts.schedule_v2 import schedule_data
+from sorts.schedule_v2.schedule import Schedule
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +42,7 @@ def to_dataframe(ds: xr.Dataset):
         t.cast(
             list[pd.DataFrame],
             [
-                schedule_data_to_dataframe(ds),
+                schedule_data.schedule_data_to_dataframe(ds),
                 (
                     ds[_IK.allowed_start_time].transpose().to_pandas()
                     if _IK.allowed_start_time in ds
@@ -71,7 +67,9 @@ def to_dataframe(ds: xr.Dataset):
     return df
 
 
-def priority_scheduling(sch_datas: t.Sequence[ScheduleData]) -> ScheduleData:
+def priority_scheduling(
+    sch_datas: t.Sequence[schedule_data.ScheduleData],
+) -> schedule_data.ScheduleData:
     """
     Merge a sequence of schedule data for a single station into one,
     schedule with smaller index in the sequence is given priority over those with larger index.
@@ -119,7 +117,7 @@ def priority_scheduling(sch_datas: t.Sequence[ScheduleData]) -> ScheduleData:
         # so the df will be in order of start_time, then priority after sorting
         # also note that attrs merged in the way that former schedule has higher priority than latter,
         # consistent with the func `priority_scheduling`
-        merged_sch_data.attrs = merge_attrs([sch_data.attrs, merged_sch_data.attrs])
+        merged_sch_data.attrs = schedule_data.merge_attrs([sch_data.attrs, merged_sch_data.attrs])
         merged_sch_data = xr.concat([merged_sch_data, sch_data], dim=_SK.start_time)
         merged_sch_data = merged_sch_data.sortby(_SK.start_time)
 
