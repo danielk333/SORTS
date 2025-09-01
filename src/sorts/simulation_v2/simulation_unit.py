@@ -115,50 +115,15 @@ class SimulationUnit:
         rx_sch: Schedule,
         state_data: StateData,
     ):
-        self.space_object = spobj
         self._state_data = state_data
 
-        size = len(state_data[_K.time])
+        self.space_object = spobj
+        self.space_object_interp = spobj_interp
 
-        self.epoch = to_datetime64_us(spobj.epoch)
         self.tx_station = tx_stn
         self.rx_station = rx_stn
-
-        self.dsec = (state_data[_K.time] - self.epoch).astype(np.float64) * 1e-6
-        self.spobj_states = spobj_interp.get_state(self.dsec)
-        self.spobj_tx_enu = tx_stn.enu(self.spobj_states)
-        self.spobj_rx_enu = rx_stn.enu(self.spobj_states)
-
-        self.range_tx: npt.NDArray[Float64_as_m] = np.linalg.norm(self.spobj_tx_enu[:3, :], axis=0)
-        self.range_rx: npt.NDArray[Float64_as_m] = np.linalg.norm(self.spobj_rx_enu[:3, :], axis=0)
-
-        self.snr = np.empty((size,), dtype=np.float64)
-        self.powers = np.empty((size,), dtype=np.float64)
-
-        # TODO: do we need `pulse_lengths`?
-        # TODO: do we need `ipps`?
-        # TODO: do we need `duty_cycles`?
-        self.powers = np.array(
-            [
-                tx_sch._data.attrs[_SK.exp_detail_map][n]["power"]
-                for n in state_data[_K.exp_num].to_numpy()
-            ],
-            dtype=np.float64,
-        )
-        self.bandwidths = np.array(
-            [
-                tx_sch._data.attrs[_SK.exp_detail_map][n]["bandwidth"]
-                for n in state_data[_K.exp_num].to_numpy()
-            ],
-            dtype=np.float64,
-        )
-        self.rx_noise_temps = np.array(
-            [
-                rx_sch._data.attrs[_SK.exp_detail_map][n]["noise_temp"]
-                for n in state_data[_K.exp_num].to_numpy()
-            ],
-            dtype=np.float64,
-        )
+        self.tx_schedule = tx_sch
+        self.rx_schedule = rx_sch
 
     # TODO: can be removed?
     @classmethod
@@ -254,6 +219,45 @@ class SimulationUnit:
 
     def simulate(self):
         """Run simulation calculation and update its state/data"""
+
+        size = len(self._state_data[_K.time])
+
+        self.epoch = to_datetime64_us(self.space_object.epoch)
+        self.dsec = (self._state_data[_K.time] - self.epoch).astype(np.float64) * 1e-6
+        self.spobj_states = self.space_object_interp.get_state(self.dsec)
+        self.spobj_tx_enu = self.tx_station.enu(self.spobj_states)
+        self.spobj_rx_enu = self.rx_station.enu(self.spobj_states)
+
+        self.range_tx: npt.NDArray[Float64_as_m] = np.linalg.norm(self.spobj_tx_enu[:3, :], axis=0)
+        self.range_rx: npt.NDArray[Float64_as_m] = np.linalg.norm(self.spobj_rx_enu[:3, :], axis=0)
+
+        self.snr = np.empty((size,), dtype=np.float64)
+        self.powers = np.empty((size,), dtype=np.float64)
+
+        # TODO: do we need `pulse_lengths`?
+        # TODO: do we need `ipps`?
+        # TODO: do we need `duty_cycles`?
+        self.powers = np.array(
+            [
+                self.tx_schedule._data.attrs[_SK.exp_detail_map][n]["power"]
+                for n in self._state_data[_K.exp_num].to_numpy()
+            ],
+            dtype=np.float64,
+        )
+        self.bandwidths = np.array(
+            [
+                self.tx_schedule._data.attrs[_SK.exp_detail_map][n]["bandwidth"]
+                for n in self._state_data[_K.exp_num].to_numpy()
+            ],
+            dtype=np.float64,
+        )
+        self.rx_noise_temps = np.array(
+            [
+                self.rx_schedule._data.attrs[_SK.exp_detail_map][n]["noise_temp"]
+                for n in self._state_data[_K.exp_num].to_numpy()
+            ],
+            dtype=np.float64,
+        )
 
         self._state_data = calc_gain(
             state_data=self._state_data,
