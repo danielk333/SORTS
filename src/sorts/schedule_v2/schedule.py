@@ -280,19 +280,6 @@ class Schedule:
 
         return arr_dict
 
-    # TODO: remove its usage, then remove this method
-    def to_ndarrays_2(self) -> ScheduleNdarrayDict2:
-        arr_dict: ScheduleNdarrayDict2 = {
-            "stn_id": self._data.attrs[_K.stn_id],
-            "exp_detail_map": self._data.attrs[_K.exp_detail_map],
-            "start_time": self._data[_K.start_time].to_numpy(),
-            "exp_num": self._data[_K.exp_num].to_numpy(),
-            "pointing_az": self._data[_K.pointing].to_numpy()[0],
-            "pointing_el": self._data[_K.pointing].to_numpy()[1],
-        }
-
-        return arr_dict
-
     def to_dataframe(self) -> pd.DataFrame:
         return schedule_data_to_dataframe(self._data)
 

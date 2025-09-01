@@ -3,6 +3,7 @@ import numpy.typing as npt
 from astropy.time import Time
 from sorts.radar.radars import get_radar
 from sorts.controller_v2.fence_scan_controller import FenceScanController
+from sorts.schedule_v2.schedule import Schedule
 
 
 def setup_function():
@@ -18,6 +19,8 @@ def FenceScanController_smoke_test():
     Note: only tx schedule is checked at the moment
     """
     # TODO: should also check if other fields are correct
+
+    _K = Schedule._K
 
     start_time_np = np.datetime64("2025-06-30 00:00:00", "us")
     end_time_np = np.datetime64("2025-06-30 00:00:01", "us")
@@ -49,7 +52,6 @@ def FenceScanController_smoke_test():
     schs = fenceScanController.generate(Time(start_time_np), Time(end_time_np))
     expected_sch_len = round((end_time_np - start_time_np) / slice_duration)
 
-    # TODO: cleanup; `to_ndarrays()` is a tmp workaround during xarray adoption
-    assert len(schs.tx_schedule.to_ndarrays_2()["start_time"]) == expected_sch_len
+    assert len(schs.tx_schedule._data[_K.start_time]) == expected_sch_len
 
     return
