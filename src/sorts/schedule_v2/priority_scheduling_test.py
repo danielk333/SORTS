@@ -18,7 +18,7 @@ def setup_function():
 def priority_scheduling_interleaved_schedule_test():
     _SK = Schedule._K
 
-    # 1hr long, 2hr intv
+    # 30min long, 2hr intv
     sch_a = Schedule.from_ndarrays(
         {
             "stn_id": "stn_a",
