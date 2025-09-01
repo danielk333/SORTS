@@ -21,7 +21,7 @@ from sorts.types import (
     Timedelta64_us,
     Float64_as_sec,
 )
-from sorts.utils import to_datetime64_us
+from sorts.utils import to_datetime64_us, assert_class_attributes_equal_to
 from sorts.frames import ITRS_to_geodetic
 import sorts.schedule_v2 as schedule
 from sorts.schedule_v2.types import ScheduleNdarrayDict2
@@ -54,6 +54,8 @@ def _schedule_plot_from_cds(
 ):
     """An internal ver of `schedule_plot` that takes a bokeh `ColumnDataSource`"""
 
+    _SK = Schedule._K
+
     bar = bp.figure(
         y_range=y_range,  # type: ignore
         x_axis_type="datetime",
@@ -64,9 +66,9 @@ def _schedule_plot_from_cds(
     bar.add_tools(bokeh_models.HoverTool())
 
     bar.hbar(
-        y=schedule.cn["exp_num"],
-        left=schedule.cn["start_time"],
-        right=schedule.cn["end_time"],
+        y=_SK.exp_num,
+        left=_SK.start_time,
+        right=_SK.end_time,
         source=source,
     )
     bar.x_range.range_padding = 0  # type: ignore
@@ -118,25 +120,26 @@ def schedule_plot(
     Without aggregations, a good starting point is a 5 minutes time range.
     """
 
-    cn = schedule.cn
+    _SK = Schedule._K
+
     df = Schedule.from_ndarrays_2(sch).to_dataframe()
 
     start_time_: Datetime64_us = (
-        to_datetime64_us(start_time) if start_time is not None else df[cn["start_time"]].min()
+        to_datetime64_us(start_time) if start_time is not None else df[_SK.start_time].min()
     )
     end_time_: Datetime64_us = (
-        to_datetime64_us(end_time) if end_time is not None else df[cn["end_time"]].max()
+        to_datetime64_us(end_time) if end_time is not None else df[_SK.end_time].max()
     )
 
-    df = df[(df[cn["start_time"]] >= start_time_) & (df[cn["end_time"]] <= end_time_)]
+    df = df[(df[_SK.start_time] >= start_time_) & (df[_SK.end_time] <= end_time_)]
     # bokeh requires str type for categorical axis
-    df[cn["exp_num"]] = df[cn["exp_num"]].astype(str)
+    df[_SK.exp_num] = df[_SK.exp_num].astype(str)
 
     plot, *_ = _schedule_plot_from_cds(
         source=bokeh_models.ColumnDataSource(df),
         start_time=start_time_,
         end_time=end_time_,
-        y_range=df[cn["exp_num"]].unique(),
+        y_range=df[_SK.exp_num].unique(),
     )
 
     return plot
@@ -145,13 +148,22 @@ def schedule_plot(
 AzelSkyplotColumnKey = t.Literal["azimuth", "elevation", "adj_azimuth", "adj_elevation"]
 
 
-def _azel_skyplot_from_cds(
-    source: bokeh_models.ColumnarDataSource,
-    cn: dict[AzelSkyplotColumnKey, str] | None = None,
-):
+class _K_AzelSkyplotColumnKey:
+    """Internal helper class for accessing string keys consistently"""
+
+    azimuth: t.Final = "azimuth"
+    elevation: t.Final = "elevation"
+    adj_azimuth: t.Final = "adj_azimuth"
+    adj_elevation: t.Final = "adj_elevation"
+
+
+assert_class_attributes_equal_to(_K_AzelSkyplotColumnKey, t.get_args(AzelSkyplotColumnKey))
+
+
+def _azel_skyplot_from_cds(source: bokeh_models.ColumnarDataSource):
     """An internal ver of `azel_skyplot` that takes a bokeh `ColumnDataSource`."""
 
-    cn = {k: k for k in t.get_args(AzelSkyplotColumnKey)} | (cn if cn is not None else {})
+    _K = _K_AzelSkyplotColumnKey
 
     # make a plot and set the pixel aspect ratio to equal to the data aspect ratio
     # (i.e. a circle in data will be a circle on screen)
@@ -219,8 +231,8 @@ def _azel_skyplot_from_cds(
         )
 
     tf = bokeh_models.PolarTransform(
-        angle=cn["adj_azimuth"],
-        radius=cn["adj_elevation"],
+        angle=_K.adj_azimuth,
+        radius=_K.adj_elevation,
         angle_units="deg",  # type: ignore
         direction="clock",
     )
@@ -237,7 +249,7 @@ def _azel_skyplot_from_cds(
             renderers=[scatter],
             tooltips=[
                 ("index", "$index"),
-                ("data (az, el)", f'(@{cn["azimuth"]}, @{cn["elevation"]})'),
+                ("data (az, el)", f"(@{_K.azimuth}, @{_K.elevation})"),
             ],
         )
     )
@@ -275,16 +287,22 @@ def azel_skyplot(azimuths: npt.NDArray[Float64_as_deg], elevations: npt.NDArray[
 EcefStatesPositionsPlotColumnKey = t.Literal["lat", "lon", "wmx", "wmy"]
 
 
-def _ecef_states_positions_plot_from_cds(
-    source: bokeh_models.ColumnarDataSource,
-    cn: dict[EcefStatesPositionsPlotColumnKey, str] | None = None,
-):
+class _K_EcefStatesPositionsPlotColumnKey:
+    """Internal helper class for accessing string keys consistently"""
+
+    lat: t.Final = "lat"
+    lon: t.Final = "lon"
+    wmx: t.Final = "wmx"
+    wmy: t.Final = "wmy"
+
+
+assert_class_attributes_equal_to(_K_AzelSkyplotColumnKey, t.get_args(AzelSkyplotColumnKey))
+
+
+def _ecef_states_positions_plot_from_cds(source: bokeh_models.ColumnarDataSource):
     """An internal ver of `ecef_states_positions_plot` that takes a bokeh `ColumnDataSource`."""
 
-    cn = {k: k for k in t.get_args(EcefStatesPositionsPlotColumnKey)} | (
-        cn if cn is not None else {}
-    )
-
+    _K = _K_EcefStatesPositionsPlotColumnKey
     plot = bp.figure(
         x_axis_type="mercator",
         y_axis_type="mercator",
@@ -292,7 +310,7 @@ def _ecef_states_positions_plot_from_cds(
     )
     plot.add_tile("CartoDB Positron", retina=True)
 
-    scatter = plot.scatter(x=cn["wmx"], y=cn["wmy"], source=source)
+    scatter = plot.scatter(x=_K.wmx, y=_K.wmy, source=source)
 
     # TODO: Implement a fix for the antimeridian wrapping issue
     # NOTE: We are not plotting the connecting line segments for now
@@ -306,7 +324,7 @@ def _ecef_states_positions_plot_from_cds(
             renderers=[scatter],
             tooltips=[
                 ("index", "$index"),
-                ("data (lat, lon)", f'(@{cn["lat"]}, @{cn["lon"]})'),
+                ("data (lat, lon)", f"(@{_K.lat}, @{_K.lon})"),
             ],
         )
     )
@@ -425,29 +443,15 @@ def kepler_space_object_on_map(
     return plot
 
 
-# fmt: off
-RadarScheduleEcefPositionPlotColumnKey = t.Literal[
-    "start_time", "end_time", "pointing_az", "pointing_el", "exp_num", # sorts.schedule_v2.DataFrameColumnName
-    "azimuth", "elevation", "adj_azimuth", "adj_elevation", # AzelSkyplotColumnKey
-    "lat", "lon", "wmx", "wmy", # EcefStatesPositionsPlotColumnKey
-]
-# fmt: on
-assert set(t.get_args(RadarScheduleEcefPositionPlotColumnKey)) == set(
-    [
-        *t.get_args(schedule.DataFrameColumnName),
-        *t.get_args(AzelSkyplotColumnKey),
-        *t.get_args(EcefStatesPositionsPlotColumnKey),
-    ]
-)
-
-
 def _radar_schedule_ecef_position_plot_cds_df(
     ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], sch: ScheduleNdarrayDict2
 ):
+    _SK = Schedule._K
+
     df = Schedule.from_ndarrays_2(sch).to_dataframe()
 
     # bokeh requires str type for categorical axis
-    df[schedule.cn["exp_num"]] = df[schedule.cn["exp_num"]].astype(str)
+    df[_SK.exp_num] = df[_SK.exp_num].astype(str)
 
     # insert columns for azel_skyplot
     azel_skyplot_cols = _azel_skyplot_cds_cols(sch["pointing_az"], sch["pointing_el"])
@@ -458,8 +462,8 @@ def _radar_schedule_ecef_position_plot_cds_df(
     ecef_pos_plot_cols = _ecef_states_positions_plot_cds_cols(ecefs)
     df = pd.merge(
         df,
-        pd.DataFrame({schedule.cn["start_time"]: ecefs_time, **ecef_pos_plot_cols}),
-        on=schedule.cn["start_time"],
+        pd.DataFrame({_SK.start_time: ecefs_time, **ecef_pos_plot_cols}),
+        on=_SK.start_time,
         how="outer",
     )
 
@@ -469,18 +473,20 @@ def _radar_schedule_ecef_position_plot_cds_df(
 def radar_schedule_ecef_position_plot(
     ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], sch: ScheduleNdarrayDict2
 ):
+    _SK = Schedule._K
+
     df = _radar_schedule_ecef_position_plot_cds_df(ecefs=ecefs, ecefs_time=ecefs_time, sch=sch)
 
     cds = bokeh_models.ColumnDataSource(df)
 
-    start_time = df[schedule.cn["start_time"]].min()
-    end_time = df[schedule.cn["end_time"]].max()
+    start_time = df[_SK.start_time].min()
+    end_time = df[_SK.end_time].max()
 
     sch_plot, sch_plot_bar, *_ = _schedule_plot_from_cds(
         cds,
         start_time=start_time,
         end_time=end_time,
-        y_range=df[schedule.cn["exp_num"]].dropna().unique(),
+        y_range=df[_SK.exp_num].dropna().unique(),
     )
     sch_plot_bar_select_tool = bokeh_models.BoxSelectTool()
     sch_plot_bar.add_tools(sch_plot_bar_select_tool)

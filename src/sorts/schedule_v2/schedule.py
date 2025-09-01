@@ -13,32 +13,6 @@ from sorts.schedule_v2.priority_scheduling import priority_scheduling
 
 logger = logging.getLogger(__name__)
 
-# TODO: move it, superseded by `ScheduleDataKey`, `ScheduleCoordKey`, `ScheduleAttrKey`
-# <todo-start>
-ScheduleFieldKey = t.Literal[
-    "exp_detail_map", "start_time", "pointing_az", "pointing_el", "exp_num"
-]
-
-# Define the column names used when exported as a `DataFrame` (pandas or alike)
-NonDerivedDataFrameColumnName = t.Literal["start_time", "pointing_az", "pointing_el", "exp_num"]
-DerivedDataFrameColumnName = t.Literal["end_time"]
-DataFrameColumnName = t.Literal["start_time", "end_time", "pointing_az", "pointing_el", "exp_num"]
-
-assert all((n in t.get_args(ScheduleFieldKey) for n in t.get_args(NonDerivedDataFrameColumnName)))
-assert set(t.get_args(DataFrameColumnName)) == set(
-    [*t.get_args(NonDerivedDataFrameColumnName), *t.get_args(DerivedDataFrameColumnName)]
-)
-
-
-data_frame_column_names: t.Final[dict[DataFrameColumnName, str]] = {
-    n: n for n in t.get_args(DataFrameColumnName)
-}
-"""A dict of `DataFrameColumnName` as string key-value pair for convenience."""
-
-cn = data_frame_column_names
-"""An alias of `data_frame_column_names`"""
-# <todo-end>
-
 
 ScheduleDataKey = t.Literal["pointing", "exp_num"]
 ScheduleCoordKey = t.Literal["start_time", "end_time"]
@@ -82,18 +56,6 @@ class ScheduleNdarrayDict(t.TypedDict):
 
 
 ScheduleData = xr.Dataset
-
-
-# TODO: can be removed? xarray dataset class is already dataframe like, and have pandas conversion methods
-def from_dataframe(
-    df: pd.DataFrame, exp_detail_map: dict[int, ExperimentDetail]
-) -> ScheduleNdarrayDict2:
-    sch = ScheduleNdarrayDict2(
-        **{k: df[k].to_numpy() for k in t.get_args(NonDerivedDataFrameColumnName)},
-        exp_detail_map=exp_detail_map,
-    )
-
-    return sch
 
 
 def schedule_data_to_dataframe(ds: ScheduleData) -> pd.DataFrame:
