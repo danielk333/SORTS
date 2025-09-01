@@ -6,9 +6,9 @@ from .schedule import (
     Schedule,
 )
 from .schedule_data import (
-    ScheduleDataKey,
-    ScheduleCoordKey,
-    ScheduleAttrKey,
-    ScheduleKey,
+    DataKey,
+    CoordKey,
+    AttrKey,
+    Key,
     ScheduleData,
 )

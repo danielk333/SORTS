@@ -1,8 +1,8 @@
 """
 Types and functions for `ScheduleData` manipuations.
 
-- Not intended for consumption from outside of the library
-- Intended to be imported as a module (e.g. `from sorts.schedule_v2 import schedule_data)
+- Not intended for consumption from outside of this library
+- Intended to be imported as a module when consuming (e.g. `from sorts.schedule_v2 import schedule_data)
 """
 
 from __future__ import annotations
@@ -20,10 +20,10 @@ if t.TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-ScheduleDataKey = t.Literal["pointing", "exp_num"]
-ScheduleCoordKey = t.Literal["start_time", "end_time"]
-ScheduleAttrKey = t.Literal["stn_id", "exp_detail_map"]
-ScheduleKey = t.Literal[ScheduleDataKey, ScheduleCoordKey, ScheduleAttrKey]
+DataKey = t.Literal["pointing", "exp_num"]
+CoordKey = t.Literal["start_time", "end_time"]
+AttrKey = t.Literal["stn_id", "exp_detail_map"]
+Key = t.Literal[DataKey, CoordKey, AttrKey]
 
 
 class _K:
@@ -37,13 +37,13 @@ class _K:
     exp_detail_map: t.Final = "exp_detail_map"
 
 
-assert_class_attributes_equal_to(_K, t.get_args(ScheduleKey))
+assert_class_attributes_equal_to(_K, t.get_args(Key))
 
 
 ScheduleData = xr.Dataset
 
 
-def schedule_data_to_dataframe(ds: ScheduleData) -> pd.DataFrame:
+def to_dataframe(ds: ScheduleData) -> pd.DataFrame:
     df = pd.concat(
         t.cast(
             list[pd.DataFrame],
@@ -60,7 +60,7 @@ def schedule_data_to_dataframe(ds: ScheduleData) -> pd.DataFrame:
     return df
 
 
-def merge_attrs(attrs_dicts: list[dict[ScheduleAttrKey, t.Any]]) -> dict:
+def merge_attrs(attrs_dicts: list[dict[AttrKey, t.Any]]) -> dict:
     """Merging attrs dict, latter attrs dict will override former attrs dict, just like `.update()` method of `dict`"""
 
     match len(attrs_dicts):
@@ -69,7 +69,7 @@ def merge_attrs(attrs_dicts: list[dict[ScheduleAttrKey, t.Any]]) -> dict:
         case 1:
             return attrs_dicts[0]
         case _:
-            result: dict[ScheduleAttrKey, t.Any] = attrs_dicts[0]
+            result: dict[AttrKey, t.Any] = attrs_dicts[0]
             for attrs_dict in attrs_dicts[0:]:
                 result[_K.stn_id] = attrs_dict[_K.stn_id]
                 result[_K.exp_detail_map].update(attrs_dict[_K.exp_detail_map])
@@ -77,7 +77,7 @@ def merge_attrs(attrs_dicts: list[dict[ScheduleAttrKey, t.Any]]) -> dict:
     return result
 
 
-def filter_schedule_data_by_time_range(ds: ScheduleData, time_range: TimeRange_us) -> ScheduleData:
+def filter_by_time_range(ds: ScheduleData, time_range: TimeRange_us) -> ScheduleData:
     mask = (ds[_K.start_time] >= time_range[0]) & (ds[_K.start_time] <= time_range[1])
 
     ds_masked = ds[{_K.start_time: mask}]

@@ -69,7 +69,7 @@ class Schedule:
     Also contains some related metadata.
 
     Schedule data is stored in the private attribute `_data`,
-    and is not intended for consumption from outside of the library.
+    and is not intended for consumption from outside of this library.
 
     NOTE:
         We are still evaluating which backing data structure to use and is subject to change
@@ -148,11 +148,11 @@ class Schedule:
         return arr_dict
 
     def to_dataframe(self) -> pd.DataFrame:
-        return schedule_data.schedule_data_to_dataframe(self._data)
+        return schedule_data.to_dataframe(self._data)
 
     def filter_by_time_range(self, time_range: TimeRange_us) -> t.Self:
         cls = type(self)
-        filtered_data = schedule_data.filter_schedule_data_by_time_range(self._data, time_range)
+        filtered_data = schedule_data.filter_by_time_range(self._data, time_range)
         return cls(data=filtered_data)
 
     # TODO: we can probably inject the schedule is tx or rx into `Schedule` class and remove param `is_split_simu`

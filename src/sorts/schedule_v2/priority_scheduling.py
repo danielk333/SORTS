@@ -42,7 +42,7 @@ def to_dataframe(ds: xr.Dataset):
         t.cast(
             list[pd.DataFrame],
             [
-                schedule_data.schedule_data_to_dataframe(ds),
+                schedule_data.to_dataframe(ds),
                 (
                     ds[_IK.allowed_start_time].transpose().to_pandas()
                     if _IK.allowed_start_time in ds
