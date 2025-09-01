@@ -103,11 +103,11 @@ def derive_observation_indexers(
 ) -> list[ObservationIndexer]:
     """Derive an indexer for each observation"""
 
+    _K = Schedule._K
+
     obs_indexers: list[ObservationIndexer] = []
 
-    rx_schedule_map: dict[str, Schedule] = {
-        sch._data.attrs[sch.attr_keys["stn_id"]]: sch for sch in rx_schs
-    }
+    rx_schedule_map: dict[str, Schedule] = {sch._data.attrs[_K.stn_id]: sch for sch in rx_schs}
 
     tx_obs_idxers = tx_sch.filter_by_time_range(passage["time_range"]).get_indexer_per_measurement(
         is_split_simu=False

@@ -4,27 +4,16 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import xarray as xr
+from sorts.utils import assert_class_attributes_equal_to
 from sorts.types import Datetime64_us, TimeRange_us
 from sorts.schedule_v2.types import ExperimentDetail, ScheduleNdarrayDict2
-from sorts.schedule_v2.schedule_data import (
-    ScheduleDataKey,
-    ScheduleCoordKey,
-    ScheduleAttrKey,
-    ScheduleKey,
-    schedule_data_keys,
-    schedule_coord_keys,
-    schedule_attr_keys,
-    schedule_keys,
-    _K,
-    ScheduleNdarrayDict,
-    ScheduleXrds,
-    from_ndarrays_2,
-)
+from sorts.schedule_v2.schedule_data import ScheduleNdarrayDict, ScheduleXrds, from_ndarrays_2
 from sorts.schedule_v2.priority_scheduling import priority_scheduling
 
 logger = logging.getLogger(__name__)
 
 # TODO: move it, superseded by `ScheduleDataKey`, `ScheduleCoordKey`, `ScheduleAttrKey`
+# <todo-start>
 ScheduleFieldKey = t.Literal[
     "exp_detail_map", "start_time", "pointing_az", "pointing_el", "exp_num"
 ]
@@ -47,6 +36,27 @@ data_frame_column_names: t.Final[dict[DataFrameColumnName, str]] = {
 
 cn = data_frame_column_names
 """An alias of `data_frame_column_names`"""
+# <todo-end>
+
+
+ScheduleDataKey = t.Literal["pointing", "exp_num"]
+ScheduleCoordKey = t.Literal["start_time", "end_time"]
+ScheduleAttrKey = t.Literal["stn_id", "exp_detail_map"]
+ScheduleKey = t.Literal[ScheduleDataKey, ScheduleCoordKey, ScheduleAttrKey]
+
+
+class _K:
+    """Internal helper class for accessing string keys consistently"""
+
+    pointing: t.Final = "pointing"
+    exp_num: t.Final = "exp_num"
+    start_time: t.Final = "start_time"
+    end_time: t.Final = "end_time"
+    stn_id: t.Final = "stn_id"
+    exp_detail_map: t.Final = "exp_detail_map"
+
+
+assert_class_attributes_equal_to(_K, t.get_args(ScheduleKey))
 
 
 # TODO: can be removed? xarray dataset class is already dataframe like, and have pandas conversion methods
@@ -62,16 +72,13 @@ def from_dataframe(
 
 
 def schedule_data_to_dataframe(ds: ScheduleXrds) -> pd.DataFrame:
-    # define some column names/keys
-    keys = schedule_keys
-
     df = pd.concat(
         t.cast(
             list[pd.DataFrame],
             [
-                ds[keys["end_time"]].transpose().to_pandas(),
-                ds[keys["pointing"]].transpose().to_pandas(),
-                ds[keys["exp_num"]].transpose().to_pandas(),
+                ds[_K.end_time].transpose().to_pandas(),
+                ds[_K.pointing].transpose().to_pandas(),
+                ds[_K.exp_num].transpose().to_pandas(),
             ],
         ),
         axis=1,
@@ -99,11 +106,9 @@ def merge_attrs(attrs_dicts: list[dict[ScheduleAttrKey, t.Any]]) -> dict:
 
 
 def filter_schedule_data_by_time_range(ds: ScheduleXrds, time_range: TimeRange_us) -> ScheduleXrds:
-    mask = (ds[schedule_keys["start_time"]] >= time_range[0]) & (
-        ds[schedule_keys["start_time"]] <= time_range[1]
-    )
+    mask = (ds[_K.start_time] >= time_range[0]) & (ds[_K.start_time] <= time_range[1])
 
-    ds_masked = ds[{schedule_keys["start_time"]: mask}]
+    ds_masked = ds[{_K.start_time: mask}]
 
     return ds_masked
 
@@ -139,32 +144,30 @@ def get_indexer_per_measurement(ds: ScheduleXrds, is_split_simu: bool) -> list[x
     i.e. By `exp_num` and optionally per each of the simutaneous pointings (controlled by `is_split_simu`)
     """
 
-    k = schedule_keys
-
     # identify where `exp_num` changes
-    chg_pts = ds[k["exp_num"]] != ds[k["exp_num"]].shift({k["start_time"]: 1})
+    chg_pts = ds[_K.exp_num] != ds[_K.exp_num].shift({_K.start_time: 1})
     split_ids = chg_pts.cumsum()
 
-    exp_detail_map: dict[int, ExperimentDetail] = ds.attrs[k["exp_detail_map"]]
+    exp_detail_map: dict[int, ExperimentDetail] = ds.attrs[_K.exp_detail_map]
     idxers: list[xr.DataArray] = []
     for _, ds_split in ds.groupby(split_ids):
         if is_split_simu:
             # further spliting according to number of simutaneous rx pointings
-            simu_num = exp_detail_map[ds_split[k["exp_num"]][0].item()].get(
+            simu_num = exp_detail_map[ds_split[_K.exp_num][0].item()].get(
                 "num_simutaneous_pointings", 1
             )
             for i in range(simu_num):
                 idxers.append(
                     xr.DataArray(
-                        (np.arange(len(ds_split[k["start_time"]])) - i) % simu_num == 0,
-                        dims=k["start_time"],
+                        (np.arange(len(ds_split[_K.start_time])) - i) % simu_num == 0,
+                        dims=_K.start_time,
                     )
                 )
         else:
             idxers.append(
                 xr.DataArray(
-                    np.full(len(ds_split[k["start_time"]]), True, dtype=np.bool),
-                    dims=k["start_time"],
+                    np.full(len(ds_split[_K.start_time]), True, dtype=np.bool),
+                    dims=_K.start_time,
                 )
             )
 
@@ -215,25 +218,6 @@ class Schedule:
     NOTE:
         We are still evaluating which backing data structure to use and is subject to change
     """
-
-    # TODO: remove these and replace their usage by `_K` class
-    DataKey = ScheduleDataKey
-    """shortcut to module attribute"""
-    CoordKey = ScheduleCoordKey
-    """shortcut to module attribute"""
-    AttrKey = ScheduleAttrKey
-    """shortcut to module attribute"""
-    Key = ScheduleKey
-    """shortcut to module attribute"""
-
-    data_keys = schedule_data_keys
-    """shortcut to module attribute"""
-    coord_keys = schedule_coord_keys
-    """shortcut to module attribute"""
-    attr_keys = schedule_attr_keys
-    """shortcut to module attribute"""
-    keys = schedule_keys
-    """shortcut to module attribute"""
 
     _K = _K
     """shortcut to module attribute"""
@@ -299,12 +283,12 @@ class Schedule:
 
     def to_ndarrays(self) -> ScheduleNdarrayDict:
         arr_dict: ScheduleNdarrayDict = {
-            "stn_id": self._data.attrs[self.attr_keys["stn_id"]],
-            "exp_detail_map": self._data.attrs[self.attr_keys["exp_detail_map"]],
-            "start_time": self._data[self.coord_keys["start_time"]].to_numpy(),
-            "end_time": self._data[self.coord_keys["end_time"]].to_numpy(),
-            "exp_num": self._data[self.data_keys["exp_num"]].to_numpy(),
-            "pointing": self._data[self.data_keys["pointing"]].to_numpy(),
+            "stn_id": self._data.attrs[_K.stn_id],
+            "exp_detail_map": self._data.attrs[_K.exp_detail_map],
+            "start_time": self._data[_K.start_time].to_numpy(),
+            "end_time": self._data[_K.end_time].to_numpy(),
+            "exp_num": self._data[_K.exp_num].to_numpy(),
+            "pointing": self._data[_K.pointing].to_numpy(),
         }
 
         return arr_dict
@@ -312,12 +296,12 @@ class Schedule:
     # TODO: remove its usage, then remove this method
     def to_ndarrays_2(self) -> ScheduleNdarrayDict2:
         arr_dict: ScheduleNdarrayDict2 = {
-            "stn_id": self._data.attrs[self.attr_keys["stn_id"]],
-            "exp_detail_map": self._data.attrs[self.attr_keys["exp_detail_map"]],
-            "start_time": self._data[self.coord_keys["start_time"]].to_numpy(),
-            "exp_num": self._data[self.data_keys["exp_num"]].to_numpy(),
-            "pointing_az": self._data[self.data_keys["pointing"]].to_numpy()[0],
-            "pointing_el": self._data[self.data_keys["pointing"]].to_numpy()[1],
+            "stn_id": self._data.attrs[_K.stn_id],
+            "exp_detail_map": self._data.attrs[_K.exp_detail_map],
+            "start_time": self._data[_K.start_time].to_numpy(),
+            "exp_num": self._data[_K.exp_num].to_numpy(),
+            "pointing_az": self._data[_K.pointing].to_numpy()[0],
+            "pointing_el": self._data[_K.pointing].to_numpy()[1],
         }
 
         return arr_dict

@@ -4,18 +4,14 @@ from .types import (
 )
 from . import schedule_data
 from .schedule_data import (
-    ScheduleDataKey,
-    ScheduleCoordKey,
-    ScheduleAttrKey,
-    ScheduleKey,
-    schedule_data_keys,
-    schedule_coord_keys,
-    schedule_attr_keys,
-    schedule_keys,
     ScheduleNdarrayDict,
     ScheduleXrds,
 )
 from .schedule import (
+    ScheduleDataKey,
+    ScheduleCoordKey,
+    ScheduleAttrKey,
+    ScheduleKey,
     ScheduleFieldKey,
     NonDerivedDataFrameColumnName,
     DerivedDataFrameColumnName,
