@@ -72,9 +72,3 @@ def to_flat_dict(observation: Observation):
         },
     }
     return d
-
-
-# TODO: putting non 1-dim columns (e.g. `tx_k`, `rx_k`) in pandas df is not ideal
-def list_to_dataframe(observations: list[Observation]):
-    df = pd.DataFrame([to_flat_dict(obs) for obs in observations])
-    return df
