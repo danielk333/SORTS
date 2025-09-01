@@ -8,7 +8,7 @@ from sorts.types import Datetime64_us, TimeRange_us, AzelrCoordinates_DegM
 from sorts.utils import assert_class_attributes_equal_to
 from sorts.radar.tx_rx import StationId
 from sorts.schedule_v2.types import ExperimentDetail, ScheduleNdarrayDict2
-from sorts.schedule_v2.schedule_data import from_ndarrays_2
+
 
 logger = logging.getLogger(__name__)
 
@@ -235,11 +235,6 @@ class Schedule:
         )
 
         return cls(data=sch_data)
-
-    # TODO: remove its usage, then remove this method
-    @classmethod
-    def from_ndarrays_2(cls, data: ScheduleNdarrayDict2) -> t.Self:
-        return cls(data=from_ndarrays_2(data))
 
     @classmethod
     def empty(cls) -> t.Self:
