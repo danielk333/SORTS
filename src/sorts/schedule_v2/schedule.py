@@ -81,9 +81,7 @@ class ScheduleNdarrayDict(t.TypedDict):
     pointing: AzelrCoordinates_DegM
 
 
-# TODO: rename to just `ScheduleData` when xarray adoptation is done?
-ScheduleXrds = xr.Dataset
-"""An xarray `Dataset` that contains the schedule data"""
+ScheduleData = xr.Dataset
 
 
 # TODO: can be removed? xarray dataset class is already dataframe like, and have pandas conversion methods
@@ -98,7 +96,7 @@ def from_dataframe(
     return sch
 
 
-def schedule_data_to_dataframe(ds: ScheduleXrds) -> pd.DataFrame:
+def schedule_data_to_dataframe(ds: ScheduleData) -> pd.DataFrame:
     df = pd.concat(
         t.cast(
             list[pd.DataFrame],
@@ -132,7 +130,7 @@ def merge_attrs(attrs_dicts: list[dict[ScheduleAttrKey, t.Any]]) -> dict:
     return result
 
 
-def filter_schedule_data_by_time_range(ds: ScheduleXrds, time_range: TimeRange_us) -> ScheduleXrds:
+def filter_schedule_data_by_time_range(ds: ScheduleData, time_range: TimeRange_us) -> ScheduleData:
     mask = (ds[_K.start_time] >= time_range[0]) & (ds[_K.start_time] <= time_range[1])
 
     ds_masked = ds[{_K.start_time: mask}]
@@ -164,7 +162,7 @@ def create_mask_by_time_range(
 
 # TODO: maybe saving a `simu_grp` number in schedule is more memory efficient?
 #   (or not, because measurement is very sparse over schedule)
-def get_indexer_per_measurement(ds: ScheduleXrds, is_split_simu: bool) -> list[xr.DataArray]:
+def get_indexer_per_measurement(ds: ScheduleData, is_split_simu: bool) -> list[xr.DataArray]:
     """
     Split a schedule data by measurements.
 
@@ -249,8 +247,8 @@ class Schedule:
     _K = _K
     """shortcut to module attribute"""
 
-    def __init__(self, data: ScheduleXrds):
-        self._data: ScheduleXrds = data
+    def __init__(self, data: ScheduleData):
+        self._data: ScheduleData = data
 
     @classmethod
     def from_ndarrays(cls, data: ScheduleNdarrayDict) -> t.Self:

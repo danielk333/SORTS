@@ -51,6 +51,7 @@ assert_class_attributes_equal_to(_K, t.get_args(Key))
 _SK = Schedule._K
 """Internal helper for accessing string keys consistently"""
 
+# TODO: re-eval NewType vs just type alias
 StateData = t.NewType("StateData", xr.Dataset)
 
 

@@ -8,7 +8,7 @@ from .schedule import (
     ScheduleAttrKey,
     ScheduleKey,
     ScheduleNdarrayDict,
-    ScheduleXrds,
+    ScheduleData,
     ScheduleFieldKey,
     NonDerivedDataFrameColumnName,
     DerivedDataFrameColumnName,

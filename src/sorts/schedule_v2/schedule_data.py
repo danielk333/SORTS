@@ -9,9 +9,9 @@ logger = logging.getLogger(__name__)
 
 # TODO: remove its usage, then remove this method
 def from_ndarrays_2(data: ScheduleNdarrayDict2):
-    from sorts.schedule_v2.schedule import ScheduleXrds
+    from sorts.schedule_v2.schedule import ScheduleData
 
-    sch_data: ScheduleXrds = xr.Dataset(
+    sch_data: ScheduleData = xr.Dataset(
         coords={
             "start_time": data["start_time"],
             "end_time": ("start_time", data["start_time"]),

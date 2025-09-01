@@ -6,7 +6,7 @@ import xarray as xr
 from sorts.utils import assert_class_attributes_equal_to
 
 if t.TYPE_CHECKING:
-    from sorts.schedule_v2.schedule import ScheduleXrds
+    from sorts.schedule_v2.schedule import ScheduleData
 
 
 logger = logging.getLogger(__name__)
@@ -72,7 +72,7 @@ def to_dataframe(ds: xr.Dataset):
     return df
 
 
-def priority_scheduling(sch_datas: t.Sequence[ScheduleXrds]) -> ScheduleXrds:
+def priority_scheduling(sch_datas: t.Sequence[ScheduleData]) -> ScheduleData:
     """
     Merge a sequence of schedule data for a single station into one,
     schedule with smaller index in the sequence is given priority over those with larger index.
