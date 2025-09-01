@@ -5,8 +5,6 @@ from sorts.types import Datetime64_us, EcefStates, Float64_as_sec, Datetime_Like
 from sorts.utils import to_datetime64_us
 from sorts.radar.tx_rx import Station
 from sorts.space_object import SpaceObject
-from sorts import schedule_v2 as schedule
-from sorts.schedule_v2.schedule import Schedule, ScheduleNdarrayDict2, ExperimentDetail
 
 
 class Passage(t.TypedDict):
@@ -23,25 +21,6 @@ class Passage(t.TypedDict):
     epoch: Datetime64_us
     time_range: tuple[Datetime64_us, Datetime64_us]
     """The start time and end time of the passage, a right-open interval"""
-
-
-# TODO: can be removed?
-# TODO: rename to `MeasurementPassage`?
-class ExperimentPassage(Passage):
-    """
-    A TypedDict of params.
-    Represent a passage of a space object over the field of view of a TX-RX radar station pair,
-    with additional data that facilitate the measurement calculations.
-
-    Contain these fields in addition to those in TypedDict `Passage`:
-    - `experiment_detail`
-    - `tx_schedule` (The TX schedule during the passage.)
-    - `rx_schedule` (The RX schedule during the passage.)
-    """
-
-    experiment_detail: ExperimentDetail
-    tx_schedule: ScheduleNdarrayDict2
-    rx_schedule: ScheduleNdarrayDict2
 
 
 def find_passages(

@@ -4,7 +4,6 @@ import numpy.typing as npt
 import pandas as pd
 from sorts.types import AzelCoordinates_DegM, Datetime64_us, Float64_as_m
 from sorts.schedule_v2.schedule import XrDataArrayIndexer
-from sorts.simulation_v2.passage import ExperimentPassage
 
 
 class ObservationIndexer(t.TypedDict):
@@ -26,7 +25,7 @@ class Observation(t.TypedDict):
     # observationIndexer: ObservationIndexer
 
     # TODO: re-think this naming
-    experiment_passage: ExperimentPassage
+    # experiment_passage: ExperimentPassage
 
     tx_time: npt.NDArray[Datetime64_us]
     rx_time: npt.NDArray[Datetime64_us]
@@ -62,10 +61,10 @@ class Observation(t.TypedDict):
 def to_flat_dict(observation: Observation):
     d = {
         # TODO: putting normal python object in pandas df is not ideal
-        **{
-            f"expps_{k}": observation["experiment_passage"][k]
-            for k in ExperimentPassage.__annotations__.keys()
-        },
+        # **{
+        #     f"expps_{k}": observation["experiment_passage"][k]
+        #     for k in ExperimentPassage.__annotations__.keys()
+        # },
         **{
             k: observation[k]
             for k in Observation.__annotations__.keys()

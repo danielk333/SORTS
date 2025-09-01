@@ -7,7 +7,7 @@ import xarray as xr
 from sorts.types import Datetime64_us, TimeRange_us, AzelrCoordinates_DegM
 from sorts.utils import assert_class_attributes_equal_to
 from sorts.radar.tx_rx import StationId
-from sorts.schedule_v2.types import ExperimentDetail, ScheduleNdarrayDict2
+from sorts.schedule_v2.types import ExperimentDetail
 
 
 logger = logging.getLogger(__name__)
@@ -85,8 +85,8 @@ def merge_attrs(attrs_dicts: list[dict[ScheduleAttrKey, t.Any]]) -> dict:
         case _:
             result: dict[ScheduleAttrKey, t.Any] = attrs_dicts[0]
             for attrs_dict in attrs_dicts[0:]:
-                result["stn_id"] = attrs_dict["stn_id"]
-                result["exp_detail_map"].update(attrs_dict["exp_detail_map"])
+                result[_K.stn_id] = attrs_dict[_K.stn_id]
+                result[_K.exp_detail_map].update(attrs_dict[_K.exp_detail_map])
 
     return result
 
@@ -97,28 +97,6 @@ def filter_schedule_data_by_time_range(ds: ScheduleData, time_range: TimeRange_u
     ds_masked = ds[{_K.start_time: mask}]
 
     return ds_masked
-
-
-# TODO: remove its usage, then remove this func
-def create_mask_by_time_range(
-    sch: ScheduleNdarrayDict2, time_range: tuple[Datetime64_us, Datetime64_us]
-) -> npt.NDArray[np.bool]:
-    """
-    Return a mask that filters out schedule entries that are not inside `time_range`.
-    (a right-open interval)
-
-    NOTE: right now it only check against `start_time`
-    """
-
-    start_time, end_time = time_range
-
-    # TODO: better include end_time in the schedule and check against that
-    mask: npt.NDArray[np.bool] = np.logical_and(
-        sch["start_time"] >= start_time,
-        sch["start_time"] <= end_time,
-    )
-
-    return mask
 
 
 # TODO: maybe saving a `simu_grp` number in schedule is more memory efficient?
@@ -158,33 +136,6 @@ def get_indexer_per_measurement(ds: ScheduleData, is_split_simu: bool) -> list[x
             )
 
     return idxers
-
-
-# TODO: remove its usage, then remove this func
-def filter_by_mask(sch: ScheduleNdarrayDict2, mask: npt.NDArray[np.bool]) -> ScheduleNdarrayDict2:
-    """Return a slice of the origin schedule based on the `mask`"""
-
-    filtered_sch = ScheduleNdarrayDict2(
-        exp_detail_map=sch["exp_detail_map"],
-        start_time=sch["start_time"][mask],
-        exp_num=sch["exp_num"][mask],
-        pointing_az=sch["pointing_az"][mask],
-        pointing_el=sch["pointing_el"][mask],
-    )
-
-    return filtered_sch
-
-
-# TODO: remove its usage, then remove this func
-def filter_by_time_range(
-    sch: ScheduleNdarrayDict2, time_range: tuple[Datetime64_us, Datetime64_us]
-) -> ScheduleNdarrayDict2:
-    """
-    Return a slice of the origin schedule based on the `time_range`
-    (a right-open interval)
-    """
-
-    return filter_by_mask(sch, create_mask_by_time_range(sch, time_range))
 
 
 TimeRangeIndexer = TimeRange_us

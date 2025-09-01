@@ -24,26 +24,3 @@ class ExperimentDetail(t.TypedDict):
 
     # TODO: this is a temp workaround to get multiple simutaneous rx pointings working
     num_simutaneous_pointings: t.NotRequired[int]
-
-
-# TODO: try to remove/dissolve this class?
-class ScheduleNdarrayDict2(t.TypedDict):
-    """
-    A TypedDict, stores a collection of "control slices" (or "slices" in short).
-
-    - Slice data are stored as columns of fields, each of which is a `ndarray`.
-    - Metadata (`ExperimentDetail`s) are stored as a dict inside the `exp_detail_map` field.
-    """
-
-    # TODO: add `Station` into this class?
-    exp_detail_map: dict[int, ExperimentDetail]
-
-    start_time: npt.NDArray[Datetime64_us]
-
-    # TODO: re-eval the size of `exp_num`
-    exp_num: npt.NDArray[np.int64]
-
-    pointing_az: npt.NDArray[Float64_as_deg]
-    pointing_el: npt.NDArray[Float64_as_deg]
-
-    stn_id: t.NotRequired[str]

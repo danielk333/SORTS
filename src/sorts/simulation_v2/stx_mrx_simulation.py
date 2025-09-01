@@ -9,12 +9,7 @@ from sorts.interpolation import Interpolator
 from sorts.radar.tx_rx import Station, StationId
 from sorts.utils import to_datetime64_us
 from sorts.types import Datetime_Like, Float64_as_sec, EcefStates, Datetime64_us
-from sorts.schedule_v2.schedule import (
-    Schedule,
-    TimeRangeIndexer,
-    ScheduleNdarrayDict2,
-    ExperimentDetail,
-)
+from sorts.schedule_v2.schedule import Schedule, TimeRangeIndexer, ExperimentDetail
 from sorts.simulation_v2.passage import Passage, find_passages
 from sorts.simulation_v2.simulation_unit import SimulationUnit
 from sorts.simulation_v2.observation import Observation, ObservationIndexer
