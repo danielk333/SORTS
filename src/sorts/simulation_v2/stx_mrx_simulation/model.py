@@ -38,34 +38,15 @@ class Spec(t.TypedDict):
     interpolator_class: type[Interpolator]
 
 
-# TODO: can be dissolved, when we have SimulationUnit now?
-class State(t.TypedDict):
-    """A TypedDict of params"""
-
-    space_object_sample_dsec: list[npt.NDArray[Float64_as_sec]]
-    space_object_sample_states: list[EcefStates]
-    space_object_interpolators: list[Interpolator]
-    observations: list[Observation]
-
-
 # TODO: we need to enforce each station to has a unique id (`.uid` prop)
 #   either in the simulation class or in related station getter like `get_radar`
 class StxMrxSimulation:
-    def __init__(self, spec: Spec, state: State):
+    def __init__(self, spec: Spec):
         self.spec: Spec = spec
-        self.state: State = state
 
     @classmethod
-    def from_spec(cls, spec: Spec) -> StxMrxSimulation:
-        sim = StxMrxSimulation(
-            spec=spec,
-            state={
-                "space_object_sample_dsec": [],
-                "space_object_sample_states": [],
-                "space_object_interpolators": [],
-                "observations": [],
-            },
-        )
+    def from_spec(cls, spec: Spec) -> t.Self:
+        sim = cls(spec=spec)
 
         return sim
 
@@ -85,10 +66,6 @@ class StxMrxSimulation:
             for spobj_smpl_dsec, spobj_smpl_states in zip(spobjs_smpl_dsec, spobjs_smpl_states)
         ]
         logger.debug("interpolators done")
-
-        self.state["space_object_sample_dsec"] = spobjs_smpl_dsec
-        self.state["space_object_sample_states"] = spobjs_smpl_states
-        self.state["space_object_interpolators"] = spobjs_interpolators
 
         passages_lists = funcs.find_passages(
             spec=self.spec,
