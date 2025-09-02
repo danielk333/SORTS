@@ -9,22 +9,7 @@ from sorts.types import Datetime64_us, EcefStates, Float64_as_sec, Datetime_Like
 from sorts.utils import to_datetime64_us
 from sorts.radar import Station
 from sorts.space_object import SpaceObject
-
-
-class Passage(t.TypedDict):
-    """
-    A TypedDict of params. Represent a passage of a space object over the field of view of a TX-RX radar station pair.
-    """
-
-    # id: int # TODO: revisit if this is needed
-    # TODO: add ENU and/or ECEF states?
-
-    space_object: SpaceObject
-    tx_station: Station
-    rx_station: Station
-    epoch: Datetime64_us
-    time_range: tuple[Datetime64_us, Datetime64_us]
-    """The start time and end time of the passage, a right-open interval"""
+from .types import Passage
 
 
 def find_passages(

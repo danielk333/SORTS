@@ -13,7 +13,8 @@ from sorts.interpolation import Interpolator
 from sorts.radar import StationId
 from sorts.types import Float64_as_sec, EcefStates, Datetime64_us
 from sorts.schedule_v2 import Schedule, TimeRangeIndexer
-from sorts.simulation_v2 import passage
+from sorts.simulation_v2.types import Passage
+from sorts.simulation_v2 import funcs
 from sorts.simulation_v2.simulation_unit import SimulationUnit
 from sorts.simulation_v2.observation import ObservationIndexer
 
@@ -52,7 +53,7 @@ def sample_and_propagate_pace_objects_states(
 
 
 def derive_schedule_indexers_per_tx_rx_station_pair(
-    passages: list[passage.Passage],
+    passages: list[Passage],
 ) -> dict[tuple[StationId, StationId], list[TimeRangeIndexer]]:
     """Derive a list of schedule indexer for each tx-rx station pair found in the give passages"""
 
@@ -71,7 +72,7 @@ def derive_schedule_indexers_per_tx_rx_station_pair(
 
 
 def derive_observation_indexers(
-    passage: passage.Passage,
+    passage: Passage,
     tx_sch: Schedule,
     rx_schs: t.Sequence[Schedule],
 ) -> list[ObservationIndexer]:
@@ -103,25 +104,25 @@ def find_passages(
     spec: Spec,
     spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]],
     spobjs_smpl_states: list[EcefStates],
-) -> list[list[passage.Passage]]:
+) -> list[list[Passage]]:
     """
     Find passages for each space objects over the simulation period.
 
     Returns a `list[Passage]` per space object.
     """
 
-    passages_list: list[list[passage.Passage]] = []
+    passages_list: list[list[Passage]] = []
 
     for spobj, spobj_smpl_dsec, spobj_smpl_states in zip(
         spec["space_objects"],
         spobjs_smpl_dsec,
         spobjs_smpl_states,
     ):
-        passages_of_spobj: list[passage.Passage] = []
+        passages_of_spobj: list[Passage] = []
 
         for rx_station in spec["rx_stations"]:
             passages_of_spobj.extend(
-                passage.find_passages(
+                funcs.find_passages(
                     dt=spobj_smpl_dsec,
                     space_object=spobj,
                     states=spobj_smpl_states,
@@ -141,7 +142,7 @@ def find_passages(
 #   - the loops might be simplified a bit as well
 def derive_simulation_units(
     spec: Spec,
-    passages_lists: list[list[passage.Passage]],
+    passages_lists: list[list[Passage]],
     spobjs_interpolators: list[Interpolator],
 ):
     sim_units: list[SimulationUnit] = []

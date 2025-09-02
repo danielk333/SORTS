@@ -7,10 +7,11 @@ from tqdm import tqdm
 from sorts.interpolation import Interpolator
 from sorts.radar import Station
 from sorts.utils import to_datetime64_us
-from sorts.types import Datetime_Like, Float64_as_sec, EcefStates
+from sorts.types import Datetime_Like, Float64_as_sec
 from sorts.schedule_v2 import Schedule, ExperimentDetail
-from sorts.simulation_v2 import passage
-from sorts.simulation_v2.observation import Observation, ObservationIndexer
+from sorts.simulation_v2.types import Passage
+from sorts.simulation_v2 import funcs
+from sorts.simulation_v2.observation import ObservationIndexer
 from sorts.simulation_v2.stx_mrx_simulation import funcs
 
 logger = logging.getLogger(__name__)
@@ -44,6 +45,7 @@ class StxMrxSimulation:
     def __init__(self, spec: Spec):
         self.spec: Spec = spec
 
+    # TODO: can be removed, it is the same as default constructor now
     @classmethod
     def from_spec(cls, spec: Spec) -> t.Self:
         sim = cls(spec=spec)
@@ -91,7 +93,7 @@ class StxMrxSimulation:
         pbar.close()
 
         # TODO: simplification neeeded, update `Observation` class, (and return list of `Observation` here?)
-        passage_obs_idxers_pairs: list[tuple[passage.Passage, list[ObservationIndexer]]] = []
+        passage_obs_idxers_pairs: list[tuple[Passage, list[ObservationIndexer]]] = []
         for passages in passages_lists:
             pairs = [
                 (
