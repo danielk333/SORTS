@@ -20,8 +20,7 @@ from sorts.propagator import Kepler
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.controller_v2.tracker_controller import TrackerController
-from sorts.simulation_v2 import StxMrxSimulation
-from sorts.simulation_v2.simulation_unit import SimulationUnit
+from sorts.simulation_v2 import StxMrxSimulation, SimulationUnit
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
