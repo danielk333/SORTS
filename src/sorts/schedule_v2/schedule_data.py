@@ -1,7 +1,6 @@
 """
-Types and functions for `ScheduleData`
+Functions for core functionality of the subpackage
 
-- Not intended for consumption from outside of this library
 - Intended to be imported as a whole module when consuming
 """
 
@@ -14,7 +13,7 @@ from sorts.types import TimeRange_us
 from sorts.utils import assert_class_attributes_equal_to
 
 if t.TYPE_CHECKING:
-    from sorts.schedule_v2.schedule import ExperimentDetail
+    from sorts.schedule_v2.model import ExperimentDetail
 
 
 logger = logging.getLogger(__name__)

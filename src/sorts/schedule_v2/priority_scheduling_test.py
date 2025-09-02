@@ -1,8 +1,8 @@
 import typing as t
 import numpy as np
 import xarray as xr
-from sorts.schedule_v2.schedule import Schedule
-from sorts.schedule_v2.priority_scheduling import priority_scheduling
+from .model import Schedule
+from .priority_scheduling import priority_scheduling
 
 
 def setup_function():

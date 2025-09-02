@@ -10,7 +10,7 @@ from sorts.radar.tx_rx import Station
 from sorts.space_object import SpaceObject
 from sorts.signals import hard_target_snr
 from sorts.interpolation import Interpolator
-from sorts.schedule_v2.schedule import Schedule, TimeRangeIndexer
+from sorts.schedule_v2 import Schedule, TimeRangeIndexer
 
 CoordKey = t.Literal["time", "azelr", "az", "el", "r"]
 DataKey = t.Literal[

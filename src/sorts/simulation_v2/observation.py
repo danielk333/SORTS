@@ -1,9 +1,8 @@
 import typing as t
 import numpy as np
 import numpy.typing as npt
-import pandas as pd
 from sorts.types import AzelCoordinates_DegM, Datetime64_us, Float64_as_m
-from sorts.schedule_v2.schedule import XrDataArrayIndexer
+from sorts.schedule_v2 import XrDataArrayIndexer
 
 
 class ObservationIndexer(t.TypedDict):

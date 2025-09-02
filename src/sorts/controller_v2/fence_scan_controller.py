@@ -15,7 +15,7 @@ from sorts.types import (
     Datetime_Like,
 )
 from sorts.utils import to_datetime64_us, wrap_azimuths_elevations
-from sorts.schedule_v2.schedule import Schedule, ExperimentDetail
+from sorts.schedule_v2 import Schedule, ExperimentDetail
 from sorts.controller_v2 import pointing_patterns
 
 logger = logging.getLogger(__name__)

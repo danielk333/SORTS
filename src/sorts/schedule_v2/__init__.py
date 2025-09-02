@@ -1,4 +1,4 @@
-from .schedule import (
+from .model import (
     ExperimentDetail,
     ScheduleNdarrayDict,
     TimeRangeIndexer,

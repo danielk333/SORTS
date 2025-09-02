@@ -3,7 +3,7 @@ import pandas as pd
 import bokeh.models as bokeh_models
 import bokeh.layouts as bokeh_layouts
 from sorts.types import EcefStates, Datetime64_us
-from sorts.schedule_v2.schedule import Schedule
+from sorts.schedule_v2 import Schedule
 from sorts.plots.schedule_plot import _schedule_plot_from_cds
 from sorts.plots.azel_skyplot import _azel_skyplot_cds_cols, _azel_skyplot_from_cds
 from sorts.plots.ecef_states_positions_plot import (

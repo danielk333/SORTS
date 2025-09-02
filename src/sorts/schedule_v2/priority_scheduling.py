@@ -4,8 +4,8 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from sorts.utils import assert_class_attributes_equal_to
-from sorts.schedule_v2 import schedule_data
-from sorts.schedule_v2.schedule import Schedule
+from . import schedule_data
+from .model import Schedule
 
 logger = logging.getLogger(__name__)
 
