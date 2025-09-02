@@ -1,8 +1,5 @@
+from .types import DataKey, CoordKey, AttrKey, Key
 from .model import (
-    DataKey,
-    CoordKey,
-    AttrKey,
-    Key,
     ScheduleData,
     ExperimentDetail,
     ScheduleNdarrayDict,

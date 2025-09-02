@@ -10,9 +10,10 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from sorts.types import TimeRange_us
+from .types import _K, AttrKey
 
 if t.TYPE_CHECKING:
-    from sorts.schedule_v2.model import _K, AttrKey, ScheduleData, ExperimentDetail
+    from .model import ScheduleData, ExperimentDetail
 
 
 logger = logging.getLogger(__name__)

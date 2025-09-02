@@ -5,31 +5,12 @@ import numpy.typing as npt
 import pandas as pd
 import xarray as xr
 from sorts.types import Datetime64_us, TimeRange_us, Timedelta64_us, AzelrCoordinates_DegM
-from sorts.utils import assert_class_attributes_equal_to
 from sorts.radar import StationId
+from .types import _K
 from . import funcs
 
 
 logger = logging.getLogger(__name__)
-
-DataKey = t.Literal["pointing", "exp_num"]
-CoordKey = t.Literal["start_time", "end_time"]
-AttrKey = t.Literal["stn_id", "exp_detail_map"]
-Key = t.Literal[DataKey, CoordKey, AttrKey]
-
-
-class _K:
-    """Internal helper class for accessing string keys consistently"""
-
-    pointing: t.Final = "pointing"
-    exp_num: t.Final = "exp_num"
-    start_time: t.Final = "start_time"
-    end_time: t.Final = "end_time"
-    stn_id: t.Final = "stn_id"
-    exp_detail_map: t.Final = "exp_detail_map"
-
-
-assert_class_attributes_equal_to(_K, t.get_args(Key))
 
 
 ScheduleData = xr.Dataset
@@ -112,7 +93,7 @@ class Schedule:
         We are still evaluating which backing data structure to use and is subject to change
     """
 
-    _K = funcs._K
+    _K = _K
     """shortcut to module attribute"""
 
     def __init__(self, data: ScheduleData):
