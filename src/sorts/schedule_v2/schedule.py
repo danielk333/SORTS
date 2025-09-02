@@ -176,3 +176,6 @@ class Schedule:
     # TODO: we can probably inject the schedule is tx or rx into `Schedule` class and remove param `is_split_simu`
     def get_indexer_per_measurement(self, is_split_simu: bool) -> list[XrDataArrayIndexer]:
         return funcs.get_indexer_per_measurement(self._data, is_split_simu)
+
+    def get_experiment_detail(self, exp_num: int) -> ExperimentDetail:
+        return self._data.attrs[_K.exp_detail_map][exp_num]

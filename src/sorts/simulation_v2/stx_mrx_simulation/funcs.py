@@ -92,7 +92,7 @@ def derive_observation_indexers(
 
     for tx_obs_idxer in tx_obs_idxers:
         for rx_obs_idxer in rx_obs_idxers:
-            obs_indexers.append({"tx_indexer": tx_obs_idxer, "rx_indexer": rx_obs_idxer})
+            obs_indexers.append(ObservationIndexer(tx=tx_obs_idxer, rx=rx_obs_idxer))
 
     return obs_indexers
 

@@ -1,3 +1,11 @@
+"""
+Shared types in this package.
+
+(Types might live in their own module instead of here if it improves readability,
+and the imports can be worked around, e.g, by `if t.TYPE_CHECKING`)
+"""
+
+import typing as t
 import numpy as np
 import numpy.typing as npt
 from datetime import datetime, timedelta
@@ -105,3 +113,8 @@ EcefCoordinates = NDArray_3xN[np.float64]
 
 EcefStates = NDArray_6xN[np.float64]
 "ECEF states in cartesian coordinate, a `(6,n)` ndarray of `float64`, usually used for space objects"
+
+
+class TxRxTuple[TxType, RxType](t.NamedTuple):
+    tx: TxType
+    rx: RxType

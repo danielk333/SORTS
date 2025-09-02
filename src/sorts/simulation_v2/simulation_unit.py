@@ -53,6 +53,7 @@ _SK = Schedule._K
 
 # TODO: re-eval NewType vs just type alias
 StateData = t.NewType("StateData", xr.Dataset)
+"""`NewType` of `xr.Dataset`"""
 
 
 # TODO: get radar instant in init of `Schedule` so we not need to pass them here?
