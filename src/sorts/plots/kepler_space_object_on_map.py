@@ -3,7 +3,7 @@ import numpy.typing as npt
 from sorts.space_object import SpaceObject
 from sorts.types import Datetime_Like, Datetime64_us, Timedelta64_us, Float64_as_sec
 from sorts.utils import to_datetime64_us
-from sorts.plots.ecef_states_positions_plot import ecef_states_positions_plot
+from .ecef_states_positions_plot import ecef_states_positions_plot
 
 
 def kepler_space_object_on_map(
