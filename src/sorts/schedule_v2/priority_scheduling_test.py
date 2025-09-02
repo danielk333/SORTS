@@ -1,7 +1,7 @@
 import typing as t
 import numpy as np
 import xarray as xr
-from .model import Schedule
+from .schedule import Schedule
 from .priority_scheduling import priority_scheduling
 
 

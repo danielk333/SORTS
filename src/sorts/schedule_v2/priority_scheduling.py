@@ -5,7 +5,7 @@ import pandas as pd
 import xarray as xr
 from sorts.utils import assert_class_attributes_equal_to
 from . import funcs
-from .model import Schedule, ScheduleData
+from .schedule import Schedule, ScheduleData
 
 logger = logging.getLogger(__name__)
 

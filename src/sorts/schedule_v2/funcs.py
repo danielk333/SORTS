@@ -13,7 +13,7 @@ from sorts.types import TimeRange_us
 from .types import _K, AttrKey
 
 if t.TYPE_CHECKING:
-    from .model import ScheduleData, ExperimentDetail
+    from .schedule import ScheduleData, ExperimentDetail
 
 
 logger = logging.getLogger(__name__)
