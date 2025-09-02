@@ -1,8 +1,8 @@
 """
-Types and functions for `ScheduleData` manipuations.
+Types and functions for `ScheduleData`
 
 - Not intended for consumption from outside of this library
-- Intended to be imported as a module when consuming (e.g. `from sorts.schedule_v2 import schedule_data)
+- Intended to be imported as a whole module when consuming
 """
 
 from __future__ import annotations

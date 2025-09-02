@@ -10,7 +10,7 @@ from sorts.radar.tx_rx import Station, StationId
 from sorts.utils import to_datetime64_us
 from sorts.types import Datetime_Like, Float64_as_sec, EcefStates, Datetime64_us
 from sorts.schedule_v2.schedule import Schedule, TimeRangeIndexer, ExperimentDetail
-from sorts.simulation_v2.passage import Passage, find_passages
+from sorts.simulation_v2 import passage
 from sorts.simulation_v2.simulation_unit import SimulationUnit
 from sorts.simulation_v2.observation import Observation, ObservationIndexer
 
@@ -39,6 +39,7 @@ class Spec(t.TypedDict):
     interpolator_class: type[Interpolator]
 
 
+# TODO: can be dissolved, when we have SimulationUnit now?
 class State(t.TypedDict):
     """A TypedDict of params"""
 
@@ -73,7 +74,7 @@ def sample_and_propagate_pace_objects_states(
 
 
 def derive_schedule_indexers_per_tx_rx_station_pair(
-    passages: list[Passage],
+    passages: list[passage.Passage],
 ) -> dict[tuple[StationId, StationId], list[TimeRangeIndexer]]:
     """Derive a list of schedule indexer for each tx-rx station pair found in the give passages"""
 
@@ -92,7 +93,7 @@ def derive_schedule_indexers_per_tx_rx_station_pair(
 
 
 def derive_observation_indexers(
-    passage: Passage,
+    passage: passage.Passage,
     tx_sch: Schedule,
     rx_schs: t.Sequence[Schedule],
 ) -> list[ObservationIndexer]:
@@ -120,74 +121,73 @@ def derive_observation_indexers(
     return obs_indexers
 
 
-# TODO: can be dissolved?
-def calculate_observations(
+def find_passages(
     spec: Spec,
     spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]],
     spobjs_smpl_states: list[EcefStates],
-    spobjs_interpolators: list[Interpolator],
-):
+) -> list[list[passage.Passage]]:
     """
-    Calculate the observations.
+    Find passages for each space objects over the simulation period.
+
+    Returns a `list[Passage]` per space object.
     """
 
-    passages: list[Passage] = []
-    sim_units: list[SimulationUnit] = []
+    passages_list: list[list[passage.Passage]] = []
 
-    pbar = tqdm(desc="simulating observation", total=len(spec["space_objects"]))
-    for spobj, spobj_smpl_dsec, spobj_smpl_states, spobj_states_interp in zip(
+    for spobj, spobj_smpl_dsec, spobj_smpl_states in zip(
         spec["space_objects"],
         spobjs_smpl_dsec,
         spobjs_smpl_states,
-        spobjs_interpolators,
     ):
-        logger.debug(f"{spobj} calculating")
-        for rx_station in spec["rx_stations"]:
-            found_passages = find_passages(
-                dt=spobj_smpl_dsec,
-                space_object=spobj,
-                states=spobj_smpl_states,
-                tx_station=spec["tx_station"],
-                rx_station=rx_station,
-                epoch=spec["epoch"],
-            )
-            passages.extend(found_passages)
+        passages_of_spobj: list[passage.Passage] = []
 
+        for rx_station in spec["rx_stations"]:
+            passages_of_spobj.extend(
+                passage.find_passages(
+                    dt=spobj_smpl_dsec,
+                    space_object=spobj,
+                    states=spobj_smpl_states,
+                    tx_station=spec["tx_station"],
+                    rx_station=rx_station,
+                    epoch=spec["epoch"],
+                )
+            )
+
+        passages_list.append(passages_of_spobj)
+
+    return passages_list
+
+
+# TODO: minor cleanup needed
+#   - `enumerate` to get space_objects by `idx` can likely be simplified, with small adj in params/props
+#   - the loops might be simplified a bit as well
+def derive_simulation_units(
+    spec: Spec,
+    passages_lists: list[list[passage.Passage]],
+    spobjs_interpolators: list[Interpolator],
+):
+    sim_units: list[SimulationUnit] = []
+
+    for idx, (passages, spobj_states_interp) in enumerate(
+        zip(passages_lists, spobjs_interpolators)
+    ):
         indexers_dict = derive_schedule_indexers_per_tx_rx_station_pair(passages)
 
-        # TODO: minor cleanup needed, old code for schedule is making is a bit more messy than needed
         for stn_id_pair, indexers in indexers_dict.items():
             rx_stn_idx = [stn.uid for stn in spec["rx_stations"]].index(stn_id_pair[1])
 
             sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(
                 indexers=indexers,
-                spobj=spobj,
+                spobj=spec["space_objects"][idx],
                 spobj_interp=spobj_states_interp,
                 tx_stn=spec["tx_station"],
                 rx_stn=spec["rx_stations"][rx_stn_idx],
                 tx_sch=spec["tx_schedule"],
                 rx_sch=spec["rx_schedules"][rx_stn_idx],
             )
-            sim_unit.simulate()
-
             sim_units.append(sim_unit)
 
-        pbar.update(1)
-    pbar.close()
-
-    # TODO: update `Observation` class, (and return list of `Observation` here?)
-    passage_obs_idxers_pairs = [
-        (
-            passage,
-            derive_observation_indexers(
-                passage=passage,
-                tx_sch=spec["tx_schedule"],
-                rx_schs=spec["rx_schedules"],
-            ),
-        )
-        for passage in passages
-    ]
-    return sim_units, passage_obs_idxers_pairs
+    return sim_units
 
 
 # TODO: we need to enforce each station to has a unique id (`.uid` prop)
@@ -213,6 +213,7 @@ class StxMrxSimulation:
 
     def run(self):
         logger.debug("starting stx mrx sim")
+
         spobjs_smpl_dsec, spobjs_smpl_states = sample_and_propagate_pace_objects_states(
             sampler=self.spec["dsec_sampler"],
             spobjs=self.spec["space_objects"],
@@ -220,6 +221,7 @@ class StxMrxSimulation:
             end_time=to_datetime64_us(self.spec["end_time"]),
         )
         logger.debug("sample and propagate done")
+
         spobjs_interpolators = [
             self.spec["interpolator_class"](spobj_smpl_states, spobj_smpl_dsec)
             for spobj_smpl_dsec, spobj_smpl_states in zip(spobjs_smpl_dsec, spobjs_smpl_states)
@@ -230,10 +232,43 @@ class StxMrxSimulation:
         self.state["space_object_sample_states"] = spobjs_smpl_states
         self.state["space_object_interpolators"] = spobjs_interpolators
 
-        result = calculate_observations(
-            self.spec, spobjs_smpl_dsec, spobjs_smpl_states, spobjs_interpolators
+        passages_lists = find_passages(
+            spec=self.spec,
+            spobjs_smpl_dsec=spobjs_smpl_dsec,
+            spobjs_smpl_states=spobjs_smpl_states,
         )
-        logger.debug("calc obs done")
-        # self.state["observations"] = obss
+        logger.debug("find_passages done")
 
-        return result
+        sim_units = derive_simulation_units(
+            spec=self.spec,
+            passages_lists=passages_lists,
+            spobjs_interpolators=spobjs_interpolators,
+        )
+        logger.debug("derive_simulation_units done")
+
+        pbar = tqdm(desc="simulating", total=len(sim_units))
+
+        for sim_unit in sim_units:
+            sim_unit.simulate()
+            pbar.update(1)
+        logger.debug("simulation done")
+
+        pbar.close()
+
+        # TODO: simplification neeeded, update `Observation` class, (and return list of `Observation` here?)
+        passage_obs_idxers_pairs: list[tuple[passage.Passage, list[ObservationIndexer]]] = []
+        for passages in passages_lists:
+            pairs = [
+                (
+                    ps,
+                    derive_observation_indexers(
+                        passage=ps,
+                        tx_sch=self.spec["tx_schedule"],
+                        rx_schs=self.spec["rx_schedules"],
+                    ),
+                )
+                for ps in passages
+            ]
+            passage_obs_idxers_pairs.extend(pairs)
+
+        return sim_units, passage_obs_idxers_pairs

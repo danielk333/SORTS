@@ -1,3 +1,9 @@
+"""
+Types and functions for `Passage`
+
+- Intended to be imported as a whole module when consuming
+"""
+
 import typing as t
 import numpy as np
 import numpy.typing as npt
