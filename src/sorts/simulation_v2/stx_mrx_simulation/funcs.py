@@ -19,10 +19,7 @@ from sorts.simulation_v2.simulation_unit import SimulationUnit
 from sorts.simulation_v2.observation import ObservationIndexer
 
 if t.TYPE_CHECKING:
-    from sorts.simulation_v2.stx_mrx_simulation.model import (
-        Spec,
-        SpaceObjectDsecSampler,
-    )
+    from .stx_mrx_simulation import Spec, SpaceObjectDsecSampler
 
 
 logger = logging.getLogger(__name__)

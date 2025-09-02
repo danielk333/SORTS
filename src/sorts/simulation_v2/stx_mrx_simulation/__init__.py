@@ -1,1 +1,1 @@
-from .model import SpaceObjectDsecSampler, Spec, StxMrxSimulation
+from .stx_mrx_simulation import SpaceObjectDsecSampler, Spec, StxMrxSimulation
