@@ -5,13 +5,50 @@ import numpy.typing as npt
 import pandas as pd
 import xarray as xr
 from sorts.types import Datetime64_us, TimeRange_us, Timedelta64_us, AzelrCoordinates_DegM
+from sorts.utils import assert_class_attributes_equal_to
 from sorts.radar.tx_rx import StationId
-from sorts.schedule_v2 import schedule_data
+from . import funcs
 
 
 logger = logging.getLogger(__name__)
 
-_K = schedule_data._K
+DataKey = t.Literal["pointing", "exp_num"]
+CoordKey = t.Literal["start_time", "end_time"]
+AttrKey = t.Literal["stn_id", "exp_detail_map"]
+Key = t.Literal[DataKey, CoordKey, AttrKey]
+
+
+class _K:
+    """Internal helper class for accessing string keys consistently"""
+
+    pointing: t.Final = "pointing"
+    exp_num: t.Final = "exp_num"
+    start_time: t.Final = "start_time"
+    end_time: t.Final = "end_time"
+    stn_id: t.Final = "stn_id"
+    exp_detail_map: t.Final = "exp_detail_map"
+
+
+assert_class_attributes_equal_to(_K, t.get_args(Key))
+
+
+ScheduleData = xr.Dataset
+"""
+A xarray `Dataset` with:
+  ```
+  Dimensions:     (azelr: 3, start_time: n)
+  Coordinates:
+  * start_time  (start_time) datetime64[us]
+      end_time    (start_time) datetime64[us]
+  * azelr       (azelr) <U2 24B 'az' 'el' 'r'
+  Data variables:
+      pointing    (azelr, start_time) float64
+      exp_num     (start_time) int64
+  Attributes:
+      stn_id:          str
+      exp_detail_map:  dict[int, ExperimentDetail]
+  ```
+"""
 
 
 class ExperimentDetail(t.TypedDict):
@@ -75,11 +112,11 @@ class Schedule:
         We are still evaluating which backing data structure to use and is subject to change
     """
 
-    _K = schedule_data._K
+    _K = funcs._K
     """shortcut to module attribute"""
 
-    def __init__(self, data: schedule_data.ScheduleData):
-        self._data: schedule_data.ScheduleData = data
+    def __init__(self, data: ScheduleData):
+        self._data: ScheduleData = data
 
     @classmethod
     def from_ndarrays(cls, data: ScheduleNdarrayDict) -> t.Self:
@@ -148,13 +185,13 @@ class Schedule:
         return arr_dict
 
     def to_dataframe(self) -> pd.DataFrame:
-        return schedule_data.to_dataframe(self._data)
+        return funcs.to_dataframe(self._data)
 
     def filter_by_time_range(self, time_range: TimeRange_us) -> t.Self:
         cls = type(self)
-        filtered_data = schedule_data.filter_by_time_range(self._data, time_range)
+        filtered_data = funcs.filter_by_time_range(self._data, time_range)
         return cls(data=filtered_data)
 
     # TODO: we can probably inject the schedule is tx or rx into `Schedule` class and remove param `is_split_simu`
     def get_indexer_per_measurement(self, is_split_simu: bool) -> list[XrDataArrayIndexer]:
-        return schedule_data.get_indexer_per_measurement(self._data, is_split_simu)
+        return funcs.get_indexer_per_measurement(self._data, is_split_simu)

@@ -10,52 +10,12 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from sorts.types import TimeRange_us
-from sorts.utils import assert_class_attributes_equal_to
 
 if t.TYPE_CHECKING:
-    from sorts.schedule_v2.model import ExperimentDetail
+    from sorts.schedule_v2.model import _K, AttrKey, ScheduleData, ExperimentDetail
 
 
 logger = logging.getLogger(__name__)
-
-
-DataKey = t.Literal["pointing", "exp_num"]
-CoordKey = t.Literal["start_time", "end_time"]
-AttrKey = t.Literal["stn_id", "exp_detail_map"]
-Key = t.Literal[DataKey, CoordKey, AttrKey]
-
-
-class _K:
-    """Internal helper class for accessing string keys consistently"""
-
-    pointing: t.Final = "pointing"
-    exp_num: t.Final = "exp_num"
-    start_time: t.Final = "start_time"
-    end_time: t.Final = "end_time"
-    stn_id: t.Final = "stn_id"
-    exp_detail_map: t.Final = "exp_detail_map"
-
-
-assert_class_attributes_equal_to(_K, t.get_args(Key))
-
-
-ScheduleData = xr.Dataset
-"""
-A xarray `Dataset` with:
-  ```
-  Dimensions:     (azelr: 3, start_time: n)
-  Coordinates:
-  * start_time  (start_time) datetime64[us]
-      end_time    (start_time) datetime64[us]
-  * azelr       (azelr) <U2 24B 'az' 'el' 'r'
-  Data variables:
-      pointing    (azelr, start_time) float64
-      exp_num     (start_time) int64
-  Attributes:
-      stn_id:          str
-      exp_detail_map:  dict[int, ExperimentDetail]
-  ```
-"""
 
 
 def to_dataframe(ds: ScheduleData) -> pd.DataFrame:
