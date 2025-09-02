@@ -18,7 +18,7 @@ from sorts.utils import to_datetime64_us
 from sorts.interpolation import Legendre8
 from sorts.propagator import Kepler
 from sorts.space_object import SpaceObject
-from sorts.radar.tx_rx import Station
+from sorts.radar import Station
 from sorts.controller_v2.fence_scan_controller import FenceScanController
 from sorts.simulation_v2 import StxMrxSimulation
 from sorts.simulation_v2.simulation_unit import SimulationUnit

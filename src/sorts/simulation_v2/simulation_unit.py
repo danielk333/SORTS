@@ -6,7 +6,7 @@ import numpy.typing as npt
 import xarray as xr
 from sorts.utils import assert_class_attributes_equal_to, to_datetime64_us
 from sorts.types import Float64_as_m, EnuCoordinates
-from sorts.radar.tx_rx import Station
+from sorts.radar import Station
 from sorts.space_object import SpaceObject
 from sorts.signals import hard_target_snr
 from sorts.interpolation import Interpolator

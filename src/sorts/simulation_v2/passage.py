@@ -7,7 +7,7 @@ import numpy as np
 import numpy.typing as npt
 from sorts.types import Datetime64_us, EcefStates, Float64_as_sec, Datetime_Like
 from sorts.utils import to_datetime64_us
-from sorts.radar.tx_rx import Station
+from sorts.radar import Station
 from sorts.space_object import SpaceObject
 
 

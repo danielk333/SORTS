@@ -6,7 +6,7 @@ import pandas as pd
 import xarray as xr
 from sorts.types import Datetime64_us, TimeRange_us, Timedelta64_us, AzelrCoordinates_DegM
 from sorts.utils import assert_class_attributes_equal_to
-from sorts.radar.tx_rx import StationId
+from sorts.radar import StationId
 from . import funcs
 
 

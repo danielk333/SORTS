@@ -10,7 +10,7 @@ import numpy.typing as npt
 import sorts
 from tqdm import tqdm
 from sorts.interpolation import Interpolator
-from sorts.radar.tx_rx import StationId
+from sorts.radar import StationId
 from sorts.types import Float64_as_sec, EcefStates, Datetime64_us
 from sorts.schedule_v2 import Schedule, TimeRangeIndexer
 from sorts.simulation_v2 import passage

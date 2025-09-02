@@ -12,7 +12,7 @@ from sorts.interpolation import Legendre8, Linear
 from sorts.population import master_catalog, master_catalog_factor
 from sorts.propagator import SGP4
 from sorts.space_object import SpaceObject
-from sorts.radar.tx_rx import Station
+from sorts.radar import Station
 from sorts.radar.radars import get_radar
 from sorts.utils import to_datetime64_us, to_pydatetime
 from sorts.controller_v2 import TrackerController, FenceScanController

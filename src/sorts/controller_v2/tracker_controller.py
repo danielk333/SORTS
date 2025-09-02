@@ -5,7 +5,7 @@ import numpy.typing as npt
 import bokeh.layouts as bokeh_layouts
 from sorts.frames import cart_to_sph
 from sorts.space_object import SpaceObject
-from sorts.radar.tx_rx import Station
+from sorts.radar import Station
 from sorts.types import (
     EcefStates,
     Datetime64_us,

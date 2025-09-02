@@ -2,7 +2,7 @@ import logging, math
 from dataclasses import dataclass
 from datetime import timedelta
 import numpy as np
-from sorts.radar.tx_rx import StationId
+from sorts.radar import StationId
 
 logger = logging.getLogger(__name__)
 

@@ -3,7 +3,7 @@ import logging, math, typing as t
 import numpy as np
 import numpy.typing as npt
 import xarray as xr
-from sorts.radar.tx_rx import Station
+from sorts.radar import Station
 from sorts.frames import azel_to_ecef, ecef_to_enu, cart_to_sph
 from sorts.types import (
     Float_as_deg,
