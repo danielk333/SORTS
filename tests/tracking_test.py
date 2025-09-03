@@ -163,31 +163,21 @@ def south_to_north_circular_orbit_test():
     assert len(obss) == 1
     obs = obss[0]
 
-    # TODO: update and adapt
+    tx_pointings = obs.get_schedule_slice().tx._data[_SK.pointing]
+    tx_pointings_normalized = tx_pointings / np.linalg.norm(tx_pointings.to_numpy(), axis=0)
+
     # assert `E` componend of tx pointings stayed around zero
     assert np.all(
         obs.get_schedule_slice().tx._data[_SK.pointing].loc[_SK.e, :] < float_equality_thld
     )
 
-    # assert `N` componend of tx pointings swing between -1.0 and +1.0
-    assert (
-        abs(obs.get_schedule_slice().tx._data[_SK.pointing].loc[_SK.n, :].min() + 1.0)
-        < pointing_equality_thld
-    )
-    assert (
-        abs(obs.get_schedule_slice().tx._data[_SK.pointing].loc[_SK.n, :].max() - 1.0)
-        < pointing_equality_thld
-    )
+    # assert `N` componend of normalized tx pointings swing between -1.0 and +1.0
+    assert abs(tx_pointings_normalized.loc[_SK.n, :].min() + 1.0) < pointing_equality_thld
+    assert abs(tx_pointings_normalized.loc[_SK.n, :].max() - 1.0) < pointing_equality_thld
 
-    # assert `U` componend of tx pointings swing between 0.0 and 1.0
-    assert (
-        abs(obs.get_schedule_slice().tx._data[_SK.pointing].loc[_SK.u, :].min())
-        < pointing_equality_thld
-    )
-    assert (
-        abs(obs.get_schedule_slice().tx._data[_SK.pointing].loc[_SK.u, :].max() - 1.0)
-        < pointing_equality_thld
-    )
+    # assert `U` componend of normalized tx pointings swing between 0.0 and 1.0
+    assert abs(tx_pointings_normalized.loc[_SK.u, :].min()) < pointing_equality_thld
+    assert abs(tx_pointings_normalized.loc[_SK.u, :].max() - 1.0) < pointing_equality_thld
 
     # assert the max snr time is roughly at half orbital period
     assert (
