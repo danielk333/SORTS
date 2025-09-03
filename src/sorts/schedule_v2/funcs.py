@@ -54,7 +54,7 @@ def merge_attrs(attrs_dicts: list[dict[AttrKey, t.Any]]) -> dict:
 
 
 def filter_by_time_range(ds: ScheduleData, time_range: TimeRange_us) -> ScheduleData:
-    mask = (ds[_K.start_time] >= time_range[0]) & (ds[_K.start_time] <= time_range[1])
+    mask = (ds[_K.start_time] >= time_range[0]) & (ds[_K.end_time] <= time_range[1])
 
     ds_masked = ds[{_K.start_time: mask}]
 
