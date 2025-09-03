@@ -2,19 +2,17 @@ from __future__ import annotations
 import logging, math, typing as t
 import numpy as np
 import numpy.typing as npt
-import xarray as xr
 from sorts.radar import Station
-from sorts.frames import azel_to_ecef, ecef_to_enu, cart_to_sph
+from sorts.frames import enu_to_ecef, ecef_to_enu, sph_to_cart
 from sorts.types import (
     Float_as_deg,
-    AzelrCoordinates_DegM,
     Datetime64_us,
     Float64_as_m,
     EcefCoordinates,
     EnuCoordinates,
     Datetime_Like,
 )
-from sorts.utils import to_datetime64_us, wrap_azimuths_elevations
+from sorts.utils import to_datetime64_us
 from sorts.schedule_v2 import Schedule, ExperimentDetail
 from sorts.controller_v2 import pointing_patterns
 
@@ -39,7 +37,7 @@ class State(t.TypedDict):
     start_time: Datetime64_us
     end_time: Datetime64_us
     tx_schedule_size: int
-    tx_pointings_of_a_cycle: AzelrCoordinates_DegM
+    tx_pointings_of_a_cycle: EnuCoordinates
 
 
 class Output(t.NamedTuple):
@@ -49,13 +47,14 @@ class Output(t.NamedTuple):
     rx_schedules: t.Sequence[Schedule]
 
 
+# TODO: should we generate tx pointings at the specified ranges instead of normalized to 1
 def generate_from_state(spec: Spec, state: State) -> Output:
     # The logic of this function:
     # 1. repeat the cycle of tx pointings from state to form the tx schedule
     # 2. from the single cycle of tx pointings, we convert it into ECEF location coord and extend them by the `scan_range`
     # 3. using the resultant location coords from previous step,
     #    we convert them to rx station pointings of a cycle in ECEF coord,
-    #    and then further back to pointings in AzEl coord,
+    #    and then further back to pointings in ENU coord,
     #    and finally repeat them to form a rx schedule, for each rx station
 
     pointings_per_cycle = state["tx_pointings_of_a_cycle"].shape[1]
@@ -71,7 +70,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
 
     # repeat a cycle of pointings until it is at least the size of `tx_schedule_size`
     # then trim to exactly `tx_schedule_size` long
-    tx_pointing: AzelrCoordinates_DegM = np.tile(
+    tx_pointing: EnuCoordinates = np.tile(
         state["tx_pointings_of_a_cycle"],
         (state["tx_schedule_size"] + pointings_per_cycle - 1) // pointings_per_cycle,
     )[:, : state["tx_schedule_size"]]
@@ -90,12 +89,11 @@ def generate_from_state(spec: Spec, state: State) -> Output:
     rx_slice_start_time = tx_slice_start_time.repeat(len(spec["scan_range"]))
     rx_schedule_size = state["tx_schedule_size"] * len(spec["scan_range"])
     rx_schedules: list[Schedule] = []
-    tx_pointings_of_a_cycle_ecef: EcefCoordinates = azel_to_ecef(
+    tx_pointings_of_a_cycle_ecef: EcefCoordinates = enu_to_ecef(
         lat=spec["tx_station"].ecef_lat,
         lon=spec["tx_station"].ecef_lon,
         alt=spec["tx_station"].ecef_alt,
-        az=state["tx_pointings_of_a_cycle"][0],
-        el=state["tx_pointings_of_a_cycle"][1],
+        enu=state["tx_pointings_of_a_cycle"],
         degrees=True,
     )
     rx_pointing_loc_of_a_cycle_ecef: EcefCoordinates = (
@@ -108,24 +106,17 @@ def generate_from_state(spec: Spec, state: State) -> Output:
         rx_pointings_of_a_cycle_ecef: EcefCoordinates = (
             rx_pointing_loc_of_a_cycle_ecef - rx_station.ecef[:, np.newaxis]
         )
-        rx_pointings_of_a_cycle_enu: EnuCoordinates = ecef_to_enu(
+        rx_pointings_of_a_cycle: EnuCoordinates = ecef_to_enu(
             lat=rx_station.ecef_lat,
             lon=rx_station.ecef_lon,
             alt=rx_station.ecef_alt,
             ecef=rx_pointings_of_a_cycle_ecef,
             degrees=True,
         )
-        # TODO: update `wrap_azimuths_elevations` output a single ndarray of (3,n) ?
-        rx_pointings_of_a_cycle: AzelrCoordinates_DegM = cart_to_sph(
-            rx_pointings_of_a_cycle_enu, degrees=True
-        )
-        rx_pointings_of_a_cycle[0], rx_pointings_of_a_cycle[1] = wrap_azimuths_elevations(
-            rx_pointings_of_a_cycle[0], rx_pointings_of_a_cycle[1]
-        )
 
         # repeat a cycle of pointings until it is at least the size of `rx_schedule_size`
         # then trim to exactly `rx_schedule_size` long
-        rx_pointing: AzelrCoordinates_DegM = np.tile(
+        rx_pointing: EnuCoordinates = np.tile(
             rx_pointings_of_a_cycle,
             (rx_schedule_size + pointings_per_cycle - 1) // pointings_per_cycle,
         )[:, :rx_schedule_size]
@@ -209,10 +200,12 @@ class FenceScanController:
         end_time_np = to_datetime64_us(end_time)
         tx_schedule_size = math.floor((end_time_np - start_time_np) / exp_detail["slice_duration"])
 
-        tx_pointings_of_a_cycle = pointing_patterns.fence_pointing(
-            azimuth=self.spec["azimuth"],
-            min_elevation=self.spec["min_elevation"],
-            pointings_per_cycle=self.spec["pointings_per_cycle"],
+        tx_pointings_of_a_cycle = sph_to_cart(
+            pointing_patterns.fence_pointing(
+                azimuth=self.spec["azimuth"],
+                min_elevation=self.spec["min_elevation"],
+                pointings_per_cycle=self.spec["pointings_per_cycle"],
+            )
         )
 
         self.state = {
