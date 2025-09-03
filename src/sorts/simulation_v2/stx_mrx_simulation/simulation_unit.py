@@ -13,7 +13,7 @@ from sorts.interpolation import Interpolator
 from sorts.schedule_v2 import Schedule, TimeRangeIndexer
 from sorts.simulation_v2.types import Passage
 
-CoordKey = t.Literal["time", "azelr", "az", "el", "r"]
+CoordKey = t.Literal["time", "enu", "e", "n", "u"]
 DataKey = t.Literal[
     "tx_pointing",
     "rx_pointing",
@@ -32,10 +32,10 @@ class _K:
     """Internal helper for accessing string keys consistently"""
 
     time: t.Final = "time"
-    azelr: t.Final = "azelr"
-    az: t.Final = "az"
-    el: t.Final = "el"
-    r: t.Final = "r"
+    enu: t.Final = "enu"
+    e: t.Final = "e"
+    n: t.Final = "n"
+    u: t.Final = "u"
     tx_pointing: t.Final = "tx_pointing"
     rx_pointing: t.Final = "rx_pointing"
     exp_num: t.Final = "exp_num"
@@ -74,6 +74,7 @@ A xarray `Dataset` with:
 """
 
 
+# TODO: move to `funcs` module?
 # TODO: get radar instant in init of `Schedule` so we not need to pass them here?
 def calc_gain(
     state_data: StateData,
@@ -84,6 +85,7 @@ def calc_gain(
 ) -> StateData:
     size = len(state_data[_K.time])
 
+    # TODO: ask daniel should we use (n, 3) for pointing instead of (3, n), if `tx_stn.beam.point` is expecting (n, 3)
     # NOTE: looping is needed becase passing in a ndarray of pointing will trigger exception when calculating gain
     #   refs:
     #   - `pyant/beam.py` `L235` `assert vector_cnt <= max_vectors, "Too many vector valued parameters"`
@@ -91,19 +93,12 @@ def calc_gain(
     tx_gain_arr = np.full(size, 0.0, dtype=np.float64)
     rx_gain_arr = np.full(size, 0.0, dtype=np.float64)
     for idx in range(len(state_data[_K.time])):
-        tx_stn.beam.sph_point(
-            state_data[_K.tx_pointing].loc[_K.az][idx],
-            state_data[_K.tx_pointing].loc[_K.el][idx],
-            degrees=True,
-        )
+        tx_stn.beam.point(state_data[_K.tx_pointing][:, 0].to_numpy())
         tx_gain_arr[idx] = tx_stn.beam.gain(spobj_tx_enu[:3, idx])
 
-        rx_stn.beam.sph_point(
-            state_data[_K.rx_pointing].loc[_K.az][idx],
-            state_data[_K.rx_pointing].loc[_K.el][idx],
-            degrees=True,
-        )
+        rx_stn.beam.point(state_data[_K.rx_pointing][:, 0].to_numpy())
         rx_gain_arr[idx] = rx_stn.beam.gain(spobj_rx_enu[:3, idx])
+
     state_data[_K.gain_tx] = (_K.time, tx_gain_arr)
     state_data[_K.gain_rx] = (_K.time, rx_gain_arr)
 
@@ -176,18 +171,18 @@ class SimulationUnit:
         state_data = xr.Dataset(
             coords={
                 _K.time: (_K.time, time.to_numpy()),
-                _K.azelr: [_K.az, _K.el, _K.r],
+                _K.enu: [_K.e, _K.n, _K.u],
             },
             data_vars={
                 # we expand pointings from `tx_sch` here by re-indexing using `.loc[:, time]`
                 # `xarray` allow it because `tx_sch` `start_time` is an unique index
                 _K.tx_pointing: (
-                    (_K.azelr, _K.time),
+                    (_K.enu, _K.time),
                     tx_sch._data[_SK.pointing].loc[:, time].to_numpy(),
                 ),
                 # for pointings from `rx_sch`, we just apply the `rx_time_mask`
                 _K.rx_pointing: (
-                    (_K.azelr, _K.time),
+                    (_K.enu, _K.time),
                     rx_sch._data[_SK.pointing].loc[:, rx_time_mask].to_numpy(),
                 ),
                 _K.exp_num: (_K.time, tx_sch._data[_SK.exp_num].loc[time].to_numpy()),

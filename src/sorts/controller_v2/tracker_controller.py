@@ -3,7 +3,7 @@ import logging, typing as t
 import numpy as np
 import numpy.typing as npt
 import bokeh.layouts as bokeh_layouts
-from sorts.frames import cart_to_sph
+import pyant
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.types import (
@@ -11,10 +11,10 @@ from sorts.types import (
     Datetime64_us,
     Timedelta64_us,
     Float64_as_sec,
-    AzelrCoordinates_DegM,
+    EnuCoordinates,
     Datetime_Like,
 )
-from sorts.utils import wrap_azimuths_elevations, to_datetime64_us
+from sorts.utils import to_datetime64_us
 from sorts import plots
 from sorts.schedule_v2 import Schedule, ExperimentDetail
 
@@ -46,40 +46,28 @@ class Output(t.NamedTuple):
 
 
 def generate_from_state(spec: Spec, state: State) -> Output:
+    loc_zenith = np.array([0, 0, 1], dtype=np.float64)
+
     # generate pointings
-    tx_pointings: AzelrCoordinates_DegM = cart_to_sph(
-        spec["tx_station"].enu(state["spobj_states"][:3]),
-        degrees=True,
-    )
-    rxs_pointings: list[AzelrCoordinates_DegM] = [
-        cart_to_sph(rx_station.enu(state["spobj_states"][:3]), degrees=True)
-        for rx_station in spec["rx_stations"]
-    ]
+    tx_pointings: EnuCoordinates = spec["tx_station"].enu(state["spobj_states"][:3])
+    tx_pointings_zenith_ang = pyant.coordinates.vector_angle(loc_zenith, tx_pointings, degrees=True)
+    tx_el_in_range_mask = tx_pointings_zenith_ang <= 90.0 - spec["tx_station"].min_elevation
+    tx_pointings = tx_pointings[:, tx_el_in_range_mask]
 
-    # filter out invalid values
-    is_out_of_tx_el_range_mask = tx_pointings[1] < spec["tx_station"].min_elevation
-    is_out_of_rxs_el_range_mask = [
-        ((rx_pointings[1] < rx_station.min_elevation))
-        for rx_station, rx_pointings in zip(spec["rx_stations"], rxs_pointings)
-    ]
-    is_out_of_el_range_mask = np.logical_and.reduce(
-        [is_out_of_tx_el_range_mask, *is_out_of_rxs_el_range_mask]
-    )
-
-    tx_pointings = tx_pointings[:, ~is_out_of_el_range_mask]
-
-    for idx, rx_pointings in enumerate(rxs_pointings):
-        rxs_pointings[idx] = rx_pointings[:, ~is_out_of_el_range_mask]
-
-    # apply wrapping
-    tx_pointings[0], tx_pointings[1] = wrap_azimuths_elevations(tx_pointings[0], tx_pointings[1])
-
-    for rx_pointings in rxs_pointings:
-        rx_pointings[0], rx_pointings[1] = wrap_azimuths_elevations(
-            rx_pointings[0], rx_pointings[1]
+    rxs_pointings: list[EnuCoordinates] = []
+    rx_el_in_range_masks: list[npt.NDArray[np.bool]] = []
+    for rx_station in spec["rx_stations"]:
+        rx_pointings: EnuCoordinates = rx_station.enu(state["spobj_states"][:3])
+        rx_pointings_zenith_ang = pyant.coordinates.vector_angle(
+            loc_zenith, rx_pointings, degrees=True
         )
+        rx_el_in_range_mask = rx_pointings_zenith_ang <= 90.0 - rx_station.min_elevation
+        rx_pointings = rx_pointings[:, rx_el_in_range_mask]
+        rx_el_in_range_masks.append(rx_el_in_range_mask)
+        rxs_pointings.append(rx_pointings)
 
-    sch_time = state["spobj_time"][~is_out_of_el_range_mask]
+    el_in_range_mask = np.logical_and.reduce([tx_el_in_range_mask, *rx_el_in_range_masks])
+    sch_time = state["spobj_time"][el_in_range_mask]
     sch_len = len(sch_time)
 
     tx_sch = Schedule.from_ndarrays(
@@ -111,6 +99,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
     return output
 
 
+# TODO: remove or adapt to ENU coord
 def plot_state_and_output(
     state: State,
     output: Output,

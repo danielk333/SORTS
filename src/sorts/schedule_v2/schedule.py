@@ -4,7 +4,7 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import xarray as xr
-from sorts.types import Datetime64_us, TimeRange_us, Timedelta64_us, AzelrCoordinates_DegM
+from sorts.types import Datetime64_us, TimeRange_us, Timedelta64_us, EnuCoordinates
 from sorts.radar import StationId
 from .types import _K
 from . import funcs
@@ -17,13 +17,13 @@ ScheduleData = xr.Dataset
 """
 A xarray `Dataset` with:
   ```
-  Dimensions:     (azelr: 3, start_time: n)
+  Dimensions:     (enu: 3, start_time: n)
   Coordinates:
   * start_time    (start_time) datetime64[us]
       end_time    (start_time) datetime64[us]
-  * azelr         (azelr) <U2 24B 'az' 'el' 'r'
+  * enu           (enu) 'e' 'n' 'u'
   Data variables:
-      pointing    (azelr, start_time) float64
+      pointing    (enu, start_time) float64
       exp_num     (start_time) int64
   Attributes:
       stn_id:          str
@@ -70,7 +70,7 @@ class ScheduleNdarrayDict(t.TypedDict):
     # TODO: re-eval the size of `exp_num`
     exp_num: npt.NDArray[np.int64]
 
-    pointing: AzelrCoordinates_DegM
+    pointing: EnuCoordinates
 
 
 TimeRangeIndexer = TimeRange_us
@@ -99,25 +99,24 @@ class Schedule:
     def __init__(self, data: ScheduleData):
         self._data: ScheduleData = data
 
-    # TODO: use keys from `_K` instead of hard-coding inline
     @classmethod
     def from_ndarrays(cls, data: ScheduleNdarrayDict) -> t.Self:
         sch_data = xr.Dataset(
             coords={
-                "start_time": data["start_time"],
-                "end_time": ("start_time", data["end_time"]),
-                "azelr": ["az", "el", "r"],
+                _K.start_time: data[_K.start_time],
+                _K.end_time: (_K.start_time, data[_K.end_time]),
+                _K.enu: [_K.e, _K.n, _K.u],
             },
             data_vars={
-                "pointing": (
-                    ("azelr", "start_time"),
-                    data["pointing"],
+                _K.pointing: (
+                    (_K.enu, _K.start_time),
+                    data[_K.pointing],
                 ),
-                "exp_num": ("start_time", data["exp_num"]),
+                _K.exp_num: (_K.start_time, data[_K.exp_num]),
             },
             attrs={
-                "stn_id": data["stn_id"],
-                "exp_detail_map": data["exp_detail_map"],
+                _K.stn_id: data[_K.stn_id],
+                _K.exp_detail_map: data[_K.exp_detail_map],
             },
         )
 
@@ -127,12 +126,12 @@ class Schedule:
     def empty(cls) -> t.Self:
         return cls.from_ndarrays(
             {
-                "stn_id": "__EMPTY_ID__",
-                "exp_detail_map": {},
-                "start_time": np.empty(0, dtype="datetime64[us]"),
-                "end_time": np.empty(0, dtype="datetime64[us]"),
-                "exp_num": np.empty(0, dtype=np.int64),
-                "pointing": np.empty((3, 0), dtype=np.float64),
+                _K.stn_id: "__EMPTY_ID__",
+                _K.exp_detail_map: {},
+                _K.start_time: np.empty(0, dtype="datetime64[us]"),
+                _K.end_time: np.empty(0, dtype="datetime64[us]"),
+                _K.exp_num: np.empty(0, dtype=np.int64),
+                _K.pointing: np.empty((3, 0), dtype=np.float64),
             }
         )
 
@@ -156,12 +155,12 @@ class Schedule:
 
     def to_ndarrays(self) -> ScheduleNdarrayDict:
         arr_dict: ScheduleNdarrayDict = {
-            "stn_id": self._data.attrs[_K.stn_id],
-            "exp_detail_map": self._data.attrs[_K.exp_detail_map],
-            "start_time": self._data[_K.start_time].to_numpy(),
-            "end_time": self._data[_K.end_time].to_numpy(),
-            "exp_num": self._data[_K.exp_num].to_numpy(),
-            "pointing": self._data[_K.pointing].to_numpy(),
+            _K.stn_id: self._data.attrs[_K.stn_id],
+            _K.exp_detail_map: self._data.attrs[_K.exp_detail_map],
+            _K.start_time: self._data[_K.start_time].to_numpy(),
+            _K.end_time: self._data[_K.end_time].to_numpy(),
+            _K.exp_num: self._data[_K.exp_num].to_numpy(),
+            _K.pointing: self._data[_K.pointing].to_numpy(),
         }
 
         return arr_dict

@@ -87,6 +87,7 @@ def south_to_north_circular_orbit_test():
         parameters={"d": 1.0},  # diameter of the spobj
     )
 
+    # TODO: correct the return type of the `Beam.gain` base class method
     class IsotropicBeam(Beam):
         def gain(self, k, ind=None, polarization=None, **kwargs):
             if len(k.shape) == 1:
