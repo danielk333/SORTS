@@ -11,7 +11,7 @@ from sorts.space_object import SpaceObject
 from sorts.signals import hard_target_snr
 from sorts.interpolation import Interpolator
 from sorts.schedule_v2 import Schedule, TimeRangeIndexer
-from .types import Passage
+from sorts.simulation_v2.types import Passage
 
 CoordKey = t.Literal["time", "azelr", "az", "el", "r"]
 DataKey = t.Literal[

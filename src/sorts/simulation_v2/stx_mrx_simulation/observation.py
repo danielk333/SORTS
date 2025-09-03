@@ -1,7 +1,7 @@
 from sorts.types import TxRxTuple
 from sorts.schedule_v2 import XrDataArrayIndexer, Schedule
 from sorts.simulation_v2.types import Passage
-from sorts.simulation_v2.simulation_unit import SimulationUnit, StateData
+from .simulation_unit import SimulationUnit, StateData
 
 
 _SK = Schedule._K

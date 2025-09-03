@@ -15,7 +15,7 @@ from sorts.types import Float64_as_sec, EcefStates, Datetime64_us
 from sorts.schedule_v2 import TimeRangeIndexer
 from sorts.simulation_v2.types import Passage
 from sorts.simulation_v2 import funcs
-from sorts.simulation_v2.simulation_unit import SimulationUnit
+from .simulation_unit import SimulationUnit
 from .observation import ObservationIndexer, Observation
 
 if t.TYPE_CHECKING:
