@@ -19,6 +19,7 @@ from sorts.interpolation import Legendre8
 from sorts.propagator import Kepler
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
+from sorts.schedule_v2 import Schedule
 from sorts.controller_v2.tracker_controller import TrackerController
 from sorts.simulation_v2 import stx_mrx_simulation, StxMrxSimulation
 
@@ -35,18 +36,17 @@ def setup_function():
 
 
 float_equality_thld = 1e-9
-# NOTE: this is much more lenient than `float_equality_thld`, because pointing calc involves trigs and other less precise funcs
-# TODO: use ENU for pointings in schedule? it allows `pointing_equality_thld = 1e-3`
-pointing_equality_thld: Float_as_deg = 5e-3
-pointing_equality_thld_loose: Float_as_deg = 1  # even 0.5 deg fails
+# NOTE: this is much more lenient than `float_equality_thld`
+pointing_equality_thld: Float_as_deg = 0.02
 
 # TODO: re-eval the `control_slice_duration` value, need to be fast but still accurate enough for testing
 # control_slice_duration = np.timedelta64(10_000, "us")  # 10ms
 control_slice_duration = np.timedelta64(1_000_000, "us")  # 1s
 
-dt_equality_thld = control_slice_duration
+dt_equality_thld = control_slice_duration / 2
 dsec_sampling_intv: Float_as_sec = 30
 
+_SK = Schedule._K
 _SuK = stx_mrx_simulation.simulation_unit._K
 
 
@@ -160,15 +160,34 @@ def south_to_north_circular_orbit_test():
     sim_unit = sim_units[0]
 
     # assert there is only 1 observation
-    assert len(sim_units) == 1
+    assert len(obss) == 1
+    obs = obss[0]
 
     # TODO: update and adapt
-    # # assert `Az` componend of tx pointings stayed around zero
-    # assert np.all(obs["tx_k"][0] < float_equality_thld)
+    # assert `E` componend of tx pointings stayed around zero
+    assert np.all(
+        obs.get_schedule_slice().tx._data[_SK.pointing].loc[_SK.e, :] < float_equality_thld
+    )
 
-    # # assert `El` componend of tx pointings swing between 0 and 90
-    # assert abs(obs["tx_k"][1].max() - 90.0) < pointing_equality_thld
-    # assert abs(obs["tx_k"][1].min()) < pointing_equality_thld_loose
+    # assert `N` componend of tx pointings swing between -1.0 and +1.0
+    assert (
+        abs(obs.get_schedule_slice().tx._data[_SK.pointing].loc[_SK.n, :].min() + 1.0)
+        < pointing_equality_thld
+    )
+    assert (
+        abs(obs.get_schedule_slice().tx._data[_SK.pointing].loc[_SK.n, :].max() - 1.0)
+        < pointing_equality_thld
+    )
+
+    # assert `U` componend of tx pointings swing between 0.0 and 1.0
+    assert (
+        abs(obs.get_schedule_slice().tx._data[_SK.pointing].loc[_SK.u, :].min())
+        < pointing_equality_thld
+    )
+    assert (
+        abs(obs.get_schedule_slice().tx._data[_SK.pointing].loc[_SK.u, :].max() - 1.0)
+        < pointing_equality_thld
+    )
 
     # assert the max snr time is roughly at half orbital period
     assert (
@@ -182,13 +201,13 @@ def south_to_north_circular_orbit_test():
         < dt_equality_thld
     )
 
-    # # assert the start and end time of the observation is as expected
-    # # TODO: this can offset pretty large when we have large sampling time interval, is there better way to test it?
-    # assert abs(
-    #     obs["experiment_passage"]["time_range"][0] - expected_passage_start_time
-    # ) < np.timedelta64(int(dsec_sampling_intv), "s")
-    # assert abs(
-    #     obs["experiment_passage"]["time_range"][1] - expected_passage_end_time
-    # ) < np.timedelta64(int(dsec_sampling_intv), "s")
+    # assert the start and end time of the observation is as expected
+    # TODO: this can offset pretty large when we have large sampling time interval, is there better way to test it?
+    assert abs(
+        obs.get_schedule_slice().rx._data[_SK.start_time][0] - expected_passage_start_time
+    ) < np.timedelta64(int(dsec_sampling_intv), "s")
+    assert abs(
+        obs.get_schedule_slice().rx._data[_SK.end_time][-1] - expected_passage_end_time
+    ) < np.timedelta64(int(dsec_sampling_intv), "s")
 
     return
