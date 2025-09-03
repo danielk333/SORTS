@@ -11,9 +11,9 @@ import pyant
 # Local import
 from .. import frames
 
-# TODO: check with daniel on how this work with other parts of the repo
-#   (the change/enforcement of `uid` to be of type `RadarStationCompositeKey`)
-RadarStationCompositeKey = tuple[str, ...]
+StationId = str
+"""A unique string that identifies a radar station"""
+
 """
 A structured unique identifer for a station of a radar.
 
@@ -44,7 +44,15 @@ class Station(object):
 
     """
 
-    def __init__(self, lat, lon, alt, min_elevation, beam, uid: RadarStationCompositeKey = ()):
+    def __init__(
+        self,
+        lat,
+        lon,
+        alt,
+        min_elevation,
+        beam,
+        uid: StationId = "__DEFAULT_STN_ID__",
+    ):
         self.lat = lat
         self.lon = lon
         self.alt = alt
@@ -174,7 +182,14 @@ class RX(Station):
     """
 
     def __init__(
-        self, lat, lon, alt, min_elevation, beam, noise, uid: RadarStationCompositeKey = ()
+        self,
+        lat,
+        lon,
+        alt,
+        min_elevation,
+        beam,
+        noise,
+        uid: StationId = "__DEFAULT_RX_STN_ID__",
     ):
         super().__init__(lat, lon, alt, min_elevation, beam, uid=uid)
         self.noise = noise
@@ -226,7 +241,7 @@ class TX(Station):
         pulse_length=1e-3,
         ipp=10e-3,
         n_ipp=20,
-        uid: RadarStationCompositeKey = (),
+        uid: StationId = "__DEFAULT_TX_STN_ID__",
     ):
         super().__init__(lat, lon, alt, min_elevation, beam, uid=uid)
 

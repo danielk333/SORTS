@@ -2,7 +2,8 @@ from __future__ import annotations
 import logging, math, typing as t
 import numpy as np
 import numpy.typing as npt
-from sorts.radar.tx_rx import Station
+import xarray as xr
+from sorts.radar import Station
 from sorts.frames import azel_to_ecef, ecef_to_enu, cart_to_sph
 from sorts.types import (
     Float_as_deg,
@@ -14,7 +15,6 @@ from sorts.types import (
     Datetime_Like,
 )
 from sorts.utils import to_datetime64_us, wrap_azimuths_elevations
-from sorts import schedule_v2 as schedule
 from sorts.schedule_v2 import Schedule, ExperimentDetail
 from sorts.controller_v2 import pointing_patterns
 
@@ -43,6 +43,8 @@ class State(t.TypedDict):
 
 
 class Output(t.NamedTuple):
+    """A named tuple of `(tx_schedule, [rx_schedule, ...])`"""
+
     tx_schedule: Schedule
     rx_schedules: t.Sequence[Schedule]
 
@@ -61,7 +63,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
     # NOTE: for `np.arange` `stop` param,
     #   - we subtract `spec["exp_detail"]["slice_duration"]` so that only full slice are included
     #   - and add `+1` so that slice with time range `[state["end_time"] - spec["exp_detail"]["slice_duration"], state["end_time"])` is included
-    tx_slice_start_time = np.arange(
+    tx_slice_start_time: npt.NDArray[Datetime64_us] = np.arange(
         state["start_time"],
         state["end_time"] - spec["exp_detail"]["slice_duration"] + 1,
         spec["exp_detail"]["slice_duration"],
@@ -74,14 +76,16 @@ def generate_from_state(spec: Spec, state: State) -> Output:
         (state["tx_schedule_size"] + pointings_per_cycle - 1) // pointings_per_cycle,
     )[:, : state["tx_schedule_size"]]
 
-    tx_schedule = Schedule(
-        exp_detail_map={spec["exp_detail"]["id"]: spec["exp_detail"]},
-        start_time=tx_slice_start_time,
-        exp_num=np.full(state["tx_schedule_size"], spec["exp_detail"]["id"], dtype=np.int64),
-        pointing_az=tx_pointing[0],
-        pointing_el=tx_pointing[1],
+    tx_schedule = Schedule.from_ndarrays(
+        {
+            "stn_id": spec["tx_station"].uid,
+            "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
+            "start_time": tx_slice_start_time,
+            "end_time": tx_slice_start_time + spec["exp_detail"]["slice_duration"],
+            "exp_num": np.full(state["tx_schedule_size"], spec["exp_detail"]["id"], dtype=np.int64),
+            "pointing": tx_pointing,
+        },
     )
-    schedule.validate_schedule_length(tx_schedule)
 
     rx_slice_start_time = tx_slice_start_time.repeat(len(spec["scan_range"]))
     rx_schedule_size = state["tx_schedule_size"] * len(spec["scan_range"])
@@ -126,14 +130,16 @@ def generate_from_state(spec: Spec, state: State) -> Output:
             (rx_schedule_size + pointings_per_cycle - 1) // pointings_per_cycle,
         )[:, :rx_schedule_size]
 
-        rx_schedule = Schedule(
-            exp_detail_map={spec["exp_detail"]["id"]: spec["exp_detail"]},
-            start_time=rx_slice_start_time,
-            exp_num=np.full(rx_schedule_size, spec["exp_detail"]["id"], dtype=np.int64),
-            pointing_az=rx_pointing[0],
-            pointing_el=rx_pointing[1],
+        rx_schedule = Schedule.from_ndarrays(
+            {
+                "stn_id": rx_station.uid,
+                "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
+                "start_time": rx_slice_start_time,
+                "end_time": rx_slice_start_time + spec["exp_detail"]["slice_duration"],
+                "exp_num": np.full(rx_schedule_size, spec["exp_detail"]["id"], dtype=np.int64),
+                "pointing": rx_pointing,
+            }
         )
-        schedule.validate_schedule_length(rx_schedule)
 
         rx_schedules.append(rx_schedule)
 

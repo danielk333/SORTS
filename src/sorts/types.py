@@ -1,3 +1,11 @@
+"""
+Shared types in this package.
+
+(Types might live in their own module instead of here if it improves readability,
+and the imports can be worked around, e.g, by `if t.TYPE_CHECKING`)
+"""
+
+import typing as t
 import numpy as np
 import numpy.typing as npt
 from datetime import datetime, timedelta
@@ -27,8 +35,15 @@ One of:
 - `int`, the length of the duration in `us` resolution
 """
 
+# TODO: replace existing time_range typing by this type
+TimeRange_us = tuple[Datetime64_us, Datetime64_us]
+"""The start time and end time of the passage, a right-open interval"""
+
 Float_as_sec = float
 "`float` as second"
+
+Float_as_m = float
+"`float` as meters"
 
 Float_as_deg = float
 "`float` as angle in degrees"
@@ -98,3 +113,8 @@ EcefCoordinates = NDArray_3xN[np.float64]
 
 EcefStates = NDArray_6xN[np.float64]
 "ECEF states in cartesian coordinate, a `(6,n)` ndarray of `float64`, usually used for space objects"
+
+
+class TxRxTuple[TxType, RxType](t.NamedTuple):
+    tx: TxType
+    rx: RxType

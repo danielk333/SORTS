@@ -12,18 +12,12 @@ from sorts.interpolation import Legendre8, Linear
 from sorts.population import master_catalog, master_catalog_factor
 from sorts.propagator import SGP4
 from sorts.space_object import SpaceObject
-from sorts.radar.tx_rx import Station
+from sorts.radar import Station
 from sorts.radar.radars import get_radar
-from sorts.types import Datetime64_us, Timedelta64_us, Float64_as_sec
 from sorts.utils import to_datetime64_us, to_pydatetime
-from sorts.controller_v2 import tracker_controller
-from sorts.controller_v2.tracker_controller import TrackerController
-from sorts.controller_v2.fence_scan_controller import FenceScanController
-from sorts import schedule_v2 as schedule
-from sorts.schedule_v2 import Schedule, ExperimentDetail
-from sorts.scheduler_v2.priority_scheduling import priority_scheduling
+from sorts.controller_v2 import TrackerController, FenceScanController
+from sorts.schedule_v2 import Schedule
 from sorts.simulation_v2 import StxMrxSimulation
-from sorts.simulation_v2.observation import list_to_dataframe
 
 # import for plottings
 from IPython.display import display
@@ -63,11 +57,11 @@ eiscat3d = get_radar("eiscat3d", "stage1-array")
 # eiscat3d = get_radar("nostra", "example1")
 # TODO: these patching of station prop should be integrated into codebase
 tx_station: Station = eiscat3d.tx[0]
-tx_station.uid = ("eiscat3d", "stage1-array", "tx", "0")
+tx_station.uid = "eiscat3d, stage1-array, tx, 0"
 rx_station_0: Station = eiscat3d.rx[0]
-rx_station_0.uid = ("eiscat3d", "stage1-array", "rx", "0")
+rx_station_0.uid = "eiscat3d, stage1-array, rx, 0"
 rx_station_1: Station = eiscat3d.rx[1]
-rx_station_1.uid = ("eiscat3d", "stage1-array", "rx", "1")
+rx_station_1.uid = "eiscat3d, stage1-array, rx, 1"
 
 
 tracked_spobj = SpaceObject(
@@ -160,10 +154,11 @@ exp_detail_map = {
     fence_scan_ctrl.spec["exp_detail"]["id"]: fence_scan_ctrl.spec["exp_detail"],
 }
 
-tx_master_sch = priority_scheduling([tracker_schs.tx_schedule, fence_schs.tx_schedule])
+
+tx_master_sch = Schedule.priority_scheduling([tracker_schs.tx_schedule, fence_schs.tx_schedule])
 
 rx_master_schs = [
-    priority_scheduling(rx_schs)
+    Schedule.priority_scheduling(rx_schs)
     for rx_schs in zip(tracker_schs.rx_schedules, fence_schs.rx_schedules)
 ]
 

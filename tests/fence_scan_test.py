@@ -13,15 +13,15 @@ from astropy.time import Time
 from astropy.constants import R_earth  # type: ignore
 from pyant import Beam
 import pyorb
-from sorts.types import Float64_as_sec, Float64_as_deg, Float_as_sec, Float_as_deg
+from sorts.types import Float64_as_sec, Float64_as_deg, Float_as_sec, Float_as_deg, Float_as_m
 from sorts.utils import to_datetime64_us
 from sorts.interpolation import Legendre8
 from sorts.propagator import Kepler
 from sorts.space_object import SpaceObject
-from sorts.radar.tx_rx import Station
+from sorts.radar import Station
+from sorts.schedule_v2 import Schedule
 from sorts.controller_v2.fence_scan_controller import FenceScanController
-from sorts.scheduler_v2.priority_scheduling import priority_scheduling
-from sorts.simulation_v2 import StxMrxSimulation
+from sorts.simulation_v2 import StxMrxSimulation, SimulationUnit
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -40,8 +40,20 @@ float_equality_thld = 1e-9
 # TODO: use ENU for pointings in schedule? it allows `pointing_equality_thld = 1e-3`
 pointing_equality_thld: Float_as_deg = 5e-3
 pointing_equality_thld_loose: Float_as_deg = 1  # even 0.5 deg fails
-dt_equality_thld = np.timedelta64(5_000, "us")  # 5ms, half of control_slice_duration (10ms)
+# TODO: re-eval this threshold after converting schedule data to use ENU instead of Azelr
+pointing_range_equality_thld: Float_as_m = 5.0
+
+# TODO: re-eval the `control_slice_duration` value, need to be fast but still accurate enough for testing
+# control_slice_duration = np.timedelta64(10_000, "us")  # 10ms
+control_slice_duration = np.timedelta64(1_000_000, "us")  # 1s
+
+dt_equality_thld = control_slice_duration
 dsec_sampling_intv: Float_as_sec = 30
+simu_num = 3
+scan_ranges = np.linspace(300e3, 1000e3, num=simu_num, dtype=np.float64)
+
+_SK = Schedule._K
+_SuK = SimulationUnit._K
 
 
 def south_to_north_circular_orbit_test():
@@ -81,6 +93,7 @@ def south_to_north_circular_orbit_test():
         parameters={"d": 1.0},  # diameter of the spobj
     )
 
+    # TODO: correct the return type of the `Beam.gain` base class method
     class IsotropicBeam(Beam):
         def gain(self, k, ind=None, polarization=None, **kwargs):
             if len(k.shape) == 1:
@@ -100,7 +113,7 @@ def south_to_north_circular_orbit_test():
             elevation=0.0,
             frequency=233e6,  # same as eisat_3d
         ),
-        uid=("test_station", "tx", "0"),
+        uid="test_station, tx, 0",
     )
 
     rx_stn = Station(
@@ -113,10 +126,8 @@ def south_to_north_circular_orbit_test():
             elevation=0.0,
             frequency=233e6,  # same as eisat_3d
         ),
-        uid=("test_station", "rx", "0"),
+        uid="test_station, rx, 0",
     )
-
-    control_slice_duration = np.timedelta64(10_000, "us")  # 10ms
 
     def dsec_sampler(orbit, start_time, end_time):
         return np.arange(0, (end_time - start_time) / np.timedelta64(1, "s"), 30, dtype=np.float64)
@@ -138,23 +149,19 @@ def south_to_north_circular_orbit_test():
         azimuth=90,  # sweep from east to west
         min_elevation=70,
         pointings_per_cycle=40,
-        scan_range=np.linspace(300e3, 1000e3, num=10, dtype=np.float64),
+        scan_range=scan_ranges,
     )
 
     fence_schs = fence_scan_ctrl.generate(start_time, end_time)
 
     exp_detail_map = {fence_scan_ctrl.spec["exp_detail"]["id"]: fence_scan_ctrl.spec["exp_detail"]}
 
-    tx_master_sch = priority_scheduling([fence_schs.tx_schedule])
-
-    rx_master_schs = [priority_scheduling(rx_schs) for rx_schs in zip(fence_schs.rx_schedules)]
-
     sim = StxMrxSimulation.from_spec(
         {
             "tx_station": tx_stn,
-            "tx_schedule": tx_master_sch,
+            "tx_schedule": fence_schs.tx_schedule,
             "rx_stations": [rx_stn],
-            "rx_schedules": rx_master_schs,
+            "rx_schedules": fence_schs.rx_schedules,
             "exp_detail_map": exp_detail_map,
             "epoch": start_time,
             "start_time": start_time,
@@ -165,27 +172,39 @@ def south_to_north_circular_orbit_test():
         }
     )
 
-    obss = sim.run()
-    obs = obss[0]
+    obss, sim_units = sim.run()
+    sim_unit = sim_units[0]
 
-    # assert there is 10 observation
-    assert len(obss) == len(fence_scan_ctrl.spec["scan_range"])
+    # assert there is 1 passage and `simu_num` number of observations
+    assert len(sim_units) == 1
+    assert len(sim_units[0].passages) == 1
+    assert len(obss) == simu_num
 
-    for obs in obss:
+    # NOTE: this is based on the assumption that pointings at same direction but at different scan range
+    #   are scheduled in in the same order as `scan_ranges`, and without gaps
+    for obs, scan_range in zip(obss[0:3], scan_ranges):
+        assert (
+            obs.get_schedule_slice().rx._data[_SK.pointing].loc[_SK.r][0] - scan_range
+        ) < pointing_range_equality_thld
+
+    for sim_unit in sim_units:
         # TODO: assert `El` componend of tx pointings swing between 0 and 90? or we can check it in pointing generation unit test instead
         # assert `Az` componend of tx pointings is 90 or 270
         assert np.all(
-            abs(np.sort(np.unique(obs["tx_k"][0])) - np.array([90, 270], dtype=np.float64))
+            abs(
+                np.sort(np.unique(sim_unit._state_data[_SuK.tx_pointing][0]))
+                - np.array([90, 270], dtype=np.float64)
+            )
             < float_equality_thld
         )
 
         # assert the start and end time of the observation is as expected
         # TODO: this can offset pretty large when we have large sampling time interval, is there better way to test it?
         assert abs(
-            obs["experiment_passage"]["time_range"][0] - expected_passage_start_time
+            sim_unit._state_data[_SuK.time].min().to_numpy() - expected_passage_start_time
         ) < np.timedelta64(int(dsec_sampling_intv), "s")
         assert abs(
-            obs["experiment_passage"]["time_range"][1] - expected_passage_end_time
+            sim_unit._state_data[_SuK.time].max().to_numpy() - expected_passage_end_time
         ) < np.timedelta64(int(dsec_sampling_intv), "s")
 
     return

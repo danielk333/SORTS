@@ -2,8 +2,7 @@ import logging, math
 from dataclasses import dataclass
 from datetime import timedelta
 import numpy as np
-from sorts.radar.tx_rx import RadarStationCompositeKey
-from sorts.schedule_v2 import Schedule
+from sorts.radar import StationId
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +14,7 @@ class RandomUniformScansController:
     a controller that generate random uniform scans
     """
 
-    radar_station_composite_key: RadarStationCompositeKey
+    radar_station_composite_key: StationId
     exp_num: int = 0
     min_elevation_deg: float = 30.0
     time_slice_us: float = 1.0 * 10_000  # ipp * npoints
@@ -42,7 +41,8 @@ class RandomUniformScansController:
         stt_tstmp,
         end_tstmp,
         res_us=1000,
-    ) -> dict[RadarStationCompositeKey, Schedule]:
+    ):
+        # ) -> dict[StationId, ScheduleNdarrayDict2]:
         """
         Parameters
         ---
@@ -72,16 +72,16 @@ class RandomUniformScansController:
         min_el = np.radians(self.min_elevation_deg)
 
         # TODO: chk the math and add a plot function in test?
-        ret_sch = Schedule(
-            start_time=np.arange(
-                stt_tstmp,
-                end_tstmp,
-                np.timedelta64((end_tstmp - stt_tstmp) / self.npoints),
-                dtype="datetime64[us]",
-            ),
-            exp_num=np.full(self.npoints, self.exp_num),
-            pointing_az=np.random.uniform(low=0, high=2 * np.pi, size=self.npoints),
-            pointing_el=np.random.uniform(low=min_el, high=np.pi / 2, size=self.npoints),
-        )
+        # ret_sch = ScheduleNdarrayDict2(
+        #     start_time=np.arange(
+        #         stt_tstmp,
+        #         end_tstmp,
+        #         np.timedelta64((end_tstmp - stt_tstmp) / self.npoints),
+        #         dtype="datetime64[us]",
+        #     ),
+        #     exp_num=np.full(self.npoints, self.exp_num),
+        #     pointing_az=np.random.uniform(low=0, high=2 * np.pi, size=self.npoints),
+        #     pointing_el=np.random.uniform(low=min_el, high=np.pi / 2, size=self.npoints),
+        # )
 
-        return {self.radar_station_composite_key: ret_sch}
+        # return {self.radar_station_composite_key: ret_sch}
