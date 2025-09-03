@@ -146,7 +146,7 @@ class Schedule:
         """
 
         # NOTE: used lazy import here to avoid circular import
-        from sorts.schedule_v2.priority_scheduling import priority_scheduling
+        from .priority_scheduling import priority_scheduling
 
         resultant_sch_data = priority_scheduling([sch._data for sch in schs])
         return cls(data=resultant_sch_data)
