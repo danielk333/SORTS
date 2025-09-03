@@ -1,5 +1,5 @@
 """
-Functions for core functionality of this subpackage
+Functions for core functionalities of this subpackage
 
 - Intended to be imported as a whole module when consuming
 """

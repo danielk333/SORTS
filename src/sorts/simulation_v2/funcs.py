@@ -1,5 +1,7 @@
 """
-Intended to be imported as a whole module when consuming
+Functions for core functionalities of this subpackage
+
+- Intended to be imported as a whole module when consuming
 """
 
 import typing as t

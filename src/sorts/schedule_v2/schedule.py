@@ -99,6 +99,7 @@ class Schedule:
     def __init__(self, data: ScheduleData):
         self._data: ScheduleData = data
 
+    # TODO: use keys from `_K` instead of hard-coding inline
     @classmethod
     def from_ndarrays(cls, data: ScheduleNdarrayDict) -> t.Self:
         sch_data = xr.Dataset(

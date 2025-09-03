@@ -11,6 +11,7 @@ from sorts.space_object import SpaceObject
 from sorts.signals import hard_target_snr
 from sorts.interpolation import Interpolator
 from sorts.schedule_v2 import Schedule, TimeRangeIndexer
+from .types import Passage
 
 CoordKey = t.Literal["time", "azelr", "az", "el", "r"]
 DataKey = t.Literal[
@@ -110,6 +111,7 @@ class SimulationUnit:
         self,
         spobj: SpaceObject,
         spobj_interp: Interpolator,
+        passages: list[Passage],
         tx_stn: Station,
         rx_stn: Station,
         tx_sch: Schedule,
@@ -121,49 +123,19 @@ class SimulationUnit:
         self.space_object = spobj
         self.space_object_interp = spobj_interp
 
+        self.passages = passages
+
         self.tx_station = tx_stn
         self.rx_station = rx_stn
         self.tx_schedule = tx_sch
         self.rx_schedule = rx_sch
 
-    # TODO: can be removed?
-    @classmethod
-    def empty(
-        cls,
-        spobj: SpaceObject,
-        spobj_interp: Interpolator,
-        tx_stn: Station,
-        rx_stn: Station,
-        tx_sch: Schedule,
-        rx_sch: Schedule,
-    ) -> t.Self:
-        state_data = xr.Dataset(
-            coords={
-                _K.time: np.empty(0, dtype="datetime64[us]"),
-                _K.azelr: [_K.az, _K.el, _K.r],
-            },
-            data_vars={
-                _K.tx_pointing: ((_K.azelr, _K.time), np.empty((3, 0), dtype="datetime64[us]")),
-                _K.rx_pointing: ((_K.azelr, _K.time), np.empty((3, 0), dtype="datetime64[us]")),
-            },
-            attrs={
-                _K.stn_id: "__EMPTY_STN_ID__",
-            },
-        )
-        return cls(
-            spobj=spobj,
-            spobj_interp=spobj_interp,
-            tx_stn=tx_stn,
-            rx_stn=rx_stn,
-            tx_sch=tx_sch,
-            rx_sch=rx_sch,
-            state_data=StateData(state_data),
-        )
-
+    # TODO: can derive the indexers inside this method instead of as param, now that we take passages as param
     @classmethod
     def from_passages_over_tx_rx_station_pair(
         cls,
         indexers: list[TimeRangeIndexer],
+        passages: list[Passage],
         spobj: SpaceObject,
         spobj_interp: Interpolator,
         tx_stn: Station,
@@ -211,6 +183,7 @@ class SimulationUnit:
         return cls(
             spobj=spobj,
             spobj_interp=spobj_interp,
+            passages=passages,
             tx_stn=tx_stn,
             rx_stn=rx_stn,
             tx_sch=tx_sch,

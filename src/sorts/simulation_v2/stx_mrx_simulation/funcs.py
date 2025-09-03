@@ -1,5 +1,5 @@
 """
-Functions for core functionality of this subpackage
+Functions for core functionalities of this subpackage
 
 - Intended to be imported as a whole module when consuming
 """
@@ -16,7 +16,7 @@ from sorts.schedule_v2 import Schedule, TimeRangeIndexer
 from sorts.simulation_v2.types import Passage
 from sorts.simulation_v2 import funcs
 from sorts.simulation_v2.simulation_unit import SimulationUnit
-from sorts.simulation_v2.observation import ObservationIndexer
+from sorts.simulation_v2.observation import ObservationIndexer, Observation
 
 if t.TYPE_CHECKING:
     from .stx_mrx_simulation import Spec, SpaceObjectDsecSampler
@@ -68,33 +68,27 @@ def derive_schedule_indexers_per_tx_rx_station_pair(
     return sch_indexers
 
 
-def derive_observation_indexers(
-    passage: Passage,
-    tx_sch: Schedule,
-    rx_schs: t.Sequence[Schedule],
-) -> list[ObservationIndexer]:
-    """Derive an indexer for each observation"""
+def derive_observations(simulation_units: list[SimulationUnit]) -> list[Observation]:
+    """Derive observations"""
 
-    _K = Schedule._K
+    obss: list[Observation] = []
+    for sim_unit in simulation_units:
+        for passage in sim_unit.passages:
+            tx_obs_idxers = sim_unit.tx_schedule.filter_by_time_range(
+                passage["time_range"]
+            ).get_indexer_per_measurement(is_split_simu=False)
 
-    obs_indexers: list[ObservationIndexer] = []
+            rx_obs_idxers = sim_unit.rx_schedule.filter_by_time_range(
+                passage["time_range"]
+            ).get_indexer_per_measurement(is_split_simu=True)
 
-    rx_schedule_map: dict[str, Schedule] = {sch._data.attrs[_K.stn_id]: sch for sch in rx_schs}
+            for tx_obs_idxer in tx_obs_idxers:
+                for rx_obs_idxer in rx_obs_idxers:
+                    indexer = ObservationIndexer(tx=tx_obs_idxer, rx=rx_obs_idxer)
+                    obs = Observation(passage=passage, indexer=indexer, simulation_unit=sim_unit)
+                    obss.append(obs)
 
-    tx_obs_idxers = tx_sch.filter_by_time_range(passage["time_range"]).get_indexer_per_measurement(
-        is_split_simu=False
-    )
-
-    rx_sch = rx_schedule_map[passage["rx_station"].uid]
-    rx_obs_idxers = rx_sch.filter_by_time_range(passage["time_range"]).get_indexer_per_measurement(
-        is_split_simu=True
-    )
-
-    for tx_obs_idxer in tx_obs_idxers:
-        for rx_obs_idxer in rx_obs_idxers:
-            obs_indexers.append(ObservationIndexer(tx=tx_obs_idxer, rx=rx_obs_idxer))
-
-    return obs_indexers
+    return obss
 
 
 def find_passages(
@@ -154,6 +148,7 @@ def derive_simulation_units(
 
             sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(
                 indexers=indexers,
+                passages=passages,
                 spobj=spec["space_objects"][idx],
                 spobj_interp=spobj_states_interp,
                 tx_stn=spec["tx_station"],

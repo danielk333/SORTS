@@ -9,9 +9,7 @@ from sorts.radar import Station
 from sorts.utils import to_datetime64_us
 from sorts.types import Datetime_Like, Float64_as_sec
 from sorts.schedule_v2 import Schedule, ExperimentDetail
-from sorts.simulation_v2.types import Passage
 from sorts.simulation_v2 import funcs
-from sorts.simulation_v2.observation import ObservationIndexer
 from sorts.simulation_v2.stx_mrx_simulation import funcs
 
 logger = logging.getLogger(__name__)
@@ -92,20 +90,6 @@ class StxMrxSimulation:
 
         pbar.close()
 
-        # TODO: simplification neeeded, update `Observation` class, (and return list of `Observation` here?)
-        passage_obs_idxers_pairs: list[tuple[Passage, list[ObservationIndexer]]] = []
-        for passages in passages_lists:
-            pairs = [
-                (
-                    ps,
-                    funcs.derive_observation_indexers(
-                        passage=ps,
-                        tx_sch=self.spec["tx_schedule"],
-                        rx_schs=self.spec["rx_schedules"],
-                    ),
-                )
-                for ps in passages
-            ]
-            passage_obs_idxers_pairs.extend(pairs)
+        obss = funcs.derive_observations(sim_units)
 
-        return sim_units, passage_obs_idxers_pairs
+        return obss, sim_units

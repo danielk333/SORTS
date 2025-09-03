@@ -19,6 +19,7 @@ from sorts.interpolation import Legendre8
 from sorts.propagator import Kepler
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
+from sorts.schedule_v2 import Schedule
 from sorts.controller_v2.fence_scan_controller import FenceScanController
 from sorts.simulation_v2 import StxMrxSimulation, SimulationUnit
 
@@ -51,6 +52,7 @@ dsec_sampling_intv: Float_as_sec = 30
 simu_num = 3
 scan_ranges = np.linspace(300e3, 1000e3, num=simu_num, dtype=np.float64)
 
+_SK = Schedule._K
 _SuK = SimulationUnit._K
 
 
@@ -91,6 +93,7 @@ def south_to_north_circular_orbit_test():
         parameters={"d": 1.0},  # diameter of the spobj
     )
 
+    # TODO: correct the return type of the `Beam.gain` base class method
     class IsotropicBeam(Beam):
         def gain(self, k, ind=None, polarization=None, **kwargs):
             if len(k.shape) == 1:
@@ -169,26 +172,19 @@ def south_to_north_circular_orbit_test():
         }
     )
 
-    sim_units, passage_obs_idxers_pairs = sim.run()
+    obss, sim_units = sim.run()
     sim_unit = sim_units[0]
 
     # assert there is 1 passage and `simu_num` number of observations
-    assert len(passage_obs_idxers_pairs) == 1
-    assert len(passage_obs_idxers_pairs[0][1]) == simu_num
+    assert len(sim_units) == 1
+    assert len(sim_units[0].passages) == 1
+    assert len(obss) == simu_num
 
-    # TODO: simplify the indexer/simulation output so indexing into the observation is less cryptic
-    # assert we are getting observations with the intended scan ranges
-    for i, scan_range in enumerate(scan_ranges):
+    # NOTE: this is based on the assumption that pointings at same direction but at different scan range
+    #   are scheduled in in the same order as `scan_ranges`, and without gaps
+    for obs, scan_range in zip(obss[0:3], scan_ranges):
         assert (
-            (
-                fence_schs.rx_schedules[0]
-                .filter_by_time_range(passage_obs_idxers_pairs[0][0]["time_range"])
-                ._data.loc[{"start_time": passage_obs_idxers_pairs[0][1][i]["rx_indexer"]}][
-                    "pointing"
-                ]
-                .loc["r"][0]
-            )
-            - scan_range
+            obs.get_schedule_slice().rx._data[_SK.pointing].loc[_SK.r][0] - scan_range
         ) < pointing_range_equality_thld
 
     for sim_unit in sim_units:
