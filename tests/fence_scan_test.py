@@ -21,7 +21,7 @@ from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.schedule_v2 import Schedule
 from sorts.controller_v2.fence_scan_controller import FenceScanController
-from sorts.simulation_v2 import StxMrxSimulation, SimulationUnit
+from sorts.simulation_v2 import StxMrxSimulation
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -53,7 +53,7 @@ simu_num = 3
 scan_ranges = np.linspace(300e3, 1000e3, num=simu_num, dtype=np.float64)
 
 _SK = Schedule._K
-_SuK = SimulationUnit._K
+_SuK = StxMrxSimulation.SimulationUnit._K
 
 
 def south_to_north_circular_orbit_test():

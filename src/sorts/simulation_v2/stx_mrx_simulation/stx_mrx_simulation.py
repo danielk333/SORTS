@@ -9,8 +9,8 @@ from sorts.radar import Station
 from sorts.utils import to_datetime64_us
 from sorts.types import Datetime_Like, Float64_as_sec
 from sorts.schedule_v2 import Schedule, ExperimentDetail
-from sorts.simulation_v2 import funcs
-from sorts.simulation_v2.stx_mrx_simulation import funcs
+from . import funcs
+from .simulation_unit import SimulationUnit
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +40,15 @@ class Spec(t.TypedDict):
 # TODO: we need to enforce each station to has a unique id (`.uid` prop)
 #   either in the simulation class or in related station getter like `get_radar`
 class StxMrxSimulation:
+    SpaceObjectDsecSampler = SpaceObjectDsecSampler
+    """shortcut to module attribute"""
+
+    Spec = Spec
+    """shortcut to module attribute"""
+
+    SimulationUnit = SimulationUnit
+    """shortcut to module attribute"""
+
     def __init__(self, spec: Spec):
         self.spec: Spec = spec
 

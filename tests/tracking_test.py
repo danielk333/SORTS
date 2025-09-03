@@ -20,7 +20,7 @@ from sorts.propagator import Kepler
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.controller_v2.tracker_controller import TrackerController
-from sorts.simulation_v2 import StxMrxSimulation, SimulationUnit
+from sorts.simulation_v2 import StxMrxSimulation
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ control_slice_duration = np.timedelta64(1_000_000, "us")  # 1s
 dt_equality_thld = control_slice_duration
 dsec_sampling_intv: Float_as_sec = 30
 
-_SuK = SimulationUnit._K
+_SuK = StxMrxSimulation.SimulationUnit._K
 
 
 def south_to_north_circular_orbit_test():
