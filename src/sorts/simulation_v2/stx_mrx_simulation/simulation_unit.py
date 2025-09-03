@@ -85,7 +85,6 @@ def calc_gain(
 ) -> StateData:
     size = len(state_data[_K.time])
 
-    # TODO: ask daniel should we use (n, 3) for pointing instead of (3, n), if `tx_stn.beam.point` is expecting (n, 3)
     # NOTE: looping is needed becase passing in a ndarray of pointing will trigger exception when calculating gain
     #   refs:
     #   - `pyant/beam.py` `L235` `assert vector_cnt <= max_vectors, "Too many vector valued parameters"`

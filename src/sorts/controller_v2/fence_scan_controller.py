@@ -60,9 +60,9 @@ def generate_from_state(spec: Spec, state: State) -> Output:
 
     pointings_per_cycle = state["tx_pointings_of_a_cycle"].shape[1]
 
-    # NOTE: for `np.arange` `stop` param,
-    #   - we subtract `spec["exp_detail"]["slice_duration"]` so that only full slice are included
-    #   - and add `+1` so that slice with time range `[state["end_time"] - spec["exp_detail"]["slice_duration"], state["end_time"])` is included
+    # NOTE: for `np.arange` 'stop param,
+    #   - we subtract 'slice_duration' so that only full slice are included
+    #   - and add `+1` so that slice with time range `('end_time - 'slice_duration', 'end_time')` is included
     tx_slice_start_time: npt.NDArray[Datetime64_us] = np.arange(
         state["start_time"],
         state["end_time"] - spec["exp_detail"]["slice_duration"] + 1,

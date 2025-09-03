@@ -13,8 +13,9 @@ from sorts.types import (
     Float64_as_sec,
     EnuCoordinates,
     Datetime_Like,
+    Timedelta_Like,
 )
-from sorts.utils import to_datetime64_us
+from sorts.utils import to_datetime64_us, to_timedelta64_us
 from sorts import plots
 from sorts.schedule_v2 import Schedule, ExperimentDetail
 
@@ -50,6 +51,8 @@ def generate_from_state(spec: Spec, state: State) -> Output:
 
     # generate pointings
     tx_pointings: EnuCoordinates = spec["tx_station"].enu(state["spobj_states"][:3])
+    tx_pointings = tx_pointings / np.linalg.norm(tx_pointings, axis=0)
+
     tx_pointings_zenith_ang = pyant.coordinates.vector_angle(loc_zenith, tx_pointings, degrees=True)
     tx_el_in_range_mask = tx_pointings_zenith_ang <= 90.0 - spec["tx_station"].min_elevation
     tx_pointings = tx_pointings[:, tx_el_in_range_mask]
@@ -58,11 +61,14 @@ def generate_from_state(spec: Spec, state: State) -> Output:
     rx_el_in_range_masks: list[npt.NDArray[np.bool]] = []
     for rx_station in spec["rx_stations"]:
         rx_pointings: EnuCoordinates = rx_station.enu(state["spobj_states"][:3])
+        rx_pointings = rx_pointings / np.linalg.norm(rx_pointings, axis=0)
+
         rx_pointings_zenith_ang = pyant.coordinates.vector_angle(
             loc_zenith, rx_pointings, degrees=True
         )
         rx_el_in_range_mask = rx_pointings_zenith_ang <= 90.0 - rx_station.min_elevation
         rx_pointings = rx_pointings[:, rx_el_in_range_mask]
+
         rx_el_in_range_masks.append(rx_el_in_range_mask)
         rxs_pointings.append(rx_pointings)
 
@@ -186,7 +192,9 @@ class TrackerController:
 
         return ctrl
 
-    def compute_ecef_states(self, start_time: Datetime_Like, end_time: Datetime_Like):
+    def compute_ecef_states(
+        self, start_time: Datetime_Like, end_time: Datetime_Like, slice_duration: Timedelta_Like
+    ):
         """Do the computation then update the `state` property and return `self`."""
 
         if "spobj" not in self.spec:
@@ -200,9 +208,12 @@ class TrackerController:
 
         exp_detail: ExperimentDetail = self.spec["exp_detail"]
 
+        # NOTE: for `np.arange` 'stop param,
+        #   - we subtract 'slice_duration' so that only full slice are included
+        #   - and add `+1` so that slice with time range `('end_time - 'slice_duration', 'end_time')` is included
         time: npt.NDArray[Datetime64_us] = np.arange(
             to_datetime64_us(start_time),
-            to_datetime64_us(end_time),
+            to_datetime64_us(end_time) - to_timedelta64_us(slice_duration) + 1,
             exp_detail["slice_duration"],
         )
         dt: npt.NDArray[Timedelta64_us] = time - to_datetime64_us(self.spec["epoch"])
@@ -226,7 +237,9 @@ class TrackerController:
         """
 
         if start_time is not None and end_time is not None:
-            self.compute_ecef_states(start_time, end_time)
+            self.compute_ecef_states(
+                start_time, end_time, self.spec["exp_detail"]["slice_duration"]
+            )
             state = t.cast(State, self.state)
         elif self.state is None:
             raise RuntimeError(
@@ -248,7 +261,9 @@ class TrackerController:
 
         if self.state is None:
             if start_time is not None and end_time is not None:
-                self.compute_ecef_states(start_time, end_time)
+                self.compute_ecef_states(
+                    start_time, end_time, self.spec["exp_detail"]["slice_duration"]
+                )
                 state = t.cast(State, self.state)
             else:
                 raise RuntimeError(
