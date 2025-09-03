@@ -19,9 +19,9 @@ A xarray `Dataset` with:
   ```
   Dimensions:     (azelr: 3, start_time: n)
   Coordinates:
-  * start_time  (start_time) datetime64[us]
+  * start_time    (start_time) datetime64[us]
       end_time    (start_time) datetime64[us]
-  * azelr       (azelr) <U2 24B 'az' 'el' 'r'
+  * azelr         (azelr) <U2 24B 'az' 'el' 'r'
   Data variables:
       pointing    (azelr, start_time) float64
       exp_num     (start_time) int64

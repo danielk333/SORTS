@@ -54,7 +54,24 @@ _SK = Schedule._K
 
 # TODO: re-eval NewType vs just type alias
 StateData = t.NewType("StateData", xr.Dataset)
-"""`NewType` of `xr.Dataset`"""
+"""
+A xarray `Dataset` with:
+  ```
+  Dimensions:      (azelr: 3, time: 750)
+  Coordinates:
+    * time         (time) datetime64[us]
+    * azelr        (azelr) <U2 24B 'az' 'el' 'r'
+  Data variables:
+      tx_pointing  (azelr, time)
+      rx_pointing  (azelr, time)
+      exp_num      (time)
+      gain_tx      (time)
+      gain_rx      (time)
+      snr          (time)
+  Attributes:
+      stn_id:   str
+  ```
+"""
 
 
 # TODO: get radar instant in init of `Schedule` so we not need to pass them here?
