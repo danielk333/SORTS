@@ -44,6 +44,7 @@ class Observation:
 
         return TxRxTuple(tx=tx_sch_obs, rx=rx_sch_obs)
 
+    # TODO: add test?
     def get_state_slice(self) -> StateData:
         """Get the subset of `simulation_unit.StateData` data the corresponds to the the observation"""
 
@@ -57,7 +58,7 @@ class Observation:
             & (self.simulation_unit._state_data[_SuK.time] <= self.passage["time_range"][1])
         )
 
-        sim_state_slice = self.simulation_unit._state_data.loc[
+        sim_state_slice = self.simulation_unit._state_data.loc[{_SuK.time: time_mask}].loc[
             {_SuK.time: self.indexer.rx.to_numpy()}
         ]
 
