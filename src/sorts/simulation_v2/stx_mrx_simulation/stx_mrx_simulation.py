@@ -40,15 +40,6 @@ class Spec(t.TypedDict):
 # TODO: we need to enforce each station to has a unique id (`.uid` prop)
 #   either in the simulation class or in related station getter like `get_radar`
 class StxMrxSimulation:
-    SpaceObjectDsecSampler = SpaceObjectDsecSampler
-    """shortcut to module attribute"""
-
-    Spec = Spec
-    """shortcut to module attribute"""
-
-    SimulationUnit = SimulationUnit
-    """shortcut to module attribute"""
-
     def __init__(self, spec: Spec):
         self.spec: Spec = spec
 

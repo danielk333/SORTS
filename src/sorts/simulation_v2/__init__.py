@@ -1,4 +1,5 @@
 from .types import Passage
+from . import types, funcs, stx_mrx_simulation
 
-# TODO: add a ref to `Spec` as class attr in side `StxMrxSimulation` and do not re-export it
+# TODO: remove `Spec` from here; at the use site, import it from the re-exported `stx_mrx_simulation` module instead
 from .stx_mrx_simulation import Spec, StxMrxSimulation
