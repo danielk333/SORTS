@@ -28,7 +28,7 @@ class _IK:
 assert_class_attributes_equal_to(_IK, t.get_args(DsIntermediateVarKey))
 
 
-def to_dataframe(ds: xr.Dataset):
+def data_to_dataframe(ds: ScheduleData):
     """
     Convert schedule data in xarray dataset to pandas dataframe.
 
@@ -42,7 +42,7 @@ def to_dataframe(ds: xr.Dataset):
         t.cast(
             list[pd.DataFrame],
             [
-                funcs.to_dataframe(ds),
+                funcs.data_to_dataframe(ds),
                 (
                     ds[_IK.allowed_start_time].transpose().to_pandas()
                     if _IK.allowed_start_time in ds

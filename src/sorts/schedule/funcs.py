@@ -20,8 +20,8 @@ if t.TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-# TODO: this help should ideally be part of radar module/subpackage,
-#   but we can doing the moving when that module is refactored
+# TODO: this helper should ideally be part of radar module/subpackage,
+#   but we can move it after that module is refactored
 def default_station():
     return Station(
         lat=0.0,
@@ -73,7 +73,7 @@ def data_from_ndarrays(data: ScheduleNdarrayDict) -> ScheduleData:
     return sch_data
 
 
-def to_dataframe(ds: ScheduleData) -> pd.DataFrame:
+def data_to_dataframe(ds: ScheduleData) -> pd.DataFrame:
     df = pd.concat(
         t.cast(
             list[pd.DataFrame],
@@ -115,8 +115,6 @@ def filter_by_time_range(ds: ScheduleData, time_range: TimeRange_us) -> Schedule
     return ds_masked
 
 
-# TODO: maybe saving a `simu_grp` number in schedule is more memory efficient?
-#   (or not, because measurement is very sparse over schedule)
 def get_indexer_per_measurement(ds: ScheduleData, is_split_simu: bool) -> list[xr.DataArray]:
     """
     Split a schedule data by measurements.

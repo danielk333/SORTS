@@ -53,7 +53,7 @@ class StxMrxSimulation:
     def run(self):
         logger.debug("starting stx mrx sim")
 
-        spobjs_smpl_dsec, spobjs_smpl_states = funcs.sample_and_propagate_pace_objects_states(
+        spobjs_smpl_dsec, spobjs_smpl_states = funcs.sample_and_propagate_space_objects_states(
             sampler=self.spec["dsec_sampler"],
             spobjs=self.spec["space_objects"],
             start_time=to_datetime64_us(self.spec["start_time"]),

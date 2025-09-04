@@ -174,7 +174,7 @@ class Schedule:
         return arr_dict
 
     def to_dataframe(self) -> pd.DataFrame:
-        return funcs.to_dataframe(self._data)
+        return funcs.data_to_dataframe(self._data)
 
     def filter_by_time_range(self, time_range: TimeRange_us) -> t.Self:
         cls = type(self)

@@ -25,7 +25,7 @@ if t.TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def sample_and_propagate_pace_objects_states(
+def sample_and_propagate_space_objects_states(
     sampler: SpaceObjectDsecSampler,
     spobjs: t.Sequence[sorts.SpaceObject],
     start_time: Datetime64_us,
