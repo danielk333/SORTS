@@ -1,6 +1,6 @@
 from sorts.types import TxRxTuple
 from sorts.schedule import XrDataArrayIndexer, Schedule
-from sorts.simulation_v2.types import Passage
+from sorts.simulation.types import Passage
 from .simulation_unit import SimulationUnit, StateData
 
 

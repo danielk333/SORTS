@@ -21,7 +21,7 @@ from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.schedule import Schedule
 from sorts.controller.tracker_controller import TrackerController
-from sorts.simulation_v2 import stx_mrx_simulation, StxMrxSimulation
+from sorts.simulation import stx_mrx_simulation, StxMrxSimulation
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
