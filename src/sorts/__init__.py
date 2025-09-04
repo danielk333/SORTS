@@ -31,7 +31,7 @@ from .controller_v1 import RadarController
 from .scheduler import Scheduler
 from .passes import Pass
 from .errors import Errors
-from .simulation import Simulation
+from .simulation_v1 import Simulation
 
 
 # modules
@@ -48,7 +48,7 @@ from . import passes
 from . import errors
 from . import io
 from . import interpolation
-from . import simulation
+from . import simulation_v1
 from . import signals
 from . import correlator
 from . import propagator
@@ -59,7 +59,7 @@ from .correlator import correlate
 from .passes import equidistant_sampling
 from .passes import find_passes, find_simultaneous_passes, group_passes
 from .signals import hard_target_snr
-from .simulation import (
+from .simulation_v1 import (
     MPI_single_process,
     MPI_action,
     iterable_step,
