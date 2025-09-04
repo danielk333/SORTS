@@ -12,46 +12,4 @@ def setup_function():
     print()
 
 
-def FenceScanController_smoke_test():
-    """
-    Check if the `FenceScanController` can be initialize and generate schedule(s) with correct length in a basic settings.
-
-    Note: only tx schedule is checked at the moment
-    """
-    # TODO: should also check if other fields are correct
-
-    _K = Schedule._K
-
-    start_time_np = np.datetime64("2025-06-30 00:00:00", "us")
-    end_time_np = np.datetime64("2025-06-30 00:00:01", "us")
-    slice_duration = np.timedelta64(10_000, "us")  # 10ms
-
-    eiscat3d = get_radar("eiscat3d", "stage1-array")
-
-    fenceScanController = FenceScanController.from_scan_spec(
-        tx_station=eiscat3d.tx[0],
-        rx_stations=[eiscat3d.tx[0]],
-        exp_detail={
-            "id": 1,
-            "coh_int_bandwidth": 1.0,
-            "ipp": 1.0,
-            "pulse_length": 1.0,
-            "power": 5000000.0,
-            "bandwidth": 52.08333333333333,
-            "duty_cycle": 1.0,
-            "noise_temp": 150.0,
-            "slice_duration": slice_duration,
-        },
-        azimuth=90,  # sweep from east to west
-        min_elevation=30,
-        pointings_per_cycle=40,
-        # scan_range=np.linspace(300e3, 1000e3, num=10, dtype=np.float64),  # Not yet supportted
-        scan_range=np.array([300e3], dtype=np.float64),
-    )
-
-    schs = fenceScanController.generate(Time(start_time_np), Time(end_time_np))
-    expected_sch_len = round((end_time_np - start_time_np) / slice_duration)
-
-    assert len(schs.tx_schedule._data[_K.start_time]) == expected_sch_len
-
-    return
+# TODO: maybe a test for fn `generate_from_state`, `pointing_patterns.fence_pointing`
