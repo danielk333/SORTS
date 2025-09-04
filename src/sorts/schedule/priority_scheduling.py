@@ -93,7 +93,7 @@ def priority_scheduling(
     min_datetime64_us = np.datetime64(np.iinfo(np.int64).min + 1, "us")
 
     # init an empty dataset for a schedule and add some columns, will be used store merged schedule
-    merged_sch_data = Schedule.empty()._data
+    merged_sch_data = funcs.empty_data()
     if len(sch_datas) > 0:
         merged_sch_data.attrs = sch_datas[0].attrs
     merged_sch_data[_IK.allowed_start_time] = (

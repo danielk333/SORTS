@@ -19,6 +19,26 @@ if t.TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+def empty_data() -> ScheduleData:
+    sch_data = xr.Dataset(
+        coords={
+            _K.start_time: np.empty(0, dtype="datetime64[us]"),
+            _K.end_time: (_K.start_time, np.empty(0, dtype="datetime64[us]")),
+            _K.enu: [_K.e, _K.n, _K.u],
+        },
+        data_vars={
+            _K.pointing: ((_K.enu, _K.start_time), np.empty((3, 0), dtype=np.float64)),
+            _K.exp_num: (_K.start_time, np.empty(0, dtype=np.int64)),
+        },
+        attrs={
+            _K.stn_id: "__EMPTY_ID__",
+            _K.exp_detail_map: {},
+        },
+    )
+
+    return sch_data
+
+
 def to_dataframe(ds: ScheduleData) -> pd.DataFrame:
     df = pd.concat(
         t.cast(

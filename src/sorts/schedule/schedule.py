@@ -123,19 +123,6 @@ class Schedule:
         return cls(data=sch_data)
 
     @classmethod
-    def empty(cls) -> t.Self:
-        return cls.from_ndarrays(
-            {
-                _K.stn_id: "__EMPTY_ID__",
-                _K.exp_detail_map: {},
-                _K.start_time: np.empty(0, dtype="datetime64[us]"),
-                _K.end_time: np.empty(0, dtype="datetime64[us]"),
-                _K.exp_num: np.empty(0, dtype=np.int64),
-                _K.pointing: np.empty((3, 0), dtype=np.float64),
-            }
-        )
-
-    @classmethod
     def priority_scheduling(cls, schs: t.Sequence[Schedule]):
         """
         Merge a sequence of schedules for a single station into one,
