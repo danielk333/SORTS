@@ -15,9 +15,9 @@ from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.radar.radars import get_radar
 from sorts.utils import to_datetime64_us, to_pydatetime
-from sorts.controller_v2 import TrackerController, FenceScanController
-from sorts.schedule_v2 import Schedule
-from sorts.simulation_v2 import StxMrxSimulation
+from sorts.controller import TrackerController, FenceScanController
+from sorts.schedule import Schedule
+from sorts.simulation import StxMrxSimulation
 
 # import for plottings
 from IPython.display import display

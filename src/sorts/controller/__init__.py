@@ -1,11 +1,4 @@
-#!/usr/bin/env python
-
-"""Defines a radar controller
-
-"""
-
-from .radar_controller import RadarController
-
-from .tracker import Tracker
-from .scanner import Scanner
-from .static import Static
+from . import pointing_patterns
+from .random_uniform_scans_controller import RandomUniformScansController
+from .fence_scan_controller import FenceScanController
+from .tracker_controller import TrackerController

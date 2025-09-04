@@ -13,8 +13,8 @@ from sorts.types import (
     Datetime_Like,
 )
 from sorts.utils import to_datetime64_us
-from sorts.schedule_v2 import Schedule, ExperimentDetail
-from sorts.controller_v2 import pointing_patterns
+from sorts.schedule import Schedule, ExperimentDetail
+from sorts.controller import pointing_patterns
 
 logger = logging.getLogger(__name__)
 

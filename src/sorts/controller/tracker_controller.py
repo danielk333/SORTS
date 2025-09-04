@@ -17,7 +17,7 @@ from sorts.types import (
 )
 from sorts.utils import to_datetime64_us, to_timedelta64_us
 from sorts import plots
-from sorts.schedule_v2 import Schedule, ExperimentDetail
+from sorts.schedule import Schedule, ExperimentDetail
 
 logger = logging.getLogger(__name__)
 

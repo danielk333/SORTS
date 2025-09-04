@@ -1,5 +1,5 @@
 from datetime import datetime, timezone, timedelta
-from sorts.controller_v2.random_uniform_scans_controller import RandomUniformScansController
+from sorts.controller.random_uniform_scans_controller import RandomUniformScansController
 
 
 def setup_function():

@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 import sorts
 from sorts.scheduler import StaticList, ObservedParameters
-from sorts.controller import Scanner
+from sorts.controller_v1 import Scanner
 from sorts import SpaceObject
 from sorts.radar.scans import Fence
 
@@ -56,7 +56,9 @@ class ObservedScanning(StaticList, ObservedParameters):
 
 
 scanner_ctrl = Scanner(
-    eiscat3d, scan, t=np.arange(0, end_t, scan.dwell()),
+    eiscat3d,
+    scan,
+    t=np.arange(0, end_t, scan.dwell()),
 )
 
 scheduler = ObservedScanning(

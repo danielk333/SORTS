@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-"""Radar scan plot functions
-
-"""
+"""Radar scan plot functions"""
 
 # Python standard import
 from itertools import cycle
@@ -17,7 +15,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 # Local import
 from . import general
-from ..controller import Tracker
+from ..controller_v1 import Tracker
 
 prop_cycle = plt.rcParams["axes.prop_cycle"]
 

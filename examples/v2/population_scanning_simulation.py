@@ -16,13 +16,10 @@ from astropy.time import Time
 import pyvista as pv
 from pyvista import examples
 import sorts
-from sorts import _v2 as sortsV2
-from sorts import schedule_v2 as schedule
+from sorts import ExperimentDetail, FenceScanController, StxMrxSimulation, schedule
+from sorts import schedule as schedule
 from sorts.utils import to_pydatetime, to_datetime64_us
 
-# TODO: switch to normal named imports; these are tmp alias until `_v2` becomes the default namespace
-StxMrxSimulation = sortsV2.simulation.StxMrxSimulation
-StxMrxSimulationParam = sortsV2.simulation.Spec
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -44,7 +41,7 @@ end_time = Time("2004-01-01 00:10:00Z", format="iso", scale="utc")  # 600 sec af
 
 eiscat3d = sorts.get_radar("eiscat3d", "stage1-array")
 
-exp_detail_map: dict[int, sortsV2.schedule.ExperimentDetail] = {
+exp_detail_map: dict[int, ExperimentDetail] = {
     0: {
         "id": 0,
         "coh_int_bandwidth": 1.0,
@@ -64,7 +61,7 @@ tx_station.uid = "eiscat3d, stage1-array, tx, 0"
 rx_station: sorts.Station = eiscat3d.rx[0]
 rx_station.uid = "eiscat3d, stage1-array, rx, 0"
 
-fence_scan_controller = sortsV2.controller.FenceScanController.from_scan_spec(
+fence_scan_controller = FenceScanController.from_scan_spec(
     tx_station=tx_station,
     rx_stations=[rx_station],
     exp_detail=exp_detail_map[0],
