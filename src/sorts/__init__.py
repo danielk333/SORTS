@@ -20,6 +20,44 @@ __libpath__ = __sortspath__ / ("clibsorts" + suffix)
 
 clibsorts = ctypes.cdll.LoadLibrary(str(__libpath__))
 
+##
+# v2 imports
+##
+from . import types
+from . import utils
+from . import schedule
+from . import controller
+from . import simulation
+
+from .schedule import Schedule, ExperimentDetail
+from .controller import TrackerController, FenceScanController
+from .simulation import StxMrxSimulation
+
+
+##
+# v1 imports
+##
+
+# modules
+from .radar import scans
+from . import radar
+from . import functions
+from . import constants
+from . import frames
+from . import dates
+from . import plotting
+
+# from . import controller_v1
+from . import scheduler
+from . import passes
+from . import errors
+from . import io
+from . import interpolation
+
+# from . import simulation_v1
+from . import signals
+from . import correlator
+from . import propagator
 
 # classes
 from .space_object import SpaceObject
@@ -32,26 +70,6 @@ from .scheduler import Scheduler
 from .passes import Pass
 from .errors import Errors
 from .simulation_v1 import Simulation
-
-
-# modules
-from .radar import scans
-from . import radar
-from . import functions
-from . import constants
-from . import frames
-from . import dates
-from . import plotting
-from . import controller_v1
-from . import scheduler
-from . import passes
-from . import errors
-from . import io
-from . import interpolation
-from . import simulation_v1
-from . import signals
-from . import correlator
-from . import propagator
 
 # Functions
 from .radar import get_radar, list_radars
