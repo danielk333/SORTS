@@ -27,7 +27,7 @@ from .population import Population
 from .propagator import Propagator
 from .radar import Scan
 from .radar import Station, TX, RX
-from .controller import RadarController
+from .controller_v1 import RadarController
 from .scheduler import Scheduler
 from .passes import Pass
 from .errors import Errors
@@ -42,7 +42,7 @@ from . import constants
 from . import frames
 from . import dates
 from . import plotting
-from . import controller
+from . import controller_v1
 from . import scheduler
 from . import passes
 from . import errors

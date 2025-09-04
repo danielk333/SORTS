@@ -1,19 +1,18 @@
 #!/usr/bin/env python
 
-"""Basis for developing a scheduler for tracking multiple space objects.
-
-"""
+"""Basis for developing a scheduler for tracking multiple space objects."""
 import logging
 from abc import abstractmethod
 
 import numpy as np
 import pyorb
 
-from ..controller import Tracker
+from ..controller_v1 import Tracker
 from .scheduler import Scheduler
 from ..passes import equidistant_sampling
 
 logger = logging.getLogger(__name__)
+
 
 class Tracking(Scheduler):
     """#TODO: Docstring"""

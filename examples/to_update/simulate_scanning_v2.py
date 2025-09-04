@@ -12,7 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sorts
 from sorts.scheduler import StaticList, ObservedParameters
-from sorts.controller import Scanner
+from sorts.controller_v1 import Scanner
 from sorts import SpaceObject
 from sorts.radar.scans import Fence
 
