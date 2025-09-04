@@ -15,3 +15,4 @@ def setup_function():
 
 
 # TODO: maybe a test for fn `generate_from_state`
+# TODO: should test station min_elevation are taken into account

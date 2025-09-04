@@ -10,13 +10,27 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from sorts.types import TimeRange_us
+from sorts.radar import Station
 from .types import _K, AttrKey
 
 if t.TYPE_CHECKING:
-    from .schedule import ScheduleData, ExperimentDetail
+    from .schedule import ScheduleData, ExperimentDetail, ScheduleNdarrayDict
 
 
 logger = logging.getLogger(__name__)
+
+
+# TODO: this help should ideally be part of radar module/subpackage,
+#   but we can doing the moving when that module is refactored
+def default_station():
+    return Station(
+        lat=0.0,
+        lon=0.0,
+        alt=0.0,
+        min_elevation=0.0,
+        beam=None,  # might not work when the `Station` typing is tightened
+        uid=f"__generated_by_{default_station.__name__}",
+    )
 
 
 def empty_data() -> ScheduleData:
@@ -31,8 +45,28 @@ def empty_data() -> ScheduleData:
             _K.exp_num: (_K.start_time, np.empty(0, dtype=np.int64)),
         },
         attrs={
-            _K.stn_id: "__EMPTY_ID__",
+            _K.stn_id: f"__generated_by_{empty_data.__name__}",
             _K.exp_detail_map: {},
+        },
+    )
+
+    return sch_data
+
+
+def data_from_ndarrays(data: ScheduleNdarrayDict) -> ScheduleData:
+    sch_data = xr.Dataset(
+        coords={
+            _K.start_time: data[_K.start_time],
+            _K.end_time: (_K.start_time, data[_K.end_time]),
+            _K.enu: [_K.e, _K.n, _K.u],
+        },
+        data_vars={
+            _K.pointing: ((_K.enu, _K.start_time), data[_K.pointing]),
+            _K.exp_num: (_K.start_time, data[_K.exp_num]),
+        },
+        attrs={
+            _K.stn_id: data[_K.stn_id],
+            _K.exp_detail_map: data[_K.exp_detail_map],
         },
     )
 

@@ -1,8 +1,9 @@
 import typing as t
 import numpy as np
 import xarray as xr
-from .schedule import Schedule
-from .priority_scheduling import priority_scheduling
+from sorts import schedule
+from sorts.schedule import Schedule
+from sorts.schedule.priority_scheduling import priority_scheduling
 
 
 def setup_function():
@@ -19,7 +20,7 @@ def priority_scheduling_interleaved_schedule_test():
     _SK = Schedule._K
 
     # 30min long, 2hr intv
-    sch_a = Schedule.from_ndarrays(
+    sch_data_a = schedule.funcs.data_from_ndarrays(
         {
             "stn_id": "stn_a",
             "exp_detail_map": {
@@ -47,11 +48,11 @@ def priority_scheduling_interleaved_schedule_test():
             ),
             "exp_num": np.full(12, 0, dtype=np.int64),
             "pointing": np.full((3, 12), 0.0, dtype=np.float64),
-        }
+        },
     )
 
     # 1hr long, 1hr intv
-    sch_b = Schedule.from_ndarrays(
+    sch_data_b = schedule.funcs.data_from_ndarrays(
         {
             "stn_id": "stn_b",
             "exp_detail_map": {
@@ -82,7 +83,7 @@ def priority_scheduling_interleaved_schedule_test():
         }
     )
 
-    resultant_sch_data = priority_scheduling([sch_a._data, sch_b._data])
+    resultant_sch_data = priority_scheduling([sch_data_a, sch_data_b])
 
     assert all(xr.ufuncs.equal(resultant_sch_data[_SK.exp_num], [0, 1] * 12))
     assert resultant_sch_data.attrs[_SK.stn_id] == "stn_a"

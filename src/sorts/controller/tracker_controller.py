@@ -75,26 +75,28 @@ def generate_from_state(spec: Spec, state: State) -> Output:
     sch_len = len(sch_time)
 
     tx_sch = Schedule.from_ndarrays(
-        {
+        data={
             "stn_id": spec["tx_station"].uid,
             "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
             "start_time": sch_time,
             "end_time": sch_time + spec["exp_detail"]["slice_duration"],
             "exp_num": np.full(sch_len, spec["exp_detail"]["id"], dtype=np.int64),
             "pointing": tx_pointings,
-        }
+        },
+        station=spec["tx_station"],
     )
 
     rx_schs = [
         Schedule.from_ndarrays(
-            {
+            data={
                 "stn_id": spec["rx_stations"][idx].uid,
                 "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
                 "start_time": sch_time,
                 "end_time": sch_time + spec["exp_detail"]["slice_duration"],
                 "exp_num": np.full(sch_len, spec["exp_detail"]["id"], dtype=np.int64),
                 "pointing": rx_pointings,
-            }
+            },
+            station=spec["rx_stations"][idx],
         )
         for idx, rx_pointings in enumerate(rxs_pointings)
     ]

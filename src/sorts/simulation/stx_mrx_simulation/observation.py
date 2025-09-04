@@ -36,8 +36,12 @@ class Observation:
             self.passage["time_range"]
         )
 
-        tx_sch_obs = Schedule(data=tx_sch_ps._data.loc[{_SK.start_time: self.indexer.tx}])
-        rx_sch_obs = Schedule(data=rx_sch_ps._data.loc[{_SK.start_time: self.indexer.rx}])
+        tx_sch_obs = Schedule(
+            data=tx_sch_ps._data.loc[{_SK.start_time: self.indexer.tx}], station=tx_sch_ps.station
+        )
+        rx_sch_obs = Schedule(
+            data=rx_sch_ps._data.loc[{_SK.start_time: self.indexer.rx}], station=rx_sch_ps.station
+        )
 
         return TxRxTuple(tx=tx_sch_obs, rx=rx_sch_obs)
 

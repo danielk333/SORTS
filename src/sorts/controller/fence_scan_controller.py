@@ -47,7 +47,7 @@ class Output(t.NamedTuple):
     rx_schedules: t.Sequence[Schedule]
 
 
-# TODO: should we generate tx pointings at the specified ranges instead of normalized to 1
+# TODO: should we generate tx pointings at the specified ranges instead of normalized to 1?
 def generate_from_state(spec: Spec, state: State) -> Output:
     # The logic of this function:
     # 1. repeat the cycle of tx pointings from state to form the tx schedule
@@ -76,7 +76,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
     )[:, : state["tx_schedule_size"]]
 
     tx_schedule = Schedule.from_ndarrays(
-        {
+        data={
             "stn_id": spec["tx_station"].uid,
             "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
             "start_time": tx_slice_start_time,
@@ -84,6 +84,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
             "exp_num": np.full(state["tx_schedule_size"], spec["exp_detail"]["id"], dtype=np.int64),
             "pointing": tx_pointing,
         },
+        station=spec["tx_station"],
     )
 
     rx_slice_start_time = tx_slice_start_time.repeat(len(spec["scan_range"]))
@@ -122,14 +123,15 @@ def generate_from_state(spec: Spec, state: State) -> Output:
         )[:, :rx_schedule_size]
 
         rx_schedule = Schedule.from_ndarrays(
-            {
+            data={
                 "stn_id": rx_station.uid,
                 "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
                 "start_time": rx_slice_start_time,
                 "end_time": rx_slice_start_time + spec["exp_detail"]["slice_duration"],
                 "exp_num": np.full(rx_schedule_size, spec["exp_detail"]["id"], dtype=np.int64),
                 "pointing": rx_pointing,
-            }
+            },
+            station=rx_station,
         )
 
         rx_schedules.append(rx_schedule)
