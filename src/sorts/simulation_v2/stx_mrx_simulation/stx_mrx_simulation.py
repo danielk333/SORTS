@@ -8,7 +8,7 @@ from sorts.interpolation import Interpolator
 from sorts.radar import Station
 from sorts.utils import to_datetime64_us
 from sorts.types import Datetime_Like, Float64_as_sec
-from sorts.schedule_v2 import Schedule, ExperimentDetail
+from sorts.schedule import Schedule, ExperimentDetail
 from . import funcs
 from .simulation_unit import SimulationUnit
 

@@ -16,7 +16,7 @@ from sorts.radar import Station
 from sorts.radar.radars import get_radar
 from sorts.utils import to_datetime64_us, to_pydatetime
 from sorts.controller import TrackerController, FenceScanController
-from sorts.schedule_v2 import Schedule
+from sorts.schedule import Schedule
 from sorts.simulation_v2 import StxMrxSimulation
 
 # import for plottings

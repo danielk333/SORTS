@@ -19,7 +19,7 @@ from sorts.interpolation import Legendre8
 from sorts.propagator import Kepler
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
-from sorts.schedule_v2 import Schedule
+from sorts.schedule import Schedule
 from sorts.controller.tracker_controller import TrackerController
 from sorts.simulation_v2 import stx_mrx_simulation, StxMrxSimulation
 

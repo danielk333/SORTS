@@ -17,7 +17,7 @@ import pyvista as pv
 from pyvista import examples
 import sorts
 from sorts import _v2 as sortsV2
-from sorts import schedule_v2 as schedule
+from sorts import schedule as schedule
 from sorts.utils import to_pydatetime, to_datetime64_us
 
 # TODO: switch to normal named imports; these are tmp alias until `_v2` becomes the default namespace

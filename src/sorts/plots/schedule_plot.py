@@ -5,7 +5,7 @@ import bokeh.plotting as bp
 import bokeh.models as bokeh_models
 from sorts.types import Datetime_Like, Datetime64_us
 from sorts.utils import to_datetime64_us
-from sorts.schedule_v2 import Schedule
+from sorts.schedule import Schedule
 
 
 def _schedule_plot_from_cds(
