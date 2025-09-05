@@ -14,7 +14,7 @@ from sorts.types import (
 )
 from sorts.utils import to_datetime64_us
 from sorts.schedule import Schedule, ExperimentDetail
-from sorts.controller import pointing_patterns
+from sorts.controller import pointing_funcs
 
 logger = logging.getLogger(__name__)
 
@@ -203,7 +203,7 @@ class FenceScanController:
         tx_schedule_size = math.floor((end_time_np - start_time_np) / exp_detail["slice_duration"])
 
         tx_pointings_of_a_cycle = sph_to_cart(
-            pointing_patterns.fence_pointing(
+            pointing_funcs.fence_pointing(
                 azimuth=self.spec["azimuth"],
                 min_elevation=self.spec["min_elevation"],
                 pointings_per_cycle=self.spec["pointings_per_cycle"],
