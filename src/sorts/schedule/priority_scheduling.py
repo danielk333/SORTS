@@ -4,8 +4,11 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from sorts.utils import assert_class_attributes_equal_to
+from .types import _K
 from . import funcs
-from .schedule import Schedule, ScheduleData
+
+if t.TYPE_CHECKING:
+    from .schedule import ScheduleData
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +88,7 @@ def priority_scheduling(
     #   2.3. filter out new rows that conflict with `allowed_start_time`, `allowed_end_time`
     #   2.3. update `allowed_start_time`, `allowed_end_time`
 
-    _SK = Schedule._K
+    _SK = _K
 
     # define some const
     # +1 is needed for `min_datetime64_us`, otherwise it will be NaT

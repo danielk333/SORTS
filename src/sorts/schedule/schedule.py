@@ -8,6 +8,7 @@ from sorts.types import Datetime64_us, TimeRange_us, Timedelta64_us, EnuCoordina
 from sorts.radar import Station, StationId
 from .types import _K
 from . import funcs
+from .priority_scheduling import priority_scheduling
 
 
 logger = logging.getLogger(__name__)
@@ -143,9 +144,6 @@ class Schedule:
 
         Note: It is assumed (and not checked) that each of the schedule itself does not contain overlapping entries.
         """
-
-        # NOTE: used lazy import here to avoid circular import
-        from .priority_scheduling import priority_scheduling
 
         if len(schs) == 0:
             logger.warning(
