@@ -6,19 +6,22 @@ Functions for core functionalities of this subpackage
 
 from __future__ import annotations
 import logging, typing as t
+import numpy as np
 import numpy.typing as npt
 import sorts
 from tqdm import tqdm
 from sorts.interpolation import Interpolator
-from sorts.radar import StationId
-from sorts.types import Float64_as_sec, EcefStates, Datetime64_us
+from sorts.radar import Station, StationId
+from sorts.types import Float64_as_sec, EcefStates, Datetime64_us, EnuCoordinates
 from sorts.schedule import TimeRangeIndexer
 from sorts.simulation.types import Passage
 from sorts.simulation import funcs
 from .simulation_unit import SimulationUnit
 from .observation import ObservationIndexer, Observation
 
+
 if t.TYPE_CHECKING:
+    from .simulation_unit import StateData
     from .stx_mrx_simulation import Spec, SpaceObjectDsecSampler
 
 
@@ -157,3 +160,34 @@ def derive_simulation_units(
             sim_units.append(sim_unit)
 
     return sim_units
+
+
+def calc_gain(
+    state_data: StateData,
+    tx_stn: Station,
+    rx_stn: Station,
+    spobj_tx_enu: EnuCoordinates,
+    spobj_rx_enu: EnuCoordinates,
+) -> StateData:
+    # NOTE: used lazy import here to avoid circular import
+    from .simulation_unit import _K
+
+    size = len(state_data[_K.time])
+
+    # NOTE: looping is needed becase passing in a ndarray of pointing will trigger exception when calculating gain
+    #   refs:
+    #   - `pyant/beam.py` `L235` `assert vector_cnt <= max_vectors, "Too many vector valued parameters"`
+    #   - `pyant/models/array.py` `L185` `params, shape = self.get_parameters(ind, named=True, max_vectors=0)`
+    tx_gain_arr = np.full(size, 0.0, dtype=np.float64)
+    rx_gain_arr = np.full(size, 0.0, dtype=np.float64)
+    for idx in range(len(state_data[_K.time])):
+        tx_stn.beam.point(state_data[_K.tx_pointing][:, 0].to_numpy())
+        tx_gain_arr[idx] = tx_stn.beam.gain(spobj_tx_enu[:3, idx])
+
+        rx_stn.beam.point(state_data[_K.rx_pointing][:, 0].to_numpy())
+        rx_gain_arr[idx] = rx_stn.beam.gain(spobj_rx_enu[:3, idx])
+
+    state_data[_K.gain_tx] = (_K.time, tx_gain_arr)
+    state_data[_K.gain_rx] = (_K.time, rx_gain_arr)
+
+    return state_data

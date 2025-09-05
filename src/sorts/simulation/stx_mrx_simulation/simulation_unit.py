@@ -5,13 +5,13 @@ import numpy as np
 import numpy.typing as npt
 import xarray as xr
 from sorts.utils import assert_class_attributes_equal_to, to_datetime64_us
-from sorts.types import Float64_as_m, EnuCoordinates
-from sorts.radar import Station
+from sorts.types import Float64_as_m
 from sorts.space_object import SpaceObject
 from sorts.signals import hard_target_snr
 from sorts.interpolation import Interpolator
 from sorts.schedule import Schedule, TimeRangeIndexer
 from sorts.simulation.types import Passage
+from . import funcs
 
 CoordKey = t.Literal["time", "enu", "e", "n", "u"]
 DataKey = t.Literal[
@@ -72,35 +72,6 @@ A xarray `Dataset` with:
       stn_id:   str
   ```
 """
-
-
-# TODO: move to `funcs` module?
-def calc_gain(
-    state_data: StateData,
-    tx_stn: Station,
-    rx_stn: Station,
-    spobj_tx_enu: EnuCoordinates,
-    spobj_rx_enu: EnuCoordinates,
-) -> StateData:
-    size = len(state_data[_K.time])
-
-    # NOTE: looping is needed becase passing in a ndarray of pointing will trigger exception when calculating gain
-    #   refs:
-    #   - `pyant/beam.py` `L235` `assert vector_cnt <= max_vectors, "Too many vector valued parameters"`
-    #   - `pyant/models/array.py` `L185` `params, shape = self.get_parameters(ind, named=True, max_vectors=0)`
-    tx_gain_arr = np.full(size, 0.0, dtype=np.float64)
-    rx_gain_arr = np.full(size, 0.0, dtype=np.float64)
-    for idx in range(len(state_data[_K.time])):
-        tx_stn.beam.point(state_data[_K.tx_pointing][:, 0].to_numpy())
-        tx_gain_arr[idx] = tx_stn.beam.gain(spobj_tx_enu[:3, idx])
-
-        rx_stn.beam.point(state_data[_K.rx_pointing][:, 0].to_numpy())
-        rx_gain_arr[idx] = rx_stn.beam.gain(spobj_rx_enu[:3, idx])
-
-    state_data[_K.gain_tx] = (_K.time, tx_gain_arr)
-    state_data[_K.gain_rx] = (_K.time, rx_gain_arr)
-
-    return state_data
 
 
 class SimulationUnit:
@@ -237,7 +208,7 @@ class SimulationUnit:
             dtype=np.float64,
         )
 
-        self._state_data = calc_gain(
+        self._state_data = funcs.calc_gain(
             state_data=self._state_data,
             tx_stn=self.tx_station,
             rx_stn=self.rx_station,
