@@ -203,7 +203,7 @@ class FenceScanController:
         tx_schedule_size = math.floor((end_time_np - start_time_np) / exp_detail["slice_duration"])
 
         tx_pointings_of_a_cycle = sph_to_cart(
-            pointing_funcs.fence_pointing(
+            pointing_funcs.fence_pattern(
                 azimuth=self.spec["azimuth"],
                 min_elevation=self.spec["min_elevation"],
                 pointings_per_cycle=self.spec["pointings_per_cycle"],

@@ -5,7 +5,7 @@ from sorts.types import Float_as_deg, AzelrCoordinates_DegM
 logger = logging.getLogger(__name__)
 
 
-def fence_pointing(
+def fence_pattern(
     azimuth: Float_as_deg,
     min_elevation: Float_as_deg,
     pointings_per_cycle: int,
