@@ -151,8 +151,6 @@ def derive_simulation_units(
                 passages=passages,
                 spobj=spec["space_objects"][idx],
                 spobj_interp=spobj_states_interp,
-                tx_stn=spec["tx_station"],
-                rx_stn=spec["rx_stations"][rx_stn_idx],
                 tx_sch=spec["tx_schedule"],
                 rx_sch=spec["rx_schedules"][rx_stn_idx],
             )

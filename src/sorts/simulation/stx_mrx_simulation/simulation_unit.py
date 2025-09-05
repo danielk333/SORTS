@@ -75,7 +75,6 @@ A xarray `Dataset` with:
 
 
 # TODO: move to `funcs` module?
-# TODO: get radar instant in init of `Schedule` so we not need to pass them here?
 def calc_gain(
     state_data: StateData,
     tx_stn: Station,
@@ -123,8 +122,6 @@ class SimulationUnit:
         spobj: SpaceObject,
         spobj_interp: Interpolator,
         passages: list[Passage],
-        tx_stn: Station,
-        rx_stn: Station,
         tx_sch: Schedule,
         rx_sch: Schedule,
         state_data: StateData,
@@ -136,10 +133,10 @@ class SimulationUnit:
 
         self.passages = passages
 
-        self.tx_station = tx_stn
-        self.rx_station = rx_stn
         self.tx_schedule = tx_sch
         self.rx_schedule = rx_sch
+        self.tx_station = tx_sch.station
+        self.rx_station = rx_sch.station
 
     # TODO: can derive the indexers inside this method instead of as param, now that we take passages as param
     @classmethod
@@ -149,8 +146,6 @@ class SimulationUnit:
         passages: list[Passage],
         spobj: SpaceObject,
         spobj_interp: Interpolator,
-        tx_stn: Station,
-        rx_stn: Station,
         tx_sch: Schedule,
         rx_sch: Schedule,
     ) -> t.Self:
@@ -195,8 +190,6 @@ class SimulationUnit:
             spobj=spobj,
             spobj_interp=spobj_interp,
             passages=passages,
-            tx_stn=tx_stn,
-            rx_stn=rx_stn,
             tx_sch=tx_sch,
             rx_sch=rx_sch,
             state_data=StateData(state_data),
