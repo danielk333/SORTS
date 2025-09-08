@@ -74,9 +74,6 @@ class ScheduleNdarrayDict(t.TypedDict):
     pointing: EnuCoordinates
 
 
-TimeRangeIndexer = TimeRange_us
-"""Contains info to get a subset of entries from a `Schedule`"""
-
 XrDataArrayIndexer = xr.DataArray
 """Contains info to get a subset of entries from a `Schedule`"""
 

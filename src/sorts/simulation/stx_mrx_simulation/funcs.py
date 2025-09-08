@@ -13,7 +13,6 @@ from tqdm import tqdm
 from sorts.interpolation import Interpolator
 from sorts.radar import Station, StationId
 from sorts.types import Float64_as_sec, EcefStates, Datetime64_us, EnuCoordinates
-from sorts.schedule import TimeRangeIndexer
 from sorts.simulation.types import Passage
 from sorts.simulation import funcs
 from .simulation_unit import SimulationUnit
@@ -52,23 +51,23 @@ def sample_and_propagate_space_objects_states(
     return spobjs_smpl_dsec, spobjs_smpl_states
 
 
-def derive_schedule_indexers_per_tx_rx_station_pair(
+# TODO: use `TxRxTuple` type for return value?
+# TODO: can be combined with 'stx_mrx_simulation.funcs.find_passages'?
+def group_passages_by_tx_rx_station_pair(
     passages: list[Passage],
-) -> dict[tuple[StationId, StationId], list[TimeRangeIndexer]]:
-    """Derive a list of schedule indexer for each tx-rx station pair found in the give passages"""
-
-    sch_indexers: dict[tuple[StationId, StationId], list[TimeRangeIndexer]] = {}
+) -> dict[tuple[StationId, StationId], list[Passage]]:
+    groupped_passages: dict[tuple[StationId, StationId], list[Passage]] = {}
 
     for passage in passages:
         tx_station_id = passage["tx_station"].uid
         rx_station_id = passage["rx_station"].uid
 
-        if (tx_station_id, rx_station_id) in sch_indexers:
-            sch_indexers[(tx_station_id, rx_station_id)].append(passage["time_range"])
+        if (tx_station_id, rx_station_id) in groupped_passages:
+            groupped_passages[(tx_station_id, rx_station_id)].append(passage)
         else:
-            sch_indexers[(tx_station_id, rx_station_id)] = [passage["time_range"]]
+            groupped_passages[(tx_station_id, rx_station_id)] = [passage]
 
-    return sch_indexers
+    return groupped_passages
 
 
 def derive_observations(simulation_units: list[SimulationUnit]) -> list[Observation]:
@@ -138,19 +137,18 @@ def derive_simulation_units(
     spec: Spec,
     passages_lists: list[list[Passage]],
     spobjs_interpolators: list[Interpolator],
-):
+) -> list[SimulationUnit]:
     sim_units: list[SimulationUnit] = []
 
-    for idx, (passages, spobj_states_interp) in enumerate(
+    for idx, (passages_of_a_spobj, spobj_states_interp) in enumerate(
         zip(passages_lists, spobjs_interpolators)
     ):
-        indexers_dict = derive_schedule_indexers_per_tx_rx_station_pair(passages)
+        groupped_passages = group_passages_by_tx_rx_station_pair(passages_of_a_spobj)
 
-        for stn_id_pair, indexers in indexers_dict.items():
+        for stn_id_pair, passages in groupped_passages.items():
             rx_stn_idx = [stn.uid for stn in spec["rx_stations"]].index(stn_id_pair[1])
 
             sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(
-                indexers=indexers,
                 passages=passages,
                 spobj=spec["space_objects"][idx],
                 spobj_interp=spobj_states_interp,

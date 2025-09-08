@@ -9,7 +9,7 @@ from sorts.types import Float64_as_m
 from sorts.space_object import SpaceObject
 from sorts.signals import hard_target_snr
 from sorts.interpolation import Interpolator
-from sorts.schedule import Schedule, TimeRangeIndexer
+from sorts.schedule import Schedule
 from sorts.simulation.types import Passage
 from . import funcs
 
@@ -113,22 +113,22 @@ class SimulationUnit:
     @classmethod
     def from_passages_over_tx_rx_station_pair(
         cls,
-        indexers: list[TimeRangeIndexer],
         passages: list[Passage],
         spobj: SpaceObject,
         spobj_interp: Interpolator,
         tx_sch: Schedule,
         rx_sch: Schedule,
     ) -> t.Self:
-        if len(indexers) == 0:
+        if len(passages) == 0:
+            # TODO: return en empty instance would be better
             raise NotImplementedError()
 
         rx_time_mask: xr.DataArray = reduce(
             xr.ufuncs.logical_and,
             [
-                (rx_sch._data[_SK.start_time] >= idxer[0])
-                & (rx_sch._data[_SK.end_time] <= idxer[1])
-                for idxer in indexers
+                (rx_sch._data[_SK.start_time] >= time_range[0])
+                & (rx_sch._data[_SK.end_time] <= time_range[1])
+                for time_range in [ps["time_range"] for ps in passages]
             ],
         )
         time = rx_sch._data[_SK.start_time][rx_time_mask]

@@ -4,7 +4,6 @@ from .schedule import (
     ScheduleData,
     ExperimentDetail,
     ScheduleNdarrayDict,
-    TimeRangeIndexer,
     XrDataArrayIndexer,
     Schedule,
 )
