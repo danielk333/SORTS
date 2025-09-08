@@ -1,6 +1,8 @@
 import logging
 import numpy as np
-from sorts.types import Float_as_deg, AzelrCoordinates_DegM
+import numpy.typing as npt
+import pyant
+from sorts.types import Float_as_deg, AzelrCoordinates_DegM, EnuCoordinates
 
 logger = logging.getLogger(__name__)
 
@@ -37,3 +39,14 @@ def fence_pattern(
     )
 
     return azelr
+
+
+def create_mask_by_min_elevation(
+    pointings: EnuCoordinates, min_elevation: float
+) -> npt.NDArray[np.bool]:
+    loc_zenith = np.array([0, 0, 1], dtype=np.float64)
+
+    pointings_zenith_ang = pyant.coordinates.vector_angle(loc_zenith, pointings, degrees=True)
+    el_in_range_mask = pointings_zenith_ang <= 90.0 - min_elevation
+
+    return el_in_range_mask

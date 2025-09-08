@@ -31,6 +31,7 @@ class Spec(t.TypedDict):
     exp_detail: ExperimentDetail
 
 
+# TODO: can be dissolved?
 class State(t.TypedDict):
     """A TypedDict of params"""
 
@@ -38,6 +39,7 @@ class State(t.TypedDict):
     end_time: Datetime64_us
     tx_schedule_size: int
     tx_pointings_of_a_cycle: EnuCoordinates
+    """NOTE: It may contain out of range pointings"""
 
 
 class Output(t.NamedTuple):
@@ -68,25 +70,36 @@ def generate_from_state(spec: Spec, state: State) -> Output:
         spec["exp_detail"]["slice_duration"],
     )
 
-    # repeat a cycle of pointings until it is at least the size of `tx_schedule_size`
+    # TODO: `tx_schedule_size` is a bit of a mismisnomer, as out-of-range entries might later be removed
+    # repeat a cycle of pointings until it is at least the size of `tx_schedule_size`,
     # then trim to exactly `tx_schedule_size` long
     tx_pointing: EnuCoordinates = np.tile(
         state["tx_pointings_of_a_cycle"],
         (state["tx_schedule_size"] + pointings_per_cycle - 1) // pointings_per_cycle,
     )[:, : state["tx_schedule_size"]]
 
+    # mask tx values by min_elevation requirement,
+    tx_mask = pointing_funcs.create_mask_by_min_elevation(
+        tx_pointing, spec["tx_station"].min_elevation
+    )
+    tx_slice_start_time_masked = tx_slice_start_time[tx_mask]
+    tx_pointing_masked = tx_pointing[:, tx_mask]
+
     tx_schedule = Schedule.from_ndarrays(
         data={
             "stn_id": spec["tx_station"].uid,
             "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
-            "start_time": tx_slice_start_time,
-            "end_time": tx_slice_start_time + spec["exp_detail"]["slice_duration"],
-            "exp_num": np.full(state["tx_schedule_size"], spec["exp_detail"]["id"], dtype=np.int64),
-            "pointing": tx_pointing,
+            "start_time": tx_slice_start_time_masked,
+            "end_time": tx_slice_start_time_masked + spec["exp_detail"]["slice_duration"],
+            "exp_num": np.full(
+                (len(tx_slice_start_time_masked)), spec["exp_detail"]["id"], dtype=np.int64
+            ),
+            "pointing": tx_pointing_masked,
         },
         station=spec["tx_station"],
     )
 
+    # TODO: `rx_schedule_size` is a bit of a mismisnomer, as out-of-range entries might later be removed
     rx_slice_start_time = tx_slice_start_time.repeat(len(spec["scan_range"]))
     rx_schedule_size = state["tx_schedule_size"] * len(spec["scan_range"])
     rx_schedules: list[Schedule] = []
@@ -122,14 +135,21 @@ def generate_from_state(spec: Spec, state: State) -> Output:
             (rx_schedule_size + pointings_per_cycle - 1) // pointings_per_cycle,
         )[:, :rx_schedule_size]
 
+        # mask rx values by min_elevation requirement,
+        rx_mask = pointing_funcs.create_mask_by_min_elevation(rx_pointing, rx_station.min_elevation)
+        rx_slice_start_time_masked = rx_slice_start_time[rx_mask]
+        rx_pointing_masked = rx_pointing[:, rx_mask]
+
         rx_schedule = Schedule.from_ndarrays(
             data={
                 "stn_id": rx_station.uid,
                 "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
-                "start_time": rx_slice_start_time,
-                "end_time": rx_slice_start_time + spec["exp_detail"]["slice_duration"],
-                "exp_num": np.full(rx_schedule_size, spec["exp_detail"]["id"], dtype=np.int64),
-                "pointing": rx_pointing,
+                "start_time": rx_slice_start_time_masked,
+                "end_time": rx_slice_start_time_masked + spec["exp_detail"]["slice_duration"],
+                "exp_num": np.full(
+                    (len(rx_slice_start_time_masked)), spec["exp_detail"]["id"], dtype=np.int64
+                ),
+                "pointing": rx_pointing_masked,
             },
             station=rx_station,
         )
@@ -207,7 +227,8 @@ class FenceScanController:
                 azimuth=self.spec["azimuth"],
                 min_elevation=self.spec["min_elevation"],
                 pointings_per_cycle=self.spec["pointings_per_cycle"],
-            )
+            ),
+            degrees=True,
         )
 
         self.state = {
