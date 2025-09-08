@@ -103,42 +103,44 @@ def generate_from_state(spec: Spec, state: State) -> Output:
     rx_slice_start_time = tx_slice_start_time.repeat(len(spec["scan_range"]))
     rx_schedule_size = state["tx_schedule_size"] * len(spec["scan_range"])
     rx_schedules: list[Schedule] = []
-    tx_pointings_of_a_cycle_ecef: EcefCoordinates = enu_to_ecef(
+    tx_pointings_of_a_cycle_without_translation_ecef: EcefCoordinates = enu_to_ecef(
         lat=spec["tx_station"].ecef_lat,
         lon=spec["tx_station"].ecef_lon,
         alt=spec["tx_station"].ecef_alt,
         enu=state["tx_pointings_of_a_cycle"],
         degrees=True,
     )
-    rx_pointing_loc_of_a_cycle_ecef: EcefCoordinates = (
-        tx_pointings_of_a_cycle_ecef[:, :, np.newaxis]
+    rx_pointing_of_a_cycle_ecef: EcefCoordinates = (
+        tx_pointings_of_a_cycle_without_translation_ecef[:, :, np.newaxis]
         * spec["scan_range"][np.newaxis, np.newaxis, :]
         + spec["tx_station"].ecef[:, np.newaxis, np.newaxis]
     ).reshape((3, -1))
 
     for rx_station in spec["rx_stations"]:
-        rx_pointings_of_a_cycle_ecef: EcefCoordinates = (
-            rx_pointing_loc_of_a_cycle_ecef - rx_station.ecef[:, np.newaxis]
+        rx_pointings_of_a_cycle_without_translation_ecef: EcefCoordinates = (
+            rx_pointing_of_a_cycle_ecef - rx_station.ecef[:, np.newaxis]
         )
-        rx_pointings_of_a_cycle: EnuCoordinates = ecef_to_enu(
+        rx_pointings_of_a_cycle_enu: EnuCoordinates = ecef_to_enu(
             lat=rx_station.ecef_lat,
             lon=rx_station.ecef_lon,
             alt=rx_station.ecef_alt,
-            ecef=rx_pointings_of_a_cycle_ecef,
+            ecef=rx_pointings_of_a_cycle_without_translation_ecef,
             degrees=True,
         )
 
         # repeat a cycle of pointings until it is at least the size of `rx_schedule_size`
         # then trim to exactly `rx_schedule_size` long
-        rx_pointing: EnuCoordinates = np.tile(
-            rx_pointings_of_a_cycle,
+        rx_pointings_enu: EnuCoordinates = np.tile(
+            rx_pointings_of_a_cycle_enu,
             (rx_schedule_size + pointings_per_cycle - 1) // pointings_per_cycle,
         )[:, :rx_schedule_size]
 
         # mask rx values by min_elevation requirement,
-        rx_mask = pointing_funcs.create_mask_by_min_elevation(rx_pointing, rx_station.min_elevation)
+        rx_mask = pointing_funcs.create_mask_by_min_elevation(
+            rx_pointings_enu, rx_station.min_elevation
+        )
         rx_slice_start_time_masked = rx_slice_start_time[rx_mask]
-        rx_pointing_masked = rx_pointing[:, rx_mask]
+        rx_pointing_masked = rx_pointings_enu[:, rx_mask]
 
         rx_schedule = Schedule.from_ndarrays(
             data={
