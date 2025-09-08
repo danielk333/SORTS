@@ -156,8 +156,9 @@ class Schedule:
 
         return cls(data=resultant_sch_data, station=schs[0].station)
 
-    def __repr__(self):
-        return f"<sorts.Schedule> with data:\n{self._data.__repr__()}"
+    # TODO: commented out to avoid confusion; re-eval if we need it
+    # def __repr__(self):
+    #     return f"<sorts.Schedule> with data:\n{self._data.__repr__()}"
 
     def to_ndarrays(self) -> ScheduleNdarrayDict:
         arr_dict: ScheduleNdarrayDict = {
