@@ -5,6 +5,7 @@ also defines physical antennas for RX and TX.
 """
 
 import numpy as np
+from sorts.types import Float_as_deg
 
 import pyant
 
@@ -49,7 +50,7 @@ class Station(object):
         lat,
         lon,
         alt,
-        min_elevation,
+        min_elevation: Float_as_deg,
         beam,
         uid: StationId = "__DEFAULT_STN_ID__",
     ):
