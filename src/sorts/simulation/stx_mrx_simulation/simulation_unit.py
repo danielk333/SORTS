@@ -21,9 +21,11 @@ DataKey = t.Literal[
     "rx_simult_num",
     "gain_tx",
     "gain_rx",
-    "range_tx_m",
-    "range_rx_m",
     "snr",
+    "tx_range",
+    "rx_range",
+    "two_way_range",
+    "rx_range_rate",
 ]
 AttrKey = t.Literal["stn_id"]
 Key = t.Literal[DataKey, CoordKey, AttrKey]
@@ -44,9 +46,11 @@ class _K:
     rx_simult_num: t.Final = "rx_simult_num"
     gain_tx: t.Final = "gain_tx"
     gain_rx: t.Final = "gain_rx"
-    range_tx_m: t.Final = "range_tx_m"
-    range_rx_m: t.Final = "range_rx_m"
     snr: t.Final = "snr"
+    tx_range: t.Final = "tx_range"
+    rx_range: t.Final = "rx_range"
+    two_way_range: t.Final = "two_way_range"
+    rx_range_rate: t.Final = "rx_range_rate"
     stn_id: t.Final = "stn_id"
 
 
@@ -72,6 +76,10 @@ A xarray `Dataset` with:
       gain_tx        (time)
       gain_rx        (time)
       snr            (time)
+      tx_range       (time)
+      rx_range       (time)
+      two_way_range  (time)
+      rx_range_rate  (time)
   Attributes:
       stn_id:   str
   ```
@@ -229,5 +237,35 @@ class SimulationUnit:
             rx_noise_temp=rx_noise_temps,
             radar_albedo=self.space_object.parameters.get("radar_albedo", 1.0),
         )
-
         self._state_data[_K.snr] = (_K.time, snr)
+
+        self._state_data[_K.tx_range] = (
+            _K.time,
+            np.sum(
+                spobj_tx_enu[3:, :]
+                * (spobj_tx_enu[:3, :] / np.linalg.norm(spobj_tx_enu[:3, :], axis=0)),
+                axis=0,
+            ),
+        )
+
+        self._state_data[_K.rx_range] = (
+            _K.time,
+            np.sum(
+                spobj_rx_enu[3:, :]
+                * (spobj_rx_enu[:3, :] / np.linalg.norm(spobj_rx_enu[:3, :], axis=0)),
+                axis=0,
+            ),
+        )
+
+        self._state_data[_K.two_way_range] = (
+            self._state_data[_K.tx_range] + self._state_data[_K.rx_range]
+        )
+
+        self._state_data[_K.rx_range_rate] = (
+            _K.time,
+            np.sum(
+                spobj_rx_enu[3:, :]
+                * (spobj_rx_enu[:3, :] / np.linalg.norm(spobj_rx_enu[:3, :], axis=0)),
+                axis=0,
+            ),
+        )
