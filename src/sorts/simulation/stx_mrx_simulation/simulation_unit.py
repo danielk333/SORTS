@@ -174,38 +174,34 @@ class SimulationUnit:
     def simulate(self):
         """Run simulation calculation and update its state/data"""
 
-        size = len(self._state_data[_K.time])
+        epoch = to_datetime64_us(self.space_object.epoch)
+        dsec = (self._state_data[_K.time] - epoch).astype(np.float64) * 1e-6
+        spobj_states = self.space_object_interp.get_state(dsec)
+        spobj_tx_enu = self.tx_station.enu(spobj_states)
+        spobj_rx_enu = self.rx_station.enu(spobj_states)
 
-        self.epoch = to_datetime64_us(self.space_object.epoch)
-        self.dsec = (self._state_data[_K.time] - self.epoch).astype(np.float64) * 1e-6
-        self.spobj_states = self.space_object_interp.get_state(self.dsec)
-        self.spobj_tx_enu = self.tx_station.enu(self.spobj_states)
-        self.spobj_rx_enu = self.rx_station.enu(self.spobj_states)
+        range_tx: npt.NDArray[Float64_as_m] = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
+        range_rx: npt.NDArray[Float64_as_m] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
 
-        self.range_tx: npt.NDArray[Float64_as_m] = np.linalg.norm(self.spobj_tx_enu[:3, :], axis=0)
-        self.range_rx: npt.NDArray[Float64_as_m] = np.linalg.norm(self.spobj_rx_enu[:3, :], axis=0)
-
-        self.snr = np.empty((size,), dtype=np.float64)
-        self.powers = np.empty((size,), dtype=np.float64)
-
+        # TODO: can likely use assignment by slice/indexing instead of looping
         # TODO: do we need `pulse_lengths`?
         # TODO: do we need `ipps`?
         # TODO: do we need `duty_cycles`?
-        self.powers = np.array(
+        powers = np.array(
             [
                 self.tx_schedule._data.attrs[_SK.exp_detail_map][n]["power"]
                 for n in self._state_data[_K.exp_num].to_numpy()
             ],
             dtype=np.float64,
         )
-        self.bandwidths = np.array(
+        bandwidths = np.array(
             [
                 self.tx_schedule._data.attrs[_SK.exp_detail_map][n]["bandwidth"]
                 for n in self._state_data[_K.exp_num].to_numpy()
             ],
             dtype=np.float64,
         )
-        self.rx_noise_temps = np.array(
+        rx_noise_temps = np.array(
             [
                 self.rx_schedule._data.attrs[_SK.exp_detail_map][n]["noise_temp"]
                 for n in self._state_data[_K.exp_num].to_numpy()
@@ -217,20 +213,20 @@ class SimulationUnit:
             state_data=self._state_data,
             tx_stn=self.tx_station,
             rx_stn=self.rx_station,
-            spobj_tx_enu=self.spobj_tx_enu,
-            spobj_rx_enu=self.spobj_rx_enu,
+            spobj_tx_enu=spobj_tx_enu,
+            spobj_rx_enu=spobj_rx_enu,
         )
 
         snr = hard_target_snr(
             gain_tx=self._state_data[_K.gain_tx].to_numpy(),
             gain_rx=self._state_data[_K.gain_rx].to_numpy(),
             wavelength=self.tx_station.beam.wavelength,
-            power_tx=self.powers,
-            range_tx_m=self.range_tx,
-            range_rx_m=self.range_rx,
+            power_tx=powers,
+            range_tx_m=range_tx,
+            range_rx_m=range_rx,
             diameter=self.space_object.d,
-            bandwidth=self.bandwidths,
-            rx_noise_temp=self.rx_noise_temps,
+            bandwidth=bandwidths,
+            rx_noise_temp=rx_noise_temps,
             radar_albedo=self.space_object.parameters.get("radar_albedo", 1.0),
         )
 
