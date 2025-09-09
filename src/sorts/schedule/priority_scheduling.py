@@ -5,7 +5,7 @@ import pandas as pd
 import xarray as xr
 from sorts.utils import assert_class_attributes_equal_to
 from .types import _K
-from . import funcs
+from . import schedule_data_funcs
 
 if t.TYPE_CHECKING:
     from .schedule import ScheduleData
@@ -45,7 +45,7 @@ def data_to_dataframe(ds: ScheduleData):
         t.cast(
             list[pd.DataFrame],
             [
-                funcs.data_to_dataframe(ds),
+                schedule_data_funcs.to_dataframe(ds),
                 (
                     ds[_IK.allowed_start_time].transpose().to_pandas()
                     if _IK.allowed_start_time in ds
@@ -96,7 +96,7 @@ def priority_scheduling(
     min_datetime64_us = np.datetime64(np.iinfo(np.int64).min + 1, "us")
 
     # init an empty dataset for a schedule and add some columns, will be used store merged schedule
-    merged_sch_data = funcs.empty_data()
+    merged_sch_data = schedule_data_funcs.empty_data()
     if len(sch_datas) > 0:
         merged_sch_data.attrs = sch_datas[0].attrs
     merged_sch_data[_IK.allowed_start_time] = (
@@ -120,7 +120,9 @@ def priority_scheduling(
         # so the df will be in order of start_time, then priority after sorting
         # also note that attrs merged in the way that former schedule has higher priority than latter,
         # consistent with the func `priority_scheduling`
-        merged_sch_data.attrs = funcs.merge_attrs([sch_data.attrs, merged_sch_data.attrs])
+        merged_sch_data.attrs = schedule_data_funcs.merge_attrs(
+            [sch_data.attrs, merged_sch_data.attrs]
+        )
         merged_sch_data = xr.concat([merged_sch_data, sch_data], dim=_SK.start_time)
         merged_sch_data = merged_sch_data.sortby(_SK.start_time)
 

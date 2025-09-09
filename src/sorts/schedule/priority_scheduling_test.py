@@ -1,7 +1,6 @@
-import typing as t
 import numpy as np
 import xarray as xr
-from sorts import schedule
+from sorts.schedule import schedule_data_funcs
 from sorts.schedule import Schedule
 from sorts.schedule.priority_scheduling import priority_scheduling
 
@@ -20,7 +19,7 @@ def priority_scheduling_interleaved_schedule_test():
     _SK = Schedule._K
 
     # 30min long, 2hr intv
-    sch_data_a = schedule.funcs.data_from_ndarrays(
+    sch_data_a = schedule_data_funcs.from_ndarrays(
         {
             _SK.stn_id: "stn_a",
             _SK.exp_detail_map: {
@@ -53,7 +52,7 @@ def priority_scheduling_interleaved_schedule_test():
     )
 
     # 1hr long, 1hr intv
-    sch_data_b = schedule.funcs.data_from_ndarrays(
+    sch_data_b = schedule_data_funcs.from_ndarrays(
         {
             _SK.stn_id: "stn_b",
             _SK.exp_detail_map: {

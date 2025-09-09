@@ -7,7 +7,7 @@ import xarray as xr
 from sorts.types import Datetime64_us, TimeRange_us, Timedelta64_us, EnuCoordinates
 from sorts.radar import Station, StationId
 from .types import _K
-from . import funcs
+from . import schedule_data_funcs
 from .priority_scheduling import priority_scheduling
 
 
@@ -102,21 +102,21 @@ class Schedule:
 
     @classmethod
     def from_ndarrays(cls, data: ScheduleNdarrayDict, station: Station) -> t.Self:
-        sch_data = funcs.data_from_ndarrays(data)
+        sch_data = schedule_data_funcs.from_ndarrays(data)
         return cls(data=sch_data, station=station)
 
     @classmethod
     def empty(cls) -> t.Self:
         stn_id = f"__generated_by_{cls.empty.__name__}"
 
-        sch_data = funcs.empty_data()
+        sch_data = schedule_data_funcs.empty_data()
         sch_data.attrs[_K.stn_id] = stn_id
 
-        stn = funcs.default_station()
+        stn = schedule_data_funcs.default_station()
         stn.uid = stn_id
 
         return cls(
-            data=funcs.empty_data(),
+            data=schedule_data_funcs.empty_data(),
             station=stn,
         )
 
@@ -145,21 +145,21 @@ class Schedule:
     #     return f"<sorts.Schedule> with data:\n{self._data.__repr__()}"
 
     def to_ndarrays(self) -> ScheduleNdarrayDict:
-        arr_dict = funcs.data_to_ndarrays(self._data)
+        arr_dict = schedule_data_funcs.to_ndarrays(self._data)
         return arr_dict
 
     def to_dataframe(self) -> pd.DataFrame:
-        return funcs.data_to_dataframe(self._data)
+        return schedule_data_funcs.to_dataframe(self._data)
 
     def filter_by_time_range(self, time_range: TimeRange_us) -> t.Self:
         cls = type(self)
-        filtered_data = funcs.filter_by_time_range(self._data, time_range)
+        filtered_data = schedule_data_funcs.filter_by_time_range(self._data, time_range)
         return cls(data=filtered_data, station=self.station)
 
     # TODO: we can probably inject the schedule is tx or rx into `Schedule` class and remove param `is_split_simu`?
     # TODO: rename `is_split_simu` to `is_split_simult`
     def get_indexer_per_measurement(self, is_split_simu: bool) -> list[XrDataArrayIndexer]:
-        return funcs.get_indexer_per_measurement(self._data, is_split_simu)
+        return schedule_data_funcs.get_indexer_per_measurement(self._data, is_split_simu)
 
     def get_experiment_detail(self, exp_num: int) -> ExperimentDetail:
         return self._data.attrs[_K.exp_detail_map][exp_num]

@@ -1,9 +1,3 @@
-"""
-Functions for core functionalities of this subpackage
-
-- Intended to be imported as a whole module when consuming
-"""
-
 from __future__ import annotations
 import logging, typing as t
 import numpy as np
@@ -53,7 +47,7 @@ def empty_data() -> ScheduleData:
     return sch_data
 
 
-def data_from_ndarrays(data: ScheduleNdarrayDict) -> ScheduleData:
+def from_ndarrays(data: ScheduleNdarrayDict) -> ScheduleData:
     sch_data = xr.Dataset(
         coords={
             _K.start_time: data[_K.start_time],
@@ -74,7 +68,7 @@ def data_from_ndarrays(data: ScheduleNdarrayDict) -> ScheduleData:
     return sch_data
 
 
-def data_to_ndarrays(data: ScheduleData) -> ScheduleNdarrayDict:
+def to_ndarrays(data: ScheduleData) -> ScheduleNdarrayDict:
     arr_dict: ScheduleNdarrayDict = {
         _K.stn_id: data.attrs[_K.stn_id],
         _K.exp_detail_map: data.attrs[_K.exp_detail_map],
@@ -88,7 +82,7 @@ def data_to_ndarrays(data: ScheduleData) -> ScheduleNdarrayDict:
     return arr_dict
 
 
-def data_to_dataframe(ds: ScheduleData) -> pd.DataFrame:
+def to_dataframe(ds: ScheduleData) -> pd.DataFrame:
     df = pd.concat(
         t.cast(
             list[pd.DataFrame],
