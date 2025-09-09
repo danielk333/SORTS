@@ -131,6 +131,7 @@ def filter_by_time_range(ds: ScheduleData, time_range: TimeRange_us) -> Schedule
     return ds_masked
 
 
+# TODO: can probably be simplified, or even dissovled, now that we have `simult_num` in `ScheduleData`
 def get_indexer_per_measurement(ds: ScheduleData, is_split_simu: bool) -> list[xr.DataArray]:
     """
     Split a schedule data by measurements.
@@ -139,12 +140,12 @@ def get_indexer_per_measurement(ds: ScheduleData, is_split_simu: bool) -> list[x
     """
 
     # identify where `exp_num` changes
-    chg_pts = ds[_K.exp_num] != ds[_K.exp_num].shift({_K.start_time: 1})
-    split_ids = chg_pts.cumsum()
+    exp_num_chg_pts = ds[_K.exp_num] != ds[_K.exp_num].shift({_K.start_time: 1})
+    exp_num_split_ids = exp_num_chg_pts.cumsum()
 
     exp_detail_map: dict[int, ExperimentDetail] = ds.attrs[_K.exp_detail_map]
     idxers: list[xr.DataArray] = []
-    for _, ds_split in ds.groupby(split_ids):
+    for _, ds_split in ds.groupby(exp_num_split_ids):
         if is_split_simu:
             # further spliting according to number of simutaneous rx pointings
             simu_num = exp_detail_map[ds_split[_K.exp_num][0].item()].get(
@@ -153,8 +154,7 @@ def get_indexer_per_measurement(ds: ScheduleData, is_split_simu: bool) -> list[x
             for i in range(simu_num):
                 idxers.append(
                     xr.DataArray(
-                        # TODO: this will not work reliably, as we can have some simutaneous pointing within min_elevation while some don't
-                        (np.arange(len(ds_split[_K.start_time])) - i) % simu_num == 0,
+                        (ds_split[_K.simult_num] == i).to_numpy(),
                         dims=_K.start_time,
                     )
                 )

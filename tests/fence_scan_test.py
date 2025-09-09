@@ -3,9 +3,19 @@ We check against an imaginary circular orbit which
 - co-rotate with Earth
 - at 90deg inclination, 0 deg longitude
 - simulation start from the orbit's intersection with earth's equatorial plane, passing south hemisphere then north hemisphere
-"""
 
-# TODO: should add more description/explanation of the setup
+we use 2 rx station and 2 scan ranges in this setup:
+
+for scan ranges:
+- 1st range is a unrealistically low value for triggering masking effect due to min_elevation of station
+- 2nd range is a normal on that is close to `spobj_orbital_radius`
+
+for rx stations:
+- 1st one is the same as tx station, and therefore should have the exact same pointings as tx station
+- 2nd one is slightly offseted, with a small, non-zero min_elevation. It should produce 2 observations:
+  - 1st observation should be an empty observation for corresponding to the 1st scan range
+  - 2nd observation should points to the same location as the 2nd observation of the 1st station, with a bit of masking due to `min_elevation`
+"""
 
 import logging
 import numpy as np
@@ -46,8 +56,8 @@ control_slice_duration = np.timedelta64(1_000_000, "us")  # 1s
 
 dt_equality_thld = control_slice_duration
 dsec_sampling_intv: Float_as_sec = 30
-simu_num = 3
-scan_ranges = np.linspace(300e3, 1000e3, num=simu_num, dtype=np.float64)
+scan_ranges = np.array([10, 7e6], dtype=np.float64)
+simu_num = len(scan_ranges)
 
 _SK = Schedule._K
 _SuK = stx_mrx_simulation.simulation_unit._K
@@ -118,7 +128,7 @@ def south_to_north_circular_orbit_test():
         lat=1e-2,
         lon=0.0,
         alt=0.0,
-        min_elevation=30.0,
+        min_elevation=5.0,
         beam=IsotropicBeam(
             azimuth=0.0,
             elevation=0.0,
@@ -194,38 +204,39 @@ def south_to_north_circular_orbit_test():
             obs.get_schedule_slice().rx._data[_SK.end_time][-1] - expected_passage_end_time
         ) < np.timedelta64(int(dsec_sampling_intv), "s")
 
-    # assert that at every `start_time` of `obss[i+len(scan_ranges)]`, `obss[i+len(scan_ranges)]` and `obss[i]` points to the direction in ecef
-    for idx in range(len(scan_ranges)):
-        obs_i_sch_slice = obss[idx].get_schedule_slice()
-        obs_ip3_sch_slice = obss[idx + len(scan_ranges)].get_schedule_slice()
+    # assert that obss[2] is empty
+    assert len(obss[2].get_state_slice()[_SuK.time]) == 0
 
-        obs_3_pointings_in_ecef = (
-            enu_to_ecef(
-                lat=obs_ip3_sch_slice.rx.station.ecef_lat,
-                lon=obs_ip3_sch_slice.rx.station.ecef_lon,
-                alt=obs_ip3_sch_slice.rx.station.ecef_alt,
-                enu=obs_ip3_sch_slice.rx._data[_SK.pointing],
-                degrees=True,
-            )
-            + obs_ip3_sch_slice.rx.station.ecef[:, np.newaxis]
-        )
-        obs_0_pointings_at_obs_3_start_times_in_ecef = (
-            enu_to_ecef(
-                lat=obs_i_sch_slice.rx.station.ecef_lat,
-                lon=obs_i_sch_slice.rx.station.ecef_lon,
-                alt=obs_i_sch_slice.rx.station.ecef_alt,
-                enu=obs_i_sch_slice.rx._data.loc[
-                    {_SK.start_time: obs_ip3_sch_slice.rx._data["start_time"]}
-                ][_SK.pointing],
-                degrees=True,
-            )
-            + obs_i_sch_slice.rx.station.ecef[:, np.newaxis]
-        )
+    # assert that at all rx_pointing of `obss[3]` in ecef is the same as those with same `time` in `obss[1]`
+    obs_1_rx_station = obss[1].passage["rx_station"]
+    obs_1_state_slice = obss[1].get_state_slice()
+    obs_3_rx_station = obss[3].passage["rx_station"]
+    obs_3_state_slice = obss[3].get_state_slice()
 
-        # TODO: just added this test; it is working; cont from here
-        assert np.all(
-            (obs_3_pointings_in_ecef - obs_0_pointings_at_obs_3_start_times_in_ecef)
-            < pointing_range_equality_thld
+    obs_3_pointings_in_ecef = (
+        enu_to_ecef(
+            lat=obs_3_rx_station.ecef_lat,
+            lon=obs_3_rx_station.ecef_lon,
+            alt=obs_3_rx_station.ecef_alt,
+            enu=obs_3_state_slice[_SuK.rx_pointing],
+            degrees=True,
         )
+        + obs_3_rx_station.ecef[:, np.newaxis]
+    )
+    obs_0_pointings_at_obs_3_start_times_in_ecef = (
+        enu_to_ecef(
+            lat=obs_1_rx_station.ecef_lat,
+            lon=obs_1_rx_station.ecef_lon,
+            alt=obs_1_rx_station.ecef_alt,
+            enu=obs_1_state_slice.loc[{_SuK.time: obs_3_state_slice[_SuK.time]}][_SuK.rx_pointing],
+            degrees=True,
+        )
+        + obs_1_rx_station.ecef[:, np.newaxis]
+    )
+
+    assert np.all(
+        (obs_3_pointings_in_ecef - obs_0_pointings_at_obs_3_start_times_in_ecef)
+        < pointing_range_equality_thld
+    )
 
     return

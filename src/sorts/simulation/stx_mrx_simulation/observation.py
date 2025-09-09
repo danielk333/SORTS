@@ -45,7 +45,6 @@ class Observation:
 
         return TxRxTuple(tx=tx_sch_obs, rx=rx_sch_obs)
 
-    # TODO: add test?
     def get_state_slice(self) -> StateData:
         """Get the subset of `simulation_unit.StateData` data the corresponds to the the observation"""
 
