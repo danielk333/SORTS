@@ -170,7 +170,6 @@ class FenceScanController:
     """
 
     # TODO: the radar station computation capacity poses limit on the size of simutaneous `scan_range`, we should check/validate against it
-    # TODO: should take radar/station `azimuth_deg`, `elevation_deg` limitation into account?
 
     def __init__(self, spec: Spec, state: State | None):
         self.spec: Spec = spec

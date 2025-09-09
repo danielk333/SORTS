@@ -25,7 +25,8 @@ A xarray `Dataset` with:
   * enu           (enu) 'e' 'n' 'u'
   Data variables:
       pointing    (enu, start_time) float64
-      exp_num     (start_time) int64
+      exp_num     (start_time) int16
+      simutl_num  (start_time) int16
   Attributes:
       stn_id:          str
       exp_detail_map:  dict[int, ExperimentDetail]
@@ -68,8 +69,9 @@ class ScheduleNdarrayDict(t.TypedDict):
     start_time: npt.NDArray[Datetime64_us]
     end_time: npt.NDArray[Datetime64_us]
 
-    # TODO: re-eval the size of `exp_num`
-    exp_num: npt.NDArray[np.int64]
+    # TODO: re-eval the size of `exp_num`, `simult_num`
+    exp_num: npt.NDArray[np.uint16]
+    simult_num: npt.NDArray[np.int16]
 
     pointing: EnuCoordinates
 
@@ -100,22 +102,7 @@ class Schedule:
 
     @classmethod
     def from_ndarrays(cls, data: ScheduleNdarrayDict, station: Station) -> t.Self:
-        sch_data = xr.Dataset(
-            coords={
-                _K.start_time: data[_K.start_time],
-                _K.end_time: (_K.start_time, data[_K.end_time]),
-                _K.enu: [_K.e, _K.n, _K.u],
-            },
-            data_vars={
-                _K.pointing: ((_K.enu, _K.start_time), data[_K.pointing]),
-                _K.exp_num: (_K.start_time, data[_K.exp_num]),
-            },
-            attrs={
-                _K.stn_id: data[_K.stn_id],
-                _K.exp_detail_map: data[_K.exp_detail_map],
-            },
-        )
-
+        sch_data = funcs.data_from_ndarrays(data)
         return cls(data=sch_data, station=station)
 
     @classmethod
@@ -158,15 +145,7 @@ class Schedule:
     #     return f"<sorts.Schedule> with data:\n{self._data.__repr__()}"
 
     def to_ndarrays(self) -> ScheduleNdarrayDict:
-        arr_dict: ScheduleNdarrayDict = {
-            _K.stn_id: self._data.attrs[_K.stn_id],
-            _K.exp_detail_map: self._data.attrs[_K.exp_detail_map],
-            _K.start_time: self._data[_K.start_time].to_numpy(),
-            _K.end_time: self._data[_K.end_time].to_numpy(),
-            _K.exp_num: self._data[_K.exp_num].to_numpy(),
-            _K.pointing: self._data[_K.pointing].to_numpy(),
-        }
-
+        arr_dict = funcs.data_to_ndarrays(self._data)
         return arr_dict
 
     def to_dataframe(self) -> pd.DataFrame:

@@ -73,6 +73,20 @@ def data_from_ndarrays(data: ScheduleNdarrayDict) -> ScheduleData:
     return sch_data
 
 
+def data_to_ndarrays(data: ScheduleData) -> ScheduleNdarrayDict:
+    arr_dict: ScheduleNdarrayDict = {
+        _K.stn_id: data.attrs[_K.stn_id],
+        _K.exp_detail_map: data.attrs[_K.exp_detail_map],
+        _K.start_time: data[_K.start_time].to_numpy(),
+        _K.end_time: data[_K.end_time].to_numpy(),
+        _K.exp_num: data[_K.exp_num].to_numpy(),
+        _K.simult_num: data[_K.simult_num].to_numpy(),
+        _K.pointing: data[_K.pointing].to_numpy(),
+    }
+
+    return arr_dict
+
+
 def data_to_dataframe(ds: ScheduleData) -> pd.DataFrame:
     df = pd.concat(
         t.cast(
@@ -81,6 +95,7 @@ def data_to_dataframe(ds: ScheduleData) -> pd.DataFrame:
                 ds[_K.end_time].transpose().to_pandas(),
                 ds[_K.pointing].transpose().to_pandas(),
                 ds[_K.exp_num].transpose().to_pandas(),
+                ds[_K.simult_num].transpose().to_pandas(),
             ],
         ),
         axis=1,
