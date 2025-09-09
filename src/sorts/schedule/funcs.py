@@ -137,6 +137,7 @@ def get_indexer_per_measurement(ds: ScheduleData, is_split_simu: bool) -> list[x
             for i in range(simu_num):
                 idxers.append(
                     xr.DataArray(
+                        # TODO: this will not work reliably, as we can have some simutaneous pointing within min_elevation while some don't
                         (np.arange(len(ds_split[_K.start_time])) - i) % simu_num == 0,
                         dims=_K.start_time,
                     )

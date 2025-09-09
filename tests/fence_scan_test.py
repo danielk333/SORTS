@@ -15,6 +15,7 @@ from pyant import Beam
 import pyorb
 from sorts.types import Float64_as_sec, Float64_as_deg, Float_as_sec, Float_as_m
 from sorts.utils import to_datetime64_us
+from sorts.frames import enu_to_ecef
 from sorts.interpolation import Legendre8
 from sorts.propagator import Kepler
 from sorts.space_object import SpaceObject
@@ -99,7 +100,7 @@ def south_to_north_circular_orbit_test():
             else:
                 raise RuntimeError(f"unexpected shape of k: {k.shape}")
 
-    tx_rx_stn = Station(
+    tx_rx_0_stn = Station(
         lat=0.0,
         lon=0.0,
         alt=0.0,
@@ -112,26 +113,26 @@ def south_to_north_circular_orbit_test():
         uid="test_station, tx-rx, 0",
     )
 
-    # TODO: add some test for an offseted station?
-    # rx_stn = Station(
-    #     lat=1e-2,
-    #     lon=0.0,
-    #     alt=0.0,
-    #     min_elevation=0.0,
-    #     beam=IsotropicBeam(
-    #         azimuth=0.0,
-    #         elevation=0.0,
-    #         frequency=233e6,  # same as eisat_3d
-    #     ),
-    #     uid="test_station, rx, 0",
-    # )
+    # An offseted station for testing behaviours related to `min_elevation`
+    rx_1_stn = Station(
+        lat=1e-2,
+        lon=0.0,
+        alt=0.0,
+        min_elevation=30.0,
+        beam=IsotropicBeam(
+            azimuth=0.0,
+            elevation=0.0,
+            frequency=233e6,  # same as eisat_3d
+        ),
+        uid="test_station, rx, 1",
+    )
 
     def dsec_sampler(orbit, start_time, end_time):
         return np.arange(0, (end_time - start_time) / np.timedelta64(1, "s"), 30, dtype=np.float64)
 
     fence_scan_ctrl = FenceScanController.from_scan_spec(
-        tx_station=tx_rx_stn,
-        rx_stations=[tx_rx_stn],
+        tx_station=tx_rx_0_stn,
+        rx_stations=[tx_rx_0_stn, rx_1_stn],
         exp_detail={
             "id": 0,
             "coh_int_bandwidth": 1.0,
@@ -144,7 +145,7 @@ def south_to_north_circular_orbit_test():
             "slice_duration": control_slice_duration,
         },
         azimuth=90,  # sweep from east to west
-        min_elevation=70,
+        min_elevation=0,
         pointings_per_cycle=40,
         scan_range=scan_ranges,
     )
@@ -155,9 +156,9 @@ def south_to_north_circular_orbit_test():
 
     sim = StxMrxSimulation.from_spec(
         {
-            "tx_station": tx_rx_stn,
+            "tx_station": tx_rx_0_stn,
             "tx_schedule": fence_schs.tx_schedule,
-            "rx_stations": [tx_rx_stn],
+            "rx_stations": [tx_rx_0_stn, rx_1_stn],
             "rx_schedules": fence_schs.rx_schedules,
             "exp_detail_map": exp_detail_map,
             "epoch": start_time,
@@ -171,10 +172,11 @@ def south_to_north_circular_orbit_test():
 
     obss, sim_units = sim.run()
 
-    # assert there is 1 passage and `simu_num` number of observations
-    assert len(sim_units) == 1
+    # assert the number of `Passage`, `SimulationUnit` and `Observation` are expected
+    assert len(sim_units) == 2
     assert len(sim_units[0].passages) == 1
-    assert len(obss) == simu_num
+    assert len(sim_units[1].passages) == 1
+    assert len(obss) == simu_num * 2
 
     for obs, scan_range in zip(obss[0:3], scan_ranges):
         # assert that we are pointing at scan_ranges
@@ -191,5 +193,39 @@ def south_to_north_circular_orbit_test():
         assert abs(
             obs.get_schedule_slice().rx._data[_SK.end_time][-1] - expected_passage_end_time
         ) < np.timedelta64(int(dsec_sampling_intv), "s")
+
+    # assert that at every `start_time` of `obss[i+len(scan_ranges)]`, `obss[i+len(scan_ranges)]` and `obss[i]` points to the direction in ecef
+    for idx in range(len(scan_ranges)):
+        obs_i_sch_slice = obss[idx].get_schedule_slice()
+        obs_ip3_sch_slice = obss[idx + len(scan_ranges)].get_schedule_slice()
+
+        obs_3_pointings_in_ecef = (
+            enu_to_ecef(
+                lat=obs_ip3_sch_slice.rx.station.ecef_lat,
+                lon=obs_ip3_sch_slice.rx.station.ecef_lon,
+                alt=obs_ip3_sch_slice.rx.station.ecef_alt,
+                enu=obs_ip3_sch_slice.rx._data[_SK.pointing],
+                degrees=True,
+            )
+            + obs_ip3_sch_slice.rx.station.ecef[:, np.newaxis]
+        )
+        obs_0_pointings_at_obs_3_start_times_in_ecef = (
+            enu_to_ecef(
+                lat=obs_i_sch_slice.rx.station.ecef_lat,
+                lon=obs_i_sch_slice.rx.station.ecef_lon,
+                alt=obs_i_sch_slice.rx.station.ecef_alt,
+                enu=obs_i_sch_slice.rx._data.loc[
+                    {_SK.start_time: obs_ip3_sch_slice.rx._data["start_time"]}
+                ][_SK.pointing],
+                degrees=True,
+            )
+            + obs_i_sch_slice.rx.station.ecef[:, np.newaxis]
+        )
+
+        # TODO: just added this test; it is working; cont from here
+        assert np.all(
+            (obs_3_pointings_in_ecef - obs_0_pointings_at_obs_3_start_times_in_ecef)
+            < pointing_range_equality_thld
+        )
 
     return
