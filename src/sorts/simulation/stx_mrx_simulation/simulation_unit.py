@@ -155,7 +155,7 @@ class SimulationUnit:
                     rx_sch._data[_SK.pointing].loc[:, rx_time_mask].to_numpy(),
                 ),
                 _K.exp_num: (_K.time, tx_sch._data[_SK.exp_num].loc[time].to_numpy()),
-                _K.rx_simult_num: (_K.time, rx_sch._data[_SK.simult_num].loc[time].to_numpy()),
+                _K.rx_simult_num: (_K.time, rx_sch._data[_SK.simult_num][rx_time_mask].to_numpy()),
             },
             attrs={
                 _K.stn_id: tx_sch._data.attrs[_SK.stn_id],

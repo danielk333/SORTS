@@ -92,8 +92,9 @@ def generate_from_state(spec: Spec, state: State) -> Output:
             "start_time": tx_slice_start_time_masked,
             "end_time": tx_slice_start_time_masked + spec["exp_detail"]["slice_duration"],
             "exp_num": np.full(
-                (len(tx_slice_start_time_masked)), spec["exp_detail"]["id"], dtype=np.int64
+                (len(tx_slice_start_time_masked)), spec["exp_detail"]["id"], dtype=np.int16
             ),
+            "simult_num": np.full((len(tx_slice_start_time_masked)), 0, dtype=np.int16),
             "pointing": tx_pointing_masked,
         },
         station=spec["tx_station"],
@@ -134,6 +135,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
             rx_pointings_of_a_cycle_enu,
             (rx_schedule_size + pointings_per_cycle - 1) // pointings_per_cycle,
         )[:, :rx_schedule_size]
+        rx_pointings_simult_num = np.arange(rx_schedule_size) % len(spec["scan_range"])
 
         # mask rx values by min_elevation requirement,
         rx_mask = pointing_funcs.create_mask_by_min_elevation(
@@ -141,6 +143,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
         )
         rx_slice_start_time_masked = rx_slice_start_time[rx_mask]
         rx_pointing_masked = rx_pointings_enu[:, rx_mask]
+        rx_pointings_simult_num_masked = rx_pointings_simult_num[rx_mask]
 
         rx_schedule = Schedule.from_ndarrays(
             data={
@@ -149,8 +152,9 @@ def generate_from_state(spec: Spec, state: State) -> Output:
                 "start_time": rx_slice_start_time_masked,
                 "end_time": rx_slice_start_time_masked + spec["exp_detail"]["slice_duration"],
                 "exp_num": np.full(
-                    (len(rx_slice_start_time_masked)), spec["exp_detail"]["id"], dtype=np.int64
+                    (len(rx_slice_start_time_masked)), spec["exp_detail"]["id"], dtype=np.int16
                 ),
+                "simult_num": rx_pointings_simult_num_masked,
                 "pointing": rx_pointing_masked,
             },
             station=rx_station,
