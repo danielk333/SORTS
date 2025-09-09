@@ -18,6 +18,7 @@ DataKey = t.Literal[
     "tx_pointing",
     "rx_pointing",
     "exp_num",
+    "rx_simult_num",
     "gain_tx",
     "gain_rx",
     "range_tx_m",
@@ -28,6 +29,7 @@ AttrKey = t.Literal["stn_id"]
 Key = t.Literal[DataKey, CoordKey, AttrKey]
 
 
+# TODO: updated the name with tx/rx as suffix to prefix
 class _K:
     """Internal helper for accessing string keys consistently"""
 
@@ -39,6 +41,7 @@ class _K:
     tx_pointing: t.Final = "tx_pointing"
     rx_pointing: t.Final = "rx_pointing"
     exp_num: t.Final = "exp_num"
+    rx_simult_num: t.Final = "rx_simult_num"
     gain_tx: t.Final = "gain_tx"
     gain_rx: t.Final = "gain_rx"
     range_tx_m: t.Final = "range_tx_m"
@@ -65,6 +68,7 @@ A xarray `Dataset` with:
       tx_pointing  (enu, time)
       rx_pointing  (enu, time)
       exp_num      (time)
+      rx_simult_num   (time)
       gain_tx      (time)
       gain_rx      (time)
       snr          (time)
@@ -151,6 +155,7 @@ class SimulationUnit:
                     rx_sch._data[_SK.pointing].loc[:, rx_time_mask].to_numpy(),
                 ),
                 _K.exp_num: (_K.time, tx_sch._data[_SK.exp_num].loc[time].to_numpy()),
+                _K.rx_simult_num: (_K.time, rx_sch._data[_SK.simult_num].loc[time].to_numpy()),
             },
             attrs={
                 _K.stn_id: tx_sch._data.attrs[_SK.stn_id],
