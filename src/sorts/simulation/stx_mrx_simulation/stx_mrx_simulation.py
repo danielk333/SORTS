@@ -42,13 +42,6 @@ class StxMrxSimulation:
     def __init__(self, spec: Spec):
         self.spec: Spec = spec
 
-    # TODO: can be removed, it is the same as default constructor now
-    @classmethod
-    def from_spec(cls, spec: Spec) -> t.Self:
-        sim = cls(spec=spec)
-
-        return sim
-
     def run(self):
         logger.debug("starting stx mrx sim")
 

@@ -108,8 +108,8 @@ if Path(pickle_fpath).is_file():
         obss = sim.state["observations"]
         calc_time: float = saved_data["calc_time"]
 else:
-    sim = StxMrxSimulation.from_spec(
-        {
+    sim = StxMrxSimulation(
+        spec={
             "tx_station": tx_station,
             "tx_schedule": tx_schedule,
             "rx_stations": [rx_station],

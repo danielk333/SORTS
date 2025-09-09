@@ -168,8 +168,8 @@ pickle_fpath = (
     / f'{datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")}-{Path(__file__).name}.pickle'
 )
 
-sim = StxMrxSimulation.from_spec(
-    {
+sim = StxMrxSimulation(
+    spec={
         "tx_station": tx_station,
         "tx_schedule": tx_master_sch,
         "rx_stations": [rx_station_0, rx_station_1],
