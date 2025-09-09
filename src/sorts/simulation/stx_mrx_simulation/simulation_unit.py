@@ -60,18 +60,18 @@ StateData = t.NewType("StateData", xr.Dataset)
 """
 A xarray `Dataset` with:
   ```
-  Dimensions:      (enu: 3, time: 750)
+  Dimensions:        (enu: 3, time: 750)
   Coordinates:
-    * time         (time) datetime64[us]
-    * enu          (enu) <U2 24B 'az' 'el' 'r'
+    * time           (time) datetime64[us]
+    * enu            (enu) <U2 24B 'az' 'el' 'r'
   Data variables:
-      tx_pointing  (enu, time)
-      rx_pointing  (enu, time)
-      exp_num      (time)
-      rx_simult_num   (time)
-      gain_tx      (time)
-      gain_rx      (time)
-      snr          (time)
+      tx_pointing    (enu, time)
+      rx_pointing    (enu, time)
+      exp_num        (time)
+      rx_simult_num  (time)
+      gain_tx        (time)
+      gain_rx        (time)
+      snr            (time)
   Attributes:
       stn_id:   str
   ```

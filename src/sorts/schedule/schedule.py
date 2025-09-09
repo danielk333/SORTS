@@ -70,7 +70,7 @@ class ScheduleNdarrayDict(t.TypedDict):
     end_time: npt.NDArray[Datetime64_us]
 
     # TODO: re-eval the size of `exp_num`, `simult_num`
-    exp_num: npt.NDArray[np.uint16]
+    exp_num: npt.NDArray[np.int16]
     simult_num: npt.NDArray[np.int16]
 
     pointing: EnuCoordinates
