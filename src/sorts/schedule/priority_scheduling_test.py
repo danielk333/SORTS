@@ -22,8 +22,8 @@ def priority_scheduling_interleaved_schedule_test():
     # 30min long, 2hr intv
     sch_data_a = schedule.funcs.data_from_ndarrays(
         {
-            "stn_id": "stn_a",
-            "exp_detail_map": {
+            _SK.stn_id: "stn_a",
+            _SK.exp_detail_map: {
                 0: {
                     "id": 0,
                     "coh_int_bandwidth": 0,
@@ -36,26 +36,27 @@ def priority_scheduling_interleaved_schedule_test():
                     "slice_duration": np.timedelta64(3600, "s"),
                 }
             },
-            "start_time": np.arange(
+            _SK.start_time: np.arange(
                 np.datetime64("2025-01-01", "s"),
                 np.datetime64("2025-01-02", "s"),
                 np.timedelta64(3600 * 2, "s"),
             ),
-            "end_time": np.arange(
+            _SK.end_time: np.arange(
                 np.datetime64("2025-01-01 00:30:00", "s"),
                 np.datetime64("2025-01-02 00:00:01", "s"),
                 np.timedelta64(3600 * 2, "s"),
             ),
-            "exp_num": np.full(12, 0, dtype=np.int64),
-            "pointing": np.full((3, 12), 0.0, dtype=np.float64),
+            _SK.exp_num: np.full(12, 0, dtype=np.int16),
+            _SK.simult_num: np.full(12, 0, dtype=np.int16),
+            _SK.pointing: np.full((3, 12), 0.0, dtype=np.float64),
         },
     )
 
     # 1hr long, 1hr intv
     sch_data_b = schedule.funcs.data_from_ndarrays(
         {
-            "stn_id": "stn_b",
-            "exp_detail_map": {
+            _SK.stn_id: "stn_b",
+            _SK.exp_detail_map: {
                 1: {
                     "id": 1,
                     "coh_int_bandwidth": 0,
@@ -68,18 +69,19 @@ def priority_scheduling_interleaved_schedule_test():
                     "slice_duration": np.timedelta64(3600, "s"),
                 }
             },
-            "start_time": np.arange(
+            _SK.start_time: np.arange(
                 np.datetime64("2025-01-01", "s"),
                 np.datetime64("2025-01-02", "s"),
                 np.timedelta64(3600, "s"),
             ),
-            "end_time": np.arange(
+            _SK.end_time: np.arange(
                 np.datetime64("2025-01-01 01:00:00", "s"),
                 np.datetime64("2025-01-02 00:00:01", "s"),
                 np.timedelta64(3600, "s"),
             ),
-            "exp_num": np.full(24, 1, dtype=np.int64),
-            "pointing": np.full((3, 24), 1.0, dtype=np.float64),
+            _SK.exp_num: np.full(24, 1, dtype=np.int16),
+            _SK.simult_num: np.full(24, 0, dtype=np.int16),
+            _SK.pointing: np.full((3, 24), 1.0, dtype=np.float64),
         }
     )
 
