@@ -63,6 +63,7 @@ def data_from_ndarrays(data: ScheduleNdarrayDict) -> ScheduleData:
         data_vars={
             _K.pointing: ((_K.enu, _K.start_time), data[_K.pointing]),
             _K.exp_num: (_K.start_time, data[_K.exp_num]),
+            _K.simult_num: (_K.start_time, data[_K.simult_num]),
         },
         attrs={
             _K.stn_id: data[_K.stn_id],
