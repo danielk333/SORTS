@@ -23,9 +23,7 @@ class SpaceObjectDsecSampler(t.Protocol):
 class Spec(t.TypedDict):
     """A TypedDict of params"""
 
-    tx_station: Station
     tx_schedule: Schedule
-    rx_stations: t.Sequence[Station]
     rx_schedules: t.Sequence[Schedule]
     exp_detail_map: dict[int, ExperimentDetail]
     epoch: Datetime_Like

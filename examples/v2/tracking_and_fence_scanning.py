@@ -170,9 +170,7 @@ pickle_fpath = (
 
 sim = StxMrxSimulation(
     spec={
-        "tx_station": tx_station,
         "tx_schedule": tx_master_sch,
-        "rx_stations": [rx_station_0, rx_station_1],
         "rx_schedules": rx_master_schs,
         "exp_detail_map": exp_detail_map,
         "epoch": start_time,

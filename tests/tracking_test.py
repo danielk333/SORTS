@@ -142,9 +142,7 @@ def south_to_north_circular_orbit_test():
 
     sim = StxMrxSimulation(
         spec={
-            "tx_station": test_stn,
             "tx_schedule": tracker_schs.tx_schedule,
-            "rx_stations": [test_stn],
             "rx_schedules": tracker_schs.rx_schedules,
             "exp_detail_map": exp_detail_map,
             "epoch": start_time,

@@ -110,9 +110,7 @@ if Path(pickle_fpath).is_file():
 else:
     sim = StxMrxSimulation(
         spec={
-            "tx_station": tx_station,
             "tx_schedule": tx_schedule,
-            "rx_stations": [rx_station],
             "rx_schedules": rx_schedules,
             "exp_detail_map": exp_detail_map,
             "epoch": epoch,
