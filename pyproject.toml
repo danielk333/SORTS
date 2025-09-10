@@ -46,6 +46,7 @@ dependencies = [
     "pyvista>=0.45.2",
     "xarray>=2025.8.0",
     "bottleneck>=1.5.0",
+    "mpi4py>=4.1.0",
 ]
 
 [project.optional-dependencies]
