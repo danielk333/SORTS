@@ -239,23 +239,9 @@ class SimulationUnit:
         )
         self._state_data[_K.snr] = (_K.time, snr)
 
-        self._state_data[_K.tx_range] = (
-            _K.time,
-            np.sum(
-                spobj_tx_enu[3:, :]
-                * (spobj_tx_enu[:3, :] / np.linalg.norm(spobj_tx_enu[:3, :], axis=0)),
-                axis=0,
-            ),
-        )
+        self._state_data[_K.tx_range] = (_K.time, np.linalg.norm(spobj_tx_enu[:3, :], axis=0))
 
-        self._state_data[_K.rx_range] = (
-            _K.time,
-            np.sum(
-                spobj_rx_enu[3:, :]
-                * (spobj_rx_enu[:3, :] / np.linalg.norm(spobj_rx_enu[:3, :], axis=0)),
-                axis=0,
-            ),
-        )
+        self._state_data[_K.rx_range] = (_K.time, np.linalg.norm(spobj_rx_enu[:3, :], axis=0))
 
         self._state_data[_K.two_way_range] = (
             self._state_data[_K.tx_range] + self._state_data[_K.rx_range]
