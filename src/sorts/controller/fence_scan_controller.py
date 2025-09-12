@@ -78,7 +78,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
         (state["tx_schedule_size"] + pointings_per_cycle - 1) // pointings_per_cycle,
     )[:, : state["tx_schedule_size"]]
 
-    # mask tx values by min_elevation requirement,
+    # mask tx values by min_elevation requirement
     tx_mask = pointing_funcs.create_mask_by_min_elevation(
         tx_pointing, spec["tx_station"].min_elevation
     )
@@ -137,10 +137,12 @@ def generate_from_state(spec: Spec, state: State) -> Output:
         )[:, :rx_schedule_size]
         rx_pointings_simult_num = np.arange(rx_schedule_size) % len(spec["scan_range"])
 
-        # mask rx values by min_elevation requirement,
-        rx_mask = pointing_funcs.create_mask_by_min_elevation(
+        # mask rx values by min_elevation requirement, and has a corresponding tx value
+        rx_mask_by_min_elevation = pointing_funcs.create_mask_by_min_elevation(
             rx_pointings_enu, rx_station.min_elevation
         )
+        rx_mask_by_tx_mask = np.isin(rx_slice_start_time, tx_slice_start_time_masked)
+        rx_mask = np.logical_and(rx_mask_by_min_elevation, rx_mask_by_tx_mask)
         rx_slice_start_time_masked = rx_slice_start_time[rx_mask]
         rx_pointing_masked = rx_pointings_enu[:, rx_mask]
         rx_pointings_simult_num_masked = rx_pointings_simult_num[rx_mask]

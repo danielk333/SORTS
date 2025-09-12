@@ -133,12 +133,17 @@ def get_indexer_per_measurement(ds: ScheduleData, is_split_simu: bool) -> list[x
     i.e. By `exp_num` and optionally per each of the simutaneous pointings (controlled by `is_split_simu`)
     """
 
+    idxers: list[xr.DataArray] = []
+
+    # early return special case
+    if len(ds[_K.start_time]) == 0:
+        return idxers
+
     # identify where `exp_num` changes
     exp_num_chg_pts = ds[_K.exp_num] != ds[_K.exp_num].shift({_K.start_time: 1})
     exp_num_split_ids = exp_num_chg_pts.cumsum()
 
     exp_detail_map: dict[int, ExperimentDetail] = ds.attrs[_K.exp_detail_map]
-    idxers: list[xr.DataArray] = []
     for _, ds_split in ds.groupby(exp_num_split_ids):
         if is_split_simu:
             # further spliting according to number of simutaneous rx pointings

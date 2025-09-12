@@ -31,6 +31,8 @@ class Spec(t.TypedDict):
     end_time: Datetime_Like
     space_objects: t.Sequence[sorts.SpaceObject]
     dsec_sampler: SpaceObjectDsecSampler  # TODO: support different sampler for different obj?
+    # TODO: we need to implement falback mechanism,
+    #   e.g. a `Legendre8` `Interpolator` requires >=8 points, but sometime it might get less than that
     interpolator_class: type[Interpolator]
 
 
