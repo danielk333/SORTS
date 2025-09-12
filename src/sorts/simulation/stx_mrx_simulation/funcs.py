@@ -41,11 +41,15 @@ def sample_and_propagate_space_objects_states(
     """
 
     spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]] = []
-    for spobj in tqdm(spobjs, total=len(spobjs)):
+    for spobj in tqdm(spobjs, desc="sampling spobjs dt", total=len(spobjs)):
         spobjs_smpl_dsec.append(sampler(spobj.state, start_time, end_time))
 
     spobjs_smpl_states: list[EcefStates] = []
-    for spobj, spobj_smpl_dsec in tqdm(zip(spobjs, spobjs_smpl_dsec), total=len(spobjs)):
+    for spobj, spobj_smpl_dsec in tqdm(
+        zip(spobjs, spobjs_smpl_dsec),
+        desc="propagating spobjs states at sampled dt",
+        total=len(spobjs),
+    ):
         spobjs_smpl_states.append(spobj.get_state(spobj_smpl_dsec))
 
     return spobjs_smpl_dsec, spobjs_smpl_states
