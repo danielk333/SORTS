@@ -27,7 +27,7 @@ DataKey = t.Literal[
     "two_way_range",
     "rx_range_rate",
 ]
-AttrKey = t.Literal["stn_id"]
+AttrKey = t.Literal["tx_stn_id", "rx_stn_id"]
 Key = t.Literal[DataKey, CoordKey, AttrKey]
 
 
@@ -51,7 +51,8 @@ class _K:
     rx_range: t.Final = "rx_range"
     two_way_range: t.Final = "two_way_range"
     rx_range_rate: t.Final = "rx_range_rate"
-    stn_id: t.Final = "stn_id"
+    tx_stn_id: t.Final = "tx_stn_id"
+    rx_stn_id: t.Final = "rx_stn_id"
 
 
 assert_class_attributes_equal_to(_K, t.get_args(Key))
@@ -81,7 +82,8 @@ A xarray `Dataset` with:
       two_way_range  (time)
       rx_range_rate  (time)
   Attributes:
-      stn_id:   str
+      tx_stn_id:   str
+      rx_stn_id:   str
   ```
 """
 
@@ -166,7 +168,8 @@ class SimulationUnit:
                 _K.rx_simult_num: (_K.time, rx_sch._data[_SK.simult_num][rx_time_mask].to_numpy()),
             },
             attrs={
-                _K.stn_id: tx_sch._data.attrs[_SK.stn_id],
+                _K.tx_stn_id: tx_sch._data.attrs[_SK.stn_id],
+                _K.rx_stn_id: rx_sch._data.attrs[_SK.stn_id],
             },
         )
 
