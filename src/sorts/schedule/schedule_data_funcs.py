@@ -1,17 +1,101 @@
 from __future__ import annotations
 import logging, typing as t
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 import xarray as xr
-from sorts.types import TimeRange_us
-from sorts.radar import Station
-from .types import _K, AttrKey
-
-if t.TYPE_CHECKING:
-    from .schedule import ScheduleData, ExperimentDetail, ScheduleNdarrayDict
+from sorts.types import Datetime64_us, TimeRange_us, Timedelta64_us, EnuCoordinates
+from sorts.utils import assert_class_attributes_equal_to
+from sorts.radar import Station, StationId
 
 
 logger = logging.getLogger(__name__)
+
+
+DataKey = t.Literal["pointing", "exp_num", "simult_num"]
+CoordKey = t.Literal["start_time", "end_time", "enu", "e", "n", "u"]
+AttrKey = t.Literal["stn_id", "exp_detail_map"]
+Key = t.Literal[DataKey, CoordKey, AttrKey]
+
+
+class _K:
+    """Internal helper class for accessing string keys consistently"""
+
+    pointing: t.Final = "pointing"
+    exp_num: t.Final = "exp_num"
+    simult_num: t.Final = "simult_num"
+    start_time: t.Final = "start_time"
+    end_time: t.Final = "end_time"
+    enu: t.Final = "enu"
+    e: t.Final = "e"
+    n: t.Final = "n"
+    u: t.Final = "u"
+    stn_id: t.Final = "stn_id"
+    exp_detail_map: t.Final = "exp_detail_map"
+
+
+assert_class_attributes_equal_to(_K, t.get_args(Key))
+
+ScheduleData = xr.Dataset
+"""
+A xarray `Dataset` with:
+  ```
+  Dimensions:     (enu: 3, start_time: n)
+  Coordinates:
+  * start_time    (start_time) datetime64[us]
+      end_time    (start_time) datetime64[us]
+  * enu           (enu) 'e' 'n' 'u'
+  Data variables:
+      pointing    (enu, start_time) float64
+      exp_num     (start_time) int16
+      simult_num  (start_time) int16
+  Attributes:
+      stn_id:          str
+      exp_detail_map:  dict[int, ExperimentDetail]
+  ```
+"""
+
+
+class ExperimentDetail(t.TypedDict):
+    """A TypedDict of params"""
+
+    id: int
+
+    coh_int_bandwidth: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
+    ipp: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
+    pulse_length: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
+    power: float
+    bandwidth: float
+    duty_cycle: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
+    noise_temp: float
+
+    slice_duration: Timedelta64_us
+    "Duration of a control slice, in micro-second"
+
+    # TODO: this is a temp workaround to get multiple simutaneous rx pointings working
+    num_simutaneous_pointings: t.NotRequired[int]
+
+
+class ScheduleNdarrayDict(t.TypedDict):
+    """
+    A TypedDict, stores a collection of "control slices" (or "slices" in short).
+
+    - Slice data are stored as columns of fields, each of which is a `ndarray`.
+    - Metadata (`ExperimentDetail`s) are stored as a dict inside the `exp_detail_map` field.
+    """
+
+    stn_id: StationId
+
+    exp_detail_map: dict[int, ExperimentDetail]
+
+    start_time: npt.NDArray[Datetime64_us]
+    end_time: npt.NDArray[Datetime64_us]
+
+    # TODO: re-eval the size of `exp_num`, `simult_num`
+    exp_num: npt.NDArray[np.int16]
+    simult_num: npt.NDArray[np.int16]
+
+    pointing: EnuCoordinates
 
 
 # TODO: this helper should ideally be part of radar module/subpackage,

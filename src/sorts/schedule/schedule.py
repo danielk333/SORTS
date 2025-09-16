@@ -1,79 +1,15 @@
 from __future__ import annotations
 import logging, typing as t
-import numpy as np
-import numpy.typing as npt
 import pandas as pd
 import xarray as xr
-from sorts.types import Datetime64_us, TimeRange_us, Timedelta64_us, EnuCoordinates
-from sorts.radar import Station, StationId
-from .types import _K
+from sorts.types import TimeRange_us
+from sorts.radar import Station
 from . import schedule_data_funcs
+from .schedule_data_funcs import _K, ExperimentDetail, ScheduleNdarrayDict, ScheduleData
 from .priority_scheduling import priority_scheduling
 
 
 logger = logging.getLogger(__name__)
-
-
-ScheduleData = xr.Dataset
-"""
-A xarray `Dataset` with:
-  ```
-  Dimensions:     (enu: 3, start_time: n)
-  Coordinates:
-  * start_time    (start_time) datetime64[us]
-      end_time    (start_time) datetime64[us]
-  * enu           (enu) 'e' 'n' 'u'
-  Data variables:
-      pointing    (enu, start_time) float64
-      exp_num     (start_time) int16
-      simult_num  (start_time) int16
-  Attributes:
-      stn_id:          str
-      exp_detail_map:  dict[int, ExperimentDetail]
-  ```
-"""
-
-
-class ExperimentDetail(t.TypedDict):
-    """A TypedDict of params"""
-
-    id: int
-
-    coh_int_bandwidth: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-    ipp: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-    pulse_length: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-    power: float
-    bandwidth: float
-    duty_cycle: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-    noise_temp: float
-
-    slice_duration: Timedelta64_us
-    "Duration of a control slice, in micro-second"
-
-    # TODO: this is a temp workaround to get multiple simutaneous rx pointings working
-    num_simutaneous_pointings: t.NotRequired[int]
-
-
-class ScheduleNdarrayDict(t.TypedDict):
-    """
-    A TypedDict, stores a collection of "control slices" (or "slices" in short).
-
-    - Slice data are stored as columns of fields, each of which is a `ndarray`.
-    - Metadata (`ExperimentDetail`s) are stored as a dict inside the `exp_detail_map` field.
-    """
-
-    stn_id: StationId
-
-    exp_detail_map: dict[int, ExperimentDetail]
-
-    start_time: npt.NDArray[Datetime64_us]
-    end_time: npt.NDArray[Datetime64_us]
-
-    # TODO: re-eval the size of `exp_num`, `simult_num`
-    exp_num: npt.NDArray[np.int16]
-    simult_num: npt.NDArray[np.int16]
-
-    pointing: EnuCoordinates
 
 
 XrDataArrayIndexer = xr.DataArray
@@ -83,7 +19,7 @@ XrDataArrayIndexer = xr.DataArray
 # TODO: add schedule validation?
 class Schedule:
     """
-    Provides methods for manipuating the schedule data and enforce that the require columns/data are set.
+    Provides methods for manipuating schedule data and enforce that the required columns/data are set.
     Also contains some related metadata.
 
     Schedule data is stored in the private attribute `_data`,

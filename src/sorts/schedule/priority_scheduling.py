@@ -4,8 +4,8 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from sorts.utils import assert_class_attributes_equal_to
-from .types import _K
 from . import schedule_data_funcs
+from .schedule_data_funcs import _K
 
 if t.TYPE_CHECKING:
     from .schedule import ScheduleData
