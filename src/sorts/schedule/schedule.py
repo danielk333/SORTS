@@ -26,7 +26,7 @@ A xarray `Dataset` with:
   Data variables:
       pointing    (enu, start_time) float64
       exp_num     (start_time) int16
-      simutl_num  (start_time) int16
+      simult_num  (start_time) int16
   Attributes:
       stn_id:          str
       exp_detail_map:  dict[int, ExperimentDetail]
