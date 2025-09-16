@@ -87,14 +87,13 @@ class StxMrxSimulation:
 
         for sim_unit in sim_units:
             sim_unit.simulate()
+            self.obss.extend(funcs.derive_observations(sim_unit))
             pbar.update(1)
         logger.debug("simulation done")
 
         pbar.close()
 
-        obss = funcs.derive_observations(sim_units)
-
-        return obss, sim_units
+        return self.obss, sim_units
 
     def mpi_run(
         self, persistence_dir_path: str | Path
@@ -219,7 +218,7 @@ class StxMrxSimulation:
                 logger.info(f"worker: {r} | `SimulationUnit.simulate` start")
 
                 sim_unit.simulate()
-                # TODO: adj derive_observations for 1 `SimulationUnit`, or make new func
-                obss = funcs.derive_observations([sim_unit])
+                obss = funcs.derive_observations(sim_unit)
+
                 comm.send(obss, dest=master_proc_rank)
                 logger.info(f"worker: {r} | `SimulationUnit.simulate` done")

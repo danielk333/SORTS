@@ -74,25 +74,25 @@ def group_passages_by_tx_rx_station_pair(
     return groupped_passages
 
 
-def derive_observations(simulation_units: list[SimulationUnit]) -> list[Observation]:
+def derive_observations(sim_unit: SimulationUnit) -> list[Observation]:
     """Derive observations"""
 
     obss: list[Observation] = []
-    for sim_unit in simulation_units:
-        for passage in sim_unit.passages:
-            tx_obs_idxers = sim_unit.tx_schedule.filter_by_time_range(
-                passage["time_range"]
-            ).get_indexer_per_measurement(is_split_simult=False)
 
-            rx_obs_idxers = sim_unit.rx_schedule.filter_by_time_range(
-                passage["time_range"]
-            ).get_indexer_per_measurement(is_split_simult=True)
+    for passage in sim_unit.passages:
+        tx_obs_idxers = sim_unit.tx_schedule.filter_by_time_range(
+            passage["time_range"]
+        ).get_indexer_per_measurement(is_split_simult=False)
 
-            for tx_obs_idxer in tx_obs_idxers:
-                for rx_obs_idxer in rx_obs_idxers:
-                    indexer = ObservationIndexer(tx=tx_obs_idxer, rx=rx_obs_idxer)
-                    obs = Observation(passage=passage, indexer=indexer, simulation_unit=sim_unit)
-                    obss.append(obs)
+        rx_obs_idxers = sim_unit.rx_schedule.filter_by_time_range(
+            passage["time_range"]
+        ).get_indexer_per_measurement(is_split_simult=True)
+
+        for tx_obs_idxer in tx_obs_idxers:
+            for rx_obs_idxer in rx_obs_idxers:
+                indexer = ObservationIndexer(tx=tx_obs_idxer, rx=rx_obs_idxer)
+                obs = Observation(passage=passage, indexer=indexer, simulation_unit=sim_unit)
+                obss.append(obs)
 
     return obss
 
