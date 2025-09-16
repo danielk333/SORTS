@@ -126,11 +126,11 @@ def filter_by_time_range(ds: ScheduleData, time_range: TimeRange_us) -> Schedule
 
 
 # TODO: can probably be simplified, or even dissovled, now that we have `simult_num` in `ScheduleData`
-def get_indexer_per_measurement(ds: ScheduleData, is_split_simu: bool) -> list[xr.DataArray]:
+def get_indexer_per_measurement(ds: ScheduleData, is_split_simult: bool) -> list[xr.DataArray]:
     """
     Split a schedule data by measurements.
 
-    i.e. By `exp_num` and optionally per each of the simutaneous pointings (controlled by `is_split_simu`)
+    i.e. By `exp_num` and optionally per each of the simutaneous pointings (controlled by `is_split_simult`)
     """
 
     idxers: list[xr.DataArray] = []
@@ -145,7 +145,7 @@ def get_indexer_per_measurement(ds: ScheduleData, is_split_simu: bool) -> list[x
 
     exp_detail_map: dict[int, ExperimentDetail] = ds.attrs[_K.exp_detail_map]
     for _, ds_split in ds.groupby(exp_num_split_ids):
-        if is_split_simu:
+        if is_split_simult:
             # further spliting according to number of simutaneous rx pointings
             simu_num = exp_detail_map[ds_split[_K.exp_num][0].item()].get(
                 "num_simutaneous_pointings", 1

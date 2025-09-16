@@ -82,11 +82,11 @@ def derive_observations(simulation_units: list[SimulationUnit]) -> list[Observat
         for passage in sim_unit.passages:
             tx_obs_idxers = sim_unit.tx_schedule.filter_by_time_range(
                 passage["time_range"]
-            ).get_indexer_per_measurement(is_split_simu=False)
+            ).get_indexer_per_measurement(is_split_simult=False)
 
             rx_obs_idxers = sim_unit.rx_schedule.filter_by_time_range(
                 passage["time_range"]
-            ).get_indexer_per_measurement(is_split_simu=True)
+            ).get_indexer_per_measurement(is_split_simult=True)
 
             for tx_obs_idxer in tx_obs_idxers:
                 for rx_obs_idxer in rx_obs_idxers:

@@ -156,10 +156,9 @@ class Schedule:
         filtered_data = schedule_data_funcs.filter_by_time_range(self._data, time_range)
         return cls(data=filtered_data, station=self.station)
 
-    # TODO: we can probably inject the schedule is tx or rx into `Schedule` class and remove param `is_split_simu`?
-    # TODO: rename `is_split_simu` to `is_split_simult`
-    def get_indexer_per_measurement(self, is_split_simu: bool) -> list[XrDataArrayIndexer]:
-        return schedule_data_funcs.get_indexer_per_measurement(self._data, is_split_simu)
+    # TODO: we can probably inject the schedule is tx or rx into `Schedule` class and remove param `is_split_simult`?
+    def get_indexer_per_measurement(self, is_split_simult: bool) -> list[XrDataArrayIndexer]:
+        return schedule_data_funcs.get_indexer_per_measurement(self._data, is_split_simult)
 
     def get_experiment_detail(self, exp_num: int) -> ExperimentDetail:
         return self._data.attrs[_K.exp_detail_map][exp_num]
