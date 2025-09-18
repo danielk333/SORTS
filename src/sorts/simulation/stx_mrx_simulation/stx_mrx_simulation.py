@@ -161,6 +161,7 @@ class StxMrxSimulation:
 
                     idle_worker_idx = is_worker_idle_list.index(True)
                     idle_worker_rank = idle_worker_idx + 1
+                    # TODO: check if the  (full ScheduleData + indexer for SimulationUnit) or (just the relevant slices of ScheduleData) are sent
                     comm.send(sim_units[next_sim_unit_idx], dest=idle_worker_rank)
 
                     logger.debug(

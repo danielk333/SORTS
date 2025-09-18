@@ -12,9 +12,9 @@ for scan ranges:
 
 for rx stations:
 - 1st one is the same as tx station, and therefore should have the exact same pointings as tx station
-- 2nd one is slightly offseted, with a small, non-zero min_elevation. It should produce 2 observations:
-  - 1st observation should be an empty observation for corresponding to the 1st scan range
-  - 2nd observation should points to the same location as the 2nd observation of the 1st station, with a bit of masking due to `min_elevation`
+- 2nd one is slightly offseted, with a small, non-zero min_elevation. It should produce 1 observation:
+  - which points to the same location as the 2nd observation of the 1st station, with a bit of masking due to `min_elevation`
+  - no observation for the 1st scan range, beccause it is out of field-of-view/range
 """
 
 import logging
@@ -184,9 +184,9 @@ def south_to_north_circular_orbit_test():
     assert len(sim_units) == 2
     assert len(sim_units[0].passages) == 1
     assert len(sim_units[1].passages) == 1
-    assert len(obss) == simu_num * 2
+    assert len(obss) == 3
 
-    for obs, scan_range in zip(obss[0:3], scan_ranges):
+    for obs, scan_range in zip(obss, scan_ranges):
         # assert that we are pointing at scan_ranges
         # NOTE: this is based on the assumption that pointings at same direction but at different scan range
         #   are scheduled in in the same order as `scan_ranges`, and without gaps
@@ -202,14 +202,11 @@ def south_to_north_circular_orbit_test():
             obs.get_schedule_slice().rx._data[_SK.end_time][-1] - expected_passage_end_time
         ) < np.timedelta64(int(dsec_sampling_intv), "s")
 
-    # assert that obss[2] is empty
-    assert len(obss[2].get_state_slice()[_SuK.time]) == 0
-
-    # assert that at all rx_pointing of `obss[3]` in ecef is the same as those with same `time` in `obss[1]`
+    # assert that at all rx_pointing of `obss[2]` in ecef is the same as those with same `time` in `obss[1]`
     obs_1_rx_station = obss[1].passage["rx_station"]
     obs_1_state_slice = obss[1].get_state_slice()
-    obs_3_rx_station = obss[3].passage["rx_station"]
-    obs_3_state_slice = obss[3].get_state_slice()
+    obs_3_rx_station = obss[2].passage["rx_station"]
+    obs_3_state_slice = obss[2].get_state_slice()
 
     obs_3_pointings_in_ecef = (
         enu_to_ecef(

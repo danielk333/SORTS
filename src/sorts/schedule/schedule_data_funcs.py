@@ -223,7 +223,9 @@ def filter_by_time_range(ds: ScheduleData, time_range: TimeRange_us) -> Schedule
 
 
 # TODO: can probably be simplified, or even dissovled, now that we have `simult_num` in `ScheduleData`
-def get_indexer_per_measurement(ds: ScheduleData, is_split_simult: bool) -> list[xr.DataArray]:
+def get_indexer_per_measurement(
+    ds: ScheduleData, is_split_simult: bool, is_copy=False
+) -> list[xr.DataArray]:
     """
     Split a schedule data by measurements.
 
@@ -240,26 +242,16 @@ def get_indexer_per_measurement(ds: ScheduleData, is_split_simult: bool) -> list
     exp_num_chg_pts = ds[_K.exp_num] != ds[_K.exp_num].shift({_K.multi_index: 1})
     exp_num_split_ids = exp_num_chg_pts.cumsum()
 
-    exp_detail_map: dict[int, ExperimentDetail] = ds.attrs[_K.exp_detail_map]
     for _, ds_split in ds.groupby(exp_num_split_ids):
         if is_split_simult:
+            # TODO: can remove "num_simutaneous_pointings"?
             # further spliting according to number of simutaneous rx pointings
-            simu_num = exp_detail_map[ds_split[_K.exp_num][0].item()].get(
-                "num_simutaneous_pointings", 1
-            )
-            for i in range(simu_num):
-                idxers.append(
-                    xr.DataArray(
-                        (ds_split[_K.simult_num] == i).to_numpy(),
-                        dims=_K.multi_index,
-                    )
-                )
+            for simult_num in np.unique(ds_split[_K.simult_num].to_numpy()):
+                idxer = ds_split[_K.multi_index].loc[{_K.simult_num: simult_num}]
+                idxers.append(idxer if not is_copy else idxer.copy())
+
         else:
-            idxers.append(
-                xr.DataArray(
-                    np.full(len(ds_split[_K.start_time]), True, dtype=np.bool),
-                    dims=_K.multi_index,
-                )
-            )
+            idxer = ds_split[_K.multi_index]
+            idxers.append(idxer if not is_copy else idxer.copy())
 
     return idxers

@@ -93,8 +93,10 @@ class Schedule:
         return cls(data=filtered_data, station=self.station)
 
     # TODO: we can probably inject the schedule is tx or rx into `Schedule` class and remove param `is_split_simult`?
-    def get_indexer_per_measurement(self, is_split_simult: bool) -> list[XrDataArrayIndexer]:
-        return schedule_data_funcs.get_indexer_per_measurement(self._data, is_split_simult)
+    def get_indexer_per_measurement(
+        self, is_split_simult: bool, is_copy=False
+    ) -> list[XrDataArrayIndexer]:
+        return schedule_data_funcs.get_indexer_per_measurement(self._data, is_split_simult, is_copy)
 
     def get_experiment_detail(self, exp_num: int) -> ExperimentDetail:
         return self._data.attrs[_K.exp_detail_map][exp_num]
