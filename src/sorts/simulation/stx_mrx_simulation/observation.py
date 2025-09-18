@@ -37,10 +37,10 @@ class Observation:
         )
 
         tx_sch_obs = Schedule(
-            data=tx_sch_ps._data.loc[{_SK.start_time: self.indexer.tx}], station=tx_sch_ps.station
+            data=tx_sch_ps._data.loc[{_SK.multi_index: self.indexer.tx}], station=tx_sch_ps.station
         )
         rx_sch_obs = Schedule(
-            data=rx_sch_ps._data.loc[{_SK.start_time: self.indexer.rx}], station=rx_sch_ps.station
+            data=rx_sch_ps._data.loc[{_SK.multi_index: self.indexer.rx}], station=rx_sch_ps.station
         )
 
         return TxRxTuple(tx=tx_sch_obs, rx=rx_sch_obs)
@@ -58,8 +58,8 @@ class Observation:
             & (self.simulation_unit._state_data[_SuK.time] <= self.passage["time_range"][1])
         )
 
-        sim_state_slice = self.simulation_unit._state_data.loc[{_SuK.time: time_mask}].loc[
-            {_SuK.time: self.indexer.rx.to_numpy()}
+        sim_state_slice = self.simulation_unit._state_data.loc[{_SuK.multi_index: time_mask}].loc[
+            {_SuK.multi_index: self.indexer.rx.to_numpy()}
         ]
 
         return StateData(sim_state_slice)

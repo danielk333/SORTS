@@ -70,6 +70,8 @@ def data_to_dataframe(ds: ScheduleData):
     return df
 
 
+# TODO: go through the logic again, now that we have pandas MultiIndex backing the ScheduleData,
+#   it might be possible to similify the slicing/alike logic
 def priority_scheduling(
     sch_datas: t.Sequence[ScheduleData],
 ) -> ScheduleData:
@@ -100,20 +102,20 @@ def priority_scheduling(
     if len(sch_datas) > 0:
         merged_sch_data.attrs = sch_datas[0].attrs
     merged_sch_data[_IK.allowed_start_time] = (
-        _SK.start_time,
+        _SK.multi_index,
         np.empty(0, "datetime64[us]"),
     )
-    merged_sch_data[_IK.allowed_end_time] = (_SK.start_time, np.empty(0, "datetime64[us]"))
-    merged_sch_data[_IK.is_overlaped] = (_SK.start_time, np.empty(0, np.bool))
+    merged_sch_data[_IK.allowed_end_time] = (_SK.multi_index, np.empty(0, "datetime64[us]"))
+    merged_sch_data[_IK.is_overlaped] = (_SK.multi_index, np.empty(0, np.bool))
     for sch_data in sch_datas:
         # init `allowed_start_time`, `allowed_end_time`, `is_overlaped` fields in `sch_data`
         sch_data[_IK.allowed_start_time] = xr.full_like(
-            sch_data[_SK.start_time], np.datetime64("NaT"), dtype="datetime64[us]"
+            sch_data[_SK.multi_index], np.datetime64("NaT"), dtype="datetime64[us]"
         )
         sch_data[_IK.allowed_end_time] = xr.full_like(
-            sch_data[_SK.start_time], np.datetime64("NaT"), dtype="datetime64[us]"
+            sch_data[_SK.multi_index], np.datetime64("NaT"), dtype="datetime64[us]"
         )
-        sch_data[_IK.is_overlaped] = xr.full_like(sch_data[_SK.start_time], False, dtype=np.bool)
+        sch_data[_IK.is_overlaped] = xr.full_like(sch_data[_SK.multi_index], False, dtype=np.bool)
 
         # merge and then sort the schedule
         # we use a "stable" sorting algo to retains relative order,
@@ -123,34 +125,34 @@ def priority_scheduling(
         merged_sch_data.attrs = schedule_data_funcs.merge_attrs(
             [sch_data.attrs, merged_sch_data.attrs]
         )
-        merged_sch_data = xr.concat([merged_sch_data, sch_data], dim=_SK.start_time)
+        merged_sch_data = xr.concat([merged_sch_data, sch_data], dim=_SK.multi_index)
         merged_sch_data = merged_sch_data.sortby(_SK.start_time)
 
         # populate `allowed_start_time`, `allowed_end_time` columns entries that have NaT values
         # - the `end_time` of entries which have non-NaT `allowed_start_time` will be the `allowed_start_time` of its next and ffill rows
         # - the `start_time` of entries which have non-NaT `allowed_end_time` will be the `allowed_end_time` of its previous and bfill rows
         allowed_start_time_mask = ~xr.ufuncs.isnat(merged_sch_data[_IK.allowed_start_time]).shift(
-            {_SK.start_time: 1}, fill_value=False
+            {_SK.multi_index: 1}, fill_value=False
         )
         merged_sch_data[_IK.allowed_start_time].loc[allowed_start_time_mask] = (
             merged_sch_data[_SK.end_time]
-            .shift({_SK.start_time: 1}, fill_value=min_datetime64_us)
+            .shift({_SK.multi_index: 1}, fill_value=min_datetime64_us)
             .loc[allowed_start_time_mask]
         )
         merged_sch_data[_IK.allowed_start_time] = merged_sch_data[_IK.allowed_start_time].ffill(
-            _SK.start_time
+            _SK.multi_index
         )
 
         allowed_end_time_mask = ~xr.ufuncs.isnat(merged_sch_data[_IK.allowed_end_time]).shift(
-            {_SK.start_time: -1}, fill_value=False
+            {_SK.multi_index: -1}, fill_value=False
         )
         merged_sch_data[_IK.allowed_end_time].loc[allowed_end_time_mask] = (
             merged_sch_data[_SK.start_time]
-            .shift({_SK.start_time: -1}, fill_value=max_datetime64_us)
+            .shift({_SK.multi_index: -1}, fill_value=max_datetime64_us)
             .loc[allowed_end_time_mask]
         )
         merged_sch_data[_IK.allowed_end_time] = merged_sch_data[_IK.allowed_end_time].bfill(
-            _SK.start_time
+            _SK.multi_index
         )
 
         # TODO: the `ffill`, `bfill` plus `shift` with `fill_value` should have left no `NaT`, investigate why it is not
@@ -171,16 +173,16 @@ def priority_scheduling(
         merged_sch_data[_IK.is_overlaped] = (
             merged_sch_data[_SK.start_time] < merged_sch_data[_IK.allowed_start_time]
         ) | (merged_sch_data[_SK.end_time] > merged_sch_data[_IK.allowed_end_time])
-        merged_sch_data = merged_sch_data.loc[{_SK.start_time: ~merged_sch_data[_IK.is_overlaped]}]
+        merged_sch_data = merged_sch_data.loc[{_SK.multi_index: ~merged_sch_data[_IK.is_overlaped]}]
 
         # update `allowed_start_time`, `allowed_end_time` columns
         # - the `allowed_start_time` has the `end_time` of previous row
         # - the `allowed_end_time` has the `start_time` of next row
         merged_sch_data[_IK.allowed_start_time] = merged_sch_data[_SK.end_time].shift(
-            {_SK.start_time: 1}, fill_value=min_datetime64_us
+            {_SK.multi_index: 1}, fill_value=min_datetime64_us
         )
         merged_sch_data[_IK.allowed_end_time] = merged_sch_data[_SK.start_time].shift(
-            {_SK.start_time: -1}, fill_value=max_datetime64_us
+            {_SK.multi_index: -1}, fill_value=max_datetime64_us
         )
 
     merged_sch_data = merged_sch_data.drop_vars(

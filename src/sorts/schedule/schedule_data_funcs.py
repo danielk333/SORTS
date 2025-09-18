@@ -12,8 +12,8 @@ from sorts.radar import Station, StationId
 logger = logging.getLogger(__name__)
 
 
-DataKey = t.Literal["pointing", "exp_num", "simult_num"]
-CoordKey = t.Literal["start_time", "end_time", "enu", "e", "n", "u"]
+CoordKey = t.Literal["multi_index", "start_time", "exp_num", "simult_num", "enu", "e", "n", "u"]
+DataKey = t.Literal["end_time", "pointing"]
 AttrKey = t.Literal["stn_id", "exp_detail_map"]
 Key = t.Literal[DataKey, CoordKey, AttrKey]
 
@@ -21,15 +21,16 @@ Key = t.Literal[DataKey, CoordKey, AttrKey]
 class _K:
     """Internal helper class for accessing string keys consistently"""
 
-    pointing: t.Final = "pointing"
+    multi_index: t.Final = "multi_index"
+    start_time: t.Final = "start_time"
     exp_num: t.Final = "exp_num"
     simult_num: t.Final = "simult_num"
-    start_time: t.Final = "start_time"
-    end_time: t.Final = "end_time"
     enu: t.Final = "enu"
     e: t.Final = "e"
     n: t.Final = "n"
     u: t.Final = "u"
+    end_time: t.Final = "end_time"
+    pointing: t.Final = "pointing"
     stn_id: t.Final = "stn_id"
     exp_detail_map: t.Final = "exp_detail_map"
 
@@ -38,17 +39,18 @@ assert_class_attributes_equal_to(_K, t.get_args(Key))
 
 ScheduleData = xr.Dataset
 """
-A xarray `Dataset` with:
+A xarray `Dataset` of:
   ```
-  Dimensions:     (enu: 3, start_time: n)
+  Dimensions:      (multi_index: n, enu: 3)
   Coordinates:
-  * start_time    (start_time) datetime64[us]
-      end_time    (start_time) datetime64[us]
-  * enu           (enu) 'e' 'n' 'u'
+    * multi_index  (multi_index) object MultiIndex
+    * start_time   (multi_index) datetime64[us]
+    * exp_num      (multi_index) int16
+    * simult_num   (multi_index) int16
+    * enu          (enu) 'e' 'n' 'u'
   Data variables:
-      pointing    (enu, start_time) float64
-      exp_num     (start_time) int16
-      simult_num  (start_time) int16
+      end_time     (multi_index) datetime64[us]
+      pointing     (enu, multi_index) float64
   Attributes:
       stn_id:          str
       exp_detail_map:  dict[int, ExperimentDetail]
@@ -112,15 +114,23 @@ def default_station():
 
 
 def empty_data() -> ScheduleData:
+    multi_index = pd.MultiIndex.from_arrays(
+        [
+            np.empty(0, dtype="datetime64[us]"),
+            np.empty(0, dtype=np.int16),
+            np.empty(0, dtype=np.int16),
+        ],
+        names=(_K.start_time, _K.exp_num, _K.simult_num),
+    )
+
     sch_data = xr.Dataset(
         coords={
-            _K.start_time: np.empty(0, dtype="datetime64[us]"),
-            _K.end_time: (_K.start_time, np.empty(0, dtype="datetime64[us]")),
+            _K.multi_index: multi_index,
             _K.enu: [_K.e, _K.n, _K.u],
         },
         data_vars={
-            _K.pointing: ((_K.enu, _K.start_time), np.empty((3, 0), dtype=np.float64)),
-            _K.exp_num: (_K.start_time, np.empty(0, dtype=np.int64)),
+            _K.end_time: (_K.multi_index, np.empty(0, dtype="datetime64[us]")),
+            _K.pointing: ((_K.enu, _K.multi_index), np.empty((3, 0), dtype=np.float64)),
         },
         attrs={
             _K.stn_id: f"__generated_by_{empty_data.__name__}",
@@ -132,16 +142,19 @@ def empty_data() -> ScheduleData:
 
 
 def from_ndarrays(data: ScheduleNdarrayDict) -> ScheduleData:
+    multi_index = pd.MultiIndex.from_arrays(
+        [data[_K.start_time], data[_K.exp_num], data[_K.simult_num]],
+        names=(_K.start_time, _K.exp_num, _K.simult_num),
+    )
+
     sch_data = xr.Dataset(
         coords={
-            _K.start_time: data[_K.start_time],
-            _K.end_time: (_K.start_time, data[_K.end_time]),
+            _K.multi_index: multi_index,
             _K.enu: [_K.e, _K.n, _K.u],
         },
         data_vars={
-            _K.pointing: ((_K.enu, _K.start_time), data[_K.pointing]),
-            _K.exp_num: (_K.start_time, data[_K.exp_num]),
-            _K.simult_num: (_K.start_time, data[_K.simult_num]),
+            _K.end_time: (_K.multi_index, data[_K.end_time]),
+            _K.pointing: ((_K.enu, _K.multi_index), data[_K.pointing]),
         },
         attrs={
             _K.stn_id: data[_K.stn_id],
@@ -204,7 +217,7 @@ def merge_attrs(attrs_dicts: list[dict[AttrKey, t.Any]]) -> dict:
 def filter_by_time_range(ds: ScheduleData, time_range: TimeRange_us) -> ScheduleData:
     mask = (ds[_K.start_time] >= time_range[0]) & (ds[_K.end_time] <= time_range[1])
 
-    ds_masked = ds[{_K.start_time: mask}]
+    ds_masked = ds[{_K.multi_index: mask}]
 
     return ds_masked
 
@@ -220,11 +233,11 @@ def get_indexer_per_measurement(ds: ScheduleData, is_split_simult: bool) -> list
     idxers: list[xr.DataArray] = []
 
     # early return special case
-    if len(ds[_K.start_time]) == 0:
+    if len(ds[_K.multi_index]) == 0:
         return idxers
 
     # identify where `exp_num` changes
-    exp_num_chg_pts = ds[_K.exp_num] != ds[_K.exp_num].shift({_K.start_time: 1})
+    exp_num_chg_pts = ds[_K.exp_num] != ds[_K.exp_num].shift({_K.multi_index: 1})
     exp_num_split_ids = exp_num_chg_pts.cumsum()
 
     exp_detail_map: dict[int, ExperimentDetail] = ds.attrs[_K.exp_detail_map]
@@ -238,14 +251,14 @@ def get_indexer_per_measurement(ds: ScheduleData, is_split_simult: bool) -> list
                 idxers.append(
                     xr.DataArray(
                         (ds_split[_K.simult_num] == i).to_numpy(),
-                        dims=_K.start_time,
+                        dims=_K.multi_index,
                     )
                 )
         else:
             idxers.append(
                 xr.DataArray(
                     np.full(len(ds_split[_K.start_time]), True, dtype=np.bool),
-                    dims=_K.start_time,
+                    dims=_K.multi_index,
                 )
             )
 

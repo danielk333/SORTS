@@ -226,7 +226,9 @@ def south_to_north_circular_orbit_test():
             lat=obs_1_rx_station.ecef_lat,
             lon=obs_1_rx_station.ecef_lon,
             alt=obs_1_rx_station.ecef_alt,
-            enu=obs_1_state_slice.loc[{_SuK.time: obs_3_state_slice[_SuK.time]}][_SuK.rx_pointing],
+            enu=obs_1_state_slice.loc[{_SuK.multi_index: obs_3_state_slice[_SuK.multi_index]}][
+                _SuK.rx_pointing
+            ],
             degrees=True,
         )
         + obs_1_rx_station.ecef[:, np.newaxis]
