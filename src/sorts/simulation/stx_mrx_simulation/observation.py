@@ -29,18 +29,14 @@ class Observation:
     def get_schedule_slice(self) -> TxRxTuple[Schedule, Schedule]:
         """Returns subset of schedules, in `(tx_scheule, tx_schedule` that corresponds to the observation"""
 
-        tx_sch_ps = self.simulation_unit.tx_schedule.filter_by_time_range(
-            self.passage["time_range"]
-        )
-        rx_sch_ps = self.simulation_unit.rx_schedule.filter_by_time_range(
-            self.passage["time_range"]
-        )
+        tx_sch = self.simulation_unit.tx_schedule
+        rx_sch = self.simulation_unit.rx_schedule
 
         tx_sch_obs = Schedule(
-            data=tx_sch_ps._data.loc[{_SK.multi_index: self.indexer.tx}], station=tx_sch_ps.station
+            data=tx_sch._data.loc[{_SK.multi_index: self.indexer.tx}], station=tx_sch.station
         )
         rx_sch_obs = Schedule(
-            data=rx_sch_ps._data.loc[{_SK.multi_index: self.indexer.rx}], station=rx_sch_ps.station
+            data=rx_sch._data.loc[{_SK.multi_index: self.indexer.rx}], station=rx_sch.station
         )
 
         return TxRxTuple(tx=tx_sch_obs, rx=rx_sch_obs)
@@ -48,18 +44,11 @@ class Observation:
     def get_state_slice(self) -> StateData:
         """Get the subset of `simulation_unit.StateData` data the corresponds to the the observation"""
 
-        # TODO: a more robust way is preferred.
-        #   right now it works by assuming the simulation_unit consist of non-overlapping passages,
-        #   and thus indexer over a schedule filtered by a passage
-        #   will also work on simulation unit data filtered by the same passage
-        time_mask = (
-            # __forcing_line_break__
-            (self.simulation_unit._state_data[_SuK.time] >= self.passage["time_range"][0])
-            & (self.simulation_unit._state_data[_SuK.time] <= self.passage["time_range"][1])
-        )
-
-        sim_state_slice = self.simulation_unit._state_data.loc[{_SuK.multi_index: time_mask}].loc[
-            {_SuK.multi_index: self.indexer.rx.to_numpy()}
+        # TODO: maybe a mutating the index label is here is better than `.to_numpy().tolist()`?
+        # NOTE: `_state_data`'s `multi_index` has different label than `ScheduleData`'s `multi_index`
+        #   but content-wise they are the same thing, so `self.indexer.rx.to_numpy().tolist()` is used a shortcut here
+        sim_state_slice = self.simulation_unit._state_data.loc[
+            {_SuK.multi_index: self.indexer.rx.to_numpy().tolist()}
         ]
 
         return StateData(sim_state_slice)
