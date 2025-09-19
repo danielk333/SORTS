@@ -21,6 +21,7 @@ from .observation import ObservationIndexer, Observation
 
 if t.TYPE_CHECKING:
     from .simulation_unit import StateData
+    from .simulation_unit import FromPassagesOverTxRxStationPairParam
     from .stx_mrx_simulation import Spec, SpaceObjectDsecSampler
 
 
@@ -139,12 +140,18 @@ def find_passages(
 # TODO: minor cleanup needed
 #   - `enumerate` to get space_objects by `idx` can likely be simplified, with small adj in params/props
 #   - the loops might be simplified a bit as well
-def derive_simulation_units(
+def derive_simulation_unit_params(
     spec: Spec,
     passages_lists: list[list[Passage]],
     spobjs_interpolators: list[Interpolator],
-) -> list[SimulationUnit]:
-    sim_units: list[SimulationUnit] = []
+) -> list[FromPassagesOverTxRxStationPairParam]:
+    """
+    Derive a list of param for the `from_passages_over_tx_rx_station_pair` constructor of `SimulationUnit`
+
+    NOTE: Integers (casted to `str`) are used as `SimulationUnit`s' id
+    """
+
+    params: list[FromPassagesOverTxRxStationPairParam] = []
 
     for idx, (passages_of_a_spobj, spobj_states_interp) in enumerate(
         zip(passages_lists, spobjs_interpolators)
@@ -154,16 +161,18 @@ def derive_simulation_units(
         for stn_id_pair, passages in groupped_passages.items():
             rx_stn_idx = [sch.station.uid for sch in spec["rx_schedules"]].index(stn_id_pair[1])
 
-            sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(
-                passages=passages,
-                spobj=spec["space_objects"][idx],
-                spobj_interp=spobj_states_interp,
-                tx_sch=spec["tx_schedule"],
-                rx_sch=spec["rx_schedules"][rx_stn_idx],
+            params.append(
+                {
+                    "id": str(len(params)),
+                    "passages": passages,
+                    "spobj": spec["space_objects"][idx],
+                    "spobj_interp": spobj_states_interp,
+                    "tx_sch": spec["tx_schedule"],
+                    "rx_sch": spec["rx_schedules"][rx_stn_idx],
+                }
             )
-            sim_units.append(sim_unit)
 
-    return sim_units
+    return params
 
 
 def calc_gain(

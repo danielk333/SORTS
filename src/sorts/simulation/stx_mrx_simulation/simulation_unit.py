@@ -90,6 +90,16 @@ A xarray `Dataset` with:
 """
 
 
+# TODO: better naming
+class FromPassagesOverTxRxStationPairParam(t.TypedDict):
+    id: str
+    passages: list[Passage]
+    spobj: SpaceObject
+    spobj_interp: Interpolator
+    tx_sch: Schedule
+    rx_sch: Schedule
+
+
 class SimulationUnit:
     """
     Contains all the params and results for a unit of simulation calculation.
@@ -106,6 +116,7 @@ class SimulationUnit:
 
     def __init__(
         self,
+        id: str,
         spobj: SpaceObject,
         spobj_interp: Interpolator,
         passages: list[Passage],
@@ -113,6 +124,8 @@ class SimulationUnit:
         rx_sch: Schedule,
         state_data: StateData,
     ):
+        self.id = id
+
         self._state_data = state_data
 
         self.space_object = spobj
@@ -128,13 +141,15 @@ class SimulationUnit:
     # TODO: can derive the indexers inside this method instead of as param, now that we take passages as param
     @classmethod
     def from_passages_over_tx_rx_station_pair(
-        cls,
-        passages: list[Passage],
-        spobj: SpaceObject,
-        spobj_interp: Interpolator,
-        tx_sch: Schedule,
-        rx_sch: Schedule,
+        cls, **kwargs: t.Unpack[FromPassagesOverTxRxStationPairParam]
     ) -> t.Self:
+        id = kwargs["id"]
+        passages = kwargs["passages"]
+        spobj = kwargs["spobj"]
+        spobj_interp = kwargs["spobj_interp"]
+        tx_sch = kwargs["tx_sch"]
+        rx_sch = kwargs["rx_sch"]
+
         if len(passages) == 0:
             # TODO: return en empty instance would be better
             raise NotImplementedError()
@@ -192,6 +207,7 @@ class SimulationUnit:
         )
 
         return cls(
+            id=id,
             spobj=spobj,
             spobj_interp=spobj_interp,
             passages=passages,

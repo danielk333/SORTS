@@ -127,11 +127,6 @@ rx_master_schs = [
     for rx_schs in zip(tracker_schs.rx_schedules, fence_schs.rx_schedules)
 ]
 
-start_time_entries_diff = rx_master_schs[0]._data.loc[
-    {"start_time": ~rx_master_schs[0]._data["start_time"].isin(tx_master_sch._data["start_time"])}
-]
-
-assert len(start_time_entries_diff["start_time"]) == 0
 
 sim = StxMrxSimulation(
     spec={

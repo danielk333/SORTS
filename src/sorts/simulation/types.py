@@ -11,13 +11,11 @@ from sorts.radar import Station
 from sorts.space_object import SpaceObject
 
 
+# TODO: replace objects like `SpaceObject`, `Station` by ids?
 class Passage(t.TypedDict):
     """
     A TypedDict of params. Represent a passage of a space object over the field of view of a TX-RX radar station pair.
     """
-
-    # id: int # TODO: revisit if this is needed
-    # TODO: add ENU and/or ECEF states?
 
     space_object: SpaceObject
     tx_station: Station
