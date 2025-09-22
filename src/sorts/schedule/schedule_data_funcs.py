@@ -125,7 +125,7 @@ def empty_data() -> ScheduleData:
 
     sch_data = xr.Dataset(
         coords={
-            _K.multi_index: multi_index,
+            **xr.Coordinates.from_pandas_multiindex(multi_index, _K.multi_index),
             _K.enu: [_K.e, _K.n, _K.u],
         },
         data_vars={
@@ -149,7 +149,7 @@ def from_ndarrays(data: ScheduleNdarrayDict) -> ScheduleData:
 
     sch_data = xr.Dataset(
         coords={
-            _K.multi_index: multi_index,
+            **xr.Coordinates.from_pandas_multiindex(multi_index, _K.multi_index),
             _K.enu: [_K.e, _K.n, _K.u],
         },
         data_vars={
