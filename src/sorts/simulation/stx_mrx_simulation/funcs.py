@@ -13,6 +13,7 @@ from tqdm import tqdm
 from sorts.interpolation import Interpolator
 from sorts.radar import Station, StationId
 from sorts.types import Float64_as_sec, EcefStates, Datetime64_us, EnuCoordinates
+from sorts.schedule import Schedule
 from sorts.simulation.types import Passage
 from sorts.simulation import funcs
 from .simulation_unit import SimulationUnit
@@ -75,24 +76,32 @@ def group_passages_by_tx_rx_station_pair(
     return groupped_passages
 
 
-def derive_observations(sim_unit: SimulationUnit) -> list[Observation]:
+def derive_observations(
+    passages: list[Passage], tx_schedule: Schedule, rx_schedule: Schedule, sim_unit: SimulationUnit
+) -> list[Observation]:
     """Derive observations"""
 
     obss: list[Observation] = []
 
-    for passage in sim_unit.passages:
-        tx_obs_idxers = sim_unit.tx_schedule.filter_by_time_range(
+    for passage in passages:
+        tx_obs_idxers = tx_schedule.filter_by_time_range(
             passage["time_range"]
         ).get_indexer_per_measurement(is_split_simult=False, is_copy=True)
 
-        rx_obs_idxers = sim_unit.rx_schedule.filter_by_time_range(
+        rx_obs_idxers = rx_schedule.filter_by_time_range(
             passage["time_range"]
         ).get_indexer_per_measurement(is_split_simult=True, is_copy=True)
 
         for tx_obs_idxer in tx_obs_idxers:
             for rx_obs_idxer in rx_obs_idxers:
                 indexer = ObservationIndexer(tx=tx_obs_idxer, rx=rx_obs_idxer)
-                obs = Observation(passage=passage, indexer=indexer, simulation_unit=sim_unit)
+                obs = Observation(
+                    passage=passage,
+                    indexer=indexer,
+                    simulation_unit=sim_unit,
+                    tx_schedule=tx_schedule,
+                    rx_schedule=rx_schedule,
+                )
                 obss.append(obs)
 
     return obss

@@ -8,9 +8,10 @@ import xarray as xr
 from sorts.utils import assert_class_attributes_equal_to, to_datetime64_us
 from sorts.types import Float64_as_m
 from sorts.space_object import SpaceObject
+from sorts.radar import Station
 from sorts.signals import hard_target_snr
 from sorts.interpolation import Interpolator
-from sorts.schedule import Schedule
+from sorts.schedule import ExperimentDetailMap, Schedule
 from sorts.simulation.types import Passage
 from . import funcs
 
@@ -100,6 +101,7 @@ class FromPassagesOverTxRxStationPairParam(t.TypedDict):
     rx_sch: Schedule
 
 
+# TODO: re-eval: `Station`` can be taken from `Passage`, but empty `list[Passage]` would be an issue in that case.
 class SimulationUnit:
     """
     Contains all the params and results for a unit of simulation calculation.
@@ -120,8 +122,10 @@ class SimulationUnit:
         spobj: SpaceObject,
         spobj_interp: Interpolator,
         passages: list[Passage],
-        tx_sch: Schedule,
-        rx_sch: Schedule,
+        tx_station: Station,
+        rx_station: Station,
+        tx_exp_detail_map: ExperimentDetailMap,
+        rx_exp_detail_map: ExperimentDetailMap,
         state_data: StateData,
     ):
         self.id = id
@@ -133,10 +137,10 @@ class SimulationUnit:
 
         self.passages = passages
 
-        self.tx_schedule = tx_sch
-        self.rx_schedule = rx_sch
-        self.tx_station = tx_sch.station
-        self.rx_station = rx_sch.station
+        self.tx_station = tx_station
+        self.rx_station = rx_station
+        self.tx_exp_detail_map = tx_exp_detail_map
+        self.rx_exp_detail_map = rx_exp_detail_map
 
     # TODO: can derive the indexers inside this method instead of as param, now that we take passages as param
     @classmethod
@@ -211,8 +215,10 @@ class SimulationUnit:
             spobj=spobj,
             spobj_interp=spobj_interp,
             passages=passages,
-            tx_sch=tx_sch,
-            rx_sch=rx_sch,
+            tx_station=tx_sch.station,
+            rx_station=tx_sch.station,
+            tx_exp_detail_map=tx_sch._data.attrs[_SK.exp_detail_map],
+            rx_exp_detail_map=rx_sch._data.attrs[_SK.exp_detail_map],
             state_data=StateData(state_data),
         )
 
@@ -233,22 +239,19 @@ class SimulationUnit:
         # TODO: do we need `ipps`?
         # TODO: do we need `duty_cycles`?
         powers = np.array(
-            [
-                self.tx_schedule._data.attrs[_SK.exp_detail_map][n]["power"]
-                for n in self._state_data[_K.exp_num].to_numpy()
-            ],
+            [self.tx_exp_detail_map[n]["power"] for n in self._state_data[_K.exp_num].to_numpy()],
             dtype=np.float64,
         )
         bandwidths = np.array(
             [
-                self.tx_schedule._data.attrs[_SK.exp_detail_map][n]["bandwidth"]
+                self.tx_exp_detail_map[n]["bandwidth"]
                 for n in self._state_data[_K.exp_num].to_numpy()
             ],
             dtype=np.float64,
         )
         rx_noise_temps = np.array(
             [
-                self.rx_schedule._data.attrs[_SK.exp_detail_map][n]["noise_temp"]
+                self.rx_exp_detail_map[n]["noise_temp"]
                 for n in self._state_data[_K.exp_num].to_numpy()
             ],
             dtype=np.float64,

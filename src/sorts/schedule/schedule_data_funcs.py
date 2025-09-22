@@ -75,6 +75,10 @@ class ExperimentDetail(t.TypedDict):
     "Duration of a control slice, in micro-second"
 
 
+# TODO: replace existing usage of `dict[int, ExperimentDetail]` by this type
+ExperimentDetailMap = dict[int, ExperimentDetail]
+
+
 class ScheduleNdarrayDict(t.TypedDict):
     """
     A TypedDict, stores a collection of "control slices" (or "slices" in short).
@@ -85,7 +89,7 @@ class ScheduleNdarrayDict(t.TypedDict):
 
     stn_id: StationId
 
-    exp_detail_map: dict[int, ExperimentDetail]
+    exp_detail_map: ExperimentDetailMap
 
     start_time: npt.NDArray[Datetime64_us]
     end_time: npt.NDArray[Datetime64_us]

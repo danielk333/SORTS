@@ -9,7 +9,7 @@ from mpi4py import MPI
 from sorts.interpolation import Interpolator
 from sorts.utils import to_datetime64_us
 from sorts.types import Datetime_Like, Float64_as_sec
-from sorts.schedule import Schedule, ExperimentDetail
+from sorts.schedule import Schedule, ExperimentDetailMap
 from sorts.simulation.stx_mrx_simulation.observation import Observation
 from sorts.simulation.stx_mrx_simulation.simulation_unit import (
     SimulationUnit,
@@ -36,7 +36,7 @@ class Spec(t.TypedDict):
 
     tx_schedule: Schedule
     rx_schedules: t.Sequence[Schedule]
-    exp_detail_map: dict[int, ExperimentDetail]
+    exp_detail_map: ExperimentDetailMap
     epoch: Datetime_Like
     start_time: Datetime_Like
     end_time: Datetime_Like
@@ -96,7 +96,14 @@ class StxMrxSimulation:
             self.sim_units.append(sim_unit)
 
             sim_unit.simulate()
-            self.obss.extend(funcs.derive_observations(sim_unit))
+            self.obss.extend(
+                funcs.derive_observations(
+                    passages=param["passages"],
+                    tx_schedule=param["tx_sch"],
+                    rx_schedule=param["rx_sch"],
+                    sim_unit=sim_unit,
+                )
+            )
             pbar.update(1)
         logger.debug("simulation done")
 
@@ -251,7 +258,12 @@ class StxMrxSimulation:
                         pickle.dump(sim_unit, f)
                         persist_fpath_tmp.rename(persist_fpath)
 
-                obss = funcs.derive_observations(sim_unit)
+                obss = funcs.derive_observations(
+                    passages=param["passages"],
+                    tx_schedule=param["tx_sch"],
+                    rx_schedule=param["rx_sch"],
+                    sim_unit=sim_unit,
+                )
 
                 comm.send(obss, dest=master_proc_rank)
                 logger.info(f"worker: {r} | SimulationUnit:{sim_unit.id} done")

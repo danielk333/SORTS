@@ -15,28 +15,32 @@ Can be used to get a subset of entries from a `Schedule`, that corresponds to an
 """
 
 
+# TODO: param tx_schedule, rx_schedule are added as tmp solution, we should have a Dto/Serializable ObservationIndexer type
 class Observation:
     def __init__(
         self,
         passage: Passage,
         indexer: ObservationIndexer,
         simulation_unit: SimulationUnit,
+        tx_schedule: Schedule,
+        rx_schedule: Schedule,
     ):
         self.passage = passage
         self.indexer = indexer
         self.simulation_unit = simulation_unit
+        self.tx_schedule = tx_schedule
+        self.rx_schedule = rx_schedule
 
     def get_schedule_slice(self) -> TxRxTuple[Schedule, Schedule]:
         """Returns subset of schedules, in `(tx_scheule, tx_schedule` that corresponds to the observation"""
 
-        tx_sch = self.simulation_unit.tx_schedule
-        rx_sch = self.simulation_unit.rx_schedule
-
         tx_sch_obs = Schedule(
-            data=tx_sch._data.loc[{_SK.multi_index: self.indexer.tx}], station=tx_sch.station
+            data=self.tx_schedule._data.loc[{_SK.multi_index: self.indexer.tx}],
+            station=self.tx_schedule.station,
         )
         rx_sch_obs = Schedule(
-            data=rx_sch._data.loc[{_SK.multi_index: self.indexer.rx}], station=rx_sch.station
+            data=self.rx_schedule._data.loc[{_SK.multi_index: self.indexer.rx}],
+            station=self.rx_schedule.station,
         )
 
         return TxRxTuple(tx=tx_sch_obs, rx=rx_sch_obs)

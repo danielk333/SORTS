@@ -6,6 +6,7 @@ from .schedule_data_funcs import (
     Key,
     ScheduleData,
     ExperimentDetail,
+    ExperimentDetailMap,
     ScheduleNdarrayDict,
 )
 from .schedule import (
