@@ -74,9 +74,6 @@ class ExperimentDetail(t.TypedDict):
     slice_duration: Timedelta64_us
     "Duration of a control slice, in micro-second"
 
-    # TODO: this is a temp workaround to get multiple simutaneous rx pointings working
-    num_simutaneous_pointings: t.NotRequired[int]
-
 
 class ScheduleNdarrayDict(t.TypedDict):
     """
@@ -244,7 +241,6 @@ def get_indexer_per_measurement(
 
     for _, ds_split in ds.groupby(exp_num_split_ids):
         if is_split_simult:
-            # TODO: can remove "num_simutaneous_pointings"?
             # further spliting according to number of simutaneous rx pointings
             for simult_num in np.unique(ds_split[_K.simult_num].to_numpy()):
                 idxer = ds_split[_K.multi_index].loc[{_K.simult_num: simult_num}]

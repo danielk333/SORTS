@@ -202,9 +202,6 @@ class FenceScanController:
         #         + f"cannot be smaller than the dwell ({self.dwell_s} sec)."
         #     )
 
-        # TODO: this is a temp workaround to get multiple simutaneous rx pointings working
-        exp_detail.update({"num_simutaneous_pointings": len(scan_range)})
-
         ctrl = FenceScanController(
             spec={
                 "tx_station": tx_station,
