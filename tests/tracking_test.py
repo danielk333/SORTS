@@ -135,7 +135,6 @@ def south_to_north_circular_orbit_test():
             "slice_duration": control_slice_duration,
             "stn_num_map": {
                 0: test_stn.uid,
-                1: test_stn.uid,
             },
         },
     )
