@@ -46,7 +46,7 @@ A xarray `Dataset` of:
   ```
   Dimensions:      (multi_index: n, enu: 3)
   Coordinates:
-    * multi_index  (multi_index) object MultiIndex ('start_time', 'exp_num'', 'stn_num', 'simult_num')
+    * multi_index  (multi_index) object MultiIndex ('start_time', 'exp_num', 'stn_num', 'simult_num')
     * start_time   (multi_index) datetime64[us]
     * exp_num      (multi_index) int16
     * stn_num      (multi_index) int16
