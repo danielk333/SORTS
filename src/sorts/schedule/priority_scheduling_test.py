@@ -33,6 +33,7 @@ def priority_scheduling_interleaved_schedule_test():
                     "duty_cycle": 0,
                     "noise_temp": 0,
                     "slice_duration": np.timedelta64(3600, "s"),
+                    "stn_num_map": {0: "stn_a"},
                 }
             },
             _SK.start_time: np.arange(
@@ -46,6 +47,7 @@ def priority_scheduling_interleaved_schedule_test():
                 np.timedelta64(3600 * 2, "s"),
             ),
             _SK.exp_num: np.full(12, 0, dtype=np.int16),
+            _SK.stn_num: np.full(12, 0, dtype=np.int16),
             _SK.simult_num: np.full(12, 0, dtype=np.int16),
             _SK.pointing: np.full((3, 12), 0.0, dtype=np.float64),
         },
@@ -66,6 +68,7 @@ def priority_scheduling_interleaved_schedule_test():
                     "duty_cycle": 0,
                     "noise_temp": 0,
                     "slice_duration": np.timedelta64(3600, "s"),
+                    "stn_num_map": {0: "stn_b"},
                 }
             },
             _SK.start_time: np.arange(
@@ -79,6 +82,7 @@ def priority_scheduling_interleaved_schedule_test():
                 np.timedelta64(3600, "s"),
             ),
             _SK.exp_num: np.full(24, 1, dtype=np.int16),
+            _SK.stn_num: np.full(24, 1, dtype=np.int16),
             _SK.simult_num: np.full(24, 0, dtype=np.int16),
             _SK.pointing: np.full((3, 24), 1.0, dtype=np.float64),
         }

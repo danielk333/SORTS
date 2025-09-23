@@ -133,6 +133,10 @@ def south_to_north_circular_orbit_test():
             "duty_cycle": 1.0,
             "noise_temp": 150.0,
             "slice_duration": control_slice_duration,
+            "stn_num_map": {
+                0: test_stn.uid,
+                1: test_stn.uid,
+            },
         },
     )
 

@@ -42,11 +42,13 @@ class Observation:
     def get_state_slice(self) -> StateData:
         """Get the subset of `simulation_unit.StateData` data the corresponds to the the observation"""
 
-        # TODO: maybe a mutating the index label is here is better than `.to_numpy().tolist()`?
-        # NOTE: `_state_data`'s `multi_index` has different label than `ScheduleData`'s `multi_index`
-        #   but content-wise they are the same thing, so `self.indexer.rx.to_numpy().tolist()` is used a shortcut here
         sim_state_slice = self.simulation_unit._state_data.loc[
-            {_SuK.multi_index: self.indexer.rx.to_numpy().tolist()}
+            {
+                _SuK.multi_index: [
+                    (start_time, exp_num, simult_num)
+                    for start_time, exp_num, _stn_num, simult_num in self.indexer.rx.to_numpy()
+                ]
+            }
         ]
 
         return StateData(sim_state_slice)

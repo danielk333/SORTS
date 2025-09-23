@@ -182,6 +182,8 @@ class SimulationUnit:
             zip(
                 rx_time,
                 rx_exp_num,
+                # TODO: for `stn_num`; this is a hard-coded tmp workaround
+                np.full(len(rx_time), 0, dtype=np.int16),
                 np.full(len(rx_time), 0, dtype=np.int16),
             )
         )
