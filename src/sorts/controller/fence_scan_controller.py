@@ -86,7 +86,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
     tx_pointing_masked = tx_pointing[:, tx_mask]
 
     tx_schedule = Schedule.from_ndarrays(
-        data={
+        {
             "stn_id": spec["tx_station"].uid,
             "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
             "start_time": tx_slice_start_time_masked,
@@ -96,8 +96,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
             ),
             "simult_num": np.full((len(tx_slice_start_time_masked)), 0, dtype=np.int16),
             "pointing": tx_pointing_masked,
-        },
-        station=spec["tx_station"],
+        }
     )
 
     # TODO: `rx_schedule_size` is a bit of a mismisnomer, as out-of-range entries might later be removed
@@ -148,7 +147,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
         rx_pointings_simult_num_masked = rx_pointings_simult_num[rx_mask]
 
         rx_schedule = Schedule.from_ndarrays(
-            data={
+            {
                 "stn_id": rx_station.uid,
                 "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
                 "start_time": rx_slice_start_time_masked,
@@ -158,8 +157,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
                 ),
                 "simult_num": rx_pointings_simult_num_masked,
                 "pointing": rx_pointing_masked,
-            },
-            station=rx_station,
+            }
         )
 
         rx_schedules.append(rx_schedule)

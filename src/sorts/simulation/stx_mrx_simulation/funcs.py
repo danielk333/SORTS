@@ -127,15 +127,15 @@ def find_passages(
     ):
         passages_of_spobj: list[Passage] = []
 
-        for rx_schedule in spec["rx_schedules"]:
-            rx_station = rx_schedule.station
-
+        # TODO: this assume spec["rx_stations"] ordering is the same as spec["rx_schedules"],
+        #   which should be correct but should not be relied on.
+        for rx_station in spec["rx_stations"]:
             passages_of_spobj.extend(
                 funcs.find_passages(
                     dt=spobj_smpl_dsec,
                     space_object=spobj,
                     states=spobj_smpl_states,
-                    tx_station=spec["tx_schedule"].station,
+                    tx_station=spec["tx_station"],
                     rx_station=rx_station,
                     epoch=spec["epoch"],
                 )
@@ -168,7 +168,10 @@ def derive_simulation_unit_params(
         groupped_passages = group_passages_by_tx_rx_station_pair(passages_of_a_spobj)
 
         for stn_id_pair, passages in groupped_passages.items():
-            rx_stn_idx = [sch.station.uid for sch in spec["rx_schedules"]].index(stn_id_pair[1])
+            # TODO: this assume spec["rx_stations"] ordering is the same as spec["rx_schedules"],
+            #   which should be correct but should not be relied on.
+            rx_stn_idx = [stn.uid for stn in spec["rx_stations"]].index(stn_id_pair[1])
+            rx_stn = spec["rx_stations"][rx_stn_idx]
 
             params.append(
                 {
@@ -176,6 +179,8 @@ def derive_simulation_unit_params(
                     "passages": passages,
                     "spobj": spec["space_objects"][idx],
                     "spobj_interp": spobj_states_interp,
+                    "tx_station": spec["tx_station"],
+                    "rx_station": rx_stn,
                     "tx_sch": spec["tx_schedule"],
                     "rx_sch": spec["rx_schedules"][rx_stn_idx],
                 }

@@ -32,14 +32,12 @@ class Schedule:
     _K = _K
     """shortcut to module attribute"""
 
-    def __init__(self, data: ScheduleData, station: Station):
+    def __init__(self, data: ScheduleData):
         self._data = data
-        self.station = station
 
     @classmethod
-    def from_ndarrays(cls, data: ScheduleNdarrayDict, station: Station) -> t.Self:
-        sch_data = schedule_data_funcs.from_ndarrays(data)
-        return cls(data=sch_data, station=station)
+    def from_ndarrays(cls, data: ScheduleNdarrayDict) -> t.Self:
+        return cls(schedule_data_funcs.from_ndarrays(data))
 
     @classmethod
     def empty(cls) -> t.Self:
@@ -48,13 +46,7 @@ class Schedule:
         sch_data = schedule_data_funcs.empty_data()
         sch_data.attrs[_K.stn_id] = stn_id
 
-        stn = schedule_data_funcs.default_station()
-        stn.uid = stn_id
-
-        return cls(
-            data=schedule_data_funcs.empty_data(),
-            station=stn,
-        )
+        return cls(data=schedule_data_funcs.empty_data())
 
     @classmethod
     def priority_scheduling(cls, schs: t.Sequence[Schedule]):
@@ -74,11 +66,7 @@ class Schedule:
 
         resultant_sch_data = priority_scheduling([sch._data for sch in schs])
 
-        return cls(data=resultant_sch_data, station=schs[0].station)
-
-    # TODO: commented out to avoid confusion; re-eval if we need it
-    # def __repr__(self):
-    #     return f"<sorts.Schedule> with data:\n{self._data.__repr__()}"
+        return cls(data=resultant_sch_data)
 
     def to_ndarrays(self) -> ScheduleNdarrayDict:
         arr_dict = schedule_data_funcs.to_ndarrays(self._data)
@@ -90,7 +78,7 @@ class Schedule:
     def filter_by_time_range(self, time_range: TimeRange_us) -> t.Self:
         cls = type(self)
         filtered_data = schedule_data_funcs.filter_by_time_range(self._data, time_range)
-        return cls(data=filtered_data, station=self.station)
+        return cls(data=filtered_data)
 
     # TODO: we can probably inject the schedule is tx or rx into `Schedule` class and remove param `is_split_simult`?
     def get_indexer_per_measurement(

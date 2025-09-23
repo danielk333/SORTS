@@ -34,14 +34,8 @@ class Observation:
     def get_schedule_slice(self) -> TxRxTuple[Schedule, Schedule]:
         """Returns subset of schedules, in `(tx_scheule, tx_schedule` that corresponds to the observation"""
 
-        tx_sch_obs = Schedule(
-            data=self.tx_schedule._data.loc[{_SK.multi_index: self.indexer.tx}],
-            station=self.tx_schedule.station,
-        )
-        rx_sch_obs = Schedule(
-            data=self.rx_schedule._data.loc[{_SK.multi_index: self.indexer.rx}],
-            station=self.rx_schedule.station,
-        )
+        tx_sch_obs = Schedule(data=self.tx_schedule._data.loc[{_SK.multi_index: self.indexer.tx}])
+        rx_sch_obs = Schedule(data=self.rx_schedule._data.loc[{_SK.multi_index: self.indexer.rx}])
 
         return TxRxTuple(tx=tx_sch_obs, rx=rx_sch_obs)
 

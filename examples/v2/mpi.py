@@ -130,6 +130,8 @@ rx_master_schs = [
 
 sim = StxMrxSimulation(
     spec={
+        "tx_station": eiscat3d.tx[0],
+        "rx_stations": eiscat3d.rx[0:2],
         "tx_schedule": tx_master_sch,
         "rx_schedules": rx_master_schs,
         "exp_detail_map": exp_detail_map,
@@ -137,9 +139,6 @@ sim = StxMrxSimulation(
         "start_time": start_time,
         "end_time": end_time,
         "space_objects": spobjs,
-        # "space_objects": [
-        #     o for i, o in enumerate(spobjs) if i in [0, 4, 5, 17]
-        # ],  # just picked a few from the whole list for now
         "dsec_sampler": dsec_sampler,
         # "interpolator_class": Legendre8,
         "interpolator_class": Linear,

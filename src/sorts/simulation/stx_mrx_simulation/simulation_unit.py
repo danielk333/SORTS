@@ -97,6 +97,8 @@ class FromPassagesOverTxRxStationPairParam(t.TypedDict):
     passages: list[Passage]
     spobj: SpaceObject
     spobj_interp: Interpolator
+    tx_station: Station
+    rx_station: Station
     tx_sch: Schedule
     rx_sch: Schedule
 
@@ -215,8 +217,8 @@ class SimulationUnit:
             spobj=spobj,
             spobj_interp=spobj_interp,
             passages=passages,
-            tx_station=tx_sch.station,
-            rx_station=tx_sch.station,
+            tx_station=kwargs["tx_station"],
+            rx_station=kwargs["rx_station"],
             tx_exp_detail_map=tx_sch._data.attrs[_SK.exp_detail_map],
             rx_exp_detail_map=rx_sch._data.attrs[_SK.exp_detail_map],
             state_data=StateData(state_data),

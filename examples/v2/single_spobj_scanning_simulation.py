@@ -55,6 +55,8 @@ fence_scan_controller = FenceScanController.from_scan_spec(
 
 sim = StxMrxSimulation(
     spec={
+        "tx_station": tx_station,
+        "rx_stations": [rx_station],
         "tx_schedule": tx_schedule,
         "rx_schedules": rx_schedules,
         "exp_detail_map": exp_detail_map,
