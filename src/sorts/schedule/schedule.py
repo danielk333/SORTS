@@ -3,7 +3,6 @@ import logging, typing as t
 import pandas as pd
 import xarray as xr
 from sorts.types import TimeRange_us
-from sorts.radar import Station
 from . import schedule_data_funcs
 from .schedule_data_funcs import _K, ExperimentDetail, ScheduleNdarrayDict, ScheduleData
 from .priority_scheduling import priority_scheduling
