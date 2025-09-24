@@ -34,6 +34,7 @@ def priority_scheduling_interleaved_schedule_test():
                     "noise_temp": 0,
                     "slice_duration": np.timedelta64(3600, "s"),
                     "stn_num_map": {0: "stn_a"},
+                    "stn_pairs": [(0, 0)],
                 }
             },
             _SK.start_time: np.arange(
@@ -69,6 +70,7 @@ def priority_scheduling_interleaved_schedule_test():
                     "noise_temp": 0,
                     "slice_duration": np.timedelta64(3600, "s"),
                     "stn_num_map": {0: "stn_b"},
+                    "stn_pairs": [(1, 1)],
                 }
             },
             _SK.start_time: np.arange(

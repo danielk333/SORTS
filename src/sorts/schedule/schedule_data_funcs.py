@@ -213,15 +213,30 @@ def to_dataframe(ds: ScheduleData) -> pd.DataFrame:
 
 
 def merge_attrs(attrs_dicts: list[dict[AttrKey, t.Any]]) -> dict:
-    """Merging attrs dict, latter attrs dict will override former attrs dict, just like `.update()` method of `dict`"""
+    """
+    Merging attrs dict, latter attrs dict will override former attrs dict, just like `.update()` method of `dict`.
+
+    Returns a shallow copy.
+    """
 
     match len(attrs_dicts):
         case 0:
             return {}
+
         case 1:
-            return attrs_dicts[0]
+            # returns a shallow copy, the dict 'exp_detail_map' will be a new shallow copy as well
+            return {
+                **attrs_dicts[0],
+                _K.exp_detail_map: attrs_dicts[0][_K.exp_detail_map].copy(),
+            }
+
         case _:
-            result: dict[AttrKey, t.Any] = attrs_dicts[0]
+            # returns a shallow copy, the dict 'exp_detail_map' will be a new shallow copy as well
+            result: dict[AttrKey, t.Any] = {
+                **attrs_dicts[0],
+                _K.exp_detail_map: attrs_dicts[0][_K.exp_detail_map].copy(),
+            }
+
             for attrs_dict in attrs_dicts[0:]:
                 result[_K.stn_id] = attrs_dict[_K.stn_id]
                 result[_K.exp_detail_map].update(attrs_dict[_K.exp_detail_map])

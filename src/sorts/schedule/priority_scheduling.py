@@ -5,7 +5,7 @@ import pandas as pd
 import xarray as xr
 from sorts.utils import assert_class_attributes_equal_to
 from . import schedule_data_funcs
-from .schedule_data_funcs import _K as _SK
+from .schedule_data_funcs import _K as _SK, ExperimentDetail
 
 if t.TYPE_CHECKING:
     from .schedule import ScheduleData
@@ -140,17 +140,52 @@ def _fill_Na(merged_sch_data: ScheduleData) -> ScheduleData:
 
 
 def _remove_entries_with_time_clash(merged_sch_data: ScheduleData) -> ScheduleData:
-    """
-    remove rows (control slices) that have time clash
-    NOTE: we checked for is_overlaped instead of is_allowed
-      so that it is safe agaisnt comparison with `NaT`, which always return false
-      (and we assume `NaT` mean "no restructions" for both allowed_start_time and allowed_end_time)
-    """
-
+    # NOTE: we checked for is_overlaped instead of is_allowed
+    #   so that it is safe agaisnt comparison with `NaT`, which always return false
+    #   (and we assume `NaT` mean "no restructions" for both allowed_start_time and allowed_end_time)
     merged_sch_data[_IK.is_overlaped] = (
         merged_sch_data[_SK.start_time] < merged_sch_data[_IK.allowed_start_time]
     ) | (merged_sch_data[_SK.end_time] > merged_sch_data[_IK.allowed_end_time])
     merged_sch_data = merged_sch_data.loc[{_SK.multi_index: ~merged_sch_data[_IK.is_overlaped]}]
+
+    return merged_sch_data
+
+
+def _remove_entries_without_corresponding_tx(
+    merged_sch_data: ScheduleData, incoming_sch_data: ScheduleData
+) -> ScheduleData:
+    for exp_detail in incoming_sch_data.attrs[_SK.exp_detail_map].values():
+        exp_detail: ExperimentDetail
+        stn_pairs = exp_detail.get("stn_pairs", [])
+
+        for tx_stn_num, rx_stn_num in stn_pairs:
+            is_tx_dropped_mask = ~np.isin(
+                incoming_sch_data.loc[
+                    {_SK.multi_index: (slice(None), slice(None), tx_stn_num, slice(None))}
+                ][_SK.multi_index].to_numpy(),
+                merged_sch_data[_SK.multi_index].to_numpy(),
+            )
+
+            dropped_tx_midx = incoming_sch_data[_SK.multi_index][is_tx_dropped_mask]
+            try:
+                corresponding_rx_to_drop = merged_sch_data.sel(
+                    {
+                        _SK.multi_index: (
+                            # NOTE: `.tolist()` needed for MultiIndex level start_time, the value cannot be interpreted correctly otherwise for some reason
+                            dropped_tx_midx[_SK.start_time].to_numpy().tolist(),
+                            dropped_tx_midx[_SK.exp_num].to_numpy(),
+                            rx_stn_num,
+                            slice(None),
+                        )
+                    }
+                )
+                merged_sch_data = merged_sch_data.drop_sel(
+                    {_SK.multi_index: corresponding_rx_to_drop[_SK.multi_index]}
+                )
+
+            except KeyError:
+                # Do nothing when the selection returns no result.
+                pass
 
     return merged_sch_data
 
@@ -202,8 +237,8 @@ def priority_scheduling(
     )
     merged_sch_data[_IK.allowed_end_time] = (_SK.multi_index, np.empty(0, "datetime64[us]"))
     merged_sch_data[_IK.is_overlaped] = (_SK.multi_index, np.empty(0, np.bool))
-    for sch_data in sch_datas:
-        sch_data = _inject_intermediate_columns(sch_data)
+    for incoming_sch_data in sch_datas:
+        incoming_sch_data = _inject_intermediate_columns(incoming_sch_data)
 
         # merge and then sort the schedule
         # we use a "stable" sorting algo to retains relative order,
@@ -211,14 +246,17 @@ def priority_scheduling(
         # also note that attrs merged in the way that former schedule has higher priority than latter,
         # consistent with the func `priority_scheduling`
         merged_sch_data.attrs = schedule_data_funcs.merge_attrs(
-            [sch_data.attrs, merged_sch_data.attrs]
+            [incoming_sch_data.attrs, merged_sch_data.attrs]
         )
-        merged_sch_data = xr.concat([merged_sch_data, sch_data], dim=_SK.multi_index)
+        merged_sch_data = xr.concat([merged_sch_data, incoming_sch_data], dim=_SK.multi_index)
         merged_sch_data = merged_sch_data.sortby(_SK.start_time)
 
         merged_sch_data = _populate_allowed_start_time_allowed_end_time(merged_sch_data)
         merged_sch_data = _fill_Na(merged_sch_data)
         merged_sch_data = _remove_entries_with_time_clash(merged_sch_data)
+        merged_sch_data = _remove_entries_without_corresponding_tx(
+            merged_sch_data, incoming_sch_data
+        )
         merged_sch_data = _update_allowed_start_time_allowed_end_time(merged_sch_data)
 
     merged_sch_data = merged_sch_data.drop_vars(
