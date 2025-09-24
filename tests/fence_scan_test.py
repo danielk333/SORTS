@@ -157,6 +157,7 @@ def south_to_north_circular_orbit_test():
                 0: tx_rx_0_stn.uid,
                 1: rx_1_stn.uid,
             },
+            "stn_pairs": [(0, 1)],
         },
         azimuth=90,  # sweep from east to west
         min_elevation=0,

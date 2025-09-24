@@ -228,7 +228,7 @@ class FenceScanController:
     def compute_single_cycle_pointings(self, start_time: Datetime_Like, end_time: Datetime_Like):
         """Do the computation then update the `state` property and return `self`."""
 
-        exp_detail: ExperimentDetail = self.spec["exp_detail"]
+        exp_detail = self.spec["exp_detail"]
 
         start_time_np = to_datetime64_us(start_time)
         end_time_np = to_datetime64_us(end_time)

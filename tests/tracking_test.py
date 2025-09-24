@@ -136,6 +136,7 @@ def south_to_north_circular_orbit_test():
             "stn_num_map": {
                 0: test_stn.uid,
             },
+            "stn_pairs": [(0, 0)],
         },
     )
 

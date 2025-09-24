@@ -62,6 +62,7 @@ exp_detail_map: dict[int, ExperimentDetail] = {
             0: tx_station.uid,
             1: rx_station.uid,
         },
+        "stn_pairs": [(0, 1)],
     }
 }
 

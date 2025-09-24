@@ -78,7 +78,12 @@ class ExperimentDetail(t.TypedDict):
     slice_duration: Timedelta64_us
     "Duration of a control slice, in micro-second"
 
+    # TODO: re-eval if we should we `t.NotRequired` here
     stn_num_map: dict[int, StationId]
+
+    # TODO: re-eval if we should we `t.NotRequired` here
+    stn_pairs: t.NotRequired[list[tuple[int, int]]]
+    """TX-RX station number pairs"""
 
 
 # TODO: replace existing usage of `dict[int, ExperimentDetail]` by this type
