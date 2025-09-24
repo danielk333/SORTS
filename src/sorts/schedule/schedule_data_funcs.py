@@ -195,6 +195,7 @@ def to_ndarrays(data: ScheduleData) -> ScheduleNdarrayDict:
     return arr_dict
 
 
+# TODO: remove?
 def to_dataframe(ds: ScheduleData) -> pd.DataFrame:
     df = pd.concat(
         t.cast(
@@ -202,8 +203,6 @@ def to_dataframe(ds: ScheduleData) -> pd.DataFrame:
             [
                 ds[_K.end_time].transpose().to_pandas(),
                 ds[_K.pointing].transpose().to_pandas(),
-                ds[_K.exp_num].transpose().to_pandas(),
-                ds[_K.simult_num].transpose().to_pandas(),
             ],
         ),
         axis=1,
