@@ -96,3 +96,16 @@ def priority_scheduling_interleaved_schedule_test():
     assert resultant_sch_data.attrs[_SK.stn_id] == "stn_a"
 
     return
+
+
+# TODO: add test case for the resolved error::
+# spobjs = [tracked_spobj]
+# Error "not all values found in index 'multi_index'",  at space_object.oid = 20; sim_unit.id = 6
+# ```
+# pd.MultiIndex.from_tuples(tx_sch_pointing_selector).isin(tx_sch._data.indexes["multi_index"])
+#
+# :> np.argmax(~pd.MultiIndex.from_tuples(tx_sch_pointing_selector).isin(tx_sch._data.indexes["multi_index"]))
+# -> np.int64(22447)
+# tx_sch_pointing_selector[22447]
+# (np.datetime64('2025-01-01T02:49:16.530000'), np.int16(1), np.int16(0))
+# ```

@@ -62,19 +62,8 @@ _spobj_pop = master_catalog(
 rand_seed = 120389
 # TODO: reduce the filter size to more sensible value
 spobj_pop = master_catalog_factor(_spobj_pop, treshhold=5.0, seed=rand_seed)
-# spobjs = [tracked_spobj, *[spobj_pop.get_object(i) for i in range(spobj_pop.shape[0])]]
-spobjs = [tracked_spobj, spobj_pop.get_object(20)]
-# TODO: resolve the error::
-# spobjs = [tracked_spobj]
-# Error "not all values found in index 'multi_index'",  at space_object.oid = 20; sim_unit.id = 6
-# ```
-# pd.MultiIndex.from_tuples(tx_sch_pointing_selector).isin(tx_sch._data.indexes["multi_index"])
-#
-# :> np.argmax(~pd.MultiIndex.from_tuples(tx_sch_pointing_selector).isin(tx_sch._data.indexes["multi_index"]))
-# -> np.int64(22447)
-# tx_sch_pointing_selector[22447]
-# (np.datetime64('2025-01-01T02:49:16.530000'), np.int16(1), np.int16(0))
-# ```
+spobjs = [tracked_spobj, *[spobj_pop.get_object(i) for i in range(spobj_pop.shape[0])]]
+# spobjs = [tracked_spobj, spobj_pop.get_object(20)]
 
 
 def dsec_sampler(orbit, start_time, end_time):
@@ -165,8 +154,8 @@ sim = StxMrxSimulation(
 )
 
 calc_start_time = time.perf_counter()
-# obss, sim_units = sim.mpi_run(Path(__file__).parent / ".." / ".." / "local_data" / "mpi")
-obss, sim_units = sim.run()  # TODO: revert; switched to non-mpi for debugging
+obss, sim_units = sim.mpi_run(Path(__file__).parent / ".." / ".." / "local_data" / "mpi")
+# obss, sim_units = sim.run()  # or, do not use non-mpi for debugging
 calc_time = time.perf_counter() - calc_start_time
 
 print(f"len(obss): {len(obss)}")
