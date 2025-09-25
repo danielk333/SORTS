@@ -2,6 +2,7 @@ from __future__ import annotations
 import logging, math, typing as t
 import numpy as np
 import numpy.typing as npt
+import xarray as xr
 from sorts.radar import Station
 from sorts.frames import enu_to_ecef, ecef_to_enu, sph_to_cart
 from sorts.types import (
@@ -13,7 +14,7 @@ from sorts.types import (
     Datetime_Like,
 )
 from sorts.utils import to_datetime64_us
-from sorts.schedule import Schedule, ExperimentDetail
+from sorts.schedule import Schedule, ScheduleData, ExperimentDetail, schedule_data_funcs
 from sorts.controller import pointing_funcs
 
 logger = logging.getLogger(__name__)
@@ -50,7 +51,7 @@ class Output(t.NamedTuple):
 
 
 # TODO: should we generate tx pointings at the specified ranges instead of normalized to 1?
-def generate_from_state(spec: Spec, state: State) -> Output:
+def generate_from_state(spec: Spec, state: State) -> Schedule:
     # The logic of this function:
     # 1. repeat the cycle of tx pointings from state to form the tx schedule
     # 2. from the single cycle of tx pointings, we convert it into ECEF location coord and extend them by the `scan_range`
@@ -85,7 +86,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
     tx_slice_start_time_masked = tx_slice_start_time[tx_mask]
     tx_pointing_masked = tx_pointing[:, tx_mask]
 
-    tx_schedule = Schedule.from_ndarrays(
+    tx_schdata = schedule_data_funcs.from_ndarrays(
         {
             "stn_id": spec["tx_station"].uid,
             "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
@@ -105,7 +106,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
     # TODO: `rx_schedule_size` is a bit of a mismisnomer, as out-of-range entries might later be removed
     rx_slice_start_time = tx_slice_start_time.repeat(len(spec["scan_range"]))
     rx_schedule_size = state["tx_schedule_size"] * len(spec["scan_range"])
-    rx_schedules: list[Schedule] = []
+    rx_schdatas: list[ScheduleData] = []
     tx_pointings_of_a_cycle_without_translation_ecef: EcefCoordinates = enu_to_ecef(
         lat=spec["tx_station"].ecef_lat,
         lon=spec["tx_station"].ecef_lon,
@@ -149,7 +150,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
         rx_pointing_masked = rx_pointings_enu[:, rx_mask]
         rx_pointings_simult_num_masked = rx_pointings_simult_num[rx_mask]
 
-        rx_schedule = Schedule.from_ndarrays(
+        rx_schdata = schedule_data_funcs.from_ndarrays(
             {
                 "stn_id": rx_station.uid,
                 "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
@@ -164,9 +165,16 @@ def generate_from_state(spec: Spec, state: State) -> Output:
             }
         )
 
-        rx_schedules.append(rx_schedule)
+        rx_schdatas.append(rx_schdata)
 
-    return Output(tx_schedule, rx_schedules)
+    resultant_schdata = xr.concat([tx_schdata, *rx_schdatas], dim=Schedule._K.multi_index)
+    resultant_schdata = resultant_schdata.sortby(Schedule._K.start_time)
+    # TODO: re-eval if it is too brutal
+    # there will be duplicates if the tx station is also a rx station, we drop the duplicates here
+    resultant_schdata = resultant_schdata.drop_duplicates(Schedule._K.multi_index)
+    output = Schedule(resultant_schdata)
+
+    return output
 
 
 class FenceScanController:
@@ -183,7 +191,7 @@ class FenceScanController:
         self.spec: Spec = spec
         self.state: State | None = state
 
-        self._cached_output: Output | None = None
+        self._cached_output: Schedule | None = None
 
     @classmethod
     def from_scan_spec(
@@ -246,7 +254,7 @@ class FenceScanController:
 
         return self
 
-    def generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> Output:
+    def generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> Schedule:
         self.compute_single_cycle_pointings(start_time, end_time)
         state = t.cast(State, self.state)
 

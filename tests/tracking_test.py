@@ -137,7 +137,7 @@ def south_to_north_circular_orbit_test():
         },
     )
 
-    tracker_schs = tracker_ctrl.generate(start_time, end_time)
+    tracker_sch = tracker_ctrl.generate(start_time, end_time)
 
     exp_detail_map = {tracker_ctrl.spec["exp_detail"]["id"]: tracker_ctrl.spec["exp_detail"]}
 
@@ -145,8 +145,7 @@ def south_to_north_circular_orbit_test():
         spec={
             "tx_station": test_stn,
             "rx_stations": [test_stn],
-            "tx_schedule": tracker_schs.tx_schedule,
-            "rx_schedules": tracker_schs.rx_schedules,
+            "schedule": tracker_sch,
             "exp_detail_map": exp_detail_map,
             "epoch": start_time,
             "start_time": start_time,

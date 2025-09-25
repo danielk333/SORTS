@@ -38,8 +38,7 @@ class Spec(t.TypedDict):
     # TODO: param `tx_station` and `rx_stations` are tmp solution
     tx_station: Station
     rx_stations: list[Station]
-    tx_schedule: Schedule
-    rx_schedules: t.Sequence[Schedule]
+    schedule: Schedule
     exp_detail_map: ExperimentDetailMap
     epoch: Datetime_Like
     start_time: Datetime_Like
@@ -192,10 +191,10 @@ def mpi_worker_proc_loop(
                 pickle.dump(sim_unit, f)
                 persist_fpath_tmp.rename(persist_fpath)
 
+        obss = []
         obss = funcs.derive_observations(
             passages=param["passages"],
-            tx_schedule=param["tx_sch"],
-            rx_schedule=param["rx_sch"],
+            schedule=param["schedule"],
             sim_unit=sim_unit,
         )
 
@@ -255,8 +254,7 @@ class StxMrxSimulation:
             self.obss.extend(
                 funcs.derive_observations(
                     passages=param["passages"],
-                    tx_schedule=param["tx_sch"],
-                    rx_schedule=param["rx_sch"],
+                    schedule=param["schedule"],
                     sim_unit=sim_unit,
                 )
             )

@@ -99,8 +99,7 @@ class FromPassagesOverTxRxStationPairParam(t.TypedDict):
     spobj_interp: Interpolator
     tx_station: Station
     rx_station: Station
-    tx_sch: Schedule
-    rx_sch: Schedule
+    schedule: Schedule
 
 
 # TODO: re-eval: `Station`` can be taken from `Passage`, but empty `list[Passage]` would be an issue in that case.
@@ -153,8 +152,16 @@ class SimulationUnit:
         passages = kwargs["passages"]
         spobj = kwargs["spobj"]
         spobj_interp = kwargs["spobj_interp"]
-        tx_sch = kwargs["tx_sch"]
-        rx_sch = kwargs["rx_sch"]
+        tx_station = kwargs["tx_station"]
+        rx_station = kwargs["rx_station"]
+        # NOTE: xarray simplify/collapse MultiIndex when filtering a level to an exact value,
+        #   we filter on the top level "multi_index' with a tuple here to prevent it
+        tx_schdata = kwargs["schedule"]._data.loc[
+            {_SK.multi_index: (slice(None), slice(None), tx_station.uid, slice(None))}
+        ]
+        rx_schdata = kwargs["schedule"]._data.loc[
+            {_SK.multi_index: (slice(None), slice(None), rx_station.uid, slice(None))}
+        ]
 
         if len(passages) == 0:
             # TODO: return en empty instance would be better
@@ -163,15 +170,15 @@ class SimulationUnit:
         rx_time_mask: xr.DataArray = reduce(
             xr.ufuncs.logical_and,
             [
-                (rx_sch._data[_SK.start_time] >= time_range[0])
-                & (rx_sch._data[_SK.end_time] <= time_range[1])
+                (rx_schdata[_SK.start_time] >= time_range[0])
+                & (rx_schdata[_SK.end_time] <= time_range[1])
                 for time_range in [ps["time_range"] for ps in passages]
             ],
         )
 
-        rx_time = rx_sch._data[_SK.start_time][rx_time_mask].to_numpy()
-        rx_exp_num = rx_sch._data[_SK.exp_num][rx_time_mask].to_numpy()
-        rx_simult_num = rx_sch._data[_SK.simult_num][rx_time_mask].to_numpy()
+        rx_time = rx_schdata[_SK.start_time][rx_time_mask].to_numpy()
+        rx_exp_num = rx_schdata[_SK.exp_num][rx_time_mask].to_numpy()
+        rx_simult_num = rx_schdata[_SK.simult_num][rx_time_mask].to_numpy()
 
         multi_index = pd.MultiIndex.from_arrays(
             [rx_time, rx_exp_num, rx_simult_num],
@@ -202,18 +209,18 @@ class SimulationUnit:
                 #   not working: `tx_sch._data[_SK.pointing].reindex({_SK.multi_index: [(np.datetime64("2025-01-01 02:45:01", "us"), 0, 0), ...]})`
                 _K.tx_pointing: (
                     (_K.enu, _K.multi_index),
-                    tx_sch._data[_SK.pointing]
+                    tx_schdata[_SK.pointing]
                     .loc[{_SK.multi_index: tx_reindex_selector[_SK.multi_index]}]
                     .to_numpy(),
                 ),
                 _K.rx_pointing: (
                     (_K.enu, _K.multi_index),
-                    rx_sch._data[_SK.pointing].loc[:, rx_time_mask].to_numpy(),
+                    rx_schdata[_SK.pointing].loc[:, rx_time_mask].to_numpy(),
                 ),
             },
             attrs={
-                _K.tx_stn_id: tx_sch._data.attrs[_SK.stn_id],
-                _K.rx_stn_id: rx_sch._data.attrs[_SK.stn_id],
+                _K.tx_stn_id: tx_schdata.attrs[_SK.stn_id],
+                _K.rx_stn_id: rx_schdata.attrs[_SK.stn_id],
             },
         )
 
@@ -224,8 +231,8 @@ class SimulationUnit:
             passages=passages,
             tx_station=kwargs["tx_station"],
             rx_station=kwargs["rx_station"],
-            tx_exp_detail_map=tx_sch._data.attrs[_SK.exp_detail_map],
-            rx_exp_detail_map=rx_sch._data.attrs[_SK.exp_detail_map],
+            tx_exp_detail_map=tx_schdata.attrs[_SK.exp_detail_map],
+            rx_exp_detail_map=rx_schdata.attrs[_SK.exp_detail_map],
             state_data=StateData(state_data),
         )
 

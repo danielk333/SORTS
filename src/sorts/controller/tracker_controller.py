@@ -2,6 +2,7 @@ from __future__ import annotations
 import logging, typing as t
 import numpy as np
 import numpy.typing as npt
+import xarray as xr
 import bokeh.layouts as bokeh_layouts
 import pyant
 from sorts.space_object import SpaceObject
@@ -17,7 +18,7 @@ from sorts.types import (
 )
 from sorts.utils import to_datetime64_us, to_timedelta64_us
 from sorts import plots
-from sorts.schedule import Schedule, ExperimentDetail
+from sorts.schedule import Schedule, ScheduleData, ExperimentDetail, schedule_data_funcs
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,7 @@ class Output(t.NamedTuple):
     rx_schedules: t.Sequence[Schedule]
 
 
-def generate_from_state(spec: Spec, state: State) -> Output:
+def generate_from_state(spec: Spec, state: State) -> Schedule:
     loc_zenith = np.array([0, 0, 1], dtype=np.float64)
 
     # generate pointings
@@ -58,7 +59,8 @@ def generate_from_state(spec: Spec, state: State) -> Output:
 
     rxs_pointings: list[EnuCoordinates] = []
     rx_el_in_range_with_tx_masks: list[npt.NDArray[np.bool]] = []
-    for rx_station in spec["rx_stations"]:
+    pure_rx_stations = [stn for stn in spec["rx_stations"] if stn.uid != spec["tx_station"].uid]
+    for rx_station in pure_rx_stations:
         rx_pointings: EnuCoordinates = rx_station.enu(state["spobj_states"][:3])
 
         rx_pointings_zenith_ang = pyant.coordinates.vector_angle(
@@ -75,7 +77,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
     tx_sch_time = state["spobj_time"][tx_el_in_range_mask]
     tx_sch_len = len(tx_sch_time)
 
-    tx_sch = Schedule.from_ndarrays(
+    tx_schdata = schedule_data_funcs.from_ndarrays(
         {
             "stn_id": spec["tx_station"].uid,
             "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
@@ -88,15 +90,15 @@ def generate_from_state(spec: Spec, state: State) -> Output:
         }
     )
 
-    rx_schs: list[Schedule] = []
+    rx_schdatas: list[ScheduleData] = []
     for rx_stn, rx_mask, rx_pointings in zip(
-        spec["rx_stations"], rx_el_in_range_with_tx_masks, rxs_pointings
+        pure_rx_stations, rx_el_in_range_with_tx_masks, rxs_pointings
     ):
         rx_sch_time = state["spobj_time"][rx_mask]
         rx_sch_len = len(rx_sch_time)
 
-        rx_schs.append(
-            Schedule.from_ndarrays(
+        rx_schdatas.append(
+            schedule_data_funcs.from_ndarrays(
                 {
                     "stn_id": rx_stn.uid,
                     "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
@@ -110,7 +112,10 @@ def generate_from_state(spec: Spec, state: State) -> Output:
             )
         )
 
-    output = Output(tx_sch, rx_schs)
+    resultant_schdata = xr.concat([tx_schdata, *rx_schdatas], dim=Schedule._K.multi_index)
+    resultant_schdata = resultant_schdata.sortby(Schedule._K.start_time)
+    output = Schedule(resultant_schdata)
+
     return output
 
 
@@ -153,7 +158,7 @@ class TrackerController:
         self.spec: Spec = spec
         self.state: State | None = state
 
-        self._cached_output: Output | None = None
+        self._cached_output: Schedule | None = None
         """A cache of the latest `Output`, handy for plotting"""
 
     @classmethod
@@ -239,7 +244,7 @@ class TrackerController:
 
     def generate(
         self, start_time: Datetime_Like | None = None, end_time: Datetime_Like | None = None
-    ) -> Output:
+    ) -> Schedule:
         """
         Generate the schedules.
         `start_time` and `end_time` should be omitted if this instance is created from `TrackerController.from_ecef_states`

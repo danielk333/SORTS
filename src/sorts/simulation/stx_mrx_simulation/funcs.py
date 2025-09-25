@@ -76,12 +76,25 @@ def group_passages_by_tx_rx_station_pair(
     return groupped_passages
 
 
+# TODO: go through its logic again; similar to `get_indexer_per_measurement`,
+#   now we have `stn_num`, `simult_num` in index, things can likely be done differently
 def derive_observations(
-    passages: list[Passage], tx_schedule: Schedule, rx_schedule: Schedule, sim_unit: SimulationUnit
+    passages: list[Passage], schedule: Schedule, sim_unit: SimulationUnit
 ) -> list[Observation]:
     """Derive observations"""
 
     obss: list[Observation] = []
+
+    # NOTE: xarray simplify/collapse MultiIndex when filtering a level to an exact value,
+    #   we filter on the top level "multi_index' with a tuple here to prevent it
+    tx_schdata = schedule._data.loc[
+        {Schedule._K.multi_index: (slice(None), slice(None), sim_unit.tx_station.uid, slice(None))}
+    ]
+    rx_schdata = schedule._data.loc[
+        {Schedule._K.multi_index: (slice(None), slice(None), sim_unit.rx_station.uid, slice(None))}
+    ]
+    tx_schedule = Schedule(tx_schdata)
+    rx_schedule = Schedule(rx_schdata)
 
     for passage in passages:
         tx_obs_idxers = tx_schedule.filter_by_time_range(
@@ -170,8 +183,7 @@ def derive_simulation_unit_params(
         for stn_id_pair, passages in groupped_passages.items():
             # TODO: this assume spec["rx_stations"] ordering is the same as spec["rx_schedules"],
             #   which should be correct but should not be relied on.
-            rx_stn_idx = [stn.uid for stn in spec["rx_stations"]].index(stn_id_pair[1])
-            rx_stn = spec["rx_stations"][rx_stn_idx]
+            rx_stn = next((stn for stn in spec["rx_stations"] if stn.uid == stn_id_pair[1]))
 
             params.append(
                 {
@@ -181,8 +193,7 @@ def derive_simulation_unit_params(
                     "spobj_interp": spobj_states_interp,
                     "tx_station": spec["tx_station"],
                     "rx_station": rx_stn,
-                    "tx_sch": spec["tx_schedule"],
-                    "rx_sch": spec["rx_schedules"][rx_stn_idx],
+                    "schedule": spec["schedule"],
                 }
             )
 

@@ -114,8 +114,8 @@ fence_scan_ctrl = FenceScanController.from_scan_spec(
     scan_range=np.array([300e3], dtype=np.float64),
 )
 
-tracker_schs = tracker_ctrl.generate(start_time, end_time)
-fence_schs = fence_scan_ctrl.generate(start_time, end_time)
+tracker_sch = tracker_ctrl.generate(start_time, end_time)
+fence_sch = fence_scan_ctrl.generate(start_time, end_time)
 
 exp_detail_map = {
     tracker_ctrl.spec["exp_detail"]["id"]: tracker_ctrl.spec["exp_detail"],
@@ -123,20 +123,14 @@ exp_detail_map = {
 }
 
 
-tx_master_sch = Schedule.priority_scheduling([tracker_schs.tx_schedule, fence_schs.tx_schedule])
-
-rx_master_schs = [
-    Schedule.priority_scheduling(rx_schs)
-    for rx_schs in zip(tracker_schs.rx_schedules, fence_schs.rx_schedules)
-]
+master_sch = Schedule.priority_scheduling([tracker_sch, fence_sch])
 
 
 sim = StxMrxSimulation(
     spec={
         "tx_station": tx_station,
         "rx_stations": [rx_station_0, rx_station_1],
-        "tx_schedule": tx_master_sch,
-        "rx_schedules": rx_master_schs,
+        "schedule": master_sch,
         "exp_detail_map": exp_detail_map,
         "epoch": start_time,
         "start_time": start_time,

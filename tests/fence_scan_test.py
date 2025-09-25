@@ -168,7 +168,7 @@ def south_to_north_circular_orbit_test():
         scan_range=scan_ranges,
     )
 
-    fence_schs = fence_scan_ctrl.generate(start_time, end_time)
+    fence_sch = fence_scan_ctrl.generate(start_time, end_time)
 
     exp_detail_map = {fence_scan_ctrl.spec["exp_detail"]["id"]: fence_scan_ctrl.spec["exp_detail"]}
 
@@ -176,8 +176,7 @@ def south_to_north_circular_orbit_test():
         spec={
             "tx_station": tx_rx_0_stn,
             "rx_stations": [tx_rx_0_stn, rx_1_stn],
-            "tx_schedule": fence_schs.tx_schedule,
-            "rx_schedules": fence_schs.rx_schedules,
+            "schedule": fence_sch,
             "exp_detail_map": exp_detail_map,
             "epoch": start_time,
             "start_time": start_time,
