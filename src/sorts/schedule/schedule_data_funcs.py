@@ -12,7 +12,9 @@ from sorts.radar import Station, StationId
 logger = logging.getLogger(__name__)
 
 
-CoordKey = t.Literal["multi_index", "start_time", "exp_num", "simult_num", "enu", "e", "n", "u"]
+CoordKey = t.Literal[
+    "multi_index", "start_time", "exp_num", "stn_num", "simult_num", "enu", "e", "n", "u"
+]
 DataKey = t.Literal["end_time", "pointing"]
 AttrKey = t.Literal["stn_id", "exp_detail_map"]
 Key = t.Literal[DataKey, CoordKey, AttrKey]
@@ -24,6 +26,7 @@ class _K:
     multi_index: t.Final = "multi_index"
     start_time: t.Final = "start_time"
     exp_num: t.Final = "exp_num"
+    stn_num: t.Final = "stn_num"
     simult_num: t.Final = "simult_num"
     enu: t.Final = "enu"
     e: t.Final = "e"
@@ -43,9 +46,10 @@ A xarray `Dataset` of:
   ```
   Dimensions:      (multi_index: n, enu: 3)
   Coordinates:
-    * multi_index  (multi_index) object MultiIndex
+    * multi_index  (multi_index) object MultiIndex ('start_time', 'exp_num', 'stn_num', 'simult_num')
     * start_time   (multi_index) datetime64[us]
     * exp_num      (multi_index) int16
+    * stn_num      (multi_index) int16
     * simult_num   (multi_index) int16
     * enu          (enu) 'e' 'n' 'u'
   Data variables:
@@ -74,6 +78,13 @@ class ExperimentDetail(t.TypedDict):
     slice_duration: Timedelta64_us
     "Duration of a control slice, in micro-second"
 
+    # TODO: re-eval if we should we `t.NotRequired` here
+    stn_num_map: dict[int, StationId]
+
+    # TODO: re-eval if we should we `t.NotRequired` here
+    stn_pairs: t.NotRequired[list[tuple[int, int]]]
+    """TX-RX station number pairs"""
+
 
 # TODO: replace existing usage of `dict[int, ExperimentDetail]` by this type
 ExperimentDetailMap = dict[int, ExperimentDetail]
@@ -87,6 +98,7 @@ class ScheduleNdarrayDict(t.TypedDict):
     - Metadata (`ExperimentDetail`s) are stored as a dict inside the `exp_detail_map` field.
     """
 
+    # TODO: remove `stn_id`
     stn_id: StationId
 
     exp_detail_map: ExperimentDetailMap
@@ -94,8 +106,9 @@ class ScheduleNdarrayDict(t.TypedDict):
     start_time: npt.NDArray[Datetime64_us]
     end_time: npt.NDArray[Datetime64_us]
 
-    # TODO: re-eval the size of `exp_num`, `simult_num`
+    # TODO: re-eval the size of `exp_num`, `stn_num`, `simult_num`
     exp_num: npt.NDArray[np.int16]
+    stn_num: npt.NDArray[np.int16]
     simult_num: npt.NDArray[np.int16]
 
     pointing: EnuCoordinates
@@ -120,8 +133,9 @@ def empty_data() -> ScheduleData:
             np.empty(0, dtype="datetime64[us]"),
             np.empty(0, dtype=np.int16),
             np.empty(0, dtype=np.int16),
+            np.empty(0, dtype=np.int16),
         ],
-        names=(_K.start_time, _K.exp_num, _K.simult_num),
+        names=(_K.start_time, _K.exp_num, _K.stn_num, _K.simult_num),
     )
 
     sch_data = xr.Dataset(
@@ -144,8 +158,8 @@ def empty_data() -> ScheduleData:
 
 def from_ndarrays(data: ScheduleNdarrayDict) -> ScheduleData:
     multi_index = pd.MultiIndex.from_arrays(
-        [data[_K.start_time], data[_K.exp_num], data[_K.simult_num]],
-        names=(_K.start_time, _K.exp_num, _K.simult_num),
+        [data[_K.start_time], data[_K.exp_num], data[_K.stn_num], data[_K.simult_num]],
+        names=(_K.start_time, _K.exp_num, _K.stn_num, _K.simult_num),
     )
 
     sch_data = xr.Dataset(
@@ -173,6 +187,7 @@ def to_ndarrays(data: ScheduleData) -> ScheduleNdarrayDict:
         _K.start_time: data[_K.start_time].to_numpy(),
         _K.end_time: data[_K.end_time].to_numpy(),
         _K.exp_num: data[_K.exp_num].to_numpy(),
+        _K.stn_num: data[_K.stn_num].to_numpy(),
         _K.simult_num: data[_K.simult_num].to_numpy(),
         _K.pointing: data[_K.pointing].to_numpy(),
     }
@@ -180,6 +195,7 @@ def to_ndarrays(data: ScheduleData) -> ScheduleNdarrayDict:
     return arr_dict
 
 
+# TODO: remove?
 def to_dataframe(ds: ScheduleData) -> pd.DataFrame:
     df = pd.concat(
         t.cast(
@@ -187,8 +203,6 @@ def to_dataframe(ds: ScheduleData) -> pd.DataFrame:
             [
                 ds[_K.end_time].transpose().to_pandas(),
                 ds[_K.pointing].transpose().to_pandas(),
-                ds[_K.exp_num].transpose().to_pandas(),
-                ds[_K.simult_num].transpose().to_pandas(),
             ],
         ),
         axis=1,
@@ -199,15 +213,30 @@ def to_dataframe(ds: ScheduleData) -> pd.DataFrame:
 
 
 def merge_attrs(attrs_dicts: list[dict[AttrKey, t.Any]]) -> dict:
-    """Merging attrs dict, latter attrs dict will override former attrs dict, just like `.update()` method of `dict`"""
+    """
+    Merging attrs dict, latter attrs dict will override former attrs dict, just like `.update()` method of `dict`.
+
+    Returns a shallow copy.
+    """
 
     match len(attrs_dicts):
         case 0:
             return {}
+
         case 1:
-            return attrs_dicts[0]
+            # returns a shallow copy, the dict 'exp_detail_map' will be a new shallow copy as well
+            return {
+                **attrs_dicts[0],
+                _K.exp_detail_map: attrs_dicts[0][_K.exp_detail_map].copy(),
+            }
+
         case _:
-            result: dict[AttrKey, t.Any] = attrs_dicts[0]
+            # returns a shallow copy, the dict 'exp_detail_map' will be a new shallow copy as well
+            result: dict[AttrKey, t.Any] = {
+                **attrs_dicts[0],
+                _K.exp_detail_map: attrs_dicts[0][_K.exp_detail_map].copy(),
+            }
+
             for attrs_dict in attrs_dicts[0:]:
                 result[_K.stn_id] = attrs_dict[_K.stn_id]
                 result[_K.exp_detail_map].update(attrs_dict[_K.exp_detail_map])

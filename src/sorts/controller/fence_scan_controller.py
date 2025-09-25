@@ -85,19 +85,23 @@ def generate_from_state(spec: Spec, state: State) -> Output:
     tx_slice_start_time_masked = tx_slice_start_time[tx_mask]
     tx_pointing_masked = tx_pointing[:, tx_mask]
 
+    tx_stn_num = next(
+        (k for k, v in spec["exp_detail"]["stn_num_map"].items() if v == spec["tx_station"].uid)
+    )
+
     tx_schedule = Schedule.from_ndarrays(
-        data={
+        {
             "stn_id": spec["tx_station"].uid,
             "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
             "start_time": tx_slice_start_time_masked,
             "end_time": tx_slice_start_time_masked + spec["exp_detail"]["slice_duration"],
             "exp_num": np.full(
-                (len(tx_slice_start_time_masked)), spec["exp_detail"]["id"], dtype=np.int16
+                len(tx_slice_start_time_masked), spec["exp_detail"]["id"], dtype=np.int16
             ),
-            "simult_num": np.full((len(tx_slice_start_time_masked)), 0, dtype=np.int16),
+            "stn_num": np.full(len(tx_slice_start_time_masked), tx_stn_num, dtype=np.int16),
+            "simult_num": np.full(len(tx_slice_start_time_masked), 0, dtype=np.int16),
             "pointing": tx_pointing_masked,
-        },
-        station=spec["tx_station"],
+        }
     )
 
     # TODO: `rx_schedule_size` is a bit of a mismisnomer, as out-of-range entries might later be removed
@@ -147,19 +151,23 @@ def generate_from_state(spec: Spec, state: State) -> Output:
         rx_pointing_masked = rx_pointings_enu[:, rx_mask]
         rx_pointings_simult_num_masked = rx_pointings_simult_num[rx_mask]
 
+        rx_stn_num = next(
+            (k for k, v in spec["exp_detail"]["stn_num_map"].items() if v == rx_station.uid)
+        )
+
         rx_schedule = Schedule.from_ndarrays(
-            data={
+            {
                 "stn_id": rx_station.uid,
                 "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
                 "start_time": rx_slice_start_time_masked,
                 "end_time": rx_slice_start_time_masked + spec["exp_detail"]["slice_duration"],
                 "exp_num": np.full(
-                    (len(rx_slice_start_time_masked)), spec["exp_detail"]["id"], dtype=np.int16
+                    len(rx_slice_start_time_masked), spec["exp_detail"]["id"], dtype=np.int16
                 ),
+                "stn_num": np.full(len(rx_slice_start_time_masked), rx_stn_num, dtype=np.int16),
                 "simult_num": rx_pointings_simult_num_masked,
                 "pointing": rx_pointing_masked,
-            },
-            station=rx_station,
+            }
         )
 
         rx_schedules.append(rx_schedule)
@@ -220,7 +228,7 @@ class FenceScanController:
     def compute_single_cycle_pointings(self, start_time: Datetime_Like, end_time: Datetime_Like):
         """Do the computation then update the `state` property and return `self`."""
 
-        exp_detail: ExperimentDetail = self.spec["exp_detail"]
+        exp_detail = self.spec["exp_detail"]
 
         start_time_np = to_datetime64_us(start_time)
         end_time_np = to_datetime64_us(end_time)

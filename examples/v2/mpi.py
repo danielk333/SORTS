@@ -62,8 +62,8 @@ _spobj_pop = master_catalog(
 rand_seed = 120389
 # TODO: reduce the filter size to more sensible value
 spobj_pop = master_catalog_factor(_spobj_pop, treshhold=5.0, seed=rand_seed)
-# spobjs = [tracked_spobj, *[spobj_pop.get_object(i) for i in range(spobj_pop.shape[0])]]
-spobjs = [tracked_spobj]
+spobjs = [tracked_spobj, *[spobj_pop.get_object(i) for i in range(spobj_pop.shape[0])]]
+# spobjs = [tracked_spobj, spobj_pop.get_object(20)]
 
 
 def dsec_sampler(orbit, start_time, end_time):
@@ -73,9 +73,8 @@ def dsec_sampler(orbit, start_time, end_time):
 tracker_ctrl = TrackerController.from_space_object(
     spobj=tracked_spobj,
     epoch=start_time,
-    tx_station=eiscat3d.tx[0],
-    # rx_stations=eiscat3d.rx[0:1],
-    rx_stations=eiscat3d.rx[0:2],
+    tx_station=tx_station,
+    rx_stations=[rx_station_0, rx_station_1],
     exp_detail={
         "id": 0,
         "coh_int_bandwidth": 1.0,
@@ -86,13 +85,17 @@ tracker_ctrl = TrackerController.from_space_object(
         "duty_cycle": 1.0,
         "noise_temp": 150.0,
         "slice_duration": control_slice_duration,
+        "stn_num_map": {
+            0: tx_station.uid,
+            1: rx_station_0.uid,
+            2: rx_station_1.uid,
+        },
     },
 )
 
 fence_scan_ctrl = FenceScanController.from_scan_spec(
-    tx_station=eiscat3d.tx[0],
-    # rx_stations=eiscat3d.rx[0:1],
-    rx_stations=eiscat3d.rx[0:2],
+    tx_station=tx_station,
+    rx_stations=[rx_station_0, rx_station_1],
     exp_detail={
         "id": 1,
         "coh_int_bandwidth": 1.0,
@@ -103,6 +106,11 @@ fence_scan_ctrl = FenceScanController.from_scan_spec(
         "duty_cycle": 1.0,
         "noise_temp": 150.0,
         "slice_duration": control_slice_duration,
+        "stn_num_map": {
+            0: tx_station.uid,
+            1: rx_station_0.uid,
+            2: rx_station_1.uid,
+        },
     },
     azimuth=90,  # sweep from east to west
     min_elevation=30,
@@ -130,6 +138,8 @@ rx_master_schs = [
 
 sim = StxMrxSimulation(
     spec={
+        "tx_station": tx_station,
+        "rx_stations": [rx_station_0, rx_station_1],
         "tx_schedule": tx_master_sch,
         "rx_schedules": rx_master_schs,
         "exp_detail_map": exp_detail_map,
@@ -137,9 +147,6 @@ sim = StxMrxSimulation(
         "start_time": start_time,
         "end_time": end_time,
         "space_objects": spobjs,
-        # "space_objects": [
-        #     o for i, o in enumerate(spobjs) if i in [0, 4, 5, 17]
-        # ],  # just picked a few from the whole list for now
         "dsec_sampler": dsec_sampler,
         # "interpolator_class": Legendre8,
         "interpolator_class": Linear,
@@ -148,6 +155,7 @@ sim = StxMrxSimulation(
 
 calc_start_time = time.perf_counter()
 obss, sim_units = sim.mpi_run(Path(__file__).parent / ".." / ".." / "local_data" / "mpi")
+# obss, sim_units = sim.run()  # or, do not use non-mpi for debugging
 calc_time = time.perf_counter() - calc_start_time
 
 print(f"len(obss): {len(obss)}")

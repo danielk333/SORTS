@@ -9,6 +9,7 @@ from mpi4py import MPI
 from sorts.interpolation import Interpolator
 from sorts.utils import to_datetime64_us
 from sorts.types import Datetime_Like, Float64_as_sec
+from sorts.radar import Station
 from sorts.schedule import Schedule, ExperimentDetailMap
 from sorts.simulation.stx_mrx_simulation.observation import Observation
 from sorts.simulation.stx_mrx_simulation.simulation_unit import (
@@ -34,6 +35,9 @@ class SpaceObjectDsecSampler(t.Protocol):
 class Spec(t.TypedDict):
     """A TypedDict of params"""
 
+    # TODO: param `tx_station` and `rx_stations` are tmp solution
+    tx_station: Station
+    rx_stations: list[Station]
     tx_schedule: Schedule
     rx_schedules: t.Sequence[Schedule]
     exp_detail_map: ExperimentDetailMap

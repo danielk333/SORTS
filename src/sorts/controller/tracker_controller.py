@@ -74,17 +74,21 @@ def generate_from_state(spec: Spec, state: State) -> Output:
 
     tx_sch_time = state["spobj_time"][tx_el_in_range_mask]
     tx_sch_len = len(tx_sch_time)
+    tx_stn_num = next(
+        (k for k, v in spec["exp_detail"]["stn_num_map"].items() if v == spec["tx_station"].uid)
+    )
+
     tx_sch = Schedule.from_ndarrays(
-        data={
+        {
             "stn_id": spec["tx_station"].uid,
             "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
             "start_time": tx_sch_time,
             "end_time": tx_sch_time + spec["exp_detail"]["slice_duration"],
             "exp_num": np.full(tx_sch_len, spec["exp_detail"]["id"], dtype=np.int16),
+            "stn_num": np.full(tx_sch_len, tx_stn_num, dtype=np.int16),
             "simult_num": np.full(tx_sch_len, 0, dtype=np.int16),
             "pointing": tx_pointings,
-        },
-        station=spec["tx_station"],
+        }
     )
 
     rx_schs: list[Schedule] = []
@@ -93,18 +97,22 @@ def generate_from_state(spec: Spec, state: State) -> Output:
     ):
         rx_sch_time = state["spobj_time"][rx_mask]
         rx_sch_len = len(rx_sch_time)
+        rx_stn_num = next(
+            (k for k, v in spec["exp_detail"]["stn_num_map"].items() if v == rx_stn.uid)
+        )
+
         rx_schs.append(
             Schedule.from_ndarrays(
-                data={
+                {
                     "stn_id": rx_stn.uid,
                     "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
                     "start_time": rx_sch_time,
                     "end_time": rx_sch_time + spec["exp_detail"]["slice_duration"],
                     "exp_num": np.full(rx_sch_len, spec["exp_detail"]["id"], dtype=np.int16),
+                    "stn_num": np.full(rx_sch_len, rx_stn_num, dtype=np.int16),
                     "simult_num": np.full(rx_sch_len, 0, dtype=np.int16),
                     "pointing": rx_pointings,
-                },
-                station=rx_stn,
+                }
             )
         )
 

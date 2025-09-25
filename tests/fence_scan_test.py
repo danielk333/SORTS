@@ -153,6 +153,11 @@ def south_to_north_circular_orbit_test():
             "duty_cycle": 1.0,
             "noise_temp": 150.0,
             "slice_duration": control_slice_duration,
+            "stn_num_map": {
+                0: tx_rx_0_stn.uid,
+                1: rx_1_stn.uid,
+            },
+            "stn_pairs": [(0, 1)],
         },
         azimuth=90,  # sweep from east to west
         min_elevation=0,
@@ -166,6 +171,8 @@ def south_to_north_circular_orbit_test():
 
     sim = StxMrxSimulation(
         spec={
+            "tx_station": tx_rx_0_stn,
+            "rx_stations": [tx_rx_0_stn, rx_1_stn],
             "tx_schedule": fence_schs.tx_schedule,
             "rx_schedules": fence_schs.rx_schedules,
             "exp_detail_map": exp_detail_map,
@@ -205,25 +212,25 @@ def south_to_north_circular_orbit_test():
     # assert that at all rx_pointing of `obss[2]` in ecef is the same as those with same `time` in `obss[1]`
     obs_1_rx_station = obss[1].passage["rx_station"]
     obs_1_state_slice = obss[1].get_state_slice()
-    obs_3_rx_station = obss[2].passage["rx_station"]
-    obs_3_state_slice = obss[2].get_state_slice()
+    obs_2_rx_station = obss[2].passage["rx_station"]
+    obs_2_state_slice = obss[2].get_state_slice()
 
-    obs_3_pointings_in_ecef = (
+    obs_2_pointings_in_ecef = (
         enu_to_ecef(
-            lat=obs_3_rx_station.ecef_lat,
-            lon=obs_3_rx_station.ecef_lon,
-            alt=obs_3_rx_station.ecef_alt,
-            enu=obs_3_state_slice[_SuK.rx_pointing],
+            lat=obs_2_rx_station.ecef_lat,
+            lon=obs_2_rx_station.ecef_lon,
+            alt=obs_2_rx_station.ecef_alt,
+            enu=obs_2_state_slice[_SuK.rx_pointing],
             degrees=True,
         )
-        + obs_3_rx_station.ecef[:, np.newaxis]
+        + obs_2_rx_station.ecef[:, np.newaxis]
     )
-    obs_0_pointings_at_obs_3_start_times_in_ecef = (
+    obs_1_pointings_at_obs_2_start_times_in_ecef = (
         enu_to_ecef(
             lat=obs_1_rx_station.ecef_lat,
             lon=obs_1_rx_station.ecef_lon,
             alt=obs_1_rx_station.ecef_alt,
-            enu=obs_1_state_slice.loc[{_SuK.multi_index: obs_3_state_slice[_SuK.multi_index]}][
+            enu=obs_1_state_slice.loc[{_SuK.multi_index: obs_2_state_slice[_SuK.multi_index]}][
                 _SuK.rx_pointing
             ],
             degrees=True,
@@ -232,7 +239,7 @@ def south_to_north_circular_orbit_test():
     )
 
     assert np.all(
-        (obs_3_pointings_in_ecef - obs_0_pointings_at_obs_3_start_times_in_ecef)
+        (obs_2_pointings_in_ecef - obs_1_pointings_at_obs_2_start_times_in_ecef)
         < pointing_range_equality_thld
     )
 

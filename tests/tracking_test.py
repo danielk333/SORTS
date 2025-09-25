@@ -133,6 +133,10 @@ def south_to_north_circular_orbit_test():
             "duty_cycle": 1.0,
             "noise_temp": 150.0,
             "slice_duration": control_slice_duration,
+            "stn_num_map": {
+                0: test_stn.uid,
+            },
+            "stn_pairs": [(0, 0)],
         },
     )
 
@@ -142,6 +146,8 @@ def south_to_north_circular_orbit_test():
 
     sim = StxMrxSimulation(
         spec={
+            "tx_station": test_stn,
+            "rx_stations": [test_stn],
             "tx_schedule": tracker_schs.tx_schedule,
             "rx_schedules": tracker_schs.rx_schedules,
             "exp_detail_map": exp_detail_map,
