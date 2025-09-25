@@ -120,7 +120,7 @@ def south_to_north_circular_orbit_test():
             elevation=0.0,
             frequency=233e6,  # same as eisat_3d
         ),
-        uid="test_station, tx-rx, 0",
+        uid=0,
     )
 
     # An offseted station for testing behaviours related to `min_elevation`
@@ -134,7 +134,14 @@ def south_to_north_circular_orbit_test():
             elevation=0.0,
             frequency=233e6,  # same as eisat_3d
         ),
-        uid="test_station, rx, 1",
+        uid=1,
+    )
+
+    stn_num_map = (
+        {
+            0: "test_station, tx-rx, 0",
+            1: "test_station, rx, 1",
+        },
     )
 
     def dsec_sampler(orbit, start_time, end_time):
@@ -153,10 +160,6 @@ def south_to_north_circular_orbit_test():
             "duty_cycle": 1.0,
             "noise_temp": 150.0,
             "slice_duration": control_slice_duration,
-            "stn_num_map": {
-                0: tx_rx_0_stn.uid,
-                1: rx_1_stn.uid,
-            },
             "stn_pairs": [(0, 1)],
         },
         azimuth=90,  # sweep from east to west

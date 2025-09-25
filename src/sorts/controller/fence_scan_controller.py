@@ -85,10 +85,6 @@ def generate_from_state(spec: Spec, state: State) -> Output:
     tx_slice_start_time_masked = tx_slice_start_time[tx_mask]
     tx_pointing_masked = tx_pointing[:, tx_mask]
 
-    tx_stn_num = next(
-        (k for k, v in spec["exp_detail"]["stn_num_map"].items() if v == spec["tx_station"].uid)
-    )
-
     tx_schedule = Schedule.from_ndarrays(
         {
             "stn_id": spec["tx_station"].uid,
@@ -98,7 +94,9 @@ def generate_from_state(spec: Spec, state: State) -> Output:
             "exp_num": np.full(
                 len(tx_slice_start_time_masked), spec["exp_detail"]["id"], dtype=np.int16
             ),
-            "stn_num": np.full(len(tx_slice_start_time_masked), tx_stn_num, dtype=np.int16),
+            "stn_num": np.full(
+                len(tx_slice_start_time_masked), spec["tx_station"].uid, dtype=np.int16
+            ),
             "simult_num": np.full(len(tx_slice_start_time_masked), 0, dtype=np.int16),
             "pointing": tx_pointing_masked,
         }
@@ -151,10 +149,6 @@ def generate_from_state(spec: Spec, state: State) -> Output:
         rx_pointing_masked = rx_pointings_enu[:, rx_mask]
         rx_pointings_simult_num_masked = rx_pointings_simult_num[rx_mask]
 
-        rx_stn_num = next(
-            (k for k, v in spec["exp_detail"]["stn_num_map"].items() if v == rx_station.uid)
-        )
-
         rx_schedule = Schedule.from_ndarrays(
             {
                 "stn_id": rx_station.uid,
@@ -164,7 +158,7 @@ def generate_from_state(spec: Spec, state: State) -> Output:
                 "exp_num": np.full(
                     len(rx_slice_start_time_masked), spec["exp_detail"]["id"], dtype=np.int16
                 ),
-                "stn_num": np.full(len(rx_slice_start_time_masked), rx_stn_num, dtype=np.int16),
+                "stn_num": np.full(len(rx_slice_start_time_masked), rx_station.uid, dtype=np.int16),
                 "simult_num": rx_pointings_simult_num_masked,
                 "pointing": rx_pointing_masked,
             }

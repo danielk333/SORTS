@@ -57,12 +57,19 @@ eiscat3d = get_radar("eiscat3d", "stage1-array")
 # eiscat3d = get_radar("nostra", "example1")
 # TODO: these patching of station prop should be integrated into codebase
 tx_station: Station = eiscat3d.tx[0]
-tx_station.uid = "eiscat3d, stage1-array, tx, 0"
+tx_station.uid = 0
 rx_station_0: Station = eiscat3d.rx[0]
-rx_station_0.uid = "eiscat3d, stage1-array, rx, 0"
+rx_station_0.uid = 1
 rx_station_1: Station = eiscat3d.rx[1]
-rx_station_1.uid = "eiscat3d, stage1-array, rx, 1"
+rx_station_1.uid = 2
 
+stn_num_map = (
+    {
+        0: "eiscat3d, stage1-array, tx, 0",
+        1: "eiscat3d, stage1-array, rx, 0",
+        2: "eiscat3d, stage1-array, rx, 1",
+    },
+)
 
 tracked_spobj = SpaceObject(
     oid=-1,
@@ -121,11 +128,6 @@ tracker_ctrl = TrackerController.from_space_object(
         "duty_cycle": 1.0,
         "noise_temp": 150.0,
         "slice_duration": control_slice_duration,
-        "stn_num_map": {
-            0: tx_station.uid,
-            1: rx_station_0.uid,
-            2: rx_station_1.uid,
-        },
         "stn_pairs": [(0, 1), (0, 2)],
     },
 )
@@ -144,11 +146,6 @@ fence_scan_ctrl = FenceScanController.from_scan_spec(
         "duty_cycle": 1.0,
         "noise_temp": 150.0,
         "slice_duration": control_slice_duration,
-        "stn_num_map": {
-            0: tx_station.uid,
-            1: rx_station_0.uid,
-            2: rx_station_1.uid,
-        },
         "stn_pairs": [(0, 1), (0, 2)],
     },
     azimuth=90,  # sweep from east to west

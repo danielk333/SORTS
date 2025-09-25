@@ -21,7 +21,7 @@ def priority_scheduling_interleaved_schedule_test():
     # 30min long, 2hr intv
     sch_data_a = schedule_data_funcs.from_ndarrays(
         {
-            _SK.stn_id: "stn_a",
+            _SK.stn_id: 0,
             _SK.exp_detail_map: {
                 0: {
                     "id": 0,
@@ -33,7 +33,6 @@ def priority_scheduling_interleaved_schedule_test():
                     "duty_cycle": 0,
                     "noise_temp": 0,
                     "slice_duration": np.timedelta64(3600, "s"),
-                    "stn_num_map": {0: "stn_a"},
                     "stn_pairs": [(0, 0)],
                 }
             },
@@ -57,7 +56,7 @@ def priority_scheduling_interleaved_schedule_test():
     # 1hr long, 1hr intv
     sch_data_b = schedule_data_funcs.from_ndarrays(
         {
-            _SK.stn_id: "stn_b",
+            _SK.stn_id: 1,
             _SK.exp_detail_map: {
                 1: {
                     "id": 1,
@@ -69,7 +68,6 @@ def priority_scheduling_interleaved_schedule_test():
                     "duty_cycle": 0,
                     "noise_temp": 0,
                     "slice_duration": np.timedelta64(3600, "s"),
-                    "stn_num_map": {0: "stn_b"},
                     "stn_pairs": [(1, 1)],
                 }
             },
@@ -93,7 +91,6 @@ def priority_scheduling_interleaved_schedule_test():
     resultant_sch_data = priority_scheduling([sch_data_a, sch_data_b])
 
     assert all(xr.ufuncs.equal(resultant_sch_data[_SK.exp_num], [0, 1] * 12))
-    assert resultant_sch_data.attrs[_SK.stn_id] == "stn_a"
 
     return
 

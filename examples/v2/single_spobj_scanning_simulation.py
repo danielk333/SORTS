@@ -23,9 +23,14 @@ end_time = Time("2004-01-01 00:10:00Z", format="iso", scale="utc")  # 600 sec af
 eiscat3d = sorts.get_radar("eiscat3d", "stage1-array")
 
 tx_station: sorts.Station = eiscat3d.tx[0]
-tx_station.uid = "eiscat3d, stage1-array, tx, 0"
+tx_station.uid = 0
 rx_station: sorts.Station = eiscat3d.rx[0]
-rx_station.uid = "eiscat3d, stage1-array, rx, 0"
+rx_station.uid = 1
+
+stn_num_map = {
+    0: "eiscat3d, stage1-array, tx, 0",
+    1: "eiscat3d, stage1-array, rx, 0",
+}
 
 exp_detail_map: dict[int, ExperimentDetail] = {
     0: {
@@ -38,10 +43,6 @@ exp_detail_map: dict[int, ExperimentDetail] = {
         "duty_cycle": 1.0,
         "noise_temp": 150.0,
         "slice_duration": np.timedelta64(10_000, "us"),  # 10ms
-        "stn_num_map": {
-            0: tx_station.uid,
-            1: rx_station.uid,
-        },
         "stn_pairs": [(0, 1)],
     }
 }

@@ -178,21 +178,32 @@ class SimulationUnit:
             names=(_K.time, _K.exp_num, _K.rx_simult_num),
         )
 
+        tx_reindex_selector = xr.Coordinates.from_pandas_multiindex(
+            pd.MultiIndex.from_arrays(
+                [
+                    rx_time,
+                    rx_exp_num,
+                    np.full(len(rx_time), kwargs["tx_station"].uid, dtype=np.int16),
+                    np.full(len(rx_time), 0, dtype=np.int16),  # assuming single tx
+                ],
+                names=(_SK.start_time, _SK.exp_num, _SK.stn_num, _SK.simult_num),
+            ),
+            _SK.multi_index,
+        )
+
         state_data = xr.Dataset(
             coords={
                 **xr.Coordinates.from_pandas_multiindex(multi_index, _K.multi_index),
                 _K.enu: [_K.e, _K.n, _K.u],
             },
             data_vars={
-                # TODO: tmp used `slice(None)` for index level 'stn_num';
-                #   should use int id for station and add a int id to str label mapping in simulation level?
                 # NOTE: we used `.loc` instead of `reindex` here because we cannot get `reindex` working
                 # TODO: investigate why `reindex` won't work
                 #   not working: `tx_sch._data[_SK.pointing].reindex({_SK.multi_index: [(np.datetime64("2025-01-01 02:45:01", "us"), 0, 0), ...]})`
                 _K.tx_pointing: (
                     (_K.enu, _K.multi_index),
                     tx_sch._data[_SK.pointing]
-                    .loc[{_SK.multi_index: (rx_time, rx_exp_num, slice(None), slice(None))}]
+                    .loc[{_SK.multi_index: tx_reindex_selector[_SK.multi_index]}]
                     .to_numpy(),
                 ),
                 _K.rx_pointing: (

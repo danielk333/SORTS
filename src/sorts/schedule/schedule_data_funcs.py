@@ -79,9 +79,6 @@ class ExperimentDetail(t.TypedDict):
     "Duration of a control slice, in micro-second"
 
     # TODO: re-eval if we should we `t.NotRequired` here
-    stn_num_map: dict[int, StationId]
-
-    # TODO: re-eval if we should we `t.NotRequired` here
     stn_pairs: t.NotRequired[list[tuple[int, int]]]
     """TX-RX station number pairs"""
 
@@ -123,7 +120,7 @@ def default_station():
         alt=0.0,
         min_elevation=0.0,
         beam=None,  # might not work when the `Station` typing is tightened
-        uid=f"__generated_by_{default_station.__name__}",
+        uid=0,
     )
 
 
