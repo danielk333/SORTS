@@ -270,31 +270,41 @@ class StxMrxSimulation:
     def mpi_run(
         self, persistence_dir_path: str | Path
     ) -> tuple[list[Observation], list[SimulationUnit]]:
-        persist_dir = Path(persistence_dir_path)
-        assert persist_dir.exists()
-        assert persist_dir.is_dir()
+        try:
+            persist_dir = Path(persistence_dir_path)
+            assert persist_dir.exists()
+            assert persist_dir.is_dir()
 
-        master_proc_rank: t.Final = 0
+            master_proc_rank: t.Final = 0
 
-        comm = MPI.COMM_WORLD
-        r = comm.Get_rank()
-        rank_size = comm.Get_size()
+            comm = MPI.COMM_WORLD
+            r = comm.Get_rank()
+            rank_size = comm.Get_size()
 
-        if r == master_proc_rank:  # master
-            obss, sim_units = mpi_master_proc_loop(
-                comm=comm, master_proc_rank=r, spec=self.spec, rank_size=rank_size
+            if r == master_proc_rank:  # master
+                obss, sim_units = mpi_master_proc_loop(
+                    comm=comm, master_proc_rank=r, spec=self.spec, rank_size=rank_size
+                )
+
+                self.obss = obss
+                self.sim_units = sim_units
+                return self.obss, self.sim_units
+
+            else:  # workers
+                mpi_worker_proc_loop(
+                    comm=comm,
+                    master_proc_rank=master_proc_rank,
+                    worker_proc_rank=r,
+                    persist_dir=persist_dir,
+                )
+
+                return self.obss, self.sim_units
+
+        except Exception as err:
+            comm = MPI.COMM_WORLD
+            r = comm.Get_rank()
+
+            logger.error(
+                f"terminating mpi proc due to exception occured in rank: {r}, error: {err}"
             )
-
-            self.obss = obss
-            self.sim_units = sim_units
-            return self.obss, self.sim_units
-
-        else:  # workers
-            mpi_worker_proc_loop(
-                comm=comm,
-                master_proc_rank=master_proc_rank,
-                worker_proc_rank=r,
-                persist_dir=persist_dir,
-            )
-
-            return self.obss, self.sim_units
+            comm.Abort(1)
