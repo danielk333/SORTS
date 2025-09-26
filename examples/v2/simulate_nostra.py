@@ -1,206 +1,142 @@
-""" """
-
-import pickle
-import time
+import time, logging, argparse
 from pathlib import Path
 import numpy as np
-from scipy.interpolate import interp1d
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 from astropy.time import Time, TimeDelta
-import pyvista as pv
-from pyvista import examples
-import argparse
-
 import sorts
-from sorts import _v2 as sortsV2
+from sorts import (
+    interpolation,
+    population,
+    propagator,
+    space_object,
+    radar,
+    radar,
+    controller,
+    schedule,
+    simulation,
+)
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+logger.info("starting example")
 
 parser = argparse.ArgumentParser()
-parser.add_argument("master_catalog")
-parser.add_argument("output_folder")
-parser.add_argument("-c", "-clobber", action="store_true")
+parser.add_argument(
+    "-master_catalog",
+    default=Path(__file__).parent / ".." / ".." / "local_data" / "celn_20090501_00.sim",
+)
+parser.add_argument(
+    "-output_folder", default=Path(__file__).parent / ".." / ".." / "local_data" / "simulate_nostra"
+)
+# parser.add_argument("-c", "-clobber", action="store_true") # TODO: implement
 args = parser.parse_args()
 
 catalog_fpath = Path(args.master_catalog)
 output_folder = Path(args.output_folder)
-pickle_fpath = output_folder / f"{Path(__file__).name}.pickle"
 
 
-epoch = Time("2004-01-01 00:00:00Z", format="iso", scale="utc")
 start_time = Time("2004-01-01 00:00:00Z", format="iso", scale="utc")
-end_time = start_time + TimeDelta(6 * 10, format="sec")
+# end_time = start_time + TimeDelta(6 * 10, format="sec")
+end_time = start_time + TimeDelta(6 * 10 * 60, format="sec")
+control_slice_duration = np.timedelta64(10_000, "us")  # 10ms
+
 eiscat3d = sorts.get_radar("eiscat3d", "stage1-array")
 
-_pop = sorts.population.master_catalog(
+tx_station: radar.Station = eiscat3d.tx[0]
+tx_station.uid = 0
+rx_station_0: radar.Station = eiscat3d.rx[0]
+rx_station_0.uid = 1
+_pop = population.master_catalog(
     catalog_fpath,
-    propagator=sorts.propagator.SGP4,
+    propagator=propagator.SGP4,
     propagator_options={"settings": {"in_frame": "TEME", "out_frame": "ITRF"}},
 )
 rand_seed = 120389
 
-pop = sorts.population.master_catalog_factor(_pop, treshhold=1.0, seed=rand_seed)
+
+def dsec_sampler(orbit, start_time, end_time):
+    return np.arange(0, (end_time - start_time) / np.timedelta64(1, "s"), 120, dtype=np.float64)
+
+
+pop = population.master_catalog_factor(_pop, treshhold=1.0, seed=rand_seed)
 print(f"true population size: {len(pop)}")
 pop.delete(slice(100, None))
 space_objects = [obj for obj in pop]
 print(f"clamped population size: {len(space_objects)}")
 
-exp_detail = sortsV2.detection_config.ExperimentDetail(
-    coh_int_bandwidth=1.0,
-    ipp=1.0,
-    pulse_length=1.0,
-    power=5e8,
-    bandwidth=52.08333333333333,
-    duty_cycle=1.0,
-    noise_temp=150.0,
-)
-exp_num_map: dict[int, sortsV2.detection_config.ExperimentDetail] = {0: exp_detail}
-
-fence_scan_controller = sortsV2.controller.FenceScanController(
-    tx_station=eiscat3d.tx[0],
-    rx_station=eiscat3d.rx[0],
-    azimuth_deg=90,
-    min_elevation_deg=30,
-    dwell_s=0.1,
-    num=40,
-    start_time=start_time,
-    end_time=end_time,
-    exp_num=0,
+tracker_ctrl = controller.TrackerController.from_space_object(
+    spobj=space_objects[0],
+    epoch=start_time,
+    tx_station=tx_station,
+    rx_stations=[rx_station_0],
+    exp_detail={
+        "id": 0,
+        "coh_int_bandwidth": 1.0,
+        "ipp": 1.0,
+        "pulse_length": 1.0,
+        "power": 5000000.0,
+        "bandwidth": 52.08333333333333,
+        "duty_cycle": 1.0,
+        "noise_temp": 150.0,
+        "slice_duration": control_slice_duration,
+    },
 )
 
-(tx_schedule, rx_schedule) = fence_scan_controller.generate(start_time, end_time)
-
-
-sim = sortsV2.Simulation(
-    epoch=epoch,
-    start_time=start_time,
-    end_time=end_time,
-    detection_config=sortsV2.detection_config.SimpleStxSrx(
-        tx_station=eiscat3d.tx[0],
-        tx_schedule=tx_schedule,
-        rx_station=eiscat3d.rx[0],
-        rx_schedule=rx_schedule,
-        exp_num_map=exp_num_map,
-    ),
-    space_objects=space_objects,
-    space_objects_dt_sampler_s=lambda orbit, start_time, end_time: np.arange(
-        start_time, end_time, 20.0
-    ),
-    space_objects_dt_interpolator_s=sorts.interpolation.Linear,
+fence_scan_ctrl = controller.FenceScanController.from_scan_spec(
+    tx_station=tx_station,
+    rx_stations=[rx_station_0],
+    exp_detail={
+        "id": 1,
+        "coh_int_bandwidth": 1.0,
+        "ipp": 1.0,
+        "pulse_length": 1.0,
+        "power": 5000000.0,
+        "bandwidth": 52.08333333333333,
+        "duty_cycle": 1.0,
+        "noise_temp": 150.0,
+        "slice_duration": control_slice_duration,
+    },
+    azimuth=90,  # sweep from east to west
+    min_elevation=30,
+    pointings_per_cycle=40,
+    scan_range=np.linspace(300e3, 1000e3, num=10, dtype=np.float64),
 )
 
-if Path(pickle_fpath).is_file() and not args.clobber:
-    with open(pickle_fpath, "rb") as f:
-        saved_data = pickle.load(f)
-        obss = saved_data["obss"]
-        masks = saved_data["masks"]
-        calc_time = saved_data["calc_time"]
-        spobjs_states_interps = saved_data["spobjs_states_interps"]
-else:
-    calc_start_time = time.perf_counter()
-    obss, masks = sim.calculate_observations()
-    calc_time = time.perf_counter() - calc_start_time
-    spobjs_states_interps = sim._spobjs_states_interps
+tracker_sch = tracker_ctrl.generate(start_time, end_time)
+fence_sch = fence_scan_ctrl.generate(start_time, end_time)
 
-    with open(pickle_fpath, "wb") as f:
-        pickle.dump(
-            {
-                "obss": obss,
-                "masks": masks,
-                "calc_time": calc_time,
-                "spobjs_states_interps": spobjs_states_interps,
-            },
-            f,
-        )
-        print(f"calculate_observations took {calc_time} sec")
+exp_detail_map = {
+    tracker_ctrl.spec["exp_detail"]["id"]: tracker_ctrl.spec["exp_detail"],
+    fence_scan_ctrl.spec["exp_detail"]["id"]: fence_scan_ctrl.spec["exp_detail"],
+}
 
+master_sch = schedule.Schedule.priority_scheduling([tracker_sch, fence_sch])
 
-##
-# some matplotlib plottings
-##
-
-# find the index of the space objects which has non-empty observation list
-nonempty_obss_idx_ls = [
-    x[0] for x in filter(lambda x: len(x[1]) != 0, enumerate(obss[space_objects_slice]))
-]
-print(f"space object with observations: {nonempty_obss_idx_ls}")
-target_spobj_idx = nonempty_obss_idx_ls[0]
-
-obs = obss[target_spobj_idx][0]
-sch_dt_s_arr_pass_mask = masks[target_spobj_idx][0]
-spobjs_states_interp = spobjs_states_interps[target_spobj_idx]
-
-fig, axs = plt.subplots(2, 2)
-
-sch_dt_s_arr = (sim.detection_config.rx_schedule.stt_tstmp_us - np.datetime64(sim.epoch)).astype(
-    "timedelta64[us]"
-).astype(np.float64) / 1e6
-sch_dt_s_arr_pass = sch_dt_s_arr[sch_dt_s_arr_pass_mask]
-
-axs[0, 0].plot(
-    sim.detection_config.rx_schedule.stt_tstmp_us[sch_dt_s_arr_pass_mask],
-    np.log10(np.clip(obs.snr, a_min=1, a_max=None)) * 10,
-    "r",
+sim = simulation.StxMrxSimulation(
+    spec={
+        "tx_station": tx_station,
+        "rx_stations": [rx_station_0],
+        "schedule": master_sch,
+        "exp_detail_map": exp_detail_map,
+        "epoch": start_time,
+        "start_time": start_time,
+        "end_time": end_time,
+        "space_objects": space_objects,
+        "dsec_sampler": dsec_sampler,
+        # "interpolator_class": interpolation.Legendre8,
+        "interpolator_class": interpolation.Linear,
+    }
 )
 
-# interpolation functions for secondary x-axis
-datetimef = mdates.date2num(sim.detection_config.rx_schedule.stt_tstmp_us[sch_dt_s_arr_pass_mask])
-# NOTE: `fill_value="extrapolate"` triggers error but is actually okay
-datetimef_to_timedelta = interp1d(datetimef, sch_dt_s_arr_pass, fill_value="extrapolate")  # type: ignore
-timedelta_to_datetimef = interp1d(sch_dt_s_arr_pass, datetimef, fill_value="extrapolate")  # type: ignore
 
-# add secondary x-axis
-axs[0, 0].secondary_xaxis("top", functions=(datetimef_to_timedelta, timedelta_to_datetimef))
+calc_start_time = time.perf_counter()
+obss, sim_units = sim.mpi_run(output_folder)
+# obss, sim_units = sim.run()  # or, do not use non-mpi for debugging
+calc_time = time.perf_counter() - calc_start_time
 
-axs[0, 1].plot(
-    sim.detection_config.rx_schedule.stt_tstmp_us,
-    sim.detection_config.rx_schedule.pointing_az,
-    "r",
-)
-axs[0, 1].plot(
-    sim.detection_config.rx_schedule.stt_tstmp_us,
-    sim.detection_config.rx_schedule.pointing_el,
-    "g",
-)
+print(f"len(obss): {len(obss)}")
+for idx, obs in enumerate(obss):
+    print(f"obs: {idx}")
+    print(obs.passage)
+    print(obs.get_state_slice())
 
-# plt.show() # tmp disabled
-
-##
-# some vtk plottings
-#
-# TODO: clean up the plottings
-##
-plotter = pv.Plotter()
-# dt_s_arr_1_yr = np.arange(0, 60 * 60 * 24 * 365, 60 * 60 * 24, dtype=np.float64)
-dt_s_arr_path = np.arange(-3600, 3600, 60, dtype=np.float64)
-obs_splines: list[pv.PolyData] = []
-path_splines: list[pv.PolyData] = []
-for target_spobj_idx in nonempty_obss_idx_ls[:]:
-    # for target_spobj_idx in [nonempty_obss_idx_ls[1]]: # plot just 1 spobj for debugging
-    spobj = space_objects[target_spobj_idx]
-    spobjs_states_interp = spobjs_states_interps[target_spobj_idx]
-
-    path_pts = spobj.get_state(dt_s_arr_path)[:3].T
-    spline = pv.Spline(path_pts, 1000)  # generate a spline with n interpolation points
-    path_splines.append(spline)
-
-    obs_pts = spobjs_states_interp.get_state(sch_dt_s_arr_pass)[:3].T
-    spline = pv.Spline(obs_pts, 100)  # generate a spline with n interpolation points
-    obs_splines.append(spline)
-
-
-# refs:
-# - https://docs.pyvista.org/api/examples/_autosummary/pyvista.examples.planets.load_earth.html
-# - https://docs.pyvista.org/examples/99-advanced/planets.html
-# - https://docs.pyvista.org/examples/00-load/create_spline#:~:text=The%20spline%20can%20also%20be%20plotted%20as%20a%20plain%20line
-
-earth = examples.planets.load_earth(radius=6371e3)
-# earth.rotate_z(angle=180, inplace=True)
-texture = examples.load_globe_texture()
-image_path = examples.planets.download_stars_sky_background(load=False)
-plotter.add_mesh(earth, texture=texture)
-for spline in path_splines:
-    plotter.add_mesh(spline, color="b", line_width=2)
-for spline in obs_splines:
-    plotter.add_mesh(spline, color="r", line_width=5)
-plotter.show_grid()  # type: ignore
-plotter.show()
+exit()
