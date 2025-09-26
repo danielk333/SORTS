@@ -50,18 +50,7 @@ class Spec(t.TypedDict):
     interpolator_class: type[Interpolator]
 
 
-def mpi_master_proc_loop(
-    comm: MPI.Intracomm,
-    master_proc_rank: int,
-    spec: Spec,
-    rank_size: int,
-):
-    logger.debug(f"running in mpi with rank: {rank_size}")
-    logger.info(f"master: {master_proc_rank} | simulation preparation start")
-
-    sim_units = []
-    obss = []
-
+def prepare_simulation_unit_params(spec: Spec) -> list[FromPassagesOverTxRxStationPairParam]:
     spobjs_smpl_dsec, spobjs_smpl_states = funcs.sample_and_propagate_space_objects_states(
         sampler=spec["dsec_sampler"],
         spobjs=spec["space_objects"],
@@ -88,8 +77,24 @@ def mpi_master_proc_loop(
         passages_lists=passages_lists,
         spobjs_interpolators=spobjs_interpolators,
     )
+    logger.info(f"prepare_simulation_unit_params done")
 
-    logger.info(f"master: {master_proc_rank} | simulation preparation done")
+    return sim_units_param
+
+
+def mpi_master_proc_loop(
+    comm: MPI.Intracomm,
+    master_proc_rank: int,
+    spec: Spec,
+    rank_size: int,
+):
+    logger.debug(f"running in mpi with rank: {rank_size}")
+    logger.info(f"master: {master_proc_rank} | simulation preparation start")
+
+    sim_units = []
+    obss = []
+
+    sim_units_param = prepare_simulation_unit_params(spec)
 
     ##
     # parallization section
@@ -216,33 +221,7 @@ class StxMrxSimulation:
         self.sim_units = []
         self.obss = []
 
-        spobjs_smpl_dsec, spobjs_smpl_states = funcs.sample_and_propagate_space_objects_states(
-            sampler=self.spec["dsec_sampler"],
-            spobjs=self.spec["space_objects"],
-            start_time=to_datetime64_us(self.spec["start_time"]),
-            end_time=to_datetime64_us(self.spec["end_time"]),
-        )
-        logger.debug("sample and propagate done")
-
-        spobjs_interpolators = [
-            self.spec["interpolator_class"](spobj_smpl_states, spobj_smpl_dsec)
-            for spobj_smpl_dsec, spobj_smpl_states in zip(spobjs_smpl_dsec, spobjs_smpl_states)
-        ]
-        logger.debug("interpolators done")
-
-        passages_lists = funcs.find_passages(
-            spec=self.spec,
-            spobjs_smpl_dsec=spobjs_smpl_dsec,
-            spobjs_smpl_states=spobjs_smpl_states,
-        )
-        logger.debug("find_passages done")
-
-        sim_units_param = funcs.derive_simulation_unit_params(
-            spec=self.spec,
-            passages_lists=passages_lists,
-            spobjs_interpolators=spobjs_interpolators,
-        )
-        logger.debug("derive_simulation_units done")
+        sim_units_param = prepare_simulation_unit_params(self.spec)
 
         pbar = tqdm(desc="simulating", total=len(sim_units_param))
 
