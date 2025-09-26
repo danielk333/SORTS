@@ -88,7 +88,6 @@ def generate_from_state(spec: Spec, state: State) -> Schedule:
 
     tx_schdata = schedule_data_funcs.from_ndarrays(
         {
-            "stn_id": spec["tx_station"].uid,
             "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
             "start_time": tx_slice_start_time_masked,
             "end_time": tx_slice_start_time_masked + spec["exp_detail"]["slice_duration"],
@@ -152,7 +151,6 @@ def generate_from_state(spec: Spec, state: State) -> Schedule:
 
         rx_schdata = schedule_data_funcs.from_ndarrays(
             {
-                "stn_id": rx_station.uid,
                 "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
                 "start_time": rx_slice_start_time_masked,
                 "end_time": rx_slice_start_time_masked + spec["exp_detail"]["slice_duration"],

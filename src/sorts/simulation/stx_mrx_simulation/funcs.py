@@ -181,8 +181,6 @@ def derive_simulation_unit_params(
         groupped_passages = group_passages_by_tx_rx_station_pair(passages_of_a_spobj)
 
         for stn_id_pair, passages in groupped_passages.items():
-            # TODO: this assume spec["rx_stations"] ordering is the same as spec["rx_schedules"],
-            #   which should be correct but should not be relied on.
             rx_stn = next((stn for stn in spec["rx_stations"] if stn.uid == stn_id_pair[1]))
 
             params.append(

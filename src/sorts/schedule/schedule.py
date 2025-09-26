@@ -40,11 +40,6 @@ class Schedule:
 
     @classmethod
     def empty(cls) -> t.Self:
-        stn_id = f"__generated_by_{cls.empty.__name__}"
-
-        sch_data = schedule_data_funcs.empty_data()
-        sch_data.attrs[_K.stn_id] = stn_id
-
         return cls(data=schedule_data_funcs.empty_data())
 
     @classmethod

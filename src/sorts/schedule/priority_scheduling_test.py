@@ -21,7 +21,6 @@ def priority_scheduling_interleaved_schedule_test():
     # 30min long, 2hr intv
     sch_data_a = schedule_data_funcs.from_ndarrays(
         {
-            _SK.stn_id: 0,
             _SK.exp_detail_map: {
                 0: {
                     "id": 0,
@@ -56,7 +55,6 @@ def priority_scheduling_interleaved_schedule_test():
     # 1hr long, 1hr intv
     sch_data_b = schedule_data_funcs.from_ndarrays(
         {
-            _SK.stn_id: 1,
             _SK.exp_detail_map: {
                 1: {
                     "id": 1,

@@ -28,8 +28,7 @@ DataKey = t.Literal[
     "two_way_range",
     "rx_range_rate",
 ]
-AttrKey = t.Literal["tx_stn_id", "rx_stn_id"]
-Key = t.Literal[DataKey, CoordKey, AttrKey]
+Key = t.Literal[DataKey, CoordKey]
 
 
 # TODO: updated the name with tx/rx as suffix to prefix
@@ -53,8 +52,6 @@ class _K:
     rx_range: t.Final = "rx_range"
     two_way_range: t.Final = "two_way_range"
     rx_range_rate: t.Final = "rx_range_rate"
-    tx_stn_id: t.Final = "tx_stn_id"
-    rx_stn_id: t.Final = "rx_stn_id"
 
 
 assert_class_attributes_equal_to(_K, t.get_args(Key))
@@ -84,9 +81,6 @@ A xarray `Dataset` with:
       rx_range       (multi_index) float64
       two_way_range  (multi_index) float64
       rx_range_rate  (multi_index) float64
-  Attributes:
-      tx_stn_id:   str
-      rx_stn_id:   str
   ```
 """
 
@@ -217,10 +211,6 @@ class SimulationUnit:
                     (_K.enu, _K.multi_index),
                     rx_schdata[_SK.pointing].loc[:, rx_time_mask].to_numpy(),
                 ),
-            },
-            attrs={
-                _K.tx_stn_id: tx_schdata.attrs[_SK.stn_id],
-                _K.rx_stn_id: rx_schdata.attrs[_SK.stn_id],
             },
         )
 

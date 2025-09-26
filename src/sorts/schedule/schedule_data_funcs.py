@@ -16,7 +16,7 @@ CoordKey = t.Literal[
     "multi_index", "start_time", "exp_num", "stn_num", "simult_num", "enu", "e", "n", "u"
 ]
 DataKey = t.Literal["end_time", "pointing"]
-AttrKey = t.Literal["stn_id", "exp_detail_map"]
+AttrKey = t.Literal["exp_detail_map"]
 Key = t.Literal[DataKey, CoordKey, AttrKey]
 
 
@@ -34,7 +34,6 @@ class _K:
     u: t.Final = "u"
     end_time: t.Final = "end_time"
     pointing: t.Final = "pointing"
-    stn_id: t.Final = "stn_id"
     exp_detail_map: t.Final = "exp_detail_map"
 
 
@@ -56,7 +55,6 @@ A xarray `Dataset` of:
       end_time     (multi_index) datetime64[us]
       pointing     (enu, multi_index) float64
   Attributes:
-      stn_id:          str
       exp_detail_map:  dict[int, ExperimentDetail]
   ```
 """
@@ -94,9 +92,6 @@ class ScheduleNdarrayDict(t.TypedDict):
     - Slice data are stored as columns of fields, each of which is a `ndarray`.
     - Metadata (`ExperimentDetail`s) are stored as a dict inside the `exp_detail_map` field.
     """
-
-    # TODO: remove `stn_id`
-    stn_id: StationId
 
     exp_detail_map: ExperimentDetailMap
 
@@ -144,10 +139,7 @@ def empty_data() -> ScheduleData:
             _K.end_time: (_K.multi_index, np.empty(0, dtype="datetime64[us]")),
             _K.pointing: ((_K.enu, _K.multi_index), np.empty((3, 0), dtype=np.float64)),
         },
-        attrs={
-            _K.stn_id: f"__generated_by_{empty_data.__name__}",
-            _K.exp_detail_map: {},
-        },
+        attrs={_K.exp_detail_map: {}},
     )
 
     return sch_data
@@ -168,10 +160,7 @@ def from_ndarrays(data: ScheduleNdarrayDict) -> ScheduleData:
             _K.end_time: (_K.multi_index, data[_K.end_time]),
             _K.pointing: ((_K.enu, _K.multi_index), data[_K.pointing]),
         },
-        attrs={
-            _K.stn_id: data[_K.stn_id],
-            _K.exp_detail_map: data[_K.exp_detail_map],
-        },
+        attrs={_K.exp_detail_map: data[_K.exp_detail_map]},
     )
 
     return sch_data
@@ -179,7 +168,6 @@ def from_ndarrays(data: ScheduleNdarrayDict) -> ScheduleData:
 
 def to_ndarrays(data: ScheduleData) -> ScheduleNdarrayDict:
     arr_dict: ScheduleNdarrayDict = {
-        _K.stn_id: data.attrs[_K.stn_id],
         _K.exp_detail_map: data.attrs[_K.exp_detail_map],
         _K.start_time: data[_K.start_time].to_numpy(),
         _K.end_time: data[_K.end_time].to_numpy(),
@@ -235,7 +223,6 @@ def merge_attrs(attrs_dicts: list[dict[AttrKey, t.Any]]) -> dict:
             }
 
             for attrs_dict in attrs_dicts[0:]:
-                result[_K.stn_id] = attrs_dict[_K.stn_id]
                 result[_K.exp_detail_map].update(attrs_dict[_K.exp_detail_map])
 
     return result
