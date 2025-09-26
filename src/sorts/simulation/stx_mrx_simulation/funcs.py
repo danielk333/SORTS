@@ -175,8 +175,8 @@ def derive_simulation_unit_params(
 
     params: list[FromPassagesOverTxRxStationPairParam] = []
 
-    for idx, (passages_of_a_spobj, spobj_states_interp) in enumerate(
-        zip(passages_lists, spobjs_interpolators)
+    for spobj, passages_of_a_spobj, spobj_states_interp in zip(
+        spec["space_objects"], passages_lists, spobjs_interpolators
     ):
         groupped_passages = group_passages_by_tx_rx_station_pair(passages_of_a_spobj)
 
@@ -187,7 +187,7 @@ def derive_simulation_unit_params(
                 {
                     "id": str(len(params)),
                     "passages": passages,
-                    "spobj": spec["space_objects"][idx],
+                    "spobj": spobj,
                     "spobj_interp": spobj_states_interp,
                     "tx_station": spec["tx_station"],
                     "rx_station": rx_stn,
