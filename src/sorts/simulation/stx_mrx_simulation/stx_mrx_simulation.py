@@ -1,5 +1,5 @@
 from __future__ import annotations
-import logging, typing as t, pickle
+import logging, typing as t, pickle, traceback
 from pathlib import Path
 import numpy.typing as npt
 import pyorb
@@ -249,6 +249,8 @@ class StxMrxSimulation:
     ) -> tuple[list[Observation], list[SimulationUnit]]:
         try:
             persist_dir = Path(persistence_dir_path)
+            if not persist_dir.exists():
+                persist_dir.mkdir()
             assert persist_dir.exists()
             assert persist_dir.is_dir()
 
@@ -282,6 +284,7 @@ class StxMrxSimulation:
             r = comm.Get_rank()
 
             logger.error(
-                f"terminating mpi proc due to exception occured in rank: {r}, error: {err}"
+                f"terminating mpi proc due to exception occured in rank: {r}, error:\n"
+                + "\n".join(traceback.format_exception(err))
             )
             comm.Abort(1)
