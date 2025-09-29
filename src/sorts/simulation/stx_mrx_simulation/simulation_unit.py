@@ -3,22 +3,23 @@ import typing as t
 from functools import reduce
 import numpy as np
 import numpy.typing as npt
+import pandas as pd
 import xarray as xr
 from sorts.utils import assert_class_attributes_equal_to, to_datetime64_us
 from sorts.types import Float64_as_m
 from sorts.space_object import SpaceObject
+from sorts.radar import Station
 from sorts.signals import hard_target_snr
 from sorts.interpolation import Interpolator
-from sorts.schedule import Schedule
+from sorts.schedule import ExperimentDetailMap, Schedule
 from sorts.simulation.types import Passage
 from . import funcs
 
-CoordKey = t.Literal["time", "enu", "e", "n", "u"]
+CoordKey = t.Literal["multi_index", "time", "exp_num", "rx_simult_num", "enu", "e", "n", "u"]
 DataKey = t.Literal[
     "tx_pointing",
     "rx_pointing",
     "exp_num",
-    "rx_simult_num",
     "gain_tx",
     "gain_rx",
     "snr",
@@ -27,23 +28,23 @@ DataKey = t.Literal[
     "two_way_range",
     "rx_range_rate",
 ]
-AttrKey = t.Literal["stn_id"]
-Key = t.Literal[DataKey, CoordKey, AttrKey]
+Key = t.Literal[DataKey, CoordKey]
 
 
 # TODO: updated the name with tx/rx as suffix to prefix
 class _K:
     """Internal helper for accessing string keys consistently"""
 
+    multi_index: t.Final = "multi_index"
     time: t.Final = "time"
+    exp_num: t.Final = "exp_num"
+    rx_simult_num: t.Final = "rx_simult_num"
     enu: t.Final = "enu"
     e: t.Final = "e"
     n: t.Final = "n"
     u: t.Final = "u"
     tx_pointing: t.Final = "tx_pointing"
     rx_pointing: t.Final = "rx_pointing"
-    exp_num: t.Final = "exp_num"
-    rx_simult_num: t.Final = "rx_simult_num"
     gain_tx: t.Final = "gain_tx"
     gain_rx: t.Final = "gain_rx"
     snr: t.Final = "snr"
@@ -51,7 +52,6 @@ class _K:
     rx_range: t.Final = "rx_range"
     two_way_range: t.Final = "two_way_range"
     rx_range_rate: t.Final = "rx_range_rate"
-    stn_id: t.Final = "stn_id"
 
 
 assert_class_attributes_equal_to(_K, t.get_args(Key))
@@ -64,28 +64,39 @@ StateData = t.NewType("StateData", xr.Dataset)
 """
 A xarray `Dataset` with:
   ```
-  Dimensions:        (enu: 3, time: 750)
+  Dimensions:        (multi_index: n, enu: 3)
   Coordinates:
-    * time           (time) datetime64[us]
-    * enu            (enu) <U2 24B 'az' 'el' 'r'
+    * multi_index    (multi_index) object MultiIndex ('time', 'exp_num', 'rx_simult_num')
+    * time           (multi_index) datetime64[us]
+    * exp_num        (multi_index) int16
+    * rx_simult_num  (multi_index) int16
+    * enu            (enu) 'e' 'n' 'u'
   Data variables:
-      tx_pointing    (enu, time)
-      rx_pointing    (enu, time)
-      exp_num        (time)
-      rx_simult_num  (time)
-      gain_tx        (time)
-      gain_rx        (time)
-      snr            (time)
-      tx_range       (time)
-      rx_range       (time)
-      two_way_range  (time)
-      rx_range_rate  (time)
-  Attributes:
-      stn_id:   str
+      tx_pointing    (enu, multi_index) float64
+      rx_pointing    (enu, multi_index) float64
+      gain_tx        (multi_index) float64
+      gain_rx        (multi_index) float64
+      snr            (multi_index) float64
+      tx_range       (multi_index) float64
+      rx_range       (multi_index) float64
+      two_way_range  (multi_index) float64
+      rx_range_rate  (multi_index) float64
   ```
 """
 
 
+# TODO: better naming
+class FromPassagesOverTxRxStationPairParam(t.TypedDict):
+    id: str
+    passages: list[Passage]
+    spobj: SpaceObject
+    spobj_interp: Interpolator
+    tx_station: Station
+    rx_station: Station
+    schedule: Schedule
+
+
+# TODO: re-eval: `Station`` can be taken from `Passage`, but empty `list[Passage]` would be an issue in that case.
 class SimulationUnit:
     """
     Contains all the params and results for a unit of simulation calculation.
@@ -102,13 +113,18 @@ class SimulationUnit:
 
     def __init__(
         self,
+        id: str,
         spobj: SpaceObject,
         spobj_interp: Interpolator,
         passages: list[Passage],
-        tx_sch: Schedule,
-        rx_sch: Schedule,
+        tx_station: Station,
+        rx_station: Station,
+        tx_exp_detail_map: ExperimentDetailMap,
+        rx_exp_detail_map: ExperimentDetailMap,
         state_data: StateData,
     ):
+        self.id = id
+
         self._state_data = state_data
 
         self.space_object = spobj
@@ -116,21 +132,31 @@ class SimulationUnit:
 
         self.passages = passages
 
-        self.tx_schedule = tx_sch
-        self.rx_schedule = rx_sch
-        self.tx_station = tx_sch.station
-        self.rx_station = rx_sch.station
+        self.tx_station = tx_station
+        self.rx_station = rx_station
+        self.tx_exp_detail_map = tx_exp_detail_map
+        self.rx_exp_detail_map = rx_exp_detail_map
 
     # TODO: can derive the indexers inside this method instead of as param, now that we take passages as param
     @classmethod
     def from_passages_over_tx_rx_station_pair(
-        cls,
-        passages: list[Passage],
-        spobj: SpaceObject,
-        spobj_interp: Interpolator,
-        tx_sch: Schedule,
-        rx_sch: Schedule,
+        cls, **kwargs: t.Unpack[FromPassagesOverTxRxStationPairParam]
     ) -> t.Self:
+        id = kwargs["id"]
+        passages = kwargs["passages"]
+        spobj = kwargs["spobj"]
+        spobj_interp = kwargs["spobj_interp"]
+        tx_station = kwargs["tx_station"]
+        rx_station = kwargs["rx_station"]
+        # NOTE: xarray simplify/collapse MultiIndex when filtering a level to an exact value,
+        #   we filter on the top level "multi_index' with a tuple here to prevent it
+        tx_schdata = kwargs["schedule"]._data.loc[
+            {_SK.multi_index: (slice(None), slice(None), tx_station.uid, slice(None))}
+        ]
+        rx_schdata = kwargs["schedule"]._data.loc[
+            {_SK.multi_index: (slice(None), slice(None), rx_station.uid, slice(None))}
+        ]
+
         if len(passages) == 0:
             # TODO: return en empty instance would be better
             raise NotImplementedError()
@@ -138,44 +164,65 @@ class SimulationUnit:
         rx_time_mask: xr.DataArray = reduce(
             xr.ufuncs.logical_and,
             [
-                (rx_sch._data[_SK.start_time] >= time_range[0])
-                & (rx_sch._data[_SK.end_time] <= time_range[1])
+                (rx_schdata[_SK.start_time] >= time_range[0])
+                & (rx_schdata[_SK.end_time] <= time_range[1])
                 for time_range in [ps["time_range"] for ps in passages]
             ],
         )
-        time = rx_sch._data[_SK.start_time][rx_time_mask]
+
+        rx_time = rx_schdata[_SK.start_time][rx_time_mask].to_numpy()
+        rx_exp_num = rx_schdata[_SK.exp_num][rx_time_mask].to_numpy()
+        rx_simult_num = rx_schdata[_SK.simult_num][rx_time_mask].to_numpy()
+
+        multi_index = pd.MultiIndex.from_arrays(
+            [rx_time, rx_exp_num, rx_simult_num],
+            names=(_K.time, _K.exp_num, _K.rx_simult_num),
+        )
+
+        tx_reindex_selector = xr.Coordinates.from_pandas_multiindex(
+            pd.MultiIndex.from_arrays(
+                [
+                    rx_time,
+                    rx_exp_num,
+                    np.full(len(rx_time), kwargs["tx_station"].uid, dtype=np.int16),
+                    np.full(len(rx_time), 0, dtype=np.int16),  # assuming single tx
+                ],
+                names=(_SK.start_time, _SK.exp_num, _SK.stn_num, _SK.simult_num),
+            ),
+            _SK.multi_index,
+        )
 
         state_data = xr.Dataset(
             coords={
-                _K.time: (_K.time, time.to_numpy()),
+                **xr.Coordinates.from_pandas_multiindex(multi_index, _K.multi_index),
                 _K.enu: [_K.e, _K.n, _K.u],
             },
             data_vars={
-                # we expand pointings from `tx_sch` here by re-indexing using `.loc[:, time]`
-                # `xarray` allow it because `tx_sch` `start_time` is an unique index
+                # NOTE: we used `.loc` instead of `reindex` here because we cannot get `reindex` working
+                # TODO: investigate why `reindex` won't work
+                #   not working: `tx_sch._data[_SK.pointing].reindex({_SK.multi_index: [(np.datetime64("2025-01-01 02:45:01", "us"), 0, 0), ...]})`
                 _K.tx_pointing: (
-                    (_K.enu, _K.time),
-                    tx_sch._data[_SK.pointing].loc[:, time].to_numpy(),
+                    (_K.enu, _K.multi_index),
+                    tx_schdata[_SK.pointing]
+                    .loc[{_SK.multi_index: tx_reindex_selector[_SK.multi_index]}]
+                    .to_numpy(),
                 ),
-                # for pointings from `rx_sch`, we just apply the `rx_time_mask`
                 _K.rx_pointing: (
-                    (_K.enu, _K.time),
-                    rx_sch._data[_SK.pointing].loc[:, rx_time_mask].to_numpy(),
+                    (_K.enu, _K.multi_index),
+                    rx_schdata[_SK.pointing].loc[:, rx_time_mask].to_numpy(),
                 ),
-                _K.exp_num: (_K.time, tx_sch._data[_SK.exp_num].loc[time].to_numpy()),
-                _K.rx_simult_num: (_K.time, rx_sch._data[_SK.simult_num][rx_time_mask].to_numpy()),
-            },
-            attrs={
-                _K.stn_id: tx_sch._data.attrs[_SK.stn_id],
             },
         )
 
         return cls(
+            id=id,
             spobj=spobj,
             spobj_interp=spobj_interp,
             passages=passages,
-            tx_sch=tx_sch,
-            rx_sch=rx_sch,
+            tx_station=kwargs["tx_station"],
+            rx_station=kwargs["rx_station"],
+            tx_exp_detail_map=tx_schdata.attrs[_SK.exp_detail_map],
+            rx_exp_detail_map=rx_schdata.attrs[_SK.exp_detail_map],
             state_data=StateData(state_data),
         )
 
@@ -196,22 +243,19 @@ class SimulationUnit:
         # TODO: do we need `ipps`?
         # TODO: do we need `duty_cycles`?
         powers = np.array(
-            [
-                self.tx_schedule._data.attrs[_SK.exp_detail_map][n]["power"]
-                for n in self._state_data[_K.exp_num].to_numpy()
-            ],
+            [self.tx_exp_detail_map[n]["power"] for n in self._state_data[_K.exp_num].to_numpy()],
             dtype=np.float64,
         )
         bandwidths = np.array(
             [
-                self.tx_schedule._data.attrs[_SK.exp_detail_map][n]["bandwidth"]
+                self.tx_exp_detail_map[n]["bandwidth"]
                 for n in self._state_data[_K.exp_num].to_numpy()
             ],
             dtype=np.float64,
         )
         rx_noise_temps = np.array(
             [
-                self.rx_schedule._data.attrs[_SK.exp_detail_map][n]["noise_temp"]
+                self.rx_exp_detail_map[n]["noise_temp"]
                 for n in self._state_data[_K.exp_num].to_numpy()
             ],
             dtype=np.float64,
@@ -237,18 +281,24 @@ class SimulationUnit:
             rx_noise_temp=rx_noise_temps,
             radar_albedo=self.space_object.parameters.get("radar_albedo", 1.0),
         )
-        self._state_data[_K.snr] = (_K.time, snr)
+        self._state_data[_K.snr] = (_K.multi_index, snr)
 
-        self._state_data[_K.tx_range] = (_K.time, np.linalg.norm(spobj_tx_enu[:3, :], axis=0))
+        self._state_data[_K.tx_range] = (
+            _K.multi_index,
+            np.linalg.norm(spobj_tx_enu[:3, :], axis=0),
+        )
 
-        self._state_data[_K.rx_range] = (_K.time, np.linalg.norm(spobj_rx_enu[:3, :], axis=0))
+        self._state_data[_K.rx_range] = (
+            _K.multi_index,
+            np.linalg.norm(spobj_rx_enu[:3, :], axis=0),
+        )
 
         self._state_data[_K.two_way_range] = (
             self._state_data[_K.tx_range] + self._state_data[_K.rx_range]
         )
 
         self._state_data[_K.rx_range_rate] = (
-            _K.time,
+            _K.multi_index,
             np.sum(
                 spobj_rx_enu[3:, :]
                 * (spobj_rx_enu[:3, :] / np.linalg.norm(spobj_rx_enu[:3, :], axis=0)),

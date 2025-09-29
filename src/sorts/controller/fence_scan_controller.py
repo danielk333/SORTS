@@ -2,6 +2,7 @@ from __future__ import annotations
 import logging, math, typing as t
 import numpy as np
 import numpy.typing as npt
+import xarray as xr
 from sorts.radar import Station
 from sorts.frames import enu_to_ecef, ecef_to_enu, sph_to_cart
 from sorts.types import (
@@ -13,7 +14,7 @@ from sorts.types import (
     Datetime_Like,
 )
 from sorts.utils import to_datetime64_us
-from sorts.schedule import Schedule, ExperimentDetail
+from sorts.schedule import Schedule, ScheduleData, ExperimentDetail, schedule_data_funcs
 from sorts.controller import pointing_funcs
 
 logger = logging.getLogger(__name__)
@@ -50,7 +51,7 @@ class Output(t.NamedTuple):
 
 
 # TODO: should we generate tx pointings at the specified ranges instead of normalized to 1?
-def generate_from_state(spec: Spec, state: State) -> Output:
+def generate_from_state(spec: Spec, state: State) -> Schedule:
     # The logic of this function:
     # 1. repeat the cycle of tx pointings from state to form the tx schedule
     # 2. from the single cycle of tx pointings, we convert it into ECEF location coord and extend them by the `scan_range`
@@ -78,32 +79,33 @@ def generate_from_state(spec: Spec, state: State) -> Output:
         (state["tx_schedule_size"] + pointings_per_cycle - 1) // pointings_per_cycle,
     )[:, : state["tx_schedule_size"]]
 
-    # mask tx values by min_elevation requirement,
+    # mask tx values by min_elevation requirement
     tx_mask = pointing_funcs.create_mask_by_min_elevation(
         tx_pointing, spec["tx_station"].min_elevation
     )
     tx_slice_start_time_masked = tx_slice_start_time[tx_mask]
     tx_pointing_masked = tx_pointing[:, tx_mask]
 
-    tx_schedule = Schedule.from_ndarrays(
-        data={
-            "stn_id": spec["tx_station"].uid,
+    tx_schdata = schedule_data_funcs.from_ndarrays(
+        {
             "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
             "start_time": tx_slice_start_time_masked,
             "end_time": tx_slice_start_time_masked + spec["exp_detail"]["slice_duration"],
             "exp_num": np.full(
-                (len(tx_slice_start_time_masked)), spec["exp_detail"]["id"], dtype=np.int16
+                len(tx_slice_start_time_masked), spec["exp_detail"]["id"], dtype=np.int16
             ),
-            "simult_num": np.full((len(tx_slice_start_time_masked)), 0, dtype=np.int16),
+            "stn_num": np.full(
+                len(tx_slice_start_time_masked), spec["tx_station"].uid, dtype=np.int16
+            ),
+            "simult_num": np.full(len(tx_slice_start_time_masked), 0, dtype=np.int16),
             "pointing": tx_pointing_masked,
-        },
-        station=spec["tx_station"],
+        }
     )
 
     # TODO: `rx_schedule_size` is a bit of a mismisnomer, as out-of-range entries might later be removed
     rx_slice_start_time = tx_slice_start_time.repeat(len(spec["scan_range"]))
     rx_schedule_size = state["tx_schedule_size"] * len(spec["scan_range"])
-    rx_schedules: list[Schedule] = []
+    rx_schdatas: list[ScheduleData] = []
     tx_pointings_of_a_cycle_without_translation_ecef: EcefCoordinates = enu_to_ecef(
         lat=spec["tx_station"].ecef_lat,
         lon=spec["tx_station"].ecef_lon,
@@ -137,32 +139,40 @@ def generate_from_state(spec: Spec, state: State) -> Output:
         )[:, :rx_schedule_size]
         rx_pointings_simult_num = np.arange(rx_schedule_size) % len(spec["scan_range"])
 
-        # mask rx values by min_elevation requirement,
-        rx_mask = pointing_funcs.create_mask_by_min_elevation(
+        # mask rx values by min_elevation requirement, and has a corresponding tx value
+        rx_mask_by_min_elevation = pointing_funcs.create_mask_by_min_elevation(
             rx_pointings_enu, rx_station.min_elevation
         )
+        rx_mask_by_tx_mask = np.isin(rx_slice_start_time, tx_slice_start_time_masked)
+        rx_mask = np.logical_and(rx_mask_by_min_elevation, rx_mask_by_tx_mask)
         rx_slice_start_time_masked = rx_slice_start_time[rx_mask]
         rx_pointing_masked = rx_pointings_enu[:, rx_mask]
         rx_pointings_simult_num_masked = rx_pointings_simult_num[rx_mask]
 
-        rx_schedule = Schedule.from_ndarrays(
-            data={
-                "stn_id": rx_station.uid,
+        rx_schdata = schedule_data_funcs.from_ndarrays(
+            {
                 "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
                 "start_time": rx_slice_start_time_masked,
                 "end_time": rx_slice_start_time_masked + spec["exp_detail"]["slice_duration"],
                 "exp_num": np.full(
-                    (len(rx_slice_start_time_masked)), spec["exp_detail"]["id"], dtype=np.int16
+                    len(rx_slice_start_time_masked), spec["exp_detail"]["id"], dtype=np.int16
                 ),
+                "stn_num": np.full(len(rx_slice_start_time_masked), rx_station.uid, dtype=np.int16),
                 "simult_num": rx_pointings_simult_num_masked,
                 "pointing": rx_pointing_masked,
-            },
-            station=rx_station,
+            }
         )
 
-        rx_schedules.append(rx_schedule)
+        rx_schdatas.append(rx_schdata)
 
-    return Output(tx_schedule, rx_schedules)
+    resultant_schdata = xr.concat([tx_schdata, *rx_schdatas], dim=Schedule._K.multi_index)
+    resultant_schdata = resultant_schdata.sortby(Schedule._K.start_time)
+    # TODO: re-eval if it is too brutal
+    # there will be duplicates if the tx station is also a rx station, we drop the duplicates here
+    resultant_schdata = resultant_schdata.drop_duplicates(Schedule._K.multi_index)
+    output = Schedule(resultant_schdata)
+
+    return output
 
 
 class FenceScanController:
@@ -179,7 +189,7 @@ class FenceScanController:
         self.spec: Spec = spec
         self.state: State | None = state
 
-        self._cached_output: Output | None = None
+        self._cached_output: Schedule | None = None
 
     @classmethod
     def from_scan_spec(
@@ -200,9 +210,6 @@ class FenceScanController:
         #         + f"cannot be smaller than the dwell ({self.dwell_s} sec)."
         #     )
 
-        # TODO: this is a temp workaround to get multiple simutaneous rx pointings working
-        exp_detail.update({"num_simutaneous_pointings": len(scan_range)})
-
         ctrl = FenceScanController(
             spec={
                 "tx_station": tx_station,
@@ -221,7 +228,7 @@ class FenceScanController:
     def compute_single_cycle_pointings(self, start_time: Datetime_Like, end_time: Datetime_Like):
         """Do the computation then update the `state` property and return `self`."""
 
-        exp_detail: ExperimentDetail = self.spec["exp_detail"]
+        exp_detail = self.spec["exp_detail"]
 
         start_time_np = to_datetime64_us(start_time)
         end_time_np = to_datetime64_us(end_time)
@@ -245,7 +252,7 @@ class FenceScanController:
 
         return self
 
-    def generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> Output:
+    def generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> Schedule:
         self.compute_single_cycle_pointings(start_time, end_time)
         state = t.cast(State, self.state)
 

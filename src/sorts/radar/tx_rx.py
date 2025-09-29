@@ -12,8 +12,8 @@ import pyant
 # Local import
 from .. import frames
 
-StationId = str
-"""A unique string that identifies a radar station"""
+StationId = int
+"""A unique int16 that identifies a radar station"""
 
 """
 A structured unique identifer for a station of a radar.
@@ -52,7 +52,7 @@ class Station(object):
         alt,
         min_elevation: Float_as_deg,
         beam,
-        uid: StationId = "__DEFAULT_STN_ID__",
+        uid: StationId = 0,
     ):
         self.lat = lat
         self.lon = lon
@@ -190,7 +190,7 @@ class RX(Station):
         min_elevation,
         beam,
         noise,
-        uid: StationId = "__DEFAULT_RX_STN_ID__",
+        uid: StationId = 1,
     ):
         super().__init__(lat, lon, alt, min_elevation, beam, uid=uid)
         self.noise = noise
@@ -242,7 +242,7 @@ class TX(Station):
         pulse_length=1e-3,
         ipp=10e-3,
         n_ipp=20,
-        uid: StationId = "__DEFAULT_TX_STN_ID__",
+        uid: StationId = 0,
     ):
         super().__init__(lat, lon, alt, min_elevation, beam, uid=uid)
 

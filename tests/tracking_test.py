@@ -107,7 +107,7 @@ def south_to_north_circular_orbit_test():
             elevation=0.0,
             frequency=233e6,  # same as eisat_3d
         ),
-        uid="test_station, tx_rx, 0",
+        uid=0,
     )
 
     def dsec_sampler(orbit, start_time, end_time):
@@ -133,17 +133,19 @@ def south_to_north_circular_orbit_test():
             "duty_cycle": 1.0,
             "noise_temp": 150.0,
             "slice_duration": control_slice_duration,
+            "stn_pairs": [(0, 0)],
         },
     )
 
-    tracker_schs = tracker_ctrl.generate(start_time, end_time)
+    tracker_sch = tracker_ctrl.generate(start_time, end_time)
 
     exp_detail_map = {tracker_ctrl.spec["exp_detail"]["id"]: tracker_ctrl.spec["exp_detail"]}
 
     sim = StxMrxSimulation(
         spec={
-            "tx_schedule": tracker_schs.tx_schedule,
-            "rx_schedules": tracker_schs.rx_schedules,
+            "tx_station": test_stn,
+            "rx_stations": [test_stn],
+            "schedule": tracker_sch,
             "exp_detail_map": exp_detail_map,
             "epoch": start_time,
             "start_time": start_time,
@@ -180,7 +182,9 @@ def south_to_north_circular_orbit_test():
     # assert the max snr time is roughly at half orbital period
     assert (
         abs(
-            sim_unit._state_data[_SuK.time][{_SuK.time: sim_unit._state_data[_SuK.snr].argmax()}]
+            sim_unit._state_data[_SuK.time][
+                {_SuK.multi_index: sim_unit._state_data[_SuK.snr].argmax()}
+            ]
             - (
                 to_datetime64_us(start_time)
                 + spobj_orbital_period / 2 * np.timedelta64(int(1e6), "us")

@@ -1,79 +1,14 @@
 from __future__ import annotations
 import logging, typing as t
-import numpy as np
-import numpy.typing as npt
 import pandas as pd
 import xarray as xr
-from sorts.types import Datetime64_us, TimeRange_us, Timedelta64_us, EnuCoordinates
-from sorts.radar import Station, StationId
-from .types import _K
+from sorts.types import TimeRange_us
 from . import schedule_data_funcs
+from .schedule_data_funcs import _K, ExperimentDetail, ScheduleNdarrayDict, ScheduleData
 from .priority_scheduling import priority_scheduling
 
 
 logger = logging.getLogger(__name__)
-
-
-ScheduleData = xr.Dataset
-"""
-A xarray `Dataset` with:
-  ```
-  Dimensions:     (enu: 3, start_time: n)
-  Coordinates:
-  * start_time    (start_time) datetime64[us]
-      end_time    (start_time) datetime64[us]
-  * enu           (enu) 'e' 'n' 'u'
-  Data variables:
-      pointing    (enu, start_time) float64
-      exp_num     (start_time) int16
-      simutl_num  (start_time) int16
-  Attributes:
-      stn_id:          str
-      exp_detail_map:  dict[int, ExperimentDetail]
-  ```
-"""
-
-
-class ExperimentDetail(t.TypedDict):
-    """A TypedDict of params"""
-
-    id: int
-
-    coh_int_bandwidth: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-    ipp: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-    pulse_length: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-    power: float
-    bandwidth: float
-    duty_cycle: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-    noise_temp: float
-
-    slice_duration: Timedelta64_us
-    "Duration of a control slice, in micro-second"
-
-    # TODO: this is a temp workaround to get multiple simutaneous rx pointings working
-    num_simutaneous_pointings: t.NotRequired[int]
-
-
-class ScheduleNdarrayDict(t.TypedDict):
-    """
-    A TypedDict, stores a collection of "control slices" (or "slices" in short).
-
-    - Slice data are stored as columns of fields, each of which is a `ndarray`.
-    - Metadata (`ExperimentDetail`s) are stored as a dict inside the `exp_detail_map` field.
-    """
-
-    stn_id: StationId
-
-    exp_detail_map: dict[int, ExperimentDetail]
-
-    start_time: npt.NDArray[Datetime64_us]
-    end_time: npt.NDArray[Datetime64_us]
-
-    # TODO: re-eval the size of `exp_num`, `simult_num`
-    exp_num: npt.NDArray[np.int16]
-    simult_num: npt.NDArray[np.int16]
-
-    pointing: EnuCoordinates
 
 
 XrDataArrayIndexer = xr.DataArray
@@ -83,7 +18,7 @@ XrDataArrayIndexer = xr.DataArray
 # TODO: add schedule validation?
 class Schedule:
     """
-    Provides methods for manipuating the schedule data and enforce that the require columns/data are set.
+    Provides methods for manipuating schedule data and enforce that the required columns/data are set.
     Also contains some related metadata.
 
     Schedule data is stored in the private attribute `_data`,
@@ -96,29 +31,16 @@ class Schedule:
     _K = _K
     """shortcut to module attribute"""
 
-    def __init__(self, data: ScheduleData, station: Station):
+    def __init__(self, data: ScheduleData):
         self._data = data
-        self.station = station
 
     @classmethod
-    def from_ndarrays(cls, data: ScheduleNdarrayDict, station: Station) -> t.Self:
-        sch_data = schedule_data_funcs.from_ndarrays(data)
-        return cls(data=sch_data, station=station)
+    def from_ndarrays(cls, data: ScheduleNdarrayDict) -> t.Self:
+        return cls(schedule_data_funcs.from_ndarrays(data))
 
     @classmethod
     def empty(cls) -> t.Self:
-        stn_id = f"__generated_by_{cls.empty.__name__}"
-
-        sch_data = schedule_data_funcs.empty_data()
-        sch_data.attrs[_K.stn_id] = stn_id
-
-        stn = schedule_data_funcs.default_station()
-        stn.uid = stn_id
-
-        return cls(
-            data=schedule_data_funcs.empty_data(),
-            station=stn,
-        )
+        return cls(data=schedule_data_funcs.empty_data())
 
     @classmethod
     def priority_scheduling(cls, schs: t.Sequence[Schedule]):
@@ -138,11 +60,7 @@ class Schedule:
 
         resultant_sch_data = priority_scheduling([sch._data for sch in schs])
 
-        return cls(data=resultant_sch_data, station=schs[0].station)
-
-    # TODO: commented out to avoid confusion; re-eval if we need it
-    # def __repr__(self):
-    #     return f"<sorts.Schedule> with data:\n{self._data.__repr__()}"
+        return cls(data=resultant_sch_data)
 
     def to_ndarrays(self) -> ScheduleNdarrayDict:
         arr_dict = schedule_data_funcs.to_ndarrays(self._data)
@@ -154,12 +72,13 @@ class Schedule:
     def filter_by_time_range(self, time_range: TimeRange_us) -> t.Self:
         cls = type(self)
         filtered_data = schedule_data_funcs.filter_by_time_range(self._data, time_range)
-        return cls(data=filtered_data, station=self.station)
+        return cls(data=filtered_data)
 
-    # TODO: we can probably inject the schedule is tx or rx into `Schedule` class and remove param `is_split_simu`?
-    # TODO: rename `is_split_simu` to `is_split_simult`
-    def get_indexer_per_measurement(self, is_split_simu: bool) -> list[XrDataArrayIndexer]:
-        return schedule_data_funcs.get_indexer_per_measurement(self._data, is_split_simu)
+    # TODO: we can probably inject the schedule is tx or rx into `Schedule` class and remove param `is_split_simult`?
+    def get_indexer_per_measurement(
+        self, is_split_simult: bool, is_copy=False
+    ) -> list[XrDataArrayIndexer]:
+        return schedule_data_funcs.get_indexer_per_measurement(self._data, is_split_simult, is_copy)
 
     def get_experiment_detail(self, exp_num: int) -> ExperimentDetail:
         return self._data.attrs[_K.exp_detail_map][exp_num]

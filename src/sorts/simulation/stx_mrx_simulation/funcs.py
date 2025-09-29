@@ -13,6 +13,7 @@ from tqdm import tqdm
 from sorts.interpolation import Interpolator
 from sorts.radar import Station, StationId
 from sorts.types import Float64_as_sec, EcefStates, Datetime64_us, EnuCoordinates
+from sorts.schedule import Schedule
 from sorts.simulation.types import Passage
 from sorts.simulation import funcs
 from .simulation_unit import SimulationUnit
@@ -21,6 +22,7 @@ from .observation import ObservationIndexer, Observation
 
 if t.TYPE_CHECKING:
     from .simulation_unit import StateData
+    from .simulation_unit import FromPassagesOverTxRxStationPairParam
     from .stx_mrx_simulation import Spec, SpaceObjectDsecSampler
 
 
@@ -41,11 +43,15 @@ def sample_and_propagate_space_objects_states(
     """
 
     spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]] = []
-    for spobj in tqdm(spobjs, total=len(spobjs)):
+    for spobj in tqdm(spobjs, desc="sampling spobjs dt", total=len(spobjs)):
         spobjs_smpl_dsec.append(sampler(spobj.state, start_time, end_time))
 
     spobjs_smpl_states: list[EcefStates] = []
-    for spobj, spobj_smpl_dsec in tqdm(zip(spobjs, spobjs_smpl_dsec), total=len(spobjs)):
+    for spobj, spobj_smpl_dsec in tqdm(
+        zip(spobjs, spobjs_smpl_dsec),
+        desc="propagating spobjs states at sampled dt",
+        total=len(spobjs),
+    ):
         spobjs_smpl_states.append(spobj.get_state(spobj_smpl_dsec))
 
     return spobjs_smpl_dsec, spobjs_smpl_states
@@ -70,25 +76,46 @@ def group_passages_by_tx_rx_station_pair(
     return groupped_passages
 
 
-def derive_observations(simulation_units: list[SimulationUnit]) -> list[Observation]:
+# TODO: go through its logic again; similar to `get_indexer_per_measurement`,
+#   now we have `stn_num`, `simult_num` in index, things can likely be done differently
+def derive_observations(
+    passages: list[Passage], schedule: Schedule, sim_unit: SimulationUnit
+) -> list[Observation]:
     """Derive observations"""
 
     obss: list[Observation] = []
-    for sim_unit in simulation_units:
-        for passage in sim_unit.passages:
-            tx_obs_idxers = sim_unit.tx_schedule.filter_by_time_range(
-                passage["time_range"]
-            ).get_indexer_per_measurement(is_split_simu=False)
 
-            rx_obs_idxers = sim_unit.rx_schedule.filter_by_time_range(
-                passage["time_range"]
-            ).get_indexer_per_measurement(is_split_simu=True)
+    # NOTE: xarray simplify/collapse MultiIndex when filtering a level to an exact value,
+    #   we filter on the top level "multi_index' with a tuple here to prevent it
+    tx_schdata = schedule._data.loc[
+        {Schedule._K.multi_index: (slice(None), slice(None), sim_unit.tx_station.uid, slice(None))}
+    ]
+    rx_schdata = schedule._data.loc[
+        {Schedule._K.multi_index: (slice(None), slice(None), sim_unit.rx_station.uid, slice(None))}
+    ]
+    tx_schedule = Schedule(tx_schdata)
+    rx_schedule = Schedule(rx_schdata)
 
-            for tx_obs_idxer in tx_obs_idxers:
-                for rx_obs_idxer in rx_obs_idxers:
-                    indexer = ObservationIndexer(tx=tx_obs_idxer, rx=rx_obs_idxer)
-                    obs = Observation(passage=passage, indexer=indexer, simulation_unit=sim_unit)
-                    obss.append(obs)
+    for passage in passages:
+        tx_obs_idxers = tx_schedule.filter_by_time_range(
+            passage["time_range"]
+        ).get_indexer_per_measurement(is_split_simult=False, is_copy=True)
+
+        rx_obs_idxers = rx_schedule.filter_by_time_range(
+            passage["time_range"]
+        ).get_indexer_per_measurement(is_split_simult=True, is_copy=True)
+
+        for tx_obs_idxer in tx_obs_idxers:
+            for rx_obs_idxer in rx_obs_idxers:
+                indexer = ObservationIndexer(tx=tx_obs_idxer, rx=rx_obs_idxer)
+                obs = Observation(
+                    passage=passage,
+                    indexer=indexer,
+                    simulation_unit=sim_unit,
+                    tx_schedule=tx_schedule,
+                    rx_schedule=rx_schedule,
+                )
+                obss.append(obs)
 
     return obss
 
@@ -113,15 +140,15 @@ def find_passages(
     ):
         passages_of_spobj: list[Passage] = []
 
-        for rx_schedule in spec["rx_schedules"]:
-            rx_station = rx_schedule.station
-
+        # TODO: this assume spec["rx_stations"] ordering is the same as spec["rx_schedules"],
+        #   which should be correct but should not be relied on.
+        for rx_station in spec["rx_stations"]:
             passages_of_spobj.extend(
                 funcs.find_passages(
                     dt=spobj_smpl_dsec,
                     space_object=spobj,
                     states=spobj_smpl_states,
-                    tx_station=spec["tx_schedule"].station,
+                    tx_station=spec["tx_station"],
                     rx_station=rx_station,
                     epoch=spec["epoch"],
                 )
@@ -135,31 +162,40 @@ def find_passages(
 # TODO: minor cleanup needed
 #   - `enumerate` to get space_objects by `idx` can likely be simplified, with small adj in params/props
 #   - the loops might be simplified a bit as well
-def derive_simulation_units(
+def derive_simulation_unit_params(
     spec: Spec,
     passages_lists: list[list[Passage]],
     spobjs_interpolators: list[Interpolator],
-) -> list[SimulationUnit]:
-    sim_units: list[SimulationUnit] = []
+) -> list[FromPassagesOverTxRxStationPairParam]:
+    """
+    Derive a list of param for the `from_passages_over_tx_rx_station_pair` constructor of `SimulationUnit`
 
-    for idx, (passages_of_a_spobj, spobj_states_interp) in enumerate(
-        zip(passages_lists, spobjs_interpolators)
+    NOTE: Integers (casted to `str`) are used as `SimulationUnit`s' id
+    """
+
+    params: list[FromPassagesOverTxRxStationPairParam] = []
+
+    for spobj, passages_of_a_spobj, spobj_states_interp in zip(
+        spec["space_objects"], passages_lists, spobjs_interpolators
     ):
         groupped_passages = group_passages_by_tx_rx_station_pair(passages_of_a_spobj)
 
         for stn_id_pair, passages in groupped_passages.items():
-            rx_stn_idx = [sch.station.uid for sch in spec["rx_schedules"]].index(stn_id_pair[1])
+            rx_stn = next((stn for stn in spec["rx_stations"] if stn.uid == stn_id_pair[1]))
 
-            sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(
-                passages=passages,
-                spobj=spec["space_objects"][idx],
-                spobj_interp=spobj_states_interp,
-                tx_sch=spec["tx_schedule"],
-                rx_sch=spec["rx_schedules"][rx_stn_idx],
+            params.append(
+                {
+                    "id": str(len(params)),
+                    "passages": passages,
+                    "spobj": spobj,
+                    "spobj_interp": spobj_states_interp,
+                    "tx_station": spec["tx_station"],
+                    "rx_station": rx_stn,
+                    "schedule": spec["schedule"],
+                }
             )
-            sim_units.append(sim_unit)
 
-    return sim_units
+    return params
 
 
 def calc_gain(

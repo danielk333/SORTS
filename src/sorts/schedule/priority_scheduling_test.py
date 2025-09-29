@@ -21,7 +21,6 @@ def priority_scheduling_interleaved_schedule_test():
     # 30min long, 2hr intv
     sch_data_a = schedule_data_funcs.from_ndarrays(
         {
-            _SK.stn_id: "stn_a",
             _SK.exp_detail_map: {
                 0: {
                     "id": 0,
@@ -33,6 +32,7 @@ def priority_scheduling_interleaved_schedule_test():
                     "duty_cycle": 0,
                     "noise_temp": 0,
                     "slice_duration": np.timedelta64(3600, "s"),
+                    "stn_pairs": [(0, 0)],
                 }
             },
             _SK.start_time: np.arange(
@@ -46,6 +46,7 @@ def priority_scheduling_interleaved_schedule_test():
                 np.timedelta64(3600 * 2, "s"),
             ),
             _SK.exp_num: np.full(12, 0, dtype=np.int16),
+            _SK.stn_num: np.full(12, 0, dtype=np.int16),
             _SK.simult_num: np.full(12, 0, dtype=np.int16),
             _SK.pointing: np.full((3, 12), 0.0, dtype=np.float64),
         },
@@ -54,7 +55,6 @@ def priority_scheduling_interleaved_schedule_test():
     # 1hr long, 1hr intv
     sch_data_b = schedule_data_funcs.from_ndarrays(
         {
-            _SK.stn_id: "stn_b",
             _SK.exp_detail_map: {
                 1: {
                     "id": 1,
@@ -66,6 +66,7 @@ def priority_scheduling_interleaved_schedule_test():
                     "duty_cycle": 0,
                     "noise_temp": 0,
                     "slice_duration": np.timedelta64(3600, "s"),
+                    "stn_pairs": [(1, 1)],
                 }
             },
             _SK.start_time: np.arange(
@@ -79,6 +80,7 @@ def priority_scheduling_interleaved_schedule_test():
                 np.timedelta64(3600, "s"),
             ),
             _SK.exp_num: np.full(24, 1, dtype=np.int16),
+            _SK.stn_num: np.full(24, 1, dtype=np.int16),
             _SK.simult_num: np.full(24, 0, dtype=np.int16),
             _SK.pointing: np.full((3, 24), 1.0, dtype=np.float64),
         }
@@ -87,6 +89,18 @@ def priority_scheduling_interleaved_schedule_test():
     resultant_sch_data = priority_scheduling([sch_data_a, sch_data_b])
 
     assert all(xr.ufuncs.equal(resultant_sch_data[_SK.exp_num], [0, 1] * 12))
-    assert resultant_sch_data.attrs[_SK.stn_id] == "stn_a"
 
     return
+
+
+# TODO: add test case for the resolved error::
+# spobjs = [tracked_spobj]
+# Error "not all values found in index 'multi_index'",  at space_object.oid = 20; sim_unit.id = 6
+# ```
+# pd.MultiIndex.from_tuples(tx_sch_pointing_selector).isin(tx_sch._data.indexes["multi_index"])
+#
+# :> np.argmax(~pd.MultiIndex.from_tuples(tx_sch_pointing_selector).isin(tx_sch._data.indexes["multi_index"]))
+# -> np.int64(22447)
+# tx_sch_pointing_selector[22447]
+# (np.datetime64('2025-01-01T02:49:16.530000'), np.int16(1), np.int16(0))
+# ```

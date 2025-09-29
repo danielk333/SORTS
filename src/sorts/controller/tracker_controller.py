@@ -2,6 +2,7 @@ from __future__ import annotations
 import logging, typing as t
 import numpy as np
 import numpy.typing as npt
+import xarray as xr
 import bokeh.layouts as bokeh_layouts
 import pyant
 from sorts.space_object import SpaceObject
@@ -17,7 +18,7 @@ from sorts.types import (
 )
 from sorts.utils import to_datetime64_us, to_timedelta64_us
 from sorts import plots
-from sorts.schedule import Schedule, ExperimentDetail
+from sorts.schedule import Schedule, ScheduleData, ExperimentDetail, schedule_data_funcs
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,7 @@ class Output(t.NamedTuple):
     rx_schedules: t.Sequence[Schedule]
 
 
-def generate_from_state(spec: Spec, state: State) -> Output:
+def generate_from_state(spec: Spec, state: State) -> Schedule:
     loc_zenith = np.array([0, 0, 1], dtype=np.float64)
 
     # generate pointings
@@ -57,53 +58,62 @@ def generate_from_state(spec: Spec, state: State) -> Output:
     tx_pointings = tx_pointings[:, tx_el_in_range_mask]
 
     rxs_pointings: list[EnuCoordinates] = []
-    rx_el_in_range_masks: list[npt.NDArray[np.bool]] = []
-    for rx_station in spec["rx_stations"]:
+    rx_el_in_range_with_tx_masks: list[npt.NDArray[np.bool]] = []
+    pure_rx_stations = [stn for stn in spec["rx_stations"] if stn.uid != spec["tx_station"].uid]
+    for rx_station in pure_rx_stations:
         rx_pointings: EnuCoordinates = rx_station.enu(state["spobj_states"][:3])
 
         rx_pointings_zenith_ang = pyant.coordinates.vector_angle(
             loc_zenith, rx_pointings, degrees=True
         )
         rx_el_in_range_mask = rx_pointings_zenith_ang <= 90.0 - rx_station.min_elevation
-        rx_pointings = rx_pointings[:, rx_el_in_range_mask]
 
-        rx_el_in_range_masks.append(rx_el_in_range_mask)
+        rx_el_in_range_with_tx_mask = np.logical_and(tx_el_in_range_mask, rx_el_in_range_mask)
+        rx_el_in_range_with_tx_masks.append(rx_el_in_range_with_tx_mask)
+
+        rx_pointings = rx_pointings[:, rx_el_in_range_with_tx_mask]
         rxs_pointings.append(rx_pointings)
 
-    el_in_range_mask = np.logical_and.reduce([tx_el_in_range_mask, *rx_el_in_range_masks])
-    sch_time = state["spobj_time"][el_in_range_mask]
-    sch_len = len(sch_time)
+    tx_sch_time = state["spobj_time"][tx_el_in_range_mask]
+    tx_sch_len = len(tx_sch_time)
 
-    tx_sch = Schedule.from_ndarrays(
-        data={
-            "stn_id": spec["tx_station"].uid,
+    tx_schdata = schedule_data_funcs.from_ndarrays(
+        {
             "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
-            "start_time": sch_time,
-            "end_time": sch_time + spec["exp_detail"]["slice_duration"],
-            "exp_num": np.full(sch_len, spec["exp_detail"]["id"], dtype=np.int16),
-            "simult_num": np.full(sch_len, 0, dtype=np.int16),
+            "start_time": tx_sch_time,
+            "end_time": tx_sch_time + spec["exp_detail"]["slice_duration"],
+            "exp_num": np.full(tx_sch_len, spec["exp_detail"]["id"], dtype=np.int16),
+            "stn_num": np.full(tx_sch_len, spec["tx_station"].uid, dtype=np.int16),
+            "simult_num": np.full(tx_sch_len, 0, dtype=np.int16),
             "pointing": tx_pointings,
-        },
-        station=spec["tx_station"],
+        }
     )
 
-    rx_schs = [
-        Schedule.from_ndarrays(
-            data={
-                "stn_id": spec["rx_stations"][idx].uid,
-                "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
-                "start_time": sch_time,
-                "end_time": sch_time + spec["exp_detail"]["slice_duration"],
-                "exp_num": np.full(sch_len, spec["exp_detail"]["id"], dtype=np.int16),
-                "simult_num": np.full(sch_len, 0, dtype=np.int16),
-                "pointing": rx_pointings,
-            },
-            station=spec["rx_stations"][idx],
-        )
-        for idx, rx_pointings in enumerate(rxs_pointings)
-    ]
+    rx_schdatas: list[ScheduleData] = []
+    for rx_stn, rx_mask, rx_pointings in zip(
+        pure_rx_stations, rx_el_in_range_with_tx_masks, rxs_pointings
+    ):
+        rx_sch_time = state["spobj_time"][rx_mask]
+        rx_sch_len = len(rx_sch_time)
 
-    output = Output(tx_sch, rx_schs)
+        rx_schdatas.append(
+            schedule_data_funcs.from_ndarrays(
+                {
+                    "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
+                    "start_time": rx_sch_time,
+                    "end_time": rx_sch_time + spec["exp_detail"]["slice_duration"],
+                    "exp_num": np.full(rx_sch_len, spec["exp_detail"]["id"], dtype=np.int16),
+                    "stn_num": np.full(rx_sch_len, rx_stn.uid, dtype=np.int16),
+                    "simult_num": np.full(rx_sch_len, 0, dtype=np.int16),
+                    "pointing": rx_pointings,
+                }
+            )
+        )
+
+    resultant_schdata = xr.concat([tx_schdata, *rx_schdatas], dim=Schedule._K.multi_index)
+    resultant_schdata = resultant_schdata.sortby(Schedule._K.start_time)
+    output = Schedule(resultant_schdata)
+
     return output
 
 
@@ -146,7 +156,7 @@ class TrackerController:
         self.spec: Spec = spec
         self.state: State | None = state
 
-        self._cached_output: Output | None = None
+        self._cached_output: Schedule | None = None
         """A cache of the latest `Output`, handy for plotting"""
 
     @classmethod
@@ -232,7 +242,7 @@ class TrackerController:
 
     def generate(
         self, start_time: Datetime_Like | None = None, end_time: Datetime_Like | None = None
-    ) -> Output:
+    ) -> Schedule:
         """
         Generate the schedules.
         `start_time` and `end_time` should be omitted if this instance is created from `TrackerController.from_ecef_states`

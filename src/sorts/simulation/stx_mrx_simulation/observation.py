@@ -15,51 +15,40 @@ Can be used to get a subset of entries from a `Schedule`, that corresponds to an
 """
 
 
+# TODO: param tx_schedule, rx_schedule are added as tmp solution, we should have a Dto/Serializable ObservationIndexer type
 class Observation:
     def __init__(
         self,
         passage: Passage,
         indexer: ObservationIndexer,
         simulation_unit: SimulationUnit,
+        tx_schedule: Schedule,
+        rx_schedule: Schedule,
     ):
         self.passage = passage
         self.indexer = indexer
         self.simulation_unit = simulation_unit
+        self.tx_schedule = tx_schedule
+        self.rx_schedule = rx_schedule
 
     def get_schedule_slice(self) -> TxRxTuple[Schedule, Schedule]:
         """Returns subset of schedules, in `(tx_scheule, tx_schedule` that corresponds to the observation"""
 
-        tx_sch_ps = self.simulation_unit.tx_schedule.filter_by_time_range(
-            self.passage["time_range"]
-        )
-        rx_sch_ps = self.simulation_unit.rx_schedule.filter_by_time_range(
-            self.passage["time_range"]
-        )
-
-        tx_sch_obs = Schedule(
-            data=tx_sch_ps._data.loc[{_SK.start_time: self.indexer.tx}], station=tx_sch_ps.station
-        )
-        rx_sch_obs = Schedule(
-            data=rx_sch_ps._data.loc[{_SK.start_time: self.indexer.rx}], station=rx_sch_ps.station
-        )
+        tx_sch_obs = Schedule(data=self.tx_schedule._data.loc[{_SK.multi_index: self.indexer.tx}])
+        rx_sch_obs = Schedule(data=self.rx_schedule._data.loc[{_SK.multi_index: self.indexer.rx}])
 
         return TxRxTuple(tx=tx_sch_obs, rx=rx_sch_obs)
 
     def get_state_slice(self) -> StateData:
         """Get the subset of `simulation_unit.StateData` data the corresponds to the the observation"""
 
-        # TODO: a more robust way is preferred.
-        #   right now it works by assuming the simulation_unit consist of non-overlapping passages,
-        #   and thus indexer over a schedule filtered by a passage
-        #   will also work on simulation unit data filtered by the same passage
-        time_mask = (
-            # __forcing_line_break__
-            (self.simulation_unit._state_data[_SuK.time] >= self.passage["time_range"][0])
-            & (self.simulation_unit._state_data[_SuK.time] <= self.passage["time_range"][1])
-        )
-
-        sim_state_slice = self.simulation_unit._state_data.loc[{_SuK.time: time_mask}].loc[
-            {_SuK.time: self.indexer.rx.to_numpy()}
+        sim_state_slice = self.simulation_unit._state_data.loc[
+            {
+                _SuK.multi_index: [
+                    (start_time, exp_num, simult_num)
+                    for start_time, exp_num, _stn_num, simult_num in self.indexer.rx.to_numpy()
+                ]
+            }
         ]
 
         return StateData(sim_state_slice)
