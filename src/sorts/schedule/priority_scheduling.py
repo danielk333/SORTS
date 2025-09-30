@@ -193,15 +193,42 @@ def _remove_entries_without_corresponding_tx(
 def _update_allowed_start_time_allowed_end_time(merged_sch_data: ScheduleData) -> ScheduleData:
     """
     update `allowed_start_time`, `allowed_end_time` columns
-    - the `allowed_start_time` has the `end_time` of previous row
-    - the `allowed_end_time` has the `start_time` of next row
+    - the `allowed_start_time` has the previous `end_time`;
+      for top values that have no corresponding pervious values, `min_datetime64_us` is used
+    - the `allowed_end_time` has the next `start_time`;
+      for bottom values that have no corresponding next values, `max_datetime64_us` is used
     """
 
-    merged_sch_data[_IK.allowed_start_time] = merged_sch_data[_SK.end_time].shift(
-        {_SK.multi_index: 1}, fill_value=min_datetime64_us
+    # NOTE:
+    #  index level `simult_num` does not affect `allowed_start_time` and `allowed_end_time`
+    #  but will complicate the shifting logic.
+    #  so we create `allowed_start_time` and `allowed_end_time` without level `simult_num`
+    #  and then use reindex to assign them back to the full MultiIndex
+
+    allowed_start_time = (
+        t.cast(pd.Series, merged_sch_data[_SK.end_time].to_pandas())
+        # reduce/dissolve index level '_SK.simult_num' by using groupby and first
+        .groupby(level=[_SK.start_time, _SK.exp_num, _SK.stn_num])
+        .first()
+        # apply shift per station
+        .groupby(level=_SK.stn_num)
+        .shift(+1, fill_value=min_datetime64_us)
     )
-    merged_sch_data[_IK.allowed_end_time] = merged_sch_data[_SK.start_time].shift(
-        {_SK.multi_index: -1}, fill_value=max_datetime64_us
+    allowed_end_time = (
+        t.cast(pd.Series, merged_sch_data[_SK.start_time].to_pandas())
+        # reduce/dissolve index level '_SK.simult_num' by using groupby and first
+        .groupby(level=[_SK.start_time, _SK.exp_num, _SK.stn_num])
+        .first()
+        # apply shift per station
+        .groupby(level=_SK.stn_num)
+        .shift(-1, fill_value=max_datetime64_us)
+    )
+
+    merged_sch_data[_IK.allowed_start_time] = allowed_start_time.reindex(
+        merged_sch_data[_SK.start_time].to_pandas().index
+    )
+    merged_sch_data[_IK.allowed_end_time] = allowed_end_time.reindex(
+        merged_sch_data[_SK.start_time].to_pandas().index
     )
 
     return merged_sch_data
