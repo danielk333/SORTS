@@ -5,17 +5,19 @@ Such a subclass can then be used with every other functionality of SORTS.
 
 """
 
+import importlib.util
 from .base import Propagator
 
 __all__ = [
     "Propagator",
 ]
 
-try:
+# TODO: discuss with daniel if he is okay with this import guard
+if importlib.util.find_spec("orekit") is not None:
     from .orekit import Orekit
 
     __all__.append("Orekit")
-except ImportError:
+else:
     Orekit = None
 
 try:
@@ -36,9 +38,9 @@ from .kepler import Kepler
 
 __all__.append("Kepler")
 
-try:
+if importlib.util.find_spec("poliastro") is not None:
     from .poliastro import TwoBody
 
     __all__.append("TwoBody")
-except ImportError:
+else:
     TwoBody = None
