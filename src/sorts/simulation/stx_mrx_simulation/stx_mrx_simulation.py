@@ -77,6 +77,10 @@ def prepare_simulation_unit_params(spec: Spec) -> list[FromPassagesOverTxRxStati
         passages_lists=passages_lists,
         spobjs_interpolators=spobjs_interpolators,
     )
+    # filter away param with empty schedule
+    sim_units_param = [
+        p for p in sim_units_param if len(p["schedule"]._data[Schedule._K.multi_index]) > 0
+    ]
     logger.info(f"prepare_simulation_unit_params done")
 
     return sim_units_param
