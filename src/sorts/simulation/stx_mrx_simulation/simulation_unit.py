@@ -161,6 +161,7 @@ class SimulationUnit:
             # TODO: return en empty instance would be better
             raise NotImplementedError()
 
+        # TODO: should used `logical_or`?
         rx_time_mask: xr.DataArray = reduce(
             xr.ufuncs.logical_and,
             [

@@ -74,6 +74,13 @@ class Schedule:
         filtered_data = schedule_data_funcs.filter_by_time_range(self._data, time_range)
         return cls(data=filtered_data)
 
+    def filter_by_time_ranges(self, time_ranges: t.Sequence[TimeRange_us]) -> t.Self:
+        cls = type(self)
+
+        filtered_datas = schedule_data_funcs.filter_by_time_ranges(self._data, time_ranges)
+
+        return cls(data=filtered_datas)
+
     # TODO: we can probably inject the schedule is tx or rx into `Schedule` class and remove param `is_split_simult`?
     def get_indexer_per_measurement(
         self, is_split_simult: bool, is_copy=False

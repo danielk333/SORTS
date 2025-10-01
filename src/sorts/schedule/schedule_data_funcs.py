@@ -1,5 +1,6 @@
 from __future__ import annotations
 import logging, typing as t
+from functools import reduce
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
@@ -232,6 +233,22 @@ def filter_by_time_range(ds: ScheduleData, time_range: TimeRange_us) -> Schedule
     mask = (ds[_K.start_time] >= time_range[0]) & (ds[_K.end_time] <= time_range[1])
 
     ds_masked = ds[{_K.multi_index: mask}]
+
+    return ds_masked
+
+
+# TODO: this is very similar to `rx_time_mask: xr.DataArray = reduce(...)` in `simulation_unit.py`,
+#   maybe one of them can be dissolved?
+def filter_by_time_ranges(ds: ScheduleData, time_ranges: t.Sequence[TimeRange_us]) -> ScheduleData:
+    resultant_mask: xr.DataArray = reduce(
+        xr.ufuncs.logical_or,
+        [
+            (ds[_K.start_time] >= time_range[0]) & (ds[_K.end_time] <= time_range[1])
+            for time_range in time_ranges
+        ],
+    )
+
+    ds_masked = ds[{_K.multi_index: resultant_mask}]
 
     return ds_masked
 

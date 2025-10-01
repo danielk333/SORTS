@@ -183,6 +183,10 @@ def derive_simulation_unit_params(
         for stn_id_pair, passages in groupped_passages.items():
             rx_stn = next((stn for stn in spec["rx_stations"] if stn.uid == stn_id_pair[1]))
 
+            filtered_sch = spec["schedule"].filter_by_time_ranges(
+                [ps["time_range"] for ps in passages]
+            )
+
             params.append(
                 {
                     "id": str(len(params)),
@@ -191,7 +195,7 @@ def derive_simulation_unit_params(
                     "spobj_interp": spobj_states_interp,
                     "tx_station": spec["tx_station"],
                     "rx_station": rx_stn,
-                    "schedule": spec["schedule"],
+                    "schedule": filtered_sch,
                 }
             )
 
