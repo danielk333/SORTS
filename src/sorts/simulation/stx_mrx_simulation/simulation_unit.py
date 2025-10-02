@@ -137,7 +137,6 @@ class SimulationUnit:
         self.tx_exp_detail_map = tx_exp_detail_map
         self.rx_exp_detail_map = rx_exp_detail_map
 
-    # TODO: can derive the indexers inside this method instead of as param, now that we take passages as param
     @classmethod
     def from_passages_over_tx_rx_station_pair(
         cls, **kwargs: t.Unpack[FromPassagesOverTxRxStationPairParam]
@@ -161,19 +160,9 @@ class SimulationUnit:
             # TODO: return en empty instance would be better
             raise NotImplementedError()
 
-        # TODO: should used `logical_or`?
-        rx_time_mask: xr.DataArray = reduce(
-            xr.ufuncs.logical_and,
-            [
-                (rx_schdata[_SK.start_time] >= time_range[0])
-                & (rx_schdata[_SK.end_time] <= time_range[1])
-                for time_range in [ps["time_range"] for ps in passages]
-            ],
-        )
-
-        rx_time = rx_schdata[_SK.start_time][rx_time_mask].to_numpy()
-        rx_exp_num = rx_schdata[_SK.exp_num][rx_time_mask].to_numpy()
-        rx_simult_num = rx_schdata[_SK.simult_num][rx_time_mask].to_numpy()
+        rx_time = rx_schdata[_SK.start_time].to_numpy()
+        rx_exp_num = rx_schdata[_SK.exp_num].to_numpy()
+        rx_simult_num = rx_schdata[_SK.simult_num].to_numpy()
 
         multi_index = pd.MultiIndex.from_arrays(
             [rx_time, rx_exp_num, rx_simult_num],
@@ -208,10 +197,7 @@ class SimulationUnit:
                     .loc[{_SK.multi_index: tx_reindex_selector[_SK.multi_index]}]
                     .to_numpy(),
                 ),
-                _K.rx_pointing: (
-                    (_K.enu, _K.multi_index),
-                    rx_schdata[_SK.pointing].loc[:, rx_time_mask].to_numpy(),
-                ),
+                _K.rx_pointing: ((_K.enu, _K.multi_index), rx_schdata[_SK.pointing].to_numpy()),
             },
         )
 
