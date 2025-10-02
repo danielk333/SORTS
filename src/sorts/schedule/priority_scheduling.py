@@ -18,8 +18,6 @@ min_datetime64_us = np.datetime64(
 )  # +1 is needed, otherwise it will be NaT
 
 DsIntermediateVarKey = t.Literal[
-    "allowed_start_time",
-    "allowed_end_time",
     "cummax_start_time",
     "cummax_end_time",
     "is_overlaped",
@@ -29,8 +27,6 @@ DsIntermediateVarKey = t.Literal[
 class _IK:
     """Internal helper class for accessing string keys consistently"""
 
-    allowed_start_time: t.Final = "allowed_start_time"
-    allowed_end_time: t.Final = "allowed_end_time"
     cummax_start_time: t.Final = "cummax_start_time"
     cummax_end_time: t.Final = "cummax_end_time"
     is_overlaped: t.Final = "is_overlaped"
@@ -56,13 +52,13 @@ def to_dataframe(ds: ScheduleData):
             [
                 schedule_data_funcs.to_dataframe(ds),
                 (
-                    ds[_IK.allowed_start_time].transpose().to_pandas()
-                    if _IK.allowed_start_time in ds
+                    ds[_IK.cummax_start_time].transpose().to_pandas()
+                    if _IK.cummax_start_time in ds
                     else empty_df
                 ),
                 (
-                    ds[_IK.allowed_end_time].transpose().to_pandas()
-                    if _IK.allowed_end_time in ds
+                    ds[_IK.cummax_end_time].transpose().to_pandas()
+                    if _IK.cummax_end_time in ds
                     else empty_df
                 ),
                 (
@@ -84,12 +80,6 @@ def _inject_intermediate_columns(sch_data: ScheduleData) -> ScheduleData:
     init `allowed_start_time`, `allowed_end_time`, `is_overlaped` fields in `sch_data`
     """
 
-    sch_data[_IK.allowed_start_time] = xr.full_like(
-        sch_data[_SK.multi_index], np.datetime64("NaT"), dtype="datetime64[us]"
-    )
-    sch_data[_IK.allowed_end_time] = xr.full_like(
-        sch_data[_SK.multi_index], np.datetime64("NaT"), dtype="datetime64[us]"
-    )
     sch_data[_IK.cummax_start_time] = xr.full_like(
         sch_data[_SK.multi_index], np.datetime64("NaT"), dtype="datetime64[us]"
     )
@@ -101,15 +91,7 @@ def _inject_intermediate_columns(sch_data: ScheduleData) -> ScheduleData:
     return sch_data
 
 
-def _populate_allowed_start_time_allowed_end_time(
-    merged_sch_data: ScheduleData, incoming_sch_data: ScheduleData
-) -> ScheduleData:
-    """
-    populate `allowed_start_time`, `allowed_end_time` columns entries that have NaT values
-    - the `end_time` of entries which have non-NaT `allowed_start_time` will be the `allowed_start_time` of its next and ffill rows
-    - the `start_time` of entries which have non-NaT `allowed_end_time` will be the `allowed_end_time` of its previous and bfill rows
-    """
-
+def _propagate_cummax_start_time_cummax_end_time(merged_sch_data: ScheduleData) -> ScheduleData:
     merged_sch_data[_IK.cummax_start_time] = (
         t.cast(pd.Series, merged_sch_data[_IK.cummax_start_time].to_pandas())
         .groupby(level=[_SK.stn_num])
@@ -121,6 +103,12 @@ def _populate_allowed_start_time_allowed_end_time(
         .ffill()
     )
 
+    return merged_sch_data
+
+
+def _remove_entries_with_time_clash(
+    merged_sch_data: ScheduleData, incoming_sch_data: ScheduleData
+) -> ScheduleData:
     allowed_start_time = (
         t.cast(pd.Series, merged_sch_data[_IK.cummax_end_time].to_pandas())
         .groupby(level=_SK.stn_num)
@@ -132,44 +120,22 @@ def _populate_allowed_start_time_allowed_end_time(
         .shift(-1, fill_value=max_datetime64_us)
     )
 
-    merged_sch_data[_IK.allowed_start_time].loc[
+    # calc bool mask for overlapping just for the new/incoming entries
+    is_over_allowed_start_time = merged_sch_data[_SK.start_time].loc[
         {_SK.multi_index: incoming_sch_data[_SK.multi_index]}
-    ] = allowed_start_time.reindex(incoming_sch_data[_SK.multi_index].to_pandas().index)
-    merged_sch_data[_IK.allowed_end_time].loc[
+    ] < allowed_start_time.reindex(incoming_sch_data[_SK.multi_index].to_pandas().index)
+
+    is_over_allowed_end_time = merged_sch_data[_SK.end_time].loc[
         {_SK.multi_index: incoming_sch_data[_SK.multi_index]}
-    ] = allowed_end_time.reindex(incoming_sch_data[_SK.multi_index].to_pandas().index)
+    ] > allowed_end_time.reindex(incoming_sch_data[_SK.multi_index].to_pandas().index)
 
-    return merged_sch_data
-
-
-def _fill_Na(merged_sch_data: ScheduleData) -> ScheduleData:
-    """
-    we fill in `min_datetime64_us`, `max_datetime64_us` for the remaining NaT in `allowed_start_time`, `allowed_end_time`
-    so that resolved rows always have non NA values in that two column.
-    (they are likely at the tops and bottoms)
-    """
-    # TODO: this func might no longer be needed.
-    #   it was needed only because some older ver of
-    #   `_propagate_allowed_start_time_allowed_end_time` left `NaT` in some entries,
-    #   (despite the we have `fill_value` param when calling `shift` and called `ffill`, `bfill` afterwards)
-
-    merged_sch_data[_IK.allowed_start_time] = merged_sch_data[_IK.allowed_start_time].fillna(
-        min_datetime64_us
-    )
-    merged_sch_data[_IK.allowed_end_time] = merged_sch_data[_IK.allowed_end_time].fillna(
-        max_datetime64_us
-    )
-
-    return merged_sch_data
-
-
-def _remove_entries_with_time_clash(merged_sch_data: ScheduleData) -> ScheduleData:
     # NOTE: we checked for is_overlaped instead of is_allowed
     #   so that it is safe agaisnt comparison with `NaT`, which always return false
     #   (and we assume `NaT` mean "no restructions" for both allowed_start_time and allowed_end_time)
-    merged_sch_data[_IK.is_overlaped] = (
-        merged_sch_data[_SK.start_time] < merged_sch_data[_IK.allowed_start_time]
-    ) | (merged_sch_data[_SK.end_time] > merged_sch_data[_IK.allowed_end_time])
+    merged_sch_data[_IK.is_overlaped].loc[{_SK.multi_index: incoming_sch_data[_SK.multi_index]}] = (
+        is_over_allowed_start_time
+    ) | is_over_allowed_end_time
+
     merged_sch_data = merged_sch_data.loc[{_SK.multi_index: ~merged_sch_data[_IK.is_overlaped]}]
 
     return merged_sch_data
@@ -210,50 +176,6 @@ def _remove_entries_without_corresponding_tx(
             except KeyError:
                 # Do nothing when the selection returns no result.
                 pass
-
-    return merged_sch_data
-
-
-def _update_allowed_start_time_allowed_end_time(merged_sch_data: ScheduleData) -> ScheduleData:
-    """
-    update `allowed_start_time`, `allowed_end_time` columns
-    - the `allowed_start_time` has the previous `end_time`;
-      for top values that have no corresponding pervious values, `min_datetime64_us` is used
-    - the `allowed_end_time` has the next `start_time`;
-      for bottom values that have no corresponding next values, `max_datetime64_us` is used
-    """
-
-    # NOTE:
-    #  index level `simult_num` does not affect `allowed_start_time` and `allowed_end_time`
-    #  but will complicate the shifting logic.
-    #  so we create `allowed_start_time` and `allowed_end_time` without level `simult_num`
-    #  and then use reindex to assign them back to the full MultiIndex
-
-    allowed_start_time = (
-        t.cast(pd.Series, merged_sch_data[_SK.end_time].to_pandas())
-        # reduce/dissolve index level '_SK.simult_num' by using groupby and first
-        .groupby(level=[_SK.start_time, _SK.exp_num, _SK.stn_num])
-        .first()
-        # apply shift per station
-        .groupby(level=_SK.stn_num)
-        .shift(+1, fill_value=min_datetime64_us)
-    )
-    allowed_end_time = (
-        t.cast(pd.Series, merged_sch_data[_SK.start_time].to_pandas())
-        # reduce/dissolve index level '_SK.simult_num' by using groupby and first
-        .groupby(level=[_SK.start_time, _SK.exp_num, _SK.stn_num])
-        .first()
-        # apply shift per station
-        .groupby(level=_SK.stn_num)
-        .shift(-1, fill_value=max_datetime64_us)
-    )
-
-    merged_sch_data[_IK.allowed_start_time] = allowed_start_time.reindex(
-        merged_sch_data[_SK.start_time].to_pandas().index
-    )
-    merged_sch_data[_IK.allowed_end_time] = allowed_end_time.reindex(
-        merged_sch_data[_SK.start_time].to_pandas().index
-    )
 
     return merged_sch_data
 
@@ -301,12 +223,7 @@ def priority_scheduling(
     merged_sch_data = schedule_data_funcs.empty_data()
     if len(sch_datas) > 0:
         merged_sch_data.attrs = sch_datas[0].attrs
-    merged_sch_data[_IK.allowed_start_time] = (
-        _SK.multi_index,
-        np.empty(0, "datetime64[us]"),
-    )
-    merged_sch_data[_IK.allowed_end_time] = (_SK.multi_index, np.empty(0, "datetime64[us]"))
-    merged_sch_data[_IK.is_overlaped] = (_SK.multi_index, np.empty(0, np.bool))
+    merged_sch_data = _inject_intermediate_columns(merged_sch_data)
     for incoming_sch_data in sch_datas:
         incoming_sch_data = _inject_intermediate_columns(incoming_sch_data)
 
@@ -321,21 +238,15 @@ def priority_scheduling(
         merged_sch_data = xr.concat([merged_sch_data, incoming_sch_data], dim=_SK.multi_index)
         merged_sch_data = merged_sch_data.sortby(_SK.start_time)
 
-        merged_sch_data = _populate_allowed_start_time_allowed_end_time(
-            merged_sch_data, incoming_sch_data
-        )
-        merged_sch_data = _fill_Na(merged_sch_data)
-        merged_sch_data = _remove_entries_with_time_clash(merged_sch_data)
+        merged_sch_data = _propagate_cummax_start_time_cummax_end_time(merged_sch_data)
+        merged_sch_data = _remove_entries_with_time_clash(merged_sch_data, incoming_sch_data)
         merged_sch_data = _remove_entries_without_corresponding_tx(
             merged_sch_data, incoming_sch_data
         )
-        merged_sch_data = _update_allowed_start_time_allowed_end_time(merged_sch_data)
         merged_sch_data = _update_cummax_start_time_cummax_end_time(merged_sch_data)
 
     merged_sch_data = merged_sch_data.drop_vars(
         [
-            _IK.allowed_start_time,
-            _IK.allowed_end_time,
             _IK.cummax_start_time,
             _IK.cummax_end_time,
             _IK.is_overlaped,
