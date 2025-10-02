@@ -40,7 +40,7 @@ assert_class_attributes_equal_to(_IK, t.get_args(DsIntermediateVarKey))
 
 
 # TODO: remove?
-def data_to_dataframe(ds: ScheduleData):
+def to_dataframe(ds: ScheduleData):
     """
     Convert schedule data in xarray dataset to pandas dataframe.
 
