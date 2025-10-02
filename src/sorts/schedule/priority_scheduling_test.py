@@ -66,7 +66,7 @@ def priority_scheduling_interleaved_schedule_test():
                     "duty_cycle": 0,
                     "noise_temp": 0,
                     "slice_duration": np.timedelta64(3600, "s"),
-                    "stn_pairs": [(1, 1)],
+                    "stn_pairs": [(0, 0)],
                 }
             },
             _SK.start_time: np.arange(
@@ -80,7 +80,7 @@ def priority_scheduling_interleaved_schedule_test():
                 np.timedelta64(3600, "s"),
             ),
             _SK.exp_num: np.full(24, 1, dtype=np.int16),
-            _SK.stn_num: np.full(24, 1, dtype=np.int16),
+            _SK.stn_num: np.full(24, 0, dtype=np.int16),
             _SK.simult_num: np.full(24, 0, dtype=np.int16),
             _SK.pointing: np.full((3, 24), 1.0, dtype=np.float64),
         }
@@ -93,14 +93,20 @@ def priority_scheduling_interleaved_schedule_test():
     return
 
 
-# TODO: add test case for the resolved error::
-# spobjs = [tracked_spobj]
-# Error "not all values found in index 'multi_index'",  at space_object.oid = 20; sim_unit.id = 6
-# ```
-# pd.MultiIndex.from_tuples(tx_sch_pointing_selector).isin(tx_sch._data.indexes["multi_index"])
+# TODO: add test case to ensure rx entries are removed when tx entries are removed.
+#   this is related to the resolved error::
 #
-# :> np.argmax(~pd.MultiIndex.from_tuples(tx_sch_pointing_selector).isin(tx_sch._data.indexes["multi_index"]))
-# -> np.int64(22447)
-# tx_sch_pointing_selector[22447]
-# (np.datetime64('2025-01-01T02:49:16.530000'), np.int16(1), np.int16(0))
-# ```
+#   spobjs = [tracked_spobj]
+#   Error "not all values found in index 'multi_index'",  at space_object.oid = 20; sim_unit.id = 6
+#   ```
+#   pd.MultiIndex.from_tuples(tx_sch_pointing_selector).isin(tx_sch._data.indexes["multi_index"])
+#
+#   :> np.argmax(~pd.MultiIndex.from_tuples(tx_sch_pointing_selector).isin(tx_sch._data.indexes["multi_index"]))
+#   -> np.int64(22447)
+#   tx_sch_pointing_selector[22447]
+#   (np.datetime64('2025-01-01T02:49:16.530000'), np.int16(1), np.int16(0))
+#   ```
+
+# TODO: add test case to ensure we do not shift among the index level `simult_num` and `stn_num`
+#   when updating the `allowed_start_time`, `allowed_end_time`;
+#   related func: '_update_allowed_start_time_allowed_end_time'
