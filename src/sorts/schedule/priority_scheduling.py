@@ -109,6 +109,11 @@ def _propagate_cummax_start_time_cummax_end_time(merged_sch_data: ScheduleData) 
 def _remove_entries_with_time_clash(
     merged_sch_data: ScheduleData, incoming_sch_data: ScheduleData
 ) -> ScheduleData:
+    # NOTE:
+    #   - the `allowed_start_time` has the previous `end_time`;
+    #     for top values that have no corresponding pervious values, `min_datetime64_us` is used
+    #   - the `allowed_end_time` has the next `start_time`;
+    #     for bottom values that have no corresponding next values, `max_datetime64_us` is used
     allowed_start_time = (
         t.cast(pd.Series, merged_sch_data[_IK.cummax_end_time].to_pandas())
         .groupby(level=_SK.stn_num)
