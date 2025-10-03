@@ -87,16 +87,10 @@ def prepare_simulation_unit_params(spec: Spec) -> list[FromPassagesOverTxRxStati
 
 
 def mpi_master_proc_loop(
-    comm: MPI.Intracomm,
-    master_proc_rank: int,
-    spec: Spec,
-    rank_size: int,
-):
+    comm: MPI.Intracomm, master_proc_rank: int, spec: Spec, rank_size: int
+) -> None:
     logger.debug(f"running in mpi with rank: {rank_size}")
     logger.info(f"master: {master_proc_rank} | simulation preparation start")
-
-    sim_units = []
-    obss = []
 
     sim_units_param = prepare_simulation_unit_params(spec)
 
@@ -135,15 +129,14 @@ def mpi_master_proc_loop(
             logger.debug(f"master: {master_proc_rank} | awaiting results ...")
 
             status = MPI.Status()
-            recv_obss = comm.recv(status=status)
+            recv_obss_cnt: int = comm.recv(status=status)
             worker_rank = status.Get_source()
             logger.debug(
-                f"master: {master_proc_rank} | received {len(recv_obss)} observations from worker: {worker_rank}"
+                f"master: {master_proc_rank} | received observation count: {recv_obss_cnt}, from worker: {worker_rank}"
             )
             processed_sim_unit_cnt += 1
 
             is_worker_idle_list[worker_rank - 1] = True
-            obss.extend(recv_obss)
 
     logger.info(f"master: {master_proc_rank} | parallel processing of SimulationUnit done")
 
@@ -155,13 +148,16 @@ def mpi_master_proc_loop(
         comm.send(_MpiMsg.terminate, dest=r)
         comm.recv(source=r)  # wait for an ack
 
-    logger.info(f"master: {master_proc_rank} | `mpi_run` done,  returning...")
-    return obss, sim_units
+    # TODO: re-eval if we should implement automatic result gathering
+    logger.warning(
+        f"master: {master_proc_rank} | observations are not gathered by mpi master process automatically at the moment."
+    )
+    logger.info(f"master: {master_proc_rank} | master main loop done,  returning...")
 
 
 def mpi_worker_proc_loop(
     comm: MPI.Intracomm, master_proc_rank: int, worker_proc_rank: int, persist_dir: Path
-):
+) -> None:
     while True:
         logger.info(f"worker: {worker_proc_rank} | waiting for msg...")
         msg = comm.recv(source=master_proc_rank)
@@ -207,8 +203,10 @@ def mpi_worker_proc_loop(
             sim_unit=sim_unit,
         )
 
-        comm.send(obss, dest=master_proc_rank)
-        logger.info(f"worker: {worker_proc_rank} | SimulationUnit:{sim_unit.id} done")
+        comm.send(len(obss), dest=master_proc_rank)
+        logger.info(
+            f"worker: {worker_proc_rank} | SimulationUnit:{sim_unit.id} done with {len(obss)} observations"
+        )
 
 
 # TODO: we need to enforce each station to has a unique id (`.uid` prop)
@@ -248,9 +246,7 @@ class StxMrxSimulation:
 
         return self.obss, self.sim_units
 
-    def mpi_run(
-        self, persistence_dir_path: str | Path
-    ) -> tuple[list[Observation], list[SimulationUnit]]:
+    def mpi_run(self, persistence_dir_path: str | Path) -> None:
         try:
             persist_dir = Path(persistence_dir_path)
             if not persist_dir.exists():
@@ -265,13 +261,11 @@ class StxMrxSimulation:
             rank_size = comm.Get_size()
 
             if r == master_proc_rank:  # master
-                obss, sim_units = mpi_master_proc_loop(
+                mpi_master_proc_loop(
                     comm=comm, master_proc_rank=r, spec=self.spec, rank_size=rank_size
                 )
 
-                self.obss = obss
-                self.sim_units = sim_units
-                return self.obss, self.sim_units
+                return
 
             else:  # workers
                 mpi_worker_proc_loop(
@@ -281,7 +275,7 @@ class StxMrxSimulation:
                     persist_dir=persist_dir,
                 )
 
-                return self.obss, self.sim_units
+                return
 
         except Exception as err:
             comm = MPI.COMM_WORLD

@@ -1,6 +1,5 @@
 from __future__ import annotations
 import typing as t
-from functools import reduce
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
