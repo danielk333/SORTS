@@ -710,6 +710,19 @@ wheels = [
 ]
 
 [[package]]
+name = "h5netcdf"
+version = "1.6.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "h5py" },
+    { name = "packaging" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/5a/a1/e3ca842fd0895fcfb21c754a18fd8cd7362d1625b3a93408c982c38f4ec1/h5netcdf-1.6.4.tar.gz", hash = "sha256:83db7e5eb9b822bed2c79050d6cf8f36ecbd1039f4252bd90fab200edcaaf67d", size = 65832, upload-time = "2025-08-05T06:26:56.707Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5b/f5/ac71e692aad076d50a0f5f073204346d5f5577daffd21bb4b72c485f8959/h5netcdf-1.6.4-py3-none-any.whl", hash = "sha256:e0018e6a918f2bef2a4aa7b470a952b8a0b5d16a5893d59bea56524cc6207fcf", size = 50683, upload-time = "2025-08-05T06:26:55.644Z" },
+]
+
+[[package]]
 name = "h5py"
 version = "3.13.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2917,6 +2930,7 @@ dependencies = [
     { name = "astropy" },
     { name = "bokeh" },
     { name = "bottleneck" },
+    { name = "h5netcdf" },
     { name = "h5py" },
     { name = "jupyter-bokeh" },
     { name = "jupyterlab" },
@@ -2985,6 +2999,7 @@ requires-dist = [
     { name = "bottleneck", specifier = ">=1.5.0" },
     { name = "build", marker = "extra == 'dev'", specifier = ">=0.7.0" },
     { name = "flake8", marker = "extra == 'dev'", specifier = ">=4.0.1" },
+    { name = "h5netcdf", specifier = ">=1.6.4" },
     { name = "h5py", specifier = ">=3.2.1" },
     { name = "ipykernel", marker = "extra == 'dev'", specifier = ">=6.9.1" },
     { name = "ipykernel", marker = "extra == 'jupyter'", specifier = ">=6.29.5" },
