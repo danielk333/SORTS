@@ -151,38 +151,59 @@ def _remove_entries_without_corresponding_tx(
 ) -> ScheduleData:
     for exp_detail in incoming_sch_data.attrs[_SK.exp_detail_map].values():
         exp_detail: ExperimentDetail
+        exp_id = exp_detail["id"]
         stn_pairs = exp_detail.get("stn_pairs")
         if stn_pairs is None:
             raise RuntimeError("stn_pairs not found in ExperimentDetail")
 
         for tx_stn_num, rx_stn_num in stn_pairs:
-            is_tx_dropped_mask = ~np.isin(
+            incoming_tx_entries = t.cast(
+                pd.Series,
                 incoming_sch_data.loc[
-                    {_SK.multi_index: (slice(None), slice(None), tx_stn_num, slice(None))}
-                ][_SK.multi_index].to_numpy(),
-                merged_sch_data[_SK.multi_index].to_numpy(),
+                    {_SK.multi_index: (slice(None), exp_id, tx_stn_num, slice(None))}
+                ][_SK.multi_index].to_pandas(),
             )
 
-            dropped_tx_midx = incoming_sch_data[_SK.multi_index][is_tx_dropped_mask]
-            try:
-                corresponding_rx_to_drop = merged_sch_data.sel(
+            is_tx_dropped = ~incoming_tx_entries.isin(merged_sch_data[_SK.multi_index].to_pandas())
+            dropped_tx_start_time_idx = (
+                incoming_sch_data.loc[{_SK.multi_index: is_tx_dropped[is_tx_dropped == True].index}]
+                .indexes[_SK.multi_index]
+                .get_level_values(_SK.start_time)
+            )
+
+            # NOTE: we cannot filter the MultiIndex by levels 'start_time', 'exp_num', 'stn_num'
+            #   directly using `(dropped_tx_start_time_idx, exp_id, rx_stn_num)` here
+            #   because 'dropped_tx_start_time_idx' can contains entries from other exp or station, which will lead to KeyError.
+            #
+            #   Instead, we filter by first by levels 'exp_num', 'stn_num' here
+            #   and followed by an intersection with 'dropped_tx_start_time_idx' later when dropping
+            rx_start_time_of_the_exp_idx = (
+                merged_sch_data.loc[
                     {
                         _SK.multi_index: (
-                            # NOTE: `.tolist()` needed for MultiIndex level start_time, the value cannot be interpreted correctly otherwise for some reason
-                            dropped_tx_midx[_SK.start_time].to_numpy().tolist(),
-                            dropped_tx_midx[_SK.exp_num].to_numpy(),
+                            slice(None),
+                            exp_id,
                             rx_stn_num,
                             slice(None),
                         )
                     }
-                )
-                merged_sch_data = merged_sch_data.drop_sel(
-                    {_SK.multi_index: corresponding_rx_to_drop[_SK.multi_index]}
-                )
+                ]
+                .indexes[_SK.multi_index]
+                .get_level_values(_SK.start_time)
+            )
 
-            except KeyError:
-                # Do nothing when the selection returns no result.
-                pass
+            # NOTE: cannot drop using `.drop_sel` directly for some reason, so we do a selection by `.loc` first
+            dropping = merged_sch_data.loc[
+                {
+                    _SK.multi_index: (
+                        rx_start_time_of_the_exp_idx.intersection(dropped_tx_start_time_idx),
+                        exp_id,
+                        rx_stn_num,
+                        slice(None),
+                    )
+                }
+            ]
+            merged_sch_data = merged_sch_data.drop_sel({_SK.multi_index: dropping[_SK.multi_index]})
 
     return merged_sch_data
 
