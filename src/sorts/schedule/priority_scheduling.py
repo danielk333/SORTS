@@ -151,7 +151,9 @@ def _remove_entries_without_corresponding_tx(
 ) -> ScheduleData:
     for exp_detail in incoming_sch_data.attrs[_SK.exp_detail_map].values():
         exp_detail: ExperimentDetail
-        stn_pairs = exp_detail.get("stn_pairs", [])
+        stn_pairs = exp_detail.get("stn_pairs")
+        if stn_pairs is None:
+            raise RuntimeError("stn_pairs not found in ExperimentDetail")
 
         for tx_stn_num, rx_stn_num in stn_pairs:
             is_tx_dropped_mask = ~np.isin(
