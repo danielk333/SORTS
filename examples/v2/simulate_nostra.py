@@ -7,8 +7,6 @@ from sorts import (
     interpolation,
     population,
     propagator,
-    space_object,
-    radar,
     radar,
     controller,
     schedule,
