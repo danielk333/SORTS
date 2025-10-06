@@ -99,8 +99,6 @@ def mpi_master_proc_loop(
     ##
     logger.info(f"master: {master_proc_rank} | parallel processing of SimulationUnit start")
 
-    obss: list[Observation] = []
-
     num_workers = comm.Get_size() - 1
     is_worker_idle_list = [True for _ in range(num_workers)]
     processed_sim_unit_cnt = 0
@@ -207,6 +205,13 @@ def mpi_worker_proc_loop(
         logger.info(
             f"worker: {worker_proc_rank} | SimulationUnit:{sim_unit.id} done with {len(obss)} observations"
         )
+
+
+def iter_mpi_simulation_results(save_dir: Path):
+    for fpath in save_dir.glob("*.pickle"):
+        with open(fpath, "rb") as f:
+            sim_unit: SimulationUnit = pickle.load(f)
+            yield sim_unit
 
 
 # TODO: we need to enforce each station to has a unique id (`.uid` prop)

@@ -1,12 +1,14 @@
-import pickle, time
-from datetime import datetime, timezone
+import logging, time, typing as t
 from pathlib import Path
 import numpy as np
 import numpy.typing as npt
+import xarray as xr
 from astropy.time import Time
-import logging
+import matplotlib
+import matplotlib.pyplot as plt
 import sorts
 from sorts import (
+    types,
     interpolation,
     population,
     propagator,
@@ -16,10 +18,13 @@ from sorts import (
     schedule,
     simulation,
 )
+from sorts.simulation.stx_mrx_simulation import stx_mrx_simulation
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 logger.info("starting example")
+
+matplotlib.use("Agg")  # Use a non-GUI backend
 
 # 15min runtime
 start_time = Time("2025-01-01 02:45:00")
@@ -146,15 +151,52 @@ sim = simulation.StxMrxSimulation(
     }
 )
 
-calc_start_time = time.perf_counter()
-obss, sim_units = sim.mpi_run(Path(__file__).parent / ".." / ".." / "local_data" / "mpi")
-# obss, sim_units = sim.run()  # or, do not use non-mpi for debugging
-calc_time = time.perf_counter() - calc_start_time
+# is_run_by_mpi = False  # a convenience flag to switch between running mode for debugging
+is_run_by_mpi = True  # a convenience flag to switch between running mode for debugging
+if not is_run_by_mpi:
+    calc_start_time = time.perf_counter()
+    obss, sim_units = sim.run()
+    calc_time = time.perf_counter() - calc_start_time
 
-print(f"len(obss): {len(obss)}")
-for idx, obs in enumerate(obss):
-    print(f"obs: {idx}")
-    print(obs.passage)
-    print(obs.get_state_slice())
+    print(f"len(obss): {len(obss)}")
+    for idx, obs in enumerate(obss):
+        print(f"obs: {idx}")
+        print(obs.passage)
+        print(obs.get_state_slice())
+else:
+    save_dir = Path(__file__).parent / ".." / ".." / "local_data" / "mpi"
+
+    calc_start_time = time.perf_counter()
+    sim.mpi_run(save_dir)
+    calc_time = time.perf_counter() - calc_start_time
+
+    max_snrs_value = []
+    max_snrs_time: list[types.Datetime64_us] = []
+    max_snrs_spobj_id: list[int] = []
+
+    for sim_unit in stx_mrx_simulation.iter_mpi_simulation_results(save_dir):
+        _SuK = stx_mrx_simulation.SimulationUnit._K
+
+        obss = stx_mrx_simulation.funcs.derive_observations(
+            passages=sim_unit.passages,
+            schedule=master_sch,
+            sim_unit=sim_unit,
+        )
+
+        for obs in obss:
+            obs_state = obs.get_state_slice()
+            argmax_snr = t.cast(xr.DataArray, obs_state[_SuK.snr].argmax())
+            midx_max_snr = obs_state[{_SuK.multi_index: argmax_snr.item()}]
+            midx_max_snr_value = midx_max_snr[_SuK.snr].item()
+            midx_max_snr_time = midx_max_snr[_SuK.time].item()
+
+            max_snrs_value.append(midx_max_snr_value)
+            max_snrs_time.append(midx_max_snr_time)
+            max_snrs_spobj_id.append(sim_unit.space_object.oid)
+
+    plt.figure()
+    plt.scatter(max_snrs_time, max_snrs_value)
+    plt.savefig(save_dir / "max_snr_vs_time.png", dpi=300, bbox_inches="tight")
+
 
 exit()

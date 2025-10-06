@@ -76,6 +76,7 @@ def group_passages_by_tx_rx_station_pair(
     return groupped_passages
 
 
+# TODO: better move to `simulation_unit` module?
 # TODO: go through its logic again; similar to `get_indexer_per_measurement`,
 #   now we have `stn_num`, `simult_num` in index, things can likely be done differently
 def derive_observations(
