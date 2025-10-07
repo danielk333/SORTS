@@ -6,6 +6,7 @@ import xarray as xr
 from astropy.time import Time
 import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 import sorts
 from sorts import (
     types,
@@ -194,8 +195,13 @@ else:
             max_snrs_time.append(midx_max_snr_time)
             max_snrs_spobj_id.append(sim_unit.space_object.oid)
 
-    plt.figure()
-    plt.scatter(max_snrs_time, max_snrs_value)
+    # plotting
+    fig, ax = plt.subplots()
+    ax.set_title("snr vs time")
+    ax.scatter(max_snrs_time, max_snrs_value, s=3)
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d %H:%M:%S"))
+    fig.autofmt_xdate()
+    ax.set_yscale("log")
     plt.savefig(save_dir / "max_snr_vs_time.png", dpi=300, bbox_inches="tight")
 
 
