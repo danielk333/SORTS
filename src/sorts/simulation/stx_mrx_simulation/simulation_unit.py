@@ -84,6 +84,36 @@ A xarray `Dataset` with:
 """
 
 
+def empty_state_data() -> StateData:
+    multi_index = pd.MultiIndex.from_arrays(
+        [
+            np.empty(0, dtype="datetime64[us]"),
+            np.empty(0, dtype=np.int16),
+            np.empty(0, dtype=np.int16),
+        ],
+        names=(_K.time, _K.exp_num, _K.rx_simult_num),
+    )
+
+    state_data = xr.Dataset(
+        coords={
+            **xr.Coordinates.from_pandas_multiindex(multi_index, _K.multi_index),
+            _K.enu: [_K.e, _K.n, _K.u],
+        },
+        data_vars={
+            # NOTE: we used `.loc` instead of `reindex` here because we cannot get `reindex` working
+            # TODO: investigate why `reindex` won't work
+            #   not working: `tx_sch._data[_SK.pointing].reindex({_SK.multi_index: [(np.datetime64("2025-01-01 02:45:01", "us"), 0, 0), ...]})`
+            _K.tx_pointing: (
+                (_K.enu, _K.multi_index),
+                np.empty((3, 0), dtype=np.float64),
+            ),
+            _K.rx_pointing: ((_K.enu, _K.multi_index), np.empty((3, 0), dtype=np.float64)),
+        },
+    )
+
+    return StateData(state_data)
+
+
 # TODO: better naming
 class FromPassagesOverTxRxStationPairParam(t.TypedDict):
     id: str
@@ -96,6 +126,7 @@ class FromPassagesOverTxRxStationPairParam(t.TypedDict):
 
 
 # TODO: re-eval: `Station`` can be taken from `Passage`, but empty `list[Passage]` would be an issue in that case.
+# TODO: 'tx_exp_detail_map' and 'rx_exp_detail_map' are the same thing now, combine/dissolve them
 class SimulationUnit:
     """
     Contains all the params and results for a unit of simulation calculation.
@@ -146,6 +177,27 @@ class SimulationUnit:
         spobj_interp = kwargs["spobj_interp"]
         tx_station = kwargs["tx_station"]
         rx_station = kwargs["rx_station"]
+
+        # early return for empty cases
+        # NOTE: this is particularly needed because `.loc` will throw KeyError for non-existence keys
+        # TODO: add test case for empty case?
+        if (
+            len(passages) == 0
+            or not (kwargs["schedule"]._data[_SK.stn_num] == tx_station.uid).any()
+            or not (kwargs["schedule"]._data[_SK.stn_num] == rx_station.uid).any()
+        ):
+            return cls(
+                id=id,
+                spobj=spobj,
+                spobj_interp=spobj_interp,
+                passages=passages,
+                tx_station=kwargs["tx_station"],
+                rx_station=kwargs["rx_station"],
+                tx_exp_detail_map=kwargs["schedule"]._data.attrs[_SK.exp_detail_map],
+                rx_exp_detail_map=kwargs["schedule"]._data.attrs[_SK.exp_detail_map],
+                state_data=StateData(empty_state_data()),
+            )
+
         # NOTE: xarray simplify/collapse MultiIndex when filtering a level to an exact value,
         #   we filter on the top level "multi_index' with a tuple here to prevent it
         tx_schdata = kwargs["schedule"]._data.loc[
@@ -154,10 +206,6 @@ class SimulationUnit:
         rx_schdata = kwargs["schedule"]._data.loc[
             {_SK.multi_index: (slice(None), slice(None), rx_station.uid, slice(None))}
         ]
-
-        if len(passages) == 0:
-            # TODO: return en empty instance would be better
-            raise NotImplementedError()
 
         rx_time = rx_schdata[_SK.start_time].to_numpy()
         rx_exp_num = rx_schdata[_SK.exp_num].to_numpy()
@@ -207,8 +255,8 @@ class SimulationUnit:
             passages=passages,
             tx_station=kwargs["tx_station"],
             rx_station=kwargs["rx_station"],
-            tx_exp_detail_map=tx_schdata.attrs[_SK.exp_detail_map],
-            rx_exp_detail_map=rx_schdata.attrs[_SK.exp_detail_map],
+            tx_exp_detail_map=kwargs["schedule"]._data.attrs[_SK.exp_detail_map],
+            rx_exp_detail_map=kwargs["schedule"]._data.attrs[_SK.exp_detail_map],
             state_data=StateData(state_data),
         )
 

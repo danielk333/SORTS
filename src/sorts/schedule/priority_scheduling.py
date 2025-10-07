@@ -228,6 +228,10 @@ def priority_scheduling(
     schedule with smaller index in the sequence is given priority over those with larger index.
 
     Note: It is assumed (and not checked) that each of the schedule itself does not contain overlapping entries.
+
+    Known artifacts:
+      There could be cases of dangling TX entries in the result
+      (but not the inverse, i.e. there will not be any dangling RX entries).
     """
 
     # The logic of this function:

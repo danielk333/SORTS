@@ -86,6 +86,16 @@ def derive_observations(
 
     obss: list[Observation] = []
 
+    # early return for empty cases
+    # NOTE: this is particularly needed because `.loc` will throw KeyError for non-existence keys
+    # TODO: add test case for empty case?
+    if (
+        len(passages) == 0
+        or not (schedule._data[Schedule._K.stn_num] == sim_unit.tx_station.uid).any()
+        or not (schedule._data[Schedule._K.stn_num] == sim_unit.rx_station.uid).any()
+    ):
+        return obss
+
     # NOTE: xarray simplify/collapse MultiIndex when filtering a level to an exact value,
     #   we filter on the top level "multi_index' with a tuple here to prevent it
     tx_schdata = schedule._data.loc[
