@@ -76,10 +76,6 @@ def to_dataframe(ds: ScheduleData):
 
 
 def _inject_intermediate_columns(sch_data: ScheduleData) -> ScheduleData:
-    """
-    init `allowed_start_time`, `allowed_end_time`, `is_overlaped` fields in `sch_data`
-    """
-
     sch_data[_IK.cummax_start_time] = xr.full_like(
         sch_data[_SK.multi_index], np.datetime64("NaT"), dtype="datetime64[us]"
     )
@@ -224,11 +220,6 @@ def _update_cummax_start_time_cummax_end_time(merged_sch_data: ScheduleData) -> 
     return merged_sch_data
 
 
-# TODO: go through the logic again, now that we have pandas MultiIndex backing the ScheduleData,
-#   it might be possible to similify the slicing/alike logic;
-#
-#   maybe no need to `_update_allowed_start_time_allowed_end_time`,
-#   and `allowed_start_time`, `allowed_end_time` can be kept ephemeral and passed ard as param?
 def priority_scheduling(
     sch_datas: t.Sequence[ScheduleData],
 ) -> ScheduleData:
@@ -243,9 +234,9 @@ def priority_scheduling(
     # 1. prepare an empty schedule data as the merge result
     # 2. for each of the schedule passed in
     #   2.1. merge it into the merge result
-    #   2.2. populate `allowed_start_time`, `allowed_end_time` for new rows
-    #   2.3. filter out new rows that conflict with `allowed_start_time`, `allowed_end_time`
-    #   2.3. update `allowed_start_time`, `allowed_end_time`
+    #   2.2. propagate `cummax_start_time`, `cummax_end_time` to new rows
+    #   2.3. filter out new rows that have conflicts
+    #   2.3. update `cummax_start_time`, `cummax_end_time`
 
     # init an empty dataset for a schedule and add some columns, will be used store merged schedule
     merged_sch_data = schedule_data_funcs.empty_data()
