@@ -5,6 +5,7 @@ import numpy.typing as npt
 import xarray as xr
 import bokeh.layouts as bokeh_layouts
 import pyant
+from sorts import schedule
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.types import (
@@ -18,7 +19,6 @@ from sorts.types import (
 )
 from sorts.utils import to_datetime64_us, to_timedelta64_us
 from sorts import plots
-from sorts.schedule import Schedule, ScheduleData, ExperimentDetail, schedule_data_funcs
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ class Spec(t.TypedDict):
 
     tx_station: Station
     rx_stations: t.Sequence[Station]
-    exp_detail: ExperimentDetail
+    exp_detail: schedule.ExperimentDetail
     spobj: t.NotRequired[SpaceObject]
     epoch: t.NotRequired[Datetime_Like]
 
@@ -40,7 +40,7 @@ class State(t.TypedDict):
     spobj_states: EcefStates
 
 
-def generate_from_state(spec: Spec, state: State) -> Schedule:
+def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
     loc_zenith = np.array([0, 0, 1], dtype=np.float64)
 
     # generate pointings
@@ -70,7 +70,7 @@ def generate_from_state(spec: Spec, state: State) -> Schedule:
     tx_sch_time = state["spobj_time"][tx_el_in_range_mask]
     tx_sch_len = len(tx_sch_time)
 
-    tx_schdata = schedule_data_funcs.from_ndarrays(
+    tx_schdata = schedule.from_ndarrays(
         {
             "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
             "start_time": tx_sch_time,
@@ -82,7 +82,7 @@ def generate_from_state(spec: Spec, state: State) -> Schedule:
         }
     )
 
-    rx_schdatas: list[ScheduleData] = []
+    rx_schdatas: list[schedule.ScheduleData] = []
     for rx_stn, rx_mask, rx_pointings in zip(
         pure_rx_stations, rx_el_in_range_with_tx_masks, rxs_pointings
     ):
@@ -90,7 +90,7 @@ def generate_from_state(spec: Spec, state: State) -> Schedule:
         rx_sch_len = len(rx_sch_time)
 
         rx_schdatas.append(
-            schedule_data_funcs.from_ndarrays(
+            schedule.from_ndarrays(
                 {
                     "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
                     "start_time": rx_sch_time,
@@ -103,15 +103,15 @@ def generate_from_state(spec: Spec, state: State) -> Schedule:
             )
         )
 
-    resultant_schdata = xr.concat([tx_schdata, *rx_schdatas], dim=Schedule._K.multi_index)
-    resultant_schdata = resultant_schdata.sortby(Schedule._K.start_time)
-    output = Schedule(resultant_schdata)
+    resultant_schdata = xr.concat([tx_schdata, *rx_schdatas], dim=schedule._K.multi_index)
+    resultant_schdata = resultant_schdata.sortby(schedule._K.start_time)
+    output = schedule.Schedule(resultant_schdata)
 
     return output
 
 
 # TODO: remove or adapt to ENU coord
-def plot_state_and_output(state: State, rx_schedules: t.Sequence[Schedule]):
+def plot_state_and_output(state: State, rx_schedules: t.Sequence[schedule.Schedule]):
     pos_plot = plots.ecef_states_positions_plot(state["spobj_states"])
     pos_plot.title = "ecef_states_positions_plot"
 
@@ -146,7 +146,7 @@ class TrackerController:
         self.spec: Spec = spec
         self.state: State | None = state
 
-        self._cached_output: Schedule | None = None
+        self._cached_output: schedule.Schedule | None = None
         """A cache of the latest `Output`, handy for plotting"""
 
     @classmethod
@@ -156,7 +156,7 @@ class TrackerController:
         space_object_states: EcefStates,
         tx_station: Station,
         rx_stations: t.Sequence[Station],
-        exp_detail: ExperimentDetail,
+        exp_detail: schedule.ExperimentDetail,
     ) -> TrackerController:
         ctrl = TrackerController(
             spec={
@@ -179,7 +179,7 @@ class TrackerController:
         epoch: Datetime_Like,
         tx_station: Station,
         rx_stations: t.Sequence[Station],
-        exp_detail: ExperimentDetail,
+        exp_detail: schedule.ExperimentDetail,
     ) -> TrackerController:
         exp_detail.update(
             {"stn_pairs": [(tx_station.uid, rx_station.uid) for rx_station in rx_stations]}
@@ -212,7 +212,7 @@ class TrackerController:
                 "Cannot compute space object ECEF states without `epoch` in the `spec` prop."
             )
 
-        exp_detail: ExperimentDetail = self.spec["exp_detail"]
+        exp_detail: schedule.ExperimentDetail = self.spec["exp_detail"]
 
         # NOTE: for `np.arange` 'stop param,
         #   - we subtract 'slice_duration' so that only full slice are included
@@ -236,7 +236,7 @@ class TrackerController:
 
     def generate(
         self, start_time: Datetime_Like | None = None, end_time: Datetime_Like | None = None
-    ) -> Schedule:
+    ) -> schedule.Schedule:
         """
         Generate the schedules.
         `start_time` and `end_time` should be omitted if this instance is created from `TrackerController.from_ecef_states`
@@ -293,5 +293,5 @@ class TrackerController:
         else:
             cached_output = self._cached_output
 
-        p = plot_state_and_output(state, cached_output)
+        p = plot_state_and_output(state, [cached_output])
         return p
