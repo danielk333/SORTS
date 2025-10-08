@@ -160,7 +160,6 @@ def south_to_north_circular_orbit_test():
             "duty_cycle": 1.0,
             "noise_temp": 150.0,
             "slice_duration": control_slice_duration,
-            "stn_pairs": [(0, 1)],
         },
         azimuth=90,  # sweep from east to west
         min_elevation=0,

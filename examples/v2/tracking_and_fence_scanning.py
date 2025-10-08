@@ -116,7 +116,6 @@ tracker_ctrl = TrackerController.from_space_object(
     spobj=tracked_spobj,
     epoch=start_time,
     tx_station=tx_station,
-    # rx_stations=[rx_station_0],
     rx_stations=[rx_station_0, rx_station_1],
     exp_detail={
         "id": 0,
@@ -128,13 +127,11 @@ tracker_ctrl = TrackerController.from_space_object(
         "duty_cycle": 1.0,
         "noise_temp": 150.0,
         "slice_duration": control_slice_duration,
-        "stn_pairs": [(0, 1), (0, 2)],
     },
 )
 
 fence_scan_ctrl = FenceScanController.from_scan_spec(
     tx_station=tx_station,
-    # rx_stations=[rx_station_0],
     rx_stations=[rx_station_0, rx_station_1],
     exp_detail={
         "id": 1,
@@ -146,7 +143,6 @@ fence_scan_ctrl = FenceScanController.from_scan_spec(
         "duty_cycle": 1.0,
         "noise_temp": 150.0,
         "slice_duration": control_slice_duration,
-        "stn_pairs": [(0, 1), (0, 2)],
     },
     azimuth=90,  # sweep from east to west
     min_elevation=30,

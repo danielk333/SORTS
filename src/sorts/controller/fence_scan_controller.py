@@ -210,6 +210,10 @@ class FenceScanController:
         #         + f"cannot be smaller than the dwell ({self.dwell_s} sec)."
         #     )
 
+        exp_detail.update(
+            {"stn_pairs": [(tx_station.uid, rx_station.uid) for rx_station in rx_stations]}
+        )
+
         ctrl = FenceScanController(
             spec={
                 "tx_station": tx_station,

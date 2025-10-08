@@ -43,7 +43,6 @@ exp_detail_map: dict[int, ExperimentDetail] = {
         "duty_cycle": 1.0,
         "noise_temp": 150.0,
         "slice_duration": np.timedelta64(10_000, "us"),  # 10ms
-        "stn_pairs": [(0, 1)],
     }
 }
 

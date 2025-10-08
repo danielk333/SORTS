@@ -191,6 +191,10 @@ class TrackerController:
         rx_stations: t.Sequence[Station],
         exp_detail: ExperimentDetail,
     ) -> TrackerController:
+        exp_detail.update(
+            {"stn_pairs": [(tx_station.uid, rx_station.uid) for rx_station in rx_stations]}
+        )
+
         ctrl = TrackerController(
             spec={
                 "tx_station": tx_station,
