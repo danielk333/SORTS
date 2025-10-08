@@ -2,11 +2,11 @@ from __future__ import annotations
 import logging, typing as t
 import pandas as pd
 import xarray as xr
-from sorts.types import TimeRange_us
-from . import schedule_data_funcs
-from .schedule_data_funcs import _K, ExperimentDetail, ScheduleNdarrayDict, ScheduleData
-from .priority_scheduling import priority_scheduling
+from sorts import types
+from . import schedule_data_funcs, priority_scheduling
 
+
+_K = schedule_data_funcs._K
 
 logger = logging.getLogger(__name__)
 
@@ -28,14 +28,14 @@ class Schedule:
         We are still evaluating which backing data structure to use and is subject to change
     """
 
-    _K = _K
+    _K = schedule_data_funcs._K
     """shortcut to module attribute"""
 
-    def __init__(self, data: ScheduleData):
+    def __init__(self, data: schedule_data_funcs.ScheduleData):
         self._data = data
 
     @classmethod
-    def from_ndarrays(cls, data: ScheduleNdarrayDict) -> t.Self:
+    def from_ndarrays(cls, data: schedule_data_funcs.ScheduleNdarrayDict) -> t.Self:
         return cls(schedule_data_funcs.from_ndarrays(data))
 
     @classmethod
@@ -58,23 +58,23 @@ class Schedule:
             )
             return cls.empty()
 
-        resultant_sch_data = priority_scheduling([sch._data for sch in schs])
+        resultant_sch_data = priority_scheduling.priority_scheduling([sch._data for sch in schs])
 
         return cls(data=resultant_sch_data)
 
-    def to_ndarrays(self) -> ScheduleNdarrayDict:
+    def to_ndarrays(self) -> schedule_data_funcs.ScheduleNdarrayDict:
         arr_dict = schedule_data_funcs.to_ndarrays(self._data)
         return arr_dict
 
     def to_dataframe(self) -> pd.DataFrame:
         return schedule_data_funcs.to_dataframe(self._data)
 
-    def filter_by_time_range(self, time_range: TimeRange_us) -> t.Self:
+    def filter_by_time_range(self, time_range: types.TimeRange_us) -> t.Self:
         cls = type(self)
         filtered_data = schedule_data_funcs.filter_by_time_range(self._data, time_range)
         return cls(data=filtered_data)
 
-    def filter_by_time_ranges(self, time_ranges: t.Sequence[TimeRange_us]) -> t.Self:
+    def filter_by_time_ranges(self, time_ranges: t.Sequence[types.TimeRange_us]) -> t.Self:
         cls = type(self)
 
         filtered_datas = schedule_data_funcs.filter_by_time_ranges(self._data, time_ranges)
@@ -87,5 +87,5 @@ class Schedule:
     ) -> list[XrDataArrayIndexer]:
         return schedule_data_funcs.get_indexer_per_measurement(self._data, is_split_simult, is_copy)
 
-    def get_experiment_detail(self, exp_num: int) -> ExperimentDetail:
+    def get_experiment_detail(self, exp_num: int) -> schedule_data_funcs.ExperimentDetail:
         return self._data.attrs[_K.exp_detail_map][exp_num]
