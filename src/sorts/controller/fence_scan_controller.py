@@ -43,13 +43,6 @@ class State(t.TypedDict):
     """NOTE: It may contain out of range pointings"""
 
 
-class Output(t.NamedTuple):
-    """A named tuple of `(tx_schedule, [rx_schedule, ...])`"""
-
-    tx_schedule: Schedule
-    rx_schedules: t.Sequence[Schedule]
-
-
 # TODO: should we generate tx pointings at the specified ranges instead of normalized to 1?
 def generate_from_state(spec: Spec, state: State) -> Schedule:
     # The logic of this function:

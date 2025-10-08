@@ -40,13 +40,6 @@ class State(t.TypedDict):
     spobj_states: EcefStates
 
 
-class Output(t.NamedTuple):
-    """A named tuple of `(tx_schedule, [rx_schedule, ...])`"""
-
-    tx_schedule: Schedule
-    rx_schedules: t.Sequence[Schedule]
-
-
 def generate_from_state(spec: Spec, state: State) -> Schedule:
     loc_zenith = np.array([0, 0, 1], dtype=np.float64)
 
@@ -118,15 +111,12 @@ def generate_from_state(spec: Spec, state: State) -> Schedule:
 
 
 # TODO: remove or adapt to ENU coord
-def plot_state_and_output(
-    state: State,
-    output: Output,
-):
+def plot_state_and_output(state: State, rx_schedules: t.Sequence[Schedule]):
     pos_plot = plots.ecef_states_positions_plot(state["spobj_states"])
     pos_plot.title = "ecef_states_positions_plot"
 
     rx_skyplot_plots = []
-    for idx, rx_schedule in enumerate(output.rx_schedules):
+    for idx, rx_schedule in enumerate(rx_schedules):
         rx_sch_dict = rx_schedule.to_ndarrays()
         rx_skyplot_plot = plots.azel_skyplot(
             rx_sch_dict["pointing"][0],
