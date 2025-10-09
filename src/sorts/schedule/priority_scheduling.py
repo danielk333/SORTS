@@ -34,46 +34,6 @@ class _IK:
 utils.assert_class_attributes_equal_to(_IK, t.get_args(DsIntermediateVarKey))
 
 
-# TODO: remove?
-def to_dataframe(ds: schedule.ScheduleData):
-    """
-    Convert schedule data in xarray dataset to pandas dataframe.
-
-    A helper method for debugging.
-    Includes extra intermediate columns used in function `priority_scheduling`.
-    """
-
-    empty_df = pd.DataFrame()
-
-    df = pd.concat(
-        t.cast(
-            list[pd.DataFrame],
-            [
-                schedule.to_dataframe(ds),
-                (
-                    ds[_IK.cummax_start_time].transpose().to_pandas()
-                    if _IK.cummax_start_time in ds
-                    else empty_df
-                ),
-                (
-                    ds[_IK.cummax_end_time].transpose().to_pandas()
-                    if _IK.cummax_end_time in ds
-                    else empty_df
-                ),
-                (
-                    ds[_IK.is_overlaped].transpose().to_pandas()
-                    if _IK.is_overlaped in ds
-                    else empty_df
-                ),
-            ],
-        ),
-        axis=1,
-        copy=False,
-    )
-
-    return df
-
-
 def _inject_intermediate_columns(sch_data: schedule.ScheduleData) -> schedule.ScheduleData:
     sch_data[_IK.cummax_start_time] = xr.full_like(
         sch_data[_SK.multi_index], np.datetime64("NaT"), dtype="datetime64[us]"
