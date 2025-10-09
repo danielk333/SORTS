@@ -126,7 +126,6 @@ class FromPassagesOverTxRxStationPairParam(t.TypedDict):
 
 
 # TODO: re-eval: `Station`` can be taken from `Passage`, but empty `list[Passage]` would be an issue in that case.
-# TODO: 'tx_exp_detail_map' and 'rx_exp_detail_map' are the same thing now, combine/dissolve them
 class SimulationUnit:
     """
     Contains all the params and results for a unit of simulation calculation.
@@ -149,8 +148,7 @@ class SimulationUnit:
         passages: list[Passage],
         tx_station: Station,
         rx_station: Station,
-        tx_exp_detail_map: ExperimentDetailMap,
-        rx_exp_detail_map: ExperimentDetailMap,
+        exp_detail_map: ExperimentDetailMap,
         state_data: StateData,
     ):
         self.id = id
@@ -164,8 +162,7 @@ class SimulationUnit:
 
         self.tx_station = tx_station
         self.rx_station = rx_station
-        self.tx_exp_detail_map = tx_exp_detail_map
-        self.rx_exp_detail_map = rx_exp_detail_map
+        self.exp_detail_map = exp_detail_map
 
     @classmethod
     def from_passages_over_tx_rx_station_pair(
@@ -193,8 +190,7 @@ class SimulationUnit:
                 passages=passages,
                 tx_station=kwargs["tx_station"],
                 rx_station=kwargs["rx_station"],
-                tx_exp_detail_map=kwargs["schedule"]._data.attrs[_SK.exp_detail_map],
-                rx_exp_detail_map=kwargs["schedule"]._data.attrs[_SK.exp_detail_map],
+                exp_detail_map=kwargs["schedule"]._data.attrs[_SK.exp_detail_map],
                 state_data=StateData(empty_state_data()),
             )
 
@@ -255,8 +251,7 @@ class SimulationUnit:
             passages=passages,
             tx_station=kwargs["tx_station"],
             rx_station=kwargs["rx_station"],
-            tx_exp_detail_map=kwargs["schedule"]._data.attrs[_SK.exp_detail_map],
-            rx_exp_detail_map=kwargs["schedule"]._data.attrs[_SK.exp_detail_map],
+            exp_detail_map=kwargs["schedule"]._data.attrs[_SK.exp_detail_map],
             state_data=StateData(state_data),
         )
 
@@ -277,21 +272,15 @@ class SimulationUnit:
         # TODO: do we need `ipps`?
         # TODO: do we need `duty_cycles`?
         powers = np.array(
-            [self.tx_exp_detail_map[n]["power"] for n in self._state_data[_K.exp_num].to_numpy()],
+            [self.exp_detail_map[n]["power"] for n in self._state_data[_K.exp_num].to_numpy()],
             dtype=np.float64,
         )
         bandwidths = np.array(
-            [
-                self.tx_exp_detail_map[n]["bandwidth"]
-                for n in self._state_data[_K.exp_num].to_numpy()
-            ],
+            [self.exp_detail_map[n]["bandwidth"] for n in self._state_data[_K.exp_num].to_numpy()],
             dtype=np.float64,
         )
         rx_noise_temps = np.array(
-            [
-                self.rx_exp_detail_map[n]["noise_temp"]
-                for n in self._state_data[_K.exp_num].to_numpy()
-            ],
+            [self.exp_detail_map[n]["noise_temp"] for n in self._state_data[_K.exp_num].to_numpy()],
             dtype=np.float64,
         )
 
