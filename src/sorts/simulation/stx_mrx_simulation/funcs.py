@@ -223,7 +223,7 @@ def calc_gain(
     # NOTE: used lazy import here to avoid circular import
     from .simulation_unit import _K
 
-    size = len(state_data[_K.time])
+    size = len(state_data[_K.multi_index])
 
     # NOTE: looping is needed becase passing in a ndarray of pointing will trigger exception when calculating gain
     #   refs:
@@ -231,14 +231,14 @@ def calc_gain(
     #   - `pyant/models/array.py` `L185` `params, shape = self.get_parameters(ind, named=True, max_vectors=0)`
     tx_gain_arr = np.full(size, 0.0, dtype=np.float64)
     rx_gain_arr = np.full(size, 0.0, dtype=np.float64)
-    for idx in range(len(state_data[_K.time])):
+    for idx in range(len(state_data[_K.multi_index])):
         tx_stn.beam.point(state_data[_K.tx_pointing][:, 0].to_numpy())
         tx_gain_arr[idx] = tx_stn.beam.gain(spobj_tx_enu[:3, idx])
 
         rx_stn.beam.point(state_data[_K.rx_pointing][:, 0].to_numpy())
         rx_gain_arr[idx] = rx_stn.beam.gain(spobj_rx_enu[:3, idx])
 
-    state_data[_K.gain_tx] = (_K.time, tx_gain_arr)
-    state_data[_K.gain_rx] = (_K.time, rx_gain_arr)
+    state_data[_K.gain_tx] = (_K.multi_index, tx_gain_arr)
+    state_data[_K.gain_rx] = (_K.multi_index, rx_gain_arr)
 
     return state_data
