@@ -43,12 +43,6 @@ rx_station_0.uid = 1
 rx_station_1: radar.Station = eiscat3d.rx[1]
 rx_station_1.uid = 2
 
-stn_num_map = {
-    0: "eiscat3d, stage1-array, tx, 0",
-    1: "eiscat3d, stage1-array, rx, 0",
-    2: "eiscat3d, stage1-array, rx, 1",
-}
-
 tracked_spobj = space_object.SpaceObject(
     oid=-1,
     propagator=propagator.SGP4,

@@ -137,13 +137,6 @@ def south_to_north_circular_orbit_test():
         uid=1,
     )
 
-    stn_num_map = (
-        {
-            0: "test_station, tx-rx, 0",
-            1: "test_station, rx, 1",
-        },
-    )
-
     def dsec_sampler(orbit, start_time, end_time):
         return np.arange(0, (end_time - start_time) / np.timedelta64(1, "s"), 30, dtype=np.float64)
 
