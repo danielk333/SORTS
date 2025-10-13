@@ -203,37 +203,60 @@ def south_to_north_circular_orbit_test():
             obs.get_schedule_slice().rx._data[_SK.end_time][-1] - expected_passage_end_time
         ) < np.timedelta64(int(dsec_sampling_intv), "s")
 
-    # assert that at all rx_pointing of `obss[2]` in ecef is the same as those with same `time` in `obss[1]`
-    obs_1_rx_station = obss[1].passage["rx_station"]
-    obs_1_state_slice = obss[1].get_state_slice()
-    obs_2_rx_station = obss[2].passage["rx_station"]
-    obs_2_state_slice = obss[2].get_state_slice()
+    # assert that at all rx_pointing from "2nd rx station, 2nd scan range"
+    # is the same as those with same `time` but from "1st rx station, 2nd scan range"
+    obs_ref = next(
+        obs
+        for obs in obss
+        if obs.passage["tx_station"].uid == 0
+        and obs.passage["rx_station"].uid == 0
+        and obs.get_schedule_slice().rx._data[_SK.simult_num][0] == 1  # i.e. the 2nd scan range
+    )
+    assert (
+        obs_ref.get_schedule_slice().rx._data[_SK.simult_num].all()
+    )  # simult_num should be the same over the same observation
 
-    obs_2_pointings_in_ecef = (
+    obs_subj = next(
+        obs
+        for obs in obss
+        if obs.passage["tx_station"].uid == 0
+        and obs.passage["rx_station"].uid == 1
+        and obs.get_schedule_slice().rx._data[_SK.simult_num][0] == 1  # i.e. the 2nd scan range
+    )
+    assert (
+        obs_subj.get_schedule_slice().rx._data[_SK.simult_num].all()
+    )  # simult_num should be the same over the same observation
+
+    obs_ref_rx_station = obs_ref.passage["rx_station"]
+    obs_ref_state_slice = obs_ref.get_state_slice()
+    obs_subj_rx_station = obs_subj.passage["rx_station"]
+    obs_subj_state_slice = obs_subj.get_state_slice()
+
+    obs_subj_pointings_in_ecef = (
         enu_to_ecef(
-            lat=obs_2_rx_station.ecef_lat,
-            lon=obs_2_rx_station.ecef_lon,
-            alt=obs_2_rx_station.ecef_alt,
-            enu=obs_2_state_slice[_SuK.rx_pointing],
+            lat=obs_subj_rx_station.ecef_lat,
+            lon=obs_subj_rx_station.ecef_lon,
+            alt=obs_subj_rx_station.ecef_alt,
+            enu=obs_subj_state_slice[_SuK.rx_pointing],
             degrees=True,
         )
-        + obs_2_rx_station.ecef[:, np.newaxis]
+        + obs_subj_rx_station.ecef[:, np.newaxis]
     )
-    obs_1_pointings_at_obs_2_start_times_in_ecef = (
+    obs_ref_pointings_at_obs_subj_start_times_in_ecef = (
         enu_to_ecef(
-            lat=obs_1_rx_station.ecef_lat,
-            lon=obs_1_rx_station.ecef_lon,
-            alt=obs_1_rx_station.ecef_alt,
-            enu=obs_1_state_slice.loc[{_SuK.multi_index: obs_2_state_slice[_SuK.multi_index]}][
+            lat=obs_ref_rx_station.ecef_lat,
+            lon=obs_ref_rx_station.ecef_lon,
+            alt=obs_ref_rx_station.ecef_alt,
+            enu=obs_ref_state_slice.loc[{_SuK.multi_index: obs_subj_state_slice[_SuK.multi_index]}][
                 _SuK.rx_pointing
             ],
             degrees=True,
         )
-        + obs_1_rx_station.ecef[:, np.newaxis]
+        + obs_ref_rx_station.ecef[:, np.newaxis]
     )
 
     assert np.all(
-        (obs_2_pointings_in_ecef - obs_1_pointings_at_obs_2_start_times_in_ecef)
+        (obs_subj_pointings_in_ecef - obs_ref_pointings_at_obs_subj_start_times_in_ecef)
         < pointing_range_equality_thld
     )
 
