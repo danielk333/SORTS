@@ -109,12 +109,10 @@ exp_detail_map = {
 
 master_sch = schedule.Schedule.priority_scheduling([tracker_sch, fence_sch])
 
-sim = simulation.StxMrxSimulation(
+sim = simulation.StxMrxSimulation.from_controllers(
     spec={
-        "tx_station": tx_station,
-        "rx_stations": [rx_station_0],
+        "controllers": [tracker_ctrl, fence_scan_ctrl],
         "schedule": master_sch,
-        "exp_detail_map": exp_detail_map,
         "epoch": start_time,
         "start_time": start_time,
         "end_time": end_time,

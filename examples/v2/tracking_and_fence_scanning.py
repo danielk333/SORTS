@@ -63,14 +63,6 @@ rx_station_0.uid = 1
 rx_station_1: Station = eiscat3d.rx[1]
 rx_station_1.uid = 2
 
-stn_num_map = (
-    {
-        0: "eiscat3d, stage1-array, tx, 0",
-        1: "eiscat3d, stage1-array, rx, 0",
-        2: "eiscat3d, stage1-array, rx, 1",
-    },
-)
-
 tracked_spobj = SpaceObject(
     oid=-1,
     propagator=SGP4,
@@ -151,8 +143,8 @@ fence_scan_ctrl = FenceScanController.from_scan_spec(
     scan_range=np.array([300e3], dtype=np.float64),
 )
 
-tracker_schs = tracker_ctrl.generate(start_time, end_time)
-fence_schs = fence_scan_ctrl.generate(start_time, end_time)
+tracker_sch = tracker_ctrl.generate(start_time, end_time)
+fence_sch = fence_scan_ctrl.generate(start_time, end_time)
 
 exp_detail_map = {
     tracker_ctrl.spec["exp_detail"]["id"]: tracker_ctrl.spec["exp_detail"],
@@ -160,12 +152,8 @@ exp_detail_map = {
 }
 
 
-tx_master_sch = Schedule.priority_scheduling([tracker_schs.tx_schedule, fence_schs.tx_schedule])
+master_sch = Schedule.priority_scheduling([tracker_sch, fence_sch])
 
-rx_master_schs = [
-    Schedule.priority_scheduling(rx_schs)
-    for rx_schs in zip(tracker_schs.rx_schedules, fence_schs.rx_schedules)
-]
 
 output_folder = Path(__file__).parent / ".." / ".." / "local_data"
 pickle_fpath = (
@@ -173,13 +161,10 @@ pickle_fpath = (
     / f'{datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")}-{Path(__file__).name}.pickle'
 )
 
-sim = StxMrxSimulation(
+sim = StxMrxSimulation.from_controllers(
     spec={
-        "tx_station": tx_station,
-        "rx_stations": [rx_station_0, rx_station_1],
-        "tx_schedule": tx_master_sch,
-        "rx_schedules": rx_master_schs,
-        "exp_detail_map": exp_detail_map,
+        "controllers": [tracker_ctrl, fence_scan_ctrl],
+        "schedule": master_sch,
         "epoch": start_time,
         "start_time": start_time,
         "end_time": end_time,

@@ -186,6 +186,9 @@ class SpaceObject(object):
 
         self.propagator = propagator(**propagator_options)
 
+    def __repr__(self):
+        return f"SpaceObject(oid={self.oid})"
+
     def copy(self):
         """Returns a copy of the SpaceObject instance."""
         return SpaceObject(

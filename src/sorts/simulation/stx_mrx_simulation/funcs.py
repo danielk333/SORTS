@@ -151,16 +151,17 @@ def find_passages(
     ):
         passages_of_spobj: list[Passage] = []
 
-        # TODO: this assume spec["rx_stations"] ordering is the same as spec["rx_schedules"],
-        #   which should be correct but should not be relied on.
-        for rx_station in spec["rx_stations"]:
+        for stn_id_pair in spec["station_id_pairs"]:
+            tx_stn = spec["station_map"][stn_id_pair[0]]
+            rx_stn = spec["station_map"][stn_id_pair[1]]
+
             passages_of_spobj.extend(
                 funcs.find_passages(
                     dt=spobj_smpl_dsec,
                     space_object=spobj,
                     states=spobj_smpl_states,
-                    tx_station=spec["tx_station"],
-                    rx_station=rx_station,
+                    tx_station=tx_stn,
+                    rx_station=rx_stn,
                     epoch=spec["epoch"],
                 )
             )
@@ -170,9 +171,6 @@ def find_passages(
     return passages_list
 
 
-# TODO: minor cleanup needed
-#   - `enumerate` to get space_objects by `idx` can likely be simplified, with small adj in params/props
-#   - the loops might be simplified a bit as well
 def derive_simulation_unit_params(
     spec: Spec,
     passages_lists: list[list[Passage]],
@@ -192,7 +190,8 @@ def derive_simulation_unit_params(
         groupped_passages = group_passages_by_tx_rx_station_pair(passages_of_a_spobj)
 
         for stn_id_pair, passages in groupped_passages.items():
-            rx_stn = next((stn for stn in spec["rx_stations"] if stn.uid == stn_id_pair[1]))
+            tx_stn = spec["station_map"][stn_id_pair[0]]
+            rx_stn = spec["station_map"][stn_id_pair[1]]
 
             filtered_sch = spec["schedule"].filter_by_time_ranges(
                 [ps["time_range"] for ps in passages]
@@ -204,7 +203,7 @@ def derive_simulation_unit_params(
                     "passages": passages,
                     "spobj": spobj,
                     "spobj_interp": spobj_states_interp,
-                    "tx_station": spec["tx_station"],
+                    "tx_station": tx_stn,
                     "rx_station": rx_stn,
                     "schedule": filtered_sch,
                 }
@@ -223,7 +222,7 @@ def calc_gain(
     # NOTE: used lazy import here to avoid circular import
     from .simulation_unit import _K
 
-    size = len(state_data[_K.time])
+    size = len(state_data[_K.multi_index])
 
     # NOTE: looping is needed becase passing in a ndarray of pointing will trigger exception when calculating gain
     #   refs:
@@ -231,14 +230,14 @@ def calc_gain(
     #   - `pyant/models/array.py` `L185` `params, shape = self.get_parameters(ind, named=True, max_vectors=0)`
     tx_gain_arr = np.full(size, 0.0, dtype=np.float64)
     rx_gain_arr = np.full(size, 0.0, dtype=np.float64)
-    for idx in range(len(state_data[_K.time])):
+    for idx in range(len(state_data[_K.multi_index])):
         tx_stn.beam.point(state_data[_K.tx_pointing][:, 0].to_numpy())
         tx_gain_arr[idx] = tx_stn.beam.gain(spobj_tx_enu[:3, idx])
 
         rx_stn.beam.point(state_data[_K.rx_pointing][:, 0].to_numpy())
         rx_gain_arr[idx] = rx_stn.beam.gain(spobj_rx_enu[:3, idx])
 
-    state_data[_K.gain_tx] = (_K.time, tx_gain_arr)
-    state_data[_K.gain_rx] = (_K.time, rx_gain_arr)
+    state_data[_K.gain_tx] = (_K.multi_index, tx_gain_arr)
+    state_data[_K.gain_rx] = (_K.multi_index, rx_gain_arr)
 
     return state_data

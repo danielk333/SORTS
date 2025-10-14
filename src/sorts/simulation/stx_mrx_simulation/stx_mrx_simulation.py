@@ -6,10 +6,10 @@ import pyorb
 import sorts
 from tqdm import tqdm
 from mpi4py import MPI
+from sorts import radar, schedule, controller
 from sorts.interpolation import Interpolator
 from sorts.utils import to_datetime64_us
 from sorts.types import Datetime_Like, Float64_as_sec
-from sorts.radar import Station
 from sorts.schedule import Schedule, ExperimentDetailMap
 from sorts.simulation.stx_mrx_simulation.observation import Observation
 from sorts.simulation.stx_mrx_simulation.simulation_unit import (
@@ -35,9 +35,8 @@ class SpaceObjectDsecSampler(t.Protocol):
 class Spec(t.TypedDict):
     """A TypedDict of params"""
 
-    # TODO: param `tx_station` and `rx_stations` are tmp solution
-    tx_station: Station
-    rx_stations: list[Station]
+    station_map: dict[radar.StationId, radar.Station]
+    station_id_pairs: list[tuple[radar.StationId, radar.StationId]]
     schedule: Schedule
     exp_detail_map: ExperimentDetailMap
     epoch: Datetime_Like
@@ -47,6 +46,19 @@ class Spec(t.TypedDict):
     dsec_sampler: SpaceObjectDsecSampler  # TODO: support different sampler for different obj?
     # TODO: we need to implement falback mechanism,
     #   e.g. a `Legendre8` `Interpolator` requires >=8 points, but sometime it might get less than that
+    interpolator_class: type[Interpolator]
+
+
+class SpecByControllers(t.TypedDict):
+    """A TypedDict of params"""
+
+    controllers: t.Sequence[controller.ControllerBase]
+    schedule: Schedule
+    epoch: Datetime_Like
+    start_time: Datetime_Like
+    end_time: Datetime_Like
+    space_objects: t.Sequence[sorts.SpaceObject]
+    dsec_sampler: SpaceObjectDsecSampler  # TODO: support different sampler for different obj?
     interpolator_class: type[Interpolator]
 
 
@@ -217,10 +229,45 @@ def iter_mpi_simulation_results(save_dir: Path):
 # TODO: we need to enforce each station to has a unique id (`.uid` prop)
 #   either in the simulation class or in related station getter like `get_radar`
 class StxMrxSimulation:
+    """
+    NOTE: This is intended as an internal constructor, please use the constructor methods to create instances.
+    """
+
     def __init__(self, spec: Spec):
         self.spec: Spec = spec
         self.sim_units: list[SimulationUnit] = []
         self.obss: list[Observation] = []
+
+    @classmethod
+    def from_controllers(cls, spec: SpecByControllers):
+        """A constructor method"""
+
+        stn_map: dict[radar.StationId, radar.Station] = {}
+        stn_pairs: set[tuple[radar.StationId, radar.StationId]] = set()
+        exp_detail_map: schedule.ExperimentDetailMap = {}
+
+        for ctrl in spec["controllers"]:
+            stn_map.update(ctrl.get_station_map())
+
+            stn_pairs.update(ctrl.get_station_pairs())
+
+            exp_detail = ctrl.get_experiment_detail()
+            exp_detail_map[exp_detail["id"]] = exp_detail
+
+        return cls(
+            spec={
+                "station_map": stn_map,
+                "station_id_pairs": list(stn_pairs),
+                "schedule": spec["schedule"],
+                "exp_detail_map": exp_detail_map,
+                "epoch": spec["epoch"],
+                "start_time": spec["start_time"],
+                "end_time": spec["end_time"],
+                "space_objects": spec["space_objects"],
+                "dsec_sampler": spec["dsec_sampler"],
+                "interpolator_class": spec["interpolator_class"],
+            }
+        )
 
     def run(self) -> tuple[list[Observation], list[SimulationUnit]]:
         logger.debug("starting stx mrx sim")

@@ -43,12 +43,6 @@ rx_station_0.uid = 1
 rx_station_1: radar.Station = eiscat3d.rx[1]
 rx_station_1.uid = 2
 
-stn_num_map = {
-    0: "eiscat3d, stage1-array, tx, 0",
-    1: "eiscat3d, stage1-array, rx, 0",
-    2: "eiscat3d, stage1-array, rx, 1",
-}
-
 tracked_spobj = space_object.SpaceObject(
     oid=-1,
     propagator=propagator.SGP4,
@@ -134,12 +128,10 @@ exp_detail_map = {
 master_sch = schedule.Schedule.priority_scheduling([tracker_sch, fence_sch])
 
 
-sim = simulation.StxMrxSimulation(
+sim = simulation.StxMrxSimulation.from_controllers(
     spec={
-        "tx_station": tx_station,
-        "rx_stations": [rx_station_0, rx_station_1],
+        "controllers": [tracker_ctrl, fence_scan_ctrl],
         "schedule": master_sch,
-        "exp_detail_map": exp_detail_map,
         "epoch": start_time,
         "start_time": start_time,
         "end_time": end_time,

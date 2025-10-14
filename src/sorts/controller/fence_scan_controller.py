@@ -3,7 +3,7 @@ import logging, math, typing as t
 import numpy as np
 import numpy.typing as npt
 import xarray as xr
-from sorts import schedule
+from sorts import radar, schedule
 from sorts.radar import Station
 from sorts.frames import enu_to_ecef, ecef_to_enu, sph_to_cart
 from sorts.types import (
@@ -15,7 +15,8 @@ from sorts.types import (
     Datetime_Like,
 )
 from sorts.utils import to_datetime64_us
-from sorts.controller import pointing_funcs
+from . import pointing_funcs
+from .controller_base import ControllerBase
 
 logger = logging.getLogger(__name__)
 
@@ -168,7 +169,7 @@ def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
     return output
 
 
-class FenceScanController:
+class FenceScanController(ControllerBase):
     """
     Generate schedule for a fence scaning pattern
 
@@ -179,6 +180,10 @@ class FenceScanController:
     # TODO: the radar station computation capacity poses limit on the size of simutaneous `scan_range`, we should check/validate against it
 
     def __init__(self, spec: Spec, state: State | None):
+        """
+        NOTE: This is intended as an internal constructor, please use the constructor methods to create instances.
+        """
+
         self.spec: Spec = spec
         self.state: State | None = state
 
@@ -195,6 +200,8 @@ class FenceScanController:
         scan_range: npt.NDArray[Float64_as_m],
         exp_detail: schedule.ExperimentDetail,
     ) -> FenceScanController:
+        """A constructor method"""
+
         # TODO: update/adapt or remove?
         # self._total_duration_s = (self.end_time - self.start_time).total_seconds()
         # if self._total_duration_s < self.dwell_s:
@@ -221,6 +228,24 @@ class FenceScanController:
         )
 
         return ctrl
+
+    def get_experiment_detail(self) -> schedule.ExperimentDetail:
+        return self.spec["exp_detail"]
+
+    def get_station_map(self) -> dict[radar.StationId, radar.Station]:
+        stn_map: dict[radar.StationId, radar.Station] = {}
+
+        stn_map[self.spec["tx_station"].uid] = self.spec["tx_station"]
+        stn_map.update(list([(stn.uid, stn) for stn in self.spec["rx_stations"]]))
+
+        return stn_map
+
+    def get_station_pairs(self) -> list[tuple[radar.StationId, radar.StationId]]:
+        stn_pairs = self.spec["exp_detail"].get("stn_pairs")
+        if stn_pairs is None:
+            raise RuntimeError("stn_pairs not found in ExperimentDetail")
+
+        return stn_pairs
 
     def compute_single_cycle_pointings(self, start_time: Datetime_Like, end_time: Datetime_Like):
         """Do the computation then update the `state` property and return `self`."""

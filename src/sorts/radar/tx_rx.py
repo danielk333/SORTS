@@ -68,6 +68,9 @@ class Station(object):
         self.pointing_range = None
         self.uid = uid
 
+    def __repr__(self):
+        return f"Station(uid={self.uid}, lat={self.lat}, lon={self.lon}, alt={self.alt})"
+
     def field_of_view(self, states, **kwargs):
         """Determines the field of view of the station.
         Should be vectorized over second dimension of states.

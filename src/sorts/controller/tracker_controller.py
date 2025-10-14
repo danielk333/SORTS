@@ -5,7 +5,7 @@ import numpy.typing as npt
 import xarray as xr
 import bokeh.layouts as bokeh_layouts
 import pyant
-from sorts import schedule
+from sorts import radar, schedule
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.types import (
@@ -19,6 +19,7 @@ from sorts.types import (
 )
 from sorts.utils import to_datetime64_us, to_timedelta64_us
 from sorts import plots
+from .controller_base import ControllerBase
 
 logger = logging.getLogger(__name__)
 
@@ -134,7 +135,7 @@ def plot_state_and_output(state: State, rx_schedules: t.Sequence[schedule.Schedu
     return plot
 
 
-class TrackerController:
+class TrackerController(ControllerBase):
     """
     Generate pointing schedule that tracks a space object.
 
@@ -143,6 +144,10 @@ class TrackerController:
     """
 
     def __init__(self, spec: Spec, state: State | None):
+        """
+        NOTE: This is intended as an internal constructor, please use the constructor methods to create instances.
+        """
+
         self.spec: Spec = spec
         self.state: State | None = state
 
@@ -158,6 +163,12 @@ class TrackerController:
         rx_stations: t.Sequence[Station],
         exp_detail: schedule.ExperimentDetail,
     ) -> TrackerController:
+        """A constructor method"""
+
+        exp_detail.update(
+            {"stn_pairs": [(tx_station.uid, rx_station.uid) for rx_station in rx_stations]}
+        )
+
         ctrl = TrackerController(
             spec={
                 "tx_station": tx_station,
@@ -181,6 +192,8 @@ class TrackerController:
         rx_stations: t.Sequence[Station],
         exp_detail: schedule.ExperimentDetail,
     ) -> TrackerController:
+        """A constructor method"""
+
         exp_detail.update(
             {"stn_pairs": [(tx_station.uid, rx_station.uid) for rx_station in rx_stations]}
         )
@@ -197,6 +210,24 @@ class TrackerController:
         )
 
         return ctrl
+
+    def get_experiment_detail(self) -> schedule.ExperimentDetail:
+        return self.spec["exp_detail"]
+
+    def get_station_map(self) -> dict[radar.StationId, radar.Station]:
+        stn_map: dict[radar.StationId, radar.Station] = {}
+
+        stn_map[self.spec["tx_station"].uid] = self.spec["tx_station"]
+        stn_map.update(list([(stn.uid, stn) for stn in self.spec["rx_stations"]]))
+
+        return stn_map
+
+    def get_station_pairs(self) -> list[tuple[radar.StationId, radar.StationId]]:
+        stn_pairs = self.spec["exp_detail"].get("stn_pairs")
+        if stn_pairs is None:
+            raise RuntimeError("stn_pairs not found in ExperimentDetail")
+
+        return stn_pairs
 
     def compute_ecef_states(
         self, start_time: Datetime_Like, end_time: Datetime_Like, slice_duration: Timedelta_Like
