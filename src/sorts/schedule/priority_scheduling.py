@@ -134,33 +134,43 @@ def _remove_entries_without_corresponding_tx(
             #
             #   Instead, we filter by first by levels 'exp_num', 'stn_num' here
             #   and followed by an intersection with 'dropped_tx_start_time_idx' later when dropping
-            rx_start_time_of_the_exp_idx = (
-                merged_sch_data.loc[
+            try:
+                rx_start_time_of_the_exp_idx = (
+                    merged_sch_data.loc[
+                        {
+                            _SK.multi_index: (
+                                slice(None),
+                                exp_id,
+                                rx_stn_num,
+                                slice(None),
+                            )
+                        }
+                    ]
+                    .indexes[_SK.multi_index]
+                    .get_level_values(_SK.start_time)
+                )
+            except KeyError:
+                # NOTE: it is possible that there is no entrise with multi_index = (ANY, exp_id, rx_stn_num, ANY)
+                #   we can skip the dropping such case
+                rx_start_time_of_the_exp_idx = None
+
+            if rx_start_time_of_the_exp_idx is not None:
+                # NOTE: cannot drop using `.drop_sel` directly for some reason, so we do a selection by `.loc` first
+                dropping = merged_sch_data.loc[
                     {
                         _SK.multi_index: (
-                            slice(None),
+                            rx_start_time_of_the_exp_idx.intersection(dropped_tx_start_time_idx),
                             exp_id,
                             rx_stn_num,
                             slice(None),
                         )
                     }
                 ]
-                .indexes[_SK.multi_index]
-                .get_level_values(_SK.start_time)
-            )
-
-            # NOTE: cannot drop using `.drop_sel` directly for some reason, so we do a selection by `.loc` first
-            dropping = merged_sch_data.loc[
-                {
-                    _SK.multi_index: (
-                        rx_start_time_of_the_exp_idx.intersection(dropped_tx_start_time_idx),
-                        exp_id,
-                        rx_stn_num,
-                        slice(None),
-                    )
-                }
-            ]
-            merged_sch_data = merged_sch_data.drop_sel({_SK.multi_index: dropping[_SK.multi_index]})
+                merged_sch_data = merged_sch_data.drop_sel(
+                    {_SK.multi_index: dropping[_SK.multi_index]}
+                )
+            else:
+                continue
 
     return merged_sch_data
 
