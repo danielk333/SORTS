@@ -32,6 +32,7 @@ class Spec(t.TypedDict):
     exp_detail: schedule.ExperimentDetail
     spobj: t.NotRequired[SpaceObject]
     epoch: t.NotRequired[Datetime_Like]
+    station_id_pairs: list[tuple[radar.StationId, radar.StationId]]
 
 
 class State(t.TypedDict):
@@ -73,7 +74,6 @@ def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
 
     tx_schdata = schedule.from_ndarrays(
         {
-            "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
             "start_time": tx_sch_time,
             "end_time": tx_sch_time + spec["exp_detail"]["slice_duration"],
             "exp_num": np.full(tx_sch_len, spec["exp_detail"]["id"], dtype=np.int16),
@@ -93,7 +93,6 @@ def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
         rx_schdatas.append(
             schedule.from_ndarrays(
                 {
-                    "exp_detail_map": {spec["exp_detail"]["id"]: spec["exp_detail"]},
                     "start_time": rx_sch_time,
                     "end_time": rx_sch_time + spec["exp_detail"]["slice_duration"],
                     "exp_num": np.full(rx_sch_len, spec["exp_detail"]["id"], dtype=np.int16),
@@ -162,18 +161,18 @@ class TrackerController(ControllerBase):
         tx_station: Station,
         rx_stations: t.Sequence[Station],
         exp_detail: schedule.ExperimentDetail,
-    ) -> TrackerController:
+    ) -> t.Self:
         """A constructor method"""
 
-        exp_detail.update(
-            {"stn_pairs": [(tx_station.uid, rx_station.uid) for rx_station in rx_stations]}
-        )
+        stn_pairs = [(tx_station.uid, rx_station.uid) for rx_station in rx_stations]
+        exp_detail.update({"stn_pairs": stn_pairs})
 
-        ctrl = TrackerController(
+        ctrl = cls(
             spec={
                 "tx_station": tx_station,
                 "rx_stations": rx_stations,
                 "exp_detail": exp_detail,
+                "station_id_pairs": stn_pairs,
             },
             state={
                 "spobj_time": time,
@@ -191,20 +190,20 @@ class TrackerController(ControllerBase):
         tx_station: Station,
         rx_stations: t.Sequence[Station],
         exp_detail: schedule.ExperimentDetail,
-    ) -> TrackerController:
+    ) -> t.Self:
         """A constructor method"""
 
-        exp_detail.update(
-            {"stn_pairs": [(tx_station.uid, rx_station.uid) for rx_station in rx_stations]}
-        )
+        stn_pairs = [(tx_station.uid, rx_station.uid) for rx_station in rx_stations]
+        exp_detail.update({"stn_pairs": stn_pairs})
 
-        ctrl = TrackerController(
+        ctrl = cls(
             spec={
                 "tx_station": tx_station,
                 "rx_stations": rx_stations,
                 "exp_detail": exp_detail,
                 "spobj": spobj,
                 "epoch": epoch,
+                "station_id_pairs": stn_pairs,
             },
             state=None,
         )
@@ -213,6 +212,9 @@ class TrackerController(ControllerBase):
 
     def get_experiment_detail(self) -> schedule.ExperimentDetail:
         return self.spec["exp_detail"]
+
+    def get_experiment_id_station_id_pairs_map(self) -> schedule.ExperimentIdStationIdPairsMap:
+        return {self.spec["exp_detail"]["id"]: self.spec["station_id_pairs"]}
 
     def get_station_map(self) -> dict[radar.StationId, radar.Station]:
         stn_map: dict[radar.StationId, radar.Station] = {}

@@ -27,8 +27,10 @@ tx_station.uid = 0
 rx_station: sorts.Station = eiscat3d.rx[0]
 rx_station.uid = 1
 
-exp_detail_map: dict[int, ExperimentDetail] = {
-    0: {
+fence_scan_controller = FenceScanController.from_scan_spec(
+    tx_station=tx_station,
+    rx_stations=[rx_station],
+    exp_detail={
         "id": 0,
         "coh_int_bandwidth": 1.0,
         "ipp": 1.0,
@@ -39,13 +41,7 @@ exp_detail_map: dict[int, ExperimentDetail] = {
         "noise_temp": 150.0,
         "slice_duration": np.timedelta64(10_000, "us"),  # 10ms
         "stn_pairs": [(0, 1)],
-    }
-}
-
-fence_scan_controller = FenceScanController.from_scan_spec(
-    tx_station=tx_station,
-    rx_stations=[rx_station],
-    exp_detail=exp_detail_map[0],
+    },
     azimuth=90,  # sweep from east to west
     min_elevation=30,
     pointings_per_cycle=40,

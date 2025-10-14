@@ -206,6 +206,7 @@ def derive_simulation_unit_params(
                     "tx_station": tx_stn,
                     "rx_station": rx_stn,
                     "schedule": filtered_sch,
+                    "exp_detail_map": spec["exp_detail_map"],
                 }
             )
 

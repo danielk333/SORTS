@@ -1,6 +1,7 @@
 from __future__ import annotations
 import logging, typing as t
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 import xarray as xr
 from sorts import utils
@@ -104,12 +105,13 @@ def _remove_entries_with_time_clash(
 
 
 def _remove_entries_without_corresponding_tx(
-    merged_sch_data: schedule.ScheduleData, incoming_sch_data: schedule.ScheduleData
+    merged_sch_data: schedule.ScheduleData,
+    incoming_sch_data: schedule.ScheduleData,
+    exp_id_stn_id_pairs_map: schedule.ExperimentIdStationIdPairsMap,
 ) -> schedule.ScheduleData:
-    for exp_detail in incoming_sch_data.attrs[_SK.exp_detail_map].values():
-        exp_detail: schedule.ExperimentDetail
-        exp_id = exp_detail["id"]
-        stn_pairs = exp_detail.get("stn_pairs")
+    exp_ids: npt.NDArray[np.int16] = np.unique(incoming_sch_data[_SK.exp_num].to_numpy())
+    for exp_id in exp_ids:
+        stn_pairs = exp_id_stn_id_pairs_map[exp_id]
         if stn_pairs is None:
             raise RuntimeError("stn_pairs not found in ExperimentDetail")
 
@@ -185,6 +187,7 @@ def _update_cummax_start_time_cummax_end_time(
 
 def priority_scheduling(
     sch_datas: t.Sequence[schedule.ScheduleData],
+    exp_id_stn_id_pairs_map: schedule.ExperimentIdStationIdPairsMap,
 ) -> schedule.ScheduleData:
     """
     Merge a sequence of schedule data for a single station into one,
@@ -218,16 +221,13 @@ def priority_scheduling(
         # so the df will be in order of start_time, then priority after sorting
         # also note that attrs merged in the way that former schedule has higher priority than latter,
         # consistent with the func `priority_scheduling`
-        merged_sch_data.attrs = schedule.merge_attrs(
-            [incoming_sch_data.attrs, merged_sch_data.attrs]
-        )
         merged_sch_data = xr.concat([merged_sch_data, incoming_sch_data], dim=_SK.multi_index)
         merged_sch_data = merged_sch_data.sortby(_SK.start_time)
 
         merged_sch_data = _propagate_cummax_start_time_cummax_end_time(merged_sch_data)
         merged_sch_data = _remove_entries_with_time_clash(merged_sch_data, incoming_sch_data)
         merged_sch_data = _remove_entries_without_corresponding_tx(
-            merged_sch_data, incoming_sch_data
+            merged_sch_data, incoming_sch_data, exp_id_stn_id_pairs_map
         )
         merged_sch_data = _update_cummax_start_time_cummax_end_time(merged_sch_data)
 

@@ -20,20 +20,6 @@ def priority_scheduling_interleaved_schedule_test():
     # 30min long, 2hr intv
     sch_data_a = schedule.from_ndarrays(
         {
-            _SK.exp_detail_map: {
-                0: {
-                    "id": 0,
-                    "coh_int_bandwidth": 0,
-                    "ipp": 0,
-                    "pulse_length": 0,
-                    "power": 0,
-                    "bandwidth": 0,
-                    "duty_cycle": 0,
-                    "noise_temp": 0,
-                    "slice_duration": np.timedelta64(3600, "s"),
-                    "stn_pairs": [(0, 0)],
-                }
-            },
             _SK.start_time: np.arange(
                 np.datetime64("2025-01-01", "s"),
                 np.datetime64("2025-01-02", "s"),
@@ -54,20 +40,6 @@ def priority_scheduling_interleaved_schedule_test():
     # 1hr long, 1hr intv
     sch_data_b = schedule.from_ndarrays(
         {
-            _SK.exp_detail_map: {
-                1: {
-                    "id": 1,
-                    "coh_int_bandwidth": 0,
-                    "ipp": 0,
-                    "pulse_length": 0,
-                    "power": 0,
-                    "bandwidth": 0,
-                    "duty_cycle": 0,
-                    "noise_temp": 0,
-                    "slice_duration": np.timedelta64(3600, "s"),
-                    "stn_pairs": [(0, 0)],
-                }
-            },
             _SK.start_time: np.arange(
                 np.datetime64("2025-01-01", "s"),
                 np.datetime64("2025-01-02", "s"),
@@ -85,7 +57,7 @@ def priority_scheduling_interleaved_schedule_test():
         }
     )
 
-    resultant_sch_data = priority_scheduling([sch_data_a, sch_data_b])
+    resultant_sch_data = priority_scheduling([sch_data_a, sch_data_b], {0: [(0, 0)], 1: [(0, 0)]})
 
     assert all(xr.ufuncs.equal(resultant_sch_data[_SK.exp_num], [0, 1] * 12))
 
