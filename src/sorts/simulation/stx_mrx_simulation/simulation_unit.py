@@ -123,6 +123,7 @@ class FromPassagesOverTxRxStationPairParam(t.TypedDict):
     tx_station: Station
     rx_station: Station
     schedule: Schedule
+    exp_detail_map: ExperimentDetailMap
 
 
 # TODO: re-eval: `Station`` can be taken from `Passage`, but empty `list[Passage]` would be an issue in that case.
@@ -164,6 +165,7 @@ class SimulationUnit:
         self.rx_station = rx_station
         self.exp_detail_map = exp_detail_map
 
+    # TODO: do not use 'Unpack' here
     @classmethod
     def from_passages_over_tx_rx_station_pair(
         cls, **kwargs: t.Unpack[FromPassagesOverTxRxStationPairParam]
@@ -190,7 +192,7 @@ class SimulationUnit:
                 passages=passages,
                 tx_station=kwargs["tx_station"],
                 rx_station=kwargs["rx_station"],
-                exp_detail_map=kwargs["schedule"]._data.attrs[_SK.exp_detail_map],
+                exp_detail_map=kwargs["exp_detail_map"],
                 state_data=StateData(empty_state_data()),
             )
 
@@ -251,7 +253,7 @@ class SimulationUnit:
             passages=passages,
             tx_station=kwargs["tx_station"],
             rx_station=kwargs["rx_station"],
-            exp_detail_map=kwargs["schedule"]._data.attrs[_SK.exp_detail_map],
+            exp_detail_map=kwargs["exp_detail_map"],
             state_data=StateData(state_data),
         )
 

@@ -14,8 +14,7 @@ CoordKey = t.Literal[
     "multi_index", "start_time", "exp_num", "stn_num", "simult_num", "enu", "e", "n", "u"
 ]
 DataKey = t.Literal["end_time", "pointing"]
-AttrKey = t.Literal["exp_detail_map"]
-Key = t.Literal[DataKey, CoordKey, AttrKey]
+Key = t.Literal[DataKey, CoordKey]
 
 
 class _K:
@@ -32,7 +31,6 @@ class _K:
     u: t.Final = "u"
     end_time: t.Final = "end_time"
     pointing: t.Final = "pointing"
-    exp_detail_map: t.Final = "exp_detail_map"
 
 
 utils.assert_class_attributes_equal_to(_K, t.get_args(Key))
@@ -52,8 +50,6 @@ A xarray `Dataset` of:
   Data variables:
       end_time     (multi_index) datetime64[us]
       pointing     (enu, multi_index) float64
-  Attributes:
-      exp_detail_map:  dict[int, ExperimentDetail]
   ```
 """
 
@@ -90,11 +86,8 @@ class ScheduleNdarrayDict(t.TypedDict):
     """
     A TypedDict, stores a collection of "control slices" (or "slices" in short).
 
-    - Slice data are stored as columns of fields, each of which is a `ndarray`.
-    - Metadata (`ExperimentDetail`s) are stored as a dict inside the `exp_detail_map` field.
+    Slice data are stored as columns of fields, each of which is a `ndarray`.
     """
-
-    exp_detail_map: ExperimentDetailMap
 
     start_time: npt.NDArray[types.Datetime64_us]
     end_time: npt.NDArray[types.Datetime64_us]
@@ -109,6 +102,8 @@ class ScheduleNdarrayDict(t.TypedDict):
 
 XrDataArrayIndexer = xr.DataArray
 """Contains info to get a subset of entries from a `Schedule`"""
+
+ExperimentIdStationIdPairsMap = dict[ExperimentId, list[tuple[radar.StationId, radar.StationId]]]
 
 
 # TODO: this helper should ideally be part of radar module/subpackage,
@@ -144,7 +139,6 @@ def empty_data() -> ScheduleData:
             _K.end_time: (_K.multi_index, np.empty(0, dtype="datetime64[us]")),
             _K.pointing: ((_K.enu, _K.multi_index), np.empty((3, 0), dtype=np.float64)),
         },
-        attrs={_K.exp_detail_map: {}},
     )
 
     return sch_data
@@ -165,7 +159,6 @@ def from_ndarrays(data: ScheduleNdarrayDict) -> ScheduleData:
             _K.end_time: (_K.multi_index, data[_K.end_time]),
             _K.pointing: ((_K.enu, _K.multi_index), data[_K.pointing]),
         },
-        attrs={_K.exp_detail_map: data[_K.exp_detail_map]},
     )
 
     return sch_data
@@ -173,7 +166,6 @@ def from_ndarrays(data: ScheduleNdarrayDict) -> ScheduleData:
 
 def to_ndarrays(data: ScheduleData) -> ScheduleNdarrayDict:
     arr_dict: ScheduleNdarrayDict = {
-        _K.exp_detail_map: data.attrs[_K.exp_detail_map],
         _K.start_time: data[_K.start_time].to_numpy(),
         _K.end_time: data[_K.end_time].to_numpy(),
         _K.exp_num: data[_K.exp_num].to_numpy(),
@@ -200,37 +192,6 @@ def to_dataframe(ds: ScheduleData) -> pd.DataFrame:
     ).reset_index()
 
     return df
-
-
-def merge_attrs(attrs_dicts: list[dict[AttrKey, t.Any]]) -> dict:
-    """
-    Merging attrs dict, latter attrs dict will override former attrs dict, just like `.update()` method of `dict`.
-
-    Returns a shallow copy.
-    """
-
-    match len(attrs_dicts):
-        case 0:
-            return {}
-
-        case 1:
-            # returns a shallow copy, the dict 'exp_detail_map' will be a new shallow copy as well
-            return {
-                **attrs_dicts[0],
-                _K.exp_detail_map: attrs_dicts[0][_K.exp_detail_map].copy(),
-            }
-
-        case _:
-            # returns a shallow copy, the dict 'exp_detail_map' will be a new shallow copy as well
-            result: dict[AttrKey, t.Any] = {
-                **attrs_dicts[0],
-                _K.exp_detail_map: attrs_dicts[0][_K.exp_detail_map].copy(),
-            }
-
-            for attrs_dict in attrs_dicts[0:]:
-                result[_K.exp_detail_map].update(attrs_dict[_K.exp_detail_map])
-
-    return result
 
 
 def filter_by_time_range(ds: ScheduleData, time_range: types.TimeRange_us) -> ScheduleData:
@@ -321,7 +282,9 @@ class Schedule:
         return cls(data=empty_data())
 
     @classmethod
-    def priority_scheduling(cls, schs: t.Sequence[Schedule]):
+    def priority_scheduling(
+        cls, schs: t.Sequence[Schedule], exp_id_stn_id_pairs_map: ExperimentIdStationIdPairsMap
+    ):
         """
         Merge a sequence of schedules for a single station into one,
         schedule with smaller index in the sequence is given priority over those with larger index.
@@ -339,7 +302,9 @@ class Schedule:
             )
             return cls.empty()
 
-        resultant_sch_data = priority_scheduling.priority_scheduling([sch._data for sch in schs])
+        resultant_sch_data = priority_scheduling.priority_scheduling(
+            [sch._data for sch in schs], exp_id_stn_id_pairs_map
+        )
 
         return cls(data=resultant_sch_data)
 
@@ -367,6 +332,3 @@ class Schedule:
         self, is_split_simult: bool, is_copy=False
     ) -> list[XrDataArrayIndexer]:
         return get_indexer_per_measurement(self._data, is_split_simult, is_copy)
-
-    def get_experiment_detail(self, exp_num: int) -> ExperimentDetail:
-        return self._data.attrs[_K.exp_detail_map][exp_num]

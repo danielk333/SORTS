@@ -145,14 +145,13 @@ fence_scan_ctrl = FenceScanController.from_scan_spec(
 
 tracker_sch = tracker_ctrl.generate(start_time, end_time)
 fence_sch = fence_scan_ctrl.generate(start_time, end_time)
-
-exp_detail_map = {
-    tracker_ctrl.spec["exp_detail"]["id"]: tracker_ctrl.spec["exp_detail"],
-    fence_scan_ctrl.spec["exp_detail"]["id"]: fence_scan_ctrl.spec["exp_detail"],
-}
-
-
-master_sch = Schedule.priority_scheduling([tracker_sch, fence_sch])
+master_sch = Schedule.priority_scheduling(
+    [tracker_sch, fence_sch],
+    {
+        **tracker_ctrl.get_experiment_id_station_id_pairs_map(),
+        **fence_scan_ctrl.get_experiment_id_station_id_pairs_map(),
+    },
+)
 
 
 output_folder = Path(__file__).parent / ".." / ".." / "local_data"
