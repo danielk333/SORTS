@@ -140,8 +140,8 @@ sim = simulation.StxMrxSimulation.from_controllers(
     }
 )
 
-# is_run_by_mpi = False  # a convenience flag to switch between running mode for debugging
-is_run_by_mpi = True  # a convenience flag to switch between running mode for debugging
+is_run_by_mpi = False  # a convenience flag to switch between running mode for debugging
+# is_run_by_mpi = True  # a convenience flag to switch between running mode for debugging
 if not is_run_by_mpi:
     calc_start_time = time.perf_counter()
     obss, sim_units = sim.run()
