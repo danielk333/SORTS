@@ -112,8 +112,6 @@ def _remove_entries_without_corresponding_tx(
     exp_ids: npt.NDArray[np.int16] = np.unique(incoming_sch_data[_SK.exp_num].to_numpy())
     for exp_id in exp_ids:
         stn_pairs = exp_id_stn_id_pairs_map[exp_id]
-        if stn_pairs is None:
-            raise RuntimeError("stn_pairs not found in ExperimentDetail")
 
         for tx_stn_num, rx_stn_num in stn_pairs:
             incoming_tx_entries = t.cast(

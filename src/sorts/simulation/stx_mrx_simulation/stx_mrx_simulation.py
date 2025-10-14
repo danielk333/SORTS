@@ -243,13 +243,14 @@ class StxMrxSimulation:
         """A constructor method"""
 
         stn_map: dict[radar.StationId, radar.Station] = {}
-        stn_pairs: set[tuple[radar.StationId, radar.StationId]] = set()
+        stn_id_pairs_set: set[tuple[radar.StationId, radar.StationId]] = set()
         exp_detail_map: schedule.ExperimentDetailMap = {}
 
         for ctrl in spec["controllers"]:
             stn_map.update(ctrl.get_station_map())
 
-            stn_pairs.update(ctrl.get_station_pairs())
+            for pairs in ctrl.get_experiment_id_station_id_pairs_map().values():
+                stn_id_pairs_set.update(pairs)
 
             exp_detail = ctrl.get_experiment_detail()
             exp_detail_map[exp_detail["id"]] = exp_detail
@@ -257,7 +258,7 @@ class StxMrxSimulation:
         return cls(
             spec={
                 "station_map": stn_map,
-                "station_id_pairs": list(stn_pairs),
+                "station_id_pairs": list(stn_id_pairs_set),
                 "schedule": spec["schedule"],
                 "exp_detail_map": exp_detail_map,
                 "epoch": spec["epoch"],
