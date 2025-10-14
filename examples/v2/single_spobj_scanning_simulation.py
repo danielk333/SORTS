@@ -40,7 +40,6 @@ fence_scan_controller = FenceScanController.from_scan_spec(
         "duty_cycle": 1.0,
         "noise_temp": 150.0,
         "slice_duration": np.timedelta64(10_000, "us"),  # 10ms
-        "stn_pairs": [(0, 1)],
     },
     azimuth=90,  # sweep from east to west
     min_elevation=30,

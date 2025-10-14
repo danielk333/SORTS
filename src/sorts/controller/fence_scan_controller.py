@@ -210,7 +210,6 @@ class FenceScanController(ControllerBase):
         #     )
 
         stn_pairs = [(tx_station.uid, rx_station.uid) for rx_station in rx_stations]
-        exp_detail.update({"stn_pairs": stn_pairs})
 
         ctrl = cls(
             spec={
@@ -241,13 +240,6 @@ class FenceScanController(ControllerBase):
         stn_map.update(list([(stn.uid, stn) for stn in self.spec["rx_stations"]]))
 
         return stn_map
-
-    def get_station_pairs(self) -> list[tuple[radar.StationId, radar.StationId]]:
-        stn_pairs = self.spec["exp_detail"].get("stn_pairs")
-        if stn_pairs is None:
-            raise RuntimeError("stn_pairs not found in ExperimentDetail")
-
-        return stn_pairs
 
     def compute_single_cycle_pointings(self, start_time: Datetime_Like, end_time: Datetime_Like):
         """Do the computation then update the `state` property and return `self`."""
