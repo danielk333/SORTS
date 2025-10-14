@@ -110,7 +110,7 @@ def south_to_north_circular_orbit_test():
             else:
                 raise RuntimeError(f"unexpected shape of k: {k.shape}")
 
-    tx_rx_0_stn = Station(
+    tx_0_stn = Station(
         lat=0.0,
         lon=0.0,
         alt=0.0,
@@ -121,6 +121,22 @@ def south_to_north_circular_orbit_test():
             frequency=233e6,  # same as eisat_3d
         ),
         uid=0,
+    )
+
+    # NOTE: physically the same as tx_0_stn, but has a different id;
+    #   this is done so that we can retain both tx and rx pointings in the schedule,
+    #   as FenceScanController will drop the rx entries if both tx and rx use the same station.
+    rx_0_stn = Station(
+        lat=0.0,
+        lon=0.0,
+        alt=0.0,
+        min_elevation=0.0,
+        beam=IsotropicBeam(
+            azimuth=0.0,
+            elevation=0.0,
+            frequency=233e6,  # same as eisat_3d
+        ),
+        uid=1,
     )
 
     # An offseted station for testing behaviours related to `min_elevation`
@@ -134,15 +150,15 @@ def south_to_north_circular_orbit_test():
             elevation=0.0,
             frequency=233e6,  # same as eisat_3d
         ),
-        uid=1,
+        uid=2,
     )
 
     def dsec_sampler(orbit, start_time, end_time):
         return np.arange(0, (end_time - start_time) / np.timedelta64(1, "s"), 30, dtype=np.float64)
 
     fence_scan_ctrl = FenceScanController.from_scan_spec(
-        tx_station=tx_rx_0_stn,
-        rx_stations=[tx_rx_0_stn, rx_1_stn],
+        tx_station=tx_0_stn,
+        rx_stations=[rx_0_stn, rx_1_stn],
         exp_detail={
             "id": 0,
             "coh_int_bandwidth": 1.0,
@@ -166,8 +182,8 @@ def south_to_north_circular_orbit_test():
 
     sim = StxMrxSimulation(
         spec={
-            "tx_station": tx_rx_0_stn,
-            "rx_stations": [tx_rx_0_stn, rx_1_stn],
+            "tx_station": tx_0_stn,
+            "rx_stations": [rx_0_stn, rx_1_stn],
             "schedule": fence_sch,
             "exp_detail_map": exp_detail_map,
             "epoch": start_time,
@@ -187,20 +203,33 @@ def south_to_north_circular_orbit_test():
     assert len(sim_units[1].passages) == 1
     assert len(obss) == 3
 
-    for obs, scan_range in zip(obss, scan_ranges):
+    for obs in obss:
+        rx_schedule_slice = obs.get_schedule_slice().rx
+        simult_num = rx_schedule_slice._data[_SK.simult_num][0]
+
+        # assert that simult_num is the same over the same observation
+        assert (rx_schedule_slice._data[_SK.simult_num] == simult_num).all()
+
+        # the checks below only make sense for rx station 0
+        if obs.passage["rx_station"].uid != 0:
+            continue
+
         # assert that we are pointing at scan_ranges
         # NOTE: this is based on the assumption that pointings at same direction but at different scan range
         #   are scheduled in in the same order as `scan_ranges`, and without gaps
-        rx_pointing = obs.get_schedule_slice().rx._data[_SK.pointing][:, 0]
-        assert (np.linalg.norm(rx_pointing) - scan_range) < pointing_range_equality_thld
+        # rx_pointing = rx_schedule_slice._data[_SK.pointing][:, 0]
+        rx_pointing_diff = (
+            np.linalg.norm(rx_schedule_slice._data[_SK.pointing], axis=0) - scan_ranges[simult_num]
+        )
+        assert (rx_pointing_diff < pointing_range_equality_thld).all()
 
         # assert the start and end time of the observation is as expected
         # TODO: this can offset pretty large when we have large sampling time interval, is there better way to test it?
         assert abs(
-            obs.get_schedule_slice().rx._data[_SK.start_time][0] - expected_passage_start_time
+            rx_schedule_slice._data[_SK.start_time][0] - expected_passage_start_time
         ) < np.timedelta64(int(dsec_sampling_intv), "s")
         assert abs(
-            obs.get_schedule_slice().rx._data[_SK.end_time][-1] - expected_passage_end_time
+            rx_schedule_slice._data[_SK.end_time][-1] - expected_passage_end_time
         ) < np.timedelta64(int(dsec_sampling_intv), "s")
 
     # assert that at all rx_pointing from "2nd rx station, 2nd scan range"
@@ -208,24 +237,18 @@ def south_to_north_circular_orbit_test():
     obs_ref = next(
         obs
         for obs in obss
-        if obs.passage["tx_station"].uid == 0
-        and obs.passage["rx_station"].uid == 0
+        if obs.passage["tx_station"].uid == tx_0_stn.uid
+        and obs.passage["rx_station"].uid == rx_0_stn.uid
         and obs.get_schedule_slice().rx._data[_SK.simult_num][0] == 1  # i.e. the 2nd scan range
     )
-    assert (
-        obs_ref.get_schedule_slice().rx._data[_SK.simult_num].all()
-    )  # simult_num should be the same over the same observation
 
     obs_subj = next(
         obs
         for obs in obss
-        if obs.passage["tx_station"].uid == 0
-        and obs.passage["rx_station"].uid == 1
+        if obs.passage["tx_station"].uid == tx_0_stn.uid
+        and obs.passage["rx_station"].uid == rx_1_stn.uid
         and obs.get_schedule_slice().rx._data[_SK.simult_num][0] == 1  # i.e. the 2nd scan range
     )
-    assert (
-        obs_subj.get_schedule_slice().rx._data[_SK.simult_num].all()
-    )  # simult_num should be the same over the same observation
 
     obs_ref_rx_station = obs_ref.passage["rx_station"]
     obs_ref_state_slice = obs_ref.get_state_slice()
