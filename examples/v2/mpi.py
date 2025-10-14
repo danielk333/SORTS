@@ -33,14 +33,14 @@ start_time = Time("2025-01-01 02:45:00")
 end_time = Time("2025-01-01 03:00:00")
 control_slice_duration = np.timedelta64(10_000, "us")  # 10ms
 
-eiscat3d = sorts.get_radar("eiscat3d", "stage1-array")
-# eiscat3d = get_radar("nostra", "example1")
+# radar_sys = sorts.get_radar("eiscat3d", "stage1-array")
+radar_sys = sorts.get_radar("nostra", "example1")
 # TODO: these patching of station prop should be integrated into codebase
-tx_station: radar.Station = eiscat3d.tx[0]
+tx_station: radar.Station = radar_sys.tx[0]
 tx_station.uid = 0
-rx_station_0: radar.Station = eiscat3d.rx[0]
+rx_station_0: radar.Station = radar_sys.rx[0]
 rx_station_0.uid = 1
-rx_station_1: radar.Station = eiscat3d.rx[1]
+rx_station_1: radar.Station = radar_sys.rx[1]
 rx_station_1.uid = 2
 
 tracked_spobj = space_object.SpaceObject(
