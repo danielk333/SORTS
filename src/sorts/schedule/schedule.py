@@ -57,11 +57,14 @@ A xarray `Dataset` of:
   ```
 """
 
+ExperimentId = int
+"""A unique int16 that identifies an experiment"""
+
 
 class ExperimentDetail(t.TypedDict):
     """A TypedDict of params"""
 
-    id: int
+    id: ExperimentId
 
     coh_int_bandwidth: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
     ipp: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
@@ -75,12 +78,12 @@ class ExperimentDetail(t.TypedDict):
     "Duration of a control slice, in micro-second"
 
     # TODO: re-eval if we should we `t.NotRequired` here
-    stn_pairs: t.NotRequired[list[tuple[int, int]]]
+    stn_pairs: t.NotRequired[list[tuple[ExperimentId, ExperimentId]]]
     """TX-RX station number pairs"""
 
 
 # TODO: replace existing usage of `dict[int, ExperimentDetail]` by this type
-ExperimentDetailMap = dict[int, ExperimentDetail]
+ExperimentDetailMap = dict[ExperimentId, ExperimentDetail]
 
 
 class ScheduleNdarrayDict(t.TypedDict):

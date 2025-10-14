@@ -138,14 +138,10 @@ def south_to_north_circular_orbit_test():
 
     tracker_sch = tracker_ctrl.generate(start_time, end_time)
 
-    exp_detail_map = {tracker_ctrl.spec["exp_detail"]["id"]: tracker_ctrl.spec["exp_detail"]}
-
-    sim = StxMrxSimulation(
+    sim = StxMrxSimulation.from_controllers(
         spec={
-            "tx_station": test_stn,
-            "rx_stations": [test_stn],
+            "controllers": [tracker_ctrl],
             "schedule": tracker_sch,
-            "exp_detail_map": exp_detail_map,
             "epoch": start_time,
             "start_time": start_time,
             "end_time": end_time,

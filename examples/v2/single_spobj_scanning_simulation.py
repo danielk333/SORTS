@@ -52,15 +52,12 @@ fence_scan_controller = FenceScanController.from_scan_spec(
     scan_range=np.array([300e3], dtype=np.float64),
 )
 
-(tx_schedule, rx_schedules) = fence_scan_controller.generate(start_time, end_time)
+sch = fence_scan_controller.generate(start_time, end_time)
 
-sim = StxMrxSimulation(
+sim = StxMrxSimulation.from_controllers(
     spec={
-        "tx_station": tx_station,
-        "rx_stations": [rx_station],
-        "tx_schedule": tx_schedule,
-        "rx_schedules": rx_schedules,
-        "exp_detail_map": exp_detail_map,
+        "controllers": [fence_scan_controller],
+        "schedule": sch,
         "epoch": epoch,
         "start_time": start_time,
         "end_time": end_time,

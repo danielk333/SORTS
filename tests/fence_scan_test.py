@@ -178,14 +178,10 @@ def south_to_north_circular_orbit_test():
 
     fence_sch = fence_scan_ctrl.generate(start_time, end_time)
 
-    exp_detail_map = {fence_scan_ctrl.spec["exp_detail"]["id"]: fence_scan_ctrl.spec["exp_detail"]}
-
-    sim = StxMrxSimulation(
+    sim = StxMrxSimulation.from_controllers(
         spec={
-            "tx_station": tx_0_stn,
-            "rx_stations": [rx_0_stn, rx_1_stn],
+            "controllers": [fence_scan_ctrl],
             "schedule": fence_sch,
-            "exp_detail_map": exp_detail_map,
             "epoch": start_time,
             "start_time": start_time,
             "end_time": end_time,
