@@ -307,6 +307,14 @@ class StxMrxSimulation:
             assert persist_dir.exists()
             assert persist_dir.is_dir()
 
+            # saving the schedule
+            sch_persist_fpath = persist_dir / f"schedule.pickle"
+            sch_persist_fpath_tmp = sch_persist_fpath.with_suffix(sch_persist_fpath.suffix + ".tmp")
+            with open(sch_persist_fpath_tmp, "wb") as f:
+                pickle.dump(self.spec["schedule"], f)
+                sch_persist_fpath_tmp.rename(sch_persist_fpath)
+
+            # actual mpi stuff
             master_proc_rank: t.Final = 0
 
             comm = MPI.COMM_WORLD
