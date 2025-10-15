@@ -65,7 +65,7 @@ A xarray `Dataset` with:
   ```
   Dimensions:        (multi_index: n, enu: 3)
   Coordinates:
-    * multi_index    (multi_index) object MultiIndex ('time', 'exp_num', 'rx_simult_num')
+    * multi_index    (multi_index) object MultiIndex ('exp_num', 'rx_simult_num', 'time')
     * time           (multi_index) datetime64[us]
     * exp_num        (multi_index) int16
     * rx_simult_num  (multi_index) int16
@@ -87,11 +87,11 @@ A xarray `Dataset` with:
 def empty_state_data() -> StateData:
     multi_index = pd.MultiIndex.from_arrays(
         [
+            np.empty(0, dtype=np.int16),
+            np.empty(0, dtype=np.int16),
             np.empty(0, dtype="datetime64[us]"),
-            np.empty(0, dtype=np.int16),
-            np.empty(0, dtype=np.int16),
         ],
-        names=(_K.time, _K.exp_num, _K.rx_simult_num),
+        names=(_K.exp_num, _K.rx_simult_num, _K.time),
     )
 
     state_data = xr.Dataset(
@@ -199,10 +199,10 @@ class SimulationUnit:
         # NOTE: xarray simplify/collapse MultiIndex when filtering a level to an exact value,
         #   we filter on the top level "multi_index' with a tuple here to prevent it
         tx_schdata = kwargs["schedule"]._data.loc[
-            {_SK.multi_index: (slice(None), slice(None), tx_station.uid, slice(None))}
+            {_SK.multi_index: (slice(None), tx_station.uid, slice(None), slice(None))}
         ]
         rx_schdata = kwargs["schedule"]._data.loc[
-            {_SK.multi_index: (slice(None), slice(None), rx_station.uid, slice(None))}
+            {_SK.multi_index: (slice(None), rx_station.uid, slice(None), slice(None))}
         ]
 
         rx_time = rx_schdata[_SK.start_time].to_numpy()
@@ -210,19 +210,19 @@ class SimulationUnit:
         rx_simult_num = rx_schdata[_SK.simult_num].to_numpy()
 
         multi_index = pd.MultiIndex.from_arrays(
-            [rx_time, rx_exp_num, rx_simult_num],
-            names=(_K.time, _K.exp_num, _K.rx_simult_num),
+            [rx_exp_num, rx_simult_num, rx_time],
+            names=(_K.exp_num, _K.rx_simult_num, _K.time),
         )
 
         tx_reindex_selector = xr.Coordinates.from_pandas_multiindex(
             pd.MultiIndex.from_arrays(
                 [
-                    rx_time,
                     rx_exp_num,
                     np.full(len(rx_time), kwargs["tx_station"].uid, dtype=np.int16),
                     np.full(len(rx_time), 0, dtype=np.int16),  # assuming single tx
+                    rx_time,
                 ],
-                names=(_SK.start_time, _SK.exp_num, _SK.stn_num, _SK.simult_num),
+                names=(_SK.exp_num, _SK.stn_num, _SK.simult_num, _SK.start_time),
             ),
             _SK.multi_index,
         )

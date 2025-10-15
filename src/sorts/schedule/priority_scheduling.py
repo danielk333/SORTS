@@ -117,7 +117,7 @@ def _remove_entries_without_corresponding_tx(
             incoming_tx_entries = t.cast(
                 pd.Series,
                 incoming_sch_data.loc[
-                    {_SK.multi_index: (slice(None), exp_id, tx_stn_num, slice(None))}
+                    {_SK.multi_index: (exp_id, tx_stn_num, slice(None), slice(None))}
                 ][_SK.multi_index].to_pandas(),
             )
 
@@ -139,9 +139,9 @@ def _remove_entries_without_corresponding_tx(
                     merged_sch_data.loc[
                         {
                             _SK.multi_index: (
-                                slice(None),
                                 exp_id,
                                 rx_stn_num,
+                                slice(None),
                                 slice(None),
                             )
                         }
