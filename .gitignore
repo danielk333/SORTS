@@ -122,3 +122,7 @@ data/spice/*.tls
 
 # mkdocs output
 site
+
+# local files
+/local_data/*
+/local_scripts/*
