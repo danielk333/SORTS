@@ -1,7 +1,7 @@
 from sorts.types import TxRxTuple
 from sorts.schedule import XrDataArrayIndexer, Schedule
 from sorts.simulation.types import Passage
-from .simulation_unit import SimulationUnit, StateData
+from .simulation_unit import SimulationUnit, StateData, empty_state_data
 
 
 _SK = Schedule._K
@@ -42,12 +42,16 @@ class Observation:
     def get_state_slice(self) -> StateData:
         """Get the subset of `simulation_unit.StateData` data the corresponds to the the observation"""
 
+        if len(self.indexer.rx[_SK.multi_index]) == 0:
+            return empty_state_data()
+
         sim_state_slice = self.simulation_unit._state_data.loc[
             {
-                _SuK.multi_index: [
-                    (start_time, exp_num, simult_num)
-                    for start_time, exp_num, _stn_num, simult_num in self.indexer.rx.to_numpy()
-                ]
+                _SuK.multi_index: (
+                    self.indexer.rx[_SK.start_time].to_numpy().tolist(),
+                    self.indexer.rx[_SK.exp_num][0].item(),
+                    self.indexer.rx[_SK.simult_num][0].item(),
+                )
             }
         ]
 

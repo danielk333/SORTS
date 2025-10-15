@@ -240,7 +240,9 @@ def get_indexer_per_measurement(
         if is_split_simult:
             # further spliting according to number of simutaneous rx pointings
             for simult_num in np.unique(ds_split[_K.simult_num].to_numpy()):
-                idxer = ds_split[_K.multi_index].loc[{_K.simult_num: simult_num}]
+                idxer = ds_split[_K.multi_index].loc[
+                    {_K.multi_index: (slice(None), slice(None), slice(None), simult_num)}
+                ]
                 idxers.append(idxer if not is_copy else idxer.copy())
 
         else:
