@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 """ """
+import numpy as np
 import pyant
 
 from .radars import radar_generator
@@ -9,15 +10,11 @@ from ..tx_rx import TX, RX
 
 
 def gen_nostra_beam():
-    beam = pyant.models.Gaussian(
-        azimuth=0,
-        elevation=90.0,
-        frequency=3.4e9,
-        I0=10**5.81,
-        radius=10.0,
-        normal_azimuth=0,
-        normal_elevation=90.0,
-        degrees=True,
+    beam = pyant.models.Airy(
+        pointing=np.array([0, 0, 1], dtype=np.float64),
+        frequency=930e6,
+        radius=23.0,
+        peak_gain=10**4.81,
     )
     return beam
 
@@ -27,17 +24,17 @@ def gen_nostra():
     """The NOSTRA system."""
     dwell_time = 0.1
     tx_kw = dict(
-        power=5e6,
+        power=500e3,
         bandwidth=100e3,
         duty_cycle=0.25,
         pulse_length=1920e-6,
         ipp=10e-3,
         n_ipp=int(dwell_time / 10e-3),
-        min_elevation=45.0,
+        min_elevation=30.0,
     )
     rx_kw = dict(
-        noise=150,
-        min_elevation=45.0,
+        noise=300,
+        min_elevation=30.0,
     )
 
     se_rx = RX(lat=65.89, lon=20.18, alt=0, beam=gen_nostra_beam(), **rx_kw)
@@ -55,7 +52,7 @@ def gen_nostra():
     nostra = Radar(
         tx=tx,
         rx=rx,
-        min_SNRdb=10.0,
+        min_SNRdb=12.0,
         joint_stations=[(0, 0), (1, 1), (2, 2)],
     )
     return nostra
