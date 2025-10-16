@@ -51,7 +51,7 @@ class Station(object):
         lon,
         alt,
         min_elevation: Float_as_deg,
-        beam,
+        beam: pyant.beam.Beam,
         uid: StationId = 0,
     ):
         self.lat = lat
