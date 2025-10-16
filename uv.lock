@@ -2215,14 +2215,16 @@ wheels = [
 
 [[package]]
 name = "pyant"
-version = "0.13.1"
+version = "1.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "matplotlib" },
     { name = "numpy" },
     { name = "scipy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e0/be/2d3ea29d07b1d46f3d8e7d0d794e677205bf012072ebb588ee93491d160e/pyant-0.13.1.tar.gz", hash = "sha256:07481af574f205202abbde6068bf7449ff36ccf26d88772351bd9cfd932b669a", size = 77401, upload-time = "2025-02-05T20:29:29.009Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b9/c1/27aabfc0f0f8cdb8ae862b1ff41404935faa6de2b74260ca251a103e68f3/pyant-1.0.0.tar.gz", hash = "sha256:e9663ac695ac7becabd77b7724762913bf8dcc553e1a32216093dd9c3c0a1a40", size = 31344, upload-time = "2025-10-14T16:02:16.982Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d3/8d/83e41b9a1d63a5d5d390e09c426421eaa3cfde2dfd870f3802e4caec0f9f/pyant-1.0.0-py3-none-any.whl", hash = "sha256:df7f9c2fd5ca542fdfb667981867a74f62429bf519c172bf3170cbef8ad6cf8e", size = 35235, upload-time = "2025-10-14T16:02:15.445Z" },
+]
 
 [[package]]
 name = "pycodestyle"
@@ -3025,7 +3027,7 @@ requires-dist = [
     { name = "panel", specifier = ">=1.7.4" },
     { name = "patchelf", marker = "extra == 'dev'", specifier = ">=0.14" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">3.0.0" },
-    { name = "pyant", specifier = ">=0.11.0" },
+    { name = "pyant", specifier = ">=1.0" },
     { name = "pyorb", specifier = ">=0.5.4" },
     { name = "pyproj", specifier = ">=3.7.1" },
     { name = "pyqt6", specifier = ">=6.8.1" },
