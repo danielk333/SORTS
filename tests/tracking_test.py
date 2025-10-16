@@ -11,8 +11,7 @@ import logging
 import numpy as np
 from astropy.time import Time
 from astropy.constants import R_earth  # type: ignore
-from pyant import Beam
-import pyorb
+import pyant, pyorb
 from sorts.types import Float64_as_sec, Float64_as_deg, Float_as_sec, Float_as_deg
 from sorts.utils import to_datetime64_us
 from sorts.interpolation import Legendre8
@@ -48,6 +47,13 @@ dsec_sampling_intv: Float_as_sec = 30
 
 _SK = Schedule._K
 _SuK = stx_mrx_simulation.simulation_unit._K
+
+
+# NOTE: this is needed because the constructor of `pyant.models.Isotropic` accept no param as of 2025-10-16
+def isotropic_beam_at_freq(freq: float):
+    beam = pyant.models.Isotropic()
+    beam.parameters["frequency"] = freq
+    return beam
 
 
 def south_to_north_circular_orbit_test():
@@ -87,26 +93,12 @@ def south_to_north_circular_orbit_test():
         parameters={"d": 1.0},  # diameter of the spobj
     )
 
-    # TODO: correct the return type of the `Beam.gain` base class method
-    class IsotropicBeam(Beam):
-        def gain(self, k, ind=None, polarization=None, **kwargs):
-            if len(k.shape) == 1:
-                return 1.0
-            elif len(k.shape) == 2:
-                return np.full(k.shape[1], 1.0, dtype=np.float64)
-            else:
-                raise RuntimeError(f"unexpected shape of k: {k.shape}")
-
     test_stn = Station(
         lat=0.0,
         lon=0.0,
         alt=0.0,
         min_elevation=0.0,
-        beam=IsotropicBeam(
-            azimuth=0.0,
-            elevation=0.0,
-            frequency=233e6,  # same as eisat_3d
-        ),
+        beam=isotropic_beam_at_freq(233e6),  # same as eisat_3d
         uid=0,
     )
 
