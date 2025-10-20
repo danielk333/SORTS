@@ -198,7 +198,8 @@ is_run_by_mpi = False  # a convenience flag to switch between running mode for d
 # is_run_by_mpi = True  # a convenience flag to switch between running mode for debugging
 if not is_run_by_mpi:
     sim_env = prepare_simulation_environment()
-    sim = sim_env["sim"]
+    spec_by_controllers = sim_env["spec_by_controllers"]
+    sim = stx_mrx_simulation.StxMrxSimulation.from_controllers(sim_env["spec_by_controllers"])
 
     calc_start_time = time.perf_counter()
     obss, sim_units = sim_env["sim"].run()
