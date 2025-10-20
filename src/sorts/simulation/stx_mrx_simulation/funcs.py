@@ -223,22 +223,40 @@ def calc_gain(
     # NOTE: used lazy import here to avoid circular import
     from .simulation_unit import _K
 
-    size = len(state_data[_K.multi_index])
+    vector_len = len(state_data[_K.multi_index])
 
-    # NOTE: looping is needed becase passing in a ndarray of pointing will trigger exception when calculating gain
-    #   refs:
-    #   - `pyant/beam.py` `L235` `assert vector_cnt <= max_vectors, "Too many vector valued parameters"`
-    #   - `pyant/models/array.py` `L185` `params, shape = self.get_parameters(ind, named=True, max_vectors=0)`
-    tx_gain_arr = np.full(size, 0.0, dtype=np.float64)
-    rx_gain_arr = np.full(size, 0.0, dtype=np.float64)
-    for idx in range(len(state_data[_K.multi_index])):
-        tx_stn.beam.point(state_data[_K.tx_pointing][:, 0].to_numpy())
-        tx_gain_arr[idx] = tx_stn.beam.gain(spobj_tx_enu[:3, idx])
+    # will be populated to [tx_gain_arr, rx_gain_arr]
+    gain_arr_list: list[npt.NDArray[np.float64]] = []
 
-        rx_stn.beam.point(state_data[_K.rx_pointing][:, 0].to_numpy())
-        rx_gain_arr[idx] = rx_stn.beam.gain(spobj_rx_enu[:3, idx])
+    for beam, spobj_stn_enu in zip([tx_stn.beam, rx_stn.beam], [spobj_tx_enu, spobj_rx_enu]):
+        # we broadcast_to/reshape the beam params according to the input state length
+        # TODO: the `gain` method being dependent on beam's states are not helpful here;
+        #   we need a gain func that take all param as args
+        # NOTE: we need to mutate `beam.parameters` here,
+        #   but such mutation would create unexpect conditions if we directly mutate it.
+        #   therefore we mutate on a copy of `beam.parameters` and restore the original one afterwards
+        #   (since those `beam.parameters` are state that will be bounded with the life time of the object)
+        #   (e.g. if the same `tx_stn` is used in another `calc_gain`, the mutation from prev will persist)
 
-    state_data[_K.gain_tx] = (_K.multi_index, tx_gain_arr)
-    state_data[_K.gain_rx] = (_K.multi_index, rx_gain_arr)
+        orig_beam_params = beam.parameters
+        mut_beam_params = beam.parameters.copy()
+        beam.parameters = mut_beam_params
+
+        for key, val in mut_beam_params.items():
+            if key == "pointing":
+                beam.parameters["pointing"] = state_data[_K.tx_pointing][:, 0].to_numpy()
+            if key in beam.parameters_shape:
+                shape: tuple[int, ...] = beam.parameters_shape[key]
+                beam.parameters[key] = np.broadcast_to(
+                    val.reshape((*shape, 1)), (*shape, vector_len)
+                )
+            else:
+                beam.parameters[key] = np.full(vector_len, val, dtype=np.float64)
+
+        gain_arr_list.append(beam.gain(spobj_stn_enu[:3]))
+        beam.parameters = orig_beam_params
+
+    state_data[_K.gain_tx] = (_K.multi_index, gain_arr_list[0])
+    state_data[_K.gain_rx] = (_K.multi_index, gain_arr_list[1])
 
     return state_data
