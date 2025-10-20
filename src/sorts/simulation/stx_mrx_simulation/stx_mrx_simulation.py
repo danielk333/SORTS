@@ -208,16 +208,26 @@ def mpi_worker_proc_loop(
                     sim_unit = pickle.load(f)
 
             else:
+                # NOTE:
+                #   As a simple way to reduce risk of corrupted files,
+                #   we write to an tmp file first then rename that file
+                #
+                #   sim_unit is saved 2 times, 1 before running `simulate` and 1 after
+
                 sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(**param)
+
+                persist_fpath_tmp = persist_fpath.with_suffix(persist_fpath.suffix + ".tmp")
+                with open(persist_fpath_tmp, "wb") as f:
+                    pickle.dump(sim_unit, f)
+                    persist_fpath_tmp.rename(persist_fpath)
 
                 logger.info(f"worker: {worker_proc_rank} | `SimulationUnit.simulate` start")
                 sim_unit.simulate()
 
-                # As a simple way to reduce risk of corrupted files,
-                # we write to an tmp file first then rename that file
                 persist_fpath_tmp = persist_fpath.with_suffix(persist_fpath.suffix + ".tmp")
                 with open(persist_fpath_tmp, "wb") as f:
                     pickle.dump(sim_unit, f)
+                    persist_fpath.unlink(missing_ok=True)  # delete the file we saved earlier
                     persist_fpath_tmp.rename(persist_fpath)
 
         except Exception as err:
