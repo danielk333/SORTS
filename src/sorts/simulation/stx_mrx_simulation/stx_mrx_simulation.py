@@ -317,7 +317,7 @@ class StxMrxSimulation:
 
             if r == master_proc_rank:  # master
                 if not persist_dir.exists():
-                    persist_dir.mkdir()
+                    persist_dir.mkdir(parents=True)
                 assert persist_dir.exists()
                 assert persist_dir.is_dir()
 

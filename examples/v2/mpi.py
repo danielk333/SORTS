@@ -146,7 +146,7 @@ def prepare_simulation_environment(persistence_dir_path: Path | None = None):
     # saving sim env
     if persistence_dir_path is not None:
         if not persistence_dir_path.exists():
-            persistence_dir_path.mkdir()
+            persistence_dir_path.mkdir(parents=True)
         assert persistence_dir_path.exists()
         assert persistence_dir_path.is_dir()
 
