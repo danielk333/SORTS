@@ -26,6 +26,17 @@ class _MpiMsg:
     terminate: t.Final = "terminate"
 
 
+type SimulationEnvironment = t.Mapping[str, t.Any]
+"""
+A mapping of `str` to `Any`, with at least these items:
+```
+{
+    "spec_by_controllers": SpecByControllers,
+}
+```
+"""
+
+
 class SpaceObjectDsecSampler(t.Protocol):
     def __call__(
         self, orbit: pyorb.Orbit, start_time: Datetime_Like, end_time: Datetime_Like
@@ -114,25 +125,27 @@ def mpi_master_proc_loop(
     num_workers = comm.Get_size() - 1
     is_worker_idle_list = [True for _ in range(num_workers)]
     processed_sim_unit_cnt = 0
-    next_sim_unit_idx = 0
+    next_sim_unit_param_idx = 0
 
     while processed_sim_unit_cnt < len(sim_units_param):
 
         # TODO: would be more robust to check ids in sim_units_param than looping next_sim_unit_idx
         # send sim_unit if there is idle worker
-        if any(is_worker_idle_list) and next_sim_unit_idx < len(sim_units_param):
+        if any(is_worker_idle_list) and next_sim_unit_param_idx < len(sim_units_param):
 
             idle_worker_idx = is_worker_idle_list.index(True)
             idle_worker_rank = idle_worker_idx + 1
             # TODO: check if the  (full ScheduleData + indexer for SimulationUnit) or (just the relevant slices of ScheduleData) are sent
-            comm.send(sim_units_param[next_sim_unit_idx], dest=idle_worker_rank)
+            comm.send(sim_units_param[next_sim_unit_param_idx], dest=idle_worker_rank)
 
             logger.debug(
-                f"master: {master_proc_rank} | sent `SimulationUnit` {next_sim_unit_idx+1} of {len(sim_units_param)} to worker {idle_worker_rank}"
+                f"master: {master_proc_rank} | sent `SimulationUnit`"
+                + f" <{sim_units_param[next_sim_unit_param_idx]['id']}>"
+                + f" ({next_sim_unit_param_idx+1}/{len(sim_units_param)}) to worker {idle_worker_rank}"
             )
 
             is_worker_idle_list[idle_worker_idx] = False
-            next_sim_unit_idx += 1
+            next_sim_unit_param_idx += 1
 
         else:
             # otherwise, wait for result
@@ -183,28 +196,34 @@ def mpi_worker_proc_loop(
             raise RuntimeError(f"worker: {worker_proc_rank} | received unexcepted msg: {msg}")
 
         param = t.cast(FromPassagesOverTxRxStationPairParam, msg)
-
         persist_fpath = persist_dir / f"{param["id"]}.pickle"
-        if persist_fpath.exists():
-            logger.info(
-                f"worker: {worker_proc_rank} | SimulationUnit: {param["id"]} already completed, will load from the saved file instead"
-            )
 
-            with open(persist_fpath, "rb") as f:
-                sim_unit = pickle.load(f)
+        try:
+            if persist_fpath.exists():
+                logger.info(
+                    f"worker: {worker_proc_rank} | SimulationUnit: {param["id"]} already completed, will load from the saved file instead"
+                )
 
-        else:
-            sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(**param)
+                with open(persist_fpath, "rb") as f:
+                    sim_unit = pickle.load(f)
 
-            logger.info(f"worker: {worker_proc_rank} | `SimulationUnit.simulate` start")
-            sim_unit.simulate()
+            else:
+                sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(**param)
 
-            # As a simple way to reduce risk of corrupted files,
-            # we write to an tmp file first then rename that file
-            persist_fpath_tmp = persist_fpath.with_suffix(persist_fpath.suffix + ".tmp")
-            with open(persist_fpath_tmp, "wb") as f:
-                pickle.dump(sim_unit, f)
-                persist_fpath_tmp.rename(persist_fpath)
+                logger.info(f"worker: {worker_proc_rank} | `SimulationUnit.simulate` start")
+                sim_unit.simulate()
+
+                # As a simple way to reduce risk of corrupted files,
+                # we write to an tmp file first then rename that file
+                persist_fpath_tmp = persist_fpath.with_suffix(persist_fpath.suffix + ".tmp")
+                with open(persist_fpath_tmp, "wb") as f:
+                    pickle.dump(sim_unit, f)
+                    persist_fpath_tmp.rename(persist_fpath)
+
+        except Exception as err:
+            raise RuntimeError(
+                f"Runtime fail in worker: {worker_proc_rank} | SimulationUnit: {param["id"]}"
+            ) from err
 
         obss = []
         obss = funcs.derive_observations(
@@ -270,6 +289,59 @@ class StxMrxSimulation:
             }
         )
 
+    # TODO: is there better way to capture env for working with mpi than using a `SimulationEnvironment`?
+    @classmethod
+    def mpi_run(
+        cls,
+        persistence_dir_path: str | Path,
+        prep_sim_env_fn: t.Callable[[], SimulationEnvironment],
+        result_analysis_fn: t.Callable[[], None],
+    ) -> None:
+        persist_dir = Path(persistence_dir_path)
+        if not persist_dir.exists():
+            persist_dir.mkdir()
+        assert persist_dir.exists()
+        assert persist_dir.is_dir()
+
+        try:
+            master_proc_rank: t.Final = 0
+
+            comm = MPI.COMM_WORLD
+            r = comm.Get_rank()
+            rank_size = comm.Get_size()
+
+            if r == master_proc_rank:  # master
+                sim_env = prep_sim_env_fn()
+
+                sim = cls.from_controllers(sim_env["spec_by_controllers"])
+                mpi_master_proc_loop(
+                    comm=comm, master_proc_rank=r, spec=sim.spec, rank_size=rank_size
+                )
+
+                result_analysis_fn()
+
+                return
+
+            else:  # workers
+                mpi_worker_proc_loop(
+                    comm=comm,
+                    master_proc_rank=master_proc_rank,
+                    worker_proc_rank=r,
+                    persist_dir=persist_dir,
+                )
+
+                return
+
+        except Exception as err:
+            comm = MPI.COMM_WORLD
+            r = comm.Get_rank()
+
+            logger.error(
+                f"terminating mpi proc due to exception occured in rank: {r}, error:\n"
+                + "\n".join(traceback.format_exception(err))
+            )
+            comm.Abort(1)
+
     def run(self) -> tuple[list[Observation], list[SimulationUnit]]:
         logger.debug("starting stx mrx sim")
 
@@ -298,52 +370,3 @@ class StxMrxSimulation:
         pbar.close()
 
         return self.obss, self.sim_units
-
-    def mpi_run(self, persistence_dir_path: str | Path) -> None:
-        try:
-            persist_dir = Path(persistence_dir_path)
-            if not persist_dir.exists():
-                persist_dir.mkdir()
-            assert persist_dir.exists()
-            assert persist_dir.is_dir()
-
-            # saving the schedule
-            sch_persist_fpath = persist_dir / f"schedule.pickle"
-            sch_persist_fpath_tmp = sch_persist_fpath.with_suffix(sch_persist_fpath.suffix + ".tmp")
-            with open(sch_persist_fpath_tmp, "wb") as f:
-                pickle.dump(self.spec["schedule"], f)
-                sch_persist_fpath_tmp.rename(sch_persist_fpath)
-
-            # actual mpi stuff
-            master_proc_rank: t.Final = 0
-
-            comm = MPI.COMM_WORLD
-            r = comm.Get_rank()
-            rank_size = comm.Get_size()
-
-            if r == master_proc_rank:  # master
-                mpi_master_proc_loop(
-                    comm=comm, master_proc_rank=r, spec=self.spec, rank_size=rank_size
-                )
-
-                return
-
-            else:  # workers
-                mpi_worker_proc_loop(
-                    comm=comm,
-                    master_proc_rank=master_proc_rank,
-                    worker_proc_rank=r,
-                    persist_dir=persist_dir,
-                )
-
-                return
-
-        except Exception as err:
-            comm = MPI.COMM_WORLD
-            r = comm.Get_rank()
-
-            logger.error(
-                f"terminating mpi proc due to exception occured in rank: {r}, error:\n"
-                + "\n".join(traceback.format_exception(err))
-            )
-            comm.Abort(1)
