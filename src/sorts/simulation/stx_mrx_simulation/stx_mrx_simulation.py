@@ -196,28 +196,34 @@ def mpi_worker_proc_loop(
             raise RuntimeError(f"worker: {worker_proc_rank} | received unexcepted msg: {msg}")
 
         param = t.cast(FromPassagesOverTxRxStationPairParam, msg)
-
         persist_fpath = persist_dir / f"{param["id"]}.pickle"
-        if persist_fpath.exists():
-            logger.info(
-                f"worker: {worker_proc_rank} | SimulationUnit: {param["id"]} already completed, will load from the saved file instead"
-            )
 
-            with open(persist_fpath, "rb") as f:
-                sim_unit = pickle.load(f)
+        try:
+            if persist_fpath.exists():
+                logger.info(
+                    f"worker: {worker_proc_rank} | SimulationUnit: {param["id"]} already completed, will load from the saved file instead"
+                )
 
-        else:
-            sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(**param)
+                with open(persist_fpath, "rb") as f:
+                    sim_unit = pickle.load(f)
 
-            logger.info(f"worker: {worker_proc_rank} | `SimulationUnit.simulate` start")
-            sim_unit.simulate()
+            else:
+                sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(**param)
 
-            # As a simple way to reduce risk of corrupted files,
-            # we write to an tmp file first then rename that file
-            persist_fpath_tmp = persist_fpath.with_suffix(persist_fpath.suffix + ".tmp")
-            with open(persist_fpath_tmp, "wb") as f:
-                pickle.dump(sim_unit, f)
-                persist_fpath_tmp.rename(persist_fpath)
+                logger.info(f"worker: {worker_proc_rank} | `SimulationUnit.simulate` start")
+                sim_unit.simulate()
+
+                # As a simple way to reduce risk of corrupted files,
+                # we write to an tmp file first then rename that file
+                persist_fpath_tmp = persist_fpath.with_suffix(persist_fpath.suffix + ".tmp")
+                with open(persist_fpath_tmp, "wb") as f:
+                    pickle.dump(sim_unit, f)
+                    persist_fpath_tmp.rename(persist_fpath)
+
+        except Exception as err:
+            raise RuntimeError(
+                f"Runtime fail in worker: {worker_proc_rank} | SimulationUnit: {param["id"]}"
+            ) from err
 
         obss = []
         obss = funcs.derive_observations(
