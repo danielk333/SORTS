@@ -150,7 +150,7 @@ def prepare_simulation_environment(persistence_dir_path: Path | None = None):
         assert persistence_dir_path.exists()
         assert persistence_dir_path.is_dir()
 
-        persist_fpath = persistence_dir_path / f"schedule.pickle"
+        persist_fpath = persistence_dir_path / f"sim_env.pickle"
         persist_fpath_tmp = persist_fpath.with_suffix(persist_fpath.suffix + ".tmp")
         with open(persist_fpath_tmp, "wb") as f:
             pickle.dump(sim_env, f)
