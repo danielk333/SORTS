@@ -25,7 +25,7 @@ DataKey = t.Literal[
     "tx_range",
     "rx_range",
     "two_way_range",
-    "rx_range_rate",
+    "two_way_range_rate",
 ]
 Key = t.Literal[DataKey, CoordKey]
 
@@ -50,7 +50,7 @@ class _K:
     tx_range: t.Final = "tx_range"
     rx_range: t.Final = "rx_range"
     two_way_range: t.Final = "two_way_range"
-    rx_range_rate: t.Final = "rx_range_rate"
+    two_way_range_rate: t.Final = "two_way_range_rate"
 
 
 assert_class_attributes_equal_to(_K, t.get_args(Key))
@@ -79,7 +79,7 @@ A xarray `Dataset` with:
       tx_range       (multi_index) float64
       rx_range       (multi_index) float64
       two_way_range  (multi_index) float64
-      rx_range_rate  (multi_index) float64
+      two_way_range_rate  (multi_index) float64
   ```
 """
 
@@ -322,11 +322,14 @@ class SimulationUnit:
             self._state_data[_K.tx_range] + self._state_data[_K.rx_range]
         )
 
-        self._state_data[_K.rx_range_rate] = (
+        two_way_range_series = t.cast(pd.Series, self._state_data[_K.two_way_range].to_pandas())
+        time_series = t.cast(pd.Series, self._state_data[_K.time].to_pandas())
+        groupped_two_way_range_diff = two_way_range_series.groupby(
+            level=[_K.exp_num, _K.rx_simult_num]
+        ).diff()
+        groupped_time_diff = time_series.groupby(level=[_K.exp_num, _K.rx_simult_num]).diff()
+        self._state_data[_K.two_way_range_rate] = (
             _K.multi_index,
-            np.sum(
-                spobj_rx_enu[3:, :]
-                * (spobj_rx_enu[:3, :] / np.linalg.norm(spobj_rx_enu[:3, :], axis=0)),
-                axis=0,
-            ),
+            groupped_two_way_range_diff
+            / (groupped_time_diff / t.cast(t.Any, np.timedelta64(1, "us"))),
         )
