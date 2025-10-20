@@ -29,6 +29,13 @@ logger.info("starting example")
 matplotlib.use("Agg")  # Use a non-GUI backend
 
 
+# TODO: we need a sampler class;
+#   this dsec_sampler func is move to top level because pickle won't work otherwise;
+#   class should work better with pickle;
+def dsec_sampler(orbit, start_time, end_time):
+    return np.arange(0, (end_time - start_time) / np.timedelta64(1, "s"), 120, dtype=np.float64)
+
+
 def prepare_simulation_environment(persistence_dir_path: Path | None = None):
     # 15min runtime
     start_time = Time("2025-01-01 02:45:00")
@@ -74,9 +81,6 @@ def prepare_simulation_environment(persistence_dir_path: Path | None = None):
     # spobjs = [tracked_spobj, *[spobj_pop.get_object(i) for i in range(spobj_pop.shape[0])]]
     # spobjs = [tracked_spobj, *[spobj_pop.get_object(i) for i in range(spobj_pop.shape[0])][0:21]]
     spobjs = [tracked_spobj, spobj_pop.get_object(20)]
-
-    def dsec_sampler(orbit, start_time, end_time):
-        return np.arange(0, (end_time - start_time) / np.timedelta64(1, "s"), 120, dtype=np.float64)
 
     tracker_ctrl = controller.TrackerController.from_space_object(
         spobj=tracked_spobj,
