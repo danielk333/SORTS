@@ -26,6 +26,17 @@ class _MpiMsg:
     terminate: t.Final = "terminate"
 
 
+type SimulationEnvironment = t.Mapping[str, t.Any]
+"""
+A mapping of `str` to `Any`, with at least these items:
+```
+{
+    "spec_by_controllers": SpecByControllers,
+}
+```
+"""
+
+
 class SpaceObjectDsecSampler(t.Protocol):
     def __call__(
         self, orbit: pyorb.Orbit, start_time: Datetime_Like, end_time: Datetime_Like
@@ -299,22 +310,21 @@ class StxMrxSimulation:
 
         return self.obss, self.sim_units
 
-    def mpi_run(self, persistence_dir_path: str | Path) -> None:
+    # TODO: is there better way to capture env for working with mpi than using a `SimulationEnvironment`?
+    @classmethod
+    def mpi_run(
+        cls,
+        persistence_dir_path: str | Path,
+        prep_sim_env_fn: t.Callable[[], SimulationEnvironment],
+        result_analysis_fn: t.Callable[[], None],
+    ) -> None:
+        persist_dir = Path(persistence_dir_path)
+        if not persist_dir.exists():
+            persist_dir.mkdir()
+        assert persist_dir.exists()
+        assert persist_dir.is_dir()
+
         try:
-            persist_dir = Path(persistence_dir_path)
-            if not persist_dir.exists():
-                persist_dir.mkdir()
-            assert persist_dir.exists()
-            assert persist_dir.is_dir()
-
-            # saving the schedule
-            sch_persist_fpath = persist_dir / f"schedule.pickle"
-            sch_persist_fpath_tmp = sch_persist_fpath.with_suffix(sch_persist_fpath.suffix + ".tmp")
-            with open(sch_persist_fpath_tmp, "wb") as f:
-                pickle.dump(self.spec["schedule"], f)
-                sch_persist_fpath_tmp.rename(sch_persist_fpath)
-
-            # actual mpi stuff
             master_proc_rank: t.Final = 0
 
             comm = MPI.COMM_WORLD
@@ -322,9 +332,14 @@ class StxMrxSimulation:
             rank_size = comm.Get_size()
 
             if r == master_proc_rank:  # master
+                sim_env = prep_sim_env_fn()
+
+                sim = cls.from_controllers(sim_env["spec_by_controllers"])
                 mpi_master_proc_loop(
-                    comm=comm, master_proc_rank=r, spec=self.spec, rank_size=rank_size
+                    comm=comm, master_proc_rank=r, spec=sim.spec, rank_size=rank_size
                 )
+
+                result_analysis_fn()
 
                 return
 
