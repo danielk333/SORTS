@@ -281,35 +281,6 @@ class StxMrxSimulation:
             }
         )
 
-    def run(self) -> tuple[list[Observation], list[SimulationUnit]]:
-        logger.debug("starting stx mrx sim")
-
-        self.sim_units = []
-        self.obss = []
-
-        sim_units_param = prepare_simulation_unit_params(self.spec)
-
-        pbar = tqdm(desc="simulating", total=len(sim_units_param))
-
-        for param in sim_units_param:
-            sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(**param)
-            self.sim_units.append(sim_unit)
-
-            sim_unit.simulate()
-            self.obss.extend(
-                funcs.derive_observations(
-                    passages=param["passages"],
-                    schedule=param["schedule"],
-                    sim_unit=sim_unit,
-                )
-            )
-            pbar.update(1)
-        logger.debug("simulation done")
-
-        pbar.close()
-
-        return self.obss, self.sim_units
-
     # TODO: is there better way to capture env for working with mpi than using a `SimulationEnvironment`?
     @classmethod
     def mpi_run(
@@ -362,3 +333,32 @@ class StxMrxSimulation:
                 + "\n".join(traceback.format_exception(err))
             )
             comm.Abort(1)
+
+    def run(self) -> tuple[list[Observation], list[SimulationUnit]]:
+        logger.debug("starting stx mrx sim")
+
+        self.sim_units = []
+        self.obss = []
+
+        sim_units_param = prepare_simulation_unit_params(self.spec)
+
+        pbar = tqdm(desc="simulating", total=len(sim_units_param))
+
+        for param in sim_units_param:
+            sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(**param)
+            self.sim_units.append(sim_unit)
+
+            sim_unit.simulate()
+            self.obss.extend(
+                funcs.derive_observations(
+                    passages=param["passages"],
+                    schedule=param["schedule"],
+                    sim_unit=sim_unit,
+                )
+            )
+            pbar.update(1)
+        logger.debug("simulation done")
+
+        pbar.close()
+
+        return self.obss, self.sim_units
