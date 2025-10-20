@@ -244,7 +244,7 @@ def calc_gain(
 
         for key, val in mut_beam_params.items():
             if key == "pointing":
-                beam.parameters["pointing"] = state_data[_K.tx_pointing][:, 0].to_numpy()
+                beam.parameters["pointing"] = state_data[_K.tx_pointing].to_numpy()
             if key in beam.parameters_shape:
                 shape: tuple[int, ...] = beam.parameters_shape[key]
                 beam.parameters[key] = np.broadcast_to(
