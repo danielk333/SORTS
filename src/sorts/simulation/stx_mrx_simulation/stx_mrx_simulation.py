@@ -297,20 +297,20 @@ class StxMrxSimulation:
         prep_sim_env_fn: t.Callable[[], SimulationEnvironment],
         result_analysis_fn: t.Callable[[], None],
     ) -> None:
-        persist_dir = Path(persistence_dir_path)
-        if not persist_dir.exists():
-            persist_dir.mkdir()
-        assert persist_dir.exists()
-        assert persist_dir.is_dir()
-
         try:
             master_proc_rank: t.Final = 0
+            persist_dir = Path(persistence_dir_path)
 
             comm = MPI.COMM_WORLD
             r = comm.Get_rank()
             rank_size = comm.Get_size()
 
             if r == master_proc_rank:  # master
+                if not persist_dir.exists():
+                    persist_dir.mkdir()
+                assert persist_dir.exists()
+                assert persist_dir.is_dir()
+
                 sim_env = prep_sim_env_fn()
 
                 sim = cls.from_controllers(sim_env["spec_by_controllers"])
