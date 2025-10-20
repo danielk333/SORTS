@@ -67,9 +67,7 @@ def prepare_simulation_environment(persistence_dir_path: Path | None = None):
         parameters={"d": 0.1},
     )
 
-    catalog_fpath = default = (
-        Path(__file__).parent / ".." / ".." / "local_data" / "celn_20090501_00.sim"
-    )
+    catalog_fpath = Path(__file__).parent / ".." / ".." / "local_data" / "celn_20090501_00.sim"
     _spobj_pop = population.master_catalog(
         catalog_fpath,
         propagator=propagator.SGP4,
