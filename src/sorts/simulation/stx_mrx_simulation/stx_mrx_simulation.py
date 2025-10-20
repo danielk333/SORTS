@@ -125,25 +125,27 @@ def mpi_master_proc_loop(
     num_workers = comm.Get_size() - 1
     is_worker_idle_list = [True for _ in range(num_workers)]
     processed_sim_unit_cnt = 0
-    next_sim_unit_idx = 0
+    next_sim_unit_param_idx = 0
 
     while processed_sim_unit_cnt < len(sim_units_param):
 
         # TODO: would be more robust to check ids in sim_units_param than looping next_sim_unit_idx
         # send sim_unit if there is idle worker
-        if any(is_worker_idle_list) and next_sim_unit_idx < len(sim_units_param):
+        if any(is_worker_idle_list) and next_sim_unit_param_idx < len(sim_units_param):
 
             idle_worker_idx = is_worker_idle_list.index(True)
             idle_worker_rank = idle_worker_idx + 1
             # TODO: check if the  (full ScheduleData + indexer for SimulationUnit) or (just the relevant slices of ScheduleData) are sent
-            comm.send(sim_units_param[next_sim_unit_idx], dest=idle_worker_rank)
+            comm.send(sim_units_param[next_sim_unit_param_idx], dest=idle_worker_rank)
 
             logger.debug(
-                f"master: {master_proc_rank} | sent `SimulationUnit` {next_sim_unit_idx+1} of {len(sim_units_param)} to worker {idle_worker_rank}"
+                f"master: {master_proc_rank} | sent `SimulationUnit`"
+                + f" <{sim_units_param[next_sim_unit_param_idx]['id']}>"
+                + f" ({next_sim_unit_param_idx+1}/{len(sim_units_param)}) to worker {idle_worker_rank}"
             )
 
             is_worker_idle_list[idle_worker_idx] = False
-            next_sim_unit_idx += 1
+            next_sim_unit_param_idx += 1
 
         else:
             # otherwise, wait for result
