@@ -157,7 +157,7 @@ def prepare_simulation_environment(persistence_dir_path: Path | None = None):
     return sim_env
 
 
-def analyze_result():
+def analyze_result(save_dir: Path):
     max_snrs_value = []
     max_snrs_time: list[types.Datetime64_us] = []
     max_snrs_spobj_id: list[int] = []
@@ -211,7 +211,7 @@ else:
     save_dir = Path(__file__).parent / ".." / ".." / "local_data" / "mpi"
 
     stx_mrx_simulation.StxMrxSimulation.mpi_run(
-        save_dir, prepare_simulation_environment, analyze_result
+        save_dir, lambda: prepare_simulation_environment(save_dir), lambda: analyze_result(save_dir)
     )
 
 
