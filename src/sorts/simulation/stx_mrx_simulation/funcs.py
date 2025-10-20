@@ -238,23 +238,30 @@ def calc_gain(
         #   (since those `beam.parameters` are state that will be bounded with the life time of the object)
         #   (e.g. if the same `tx_stn` is used in another `calc_gain`, the mutation from prev will persist)
 
-        orig_beam_params = beam.parameters
-        mut_beam_params = beam.parameters.copy()
-        beam.parameters = mut_beam_params
+        # early return for empty cases
+        # NOTE: this is particularly needed because some `.gain` does not work with empty parameters (e.g. beam.parameters["pointing"])
+        # TODO: add test case for empty case?
+        if len(state_data[_K.multi_index]) == 0:
+            gain_arr_list.append(np.empty(0, dtype=np.float64))
 
-        for key, val in mut_beam_params.items():
-            if key == "pointing":
-                beam.parameters["pointing"] = state_data[_K.tx_pointing].to_numpy()
-            if key in beam.parameters_shape:
-                shape: tuple[int, ...] = beam.parameters_shape[key]
-                beam.parameters[key] = np.broadcast_to(
-                    val.reshape((*shape, 1)), (*shape, vector_len)
-                )
-            else:
-                beam.parameters[key] = np.full(vector_len, val, dtype=np.float64)
+        else:
+            orig_beam_params = beam.parameters
+            mut_beam_params = beam.parameters.copy()
+            beam.parameters = mut_beam_params
 
-        gain_arr_list.append(beam.gain(spobj_stn_enu[:3]))
-        beam.parameters = orig_beam_params
+            for key, val in mut_beam_params.items():
+                if key == "pointing":
+                    beam.parameters["pointing"] = state_data[_K.tx_pointing].to_numpy()
+                if key in beam.parameters_shape:
+                    shape: tuple[int, ...] = beam.parameters_shape[key]
+                    beam.parameters[key] = np.broadcast_to(
+                        val.reshape((*shape, 1)), (*shape, vector_len)
+                    )
+                else:
+                    beam.parameters[key] = np.full(vector_len, val, dtype=np.float64)
+
+            gain_arr_list.append(beam.gain(spobj_stn_enu[:3]))
+            beam.parameters = orig_beam_params
 
     state_data[_K.gain_tx] = (_K.multi_index, gain_arr_list[0])
     state_data[_K.gain_rx] = (_K.multi_index, gain_arr_list[1])
