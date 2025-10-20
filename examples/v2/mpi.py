@@ -143,7 +143,7 @@ def prepare_simulation_environment(persistence_dir_path: Path | None = None):
         "interpolator_class": interpolation.Linear,
     }
 
-    sim_env = locals()
+    sim_env = dict(locals())  # converted to dict to make it slightly safer
 
     # saving sim env
     if persistence_dir_path is not None:
@@ -155,7 +155,7 @@ def prepare_simulation_environment(persistence_dir_path: Path | None = None):
         persist_fpath = persistence_dir_path / f"schedule.pickle"
         persist_fpath_tmp = persist_fpath.with_suffix(persist_fpath.suffix + ".tmp")
         with open(persist_fpath_tmp, "wb") as f:
-            pickle.dump(locals(), f)
+            pickle.dump(sim_env, f)
         persist_fpath_tmp.rename(persist_fpath)
 
     return sim_env
