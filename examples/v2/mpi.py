@@ -166,6 +166,8 @@ def analyze_result(save_dir: Path, sim: stx_mrx_simulation.StxMrxSimulation):
     max_snrs_spobj_id: list[int] = []
 
     for sim_unit in stx_mrx_simulation.iter_mpi_simulation_results(save_dir):
+        logger.info(f"processing result from SimulationUnit <{sim_unit.id}>")
+
         _SuK = stx_mrx_simulation.SimulationUnit._K
 
         obss = stx_mrx_simulation.funcs.derive_observations(
@@ -186,6 +188,8 @@ def analyze_result(save_dir: Path, sim: stx_mrx_simulation.StxMrxSimulation):
             max_snrs_spobj_id.append(sim_unit.space_object.oid)
 
     # plotting
+    logger.info(f"start generating plots...")
+
     fig, ax = plt.subplots()
     ax.set_title("snr vs time")
     ax.scatter(max_snrs_time, max_snrs_value, s=3)
@@ -193,6 +197,8 @@ def analyze_result(save_dir: Path, sim: stx_mrx_simulation.StxMrxSimulation):
     fig.autofmt_xdate()
     ax.set_yscale("log")
     plt.savefig(save_dir / "max_snr_vs_time.png", dpi=300, bbox_inches="tight")
+
+    logger.info(f"done generating plots")
 
 
 is_run_by_mpi = False  # a convenience flag to switch between running mode for debugging

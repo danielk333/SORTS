@@ -328,6 +328,7 @@ class StxMrxSimulation:
                     comm=comm, master_proc_rank=r, spec=sim.spec, rank_size=rank_size
                 )
 
+                logger.info(f"master: {master_proc_rank} | result_analysis_fn start")
                 result_analysis_fn(persist_dir, sim)
 
                 return
