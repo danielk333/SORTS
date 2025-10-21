@@ -1,13 +1,11 @@
 import logging, time, typing as t, pickle
 from pathlib import Path
 import numpy as np
-import numpy.typing as npt
 import xarray as xr
 from astropy.time import Time
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from mpi4py import MPI
 import sorts
 from sorts import (
     types,
@@ -36,7 +34,9 @@ def dsec_sampler(orbit, start_time, end_time):
     return np.arange(0, (end_time - start_time) / np.timedelta64(1, "s"), 120, dtype=np.float64)
 
 
-def prepare_simulation_environment(persistence_dir_path: Path | None = None):
+def prepare_simulation_environment(
+    persistence_dir_path: Path | None = None,
+) -> stx_mrx_simulation.SimulationEnvironment:
     # 15min runtime
     start_time = Time("2025-01-01 02:45:00")
     # start_time = Time("2025-01-01 02:59:59")
@@ -159,7 +159,7 @@ def prepare_simulation_environment(persistence_dir_path: Path | None = None):
     return sim_env
 
 
-def analyze_result(save_dir: Path):
+def analyze_result(save_dir: Path, sim: stx_mrx_simulation.StxMrxSimulation):
     max_snrs_value = []
     max_snrs_time: list[types.Datetime64_us] = []
     max_snrs_spobj_id: list[int] = []
@@ -214,7 +214,7 @@ else:
     save_dir = Path(__file__).parent / ".." / ".." / "local_data" / "mpi"
 
     stx_mrx_simulation.StxMrxSimulation.mpi_run(
-        save_dir, lambda: prepare_simulation_environment(save_dir), lambda: analyze_result(save_dir)
+        save_dir, prepare_simulation_environment, analyze_result
     )
 
 

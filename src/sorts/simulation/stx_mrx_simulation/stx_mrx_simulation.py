@@ -304,8 +304,8 @@ class StxMrxSimulation:
     def mpi_run(
         cls,
         persistence_dir_path: str | Path,
-        prep_sim_env_fn: t.Callable[[], SimulationEnvironment],
-        result_analysis_fn: t.Callable[[], None],
+        prep_sim_env_fn: t.Callable[[Path], SimulationEnvironment],
+        result_analysis_fn: t.Callable[[Path, t.Self], None],
     ) -> None:
         try:
             master_proc_rank: t.Final = 0
@@ -321,14 +321,14 @@ class StxMrxSimulation:
                 assert persist_dir.exists()
                 assert persist_dir.is_dir()
 
-                sim_env = prep_sim_env_fn()
+                sim_env = prep_sim_env_fn(persist_dir)
 
                 sim = cls.from_controllers(sim_env["spec_by_controllers"])
                 mpi_master_proc_loop(
                     comm=comm, master_proc_rank=r, spec=sim.spec, rank_size=rank_size
                 )
 
-                result_analysis_fn()
+                result_analysis_fn(persist_dir, sim)
 
                 return
 
