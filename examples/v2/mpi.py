@@ -1,5 +1,6 @@
 import logging, time, typing as t, pickle
 from pathlib import Path
+from datetime import datetime
 import numpy as np
 import xarray as xr
 from astropy.time import Time
@@ -211,7 +212,10 @@ if not is_run_by_mpi:
         print(obs.passage)
         print(obs.get_state_slice())
 else:
-    save_dir = Path(__file__).parent / ".." / ".." / "local_data" / "mpi"
+    dname = (
+        datetime.now().replace(microsecond=0).isoformat(sep=" ").replace(":", ".").replace("-", ".")
+    )
+    save_dir = Path(__file__).parent / ".." / ".." / "local_data" / f"[{dname}] mpi"
 
     stx_mrx_simulation.StxMrxSimulation.mpi_run(
         save_dir, prepare_simulation_environment, analyze_result
