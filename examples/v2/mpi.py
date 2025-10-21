@@ -212,10 +212,8 @@ if not is_run_by_mpi:
         print(obs.passage)
         print(obs.get_state_slice())
 else:
-    dname = (
-        datetime.now().replace(microsecond=0).isoformat(sep=" ").replace(":", ".").replace("-", ".")
-    )
-    save_dir = Path(__file__).parent / ".." / ".." / "local_data" / f"[{dname}] mpi"
+    dname = f"[{datetime.now().replace(microsecond=0).isoformat(sep=" ").replace(":", ".").replace("-", ".")}Z] mpi"
+    save_dir = Path(__file__).parent / ".." / ".." / "local_data" / dname
 
     stx_mrx_simulation.StxMrxSimulation.mpi_run(
         save_dir, prepare_simulation_environment, analyze_result
