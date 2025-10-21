@@ -36,6 +36,8 @@ A mapping of `str` to `Any`, with at least these items:
 ```
 """
 
+sim_unit_fname_tpl = "{id}.sim_unit.pickle"
+
 
 class SpaceObjectDsecSampler(t.Protocol):
     def __call__(
@@ -196,7 +198,7 @@ def mpi_worker_proc_loop(
             raise RuntimeError(f"worker: {worker_proc_rank} | received unexcepted msg: {msg}")
 
         param = t.cast(FromPassagesOverTxRxStationPairParam, msg)
-        persist_fpath = persist_dir / f"{param["id"]}.pickle"
+        persist_fpath = persist_dir / sim_unit_fname_tpl.format(id=param["id"])
 
         try:
             if persist_fpath.exists():
@@ -249,7 +251,7 @@ def mpi_worker_proc_loop(
 
 
 def iter_mpi_simulation_results(save_dir: Path):
-    for fpath in save_dir.glob("*.pickle"):
+    for fpath in save_dir.glob(sim_unit_fname_tpl.format(id="*")):
         with open(fpath, "rb") as f:
             sim_unit: SimulationUnit = pickle.load(f)
             yield sim_unit
