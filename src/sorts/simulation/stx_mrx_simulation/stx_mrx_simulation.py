@@ -1,5 +1,5 @@
 from __future__ import annotations
-import logging, typing as t, pickle, traceback
+import logging, typing as t, pickle, traceback, time
 from pathlib import Path
 import numpy.typing as npt
 import pyorb
@@ -316,6 +316,11 @@ class StxMrxSimulation:
             rank_size = comm.Get_size()
 
             if r == master_proc_rank:  # master
+                ###
+                # simulation
+                ###
+                calc_start_time = time.perf_counter()
+
                 if not persist_dir.exists():
                     persist_dir.mkdir(parents=True)
                 assert persist_dir.exists()
@@ -328,8 +333,19 @@ class StxMrxSimulation:
                     comm=comm, master_proc_rank=r, spec=sim.spec, rank_size=rank_size
                 )
 
+                calc_time = time.perf_counter() - calc_start_time
+                logger.info(f"master: {master_proc_rank} | simulation took {calc_time} sec")
+
+                ###
+                # result analysis
+                ###
+                calc_start_time = time.perf_counter()
+
                 logger.info(f"master: {master_proc_rank} | result_analysis_fn start")
                 result_analysis_fn(persist_dir, sim)
+
+                calc_time = time.perf_counter() - calc_start_time
+                logger.info(f"master: {master_proc_rank} | result_analysis_fn took {calc_time} sec")
 
                 return
 
