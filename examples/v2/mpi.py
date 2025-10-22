@@ -209,7 +209,7 @@ if not is_run_by_mpi:
     sim = stx_mrx_simulation.StxMrxSimulation.from_controllers(sim_env["spec_by_controllers"])
 
     calc_start_time = time.perf_counter()
-    obss, sim_units = sim_env["sim"].run()
+    obss, sim_units = sim.run()
     calc_time = time.perf_counter() - calc_start_time
 
     print(f"len(obss): {len(obss)}")
