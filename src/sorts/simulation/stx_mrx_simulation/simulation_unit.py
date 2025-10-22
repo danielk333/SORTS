@@ -331,5 +331,5 @@ class SimulationUnit:
         self._state_data[_K.two_way_range_rate] = (
             _K.multi_index,
             groupped_two_way_range_diff
-            / (groupped_time_diff / t.cast(t.Any, np.timedelta64(1, "us"))),
+            / (groupped_time_diff / t.cast(t.Any, np.timedelta64(1, "s"))),
         )
