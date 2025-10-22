@@ -36,7 +36,7 @@ A mapping of `str` to `Any`, with at least these items:
 ```
 """
 
-sim_unit_fname_tpl = "{id}.sim_unit.pickle"
+sim_unit_fname_tpl = "sim_unit.{id}.pickle"
 
 
 class SpaceObjectDsecSampler(t.Protocol):
