@@ -170,11 +170,7 @@ def analyze_result(save_dir: Path, sim: stx_mrx_simulation.StxMrxSimulation):
 
         _SuK = stx_mrx_simulation.SimulationUnit._K
 
-        obss = stx_mrx_simulation.funcs.derive_observations(
-            passages=sim_unit.passages,
-            schedule=sim.spec["schedule"],
-            sim_unit=sim_unit,
-        )
+        obss = sim_unit.get_observations()
 
         for obs in obss:
             obs_state = obs.get_state_slice()

@@ -237,12 +237,7 @@ def mpi_worker_proc_loop(
                 f"Runtime fail in worker: {worker_proc_rank} | SimulationUnit: {param["id"]}"
             ) from err
 
-        obss = []
-        obss = funcs.derive_observations(
-            passages=param["passages"],
-            schedule=param["schedule"],
-            sim_unit=sim_unit,
-        )
+        obss = sim_unit.get_observations()
 
         comm.send(len(obss), dest=master_proc_rank)
         logger.info(
@@ -386,13 +381,7 @@ class StxMrxSimulation:
             self.sim_units.append(sim_unit)
 
             sim_unit.simulate()
-            self.obss.extend(
-                funcs.derive_observations(
-                    passages=param["passages"],
-                    schedule=param["schedule"],
-                    sim_unit=sim_unit,
-                )
-            )
+            self.obss.extend(sim_unit.get_observations())
             pbar.update(1)
         logger.debug("simulation done")
 

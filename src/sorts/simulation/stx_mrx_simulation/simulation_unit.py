@@ -12,7 +12,7 @@ from sorts.signals import hard_target_snr
 from sorts.interpolation import Interpolator
 from sorts.schedule import ExperimentDetailMap, Schedule
 from sorts.simulation.types import Passage
-from . import funcs
+from . import funcs, observation
 
 CoordKey = t.Literal["multi_index", "time", "exp_num", "rx_simult_num", "enu", "e", "n", "u"]
 DataKey = t.Literal[
@@ -333,3 +333,6 @@ class SimulationUnit:
             groupped_two_way_range_diff
             / (groupped_time_diff / t.cast(t.Any, np.timedelta64(1, "s"))),
         )
+
+    def get_observations(self) -> list[observation.Observation]:
+        raise NotImplementedError()
