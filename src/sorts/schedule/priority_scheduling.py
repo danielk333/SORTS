@@ -159,10 +159,10 @@ def _remove_entries_without_corresponding_tx(
                 dropping = merged_sch_data.loc[
                     {
                         _SK.multi_index: (
-                            rx_start_time_of_the_exp_idx.intersection(dropped_tx_start_time_idx),
                             exp_id,
                             rx_stn_num,
                             slice(None),
+                            rx_start_time_of_the_exp_idx.intersection(dropped_tx_start_time_idx),
                         )
                     }
                 ]
