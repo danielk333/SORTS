@@ -48,9 +48,9 @@ class Observation:
         sim_state_slice = self.simulation_unit._state_data.loc[
             {
                 _SuK.multi_index: (
-                    self.indexer.rx[_SK.start_time].to_numpy().tolist(),
                     self.indexer.rx[_SK.exp_num][0].item(),
                     self.indexer.rx[_SK.simult_num][0].item(),
+                    self.indexer.rx[_SK.start_time].to_numpy().tolist(),
                 )
             }
         ]

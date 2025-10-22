@@ -41,7 +41,7 @@ A xarray `Dataset` of:
   ```
   Dimensions:      (multi_index: n, enu: 3)
   Coordinates:
-    * multi_index  (multi_index) object MultiIndex ('start_time', 'exp_num', 'stn_num', 'simult_num')
+    * multi_index  (multi_index) object MultiIndex ('exp_num', 'stn_num', 'simult_num', 'start_time')
     * start_time   (multi_index) datetime64[us]
     * exp_num      (multi_index) int16
     * stn_num      (multi_index) int16
@@ -118,12 +118,12 @@ def default_station():
 def empty_data() -> ScheduleData:
     multi_index = pd.MultiIndex.from_arrays(
         [
+            np.empty(0, dtype=np.int16),
+            np.empty(0, dtype=np.int16),
+            np.empty(0, dtype=np.int16),
             np.empty(0, dtype="datetime64[us]"),
-            np.empty(0, dtype=np.int16),
-            np.empty(0, dtype=np.int16),
-            np.empty(0, dtype=np.int16),
         ],
-        names=(_K.start_time, _K.exp_num, _K.stn_num, _K.simult_num),
+        names=(_K.exp_num, _K.stn_num, _K.simult_num, _K.start_time),
     )
 
     sch_data = xr.Dataset(
@@ -142,8 +142,8 @@ def empty_data() -> ScheduleData:
 
 def from_ndarrays(data: ScheduleNdarrayDict) -> ScheduleData:
     multi_index = pd.MultiIndex.from_arrays(
-        [data[_K.start_time], data[_K.exp_num], data[_K.stn_num], data[_K.simult_num]],
-        names=(_K.start_time, _K.exp_num, _K.stn_num, _K.simult_num),
+        [data[_K.exp_num], data[_K.stn_num], data[_K.simult_num], data[_K.start_time]],
+        names=(_K.exp_num, _K.stn_num, _K.simult_num, _K.start_time),
     )
 
     sch_data = xr.Dataset(
@@ -241,7 +241,7 @@ def get_indexer_per_measurement(
             # further spliting according to number of simutaneous rx pointings
             for simult_num in np.unique(ds_split[_K.simult_num].to_numpy()):
                 idxer = ds_split[_K.multi_index].loc[
-                    {_K.multi_index: (slice(None), slice(None), slice(None), simult_num)}
+                    {_K.multi_index: (slice(None), slice(None), simult_num, slice(None))}
                 ]
                 idxers.append(idxer if not is_copy else idxer.copy())
 

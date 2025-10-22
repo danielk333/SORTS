@@ -99,10 +99,10 @@ def derive_observations(
     # NOTE: xarray simplify/collapse MultiIndex when filtering a level to an exact value,
     #   we filter on the top level "multi_index' with a tuple here to prevent it
     tx_schdata = schedule._data.loc[
-        {Schedule._K.multi_index: (slice(None), slice(None), sim_unit.tx_station.uid, slice(None))}
+        {Schedule._K.multi_index: (slice(None), sim_unit.tx_station.uid, slice(None), slice(None))}
     ]
     rx_schdata = schedule._data.loc[
-        {Schedule._K.multi_index: (slice(None), slice(None), sim_unit.rx_station.uid, slice(None))}
+        {Schedule._K.multi_index: (slice(None), sim_unit.rx_station.uid, slice(None), slice(None))}
     ]
     tx_schedule = Schedule(tx_schdata)
     rx_schedule = Schedule(rx_schdata)
