@@ -17,7 +17,7 @@ from sorts.schedule import Schedule
 from sorts.simulation.types import Passage
 from sorts.simulation import funcs
 from .simulation_unit import SimulationUnit
-from .observation import ObservationIndexer, Observation
+from .observation import Observation
 
 
 if t.TYPE_CHECKING:
@@ -116,17 +116,17 @@ def derive_observations(
             passage["time_range"]
         ).get_indexer_per_measurement(is_split_simult=True, is_copy=True)
 
-        for tx_obs_idxer in tx_obs_idxers:
-            for rx_obs_idxer in rx_obs_idxers:
-                indexer = ObservationIndexer(tx=tx_obs_idxer, rx=rx_obs_idxer)
-                obs = Observation(
-                    passage=passage,
-                    indexer=indexer,
-                    simulation_unit=sim_unit,
-                    tx_schedule=tx_schedule,
-                    rx_schedule=rx_schedule,
-                )
-                obss.append(obs)
+        # for tx_obs_idxer in tx_obs_idxers:
+        #     for rx_obs_idxer in rx_obs_idxers:
+        #         indexer = ObservationIndexer(tx=tx_obs_idxer, rx=rx_obs_idxer)
+        #         obs = Observation(
+        #             passage=passage,
+        #             indexer=indexer,
+        #             simulation_unit=sim_unit,
+        #             tx_schedule=tx_schedule,
+        #             rx_schedule=rx_schedule,
+        #         )
+        #         obss.append(obs)
 
     return obss
 

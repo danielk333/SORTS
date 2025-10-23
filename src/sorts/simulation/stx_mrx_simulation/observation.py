@@ -7,23 +7,13 @@ from .simulation_unit import SimulationUnit, StateData, empty_state_data
 _SK = Schedule._K
 _SuK = SimulationUnit._K
 
-# TODO: rename to sth like `IndexerOverSchedule`
-ObservationIndexer = TxRxTuple[XrDataArrayIndexer, XrDataArrayIndexer]
-"""
-Should be used with `Passage`.
-Can be used to get a subset of entries from a `Schedule`, that corresponds to an observation.
-"""
-
 
 # TODO: param tx_schedule, rx_schedule are added as tmp solution, we should have a Dto/Serializable ObservationIndexer type
 class Observation:
     def __init__(
         self,
         passage: Passage,
-        indexer: ObservationIndexer,
-        simulation_unit: SimulationUnit,
-        tx_schedule: Schedule,
-        rx_schedule: Schedule,
+        indexer,
     ):
         self.passage = passage
         self.indexer = indexer
