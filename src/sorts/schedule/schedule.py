@@ -219,42 +219,6 @@ def filter_by_time_ranges(
     return ds_masked
 
 
-# TODO: can probably be simplified, or even dissovled, now that we have `simult_num` in `ScheduleData`
-def get_indexer_per_measurement(
-    ds: ScheduleData, is_split_simult: bool, is_copy=False
-) -> list[xr.DataArray]:
-    """
-    Split a schedule data by measurements.
-
-    i.e. By `exp_num` and optionally per each of the simutaneous pointings (controlled by `is_split_simult`)
-    """
-
-    idxers: list[xr.DataArray] = []
-
-    # early return special case
-    if len(ds[_K.multi_index]) == 0:
-        return idxers
-
-    # identify where `exp_num` changes
-    exp_num_chg_pts = ds[_K.exp_num] != ds[_K.exp_num].shift({_K.multi_index: 1})
-    exp_num_split_ids = exp_num_chg_pts.cumsum()
-
-    for _, ds_split in ds.groupby(exp_num_split_ids):
-        if is_split_simult:
-            # further spliting according to number of simutaneous rx pointings
-            for simult_num in np.unique(ds_split[_K.simult_num].to_numpy()):
-                idxer = ds_split[_K.multi_index].loc[
-                    {_K.multi_index: (slice(None), slice(None), simult_num, slice(None))}
-                ]
-                idxers.append(idxer if not is_copy else idxer.copy())
-
-        else:
-            idxer = ds_split[_K.multi_index]
-            idxers.append(idxer if not is_copy else idxer.copy())
-
-    return idxers
-
-
 # TODO: add schedule validation?
 class Schedule:
     """
@@ -327,9 +291,3 @@ class Schedule:
         filtered_datas = filter_by_time_ranges(self._data, time_ranges)
 
         return cls(data=filtered_datas)
-
-    # TODO: we can probably inject the schedule is tx or rx into `Schedule` class and remove param `is_split_simult`?
-    def get_indexer_per_measurement(
-        self, is_split_simult: bool, is_copy=False
-    ) -> list[XrDataArrayIndexer]:
-        return get_indexer_per_measurement(self._data, is_split_simult, is_copy)

@@ -19,7 +19,6 @@ from .schedule import (
     to_dataframe,
     filter_by_time_range,
     filter_by_time_ranges,
-    get_indexer_per_measurement,
     Schedule,
 )
 

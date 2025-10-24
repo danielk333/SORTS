@@ -75,61 +75,6 @@ def group_passages_by_tx_rx_station_pair(
     return groupped_passages
 
 
-# TODO: better move to `simulation_unit` module?
-# TODO: go through its logic again; similar to `get_indexer_per_measurement`,
-#   now we have `stn_num`, `simult_num` in index, things can likely be done differently
-def derive_observations(
-    passages: list[Passage], schedule: Schedule, sim_unit: SimulationUnit
-) -> list[Observation]:
-    """Derive observations"""
-
-    obss: list[Observation] = []
-
-    # early return for empty cases
-    # NOTE: this is particularly needed because `.loc` will throw KeyError for non-existence keys
-    # TODO: add test case for empty case?
-    if (
-        len(passages) == 0
-        or not (schedule._data[Schedule._K.stn_num] == sim_unit.tx_station.uid).any()
-        or not (schedule._data[Schedule._K.stn_num] == sim_unit.rx_station.uid).any()
-    ):
-        return obss
-
-    # NOTE: xarray simplify/collapse MultiIndex when filtering a level to an exact value,
-    #   we filter on the top level "multi_index' with a tuple here to prevent it
-    tx_schdata = schedule._data.loc[
-        {Schedule._K.multi_index: (slice(None), sim_unit.tx_station.uid, slice(None), slice(None))}
-    ]
-    rx_schdata = schedule._data.loc[
-        {Schedule._K.multi_index: (slice(None), sim_unit.rx_station.uid, slice(None), slice(None))}
-    ]
-    tx_schedule = Schedule(tx_schdata)
-    rx_schedule = Schedule(rx_schdata)
-
-    for passage in passages:
-        tx_obs_idxers = tx_schedule.filter_by_time_range(
-            passage["time_range"]
-        ).get_indexer_per_measurement(is_split_simult=False, is_copy=True)
-
-        rx_obs_idxers = rx_schedule.filter_by_time_range(
-            passage["time_range"]
-        ).get_indexer_per_measurement(is_split_simult=True, is_copy=True)
-
-        # for tx_obs_idxer in tx_obs_idxers:
-        #     for rx_obs_idxer in rx_obs_idxers:
-        #         indexer = ObservationIndexer(tx=tx_obs_idxer, rx=rx_obs_idxer)
-        #         obs = Observation(
-        #             passage=passage,
-        #             indexer=indexer,
-        #             simulation_unit=sim_unit,
-        #             tx_schedule=tx_schedule,
-        #             rx_schedule=rx_schedule,
-        #         )
-        #         obss.append(obs)
-
-    return obss
-
-
 def find_passages(
     spec: Spec,
     spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]],
