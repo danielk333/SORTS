@@ -247,7 +247,7 @@ def mpi_worker_proc_loop(comm: MPI.Intracomm, master_proc_rank: int, worker_proc
                         f"Runtime fail in worker: {worker_proc_rank} | SimulationUnit: {param["id"]}"
                     ) from err
 
-                obss = sim_unit.get_observations()
+                obss = sim_unit.observations
 
                 comm.send(len(obss), dest=master_proc_rank)
                 logger.info(
@@ -395,7 +395,7 @@ class StxMrxSimulation:
             self.sim_units.append(sim_unit)
 
             sim_unit.simulate()
-            self.obss.extend(sim_unit.get_observations())
+            self.obss.extend(sim_unit.observations)
             pbar.update(1)
         logger.debug("simulation done")
 

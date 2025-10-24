@@ -170,8 +170,7 @@ def analyze_result(save_dir: Path, sim: stx_mrx_simulation.StxMrxSimulation):
 
         _SuK = stx_mrx_simulation.SimulationUnit._K
 
-        obss = sim_unit.get_observations()
-
+        obss = sim_unit.observations
         for obs in obss:
             obs_state = obs.get_state_slice()
             argmax_snr = t.cast(xr.DataArray, obs_state[_SuK.snr].argmax())

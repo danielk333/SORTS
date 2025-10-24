@@ -267,7 +267,10 @@ class SimulationUnit:
         )
 
     def simulate(self):
-        """Run simulation calculation and update its state/data"""
+        """
+        Run simulation calculations and update its state/data;
+        Will populate the prop `observations`
+        """
 
         epoch = to_datetime64_us(self.space_object.epoch)
         dsec = (self._state_data[_K.time] - epoch).astype(np.float64) * 1e-6
@@ -343,7 +346,11 @@ class SimulationUnit:
             / (groupped_time_diff / t.cast(t.Any, np.timedelta64(1, "s"))),
         )
 
-    # TODO: check and remove its invocations; simulate should auto populate the `observations` prop
+        obss = self.get_observations()
+        self.observations = obss
+
+        return obss
+
     def get_observations(self) -> list[Observation]:
         obss: list[Observation] = []
 
