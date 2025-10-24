@@ -17,9 +17,8 @@ from sorts import (
     radar,
     controller,
     schedule,
-    simulation,
 )
-from sorts.simulation.stx_mrx_simulation import stx_mrx_simulation
+from sorts.simulation import stx_mrx_simulation
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -130,7 +129,7 @@ def prepare_simulation_environment(
         },
     )
 
-    spec_by_controllers: simulation.stx_mrx_simulation.SpecByControllers = {
+    spec_by_controllers: stx_mrx_simulation.SpecByControllers = {
         "controllers": [tracker_ctrl, fence_scan_ctrl],
         "schedule": master_sch,
         "epoch": start_time,
@@ -168,7 +167,7 @@ def analyze_result(save_dir: Path, sim: stx_mrx_simulation.StxMrxSimulation):
     for sim_unit in stx_mrx_simulation.iter_mpi_simulation_results(save_dir):
         logger.info(f"processing result from SimulationUnit <{sim_unit.id}>")
 
-        _SuK = stx_mrx_simulation.SimulationUnit._K
+        _SuK = stx_mrx_simulation.simulation_unit._K
 
         obss = sim_unit.observations
         for obs in obss:
