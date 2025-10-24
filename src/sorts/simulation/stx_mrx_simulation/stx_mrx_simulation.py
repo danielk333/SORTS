@@ -7,10 +7,10 @@ import pyorb
 import sorts
 from tqdm import tqdm
 from mpi4py import MPI
-from sorts import types, radar, schedule, controller
-from sorts.types import Datetime_Like, Float64_as_sec
+from sorts import schedule, controller, simulation
+from sorts.types import Datetime_Like, Float64_as_sec, Datetime64_us, Float64_as_sec, EcefStates
 from sorts.utils import to_datetime64_us
-from sorts.radar import StationId
+from sorts.radar import Station, StationId
 from sorts.simulation import Passage
 from sorts.interpolation import Interpolator
 from sorts.schedule import Schedule, ExperimentDetailMap
@@ -19,7 +19,6 @@ from sorts.simulation.stx_mrx_simulation.simulation_unit import (
     FromPassagesOverTxRxStationPairParam,
     Observation,
 )
-from . import funcs
 
 logger = logging.getLogger(__name__)
 
@@ -58,8 +57,8 @@ class SpaceObjectDsecSampler(t.Protocol):
 class Spec(t.TypedDict):
     """A TypedDict of params"""
 
-    station_map: dict[radar.StationId, radar.Station]
-    station_id_pairs: list[tuple[radar.StationId, radar.StationId]]
+    station_map: dict[StationId, Station]
+    station_id_pairs: list[tuple[StationId, StationId]]
     schedule: Schedule
     exp_detail_map: ExperimentDetailMap
     epoch: Datetime_Like
@@ -88,9 +87,9 @@ class SpecByControllers(t.TypedDict):
 def sample_and_propagate_space_objects_states(
     sampler: SpaceObjectDsecSampler,
     spobjs: t.Sequence[sorts.SpaceObject],
-    start_time: types.Datetime64_us,
-    end_time: types.Datetime64_us,
-) -> tuple[list[npt.NDArray[types.Float64_as_sec]], list[types.EcefStates]]:
+    start_time: Datetime64_us,
+    end_time: Datetime64_us,
+) -> tuple[list[npt.NDArray[Float64_as_sec]], list[EcefStates]]:
     """
     Use the sampler to get the delta time of space object within the simulation `start_time` and `end_time`,
     then get the space object states at those delta time using the propagator in the space object.
@@ -98,11 +97,11 @@ def sample_and_propagate_space_objects_states(
     Returns a list of sampled delta seconds and a list of corresponding states.
     """
 
-    spobjs_smpl_dsec: list[npt.NDArray[types.Float64_as_sec]] = []
+    spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]] = []
     for spobj in tqdm(spobjs, desc="sampling spobjs dt", total=len(spobjs)):
         spobjs_smpl_dsec.append(sampler(spobj.state, start_time, end_time))
 
-    spobjs_smpl_states: list[types.EcefStates] = []
+    spobjs_smpl_states: list[EcefStates] = []
     for spobj, spobj_smpl_dsec in tqdm(
         zip(spobjs, spobjs_smpl_dsec),
         desc="propagating spobjs states at sampled dt",
@@ -116,7 +115,7 @@ def sample_and_propagate_space_objects_states(
 def group_passages_by_tx_rx_station_pair(
     passages: list[Passage],
 ) -> dict[tuple[StationId, StationId], list[Passage]]:
-    groupped_passages: dict[tuple[radar.StationId, radar.StationId], list[Passage]] = {}
+    groupped_passages: dict[tuple[StationId, StationId], list[Passage]] = {}
 
     for passage in passages:
         tx_station_id = passage["tx_station"].uid
@@ -172,6 +171,46 @@ def derive_simulation_unit_params(
     return params
 
 
+def find_passages(
+    spec: Spec,
+    spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]],
+    spobjs_smpl_states: list[EcefStates],
+) -> list[list[Passage]]:
+    """
+    Find passages for each space objects over the simulation period.
+
+    Returns a `list[Passage]` per space object.
+    """
+
+    passages_list: list[list[Passage]] = []
+
+    for spobj, spobj_smpl_dsec, spobj_smpl_states in zip(
+        spec["space_objects"],
+        spobjs_smpl_dsec,
+        spobjs_smpl_states,
+    ):
+        passages_of_spobj: list[Passage] = []
+
+        for stn_id_pair in spec["station_id_pairs"]:
+            tx_stn = spec["station_map"][stn_id_pair[0]]
+            rx_stn = spec["station_map"][stn_id_pair[1]]
+
+            passages_of_spobj.extend(
+                simulation.funcs.find_passages(
+                    dt=spobj_smpl_dsec,
+                    space_object=spobj,
+                    states=spobj_smpl_states,
+                    tx_station=tx_stn,
+                    rx_station=rx_stn,
+                    epoch=spec["epoch"],
+                )
+            )
+
+        passages_list.append(passages_of_spobj)
+
+    return passages_list
+
+
 def prepare_simulation_unit_params(spec: Spec) -> list[FromPassagesOverTxRxStationPairParam]:
     spobjs_smpl_dsec, spobjs_smpl_states = sample_and_propagate_space_objects_states(
         sampler=spec["dsec_sampler"],
@@ -187,7 +226,7 @@ def prepare_simulation_unit_params(spec: Spec) -> list[FromPassagesOverTxRxStati
     ]
     logger.debug("interpolators done")
 
-    passages_lists = funcs.find_passages(
+    passages_lists = find_passages(
         spec=spec,
         spobjs_smpl_dsec=spobjs_smpl_dsec,
         spobjs_smpl_states=spobjs_smpl_states,
@@ -371,8 +410,8 @@ class StxMrxSimulation:
     def from_controllers(cls, spec: SpecByControllers):
         """A constructor method"""
 
-        stn_map: dict[radar.StationId, radar.Station] = {}
-        stn_id_pairs_set: set[tuple[radar.StationId, radar.StationId]] = set()
+        stn_map: dict[StationId, Station] = {}
+        stn_id_pairs_set: set[tuple[StationId, StationId]] = set()
         exp_detail_map: schedule.ExperimentDetailMap = {}
 
         for ctrl in spec["controllers"]:
