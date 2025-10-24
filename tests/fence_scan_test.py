@@ -184,7 +184,7 @@ def south_to_north_circular_orbit_test():
     assert len(obss) == 3
 
     for obs in obss:
-        rx_schedule_slice = obs.get_schedule_slice(fence_sch).rx
+        rx_schedule_slice = obs.index_into_schedule(fence_sch).rx
         simult_num = rx_schedule_slice._data[_SK.simult_num][0]
 
         # assert that simult_num is the same over the same observation
@@ -219,7 +219,7 @@ def south_to_north_circular_orbit_test():
         for obs in obss
         if obs.passage["tx_station"].uid == tx_0_stn.uid
         and obs.passage["rx_station"].uid == rx_0_stn.uid
-        and obs.get_schedule_slice(fence_sch).rx._data[_SK.simult_num][0]
+        and obs.index_into_schedule(fence_sch).rx._data[_SK.simult_num][0]
         == 1  # i.e. the 2nd scan range
     )
 
@@ -228,7 +228,7 @@ def south_to_north_circular_orbit_test():
         for obs in obss
         if obs.passage["tx_station"].uid == tx_0_stn.uid
         and obs.passage["rx_station"].uid == rx_1_stn.uid
-        and obs.get_schedule_slice(fence_sch).rx._data[_SK.simult_num][0]
+        and obs.index_into_schedule(fence_sch).rx._data[_SK.simult_num][0]
         == 1  # i.e. the 2nd scan range
     )
 

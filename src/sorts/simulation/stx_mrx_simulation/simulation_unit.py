@@ -422,9 +422,7 @@ class Observation:
 
         return time_arr
 
-    # TODO: rename to `index_into_schedule`
-    # TODO: fix call sites
-    def get_schedule_slice(self, schedule: Schedule) -> types.TxRxTuple[Schedule, Schedule]:
+    def index_into_schedule(self, schedule: Schedule) -> types.TxRxTuple[Schedule, Schedule]:
         """Returns subset of schedules, in `(tx_scheule, tx_schedule` that corresponds to the observation"""
 
         tx_sch_obs = schedule.filter_by_time_range(self.passage["time_range"])

@@ -150,12 +150,12 @@ def south_to_north_circular_orbit_test():
     assert len(obss) == 1
     obs = obss[0]
 
-    tx_pointings = obs.get_schedule_slice(tracker_sch).tx._data[_SK.pointing]
+    tx_pointings = obs.index_into_schedule(tracker_sch).tx._data[_SK.pointing]
     tx_pointings_normalized = tx_pointings / np.linalg.norm(tx_pointings.to_numpy(), axis=0)
 
     # assert `E` componend of tx pointings stayed around zero
     assert np.all(
-        obs.get_schedule_slice(tracker_sch).tx._data[_SK.pointing].loc[_SK.e, :]
+        obs.index_into_schedule(tracker_sch).tx._data[_SK.pointing].loc[_SK.e, :]
         < float_equality_thld
     )
 
@@ -184,11 +184,11 @@ def south_to_north_circular_orbit_test():
     # assert the start and end time of the observation is as expected
     # TODO: this can offset pretty large when we have large sampling time interval, is there better way to test it?
     assert abs(
-        obs.get_schedule_slice(tracker_sch).rx._data[_SK.start_time][0]
+        obs.index_into_schedule(tracker_sch).rx._data[_SK.start_time][0]
         - expected_passage_start_time
     ) < np.timedelta64(int(dsec_sampling_intv), "s")
     assert abs(
-        obs.get_schedule_slice(tracker_sch).rx._data[_SK.end_time][-1] - expected_passage_end_time
+        obs.index_into_schedule(tracker_sch).rx._data[_SK.end_time][-1] - expected_passage_end_time
     ) < np.timedelta64(int(dsec_sampling_intv), "s")
 
     return
