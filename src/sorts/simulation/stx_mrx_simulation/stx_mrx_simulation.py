@@ -7,7 +7,7 @@ import pyorb
 import sorts
 from tqdm import tqdm
 from mpi4py import MPI
-from sorts import radar, schedule, controller
+from sorts import types, radar, schedule, controller
 from sorts.interpolation import Interpolator
 from sorts.utils import to_datetime64_us
 from sorts.types import Datetime_Like, Float64_as_sec
@@ -83,8 +83,36 @@ class SpecByControllers(t.TypedDict):
     interpolator_class: type[Interpolator]
 
 
+def sample_and_propagate_space_objects_states(
+    sampler: SpaceObjectDsecSampler,
+    spobjs: t.Sequence[sorts.SpaceObject],
+    start_time: types.Datetime64_us,
+    end_time: types.Datetime64_us,
+) -> tuple[list[npt.NDArray[types.Float64_as_sec]], list[types.EcefStates]]:
+    """
+    Use the sampler to get the delta time of space object within the simulation `start_time` and `end_time`,
+    then get the space object states at those delta time using the propagator in the space object.
+
+    Returns a list of sampled delta seconds and a list of corresponding states.
+    """
+
+    spobjs_smpl_dsec: list[npt.NDArray[types.Float64_as_sec]] = []
+    for spobj in tqdm(spobjs, desc="sampling spobjs dt", total=len(spobjs)):
+        spobjs_smpl_dsec.append(sampler(spobj.state, start_time, end_time))
+
+    spobjs_smpl_states: list[types.EcefStates] = []
+    for spobj, spobj_smpl_dsec in tqdm(
+        zip(spobjs, spobjs_smpl_dsec),
+        desc="propagating spobjs states at sampled dt",
+        total=len(spobjs),
+    ):
+        spobjs_smpl_states.append(spobj.get_state(spobj_smpl_dsec))
+
+    return spobjs_smpl_dsec, spobjs_smpl_states
+
+
 def prepare_simulation_unit_params(spec: Spec) -> list[FromPassagesOverTxRxStationPairParam]:
-    spobjs_smpl_dsec, spobjs_smpl_states = funcs.sample_and_propagate_space_objects_states(
+    spobjs_smpl_dsec, spobjs_smpl_states = sample_and_propagate_space_objects_states(
         sampler=spec["dsec_sampler"],
         spobjs=spec["space_objects"],
         start_time=to_datetime64_us(spec["start_time"]),

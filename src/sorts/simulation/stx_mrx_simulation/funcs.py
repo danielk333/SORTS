@@ -28,34 +28,6 @@ if t.TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def sample_and_propagate_space_objects_states(
-    sampler: SpaceObjectDsecSampler,
-    spobjs: t.Sequence[sorts.SpaceObject],
-    start_time: Datetime64_us,
-    end_time: Datetime64_us,
-) -> tuple[list[npt.NDArray[Float64_as_sec]], list[EcefStates]]:
-    """
-    Use the sampler to get the delta time of space object within the simulation `start_time` and `end_time`,
-    then get the space object states at those delta time using the propagator in the space object.
-
-    Returns a list of sampled delta seconds and a list of corresponding states.
-    """
-
-    spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]] = []
-    for spobj in tqdm(spobjs, desc="sampling spobjs dt", total=len(spobjs)):
-        spobjs_smpl_dsec.append(sampler(spobj.state, start_time, end_time))
-
-    spobjs_smpl_states: list[EcefStates] = []
-    for spobj, spobj_smpl_dsec in tqdm(
-        zip(spobjs, spobjs_smpl_dsec),
-        desc="propagating spobjs states at sampled dt",
-        total=len(spobjs),
-    ):
-        spobjs_smpl_states.append(spobj.get_state(spobj_smpl_dsec))
-
-    return spobjs_smpl_dsec, spobjs_smpl_states
-
-
 # TODO: use `TxRxTuple` type for return value?
 # TODO: can be combined with 'stx_mrx_simulation.funcs.find_passages'?
 def group_passages_by_tx_rx_station_pair(
