@@ -28,25 +28,6 @@ if t.TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-# TODO: use `TxRxTuple` type for return value?
-# TODO: can be combined with 'stx_mrx_simulation.funcs.find_passages'?
-def group_passages_by_tx_rx_station_pair(
-    passages: list[Passage],
-) -> dict[tuple[StationId, StationId], list[Passage]]:
-    groupped_passages: dict[tuple[StationId, StationId], list[Passage]] = {}
-
-    for passage in passages:
-        tx_station_id = passage["tx_station"].uid
-        rx_station_id = passage["rx_station"].uid
-
-        if (tx_station_id, rx_station_id) in groupped_passages:
-            groupped_passages[(tx_station_id, rx_station_id)].append(passage)
-        else:
-            groupped_passages[(tx_station_id, rx_station_id)] = [passage]
-
-    return groupped_passages
-
-
 def find_passages(
     spec: Spec,
     spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]],
@@ -85,45 +66,3 @@ def find_passages(
         passages_list.append(passages_of_spobj)
 
     return passages_list
-
-
-def derive_simulation_unit_params(
-    spec: Spec,
-    passages_lists: list[list[Passage]],
-    spobjs_interpolators: list[Interpolator],
-) -> list[FromPassagesOverTxRxStationPairParam]:
-    """
-    Derive a list of param for the `from_passages_over_tx_rx_station_pair` constructor of `SimulationUnit`
-
-    NOTE: Integers (casted to `str`) are used as `SimulationUnit`s' id
-    """
-
-    params: list[FromPassagesOverTxRxStationPairParam] = []
-
-    for spobj, passages_of_a_spobj, spobj_states_interp in zip(
-        spec["space_objects"], passages_lists, spobjs_interpolators
-    ):
-        groupped_passages = group_passages_by_tx_rx_station_pair(passages_of_a_spobj)
-
-        for stn_id_pair, passages in groupped_passages.items():
-            tx_stn = spec["station_map"][stn_id_pair[0]]
-            rx_stn = spec["station_map"][stn_id_pair[1]]
-
-            filtered_sch = spec["schedule"].filter_by_time_ranges(
-                [ps["time_range"] for ps in passages]
-            )
-
-            params.append(
-                {
-                    "id": str(len(params)),
-                    "passages": passages,
-                    "spobj": spobj,
-                    "spobj_interp": spobj_states_interp,
-                    "tx_station": tx_stn,
-                    "rx_station": rx_stn,
-                    "schedule": filtered_sch,
-                    "exp_detail_map": spec["exp_detail_map"],
-                }
-            )
-
-    return params
