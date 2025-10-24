@@ -1,6 +1,7 @@
 from __future__ import annotations
 import logging, typing as t, pickle, traceback, time
 from pathlib import Path
+from dataclasses import dataclass
 import numpy.typing as npt
 import pyorb
 import sorts
@@ -21,9 +22,16 @@ from . import funcs
 logger = logging.getLogger(__name__)
 
 
+@dataclass
+class WorkerJobAssignment:
+    param: FromPassagesOverTxRxStationPairParam
+    persist_dir: Path
+
+
 class _MpiMsg:
     exit_ok: t.Final = "exit_ok"
     terminate: t.Final = "terminate"
+    worker_job_assignment = WorkerJobAssignment
 
 
 type SimulationEnvironment = t.Mapping[str, t.Any]
@@ -112,7 +120,7 @@ def prepare_simulation_unit_params(spec: Spec) -> list[FromPassagesOverTxRxStati
 
 
 def mpi_master_proc_loop(
-    comm: MPI.Intracomm, master_proc_rank: int, spec: Spec, rank_size: int
+    comm: MPI.Intracomm, master_proc_rank: int, spec: Spec, rank_size: int, persist_dir: Path
 ) -> None:
     logger.debug(f"running in mpi with rank: {rank_size}")
     logger.info(f"master: {master_proc_rank} | simulation preparation start")
@@ -138,7 +146,12 @@ def mpi_master_proc_loop(
             idle_worker_idx = is_worker_idle_list.index(True)
             idle_worker_rank = idle_worker_idx + 1
             # TODO: check if the  (full ScheduleData + indexer for SimulationUnit) or (just the relevant slices of ScheduleData) are sent
-            comm.send(sim_units_param[next_sim_unit_param_idx], dest=idle_worker_rank)
+            comm.send(
+                WorkerJobAssignment(
+                    param=sim_units_param[next_sim_unit_param_idx], persist_dir=persist_dir
+                ),
+                dest=idle_worker_rank,
+            )
 
             logger.debug(
                 f"master: {master_proc_rank} | sent `SimulationUnit`"
@@ -180,69 +193,70 @@ def mpi_master_proc_loop(
     logger.info(f"master: {master_proc_rank} | master main loop done,  returning...")
 
 
-def mpi_worker_proc_loop(
-    comm: MPI.Intracomm, master_proc_rank: int, worker_proc_rank: int, persist_dir: Path
-) -> None:
+def mpi_worker_proc_loop(comm: MPI.Intracomm, master_proc_rank: int, worker_proc_rank: int) -> None:
     while True:
         logger.info(f"worker: {worker_proc_rank} | waiting for msg...")
         msg = comm.recv(source=master_proc_rank)
 
-        # exit if `_MpiMsg.terminate` is received
-        if msg == _MpiMsg.terminate:
-            logger.info(f"worker: {worker_proc_rank} | exiting...")
-            comm.send(_MpiMsg.exit_ok, dest=master_proc_rank)  # reply an ack to master
-            exit()
+        match msg:
+            case _MpiMsg.terminate:
+                # exit if `_MpiMsg.terminate` is received
+                logger.info(f"worker: {worker_proc_rank} | exiting...")
+                comm.send(_MpiMsg.exit_ok, dest=master_proc_rank)  # reply an ack to master
+                exit()
 
-        # throw if the msg is not a `FromPassagesOverTxRxStationPairParam`
-        if not isinstance(msg, dict):
-            raise RuntimeError(f"worker: {worker_proc_rank} | received unexcepted msg: {msg}")
+            case _MpiMsg.worker_job_assignment():
+                param = msg.param
+                persist_fpath = msg.persist_dir / sim_unit_fname_tpl.format(id=param["id"])
 
-        param = t.cast(FromPassagesOverTxRxStationPairParam, msg)
-        persist_fpath = persist_dir / sim_unit_fname_tpl.format(id=param["id"])
+                try:
+                    if persist_fpath.exists():
+                        logger.info(
+                            f"worker: {worker_proc_rank} | SimulationUnit: {param["id"]} already completed, will load from the saved file instead"
+                        )
 
-        try:
-            if persist_fpath.exists():
+                        with open(persist_fpath, "rb") as f:
+                            sim_unit = pickle.load(f)
+
+                    else:
+                        # NOTE:
+                        #   As a simple way to reduce risk of corrupted files,
+                        #   we write to an tmp file first then rename that file
+                        #
+                        #   sim_unit is saved 2 times, 1 before running `simulate` and 1 after
+
+                        sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(**param)
+
+                        persist_fpath_tmp = persist_fpath.with_suffix(persist_fpath.suffix + ".tmp")
+                        with open(persist_fpath_tmp, "wb") as f:
+                            pickle.dump(sim_unit, f)
+                            persist_fpath_tmp.rename(persist_fpath)
+
+                        logger.info(f"worker: {worker_proc_rank} | `SimulationUnit.simulate` start")
+                        sim_unit.simulate()
+
+                        persist_fpath_tmp = persist_fpath.with_suffix(persist_fpath.suffix + ".tmp")
+                        with open(persist_fpath_tmp, "wb") as f:
+                            pickle.dump(sim_unit, f)
+                            # delete the file we saved earlier, then rename the new dump file
+                            persist_fpath.unlink(missing_ok=True)
+                            persist_fpath_tmp.rename(persist_fpath)
+
+                except Exception as err:
+                    raise RuntimeError(
+                        f"Runtime fail in worker: {worker_proc_rank} | SimulationUnit: {param["id"]}"
+                    ) from err
+
+                obss = sim_unit.get_observations()
+
+                comm.send(len(obss), dest=master_proc_rank)
                 logger.info(
-                    f"worker: {worker_proc_rank} | SimulationUnit: {param["id"]} already completed, will load from the saved file instead"
+                    f"worker: {worker_proc_rank} | SimulationUnit:{sim_unit.id} done with {len(obss)} observations"
                 )
 
-                with open(persist_fpath, "rb") as f:
-                    sim_unit = pickle.load(f)
-
-            else:
-                # NOTE:
-                #   As a simple way to reduce risk of corrupted files,
-                #   we write to an tmp file first then rename that file
-                #
-                #   sim_unit is saved 2 times, 1 before running `simulate` and 1 after
-
-                sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(**param)
-
-                persist_fpath_tmp = persist_fpath.with_suffix(persist_fpath.suffix + ".tmp")
-                with open(persist_fpath_tmp, "wb") as f:
-                    pickle.dump(sim_unit, f)
-                    persist_fpath_tmp.rename(persist_fpath)
-
-                logger.info(f"worker: {worker_proc_rank} | `SimulationUnit.simulate` start")
-                sim_unit.simulate()
-
-                persist_fpath_tmp = persist_fpath.with_suffix(persist_fpath.suffix + ".tmp")
-                with open(persist_fpath_tmp, "wb") as f:
-                    pickle.dump(sim_unit, f)
-                    persist_fpath.unlink(missing_ok=True)  # delete the file we saved earlier
-                    persist_fpath_tmp.rename(persist_fpath)
-
-        except Exception as err:
-            raise RuntimeError(
-                f"Runtime fail in worker: {worker_proc_rank} | SimulationUnit: {param["id"]}"
-            ) from err
-
-        obss = sim_unit.get_observations()
-
-        comm.send(len(obss), dest=master_proc_rank)
-        logger.info(
-            f"worker: {worker_proc_rank} | SimulationUnit:{sim_unit.id} done with {len(obss)} observations"
-        )
+            case _:
+                # throw for unexpected msg
+                raise RuntimeError(f"worker: {worker_proc_rank} | received unexcepted msg: {msg}")
 
 
 def iter_mpi_simulation_results(save_dir: Path):
@@ -300,14 +314,12 @@ class StxMrxSimulation:
     @classmethod
     def mpi_run(
         cls,
-        persistence_dir_path: str | Path,
+        persist_dpath: str | Path,
         prep_sim_env_fn: t.Callable[[Path], SimulationEnvironment],
         result_analysis_fn: t.Callable[[Path, t.Self], None],
     ) -> None:
         try:
             master_proc_rank: t.Final = 0
-            persist_dir = Path(persistence_dir_path)
-
             comm = MPI.COMM_WORLD
             r = comm.Get_rank()
             rank_size = comm.Get_size()
@@ -316,6 +328,7 @@ class StxMrxSimulation:
                 ###
                 # simulation
                 ###
+                persist_dir = Path(persist_dpath)
                 calc_start_time = time.perf_counter()
 
                 if not persist_dir.exists():
@@ -327,7 +340,11 @@ class StxMrxSimulation:
 
                 sim = cls.from_controllers(sim_env["spec_by_controllers"])
                 mpi_master_proc_loop(
-                    comm=comm, master_proc_rank=r, spec=sim.spec, rank_size=rank_size
+                    comm=comm,
+                    master_proc_rank=r,
+                    spec=sim.spec,
+                    rank_size=rank_size,
+                    persist_dir=persist_dir,
                 )
 
                 calc_time = time.perf_counter() - calc_start_time
@@ -348,10 +365,7 @@ class StxMrxSimulation:
 
             else:  # workers
                 mpi_worker_proc_loop(
-                    comm=comm,
-                    master_proc_rank=master_proc_rank,
-                    worker_proc_rank=r,
-                    persist_dir=persist_dir,
+                    comm=comm, master_proc_rank=master_proc_rank, worker_proc_rank=r
                 )
 
                 return
