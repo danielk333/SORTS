@@ -380,31 +380,6 @@ class Observation:
         self.exp_id = exp_id
         self.simult_num = simult_num
 
-        time_arr = filter_state_data_by_time_range(sim_unit._state_data, passage["time_range"])[
-            _K.time
-        ].to_numpy()
-
-        self._schedule_indexer = ObservationScheduleIndexer(
-            tx=(
-                exp_id,
-                passage["tx_station"].uid,
-                simult_num,
-                time_arr,
-            ),
-            rx=(
-                exp_id,
-                passage["rx_station"].uid,
-                simult_num,
-                time_arr,
-            ),
-        )
-
-        self._sim_unit_state_indexer: ObservationStateIndexer = (
-            exp_id,
-            simult_num,
-            time_arr,
-        )
-
     @classmethod
     def from_passage(cls, passage: Passage, sim_unit: SimulationUnit) -> list[t.Self]:
         state_slice = filter_state_data_by_time_range(sim_unit._state_data, passage["time_range"])
