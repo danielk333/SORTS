@@ -35,7 +35,6 @@ One of:
 - `int`, the length of the duration in `us` resolution
 """
 
-# TODO: replace existing time_range typing by this type
 TimeRange_us = tuple[Datetime64_us, Datetime64_us]
 """The start time and end time of the passage, a right-open interval"""
 
