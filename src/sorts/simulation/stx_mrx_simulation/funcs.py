@@ -20,7 +20,7 @@ from .simulation_unit import SimulationUnit, Observation
 
 
 if t.TYPE_CHECKING:
-    from .simulation_unit import StateData
+    from .simulation_unit import State
     from .simulation_unit import FromPassagesOverTxRxStationPairParam
     from .stx_mrx_simulation import Spec, SpaceObjectDsecSampler
 
@@ -158,16 +158,16 @@ def derive_simulation_unit_params(
 
 
 def calc_gain(
-    state_data: StateData,
+    state: State,
     tx_stn: Station,
     rx_stn: Station,
     spobj_tx_enu: EnuCoordinates,
     spobj_rx_enu: EnuCoordinates,
-) -> StateData:
+) -> State:
     # NOTE: used lazy import here to avoid circular import
     from .simulation_unit import _K
 
-    vector_len = len(state_data[_K.multi_index])
+    vector_len = len(state[_K.multi_index])
 
     # will be populated to [tx_gain_arr, rx_gain_arr]
     gain_arr_list: list[npt.NDArray[np.float64]] = []
@@ -185,7 +185,7 @@ def calc_gain(
         # early return for empty cases
         # NOTE: this is particularly needed because some `.gain` does not work with empty parameters (e.g. beam.parameters["pointing"])
         # TODO: add test case for empty case?
-        if len(state_data[_K.multi_index]) == 0:
+        if len(state[_K.multi_index]) == 0:
             gain_arr_list.append(np.empty(0, dtype=np.float64))
 
         else:
@@ -195,7 +195,7 @@ def calc_gain(
 
             for key, val in mut_beam_params.items():
                 if key == "pointing":
-                    beam.parameters["pointing"] = state_data[_K.tx_pointing].to_numpy()
+                    beam.parameters["pointing"] = state[_K.tx_pointing].to_numpy()
                 if key in beam.parameters_shape:
                     shape: tuple[int, ...] = beam.parameters_shape[key]
                     beam.parameters[key] = np.broadcast_to(
@@ -207,7 +207,7 @@ def calc_gain(
             gain_arr_list.append(beam.gain(spobj_stn_enu[:3]))
             beam.parameters = orig_beam_params
 
-    state_data[_K.gain_tx] = (_K.multi_index, gain_arr_list[0])
-    state_data[_K.gain_rx] = (_K.multi_index, gain_arr_list[1])
+    state[_K.gain_tx] = (_K.multi_index, gain_arr_list[0])
+    state[_K.gain_rx] = (_K.multi_index, gain_arr_list[1])
 
-    return state_data
+    return state

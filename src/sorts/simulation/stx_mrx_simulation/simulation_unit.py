@@ -58,8 +58,7 @@ assert_class_attributes_equal_to(_K, t.get_args(Key))
 _SK = Schedule._K
 """Internal helper for accessing string keys consistently"""
 
-# TODO: rename to just `State`?
-StateData = t.NewType("StateData", xr.Dataset)
+State = t.NewType("State", xr.Dataset)
 """
 A xarray `Dataset` with:
   ```
@@ -84,7 +83,7 @@ A xarray `Dataset` with:
 """
 
 
-def empty_state_data() -> StateData:
+def empty_state() -> State:
     multi_index = pd.MultiIndex.from_arrays(
         [
             np.empty(0, dtype=np.int16),
@@ -94,7 +93,7 @@ def empty_state_data() -> StateData:
         names=(_K.exp_num, _K.rx_simult_num, _K.time),
     )
 
-    state_data = xr.Dataset(
+    state = xr.Dataset(
         coords={
             **xr.Coordinates.from_pandas_multiindex(multi_index, _K.multi_index),
             _K.enu: [_K.e, _K.n, _K.u],
@@ -111,10 +110,10 @@ def empty_state_data() -> StateData:
         },
     )
 
-    return StateData(state_data)
+    return State(state)
 
 
-def filter_state_data_by_time_range(state: StateData, time_range: types.TimeRange_us) -> StateData:
+def filter_state_by_time_range(state: State, time_range: types.TimeRange_us) -> State:
     mask = (state[_K.time] >= time_range[0]) & (state[_K.time] <= time_range[1])
     state_masked = state[{_K.multi_index: mask}]
 
@@ -139,7 +138,7 @@ class SimulationUnit:
     Contains all the params and results for a unit of simulation calculation.
 
     Notes about the state data:
-    - It is stored in a private attribute `_state_data`
+    - It is stored in a private attribute `_state`
     - It can contain data for more than 1 passage
     - The dataset does not always contains all the key defined in `DataKey`,
       which ones are available depends on what calculation have been done.
@@ -157,11 +156,11 @@ class SimulationUnit:
         tx_station: Station,
         rx_station: Station,
         exp_detail_map: ExperimentDetailMap,
-        state_data: StateData,
+        state: State,
     ):
         self.id = id
 
-        self._state_data = state_data
+        self._state = state
 
         self.space_object = spobj
         self.space_object_interp = spobj_interp
@@ -202,7 +201,7 @@ class SimulationUnit:
                 tx_station=kwargs["tx_station"],
                 rx_station=kwargs["rx_station"],
                 exp_detail_map=kwargs["exp_detail_map"],
-                state_data=StateData(empty_state_data()),
+                state=State(empty_state()),
             )
 
         # NOTE: xarray simplify/collapse MultiIndex when filtering a level to an exact value,
@@ -236,7 +235,7 @@ class SimulationUnit:
             _SK.multi_index,
         )
 
-        state_data = xr.Dataset(
+        state = xr.Dataset(
             coords={
                 **xr.Coordinates.from_pandas_multiindex(multi_index, _K.multi_index),
                 _K.enu: [_K.e, _K.n, _K.u],
@@ -263,7 +262,7 @@ class SimulationUnit:
             tx_station=kwargs["tx_station"],
             rx_station=kwargs["rx_station"],
             exp_detail_map=kwargs["exp_detail_map"],
-            state_data=StateData(state_data),
+            state=State(state),
         )
 
     def simulate(self):
@@ -273,7 +272,7 @@ class SimulationUnit:
         """
 
         epoch = to_datetime64_us(self.space_object.epoch)
-        dsec = (self._state_data[_K.time] - epoch).astype(np.float64) * 1e-6
+        dsec = (self._state[_K.time] - epoch).astype(np.float64) * 1e-6
         spobj_states = self.space_object_interp.get_state(dsec)
         spobj_tx_enu = self.tx_station.enu(spobj_states)
         spobj_rx_enu = self.rx_station.enu(spobj_states)
@@ -286,20 +285,20 @@ class SimulationUnit:
         # TODO: do we need `ipps`?
         # TODO: do we need `duty_cycles`?
         powers = np.array(
-            [self.exp_detail_map[n]["power"] for n in self._state_data[_K.exp_num].to_numpy()],
+            [self.exp_detail_map[n]["power"] for n in self._state[_K.exp_num].to_numpy()],
             dtype=np.float64,
         )
         bandwidths = np.array(
-            [self.exp_detail_map[n]["bandwidth"] for n in self._state_data[_K.exp_num].to_numpy()],
+            [self.exp_detail_map[n]["bandwidth"] for n in self._state[_K.exp_num].to_numpy()],
             dtype=np.float64,
         )
         rx_noise_temps = np.array(
-            [self.exp_detail_map[n]["noise_temp"] for n in self._state_data[_K.exp_num].to_numpy()],
+            [self.exp_detail_map[n]["noise_temp"] for n in self._state[_K.exp_num].to_numpy()],
             dtype=np.float64,
         )
 
-        self._state_data = funcs.calc_gain(
-            state_data=self._state_data,
+        self._state = funcs.calc_gain(
+            state=self._state,
             tx_stn=self.tx_station,
             rx_stn=self.rx_station,
             spobj_tx_enu=spobj_tx_enu,
@@ -307,8 +306,8 @@ class SimulationUnit:
         )
 
         snr = hard_target_snr(
-            gain_tx=self._state_data[_K.gain_tx].to_numpy(),
-            gain_rx=self._state_data[_K.gain_rx].to_numpy(),
+            gain_tx=self._state[_K.gain_tx].to_numpy(),
+            gain_rx=self._state[_K.gain_rx].to_numpy(),
             wavelength=self.tx_station.beam.wavelength,
             power_tx=powers,
             range_tx_m=range_tx,
@@ -318,29 +317,27 @@ class SimulationUnit:
             rx_noise_temp=rx_noise_temps,
             radar_albedo=self.space_object.parameters.get("radar_albedo", 1.0),
         )
-        self._state_data[_K.snr] = (_K.multi_index, snr)
+        self._state[_K.snr] = (_K.multi_index, snr)
 
-        self._state_data[_K.tx_range] = (
+        self._state[_K.tx_range] = (
             _K.multi_index,
             np.linalg.norm(spobj_tx_enu[:3, :], axis=0),
         )
 
-        self._state_data[_K.rx_range] = (
+        self._state[_K.rx_range] = (
             _K.multi_index,
             np.linalg.norm(spobj_rx_enu[:3, :], axis=0),
         )
 
-        self._state_data[_K.two_way_range] = (
-            self._state_data[_K.tx_range] + self._state_data[_K.rx_range]
-        )
+        self._state[_K.two_way_range] = self._state[_K.tx_range] + self._state[_K.rx_range]
 
-        two_way_range_series = t.cast(pd.Series, self._state_data[_K.two_way_range].to_pandas())
-        time_series = t.cast(pd.Series, self._state_data[_K.time].to_pandas())
+        two_way_range_series = t.cast(pd.Series, self._state[_K.two_way_range].to_pandas())
+        time_series = t.cast(pd.Series, self._state[_K.time].to_pandas())
         groupped_two_way_range_diff = two_way_range_series.groupby(
             level=[_K.exp_num, _K.rx_simult_num]
         ).diff()
         groupped_time_diff = time_series.groupby(level=[_K.exp_num, _K.rx_simult_num]).diff()
-        self._state_data[_K.two_way_range_rate] = (
+        self._state[_K.two_way_range_rate] = (
             _K.multi_index,
             groupped_two_way_range_diff
             / (groupped_time_diff / t.cast(t.Any, np.timedelta64(1, "s"))),
@@ -389,7 +386,7 @@ class Observation:
 
     @classmethod
     def from_passage(cls, passage: Passage, sim_unit: SimulationUnit) -> list[t.Self]:
-        state_slice = filter_state_data_by_time_range(sim_unit._state_data, passage["time_range"])
+        state_slice = filter_state_by_time_range(sim_unit._state, passage["time_range"])
 
         multi_index = t.cast(pd.MultiIndex, state_slice.indexes[_K.multi_index])
 
@@ -416,9 +413,9 @@ class Observation:
         )
 
     def get_time_arr(self):
-        time_arr = filter_state_data_by_time_range(
-            self.sim_unit._state_data, self.passage["time_range"]
-        )[_K.time].to_numpy()
+        time_arr = filter_state_by_time_range(self.sim_unit._state, self.passage["time_range"])[
+            _K.time
+        ].to_numpy()
 
         return time_arr
 
@@ -455,11 +452,11 @@ class Observation:
 
         return types.TxRxTuple(tx=tx_sch_obs, rx=rx_sch_obs)
 
-    def get_state_slice(self) -> StateData:
-        """Get the subset of `StateData` data the corresponds to the the observation"""
+    def get_state_slice(self) -> State:
+        """Get the subset of `State` data the corresponds to the the observation"""
 
-        sim_state_slice = filter_state_data_by_time_range(
-            self.sim_unit._state_data, self.passage["time_range"]
+        sim_state_slice = filter_state_by_time_range(
+            self.sim_unit._state, self.passage["time_range"]
         )
 
         # NOTE: early return for empty case; `loc` method does not work with non-existent selection

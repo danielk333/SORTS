@@ -170,9 +170,7 @@ def south_to_north_circular_orbit_test():
     # assert the max snr time is roughly at half orbital period
     assert (
         abs(
-            sim_unit._state_data[_SuK.time][
-                {_SuK.multi_index: sim_unit._state_data[_SuK.snr].argmax()}
-            ]
+            sim_unit._state[_SuK.time][{_SuK.multi_index: sim_unit._state[_SuK.snr].argmax()}]
             - (
                 to_datetime64_us(start_time)
                 + spobj_orbital_period / 2 * np.timedelta64(int(1e6), "us")
