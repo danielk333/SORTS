@@ -225,7 +225,7 @@ def mpi_worker_proc_loop(comm: MPI.Intracomm, master_proc_rank: int, worker_proc
                         #
                         #   sim_unit is saved 2 times, 1 before running `simulate` and 1 after
 
-                        sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(**param)
+                        sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(param)
 
                         persist_fpath_tmp = persist_fpath.with_suffix(persist_fpath.suffix + ".tmp")
                         with open(persist_fpath_tmp, "wb") as f:
@@ -391,7 +391,7 @@ class StxMrxSimulation:
         pbar = tqdm(desc="simulating", total=len(sim_units_param))
 
         for param in sim_units_param:
-            sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(**param)
+            sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(param)
             self.sim_units.append(sim_unit)
 
             sim_unit.simulate()
