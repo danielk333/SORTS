@@ -16,8 +16,7 @@ from sorts.types import Float64_as_sec, EcefStates, Datetime64_us, EnuCoordinate
 from sorts.schedule import Schedule
 from sorts.simulation.types import Passage
 from sorts.simulation import funcs
-from .simulation_unit import SimulationUnit
-from .observation import Observation
+from .simulation_unit import SimulationUnit, Observation
 
 
 if t.TYPE_CHECKING:

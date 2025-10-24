@@ -11,10 +11,10 @@ from sorts.interpolation import Interpolator
 from sorts.utils import to_datetime64_us
 from sorts.types import Datetime_Like, Float64_as_sec
 from sorts.schedule import Schedule, ExperimentDetailMap
-from sorts.simulation.stx_mrx_simulation.observation import Observation
 from sorts.simulation.stx_mrx_simulation.simulation_unit import (
     SimulationUnit,
     FromPassagesOverTxRxStationPairParam,
+    Observation,
 )
 from . import funcs
 

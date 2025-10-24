@@ -6,6 +6,7 @@ from .schedule import (
     _K,
     ScheduleData,
     ExperimentId,
+    SimultaneousNum,
     ExperimentDetail,
     ExperimentDetailMap,
     ScheduleNdarrayDict,

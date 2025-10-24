@@ -53,6 +53,9 @@ A xarray `Dataset` of:
   ```
 """
 
+SimultaneousNum = int
+"""An int16 that corresponds to the order in simultaneous pointings"""
+
 ExperimentId = int
 """A unique int16 that identifies an experiment"""
 

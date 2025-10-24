@@ -4,15 +4,15 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import xarray as xr
+from sorts import types, radar, schedule
 from sorts.utils import assert_class_attributes_equal_to, to_datetime64_us
-from sorts.types import Float64_as_m
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.signals import hard_target_snr
 from sorts.interpolation import Interpolator
 from sorts.schedule import ExperimentDetailMap, Schedule
 from sorts.simulation.types import Passage
-from . import funcs, observation
+from . import funcs
 
 CoordKey = t.Literal["multi_index", "time", "exp_num", "rx_simult_num", "enu", "e", "n", "u"]
 DataKey = t.Literal[
@@ -58,7 +58,7 @@ assert_class_attributes_equal_to(_K, t.get_args(Key))
 _SK = Schedule._K
 """Internal helper for accessing string keys consistently"""
 
-# TODO: re-eval NewType vs just type alias
+# TODO: rename to just `State`?
 StateData = t.NewType("StateData", xr.Dataset)
 """
 A xarray `Dataset` with:
@@ -114,6 +114,13 @@ def empty_state_data() -> StateData:
     return StateData(state_data)
 
 
+def filter_state_data_by_time_range(state: StateData, time_range: types.TimeRange_us) -> StateData:
+    mask = (state[_K.time] >= time_range[0]) & (state[_K.time] <= time_range[1])
+    state_masked = state[{_K.multi_index: mask}]
+
+    return state_masked
+
+
 # TODO: better naming
 class FromPassagesOverTxRxStationPairParam(t.TypedDict):
     id: str
@@ -164,6 +171,8 @@ class SimulationUnit:
         self.tx_station = tx_station
         self.rx_station = rx_station
         self.exp_detail_map = exp_detail_map
+
+        self.observations: list[Observation] = []
 
     # TODO: do not use 'Unpack' here
     @classmethod
@@ -266,8 +275,8 @@ class SimulationUnit:
         spobj_tx_enu = self.tx_station.enu(spobj_states)
         spobj_rx_enu = self.rx_station.enu(spobj_states)
 
-        range_tx: npt.NDArray[Float64_as_m] = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
-        range_rx: npt.NDArray[Float64_as_m] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
+        range_tx: npt.NDArray[types.Float64_as_m] = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
+        range_rx: npt.NDArray[types.Float64_as_m] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
 
         # TODO: can likely use assignment by slice/indexing instead of looping
         # TODO: do we need `pulse_lengths`?
@@ -334,5 +343,151 @@ class SimulationUnit:
             / (groupped_time_diff / t.cast(t.Any, np.timedelta64(1, "s"))),
         )
 
-    def get_observations(self) -> list[observation.Observation]:
-        raise NotImplementedError()
+    # TODO: check and remove its invocations; simulate should auto populate the `observations` prop
+    def get_observations(self) -> list[Observation]:
+        obss: list[Observation] = []
+
+        for passage in self.passages:
+            obss.extend(Observation.from_passage(passage, self))
+
+        return obss
+
+
+ObservationStationScheduleIndexer = tuple[
+    schedule.ExperimentId,
+    radar.StationId,
+    schedule.SimultaneousNum,
+    npt.NDArray[types.Datetime64_us],
+]
+ObservationScheduleIndexer = types.TxRxTuple[
+    ObservationStationScheduleIndexer, ObservationStationScheduleIndexer
+]
+ObservationStateIndexer = tuple[
+    schedule.ExperimentId, schedule.SimultaneousNum, npt.NDArray[types.Datetime64_us]
+]
+
+
+class Observation:
+    def __init__(
+        self,
+        passage: Passage,
+        sim_unit: SimulationUnit,
+        exp_id: schedule.ExperimentId,
+        simult_num: schedule.SimultaneousNum,
+    ):
+        self.passage = passage
+        self.sim_unit = sim_unit
+        self.exp_id = exp_id
+        self.simult_num = simult_num
+
+        time_arr = filter_state_data_by_time_range(sim_unit._state_data, passage["time_range"])[
+            _K.time
+        ].to_numpy()
+
+        self._schedule_indexer = ObservationScheduleIndexer(
+            tx=(
+                exp_id,
+                passage["tx_station"].uid,
+                simult_num,
+                time_arr,
+            ),
+            rx=(
+                exp_id,
+                passage["rx_station"].uid,
+                simult_num,
+                time_arr,
+            ),
+        )
+
+        self._sim_unit_state_indexer: ObservationStateIndexer = (
+            exp_id,
+            simult_num,
+            time_arr,
+        )
+
+    @classmethod
+    def from_passage(cls, passage: Passage, sim_unit: SimulationUnit) -> list[t.Self]:
+        state_slice = filter_state_data_by_time_range(sim_unit._state_data, passage["time_range"])
+
+        multi_index = t.cast(pd.MultiIndex, state_slice.indexes[_K.multi_index])
+
+        unique_exp_id_simult_num_pairs: list[
+            tuple[schedule.ExperimentId, schedule.SimultaneousNum]
+        ] = (multi_index.droplevel(_K.time).unique().to_list())
+
+        obss = [
+            cls(passage=passage, sim_unit=sim_unit, exp_id=exp_id, simult_num=simult_num)
+            for exp_id, simult_num in unique_exp_id_simult_num_pairs
+        ]
+
+        return obss
+
+    def __repr__(self) -> str:
+        return "\n".join(
+            [
+                "Observation(",
+                f"    time_range={self.passage["time_range"]}",
+                f"    spobj_id={self.sim_unit.space_object.oid}, tx_stn_id={self.passage["tx_station"].uid}, rx_stn_id={self.passage["rx_station"].uid}",
+                f"    exp_id={self.exp_id}, simult_num={self.simult_num}",
+                ")",
+            ]
+        )
+
+    def get_time_arr(self):
+        time_arr = filter_state_data_by_time_range(
+            self.sim_unit._state_data, self.passage["time_range"]
+        )[_K.time].to_numpy()
+
+        return time_arr
+
+    # TODO: rename to `index_into_schedule`
+    # TODO: fix call sites
+    def get_schedule_slice(self, schedule: Schedule) -> types.TxRxTuple[Schedule, Schedule]:
+        """Returns subset of schedules, in `(tx_scheule, tx_schedule` that corresponds to the observation"""
+
+        tx_sch_obs = schedule.filter_by_time_range(self.passage["time_range"])
+        tx_sch_obs = Schedule(
+            tx_sch_obs._data.loc[
+                {
+                    _SK.multi_index: (
+                        self.exp_id,
+                        self.passage["tx_station"].uid,
+                        0,  # NOTE: we only support single simultaneous tx pointing
+                        slice(None),
+                    )
+                }
+            ]
+        )
+
+        rx_sch_obs = schedule.filter_by_time_range(self.passage["time_range"])
+        rx_sch_obs = Schedule(
+            rx_sch_obs._data.loc[
+                {
+                    _SK.multi_index: (
+                        self.exp_id,
+                        self.passage["rx_station"].uid,
+                        self.simult_num,
+                        slice(None),
+                    )
+                }
+            ]
+        )
+
+        return types.TxRxTuple(tx=tx_sch_obs, rx=rx_sch_obs)
+
+    def get_state_slice(self) -> StateData:
+        """Get the subset of `StateData` data the corresponds to the the observation"""
+
+        sim_state_slice = filter_state_data_by_time_range(
+            self.sim_unit._state_data, self.passage["time_range"]
+        )
+
+        # NOTE: early return for empty case; `loc` method does not work with non-existent selection
+        if len(sim_state_slice[_K.multi_index]) == 0:
+            return sim_state_slice
+
+        sim_state_slice = sim_state_slice.loc[
+            {_K.multi_index: (self.exp_id, self.simult_num, slice(None))}
+        ]
+
+        return sim_state_slice
