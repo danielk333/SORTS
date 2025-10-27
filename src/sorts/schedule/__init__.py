@@ -4,6 +4,7 @@ from .schedule import (
     CoordKey,
     Key,
     _K,
+    Schedule,
     ScheduleData,
     ExperimentId,
     SimultaneousNum,

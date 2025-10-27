@@ -1,6 +1,7 @@
 import numpy as np
 import xarray as xr
 from sorts import schedule
+from sorts.schedule import Schedule
 from sorts.schedule.priority_scheduling import priority_scheduling
 
 
@@ -36,6 +37,7 @@ def priority_scheduling_interleaved_schedule_test():
             _SK.pointing: np.full((3, 12), 0.0, dtype=np.float64),
         },
     )
+    sch_data_a = Schedule(sch_data_a)
 
     # 1hr long, 1hr intv
     sch_data_b = schedule.from_ndarrays(
@@ -56,6 +58,7 @@ def priority_scheduling_interleaved_schedule_test():
             _SK.pointing: np.full((3, 24), 1.0, dtype=np.float64),
         }
     )
+    sch_data_b = Schedule(sch_data_b)
 
     resultant_sch_data = priority_scheduling([sch_data_a, sch_data_b], {0: [(0, 0)], 1: [(0, 0)]})
 

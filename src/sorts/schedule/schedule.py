@@ -140,7 +140,8 @@ def default_station():
     )
 
 
-def empty_data() -> ScheduleData:
+# TODO: renamed to just `empty`
+def empty_data() -> Schedule:
     multi_index = pd.MultiIndex.from_arrays(
         [
             np.empty(0, dtype=np.int16),
@@ -162,7 +163,7 @@ def empty_data() -> ScheduleData:
         },
     )
 
-    return sch_data
+    return Schedule(sch_data)
 
 
 def from_ndarrays(data: ScheduleNdarrayDict) -> ScheduleData:
@@ -289,7 +290,7 @@ class ScheduleOld:
             return cls.empty()
 
         resultant_sch_data = priority_scheduling.priority_scheduling(
-            [sch._data for sch in schs], exp_id_stn_id_pairs_map
+            [Schedule(sch._data) for sch in schs], exp_id_stn_id_pairs_map
         )
 
         return cls(data=resultant_sch_data)
