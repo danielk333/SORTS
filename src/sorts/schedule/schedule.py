@@ -1,3 +1,7 @@
+"""
+Defines the NewType `Schedule` and functions for its functionalities
+"""
+
 from __future__ import annotations
 import logging, typing as t
 from functools import reduce
@@ -34,6 +38,24 @@ class _K:
 
 
 utils.assert_class_attributes_equal_to(_K, t.get_args(Key))
+
+Schedule = t.NewType("Schedule", xr.Dataset)
+"""
+A xarray `Dataset` of:
+  ```
+  Dimensions:      (multi_index: n, enu: 3)
+  Coordinates:
+    * multi_index  (multi_index) object MultiIndex ('exp_num', 'stn_num', 'simult_num', 'start_time')
+    * start_time   (multi_index) datetime64[us]
+    * exp_num      (multi_index) int16
+    * stn_num      (multi_index) int16
+    * simult_num   (multi_index) int16
+    * enu          (enu) 'e' 'n' 'u'
+  Data variables:
+      end_time     (multi_index) datetime64[us]
+      pointing     (enu, multi_index) float64
+  ```
+"""
 
 ScheduleData = xr.Dataset
 """
@@ -219,8 +241,7 @@ def filter_by_time_ranges(
     return ds_masked
 
 
-# TODO: add schedule validation?
-class Schedule:
+class ScheduleOld:
     """
     Provides methods for manipuating schedule data and enforce that the required columns/data are set.
     Also contains some related metadata.
