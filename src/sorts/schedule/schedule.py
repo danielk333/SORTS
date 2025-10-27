@@ -122,8 +122,7 @@ def default_station():
     )
 
 
-# TODO: renamed to just `empty`
-def empty_data() -> Schedule:
+def empty() -> Schedule:
     multi_index = pd.MultiIndex.from_arrays(
         [
             np.empty(0, dtype=np.int16),

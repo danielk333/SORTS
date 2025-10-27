@@ -13,7 +13,7 @@ from .schedule import (
     XrDataArrayIndexer,
     ExperimentIdStationIdPairsMap,
     default_station,
-    empty_data,
+    empty,
     from_ndarrays,
     to_ndarrays,
     to_dataframe,
