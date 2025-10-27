@@ -12,13 +12,13 @@ import numpy as np
 from astropy.time import Time
 from astropy.constants import R_earth  # type: ignore
 import pyant, pyorb
+from sorts import schedule
 from sorts.types import Float64_as_sec, Float64_as_deg, Float_as_sec, Float_as_deg
 from sorts.utils import to_datetime64_us
 from sorts.interpolation import Legendre8
 from sorts.propagator import Kepler
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
-from sorts.schedule import ScheduleOld
 from sorts.controller.tracker_controller import TrackerController
 from sorts.simulation import stx_mrx_simulation, StxMrxSimulation
 
@@ -45,7 +45,7 @@ control_slice_duration = np.timedelta64(1_000_000, "us")  # 1s
 dt_equality_thld = control_slice_duration / 2
 dsec_sampling_intv: Float_as_sec = 30
 
-_SK = ScheduleOld._K
+_SK = schedule._K
 _SuK = stx_mrx_simulation.simulation_unit._K
 
 
@@ -150,13 +150,12 @@ def south_to_north_circular_orbit_test():
     assert len(obss) == 1
     obs = obss[0]
 
-    tx_pointings = obs.index_into_schedule(tracker_sch).tx._data[_SK.pointing]
+    tx_pointings = obs.index_into_schedule(tracker_sch).tx[_SK.pointing]
     tx_pointings_normalized = tx_pointings / np.linalg.norm(tx_pointings.to_numpy(), axis=0)
 
     # assert `E` componend of tx pointings stayed around zero
     assert np.all(
-        obs.index_into_schedule(tracker_sch).tx._data[_SK.pointing].loc[_SK.e, :]
-        < float_equality_thld
+        obs.index_into_schedule(tracker_sch).tx[_SK.pointing].loc[_SK.e, :] < float_equality_thld
     )
 
     # assert `N` componend of normalized tx pointings swing between -1.0 and +1.0
@@ -182,11 +181,10 @@ def south_to_north_circular_orbit_test():
     # assert the start and end time of the observation is as expected
     # TODO: this can offset pretty large when we have large sampling time interval, is there better way to test it?
     assert abs(
-        obs.index_into_schedule(tracker_sch).rx._data[_SK.start_time][0]
-        - expected_passage_start_time
+        obs.index_into_schedule(tracker_sch).rx[_SK.start_time][0] - expected_passage_start_time
     ) < np.timedelta64(int(dsec_sampling_intv), "s")
     assert abs(
-        obs.index_into_schedule(tracker_sch).rx._data[_SK.end_time][-1] - expected_passage_end_time
+        obs.index_into_schedule(tracker_sch).rx[_SK.end_time][-1] - expected_passage_end_time
     ) < np.timedelta64(int(dsec_sampling_intv), "s")
 
     return

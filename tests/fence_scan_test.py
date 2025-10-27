@@ -22,6 +22,7 @@ import numpy as np
 from astropy.time import Time
 from astropy.constants import R_earth  # type: ignore
 import pyant, pyorb
+from sorts import schedule
 from sorts.types import Float64_as_sec, Float64_as_deg, Float_as_sec, Float_as_m
 from sorts.utils import to_datetime64_us
 from sorts.frames import enu_to_ecef
@@ -29,7 +30,6 @@ from sorts.interpolation import Legendre8
 from sorts.propagator import Kepler
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
-from sorts.schedule import ScheduleOld
 from sorts.controller.fence_scan_controller import FenceScanController
 from sorts.simulation import stx_mrx_simulation, StxMrxSimulation
 
@@ -58,7 +58,7 @@ dsec_sampling_intv: Float_as_sec = 30
 scan_ranges = np.array([10, 7e6], dtype=np.float64)
 simu_num = len(scan_ranges)
 
-_SK = ScheduleOld._K
+_SK = schedule._K
 _SuK = stx_mrx_simulation.simulation_unit._K
 
 
@@ -185,10 +185,10 @@ def south_to_north_circular_orbit_test():
 
     for obs in obss:
         rx_schedule_slice = obs.index_into_schedule(fence_sch).rx
-        simult_num = rx_schedule_slice._data[_SK.simult_num][0]
+        simult_num = rx_schedule_slice[_SK.simult_num][0]
 
         # assert that simult_num is the same over the same observation
-        assert (rx_schedule_slice._data[_SK.simult_num] == simult_num).all()
+        assert (rx_schedule_slice[_SK.simult_num] == simult_num).all()
 
         # the checks below only make sense for rx station 0
         if obs.passage["rx_station"].uid != 0:
@@ -197,19 +197,19 @@ def south_to_north_circular_orbit_test():
         # assert that we are pointing at scan_ranges
         # NOTE: this is based on the assumption that pointings at same direction but at different scan range
         #   are scheduled in in the same order as `scan_ranges`, and without gaps
-        # rx_pointing = rx_schedule_slice._data[_SK.pointing][:, 0]
+        # rx_pointing = rx_schedule_slice[_SK.pointing][:, 0]
         rx_pointing_diff = (
-            np.linalg.norm(rx_schedule_slice._data[_SK.pointing], axis=0) - scan_ranges[simult_num]
+            np.linalg.norm(rx_schedule_slice[_SK.pointing], axis=0) - scan_ranges[simult_num]
         )
         assert (rx_pointing_diff < pointing_range_equality_thld).all()
 
         # assert the start and end time of the observation is as expected
         # TODO: this can offset pretty large when we have large sampling time interval, is there better way to test it?
         assert abs(
-            rx_schedule_slice._data[_SK.start_time][0] - expected_passage_start_time
+            rx_schedule_slice[_SK.start_time][0] - expected_passage_start_time
         ) < np.timedelta64(int(dsec_sampling_intv), "s")
         assert abs(
-            rx_schedule_slice._data[_SK.end_time][-1] - expected_passage_end_time
+            rx_schedule_slice[_SK.end_time][-1] - expected_passage_end_time
         ) < np.timedelta64(int(dsec_sampling_intv), "s")
 
     # assert that at all rx_pointing from "2nd rx station, 2nd scan range"
@@ -219,8 +219,7 @@ def south_to_north_circular_orbit_test():
         for obs in obss
         if obs.passage["tx_station"].uid == tx_0_stn.uid
         and obs.passage["rx_station"].uid == rx_0_stn.uid
-        and obs.index_into_schedule(fence_sch).rx._data[_SK.simult_num][0]
-        == 1  # i.e. the 2nd scan range
+        and obs.index_into_schedule(fence_sch).rx[_SK.simult_num][0] == 1  # i.e. the 2nd scan range
     )
 
     obs_subj = next(
@@ -228,8 +227,7 @@ def south_to_north_circular_orbit_test():
         for obs in obss
         if obs.passage["tx_station"].uid == tx_0_stn.uid
         and obs.passage["rx_station"].uid == rx_1_stn.uid
-        and obs.index_into_schedule(fence_sch).rx._data[_SK.simult_num][0]
-        == 1  # i.e. the 2nd scan range
+        and obs.index_into_schedule(fence_sch).rx[_SK.simult_num][0] == 1  # i.e. the 2nd scan range
     )
 
     obs_ref_rx_station = obs_ref.passage["rx_station"]

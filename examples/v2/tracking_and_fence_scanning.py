@@ -7,7 +7,7 @@ from pathlib import Path
 from astropy.time import Time
 import logging
 import sorts
-from sorts import equidistant_sampling
+from sorts import equidistant_sampling, schedule
 from sorts.interpolation import Legendre8, Linear
 from sorts.population import master_catalog, master_catalog_factor
 from sorts.propagator import SGP4
@@ -15,8 +15,8 @@ from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.radar.radars import get_radar
 from sorts.utils import to_datetime64_us, to_pydatetime
+from sorts.schedule.priority_scheduling import priority_scheduling
 from sorts.controller import TrackerController, FenceScanController
-from sorts.schedule import ScheduleOld
 from sorts.simulation import StxMrxSimulation
 
 # import for plottings
@@ -143,7 +143,7 @@ fence_scan_ctrl = FenceScanController.from_scan_spec(
 
 tracker_sch = tracker_ctrl.generate(start_time, end_time)
 fence_sch = fence_scan_ctrl.generate(start_time, end_time)
-master_sch = ScheduleOld.priority_scheduling(
+master_sch = priority_scheduling(
     [tracker_sch, fence_sch],
     {
         **tracker_ctrl.get_experiment_id_station_id_pairs_map(),

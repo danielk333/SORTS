@@ -2,8 +2,9 @@ import numpy.typing as npt
 import pandas as pd
 import bokeh.models as bokeh_models
 import bokeh.layouts as bokeh_layouts
+from sorts import schedule
 from sorts.types import EcefStates, Datetime64_us
-from sorts.schedule import ScheduleOld
+from sorts.schedule import Schedule
 from .schedule_plot import _schedule_plot_from_cds
 from .azel_skyplot import _azel_skyplot_cds_cols, _azel_skyplot_from_cds
 from .ecef_states_positions_plot import (
@@ -13,18 +14,18 @@ from .ecef_states_positions_plot import (
 
 
 def _radar_schedule_ecef_position_plot_cds_df(
-    ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], sch: ScheduleOld
+    ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], sch: Schedule
 ):
-    _SK = ScheduleOld._K
+    _SK = schedule._K
 
-    df = sch.to_dataframe()
+    df = schedule.to_dataframe(sch)
 
     # bokeh requires str type for categorical axis
     df[_SK.exp_num] = df[_SK.exp_num].astype(str)
 
     # insert columns for azel_skyplot
     azel_skyplot_cols = _azel_skyplot_cds_cols(
-        sch._data[_SK.pointing][0].to_numpy(), sch._data[_SK.pointing][1].to_numpy()
+        sch[_SK.pointing][0].to_numpy(), sch[_SK.pointing][1].to_numpy()
     )
     for k, v in azel_skyplot_cols.items():
         df[k] = v
@@ -42,9 +43,9 @@ def _radar_schedule_ecef_position_plot_cds_df(
 
 
 def radar_schedule_ecef_position_plot(
-    ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], sch: ScheduleOld
+    ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], sch: Schedule
 ):
-    _SK = ScheduleOld._K
+    _SK = schedule._K
 
     df = _radar_schedule_ecef_position_plot_cds_df(ecefs=ecefs, ecefs_time=ecefs_time, sch=sch)
 

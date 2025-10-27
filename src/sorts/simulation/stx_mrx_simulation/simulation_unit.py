@@ -5,12 +5,13 @@ import numpy.typing as npt
 import pandas as pd
 import xarray as xr
 from sorts import types, radar, schedule
+from sorts.types import TxRxTuple
 from sorts.utils import assert_class_attributes_equal_to, to_datetime64_us
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.signals import hard_target_snr
 from sorts.interpolation import Interpolator
-from sorts.schedule import ExperimentDetailMap, ScheduleOld
+from sorts.schedule import ExperimentDetailMap, Schedule
 from sorts.simulation.types import Passage
 
 
@@ -55,7 +56,7 @@ class _K:
 
 assert_class_attributes_equal_to(_K, t.get_args(Key))
 
-_SK = ScheduleOld._K
+_SK = schedule._K
 """Internal helper for accessing string keys consistently"""
 
 State = t.NewType("State", xr.Dataset)
@@ -101,7 +102,7 @@ def empty_state() -> State:
         data_vars={
             # NOTE: we used `.loc` instead of `reindex` here because we cannot get `reindex` working
             # TODO: investigate why `reindex` won't work
-            #   not working: `tx_sch._data[_SK.pointing].reindex({_SK.multi_index: [(np.datetime64("2025-01-01 02:45:01", "us"), 0, 0), ...]})`
+            #   not working: `tx_sch[_SK.pointing].reindex({_SK.multi_index: [(np.datetime64("2025-01-01 02:45:01", "us"), 0, 0), ...]})`
             _K.tx_pointing: (
                 (_K.enu, _K.multi_index),
                 np.empty((3, 0), dtype=np.float64),
@@ -184,7 +185,7 @@ class FromPassagesOverTxRxStationPairParam(t.TypedDict):
     spobj_interp: Interpolator
     tx_station: Station
     rx_station: Station
-    schedule: ScheduleOld
+    schedule: Schedule
     exp_detail_map: ExperimentDetailMap
 
 
@@ -245,8 +246,8 @@ class SimulationUnit:
         # TODO: add test case for empty case?
         if (
             len(passages) == 0
-            or not (param["schedule"]._data[_SK.stn_num] == tx_station.uid).any()
-            or not (param["schedule"]._data[_SK.stn_num] == rx_station.uid).any()
+            or not (param["schedule"][_SK.stn_num] == tx_station.uid).any()
+            or not (param["schedule"][_SK.stn_num] == rx_station.uid).any()
         ):
             return cls(
                 id=id,
@@ -261,10 +262,10 @@ class SimulationUnit:
 
         # NOTE: xarray simplify/collapse MultiIndex when filtering a level to an exact value,
         #   we filter on the top level "multi_index' with a tuple here to prevent it
-        tx_schdata = param["schedule"]._data.loc[
+        tx_schdata = param["schedule"].loc[
             {_SK.multi_index: (slice(None), tx_station.uid, slice(None), slice(None))}
         ]
-        rx_schdata = param["schedule"]._data.loc[
+        rx_schdata = param["schedule"].loc[
             {_SK.multi_index: (slice(None), rx_station.uid, slice(None), slice(None))}
         ]
 
@@ -298,7 +299,7 @@ class SimulationUnit:
             data_vars={
                 # NOTE: we used `.loc` instead of `reindex` here because we cannot get `reindex` working
                 # TODO: investigate why `reindex` won't work
-                #   not working: `tx_sch._data[_SK.pointing].reindex({_SK.multi_index: [(np.datetime64("2025-01-01 02:45:01", "us"), 0, 0), ...]})`
+                #   not working: `tx_sch[_SK.pointing].reindex({_SK.multi_index: [(np.datetime64("2025-01-01 02:45:01", "us"), 0, 0), ...]})`
                 _K.tx_pointing: (
                     (_K.enu, _K.multi_index),
                     tx_schdata[_SK.pointing]
@@ -418,7 +419,7 @@ ObservationStationScheduleIndexer = tuple[
     schedule.SimultaneousNum,
     npt.NDArray[types.Datetime64_us],
 ]
-ObservationScheduleIndexer = types.TxRxTuple[
+ObservationScheduleIndexer = TxRxTuple[
     ObservationStationScheduleIndexer, ObservationStationScheduleIndexer
 ]
 ObservationStateIndexer = tuple[
@@ -474,40 +475,34 @@ class Observation:
 
         return time_arr
 
-    def index_into_schedule(
-        self, schedule: ScheduleOld
-    ) -> types.TxRxTuple[ScheduleOld, ScheduleOld]:
+    def index_into_schedule(self, sch: Schedule) -> TxRxTuple[Schedule, Schedule]:
         """Returns subset of schedules, in `(tx_scheule, tx_schedule` that corresponds to the observation"""
 
-        tx_sch_obs = schedule.filter_by_time_range(self.passage["time_range"])
-        tx_sch_obs = ScheduleOld(
-            tx_sch_obs._data.loc[
-                {
-                    _SK.multi_index: (
-                        self.exp_id,
-                        self.passage["tx_station"].uid,
-                        0,  # NOTE: we only support single simultaneous tx pointing
-                        slice(None),
-                    )
-                }
-            ]
-        )
+        tx_sch_obs = schedule.filter_by_time_range(sch, self.passage["time_range"])
+        tx_sch_obs = tx_sch_obs.loc[
+            {
+                _SK.multi_index: (
+                    self.exp_id,
+                    self.passage["tx_station"].uid,
+                    0,  # NOTE: we only support single simultaneous tx pointing
+                    slice(None),
+                )
+            }
+        ]
 
-        rx_sch_obs = schedule.filter_by_time_range(self.passage["time_range"])
-        rx_sch_obs = ScheduleOld(
-            rx_sch_obs._data.loc[
-                {
-                    _SK.multi_index: (
-                        self.exp_id,
-                        self.passage["rx_station"].uid,
-                        self.simult_num,
-                        slice(None),
-                    )
-                }
-            ]
-        )
+        rx_sch_obs = schedule.filter_by_time_range(sch, self.passage["time_range"])
+        rx_sch_obs = rx_sch_obs.loc[
+            {
+                _SK.multi_index: (
+                    self.exp_id,
+                    self.passage["rx_station"].uid,
+                    self.simult_num,
+                    slice(None),
+                )
+            }
+        ]
 
-        return types.TxRxTuple(tx=tx_sch_obs, rx=rx_sch_obs)
+        return TxRxTuple(tx=tx_sch_obs, rx=rx_sch_obs)
 
     def get_state_slice(self) -> State:
         """Get the subset of `State` data the corresponds to the the observation"""

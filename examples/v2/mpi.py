@@ -18,6 +18,7 @@ from sorts import (
     controller,
     schedule,
 )
+from sorts.schedule.priority_scheduling import priority_scheduling
 from sorts.simulation import stx_mrx_simulation
 
 logging.basicConfig(level=logging.DEBUG)
@@ -121,7 +122,7 @@ def prepare_simulation_environment(
 
     tracker_sch = tracker_ctrl.generate(start_time, end_time)
     fence_sch = fence_scan_ctrl.generate(start_time, end_time)
-    master_sch = schedule.ScheduleOld.priority_scheduling(
+    master_sch = priority_scheduling(
         [tracker_sch, fence_sch],
         {
             **tracker_ctrl.get_experiment_id_station_id_pairs_map(),

@@ -29,7 +29,7 @@ from . import schedule
 from . import controller
 from . import simulation
 
-from .schedule import ScheduleOld, ExperimentDetail
+from .schedule import Schedule, ExperimentDetail
 from .controller import TrackerController, FenceScanController
 from .simulation import StxMrxSimulation
 

@@ -57,24 +57,6 @@ A xarray `Dataset` of:
   ```
 """
 
-ScheduleData = xr.Dataset
-"""
-A xarray `Dataset` of:
-  ```
-  Dimensions:      (multi_index: n, enu: 3)
-  Coordinates:
-    * multi_index  (multi_index) object MultiIndex ('exp_num', 'stn_num', 'simult_num', 'start_time')
-    * start_time   (multi_index) datetime64[us]
-    * exp_num      (multi_index) int16
-    * stn_num      (multi_index) int16
-    * simult_num   (multi_index) int16
-    * enu          (enu) 'e' 'n' 'u'
-  Data variables:
-      end_time     (multi_index) datetime64[us]
-      pointing     (enu, multi_index) float64
-  ```
-"""
-
 SimultaneousNum = int
 """An int16 that corresponds to the order in simultaneous pointings"""
 
@@ -152,7 +134,7 @@ def empty_data() -> Schedule:
         names=(_K.exp_num, _K.stn_num, _K.simult_num, _K.start_time),
     )
 
-    sch_data = xr.Dataset(
+    sch = xr.Dataset(
         coords={
             **xr.Coordinates.from_pandas_multiindex(multi_index, _K.multi_index),
             _K.enu: [_K.e, _K.n, _K.u],
@@ -163,16 +145,16 @@ def empty_data() -> Schedule:
         },
     )
 
-    return Schedule(sch_data)
+    return Schedule(sch)
 
 
-def from_ndarrays(data: ScheduleNdarrayDict) -> ScheduleData:
+def from_ndarrays(data: ScheduleNdarrayDict) -> Schedule:
     multi_index = pd.MultiIndex.from_arrays(
         [data[_K.exp_num], data[_K.stn_num], data[_K.simult_num], data[_K.start_time]],
         names=(_K.exp_num, _K.stn_num, _K.simult_num, _K.start_time),
     )
 
-    sch_data = xr.Dataset(
+    sch = xr.Dataset(
         coords={
             **xr.Coordinates.from_pandas_multiindex(multi_index, _K.multi_index),
             _K.enu: [_K.e, _K.n, _K.u],
@@ -183,30 +165,30 @@ def from_ndarrays(data: ScheduleNdarrayDict) -> ScheduleData:
         },
     )
 
-    return sch_data
+    return Schedule(sch)
 
 
-def to_ndarrays(data: ScheduleData) -> ScheduleNdarrayDict:
+def to_ndarrays(sch: Schedule) -> ScheduleNdarrayDict:
     arr_dict: ScheduleNdarrayDict = {
-        _K.start_time: data[_K.start_time].to_numpy(),
-        _K.end_time: data[_K.end_time].to_numpy(),
-        _K.exp_num: data[_K.exp_num].to_numpy(),
-        _K.stn_num: data[_K.stn_num].to_numpy(),
-        _K.simult_num: data[_K.simult_num].to_numpy(),
-        _K.pointing: data[_K.pointing].to_numpy(),
+        _K.start_time: sch[_K.start_time].to_numpy(),
+        _K.end_time: sch[_K.end_time].to_numpy(),
+        _K.exp_num: sch[_K.exp_num].to_numpy(),
+        _K.stn_num: sch[_K.stn_num].to_numpy(),
+        _K.simult_num: sch[_K.simult_num].to_numpy(),
+        _K.pointing: sch[_K.pointing].to_numpy(),
     }
 
     return arr_dict
 
 
 # TODO: remove?
-def to_dataframe(ds: ScheduleData) -> pd.DataFrame:
+def to_dataframe(sch: Schedule) -> pd.DataFrame:
     df = pd.concat(
         t.cast(
             list[pd.DataFrame],
             [
-                ds[_K.end_time].transpose().to_pandas(),
-                ds[_K.pointing].transpose().to_pandas(),
+                sch[_K.end_time].transpose().to_pandas(),
+                sch[_K.pointing].transpose().to_pandas(),
             ],
         ),
         axis=1,
@@ -216,100 +198,25 @@ def to_dataframe(ds: ScheduleData) -> pd.DataFrame:
     return df
 
 
-def filter_by_time_range(ds: ScheduleData, time_range: types.TimeRange_us) -> ScheduleData:
-    mask = (ds[_K.start_time] >= time_range[0]) & (ds[_K.end_time] <= time_range[1])
+def filter_by_time_range(sch: Schedule, time_range: types.TimeRange_us) -> Schedule:
+    mask = (sch[_K.start_time] >= time_range[0]) & (sch[_K.end_time] <= time_range[1])
 
-    ds_masked = ds[{_K.multi_index: mask}]
+    ds_masked = sch[{_K.multi_index: mask}]
 
     return ds_masked
 
 
 # TODO: this is very similar to `rx_time_mask: xr.DataArray = reduce(...)` in `simulation_unit.py`,
 #   maybe one of them can be dissolved?
-def filter_by_time_ranges(
-    ds: ScheduleData, time_ranges: t.Sequence[types.TimeRange_us]
-) -> ScheduleData:
+def filter_by_time_ranges(sch: Schedule, time_ranges: t.Sequence[types.TimeRange_us]) -> Schedule:
     resultant_mask: xr.DataArray = reduce(
         xr.ufuncs.logical_or,
         [
-            (ds[_K.start_time] >= time_range[0]) & (ds[_K.end_time] <= time_range[1])
+            (sch[_K.start_time] >= time_range[0]) & (sch[_K.end_time] <= time_range[1])
             for time_range in time_ranges
         ],
     )
 
-    ds_masked = ds[{_K.multi_index: resultant_mask}]
+    ds_masked = sch[{_K.multi_index: resultant_mask}]
 
     return ds_masked
-
-
-class ScheduleOld:
-    """
-    Provides methods for manipuating schedule data and enforce that the required columns/data are set.
-    Also contains some related metadata.
-
-    Schedule data is stored in the private attribute `_data`,
-    and is not intended for consumption from outside of this library.
-
-    NOTE:
-        We are still evaluating which backing data structure to use and is subject to change
-    """
-
-    _K = _K
-    """shortcut to module attribute"""
-
-    def __init__(self, data: ScheduleData):
-        self._data = data
-
-    @classmethod
-    def from_ndarrays(cls, data: ScheduleNdarrayDict) -> t.Self:
-        return cls(from_ndarrays(data))
-
-    @classmethod
-    def empty(cls) -> t.Self:
-        return cls(data=empty_data())
-
-    @classmethod
-    def priority_scheduling(
-        cls, schs: t.Sequence[ScheduleOld], exp_id_stn_id_pairs_map: ExperimentIdStationIdPairsMap
-    ):
-        """
-        Merge a sequence of schedules for a single station into one,
-        schedule with smaller index in the sequence is given priority over those with larger index.
-
-        Note: It is assumed (and not checked) that each of the schedule itself does not contain overlapping entries.
-        """
-
-        # NOTE: used lazy import here to avoid circular import
-        from . import priority_scheduling
-
-        if len(schs) == 0:
-            logger.warning(
-                f"An empty `Schedule` is being generated by `{priority_scheduling.__name__}`."
-                + "This happens when an empty `Schedule` list is being passed as argument, which is usually not intended."
-            )
-            return cls.empty()
-
-        resultant_sch_data = priority_scheduling.priority_scheduling(
-            [Schedule(sch._data) for sch in schs], exp_id_stn_id_pairs_map
-        )
-
-        return cls(data=resultant_sch_data)
-
-    def to_ndarrays(self) -> ScheduleNdarrayDict:
-        arr_dict = to_ndarrays(self._data)
-        return arr_dict
-
-    def to_dataframe(self) -> pd.DataFrame:
-        return to_dataframe(self._data)
-
-    def filter_by_time_range(self, time_range: types.TimeRange_us) -> t.Self:
-        cls = type(self)
-        filtered_data = filter_by_time_range(self._data, time_range)
-        return cls(data=filtered_data)
-
-    def filter_by_time_ranges(self, time_ranges: t.Sequence[types.TimeRange_us]) -> t.Self:
-        cls = type(self)
-
-        filtered_datas = filter_by_time_ranges(self._data, time_ranges)
-
-        return cls(data=filtered_datas)
