@@ -3,6 +3,7 @@ import numpy as np
 import numpy.typing as npt
 import bokeh.plotting as bp
 import bokeh.models as bokeh_models
+from sorts import schedule
 from sorts.types import Datetime_Like, Datetime64_us
 from sorts.utils import to_datetime64_us
 from sorts.schedule import Schedule
@@ -16,7 +17,7 @@ def _schedule_plot_from_cds(
 ):
     """An internal ver of `schedule_plot` that takes a bokeh `ColumnDataSource`"""
 
-    _SK = Schedule._K
+    _SK = schedule._K
 
     bar = bp.figure(
         y_range=y_range,  # type: ignore
@@ -80,9 +81,9 @@ def schedule_plot(
     Without aggregations, a good starting point is a 5 minutes time range.
     """
 
-    _SK = Schedule._K
+    _SK = schedule._K
 
-    df = sch.to_dataframe()
+    df = schedule.to_dataframe(sch)
 
     start_time_: Datetime64_us = (
         to_datetime64_us(start_time) if start_time is not None else df[_SK.start_time].min()

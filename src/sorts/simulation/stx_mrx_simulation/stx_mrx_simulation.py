@@ -151,8 +151,8 @@ def derive_simulation_unit_params(
             tx_stn = spec["station_map"][stn_id_pair[0]]
             rx_stn = spec["station_map"][stn_id_pair[1]]
 
-            filtered_sch = spec["schedule"].filter_by_time_ranges(
-                [ps["time_range"] for ps in passages]
+            filtered_sch = schedule.filter_by_time_ranges(
+                spec["schedule"], [ps["time_range"] for ps in passages]
             )
 
             params.append(
@@ -240,7 +240,7 @@ def prepare_simulation_unit_params(spec: Spec) -> list[FromPassagesOverTxRxStati
     )
     # filter away param with empty schedule
     sim_units_param = [
-        p for p in sim_units_param if len(p["schedule"]._data[Schedule._K.multi_index]) > 0
+        p for p in sim_units_param if len(p["schedule"][schedule._K.multi_index]) > 0
     ]
     logger.info(f"prepare_simulation_unit_params done")
 
@@ -273,7 +273,7 @@ def mpi_master_proc_loop(
 
             idle_worker_idx = is_worker_idle_list.index(True)
             idle_worker_rank = idle_worker_idx + 1
-            # TODO: check if the  (full ScheduleData + indexer for SimulationUnit) or (just the relevant slices of ScheduleData) are sent
+            # TODO: check if the  (full Schedule + indexer for SimulationUnit) or (just the relevant slices of Schedule) are sent
             comm.send(
                 WorkerJobAssignment(
                     param=sim_units_param[next_sim_unit_param_idx], persist_dir=persist_dir

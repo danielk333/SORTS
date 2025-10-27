@@ -4,7 +4,7 @@ from .schedule import (
     CoordKey,
     Key,
     _K,
-    ScheduleData,
+    Schedule,
     ExperimentId,
     SimultaneousNum,
     ExperimentDetail,
@@ -19,7 +19,6 @@ from .schedule import (
     to_dataframe,
     filter_by_time_range,
     filter_by_time_ranges,
-    Schedule,
 )
 
 # TODO: adj module and/or func name so func 'priority_scheduling' can be exported here

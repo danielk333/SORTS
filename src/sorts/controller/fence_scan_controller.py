@@ -81,7 +81,7 @@ def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
     tx_slice_start_time_masked = tx_slice_start_time[tx_mask]
     tx_pointing_masked = tx_pointing[:, tx_mask]
 
-    tx_schdata = schedule.from_ndarrays(
+    tx_sch = schedule.from_ndarrays(
         {
             "start_time": tx_slice_start_time_masked,
             "end_time": tx_slice_start_time_masked + spec["exp_detail"]["slice_duration"],
@@ -99,7 +99,7 @@ def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
     # TODO: `rx_schedule_size` is a bit of a mismisnomer, as out-of-range entries might later be removed
     rx_slice_start_time = tx_slice_start_time.repeat(len(spec["scan_range"]))
     rx_schedule_size = state["tx_schedule_size"] * len(spec["scan_range"])
-    rx_schdatas: list[schedule.ScheduleData] = []
+    rx_schs: list[schedule.Schedule] = []
     tx_pointings_of_a_cycle_without_translation_ecef: EcefCoordinates = enu_to_ecef(
         lat=spec["tx_station"].ecef_lat,
         lon=spec["tx_station"].ecef_lon,
@@ -143,7 +143,7 @@ def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
         rx_pointing_masked = rx_pointings_enu[:, rx_mask]
         rx_pointings_simult_num_masked = rx_pointings_simult_num[rx_mask]
 
-        rx_schdata = schedule.from_ndarrays(
+        rx_sch = schedule.from_ndarrays(
             {
                 "start_time": rx_slice_start_time_masked,
                 "end_time": rx_slice_start_time_masked + spec["exp_detail"]["slice_duration"],
@@ -156,14 +156,14 @@ def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
             }
         )
 
-        rx_schdatas.append(rx_schdata)
+        rx_schs.append(rx_sch)
 
-    resultant_schdata = xr.concat([tx_schdata, *rx_schdatas], dim=schedule._K.multi_index)
-    resultant_schdata = resultant_schdata.sortby(schedule._K.start_time)
+    resultant_sch = xr.concat([tx_sch, *rx_schs], dim=schedule._K.multi_index)
+    resultant_sch = resultant_sch.sortby(schedule._K.start_time)
     # TODO: re-eval if it is too brutal
     # there will be duplicates if the tx station is also a rx station, we drop the duplicates here
-    resultant_schdata = resultant_schdata.drop_duplicates(schedule._K.multi_index)
-    output = schedule.Schedule(resultant_schdata)
+    resultant_sch = resultant_sch.drop_duplicates(schedule._K.multi_index)
+    output = resultant_sch
 
     return output
 

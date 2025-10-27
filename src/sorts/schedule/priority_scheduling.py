@@ -6,6 +6,7 @@ import pandas as pd
 import xarray as xr
 from sorts import utils
 from . import schedule
+from .schedule import Schedule
 
 
 logger = logging.getLogger(__name__)
@@ -35,95 +36,91 @@ class _IK:
 utils.assert_class_attributes_equal_to(_IK, t.get_args(DsIntermediateVarKey))
 
 
-def _inject_intermediate_columns(sch_data: schedule.ScheduleData) -> schedule.ScheduleData:
-    sch_data[_IK.cummax_start_time] = xr.full_like(
-        sch_data[_SK.multi_index], np.datetime64("NaT"), dtype="datetime64[us]"
+def _inject_intermediate_columns(sch: Schedule) -> Schedule:
+    sch[_IK.cummax_start_time] = xr.full_like(
+        sch[_SK.multi_index], np.datetime64("NaT"), dtype="datetime64[us]"
     )
-    sch_data[_IK.cummax_end_time] = xr.full_like(
-        sch_data[_SK.multi_index], np.datetime64("NaT"), dtype="datetime64[us]"
+    sch[_IK.cummax_end_time] = xr.full_like(
+        sch[_SK.multi_index], np.datetime64("NaT"), dtype="datetime64[us]"
     )
-    sch_data[_IK.is_overlaped] = xr.full_like(sch_data[_SK.multi_index], False, dtype=np.bool)
+    sch[_IK.is_overlaped] = xr.full_like(sch[_SK.multi_index], False, dtype=np.bool)
 
-    return sch_data
+    return sch
 
 
-def _propagate_cummax_start_time_cummax_end_time(
-    merged_sch_data: schedule.ScheduleData,
-) -> schedule.ScheduleData:
-    merged_sch_data[_IK.cummax_start_time] = (
-        t.cast(pd.Series, merged_sch_data[_IK.cummax_start_time].to_pandas())
+def _propagate_cummax_start_time_cummax_end_time(merged_sch: Schedule) -> Schedule:
+    merged_sch[_IK.cummax_start_time] = (
+        t.cast(pd.Series, merged_sch[_IK.cummax_start_time].to_pandas())
         .groupby(level=[_SK.stn_num])
         .ffill()
     )
-    merged_sch_data[_IK.cummax_end_time] = (
-        t.cast(pd.Series, merged_sch_data[_IK.cummax_end_time].to_pandas())
+    merged_sch[_IK.cummax_end_time] = (
+        t.cast(pd.Series, merged_sch[_IK.cummax_end_time].to_pandas())
         .groupby(level=[_SK.stn_num])
         .ffill()
     )
 
-    return merged_sch_data
+    return merged_sch
 
 
-def _remove_entries_with_time_clash(
-    merged_sch_data: schedule.ScheduleData, incoming_sch_data: schedule.ScheduleData
-) -> schedule.ScheduleData:
+def _remove_entries_with_time_clash(merged_sch_: Schedule, incoming_sch: Schedule) -> Schedule:
     # NOTE:
     #   - the `allowed_start_time` has the previous `end_time`;
     #     for top values that have no corresponding pervious values, `min_datetime64_us` is used
     #   - the `allowed_end_time` has the next `start_time`;
     #     for bottom values that have no corresponding next values, `max_datetime64_us` is used
     allowed_start_time = (
-        t.cast(pd.Series, merged_sch_data[_IK.cummax_end_time].to_pandas())
+        t.cast(pd.Series, merged_sch_[_IK.cummax_end_time].to_pandas())
         .groupby(level=_SK.stn_num)
         .shift(+1, fill_value=min_datetime64_us)
     )
     allowed_end_time = (
-        t.cast(pd.Series, merged_sch_data[_IK.cummax_start_time].to_pandas())
+        t.cast(pd.Series, merged_sch_[_IK.cummax_start_time].to_pandas())
         .groupby(level=_SK.stn_num)
         .shift(-1, fill_value=max_datetime64_us)
     )
 
     # calc bool mask for overlapping just for the new/incoming entries
-    is_over_allowed_start_time = merged_sch_data[_SK.start_time].loc[
-        {_SK.multi_index: incoming_sch_data[_SK.multi_index]}
-    ] < allowed_start_time.reindex(incoming_sch_data[_SK.multi_index].to_pandas().index)
+    is_over_allowed_start_time = merged_sch_[_SK.start_time].loc[
+        {_SK.multi_index: incoming_sch[_SK.multi_index]}
+    ] < allowed_start_time.reindex(incoming_sch[_SK.multi_index].to_pandas().index)
 
-    is_over_allowed_end_time = merged_sch_data[_SK.end_time].loc[
-        {_SK.multi_index: incoming_sch_data[_SK.multi_index]}
-    ] > allowed_end_time.reindex(incoming_sch_data[_SK.multi_index].to_pandas().index)
+    is_over_allowed_end_time = merged_sch_[_SK.end_time].loc[
+        {_SK.multi_index: incoming_sch[_SK.multi_index]}
+    ] > allowed_end_time.reindex(incoming_sch[_SK.multi_index].to_pandas().index)
 
     # NOTE: we checked for is_overlaped instead of is_allowed
     #   so that it is safe agaisnt comparison with `NaT`, which always return false
     #   (and we assume `NaT` mean "no restructions" for both allowed_start_time and allowed_end_time)
-    merged_sch_data[_IK.is_overlaped].loc[{_SK.multi_index: incoming_sch_data[_SK.multi_index]}] = (
+    merged_sch_[_IK.is_overlaped].loc[{_SK.multi_index: incoming_sch[_SK.multi_index]}] = (
         is_over_allowed_start_time
     ) | is_over_allowed_end_time
 
-    merged_sch_data = merged_sch_data.loc[{_SK.multi_index: ~merged_sch_data[_IK.is_overlaped]}]
+    merged_sch_ = merged_sch_.loc[{_SK.multi_index: ~merged_sch_[_IK.is_overlaped]}]
 
-    return merged_sch_data
+    return merged_sch_
 
 
 def _remove_entries_without_corresponding_tx(
-    merged_sch_data: schedule.ScheduleData,
-    incoming_sch_data: schedule.ScheduleData,
+    merged_sch: Schedule,
+    incoming_sch: Schedule,
     exp_id_stn_id_pairs_map: schedule.ExperimentIdStationIdPairsMap,
-) -> schedule.ScheduleData:
-    exp_ids: npt.NDArray[np.int16] = np.unique(incoming_sch_data[_SK.exp_num].to_numpy())
+) -> Schedule:
+    exp_ids: npt.NDArray[np.int16] = np.unique(incoming_sch[_SK.exp_num].to_numpy())
     for exp_id in exp_ids:
         stn_pairs = exp_id_stn_id_pairs_map[exp_id]
 
         for tx_stn_num, rx_stn_num in stn_pairs:
             incoming_tx_entries = t.cast(
                 pd.Series,
-                incoming_sch_data.loc[
-                    {_SK.multi_index: (exp_id, tx_stn_num, slice(None), slice(None))}
-                ][_SK.multi_index].to_pandas(),
+                incoming_sch.loc[{_SK.multi_index: (exp_id, tx_stn_num, slice(None), slice(None))}][
+                    _SK.multi_index
+                ].to_pandas(),
             )
 
-            is_tx_dropped = ~incoming_tx_entries.isin(merged_sch_data[_SK.multi_index].to_pandas())
+            is_tx_dropped = ~incoming_tx_entries.isin(merged_sch[_SK.multi_index].to_pandas())
             dropped_tx_start_time_idx = (
-                incoming_sch_data.loc[{_SK.multi_index: is_tx_dropped[is_tx_dropped == True].index}]
+                incoming_sch.loc[{_SK.multi_index: is_tx_dropped[is_tx_dropped == True].index}]
                 .indexes[_SK.multi_index]
                 .get_level_values(_SK.start_time)
             )
@@ -136,7 +133,7 @@ def _remove_entries_without_corresponding_tx(
             #   and followed by an intersection with 'dropped_tx_start_time_idx' later when dropping
             try:
                 rx_start_time_of_the_exp_idx = (
-                    merged_sch_data.loc[
+                    merged_sch.loc[
                         {
                             _SK.multi_index: (
                                 exp_id,
@@ -156,7 +153,7 @@ def _remove_entries_without_corresponding_tx(
 
             if rx_start_time_of_the_exp_idx is not None:
                 # NOTE: cannot drop using `.drop_sel` directly for some reason, so we do a selection by `.loc` first
-                dropping = merged_sch_data.loc[
+                dropping = merged_sch.loc[
                     {
                         _SK.multi_index: (
                             exp_id,
@@ -166,37 +163,32 @@ def _remove_entries_without_corresponding_tx(
                         )
                     }
                 ]
-                merged_sch_data = merged_sch_data.drop_sel(
-                    {_SK.multi_index: dropping[_SK.multi_index]}
-                )
+                merged_sch = merged_sch.drop_sel({_SK.multi_index: dropping[_SK.multi_index]})
             else:
                 continue
 
-    return merged_sch_data
+    return merged_sch
 
 
-def _update_cummax_start_time_cummax_end_time(
-    merged_sch_data: schedule.ScheduleData,
-) -> schedule.ScheduleData:
-    merged_sch_data[_IK.cummax_start_time] = (
-        t.cast(pd.Series, merged_sch_data[_SK.start_time].to_pandas())
+def _update_cummax_start_time_cummax_end_time(merged_sch: Schedule) -> Schedule:
+    merged_sch[_IK.cummax_start_time] = (
+        t.cast(pd.Series, merged_sch[_SK.start_time].to_pandas())
         .groupby(level=[_SK.stn_num])
         .cummax()
     )
 
-    merged_sch_data[_IK.cummax_end_time] = (
-        t.cast(pd.Series, merged_sch_data[_SK.end_time].to_pandas())
+    merged_sch[_IK.cummax_end_time] = (
+        t.cast(pd.Series, merged_sch[_SK.end_time].to_pandas())
         .groupby(level=[_SK.stn_num])
         .cummax()
     )
 
-    return merged_sch_data
+    return merged_sch
 
 
 def priority_scheduling(
-    sch_datas: t.Sequence[schedule.ScheduleData],
-    exp_id_stn_id_pairs_map: schedule.ExperimentIdStationIdPairsMap,
-) -> schedule.ScheduleData:
+    schs: t.Sequence[Schedule], exp_id_stn_id_pairs_map: schedule.ExperimentIdStationIdPairsMap
+) -> Schedule:
     """
     Merge a sequence of schedule data for a single station into one,
     schedule with smaller index in the sequence is given priority over those with larger index.
@@ -216,30 +208,38 @@ def priority_scheduling(
     #   2.3. filter out new rows that have conflicts
     #   2.3. update `cummax_start_time`, `cummax_end_time`
 
+    # early return for empty case
+    if len(schs) == 0:
+        logger.warning(
+            f"An empty `Schedule` is being generated by `{priority_scheduling.__name__}`."
+            + "This happens when an empty `Schedule` list is being passed as argument, which is usually not intended."
+        )
+        return schedule.empty_data()
+
     # init an empty dataset for a schedule and add some columns, will be used store merged schedule
-    merged_sch_data = schedule.empty_data()
-    if len(sch_datas) > 0:
-        merged_sch_data.attrs = sch_datas[0].attrs
-    merged_sch_data = _inject_intermediate_columns(merged_sch_data)
-    for incoming_sch_data in sch_datas:
-        incoming_sch_data = _inject_intermediate_columns(incoming_sch_data)
+    merged_sch = schedule.empty_data()
+    if len(schs) > 0:
+        merged_sch.attrs = schs[0].attrs
+    merged_sch = _inject_intermediate_columns(merged_sch)
+    for incoming_sch in schs:
+        incoming_sch = _inject_intermediate_columns(incoming_sch)
 
         # merge and then sort the schedule
         # we use a "stable" sorting algo to retains relative order,
         # so the df will be in order of start_time, then priority after sorting
         # also note that attrs merged in the way that former schedule has higher priority than latter,
         # consistent with the func `priority_scheduling`
-        merged_sch_data = xr.concat([merged_sch_data, incoming_sch_data], dim=_SK.multi_index)
-        merged_sch_data = merged_sch_data.sortby(_SK.start_time)
+        merged_sch = xr.concat([merged_sch, incoming_sch], dim=_SK.multi_index)
+        merged_sch = merged_sch.sortby(_SK.start_time)
 
-        merged_sch_data = _propagate_cummax_start_time_cummax_end_time(merged_sch_data)
-        merged_sch_data = _remove_entries_with_time_clash(merged_sch_data, incoming_sch_data)
-        merged_sch_data = _remove_entries_without_corresponding_tx(
-            merged_sch_data, incoming_sch_data, exp_id_stn_id_pairs_map
+        merged_sch = _propagate_cummax_start_time_cummax_end_time(merged_sch)
+        merged_sch = _remove_entries_with_time_clash(merged_sch, incoming_sch)
+        merged_sch = _remove_entries_without_corresponding_tx(
+            merged_sch, incoming_sch, exp_id_stn_id_pairs_map
         )
-        merged_sch_data = _update_cummax_start_time_cummax_end_time(merged_sch_data)
+        merged_sch = _update_cummax_start_time_cummax_end_time(merged_sch)
 
-    merged_sch_data = merged_sch_data.drop_vars(
+    merged_sch = merged_sch.drop_vars(
         [
             _IK.cummax_start_time,
             _IK.cummax_end_time,
@@ -247,4 +247,4 @@ def priority_scheduling(
         ]
     )
 
-    return merged_sch_data
+    return merged_sch

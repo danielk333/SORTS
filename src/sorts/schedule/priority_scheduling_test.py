@@ -1,6 +1,7 @@
 import numpy as np
 import xarray as xr
 from sorts import schedule
+from sorts.schedule import Schedule
 from sorts.schedule.priority_scheduling import priority_scheduling
 
 
@@ -18,7 +19,7 @@ def priority_scheduling_interleaved_schedule_test():
     _SK = schedule._K
 
     # 30min long, 2hr intv
-    sch_data_a = schedule.from_ndarrays(
+    sch_a = schedule.from_ndarrays(
         {
             _SK.start_time: np.arange(
                 np.datetime64("2025-01-01", "s"),
@@ -36,9 +37,10 @@ def priority_scheduling_interleaved_schedule_test():
             _SK.pointing: np.full((3, 12), 0.0, dtype=np.float64),
         },
     )
+    sch_a = Schedule(sch_a)
 
     # 1hr long, 1hr intv
-    sch_data_b = schedule.from_ndarrays(
+    sch_b = schedule.from_ndarrays(
         {
             _SK.start_time: np.arange(
                 np.datetime64("2025-01-01", "s"),
@@ -56,10 +58,11 @@ def priority_scheduling_interleaved_schedule_test():
             _SK.pointing: np.full((3, 24), 1.0, dtype=np.float64),
         }
     )
+    sch_b = Schedule(sch_b)
 
-    resultant_sch_data = priority_scheduling([sch_data_a, sch_data_b], {0: [(0, 0)], 1: [(0, 0)]})
+    resultant_sch = priority_scheduling([sch_a, sch_b], {0: [(0, 0)], 1: [(0, 0)]})
 
-    assert all(xr.ufuncs.equal(resultant_sch_data[_SK.exp_num], [0, 1] * 12))
+    assert all(xr.ufuncs.equal(resultant_sch[_SK.exp_num], [0, 1] * 12))
 
     return
 
@@ -81,7 +84,7 @@ def priority_scheduling_interleaved_schedule_test():
 #   also, need to ensure the existence of tx for one experiment
 #   should not lead to retention of rx of another experiment, e.g. case like this:
 #   ```
-#   incoming_sch_data.loc[{_SK.multi_index: '2025-01-01 02:49:16.530000'}].to_dataframe()
+#   incoming_sch.loc[{_SK.multi_index: '2025-01-01 02:49:16.530000'}].to_dataframe()
 #                                                 end_time      pointing  exp_num  stn_num  simult_num cummax_start_time cummax_end_time  is_overlaped                  start_time
 #   exp_num stn_num simult_num enu
 #   1       0       0          e   2025-01-01 02:49:16.540  3.420201e-01        1        0           0               NaT             NaT         False  2025-01-01 02:49:16.530000
@@ -96,7 +99,7 @@ def priority_scheduling_interleaved_schedule_test():
 #
 #    ---
 #
-#    merged_sch_data.loc[{_SK.multi_index: '2025-01-01 02:49:16.530000'}].to_dataframe()
+#    merged_sch.loc[{_SK.multi_index: '2025-01-01 02:49:16.530000'}].to_dataframe()
 #                                                  end_time      pointing       cummax_start_time         cummax_end_time  ...  exp_num  stn_num  simult_num                  start_time
 #    exp_num stn_num simult_num enu                                                                                        ...
 #    0       0       0          e   2025-01-01 02:49:16.540 -1.137902e+06 2025-01-01 02:49:16.530 2025-01-01 02:49:16.540  ...        0        0           0  2025-01-01 02:49:16.530000

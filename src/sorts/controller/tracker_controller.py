@@ -72,7 +72,7 @@ def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
     tx_sch_time = state["spobj_time"][tx_el_in_range_mask]
     tx_sch_len = len(tx_sch_time)
 
-    tx_schdata = schedule.from_ndarrays(
+    tx_sch = schedule.from_ndarrays(
         {
             "start_time": tx_sch_time,
             "end_time": tx_sch_time + spec["exp_detail"]["slice_duration"],
@@ -83,14 +83,14 @@ def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
         }
     )
 
-    rx_schdatas: list[schedule.ScheduleData] = []
+    rx_schs: list[schedule.Schedule] = []
     for rx_stn, rx_mask, rx_pointings in zip(
         pure_rx_stations, rx_el_in_range_with_tx_masks, rxs_pointings
     ):
         rx_sch_time = state["spobj_time"][rx_mask]
         rx_sch_len = len(rx_sch_time)
 
-        rx_schdatas.append(
+        rx_schs.append(
             schedule.from_ndarrays(
                 {
                     "start_time": rx_sch_time,
@@ -103,9 +103,9 @@ def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
             )
         )
 
-    resultant_schdata = xr.concat([tx_schdata, *rx_schdatas], dim=schedule._K.multi_index)
-    resultant_schdata = resultant_schdata.sortby(schedule._K.start_time)
-    output = schedule.Schedule(resultant_schdata)
+    resultant_sch = xr.concat([tx_sch, *rx_schs], dim=schedule._K.multi_index)
+    resultant_sch = resultant_sch.sortby(schedule._K.start_time)
+    output = resultant_sch
 
     return output
 
@@ -117,7 +117,7 @@ def plot_state_and_output(state: State, rx_schedules: t.Sequence[schedule.Schedu
 
     rx_skyplot_plots = []
     for idx, rx_schedule in enumerate(rx_schedules):
-        rx_sch_dict = rx_schedule.to_ndarrays()
+        rx_sch_dict = schedule.to_ndarrays(rx_schedule)
         rx_skyplot_plot = plots.azel_skyplot(
             rx_sch_dict["pointing"][0],
             rx_sch_dict["pointing"][1],
