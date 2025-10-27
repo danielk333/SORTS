@@ -248,7 +248,7 @@ class Schedule:
 
     @classmethod
     def priority_scheduling(
-        cls, schs: t.Sequence[Schedule], exp_id_stn_id_pairs_map: ExperimentIdStationIdPairsMap
+        cls, schs: t.Sequence[ScheduleOld], exp_id_stn_id_pairs_map: ExperimentIdStationIdPairsMap
     ):
         """
         Merge a sequence of schedules for a single station into one,

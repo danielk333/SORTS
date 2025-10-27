@@ -5,7 +5,7 @@ import bokeh.plotting as bp
 import bokeh.models as bokeh_models
 from sorts.types import Datetime_Like, Datetime64_us
 from sorts.utils import to_datetime64_us
-from sorts.schedule import Schedule
+from sorts.schedule import ScheduleOld
 
 
 def _schedule_plot_from_cds(
@@ -16,7 +16,7 @@ def _schedule_plot_from_cds(
 ):
     """An internal ver of `schedule_plot` that takes a bokeh `ColumnDataSource`"""
 
-    _SK = Schedule._K
+    _SK = ScheduleOld._K
 
     bar = bp.figure(
         y_range=y_range,  # type: ignore
@@ -68,7 +68,7 @@ def _schedule_plot_from_cds(
 
 # TODO: add time based binning and aggregation
 def schedule_plot(
-    sch: Schedule,
+    sch: ScheduleOld,
     start_time: Datetime_Like | None = None,
     end_time: Datetime_Like | None = None,
 ):
@@ -80,7 +80,7 @@ def schedule_plot(
     Without aggregations, a good starting point is a 5 minutes time range.
     """
 
-    _SK = Schedule._K
+    _SK = ScheduleOld._K
 
     df = sch.to_dataframe()
 

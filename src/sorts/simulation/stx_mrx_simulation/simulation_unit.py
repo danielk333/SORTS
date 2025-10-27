@@ -10,7 +10,7 @@ from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.signals import hard_target_snr
 from sorts.interpolation import Interpolator
-from sorts.schedule import ExperimentDetailMap, Schedule
+from sorts.schedule import ExperimentDetailMap, ScheduleOld
 from sorts.simulation.types import Passage
 
 
@@ -55,7 +55,7 @@ class _K:
 
 assert_class_attributes_equal_to(_K, t.get_args(Key))
 
-_SK = Schedule._K
+_SK = ScheduleOld._K
 """Internal helper for accessing string keys consistently"""
 
 State = t.NewType("State", xr.Dataset)
@@ -184,7 +184,7 @@ class FromPassagesOverTxRxStationPairParam(t.TypedDict):
     spobj_interp: Interpolator
     tx_station: Station
     rx_station: Station
-    schedule: Schedule
+    schedule: ScheduleOld
     exp_detail_map: ExperimentDetailMap
 
 
@@ -474,11 +474,13 @@ class Observation:
 
         return time_arr
 
-    def index_into_schedule(self, schedule: Schedule) -> types.TxRxTuple[Schedule, Schedule]:
+    def index_into_schedule(
+        self, schedule: ScheduleOld
+    ) -> types.TxRxTuple[ScheduleOld, ScheduleOld]:
         """Returns subset of schedules, in `(tx_scheule, tx_schedule` that corresponds to the observation"""
 
         tx_sch_obs = schedule.filter_by_time_range(self.passage["time_range"])
-        tx_sch_obs = Schedule(
+        tx_sch_obs = ScheduleOld(
             tx_sch_obs._data.loc[
                 {
                     _SK.multi_index: (
@@ -492,7 +494,7 @@ class Observation:
         )
 
         rx_sch_obs = schedule.filter_by_time_range(self.passage["time_range"])
-        rx_sch_obs = Schedule(
+        rx_sch_obs = ScheduleOld(
             rx_sch_obs._data.loc[
                 {
                     _SK.multi_index: (

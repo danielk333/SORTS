@@ -29,7 +29,7 @@ from sorts.interpolation import Legendre8
 from sorts.propagator import Kepler
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
-from sorts.schedule import Schedule
+from sorts.schedule import ScheduleOld
 from sorts.controller.fence_scan_controller import FenceScanController
 from sorts.simulation import stx_mrx_simulation, StxMrxSimulation
 
@@ -58,7 +58,7 @@ dsec_sampling_intv: Float_as_sec = 30
 scan_ranges = np.array([10, 7e6], dtype=np.float64)
 simu_num = len(scan_ranges)
 
-_SK = Schedule._K
+_SK = ScheduleOld._K
 _SuK = stx_mrx_simulation.simulation_unit._K
 
 

@@ -18,7 +18,7 @@ from sorts.interpolation import Legendre8
 from sorts.propagator import Kepler
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
-from sorts.schedule import Schedule
+from sorts.schedule import ScheduleOld
 from sorts.controller.tracker_controller import TrackerController
 from sorts.simulation import stx_mrx_simulation, StxMrxSimulation
 
@@ -45,7 +45,7 @@ control_slice_duration = np.timedelta64(1_000_000, "us")  # 1s
 dt_equality_thld = control_slice_duration / 2
 dsec_sampling_intv: Float_as_sec = 30
 
-_SK = Schedule._K
+_SK = ScheduleOld._K
 _SuK = stx_mrx_simulation.simulation_unit._K
 
 

@@ -121,7 +121,7 @@ def prepare_simulation_environment(
 
     tracker_sch = tracker_ctrl.generate(start_time, end_time)
     fence_sch = fence_scan_ctrl.generate(start_time, end_time)
-    master_sch = schedule.Schedule.priority_scheduling(
+    master_sch = schedule.ScheduleOld.priority_scheduling(
         [tracker_sch, fence_sch],
         {
             **tracker_ctrl.get_experiment_id_station_id_pairs_map(),

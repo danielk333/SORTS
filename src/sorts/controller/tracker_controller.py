@@ -42,7 +42,7 @@ class State(t.TypedDict):
     spobj_states: EcefStates
 
 
-def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
+def generate_from_state(spec: Spec, state: State) -> schedule.ScheduleOld:
     loc_zenith = np.array([0, 0, 1], dtype=np.float64)
 
     # generate pointings
@@ -105,13 +105,13 @@ def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
 
     resultant_schdata = xr.concat([tx_schdata, *rx_schdatas], dim=schedule._K.multi_index)
     resultant_schdata = resultant_schdata.sortby(schedule._K.start_time)
-    output = schedule.Schedule(resultant_schdata)
+    output = schedule.ScheduleOld(resultant_schdata)
 
     return output
 
 
 # TODO: remove or adapt to ENU coord
-def plot_state_and_output(state: State, rx_schedules: t.Sequence[schedule.Schedule]):
+def plot_state_and_output(state: State, rx_schedules: t.Sequence[schedule.ScheduleOld]):
     pos_plot = plots.ecef_states_positions_plot(state["spobj_states"])
     pos_plot.title = "ecef_states_positions_plot"
 
@@ -150,7 +150,7 @@ class TrackerController(ControllerBase):
         self.spec: Spec = spec
         self.state: State | None = state
 
-        self._cached_output: schedule.Schedule | None = None
+        self._cached_output: schedule.ScheduleOld | None = None
         """A cache of the latest `Output`, handy for plotting"""
 
     @classmethod
@@ -260,7 +260,7 @@ class TrackerController(ControllerBase):
 
     def generate(
         self, start_time: Datetime_Like | None = None, end_time: Datetime_Like | None = None
-    ) -> schedule.Schedule:
+    ) -> schedule.ScheduleOld:
         """
         Generate the schedules.
         `start_time` and `end_time` should be omitted if this instance is created from `TrackerController.from_ecef_states`

@@ -46,7 +46,7 @@ class State(t.TypedDict):
 
 
 # TODO: should we generate tx pointings at the specified ranges instead of normalized to 1?
-def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
+def generate_from_state(spec: Spec, state: State) -> schedule.ScheduleOld:
     # The logic of this function:
     # 1. repeat the cycle of tx pointings from state to form the tx schedule
     # 2. from the single cycle of tx pointings, we convert it into ECEF location coord and extend them by the `scan_range`
@@ -163,7 +163,7 @@ def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
     # TODO: re-eval if it is too brutal
     # there will be duplicates if the tx station is also a rx station, we drop the duplicates here
     resultant_schdata = resultant_schdata.drop_duplicates(schedule._K.multi_index)
-    output = schedule.Schedule(resultant_schdata)
+    output = schedule.ScheduleOld(resultant_schdata)
 
     return output
 
@@ -186,7 +186,7 @@ class FenceScanController(ControllerBase):
         self.spec: Spec = spec
         self.state: State | None = state
 
-        self._cached_output: schedule.Schedule | None = None
+        self._cached_output: schedule.ScheduleOld | None = None
 
     @classmethod
     def from_scan_spec(
@@ -268,7 +268,7 @@ class FenceScanController(ControllerBase):
 
         return self
 
-    def generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> schedule.Schedule:
+    def generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> schedule.ScheduleOld:
         self.compute_single_cycle_pointings(start_time, end_time)
         state = t.cast(State, self.state)
 

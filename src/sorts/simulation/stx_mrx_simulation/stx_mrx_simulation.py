@@ -13,7 +13,7 @@ from sorts.utils import to_datetime64_us
 from sorts.radar import Station, StationId
 from sorts.simulation import Passage
 from sorts.interpolation import Interpolator
-from sorts.schedule import Schedule, ExperimentDetailMap
+from sorts.schedule import ScheduleOld, ExperimentDetailMap
 from sorts.simulation.stx_mrx_simulation.simulation_unit import (
     SimulationUnit,
     FromPassagesOverTxRxStationPairParam,
@@ -59,7 +59,7 @@ class Spec(t.TypedDict):
 
     station_map: dict[StationId, Station]
     station_id_pairs: list[tuple[StationId, StationId]]
-    schedule: Schedule
+    schedule: ScheduleOld
     exp_detail_map: ExperimentDetailMap
     epoch: Datetime_Like
     start_time: Datetime_Like
@@ -75,7 +75,7 @@ class SpecByControllers(t.TypedDict):
     """A TypedDict of params"""
 
     controllers: t.Sequence[controller.ControllerBase]
-    schedule: Schedule
+    schedule: ScheduleOld
     epoch: Datetime_Like
     start_time: Datetime_Like
     end_time: Datetime_Like
@@ -240,7 +240,7 @@ def prepare_simulation_unit_params(spec: Spec) -> list[FromPassagesOverTxRxStati
     )
     # filter away param with empty schedule
     sim_units_param = [
-        p for p in sim_units_param if len(p["schedule"]._data[Schedule._K.multi_index]) > 0
+        p for p in sim_units_param if len(p["schedule"]._data[ScheduleOld._K.multi_index]) > 0
     ]
     logger.info(f"prepare_simulation_unit_params done")
 

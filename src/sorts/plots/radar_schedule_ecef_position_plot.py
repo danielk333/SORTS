@@ -3,7 +3,7 @@ import pandas as pd
 import bokeh.models as bokeh_models
 import bokeh.layouts as bokeh_layouts
 from sorts.types import EcefStates, Datetime64_us
-from sorts.schedule import Schedule
+from sorts.schedule import ScheduleOld
 from .schedule_plot import _schedule_plot_from_cds
 from .azel_skyplot import _azel_skyplot_cds_cols, _azel_skyplot_from_cds
 from .ecef_states_positions_plot import (
@@ -13,9 +13,9 @@ from .ecef_states_positions_plot import (
 
 
 def _radar_schedule_ecef_position_plot_cds_df(
-    ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], sch: Schedule
+    ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], sch: ScheduleOld
 ):
-    _SK = Schedule._K
+    _SK = ScheduleOld._K
 
     df = sch.to_dataframe()
 
@@ -42,9 +42,9 @@ def _radar_schedule_ecef_position_plot_cds_df(
 
 
 def radar_schedule_ecef_position_plot(
-    ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], sch: Schedule
+    ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], sch: ScheduleOld
 ):
-    _SK = Schedule._K
+    _SK = ScheduleOld._K
 
     df = _radar_schedule_ecef_position_plot_cds_df(ecefs=ecefs, ecefs_time=ecefs_time, sch=sch)
 

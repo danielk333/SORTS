@@ -19,7 +19,7 @@ from .schedule import (
     to_dataframe,
     filter_by_time_range,
     filter_by_time_ranges,
-    Schedule,
+    ScheduleOld,
 )
 
 # TODO: adj module and/or func name so func 'priority_scheduling' can be exported here
