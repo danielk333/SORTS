@@ -23,7 +23,7 @@ from sorts import simulation
 logger = logging.getLogger(__name__)
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ControllerSpec:
     tx_station: Station
     rx_stations: t.Sequence[Station]
