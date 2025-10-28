@@ -29,7 +29,7 @@ class ControllerSpec:
     rx_stations: t.Sequence[Station]
     exp_detail: schedule.ExperimentDetail
     space_object: SpaceObject
-    epoch: Datetime_Like
+    epoch: Datetime64_us
     station_id_pairs: list[tuple[radar.StationId, radar.StationId]]
     points_per_passage: int
 
@@ -149,7 +149,7 @@ class SparseTrackerController(ControllerBase):
                 rx_stations=rx_stations,
                 exp_detail=exp_detail,
                 space_object=spobj,
-                epoch=epoch,
+                epoch=to_datetime64_us(epoch),
                 station_id_pairs=stn_pairs,
                 points_per_passage=3,
             ),
