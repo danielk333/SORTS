@@ -1,5 +1,6 @@
 from __future__ import annotations
 import logging, typing as t
+from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 import xarray as xr
@@ -22,14 +23,13 @@ from sorts import simulation
 logger = logging.getLogger(__name__)
 
 
-class ControllerSpec(t.TypedDict):
-    """A TypedDict of params"""
-
+@dataclass
+class ControllerSpec:
     tx_station: Station
     rx_stations: t.Sequence[Station]
     exp_detail: schedule.ExperimentDetail
-    spobj: t.NotRequired[SpaceObject]
-    epoch: t.NotRequired[Datetime_Like]
+    spobj: SpaceObject
+    epoch: Datetime_Like
     station_id_pairs: list[tuple[radar.StationId, radar.StationId]]
     points_per_passage: int
 
@@ -43,12 +43,12 @@ class ControllerState(t.TypedDict):
 
 def generate_from_state(spec: ControllerSpec, state: ControllerState) -> schedule.Schedule:
     passages_of_spobj = simulation.find_simultaneous_passages(
-        dt=(state["spobj_time"] - spec["epoch"]) / np.timedelta64(1, "s"),
-        space_object=spec["spobj"],
+        dt=(state["spobj_time"] - spec.epoch) / np.timedelta64(1, "s"),
+        space_object=spec.spobj,
         states=state["spobj_states"][:3, ...],
-        tx_station=spec["tx_station"],
-        rx_stations=spec["rx_stations"],
-        epoch=spec["epoch"],
+        tx_station=spec.tx_station,
+        rx_stations=spec.rx_stations,
+        epoch=spec.epoch,
     )
 
     tx_sch_index_list = []
@@ -56,13 +56,13 @@ def generate_from_state(spec: ControllerSpec, state: ControllerState) -> schedul
         start_time, end_time = ps["time_range"]
         passage_time = (end_time - start_time) / np.timedelta64(1, "s")
         relative_time_sampling = np.linspace(
-            0.0, passage_time, num=spec["points_per_passage"] + 2, endpoint=True
+            0.0, passage_time, num=spec.points_per_passage + 2, endpoint=True
         )
         relative_time_sampling = relative_time_sampling[1:-1]
         # TODO: once the propagator sampling has been changed, use a interpolator here instead
         # at the cadence that the propagator currently uses
-        pass_tx_index = np.empty((spec["points_per_passage"],), dtype=np.int64)
-        for ind in range(spec["points_per_passage"]):
+        pass_tx_index = np.empty((spec.points_per_passage,), dtype=np.int64)
+        for ind in range(spec.points_per_passage):
             pass_tx_index[ind] = np.argmin(
                 np.abs(
                     (relative_time_sampling[ind] + start_time - state["spobj_time"])
@@ -73,22 +73,22 @@ def generate_from_state(spec: ControllerSpec, state: ControllerState) -> schedul
     tx_sch_index = np.concatenate(tx_sch_index_list)
     tx_sch_time = state["spobj_time"][tx_sch_index]
     tx_sch_len = len(tx_sch_time)
-    tx_pointings: EnuCoordinates = spec["tx_station"].enu(state["spobj_states"][:3, tx_sch_index])
+    tx_pointings: EnuCoordinates = spec.tx_station.enu(state["spobj_states"][:3, tx_sch_index])
     tx_pointings = tx_pointings / np.linalg.norm(tx_pointings, axis=0)
 
     tx_sch = schedule.from_ndarrays(
         {
             "start_time": tx_sch_time,
-            "end_time": tx_sch_time + spec["exp_detail"]["slice_duration"],
-            "exp_num": np.full(tx_sch_len, spec["exp_detail"]["id"], dtype=np.int16),
-            "stn_num": np.full(tx_sch_len, spec["tx_station"].uid, dtype=np.int16),
+            "end_time": tx_sch_time + spec.exp_detail["slice_duration"],
+            "exp_num": np.full(tx_sch_len, spec.exp_detail["id"], dtype=np.int16),
+            "stn_num": np.full(tx_sch_len, spec.tx_station.uid, dtype=np.int16),
             "simult_num": np.full(tx_sch_len, 0, dtype=np.int16),
             "pointing": tx_pointings,
         }
     )
 
     rx_schs: list[schedule.Schedule] = []
-    for rx_stn in spec["rx_stations"]:
+    for rx_stn in spec.rx_stations:
         rx_pointings: EnuCoordinates = rx_stn.enu(state["spobj_states"][:3, tx_sch_index])
         rx_pointings = rx_pointings / np.linalg.norm(rx_pointings, axis=0)
 
@@ -96,8 +96,8 @@ def generate_from_state(spec: ControllerSpec, state: ControllerState) -> schedul
             schedule.from_ndarrays(
                 {
                     "start_time": tx_sch_time,
-                    "end_time": tx_sch_time + spec["exp_detail"]["slice_duration"],
-                    "exp_num": np.full(tx_sch_len, spec["exp_detail"]["id"], dtype=np.int16),
+                    "end_time": tx_sch_time + spec.exp_detail["slice_duration"],
+                    "exp_num": np.full(tx_sch_len, spec.exp_detail["id"], dtype=np.int16),
                     "stn_num": np.full(tx_sch_len, rx_stn.uid, dtype=np.int16),
                     "simult_num": np.full(tx_sch_len, 0, dtype=np.int16),
                     "pointing": rx_pointings,
@@ -152,6 +152,7 @@ class SparseTrackerController(ControllerBase):
                 "spobj": spobj,
                 "epoch": epoch,
                 "station_id_pairs": stn_pairs,
+                "points_per_passage": 3,
             },
             state=None,
         )
@@ -159,16 +160,16 @@ class SparseTrackerController(ControllerBase):
         return ctrl
 
     def get_experiment_detail(self) -> schedule.ExperimentDetail:
-        return self.spec["exp_detail"]
+        return self.spec.exp_detail
 
     def get_experiment_id_station_id_pairs_map(self) -> schedule.ExperimentIdStationIdPairsMap:
-        return {self.spec["exp_detail"]["id"]: self.spec["station_id_pairs"]}
+        return {self.spec.exp_detail["id"]: self.spec.station_id_pairs}
 
     def get_station_map(self) -> dict[radar.StationId, radar.Station]:
         stn_map: dict[radar.StationId, radar.Station] = {}
 
-        stn_map[self.spec["tx_station"].uid] = self.spec["tx_station"]
-        stn_map.update(list([(stn.uid, stn) for stn in self.spec["rx_stations"]]))
+        stn_map[self.spec.tx_station.uid] = self.spec.tx_station
+        stn_map.update(list([(stn.uid, stn) for stn in self.spec.rx_stations]))
 
         return stn_map
 
@@ -186,7 +187,7 @@ class SparseTrackerController(ControllerBase):
                 "Cannot compute space object ECEF states without `epoch` in the `spec` prop."
             )
 
-        exp_detail: schedule.ExperimentDetail = self.spec["exp_detail"]
+        exp_detail: schedule.ExperimentDetail = self.spec.exp_detail
 
         # NOTE: for `np.arange` 'stop param,
         #   - we subtract 'slice_duration' so that only full slice are included
@@ -198,10 +199,10 @@ class SparseTrackerController(ControllerBase):
             to_datetime64_us(end_time) - to_timedelta64_us(slice_duration) + 1,
             exp_detail["slice_duration"],
         )
-        dt: npt.NDArray[Timedelta64_us] = time - to_datetime64_us(self.spec["epoch"])
+        dt: npt.NDArray[Timedelta64_us] = time - to_datetime64_us(self.spec.epoch)
         dsec = t.cast(npt.NDArray[Float64_as_sec], dt.astype(np.float64) / 1e6)
 
-        ecefs = self.spec["spobj"].get_state(dsec)
+        ecefs = self.spec.spobj.get_state(dsec)
 
         self.state = {
             "spobj_time": time,
@@ -219,9 +220,7 @@ class SparseTrackerController(ControllerBase):
         """
 
         if start_time is not None and end_time is not None:
-            self.compute_ecef_states(
-                start_time, end_time, self.spec["exp_detail"]["slice_duration"]
-            )
+            self.compute_ecef_states(start_time, end_time, self.spec.exp_detail["slice_duration"])
             state = t.cast(ControllerState, self.state)
         elif self.state is None:
             raise RuntimeError(
