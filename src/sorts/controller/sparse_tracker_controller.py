@@ -144,15 +144,15 @@ class SparseTrackerController(ControllerBase):
         stn_pairs = [(tx_station.uid, rx_station.uid) for rx_station in rx_stations]
 
         ctrl = cls(
-            spec={
-                "tx_station": tx_station,
-                "rx_stations": rx_stations,
-                "exp_detail": exp_detail,
-                "spobj": spobj,
-                "epoch": epoch,
-                "station_id_pairs": stn_pairs,
-                "points_per_passage": 3,
-            },
+            spec=ControllerSpec(
+                tx_station=tx_station,
+                rx_stations=rx_stations,
+                exp_detail=exp_detail,
+                space_object=spobj,
+                epoch=epoch,
+                station_id_pairs=stn_pairs,
+                points_per_passage=3,
+            ),
             state=None,
         )
 
