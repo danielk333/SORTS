@@ -28,7 +28,7 @@ class ControllerSpec:
     tx_station: Station
     rx_stations: t.Sequence[Station]
     exp_detail: schedule.ExperimentDetail
-    spobj: SpaceObject
+    space_object: SpaceObject
     epoch: Datetime_Like
     station_id_pairs: list[tuple[radar.StationId, radar.StationId]]
     points_per_passage: int
@@ -44,7 +44,7 @@ class ControllerState(t.TypedDict):
 def generate_from_state(spec: ControllerSpec, state: ControllerState) -> schedule.Schedule:
     passages_of_spobj = simulation.find_simultaneous_passages(
         dt=(state["spobj_time"] - spec.epoch) / np.timedelta64(1, "s"),
-        space_object=spec.spobj,
+        space_object=spec.space_object,
         states=state["spobj_states"][:3, ...],
         tx_station=spec.tx_station,
         rx_stations=spec.rx_stations,
@@ -202,7 +202,7 @@ class SparseTrackerController(ControllerBase):
         dt: npt.NDArray[Timedelta64_us] = time - to_datetime64_us(self.spec.epoch)
         dsec = t.cast(npt.NDArray[Float64_as_sec], dt.astype(np.float64) / 1e6)
 
-        ecefs = self.spec.spobj.get_state(dsec)
+        ecefs = self.spec.space_object.get_state(dsec)
 
         self.state = {
             "spobj_time": time,
