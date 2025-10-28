@@ -177,15 +177,6 @@ class SparseTrackerController(ControllerBase):
     ):
         """Do the computation then update the `state` property and return `self`."""
 
-        if "spobj" not in self.spec:
-            raise RuntimeError(
-                "Cannot compute space object ECEF states without `spobj` in the `spec` prop."
-            )
-        if "epoch" not in self.spec:
-            raise RuntimeError(
-                "Cannot compute space object ECEF states without `epoch` in the `spec` prop."
-            )
-
         exp_detail: schedule.ExperimentDetail = self.spec.exp_detail
 
         # NOTE: for `np.arange` 'stop param,
