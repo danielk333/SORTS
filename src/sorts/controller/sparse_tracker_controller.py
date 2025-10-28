@@ -22,7 +22,7 @@ from sorts import simulation
 logger = logging.getLogger(__name__)
 
 
-class Spec(t.TypedDict):
+class ControllerSpec(t.TypedDict):
     """A TypedDict of params"""
 
     tx_station: Station
@@ -34,14 +34,14 @@ class Spec(t.TypedDict):
     points_per_passage: int
 
 
-class State(t.TypedDict):
+class ControllerState(t.TypedDict):
     """A TypedDict of params"""
 
     spobj_time: npt.NDArray[Datetime64_us]
     spobj_states: EcefStates
 
 
-def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
+def generate_from_state(spec: ControllerSpec, state: ControllerState) -> schedule.Schedule:
     passages_of_spobj = simulation.find_simultaneous_passages(
         dt=(state["spobj_time"] - spec["epoch"]) / np.timedelta64(1, "s"),
         space_object=spec["spobj"],
@@ -120,13 +120,13 @@ class SparseTrackerController(ControllerBase):
     - This class serve as a frontend to the `State` type in this module
     """
 
-    def __init__(self, spec: Spec, state: State | None):
+    def __init__(self, spec: ControllerSpec, state: ControllerState | None):
         """
         NOTE: This is intended as an internal constructor, please use the constructor methods to create instances.
         """
 
-        self.spec: Spec = spec
-        self.state: State | None = state
+        self.spec: ControllerSpec = spec
+        self.state: ControllerState | None = state
 
         self._cached_output: schedule.Schedule | None = None
         """A cache of the latest `Output`, handy for plotting"""
@@ -222,7 +222,7 @@ class SparseTrackerController(ControllerBase):
             self.compute_ecef_states(
                 start_time, end_time, self.spec["exp_detail"]["slice_duration"]
             )
-            state = t.cast(State, self.state)
+            state = t.cast(ControllerState, self.state)
         elif self.state is None:
             raise RuntimeError(
                 "Cannot generate without valid state property."
