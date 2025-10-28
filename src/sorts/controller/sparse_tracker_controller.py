@@ -4,7 +4,8 @@ from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 import xarray as xr
-from sorts import radar, schedule
+from sorts import radar, schedule, simulation
+from sorts.utils import to_datetime64_us, to_timedelta64_us
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.types import (
@@ -16,9 +17,7 @@ from sorts.types import (
     Datetime_Like,
     Timedelta_Like,
 )
-from sorts.utils import to_datetime64_us, to_timedelta64_us
 from .controller_base import ControllerBase
-from sorts import simulation
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +38,13 @@ class ControllerState:
     spobj_time: npt.NDArray[Datetime64_us]
     spobj_states: EcefStates
 
+    @classmethod
+    def empty(cls) -> t.Self:
+        return cls(
+            spobj_time=np.empty(0, dtype="datetime64[us]"),
+            spobj_states=np.empty((6, 0), dtype=np.float64),
+        )
+
 
 class SparseTrackerController(ControllerBase):
     """
@@ -57,7 +63,7 @@ class SparseTrackerController(ControllerBase):
         epoch: Datetime64_us,
         station_id_pairs: list[tuple[radar.StationId, radar.StationId]],
         points_per_passage: int,
-        state: ControllerState | None,
+        state: ControllerState,
     ):
         """
         NOTE: This is intended as an internal constructor, please use the constructor methods to create instances.
@@ -71,7 +77,7 @@ class SparseTrackerController(ControllerBase):
         self.station_id_pairs = station_id_pairs
         self.points_per_passage = points_per_passage
 
-        self.state: ControllerState | None = state
+        self.state = state
 
     @classmethod
     def from_space_object(cls, param: FromSpaceObjectParam) -> t.Self:
@@ -87,7 +93,7 @@ class SparseTrackerController(ControllerBase):
             epoch=to_datetime64_us(param.epoch),
             station_id_pairs=stn_pairs,
             points_per_passage=3,
-            state=None,
+            state=ControllerState.empty(),
         )
 
         return ctrl
@@ -133,18 +139,14 @@ class SparseTrackerController(ControllerBase):
         return self
 
     def generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> schedule.Schedule:
-        """
-        Generate the schedules.
-        `start_time` and `end_time` should be omitted if this instance is created from `TrackerController.from_ecef_states`
-        """
+        """Generate the schedules."""
 
         self.compute_ecef_states(start_time, end_time, self.exp_detail["slice_duration"])
-        state = t.cast(ControllerState, self.state)
 
         passages_of_spobj = simulation.find_simultaneous_passages(
-            dt=(state.spobj_time - self.epoch) / np.timedelta64(1, "s"),
+            dt=(self.state.spobj_time - self.epoch) / np.timedelta64(1, "s"),
             space_object=self.space_object,
-            states=state.spobj_states[:3, ...],
+            states=self.state.spobj_states[:3, ...],
             tx_station=self.tx_station,
             rx_stations=self.rx_stations,
             epoch=self.epoch,
@@ -164,15 +166,17 @@ class SparseTrackerController(ControllerBase):
             for ind in range(self.points_per_passage):
                 pass_tx_index[ind] = np.argmin(
                     np.abs(
-                        (relative_time_sampling[ind] + start_time - state.spobj_time)
+                        (relative_time_sampling[ind] + start_time - self.state.spobj_time)
                         / np.timedelta64(1, "s")
                     )
                 )
             tx_sch_index_list.append(pass_tx_index)
         tx_sch_index = np.concatenate(tx_sch_index_list)
-        tx_sch_time = state.spobj_time[tx_sch_index]
+        tx_sch_time = self.state.spobj_time[tx_sch_index]
         tx_sch_len = len(tx_sch_time)
-        tx_pointings: EnuCoordinates = self.tx_station.enu(state.spobj_states[:3, tx_sch_index])
+        tx_pointings: EnuCoordinates = self.tx_station.enu(
+            self.state.spobj_states[:3, tx_sch_index]
+        )
         tx_pointings = tx_pointings / np.linalg.norm(tx_pointings, axis=0)
 
         tx_sch = schedule.from_ndarrays(
@@ -188,7 +192,7 @@ class SparseTrackerController(ControllerBase):
 
         rx_schs: list[schedule.Schedule] = []
         for rx_stn in self.rx_stations:
-            rx_pointings: EnuCoordinates = rx_stn.enu(state.spobj_states[:3, tx_sch_index])
+            rx_pointings: EnuCoordinates = rx_stn.enu(self.state.spobj_states[:3, tx_sch_index])
             rx_pointings = rx_pointings / np.linalg.norm(rx_pointings, axis=0)
 
             rx_schs.append(
