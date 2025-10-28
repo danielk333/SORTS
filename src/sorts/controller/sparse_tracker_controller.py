@@ -34,18 +34,17 @@ class ControllerSpec:
     points_per_passage: int
 
 
-class ControllerState(t.TypedDict):
-    """A TypedDict of params"""
-
+@dataclass(kw_only=True)
+class ControllerState:
     spobj_time: npt.NDArray[Datetime64_us]
     spobj_states: EcefStates
 
 
 def generate_from_state(spec: ControllerSpec, state: ControllerState) -> schedule.Schedule:
     passages_of_spobj = simulation.find_simultaneous_passages(
-        dt=(state["spobj_time"] - spec.epoch) / np.timedelta64(1, "s"),
+        dt=(state.spobj_time - spec.epoch) / np.timedelta64(1, "s"),
         space_object=spec.space_object,
-        states=state["spobj_states"][:3, ...],
+        states=state.spobj_states[:3, ...],
         tx_station=spec.tx_station,
         rx_stations=spec.rx_stations,
         epoch=spec.epoch,
@@ -65,15 +64,15 @@ def generate_from_state(spec: ControllerSpec, state: ControllerState) -> schedul
         for ind in range(spec.points_per_passage):
             pass_tx_index[ind] = np.argmin(
                 np.abs(
-                    (relative_time_sampling[ind] + start_time - state["spobj_time"])
+                    (relative_time_sampling[ind] + start_time - state.spobj_time)
                     / np.timedelta64(1, "s")
                 )
             )
         tx_sch_index_list.append(pass_tx_index)
     tx_sch_index = np.concatenate(tx_sch_index_list)
-    tx_sch_time = state["spobj_time"][tx_sch_index]
+    tx_sch_time = state.spobj_time[tx_sch_index]
     tx_sch_len = len(tx_sch_time)
-    tx_pointings: EnuCoordinates = spec.tx_station.enu(state["spobj_states"][:3, tx_sch_index])
+    tx_pointings: EnuCoordinates = spec.tx_station.enu(state.spobj_states[:3, tx_sch_index])
     tx_pointings = tx_pointings / np.linalg.norm(tx_pointings, axis=0)
 
     tx_sch = schedule.from_ndarrays(
@@ -89,7 +88,7 @@ def generate_from_state(spec: ControllerSpec, state: ControllerState) -> schedul
 
     rx_schs: list[schedule.Schedule] = []
     for rx_stn in spec.rx_stations:
-        rx_pointings: EnuCoordinates = rx_stn.enu(state["spobj_states"][:3, tx_sch_index])
+        rx_pointings: EnuCoordinates = rx_stn.enu(state.spobj_states[:3, tx_sch_index])
         rx_pointings = rx_pointings / np.linalg.norm(rx_pointings, axis=0)
 
         rx_schs.append(
@@ -204,10 +203,7 @@ class SparseTrackerController(ControllerBase):
 
         ecefs = self.spec.space_object.get_state(dsec)
 
-        self.state = {
-            "spobj_time": time,
-            "spobj_states": ecefs,
-        }
+        self.state = ControllerState(spobj_time=time, spobj_states=ecefs)
 
         return self
 
