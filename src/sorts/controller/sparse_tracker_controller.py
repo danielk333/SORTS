@@ -20,6 +20,7 @@ from sorts.types import (
 from sorts.utils import to_datetime64_us, to_timedelta64_us
 from sorts import plots
 from .controller_base import ControllerBase
+from sorts import simulation
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +34,7 @@ class Spec(t.TypedDict):
     spobj: t.NotRequired[SpaceObject]
     epoch: t.NotRequired[Datetime_Like]
     station_id_pairs: list[tuple[radar.StationId, radar.StationId]]
+    points_per_passage: int
 
 
 class State(t.TypedDict):
@@ -43,34 +45,68 @@ class State(t.TypedDict):
 
 
 def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
-    loc_zenith = np.array([0, 0, 1], dtype=np.float64)
+    # loc_zenith = np.array([0, 0, 1], dtype=np.float64)
 
-    # generate pointings
-    tx_pointings: EnuCoordinates = spec["tx_station"].enu(state["spobj_states"][:3])
+    # # generate pointings
+    # tx_pointings: EnuCoordinates = spec["tx_station"].enu(state["spobj_states"][:3])
+    #
+    # tx_pointings_zenith_ang = pyant.coordinates.vector_angle(loc_zenith, tx_pointings, degrees=True)
+    # tx_el_in_range_mask = tx_pointings_zenith_ang <= 90.0 - spec["tx_station"].min_elevation
+    # tx_pointings = tx_pointings[:, tx_el_in_range_mask]
+    #
+    # rxs_pointings: list[EnuCoordinates] = []
+    # rx_el_in_range_with_tx_masks: list[npt.NDArray[np.bool]] = []
+    # pure_rx_stations = [stn for stn in spec["rx_stations"] if stn.uid != spec["tx_station"].uid]
+    # for rx_station in pure_rx_stations:
+    #     rx_pointings: EnuCoordinates = rx_station.enu(state["spobj_states"][:3])
+    #
+    #     rx_pointings_zenith_ang = pyant.coordinates.vector_angle(
+    #         loc_zenith, rx_pointings, degrees=True
+    #     )
+    #     rx_el_in_range_mask = rx_pointings_zenith_ang <= 90.0 - rx_station.min_elevation
+    #
+    #     rx_el_in_range_with_tx_mask = np.logical_and(tx_el_in_range_mask, rx_el_in_range_mask)
+    #     rx_el_in_range_with_tx_masks.append(rx_el_in_range_with_tx_mask)
+    #
+    #     rx_pointings = rx_pointings[:, rx_el_in_range_with_tx_mask]
+    #     rxs_pointings.append(rx_pointings)
+    #
+    # tx_sch_time = state["spobj_time"][tx_el_in_range_mask]
+    # tx_sch_len = len(tx_sch_time)
 
-    tx_pointings_zenith_ang = pyant.coordinates.vector_angle(loc_zenith, tx_pointings, degrees=True)
-    tx_el_in_range_mask = tx_pointings_zenith_ang <= 90.0 - spec["tx_station"].min_elevation
-    tx_pointings = tx_pointings[:, tx_el_in_range_mask]
+    passages_of_spobj = simulation.find_simultaneous_passages(
+        dt=(state["spobj_time"] - spec["epoch"]) / np.timedelta64(1, "s"),
+        space_object=spec["spobj"],
+        states=state["spobj_states"][:3, ...],
+        tx_station=spec["tx_station"],
+        rx_stations=spec["rx_stations"],
+        epoch=spec["epoch"],
+    )
 
-    rxs_pointings: list[EnuCoordinates] = []
-    rx_el_in_range_with_tx_masks: list[npt.NDArray[np.bool]] = []
-    pure_rx_stations = [stn for stn in spec["rx_stations"] if stn.uid != spec["tx_station"].uid]
-    for rx_station in pure_rx_stations:
-        rx_pointings: EnuCoordinates = rx_station.enu(state["spobj_states"][:3])
-
-        rx_pointings_zenith_ang = pyant.coordinates.vector_angle(
-            loc_zenith, rx_pointings, degrees=True
+    tx_sch_index_list = []
+    for ps in passages_of_spobj:
+        start_time, end_time = ps["time_range"]
+        passage_time = (end_time - start_time) / np.timedelta64(1, "s")
+        relative_time_sampling = np.linspace(
+            0.0, passage_time, num=spec["points_per_passage"] + 2, endpoint=True
         )
-        rx_el_in_range_mask = rx_pointings_zenith_ang <= 90.0 - rx_station.min_elevation
-
-        rx_el_in_range_with_tx_mask = np.logical_and(tx_el_in_range_mask, rx_el_in_range_mask)
-        rx_el_in_range_with_tx_masks.append(rx_el_in_range_with_tx_mask)
-
-        rx_pointings = rx_pointings[:, rx_el_in_range_with_tx_mask]
-        rxs_pointings.append(rx_pointings)
-
-    tx_sch_time = state["spobj_time"][tx_el_in_range_mask]
+        relative_time_sampling = relative_time_sampling[1:-1]
+        # TODO: once the propagator sampling has been changed, use a interpolator here instead
+        # at the cadence that the propagator currently uses
+        pass_tx_index = np.empty((spec["points_per_passage"],), dtype=np.int64)
+        for ind in range(spec["points_per_passage"]):
+            pass_tx_index[ind] = np.argmin(
+                np.abs(
+                    (relative_time_sampling[ind] + start_time - state["spobj_time"])
+                    / np.timedelta64(1, "s")
+                )
+            )
+        tx_sch_index_list.append(pass_tx_index)
+    tx_sch_index = np.concatenate(tx_sch_index_list)
+    tx_sch_time = state["spobj_time"][tx_sch_index]
     tx_sch_len = len(tx_sch_time)
+    tx_pointings: EnuCoordinates = spec["tx_station"].enu(state["spobj_states"][:3, tx_sch_index])
+    tx_pointings = tx_pointings / np.linalg.norm(tx_pointings, axis=0)
 
     tx_sch = schedule.from_ndarrays(
         {
@@ -84,20 +120,18 @@ def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
     )
 
     rx_schs: list[schedule.Schedule] = []
-    for rx_stn, rx_mask, rx_pointings in zip(
-        pure_rx_stations, rx_el_in_range_with_tx_masks, rxs_pointings
-    ):
-        rx_sch_time = state["spobj_time"][rx_mask]
-        rx_sch_len = len(rx_sch_time)
+    for rx_stn in spec["rx_stations"]:
+        rx_pointings: EnuCoordinates = rx_stn.enu(state["spobj_states"][:3, tx_sch_index])
+        rx_pointings = rx_pointings / np.linalg.norm(rx_pointings, axis=0)
 
         rx_schs.append(
             schedule.from_ndarrays(
                 {
-                    "start_time": rx_sch_time,
-                    "end_time": rx_sch_time + spec["exp_detail"]["slice_duration"],
-                    "exp_num": np.full(rx_sch_len, spec["exp_detail"]["id"], dtype=np.int16),
-                    "stn_num": np.full(rx_sch_len, rx_stn.uid, dtype=np.int16),
-                    "simult_num": np.full(rx_sch_len, 0, dtype=np.int16),
+                    "start_time": tx_sch_time,
+                    "end_time": tx_sch_time + spec["exp_detail"]["slice_duration"],
+                    "exp_num": np.full(tx_sch_len, spec["exp_detail"]["id"], dtype=np.int16),
+                    "stn_num": np.full(tx_sch_len, rx_stn.uid, dtype=np.int16),
+                    "simult_num": np.full(tx_sch_len, 0, dtype=np.int16),
                     "pointing": rx_pointings,
                 }
             )
@@ -189,6 +223,8 @@ class SparseTrackerController(ControllerBase):
         # NOTE: for `np.arange` 'stop param,
         #   - we subtract 'slice_duration' so that only full slice are included
         #   - and add `+1` so that slice with time range `('end_time - 'slice_duration', 'end_time')` is included
+        # TODO: use sampler method for this to ensure efficient propagator usage which has already
+        # been defined for the other steps of the simulation
         time: npt.NDArray[Datetime64_us] = np.arange(
             to_datetime64_us(start_time),
             to_datetime64_us(end_time) - to_timedelta64_us(slice_duration) + 1,
