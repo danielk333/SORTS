@@ -1,4 +1,4 @@
-import logging, time, typing as t, pickle
+import logging, typing as t
 from pathlib import Path
 from datetime import datetime
 import numpy as np
@@ -15,13 +15,11 @@ from sorts import (
     propagator,
     space_object,
     radar,
-    controller,
-    schedule,
 )
 from sorts.schedule.priority_scheduling import priority_scheduling
+from sorts.controller import SparseTrackerController
 from sorts.simulation.stx_mrx_simulation import (
     stx_mrx_simulation,
-    simulation_unit,
     StxMrxSimulation,
     SimulationUnit,
 )
@@ -42,13 +40,10 @@ def dsec_sampler(orbit, start_time, end_time):
 
 class MpiExample(sorts.MpiQueuedExecution):
     def prepare_master_process_environment(self):
-        # 15min runtime
         start_time = Time("2025-01-01 02:45:00")
-        # start_time = Time("2025-01-01 02:59:59")
         end_time = Time("2025-01-01 03:00:00")
         control_slice_duration = np.timedelta64(10_000, "us")  # 10ms
 
-        # radar_sys = sorts.get_radar("eiscat3d", "stage1-array")
         radar_sys = sorts.get_radar("nostra", "example1")
         # TODO: these patching of station prop should be integrated into codebase
         tx_station: radar.Station = radar_sys.tx[0]
@@ -58,7 +53,7 @@ class MpiExample(sorts.MpiQueuedExecution):
         rx_station_1: radar.Station = radar_sys.rx[1]
         rx_station_1.uid = 2
 
-        tracked_spobj = space_object.SpaceObject(
+        known_spobj = space_object.SpaceObject(
             oid=-1,
             propagator=propagator.SGP4,
             propagator_options={"settings": {"out_frame": "ITRF"}},
@@ -79,63 +74,48 @@ class MpiExample(sorts.MpiQueuedExecution):
             propagator_options={"settings": {"in_frame": "TEME", "out_frame": "ITRF"}},
         )
         rand_seed = 120389
-        # TODO: reduce the filter size to more sensible value
-        spobj_pop = population.master_catalog_factor(_spobj_pop, treshhold=5.0, seed=rand_seed)
-        # spobjs = [tracked_spobj, *[spobj_pop.get_object(i) for i in range(spobj_pop.shape[0])]]
-        # spobjs = [tracked_spobj, *[spobj_pop.get_object(i) for i in range(spobj_pop.shape[0])][0:21]]
-        spobjs = [tracked_spobj, spobj_pop.get_object(20)]
+        spobj_pop = population.master_catalog_factor(_spobj_pop, treshhold=1.0, seed=rand_seed)
+        spobjs = [
+            known_spobj,
+            *[spobj_pop.get_object(i) for i in range(spobj_pop.shape[0])][0:20],
+        ]
 
-        tracker_ctrl = controller.TrackerController.from_space_object(
-            spobj=tracked_spobj,
-            epoch=start_time,
-            tx_station=tx_station,
-            rx_stations=[rx_station_0, rx_station_1],
-            exp_detail={
-                "id": 0,
-                "coh_int_bandwidth": 1.0,
-                "ipp": 1.0,
-                "pulse_length": 1.0,
-                "power": 5000000.0,
-                "bandwidth": 52.08333333333333,
-                "duty_cycle": 1.0,
-                "noise_temp": 150.0,
-                "slice_duration": control_slice_duration,
-            },
-        )
+        tracker_ctrls = [
+            SparseTrackerController.from_space_object(
+                SparseTrackerController.FromSpaceObjectParam(
+                    tx_station=tx_station,
+                    rx_stations=[rx_station_0, rx_station_1],
+                    exp_detail={
+                        "id": exp_id,
+                        "coh_int_bandwidth": 1.0,
+                        "ipp": 1.0,
+                        "pulse_length": 1.0,
+                        "power": 5000000.0,
+                        "bandwidth": 52.08333333333333,
+                        "duty_cycle": 1.0,
+                        "noise_temp": 150.0,
+                        "slice_duration": control_slice_duration,
+                    },
+                    space_object=spobj,
+                    epoch=start_time,
+                    points_per_passage=5,
+                )
+            )
+            for exp_id, spobj in enumerate(spobjs)
+        ]
 
-        fence_scan_ctrl = controller.FenceScanController.from_scan_spec(
-            tx_station=tx_station,
-            rx_stations=[rx_station_0, rx_station_1],
-            exp_detail={
-                "id": 1,
-                "coh_int_bandwidth": 1.0,
-                "ipp": 1.0,
-                "pulse_length": 1.0,
-                "power": 5000000.0,
-                "bandwidth": 52.08333333333333,
-                "duty_cycle": 1.0,
-                "noise_temp": 150.0,
-                "slice_duration": control_slice_duration,
-            },
-            azimuth=90,  # sweep from east to west
-            min_elevation=30,
-            pointings_per_cycle=40,
-            # scan_range=np.linspace(300e3, 1000e3, num=10, dtype=np.float64),
-            scan_range=np.array([300e3], dtype=np.float64),
-        )
+        tracker_schs = [
+            tracker_ctrl.generate(start_time, end_time) for tracker_ctrl in tracker_ctrls
+        ]
 
-        tracker_sch = tracker_ctrl.generate(start_time, end_time)
-        fence_sch = fence_scan_ctrl.generate(start_time, end_time)
-        master_sch = priority_scheduling(
-            [tracker_sch, fence_sch],
-            {
-                **tracker_ctrl.get_experiment_id_station_id_pairs_map(),
-                **fence_scan_ctrl.get_experiment_id_station_id_pairs_map(),
-            },
-        )
+        exp_id_stn_id_pairs_map = {}
+        for tracker_ctrl in reversed(tracker_ctrls):
+            exp_id_stn_id_pairs_map.update(tracker_ctrl.get_experiment_id_station_id_pairs_map())
+
+        master_sch = priority_scheduling(tracker_schs, exp_id_stn_id_pairs_map)
 
         spec_by_controllers: stx_mrx_simulation.SpecByControllers = {
-            "controllers": [tracker_ctrl, fence_scan_ctrl],
+            "controllers": tracker_ctrls,
             "schedule": master_sch,
             "epoch": start_time,
             "start_time": start_time,
@@ -208,8 +188,8 @@ execution = MpiExample(
     sim_unit_fname_tpl=stx_mrx_simulation.sim_unit_fname_tpl,
 ).run(
     persist_dpath=Path(__file__).parent / ".." / ".." / "local_data" / dname,
+    # is_run_with_mpi=True,  # a convenience flag to switch between running mode for debugging
     is_run_with_mpi=False,  # a convenience flag to switch between running mode for debugging
-    # is_run_with_mpi = True  # a convenience flag to switch between running mode for debugging
 )
 
 exit()
