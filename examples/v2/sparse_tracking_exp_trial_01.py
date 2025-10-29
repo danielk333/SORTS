@@ -37,7 +37,7 @@ def dsec_sampler(orbit, start_time, end_time):
 
 def prepare_simulation_environment(
     persistence_dir_path: Path | None = None,
-) -> stx_mrx_simulation.SimulationEnvironment:
+):
     # 15min runtime
     start_time = Time("2025-01-01 02:45:00")
     # start_time = Time("2025-01-01 02:59:59")
