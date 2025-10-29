@@ -1,4 +1,4 @@
-import logging, typing as t, functools, operator
+import logging, typing as t, functools, operator, random
 from pathlib import Path
 from datetime import datetime
 import numpy as np
@@ -38,11 +38,23 @@ def dsec_sampler(orbit, start_time, end_time):
     return np.arange(0, (end_time - start_time) / np.timedelta64(1, "s"), 120, dtype=np.float64)
 
 
-def duplicate_and_perturbate_space_objects(spobjs: list[SpaceObject], dup_num=6):
+def duplicate_and_perturbate_space_objects(spobjs: list[SpaceObject], pert_ratio: float, dup_num=6):
     # duplicate list items by nesting and then flattening;
     spobjs = list(functools.reduce(operator.concat, [[spobj] * dup_num for spobj in spobjs]))
 
-    # TODO: perturbation
+    # TODO: confirm with daniel the perturbation
+    # correct/update the oid and perturbate
+    for idx, spobj in enumerate(spobjs):
+        spobj.oid = idx
+
+        # the original spobj are left intact
+        if idx % dup_num != 0:
+            perturbated_param = {
+                pkey: pval * (1 + random.random() * pert_ratio)
+                for pkey, pval in spobj.parameters.items()
+                if pkey not in ["m"]
+            }
+            spobj.update(**perturbated_param)
 
     return spobjs
 
@@ -90,7 +102,7 @@ class MpiExample(sorts.MpiQueuedExecution):
         ]
 
         # prep for jacobian calculation
-        spobjs = duplicate_and_perturbate_space_objects(spobjs)
+        spobjs = duplicate_and_perturbate_space_objects(spobjs, pert_ratio=0.1 / 100)
 
         tracker_ctrls = [
             SparseTrackerController.from_space_object(
