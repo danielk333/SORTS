@@ -30,7 +30,6 @@ class FromSpaceObjectParam:
     exp_detail: schedule.ExperimentDetail
     space_object: SpaceObject
     epoch: Datetime_Like
-    station_id_pairs: list[tuple[radar.StationId, radar.StationId]]
     points_per_passage: int
 
 
@@ -54,6 +53,12 @@ class SparseTrackerController(ControllerBase):
     - The preferred way to create instances of this class is via its class methods (e.g. `TrackerController.from_space_object`).
     - This class serve as a frontend to the `State` type in this module
     """
+
+    FromSpaceObjectParam = FromSpaceObjectParam
+    """shortcut to module attribute"""
+
+    ControllerState = ControllerState
+    """shortcut to module attribute"""
 
     def __init__(
         self,
