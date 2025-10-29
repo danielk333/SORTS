@@ -33,3 +33,17 @@ class SimultaneousPassage:
     epoch: types.Datetime64_us
     time_range: types.TimeRange_us
     """The start time and end time of the passage, a right-open interval"""
+
+    def to_passages(self) -> list[Passage]:
+        passages = [
+            Passage(
+                space_object=self.space_object,
+                tx_station=self.tx_station,
+                rx_station=rx_station,
+                epoch=self.epoch,
+                time_range=self.time_range,
+            )
+            for rx_station in self.rx_stations
+        ]
+
+        return passages
