@@ -17,6 +17,7 @@ from sorts.types import (
     Datetime_Like,
     Timedelta_Like,
 )
+from sorts.simulation.funcs import find_simultaneous_passages
 from .controller_base import ControllerBase
 
 logger = logging.getLogger(__name__)
@@ -143,7 +144,7 @@ class SparseTrackerController(ControllerBase):
 
         self.compute_ecef_states(start_time, end_time, self.exp_detail["slice_duration"])
 
-        passages_of_spobj = simulation.find_simultaneous_passages(
+        passages_of_spobj = find_simultaneous_passages(
             dt=(self.state.spobj_time - self.epoch) / np.timedelta64(1, "s"),
             space_object=self.space_object,
             states=self.state.spobj_states[:3, ...],
