@@ -32,6 +32,7 @@ from . import simulation
 from .schedule import Schedule, ExperimentDetail
 from .controller import TrackerController, FenceScanController
 from .simulation import StxMrxSimulation
+from .mpi_queued_execution import MpiQueuedExecution
 
 
 ##
