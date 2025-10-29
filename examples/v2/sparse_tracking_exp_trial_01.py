@@ -1,4 +1,4 @@
-import logging, typing as t
+import logging, typing as t, functools, operator
 from pathlib import Path
 from datetime import datetime
 import numpy as np
@@ -13,9 +13,9 @@ from sorts import (
     interpolation,
     population,
     propagator,
-    space_object,
     radar,
 )
+from sorts.space_object import SpaceObject
 from sorts.schedule.priority_scheduling import priority_scheduling
 from sorts.controller import SparseTrackerController
 from sorts.simulation.stx_mrx_simulation import (
@@ -38,6 +38,15 @@ def dsec_sampler(orbit, start_time, end_time):
     return np.arange(0, (end_time - start_time) / np.timedelta64(1, "s"), 120, dtype=np.float64)
 
 
+def duplicate_and_perturbate_space_objects(spobjs: list[SpaceObject], dup_num=6):
+    # duplicate list items by nesting and then flattening;
+    spobjs = list(functools.reduce(operator.concat, [[spobj] * dup_num for spobj in spobjs]))
+
+    # TODO: perturbation
+
+    return spobjs
+
+
 class MpiExample(sorts.MpiQueuedExecution):
     def prepare_master_process_environment(self):
         start_time = Time("2025-01-01 02:45:00")
@@ -53,7 +62,7 @@ class MpiExample(sorts.MpiQueuedExecution):
         rx_station_1: radar.Station = radar_sys.rx[1]
         rx_station_1.uid = 2
 
-        known_spobj = space_object.SpaceObject(
+        known_spobj = SpaceObject(
             oid=-1,
             propagator=propagator.SGP4,
             propagator_options={"settings": {"out_frame": "ITRF"}},
@@ -77,8 +86,11 @@ class MpiExample(sorts.MpiQueuedExecution):
         spobj_pop = population.master_catalog_factor(_spobj_pop, treshhold=1.0, seed=rand_seed)
         spobjs = [
             known_spobj,
-            *[spobj_pop.get_object(i) for i in range(spobj_pop.shape[0])][0:20],
+            *[spobj_pop.get_object(i) for i in range(spobj_pop.shape[0])][0:10],
         ]
+
+        # prep for jacobian calculation
+        spobjs = duplicate_and_perturbate_space_objects(spobjs)
 
         tracker_ctrls = [
             SparseTrackerController.from_space_object(
