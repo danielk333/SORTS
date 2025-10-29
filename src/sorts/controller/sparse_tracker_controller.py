@@ -158,6 +158,10 @@ class SparseTrackerController(ControllerBase):
             epoch=self.epoch,
         )
 
+        # early return for empty case
+        if len(passages_of_spobj) == 0:
+            return schedule.empty()
+
         tx_sch_index_list = []
         for ps in passages_of_spobj:
             start_time, end_time = ps.time_range
@@ -172,11 +176,16 @@ class SparseTrackerController(ControllerBase):
             for ind in range(self.points_per_passage):
                 pass_tx_index[ind] = np.argmin(
                     np.abs(
-                        (relative_time_sampling[ind] + start_time - self.state.spobj_time)
+                        (
+                            relative_time_sampling[ind] * np.timedelta64(1, "s")
+                            + start_time
+                            - self.state.spobj_time
+                        )
                         / np.timedelta64(1, "s")
                     )
                 )
             tx_sch_index_list.append(pass_tx_index)
+
         tx_sch_index = np.concatenate(tx_sch_index_list)
         tx_sch_time = self.state.spobj_time[tx_sch_index]
         tx_sch_len = len(tx_sch_time)
