@@ -433,7 +433,7 @@ class Observation:
 
     @classmethod
     def from_passage(cls, passage: Passage, sim_unit: SimulationUnit) -> list[t.Self]:
-        state_slice = filter_state_by_time_range(sim_unit._state, passage["time_range"])
+        state_slice = filter_state_by_time_range(sim_unit._state, passage.time_range)
 
         multi_index = t.cast(pd.MultiIndex, state_slice.indexes[_K.multi_index])
 
@@ -452,15 +452,15 @@ class Observation:
         return "\n".join(
             [
                 "Observation(",
-                f"    time_range={self.passage["time_range"]}",
-                f"    spobj_id={self.sim_unit.space_object.oid}, tx_stn_id={self.passage["tx_station"].uid}, rx_stn_id={self.passage["rx_station"].uid}",
+                f"    time_range={self.passage.time_range}",
+                f"    spobj_id={self.sim_unit.space_object.oid}, tx_stn_id={self.passage.tx_station.uid}, rx_stn_id={self.passage.rx_station.uid}",
                 f"    exp_id={self.exp_id}, simult_num={self.simult_num}",
                 ")",
             ]
         )
 
     def get_time_arr(self):
-        time_arr = filter_state_by_time_range(self.sim_unit._state, self.passage["time_range"])[
+        time_arr = filter_state_by_time_range(self.sim_unit._state, self.passage.time_range)[
             _K.time
         ].to_numpy()
 
@@ -469,24 +469,24 @@ class Observation:
     def index_into_schedule(self, sch: Schedule) -> TxRxTuple[Schedule, Schedule]:
         """Returns subset of schedules, in `(tx_scheule, tx_schedule` that corresponds to the observation"""
 
-        tx_sch_obs = schedule.filter_by_time_range(sch, self.passage["time_range"])
+        tx_sch_obs = schedule.filter_by_time_range(sch, self.passage.time_range)
         tx_sch_obs = tx_sch_obs.loc[
             {
                 _SK.multi_index: (
                     self.exp_id,
-                    self.passage["tx_station"].uid,
+                    self.passage.tx_station.uid,
                     0,  # NOTE: we only support single simultaneous tx pointing
                     slice(None),
                 )
             }
         ]
 
-        rx_sch_obs = schedule.filter_by_time_range(sch, self.passage["time_range"])
+        rx_sch_obs = schedule.filter_by_time_range(sch, self.passage.time_range)
         rx_sch_obs = rx_sch_obs.loc[
             {
                 _SK.multi_index: (
                     self.exp_id,
-                    self.passage["rx_station"].uid,
+                    self.passage.rx_station.uid,
                     self.simult_num,
                     slice(None),
                 )
@@ -498,9 +498,7 @@ class Observation:
     def get_state_slice(self) -> State:
         """Get the subset of `State` data the corresponds to the the observation"""
 
-        sim_state_slice = filter_state_by_time_range(
-            self.sim_unit._state, self.passage["time_range"]
-        )
+        sim_state_slice = filter_state_by_time_range(self.sim_unit._state, self.passage.time_range)
 
         # NOTE: early return for empty case; `loc` method does not work with non-existent selection
         if len(sim_state_slice[_K.multi_index]) == 0:

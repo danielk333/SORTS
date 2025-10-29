@@ -96,8 +96,8 @@ def group_passages_by_tx_rx_station_pair(
     groupped_passages: dict[tuple[StationId, StationId], list[Passage]] = {}
 
     for passage in passages:
-        tx_station_id = passage["tx_station"].uid
-        rx_station_id = passage["rx_station"].uid
+        tx_station_id = passage.tx_station.uid
+        rx_station_id = passage.rx_station.uid
 
         if (tx_station_id, rx_station_id) in groupped_passages:
             groupped_passages[(tx_station_id, rx_station_id)].append(passage)
@@ -130,7 +130,7 @@ def derive_simulation_unit_params(
             rx_stn = spec["station_map"][stn_id_pair[1]]
 
             filtered_sch = schedule.filter_by_time_ranges(
-                spec["schedule"], [ps["time_range"] for ps in passages]
+                spec["schedule"], [ps.time_range for ps in passages]
             )
 
             params.append(

@@ -11,7 +11,7 @@ from sorts.types import Datetime64_us, EcefStates, Float64_as_sec, Datetime_Like
 from sorts.utils import to_datetime64_us
 from sorts.radar import Station
 from sorts.space_object import SpaceObject
-from .types import Passage
+from .types import SimultaneousPassage, Passage
 
 
 def find_simultaneous_passages(
@@ -22,7 +22,7 @@ def find_simultaneous_passages(
     rx_stations: t.Sequence[Station],
     epoch: Datetime_Like,
     fov_kw=None,
-) -> list[Passage]:
+) -> list[SimultaneousPassage]:
     """
     Finds all find_passages that are simultaneously inside a tx-rx station pair's FOV.
 
@@ -32,7 +32,7 @@ def find_simultaneous_passages(
 
     epoch = to_datetime64_us(epoch)
 
-    passages: list[Passage] = []
+    passages: list[SimultaneousPassage] = []
     if fov_kw is None:
         fov_kw = {}
 
@@ -73,13 +73,13 @@ def find_simultaneous_passages(
 
         time_range = (start_time, end_time)
         passages.append(
-            {
-                "space_object": space_object,
-                "tx_station": tx_station,
-                "rx_station": rx_station,
-                "epoch": epoch,
-                "time_range": time_range,
-            }
+            SimultaneousPassage(
+                space_object=space_object,
+                tx_station=tx_station,
+                rx_stations=list(rx_stations),
+                epoch=epoch,
+                time_range=time_range,
+            )
         )
 
     return passages
@@ -140,13 +140,13 @@ def find_passages(
 
         time_range = (start_time, end_time)
         passages.append(
-            {
-                "space_object": space_object,
-                "tx_station": tx_station,
-                "rx_station": rx_station,
-                "epoch": epoch,
-                "time_range": time_range,
-            }
+            Passage(
+                space_object=space_object,
+                tx_station=tx_station,
+                rx_station=rx_station,
+                epoch=epoch,
+                time_range=time_range,
+            )
         )
 
     return passages

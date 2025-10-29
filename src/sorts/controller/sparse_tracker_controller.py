@@ -155,7 +155,7 @@ class SparseTrackerController(ControllerBase):
 
         tx_sch_index_list = []
         for ps in passages_of_spobj:
-            start_time, end_time = ps["time_range"]
+            start_time, end_time = ps.time_range
             passage_time = (end_time - start_time) / np.timedelta64(1, "s")
             relative_time_sampling = np.linspace(
                 0.0, passage_time, num=self.points_per_passage + 2, endpoint=True
