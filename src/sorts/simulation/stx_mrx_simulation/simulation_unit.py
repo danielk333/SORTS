@@ -1,5 +1,6 @@
 from __future__ import annotations
 import typing as t
+from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
@@ -177,8 +178,8 @@ def calc_gain(
     return state
 
 
-# TODO: better naming
-class FromPassagesOverTxRxStationPairParam(t.TypedDict):
+@dataclass
+class FromPassagesOverTxRxStationPairParam:
     id: str
     passages: list[Passage]
     spobj: SpaceObject
@@ -234,38 +235,38 @@ class SimulationUnit:
     def from_passages_over_tx_rx_station_pair(
         cls, param: FromPassagesOverTxRxStationPairParam
     ) -> t.Self:
-        id = param["id"]
-        passages = param["passages"]
-        spobj = param["spobj"]
-        spobj_interp = param["spobj_interp"]
-        tx_station = param["tx_station"]
-        rx_station = param["rx_station"]
+        id = param.id
+        passages = param.passages
+        spobj = param.spobj
+        spobj_interp = param.spobj_interp
+        tx_station = param.tx_station
+        rx_station = param.rx_station
 
         # early return for empty cases
         # NOTE: this is particularly needed because `.loc` will throw KeyError for non-existence keys
         # TODO: add test case for empty case?
         if (
             len(passages) == 0
-            or not (param["schedule"][_SK.stn_num] == tx_station.uid).any()
-            or not (param["schedule"][_SK.stn_num] == rx_station.uid).any()
+            or not (param.schedule[_SK.stn_num] == tx_station.uid).any()
+            or not (param.schedule[_SK.stn_num] == rx_station.uid).any()
         ):
             return cls(
                 id=id,
                 spobj=spobj,
                 spobj_interp=spobj_interp,
                 passages=passages,
-                tx_station=param["tx_station"],
-                rx_station=param["rx_station"],
-                exp_detail_map=param["exp_detail_map"],
+                tx_station=param.tx_station,
+                rx_station=param.rx_station,
+                exp_detail_map=param.exp_detail_map,
                 state=State(empty_state()),
             )
 
         # NOTE: xarray simplify/collapse MultiIndex when filtering a level to an exact value,
         #   we filter on the top level "multi_index' with a tuple here to prevent it
-        tx_schdata = param["schedule"].loc[
+        tx_schdata = param.schedule.loc[
             {_SK.multi_index: (slice(None), tx_station.uid, slice(None), slice(None))}
         ]
-        rx_schdata = param["schedule"].loc[
+        rx_schdata = param.schedule.loc[
             {_SK.multi_index: (slice(None), rx_station.uid, slice(None), slice(None))}
         ]
 
@@ -282,7 +283,7 @@ class SimulationUnit:
             pd.MultiIndex.from_arrays(
                 [
                     rx_exp_num,
-                    np.full(len(rx_time), param["tx_station"].uid, dtype=np.int16),
+                    np.full(len(rx_time), param.tx_station.uid, dtype=np.int16),
                     np.full(len(rx_time), 0, dtype=np.int16),  # assuming single tx
                     rx_time,
                 ],
@@ -315,9 +316,9 @@ class SimulationUnit:
             spobj=spobj,
             spobj_interp=spobj_interp,
             passages=passages,
-            tx_station=param["tx_station"],
-            rx_station=param["rx_station"],
-            exp_detail_map=param["exp_detail_map"],
+            tx_station=param.tx_station,
+            rx_station=param.rx_station,
+            exp_detail_map=param.exp_detail_map,
             state=State(state),
         )
 

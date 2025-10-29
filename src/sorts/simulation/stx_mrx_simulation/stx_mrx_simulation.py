@@ -134,16 +134,16 @@ def derive_simulation_unit_params(
             )
 
             params.append(
-                {
-                    "id": str(len(params)),
-                    "passages": passages,
-                    "spobj": spobj,
-                    "spobj_interp": spobj_states_interp,
-                    "tx_station": tx_stn,
-                    "rx_station": rx_stn,
-                    "schedule": filtered_sch,
-                    "exp_detail_map": spec["exp_detail_map"],
-                }
+                FromPassagesOverTxRxStationPairParam(
+                    id=str(len(params)),
+                    passages=passages,
+                    spobj=spobj,
+                    spobj_interp=spobj_states_interp,
+                    tx_station=tx_stn,
+                    rx_station=rx_stn,
+                    schedule=filtered_sch,
+                    exp_detail_map=spec["exp_detail_map"],
+                )
             )
 
     return params
@@ -197,12 +197,12 @@ def mpi_worker_job(
     persist_dpath: Path,
     param: FromPassagesOverTxRxStationPairParam,
 ):
-    persist_fpath = persist_dpath / sim_unit_fname_tpl.format(id=param["id"])
+    persist_fpath = persist_dpath / sim_unit_fname_tpl.format(id=param.id)
 
     try:
         if persist_fpath.exists():
             logger.info(
-                f"worker: {worker_proc_rank} | SimulationUnit: {param["id"]} already completed, will load from the saved file instead"
+                f"worker: {worker_proc_rank} | SimulationUnit: {param.id} already completed, will load from the saved file instead"
             )
 
             with open(persist_fpath, "rb") as f:
@@ -234,7 +234,7 @@ def mpi_worker_job(
 
     except Exception as err:
         raise RuntimeError(
-            f"Runtime fail in worker: {worker_proc_rank} | SimulationUnit: {param["id"]}"
+            f"Runtime fail in worker: {worker_proc_rank} | SimulationUnit: {param.id}"
         ) from err
 
     obss = sim_unit.observations
@@ -325,7 +325,7 @@ class StxMrxSimulation:
         )
         # filter away param with empty schedule
         sim_units_param = [
-            p for p in sim_units_param if len(p["schedule"][schedule._K.multi_index]) > 0
+            p for p in sim_units_param if len(p.schedule[schedule._K.multi_index]) > 0
         ]
         logger.info(f"prepare_simulation_unit_params done")
 

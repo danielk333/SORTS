@@ -120,7 +120,7 @@ class MpiQueuedExecution(abc.ABC):
 
                 logger.debug(
                     f"master: {self.master_proc_rank} | sent `SimulationUnit`"
-                    + f" <{sim_units_param[next_sim_unit_param_idx]['id']}>"
+                    + f" <{sim_units_param[next_sim_unit_param_idx].id}>"
                     + f" ({next_sim_unit_param_idx+1}/{len(sim_units_param)}) to worker {idle_worker_rank}"
                 )
 
