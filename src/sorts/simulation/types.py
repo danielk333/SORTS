@@ -7,14 +7,16 @@ and the imports can be worked around, e.g, by `if t.TYPE_CHECKING`)
 
 import typing as t
 from dataclasses import dataclass
-from sorts import types, radar, space_object
+from sorts import types, radar
+from sorts.space_object import SpaceObject
+from sorts.interpolation import Interpolator
 
 
 @dataclass(kw_only=True)
 class Passage:
     """Represent a passage of a space object over the field of view of a TX-RX radar station pair."""
 
-    space_object: space_object.SpaceObject
+    space_object: SpaceObject
     tx_station: radar.Station
     rx_station: radar.Station
     epoch: types.Datetime64_us
@@ -27,7 +29,7 @@ class Passage:
 class SimultaneousPassage:
     """Represent a passage of a space object over the field of view of a single TX, multiple simultaneous RX radar stations."""
 
-    space_object: space_object.SpaceObject
+    space_object: SpaceObject
     tx_station: radar.Station
     rx_stations: list[radar.Station]
     epoch: types.Datetime64_us
@@ -47,3 +49,15 @@ class SimultaneousPassage:
         ]
 
         return passages
+
+
+SpaceObjectJacobianTuple = tuple[
+    SpaceObject, SpaceObject, SpaceObject, SpaceObject, SpaceObject, SpaceObject
+]
+"""A tuple of 6 `SpaceObject`, the first one is the original one and the next 5 are perturbated versions."""
+
+
+SpaceObjectInterpolatorJacobianTuple = tuple[
+    Interpolator, Interpolator, Interpolator, Interpolator, Interpolator, Interpolator
+]
+"""A tuple of 6 `Interpolator`, the first one is the original one and the next 5 are perturbated versions."""

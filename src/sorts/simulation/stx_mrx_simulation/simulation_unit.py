@@ -13,7 +13,11 @@ from sorts.radar import Station
 from sorts.signals import hard_target_snr
 from sorts.interpolation import Interpolator
 from sorts.schedule import ExperimentDetailMap, Schedule
-from sorts.simulation.types import Passage
+from sorts.simulation.types import (
+    Passage,
+    SpaceObjectJacobianTuple,
+    SpaceObjectInterpolatorJacobianTuple,
+)
 
 
 CoordKey = t.Literal["multi_index", "time", "exp_num", "rx_simult_num", "enu", "e", "n", "u"]
@@ -183,7 +187,9 @@ class FromPassagesOverTxRxStationPairParam:
     id: str
     passages: list[Passage]
     spobj: SpaceObject
+    spobj_jacobian_tuple: SpaceObjectJacobianTuple
     spobj_interp: Interpolator
+    spobj_interp_jacobian_tuple: SpaceObjectInterpolatorJacobianTuple
     tx_station: Station
     rx_station: Station
     schedule: Schedule

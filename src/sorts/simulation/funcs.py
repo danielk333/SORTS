@@ -4,14 +4,21 @@ Functions for core functionalities of this subpackage
 - Intended to be imported as a whole module when consuming
 """
 
-import typing as t
+# TODO: this module can be moved to top level as helper funcs of sorts pkg?
+
+import typing as t, random
 import numpy as np
 import numpy.typing as npt
 from sorts.types import Datetime64_us, EcefStates, Float64_as_sec, Datetime_Like
 from sorts.utils import to_datetime64_us
 from sorts.radar import Station
 from sorts.space_object import SpaceObject
-from .types import SimultaneousPassage, Passage
+from .types import (
+    SimultaneousPassage,
+    Passage,
+    SpaceObjectJacobianTuple,
+    SpaceObjectInterpolatorJacobianTuple,
+)
 
 
 def find_simultaneous_passages(
@@ -116,3 +123,25 @@ def find_passages(
     ]
 
     return passages
+
+
+def duplicate_and_perturbate_space_objects(
+    spobjs: list[SpaceObject], pert_ratio: float
+) -> list[SpaceObjectJacobianTuple]:
+    # duplicate list items
+    spobjs_jacobian_tuples = [(spobj, spobj, spobj, spobj, spobj, spobj) for spobj in spobjs]
+
+    # TODO: confirm with daniel the perturbation
+    # perturbate
+    for spobjs_jacobian_tuple in spobjs_jacobian_tuples:
+        for idx, spobj in enumerate(spobjs_jacobian_tuple):
+            # the original spobj are left intact
+            if idx != 0:
+                perturbated_param = {
+                    pkey: pval * (1 + random.random() * pert_ratio)
+                    for pkey, pval in spobj.parameters.items()
+                    if pkey not in ["m"]
+                }
+                spobj.update(**perturbated_param)
+
+    return spobjs_jacobian_tuples
