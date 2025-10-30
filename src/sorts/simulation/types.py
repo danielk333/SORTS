@@ -52,6 +52,6 @@ class SimultaneousPassage:
 
 
 SpaceObjectJacobianTuple = tuple[
-    SpaceObject, SpaceObject, SpaceObject, SpaceObject, SpaceObject, SpaceObject
+    SpaceObject, SpaceObject, SpaceObject, SpaceObject, SpaceObject, SpaceObject, SpaceObject
 ]
-"""A tuple of 6 `SpaceObject`, the first one is the original one and the next 5 are perturbated versions."""
+"""A tuple of 7 `SpaceObject`, the first one is the original one and the next 6 are perturbated versions."""

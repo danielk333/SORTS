@@ -121,22 +121,19 @@ def find_passages(
 
 
 def duplicate_and_perturbate_space_objects(
-    spobjs: list[SpaceObject], pert_ratio: float
+    spobjs: list[SpaceObject],
+    pert_val: tuple[float, float, float, float, float, float] = (
+        1e-3, 1e-3, 1e-3, 1e-5, 1e-5, 1e-5  # fmt: skip
+    ),
 ) -> list[SpaceObjectJacobianTuple]:
     # duplicate list items
-    spobjs_jacobian_tuples = [(spobj, spobj, spobj, spobj, spobj, spobj) for spobj in spobjs]
+    spobjs_jacobian_tuples = [(spobj, spobj, spobj, spobj, spobj, spobj, spobj) for spobj in spobjs]
 
-    # TODO: confirm with daniel the perturbation
     # perturbate
     for spobjs_jacobian_tuple in spobjs_jacobian_tuples:
         for idx, spobj in enumerate(spobjs_jacobian_tuple):
             # the original spobj are left intact
             if idx != 0:
-                perturbated_param = {
-                    pkey: pval * (1 + random.random() * pert_ratio)
-                    for pkey, pval in spobj.parameters.items()
-                    if pkey not in ["m"]
-                }
-                spobj.update(**perturbated_param)
+                spobj.state._cart[idx - 1, 0] += pert_val[idx - 1]
 
     return spobjs_jacobian_tuples

@@ -327,9 +327,8 @@ class StxMrxSimulation:
             spec=self.spec,
             passages_lists=passages_lists,
             spobjs_interpolators=spobjs_interpolators,
-            # TODO: hard-coding `pert_ratio` is just a tmp solution
             spobjs_jacobian_tuples=duplicate_and_perturbate_space_objects(
-                spobjs=self.spec["space_objects"], pert_ratio=0.01 / 100
+                spobjs=self.spec["space_objects"]
             ),
         )
         # filter away param with empty schedule
