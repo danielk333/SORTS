@@ -55,9 +55,3 @@ SpaceObjectJacobianTuple = tuple[
     SpaceObject, SpaceObject, SpaceObject, SpaceObject, SpaceObject, SpaceObject
 ]
 """A tuple of 6 `SpaceObject`, the first one is the original one and the next 5 are perturbated versions."""
-
-
-SpaceObjectInterpolatorJacobianTuple = tuple[
-    Interpolator, Interpolator, Interpolator, Interpolator, Interpolator, Interpolator
-]
-"""A tuple of 6 `Interpolator`, the first one is the original one and the next 5 are perturbated versions."""

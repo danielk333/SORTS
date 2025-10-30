@@ -14,10 +14,7 @@ from sorts.radar import Station, StationId
 from sorts.simulation import Passage
 from sorts.interpolation import Interpolator
 from sorts.schedule import Schedule, ExperimentDetailMap
-from sorts.simulation.types import (
-    SpaceObjectJacobianTuple,
-    SpaceObjectInterpolatorJacobianTuple,
-)
+from sorts.simulation.types import SpaceObjectJacobianTuple
 from sorts.simulation.funcs import duplicate_and_perturbate_space_objects
 from sorts.simulation.stx_mrx_simulation.simulation_unit import (
     SimulationUnit,
@@ -118,7 +115,6 @@ def derive_simulation_unit_params(
     passages_lists: list[list[Passage]],
     spobjs_interpolators: list[Interpolator],
     spobjs_jacobian_tuples: list[SpaceObjectJacobianTuple],
-    spobjs_interp_jacobian_tuples: list[SpaceObjectInterpolatorJacobianTuple],
 ) -> list[FromPassagesOverTxRxStationPairParam]:
     """
     Derive a list of param for the `from_passages_over_tx_rx_station_pair` constructor of `SimulationUnit`
@@ -128,18 +124,8 @@ def derive_simulation_unit_params(
 
     params: list[FromPassagesOverTxRxStationPairParam] = []
 
-    for (
-        spobj,
-        passages_of_a_spobj,
-        spobj_states_interp,
-        spobjs_jacobian_tuple,
-        spobjs_interp_jacobian_tuple,
-    ) in zip(
-        spec["space_objects"],
-        passages_lists,
-        spobjs_interpolators,
-        spobjs_jacobian_tuples,
-        spobjs_interp_jacobian_tuples,
+    for spobj, passages_of_a_spobj, spobj_states_interp, spobjs_jacobian_tuple in zip(
+        spec["space_objects"], passages_lists, spobjs_interpolators, spobjs_jacobian_tuples
     ):
         groupped_passages = group_passages_by_tx_rx_station_pair(passages_of_a_spobj)
 
@@ -158,7 +144,6 @@ def derive_simulation_unit_params(
                     spobj=spobj,
                     spobj_jacobian_tuple=spobjs_jacobian_tuple,
                     spobj_interp=spobj_states_interp,
-                    spobj_interp_jacobian_tuple=spobjs_interp_jacobian_tuple,
                     tx_station=tx_stn,
                     rx_station=rx_stn,
                     schedule=filtered_sch,
@@ -342,13 +327,10 @@ class StxMrxSimulation:
             spec=self.spec,
             passages_lists=passages_lists,
             spobjs_interpolators=spobjs_interpolators,
+            # TODO: hard-coding `pert_ratio` is just a tmp solution
             spobjs_jacobian_tuples=duplicate_and_perturbate_space_objects(
                 spobjs=self.spec["space_objects"], pert_ratio=0.01 / 100
             ),
-            # TODO: this is a dummy imple
-            spobjs_interp_jacobian_tuples=[
-                (interp, interp, interp, interp, interp, interp) for interp in spobjs_interpolators
-            ],
         )
         # filter away param with empty schedule
         sim_units_param = [

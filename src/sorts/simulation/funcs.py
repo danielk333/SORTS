@@ -13,12 +13,7 @@ from sorts.types import Datetime64_us, EcefStates, Float64_as_sec, Datetime_Like
 from sorts.utils import to_datetime64_us
 from sorts.radar import Station
 from sorts.space_object import SpaceObject
-from .types import (
-    SimultaneousPassage,
-    Passage,
-    SpaceObjectJacobianTuple,
-    SpaceObjectInterpolatorJacobianTuple,
-)
+from .types import SimultaneousPassage, Passage, SpaceObjectJacobianTuple
 
 
 def find_simultaneous_passages(
