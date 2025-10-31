@@ -139,14 +139,16 @@ class MpiExample(sorts.MpiQueuedExecution):
         # TODO: probably better to make it an explicit dict instead of calling `locals()`
         # converted to dict to make it slightly safer
         sim_env = dict(locals())
-        safe_pickle(sim_env, save_dpath / "sim_env")
+        safe_pickle(sim_env, save_dpath / "sim_env.pickle")
 
-        # repeat the simulation for jacobian calculation
+        # repeat the simulation for all duplicates from perturbation
         spobj_jacobian_tuples = duplicate_and_perturbate_space_objects(spobjs)
         for idx, spobj_grp in enumerate(zip(*spobj_jacobian_tuples)):
             sim = StxMrxSimulation.from_controllers(
                 {**spec_by_controllers, "space_objects": spobj_grp}
             )
+            safe_pickle(sim, save_dpath / f"{idx}" / "sim.pickle")
+
             sim_units_params = sim.prepare_simulation_unit_params()
 
             ##
@@ -169,49 +171,58 @@ class MpiExample(sorts.MpiQueuedExecution):
         ##
         # analyze result
         ##
-        calc_start_time = time.perf_counter()
 
-        obss: list[stx_mrx_simulation.Observation] = []
-        max_snrs_value = []
-        max_snrs_time: list[types.Datetime64_us] = []
-        max_snrs_spobj_id: list[int] = []
+        # repeat the analysis for all duplicates from perturbation
+        for idx, spobj_grp in enumerate(zip(*spobj_jacobian_tuples)):
 
-        for sim_unit in stx_mrx_simulation.iter_mpi_simulation_results(save_dpath):
-            logger.info(f"processing result from SimulationUnit <{sim_unit.id}>")
+            # load simulation object from save file
+            sim: StxMrxSimulation
+            with open(save_dpath / f"{idx}" / "sim.pickle", "rb") as f:
+                sim = pickle.load(f)
 
-            _SuK = SimulationUnit._K
+            calc_start_time = time.perf_counter()
 
-            su_obss = sim_unit.observations
-            obss.extend(su_obss)
+            obss: list[stx_mrx_simulation.Observation] = []
+            max_snrs_value = []
+            max_snrs_time: list[types.Datetime64_us] = []
+            max_snrs_spobj_id: list[int] = []
 
-            for obs in su_obss:
-                obs_state = obs.get_state_slice()
-                argmax_snr = t.cast(xr.DataArray, obs_state[_SuK.snr].argmax())
-                midx_max_snr = obs_state[{_SuK.multi_index: argmax_snr.item()}]
-                midx_max_snr_value = midx_max_snr[_SuK.snr].item()
-                midx_max_snr_time = midx_max_snr[_SuK.time].item()
+            for sim_unit in stx_mrx_simulation.iter_mpi_simulation_results(save_dpath / f"{idx}"):
+                logger.info(f"processing result from SimulationUnit <{sim_unit.id}>")
 
-                max_snrs_value.append(midx_max_snr_value)
-                max_snrs_time.append(midx_max_snr_time)
-                max_snrs_spobj_id.append(sim_unit.space_object.oid)
+                _SuK = SimulationUnit._K
 
-        # plotting
-        logger.info(f"start generating plots...")
+                su_obss = sim_unit.observations
+                obss.extend(su_obss)
 
-        fig, ax = plt.subplots()
-        ax.set_title("snr vs time")
-        ax.scatter(max_snrs_time, max_snrs_value, s=3)
-        ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d %H:%M:%S"))
-        fig.autofmt_xdate()
-        # ax.set_yscale("log")
-        plt.savefig(save_dpath / "max_snr_vs_time.png", dpi=300, bbox_inches="tight")
+                for obs in su_obss:
+                    obs_state = obs.get_state_slice()
+                    argmax_snr = t.cast(xr.DataArray, obs_state[_SuK.snr].argmax())
+                    midx_max_snr = obs_state[{_SuK.multi_index: argmax_snr.item()}]
+                    midx_max_snr_value = midx_max_snr[_SuK.snr].item()
+                    midx_max_snr_time = midx_max_snr[_SuK.time].item()
 
-        logger.info(f"done generating plots")
+                    max_snrs_value.append(midx_max_snr_value)
+                    max_snrs_time.append(midx_max_snr_time)
+                    max_snrs_spobj_id.append(sim_unit.space_object.oid)
 
-        print(f"len(obss): {len(obss)}")
+            # plotting
+            logger.info(f"start generating plots...")
 
-        calc_time = time.perf_counter() - calc_start_time
-        logger.info(f"result_analysis_fn took {calc_time} sec")
+            fig, ax = plt.subplots()
+            ax.set_title("snr vs time")
+            ax.scatter(max_snrs_time, max_snrs_value, s=3)
+            ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d %H:%M:%S"))
+            fig.autofmt_xdate()
+            # ax.set_yscale("log")
+            plt.savefig(save_dpath / "max_snr_vs_time.png", dpi=300, bbox_inches="tight")
+
+            logger.info(f"done generating plots")
+
+            print(f"len(obss): {len(obss)}")
+
+            calc_time = time.perf_counter() - calc_start_time
+            logger.info(f"result_analysis_fn took {calc_time} sec")
 
         return
 
