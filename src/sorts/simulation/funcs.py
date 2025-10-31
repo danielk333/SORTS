@@ -128,7 +128,10 @@ def duplicate_and_perturbate_space_objects(
     ),
 ) -> list[SpaceObjectJacobianTuple]:
     # duplicate list items
-    spobjs_jacobian_tuples = [(spobj, spobj, spobj, spobj, spobj, spobj, spobj) for spobj in spobjs]
+    spobjs_jacobian_tuples = [
+        (spobj, spobj.copy(), spobj.copy(), spobj.copy(), spobj.copy(), spobj.copy(), spobj.copy())
+        for spobj in spobjs
+    ]
 
     # perturbate
     for spobjs_jacobian_tuple in spobjs_jacobian_tuples:
