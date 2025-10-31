@@ -17,7 +17,12 @@ from sorts.simulation.funcs import (
     safe_pickle,
     duplicate_and_perturbate_space_objects,
 )
-from sorts.simulation.stx_mrx_simulation import stx_mrx_simulation, StxMrxSimulation, SimulationUnit
+from sorts.simulation.stx_mrx_simulation import (
+    stx_mrx_simulation,
+    StxMrxSimulation,
+    SimulationUnit,
+    Observation,
+)
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -174,40 +179,66 @@ class MpiExample(sorts.MpiQueuedExecution):
         # analyze result
         ##
 
-        # repeat the analysis for all duplicates from perturbation
+        # the analysis will mostly use the group of space objects without perturbation,
+        # the perturbated groups will be used for jacobian calculation
+        sim_unit_grps: list[list[SimulationUnit]] = []
         for idx, _spobj_grp in enumerate(zip(*spobj_jacobian_tuples)):
             save_subdpath = save_dpath / f"{idx}"
+            sim_unit_grps.append(
+                list(stx_mrx_simulation.iter_mpi_simulation_results(save_subdpath))
+            )
 
-            # load simulation object from save file
-            sim: StxMrxSimulation
-            with open(save_subdpath / "sim.pickle", "rb") as f:
-                sim = pickle.load(f)
+        calc_start_time = time.perf_counter()
 
-            calc_start_time = time.perf_counter()
+        obss: list[stx_mrx_simulation.Observation] = []
+        max_snrs_value = []
+        max_snrs_time: list[types.Datetime64_us] = []
+        max_snrs_spobj_id: list[int] = []
 
-            obss: list[stx_mrx_simulation.Observation] = []
-            max_snrs_value = []
-            max_snrs_time: list[types.Datetime64_us] = []
-            max_snrs_spobj_id: list[int] = []
+        save_subdpath = save_dpath / f"{0}"
 
-            for sim_unit in stx_mrx_simulation.iter_mpi_simulation_results(save_subdpath):
-                logger.info(f"processing result from SimulationUnit <{sim_unit.id}>")
+        jaco_sim_unit_tuple: tuple[SimulationUnit, ...]
+        for jaco_sim_unit_tuple in zip(*sim_unit_grps):
 
-                _SuK = SimulationUnit._K
+            sim_unit, *pert_sim_units = jaco_sim_unit_tuple
+            spobj, *pert_spobjs = [su.space_object for su in jaco_sim_unit_tuple]
+            logger.info(f"processing result from SimulationUnit <{sim_unit.id}>")
 
-                su_obss = sim_unit.observations
-                obss.extend(su_obss)
+            _SuK = SimulationUnit._K
 
-                for obs in su_obss:
-                    obs_state = obs.get_state_slice()
-                    argmax_snr = t.cast(xr.DataArray, obs_state[_SuK.snr].argmax())
-                    midx_max_snr = obs_state[{_SuK.multi_index: argmax_snr.item()}]
-                    midx_max_snr_value = midx_max_snr[_SuK.snr].item()
-                    midx_max_snr_time = midx_max_snr[_SuK.time].item()
+            true_obss = sim_unit.observations
+            pert_obss_grp = [
+                su.observations for su in pert_sim_units
+            ]  # i.e. a list of 6 `list[Observation]`
+            obss.extend(true_obss)
 
-                    max_snrs_value.append(midx_max_snr_value)
-                    max_snrs_time.append(midx_max_snr_time)
-                    max_snrs_spobj_id.append(sim_unit.space_object.oid)
+            jaco_obs_tuple: tuple[Observation, ...]
+            for jaco_obs_tuple in zip(true_obss, *pert_obss_grp):
+
+                obs, *pert_obss = jaco_obs_tuple
+                obs_state = obs.get_state_slice()
+                pert_obs_states = [obs.get_state_slice() for obs in pert_obss]
+
+                argmax_snr = t.cast(xr.DataArray, obs_state[_SuK.snr].argmax())
+                midx_max_snr = obs_state[{_SuK.multi_index: argmax_snr.item()}]
+                midx_max_snr_value = midx_max_snr[_SuK.snr].item()
+                midx_max_snr_time = midx_max_snr[_SuK.time].item()
+
+                max_snrs_value.append(midx_max_snr_value)
+                max_snrs_time.append(midx_max_snr_time)
+                max_snrs_spobj_id.append(sim_unit.space_object.oid)
+
+                # TODO: confirm with daniel
+                #       - the sign of the difference in the partial diff
+                #       - the dimension of the jacobian, seems like a (1, n) matrix in this case?
+                #         (so it's actually a gradient in this case, since two_way_range is a scala)
+                # calc the jacobian
+                jacobian = [(
+                      (pert_obs_states[idx][_SuK.two_way_range].to_numpy() - obs_state[_SuK.two_way_range].to_numpy())
+                    / (pert_spobjs[idx].state._cart[idx] - x)
+                ) for idx, x in enumerate(spobj.state._cart)] # fmt: skip
+
+                logger.info(f"jacobian: {jacobian}")
 
             # plotting
             logger.info(f"start generating plots...")

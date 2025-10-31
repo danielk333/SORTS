@@ -59,6 +59,7 @@ assert_class_attributes_equal_to(_K, t.get_args(Key))
 _SK = schedule._K
 """Internal helper for accessing string keys consistently"""
 
+# TODO: rename to `SimulationUnitState`
 State = t.NewType("State", xr.Dataset)
 """
 A xarray `Dataset` with:
