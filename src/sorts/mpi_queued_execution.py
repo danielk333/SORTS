@@ -52,12 +52,13 @@ class MpiQueuedExecution(abc.ABC):
 
         self.comm = MPI.COMM_WORLD
         self.rank = self.comm.Get_rank()
+        self.num_workers = self.comm.Get_size() - 1
 
     @abc.abstractmethod
     def master_process(self) -> None:
         """
         The code that only ran on the master rank process.
-        - Must invoke the method `mpi_master_proc_loop` (at most once) to start dispatching job to workers.
+        - Must invoke the method `mpi_master_proc_loop` at least once to start dispatching job to workers.
         """
 
     @abc.abstractmethod
@@ -99,8 +100,7 @@ class MpiQueuedExecution(abc.ABC):
             f"master: {self.master_proc_rank} | parallel processing of SimulationUnit start"
         )
 
-        num_workers = self.comm.Get_size() - 1
-        is_worker_idle_list = [True for _ in range(num_workers)]
+        is_worker_idle_list = [True for _ in range(self.num_workers)]
         next_work_job_param_idx = 0
         processed_work_job_cnt = 0
 
@@ -126,30 +126,14 @@ class MpiQueuedExecution(abc.ABC):
                 logger.debug(f"master: {self.master_proc_rank} | awaiting results ...")
 
                 status = MPI.Status()
-                recv_obss_cnt: int = self.comm.recv(status=status)
+                self.comm.recv(status=status)
                 worker_rank = status.Get_source()
-                logger.debug(
-                    f"master: {self.master_proc_rank} | received observation count: {recv_obss_cnt}, from worker: {worker_rank}"
-                )
+
                 processed_work_job_cnt += 1
 
                 is_worker_idle_list[worker_rank - 1] = True
 
-        logger.info(f"master: {self.master_proc_rank} | parallel processing of SimulationUnit done")
-
-        # TODO: maybe we can use `comm.bcast` here?
-        #   but worker also need to call `comm.bcast` for listening,
-        #   not sure if mpi allows listening to both `bcast` and `recv`
-        for r in range(1, num_workers + 1):
-            logger.debug(f"master: {self.master_proc_rank} | terminating worker: {r} ...")
-            self.comm.send(_MpiK.terminate, dest=r)
-            self.comm.recv(source=r)  # wait for an ack
-
-        # TODO: re-eval if we should implement automatic result gathering
-        logger.warning(
-            f"master: {self.master_proc_rank} | observations are not gathered by mpi master process automatically at the moment."
-        )
-        logger.info(f"master: {self.master_proc_rank} | master main loop done,  returning...")
+        logger.info(f"master: {self.master_proc_rank} | master proc loop done,  returning...")
 
     def _mpi_master_proc_loop_without_mpi(
         self, work_job_params: t.Sequence[WorkerJobParam]
@@ -195,6 +179,14 @@ class MpiQueuedExecution(abc.ABC):
                 calc_start_time = time.perf_counter()
 
                 self.master_process()
+
+                # TODO: maybe we can use `comm.bcast` here?
+                #   but worker also need to call `comm.bcast` for listening,
+                #   not sure if mpi allows listening to both `bcast` and `recv`
+                for r in range(1, self.num_workers + 1):
+                    logger.debug(f"master: {self.master_proc_rank} | terminating worker: {r} ...")
+                    self.comm.send(_MpiK.terminate, dest=r)
+                    self.comm.recv(source=r)  # wait for an ack
 
                 calc_time = time.perf_counter() - calc_start_time
                 logger.info(f"master_process took {calc_time} sec")
