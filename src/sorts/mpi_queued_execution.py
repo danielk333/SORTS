@@ -86,11 +86,7 @@ class MpiQueuedExecution(abc.ABC):
             pickle.dump(obj, f)
         persist_fpath_tmp.rename(persist_fpath)
 
-    def mpi_master_proc_loop(self, work_job_params: t.Sequence[WorkerJobParam]) -> None:
-        # short circuit to `fake_mpi_master_proc_loop` if `is_run_with_mpi` is False
-        if not self.is_run_with_mpi:
-            return self.fake_mpi_master_proc_loop(work_job_params)
-
+    def _mpi_master_proc_loop_with_mpi(self, work_job_params: t.Sequence[WorkerJobParam]) -> None:
         rank_size = self.comm.Get_size()
 
         logger.debug(f"running in mpi with rank: {rank_size}")
@@ -155,11 +151,19 @@ class MpiQueuedExecution(abc.ABC):
         )
         logger.info(f"master: {self.master_proc_rank} | master main loop done,  returning...")
 
-    def fake_mpi_master_proc_loop(self, work_job_params: t.Sequence[WorkerJobParam]) -> None:
+    def _mpi_master_proc_loop_without_mpi(
+        self, work_job_params: t.Sequence[WorkerJobParam]
+    ) -> None:
         """This will be ran instead of `mpi_master_proc_loop` when `is_run_with_mpi` is `False`"""
 
         for work_job_param in work_job_params:
             self.worker_process(work_job_param)
+
+    def mpi_master_proc_loop(self, work_job_params: t.Sequence[WorkerJobParam]) -> None:
+        if self.is_run_with_mpi:
+            return self._mpi_master_proc_loop_with_mpi(work_job_params)
+        else:
+            return self._mpi_master_proc_loop_without_mpi(work_job_params)
 
     def mpi_worker_proc_loop(self) -> None:
         worker_proc_rank = self.rank
@@ -182,7 +186,7 @@ class MpiQueuedExecution(abc.ABC):
                 # throw for unexpected msg
                 raise RuntimeError(f"worker: {worker_proc_rank} | received unexcepted msg: {msg}")
 
-    def run_with_mpi(self):
+    def _run_with_mpi(self):
         try:
             # master
             if self.rank == self.master_proc_rank:
@@ -213,7 +217,7 @@ class MpiQueuedExecution(abc.ABC):
             )
             comm.Abort(1)
 
-    def run_without_mpi(self):
+    def _run_without_mpi(self):
         """Run the execution without MPI, mostly useful for debugging."""
 
         self.ensure_save_dir()
@@ -227,6 +231,6 @@ class MpiQueuedExecution(abc.ABC):
 
     def run(self):
         if self.is_run_with_mpi:
-            self.run_with_mpi()
+            self._run_with_mpi()
         else:
-            self.run_without_mpi()
+            self._run_without_mpi()
