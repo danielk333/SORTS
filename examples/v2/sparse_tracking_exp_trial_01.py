@@ -144,10 +144,12 @@ class MpiExample(sorts.MpiQueuedExecution):
         # repeat the simulation for all duplicates from perturbation
         spobj_jacobian_tuples = duplicate_and_perturbate_space_objects(spobjs)
         for idx, spobj_grp in enumerate(zip(*spobj_jacobian_tuples)):
+            save_subdpath = save_dpath / f"{idx}"
+
             sim = StxMrxSimulation.from_controllers(
                 {**spec_by_controllers, "space_objects": spobj_grp}
             )
-            safe_pickle(sim, save_dpath / f"{idx}" / "sim.pickle")
+            safe_pickle(sim, save_subdpath / "sim.pickle")
 
             sim_units_params = sim.prepare_simulation_unit_params()
 
@@ -159,7 +161,7 @@ class MpiExample(sorts.MpiQueuedExecution):
             job_params: list[WParam] = [
                 {
                     "param": sim_units_param,
-                    "persist_dpath": save_dpath / f"{idx}",
+                    "persist_dpath": save_subdpath,
                 }
                 for sim_units_param in sim_units_params
             ]
@@ -173,11 +175,12 @@ class MpiExample(sorts.MpiQueuedExecution):
         ##
 
         # repeat the analysis for all duplicates from perturbation
-        for idx, spobj_grp in enumerate(zip(*spobj_jacobian_tuples)):
+        for idx, _spobj_grp in enumerate(zip(*spobj_jacobian_tuples)):
+            save_subdpath = save_dpath / f"{idx}"
 
             # load simulation object from save file
             sim: StxMrxSimulation
-            with open(save_dpath / f"{idx}" / "sim.pickle", "rb") as f:
+            with open(save_subdpath / "sim.pickle", "rb") as f:
                 sim = pickle.load(f)
 
             calc_start_time = time.perf_counter()
@@ -187,7 +190,7 @@ class MpiExample(sorts.MpiQueuedExecution):
             max_snrs_time: list[types.Datetime64_us] = []
             max_snrs_spobj_id: list[int] = []
 
-            for sim_unit in stx_mrx_simulation.iter_mpi_simulation_results(save_dpath / f"{idx}"):
+            for sim_unit in stx_mrx_simulation.iter_mpi_simulation_results(save_subdpath):
                 logger.info(f"processing result from SimulationUnit <{sim_unit.id}>")
 
                 _SuK = SimulationUnit._K
@@ -215,7 +218,7 @@ class MpiExample(sorts.MpiQueuedExecution):
             ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d %H:%M:%S"))
             fig.autofmt_xdate()
             # ax.set_yscale("log")
-            plt.savefig(save_dpath / "max_snr_vs_time.png", dpi=300, bbox_inches="tight")
+            plt.savefig(save_subdpath / "max_snr_vs_time.png", dpi=300, bbox_inches="tight")
 
             logger.info(f"done generating plots")
 
