@@ -51,7 +51,7 @@ class MpiExample(sorts.MpiQueuedExecution):
         # prepare simulation environment
         ##
 
-        save_dname = f"[{datetime.now().replace(microsecond=0).isoformat(sep=" ").replace(":", ".").replace("-", ".")}Z] mpi"
+        save_dname = f"[{datetime.now().replace(microsecond=0).isoformat(sep=" ").replace(":", ".").replace("-", ".")}Z] sparse_tracking_exp_trial_01"
         save_dpath = Path(__file__).parent / ".." / ".." / "local_data" / save_dname
         ensure_directory_exist(save_dpath)
 
