@@ -1,8 +1,6 @@
 from __future__ import annotations
-import logging, typing as t, pickle, traceback, time, abc
-from pathlib import Path
+import logging, typing as t, traceback, time, abc
 from mpi4py import MPI
-from sorts.simulation.stx_mrx_simulation import StxMrxSimulation, SimulationUnit
 
 
 logger = logging.getLogger(__name__)
@@ -44,8 +42,7 @@ class MpiQueuedExecution(abc.ABC):
 
     master_proc_rank = 0
 
-    def __init__(self, save_dpath: str | Path, is_run_with_mpi=True):
-        self.persist_dpath = Path(save_dpath)
+    def __init__(self, is_run_with_mpi=True):
         self.is_run_with_mpi = is_run_with_mpi
 
         self.comm = MPI.COMM_WORLD
@@ -63,27 +60,6 @@ class MpiQueuedExecution(abc.ABC):
     def worker_process(self, job_param: WorkerJobParam) -> None:
         """The code that only ran on the worker rank processes."""
         ...
-
-    def ensure_save_dir(self):
-        if not self.persist_dpath.exists():
-            self.persist_dpath.mkdir(parents=True)
-        assert self.persist_dpath.exists()
-        assert self.persist_dpath.is_dir()
-
-    def safe_pickle(self, obj, rel_fpath: str | Path):
-        """
-        Use pickle to save an object to the specified location relative to the "save directory"
-
-        NOTE:
-            As a simple way to reduce risk of corrupted files,
-            we write to an tmp file first then rename that file
-        """
-
-        persist_fpath = self.persist_dpath / rel_fpath
-        persist_fpath_tmp = persist_fpath.with_suffix(persist_fpath.suffix + ".tmp")
-        with open(persist_fpath_tmp, "wb") as f:
-            pickle.dump(obj, f)
-        persist_fpath_tmp.rename(persist_fpath)
 
     def _mpi_master_proc_loop_with_mpi(self, work_job_params: t.Sequence[WorkerJobParam]) -> None:
         rank_size = self.comm.Get_size()
@@ -172,8 +148,6 @@ class MpiQueuedExecution(abc.ABC):
         try:
             # master
             if self.rank == self.master_proc_rank:
-                self.ensure_save_dir()
-
                 calc_start_time = time.perf_counter()
 
                 self.master_process()
@@ -189,13 +163,9 @@ class MpiQueuedExecution(abc.ABC):
                 calc_time = time.perf_counter() - calc_start_time
                 logger.info(f"master_process took {calc_time} sec")
 
-                return
-
             # workers
             else:
                 self.mpi_worker_proc_loop()
-
-                return
 
         except Exception as err:
             comm = MPI.COMM_WORLD
@@ -209,8 +179,6 @@ class MpiQueuedExecution(abc.ABC):
 
     def _run_without_mpi(self):
         """Run the execution without MPI, mostly useful for debugging."""
-
-        self.ensure_save_dir()
 
         calc_start_time = time.perf_counter()
 

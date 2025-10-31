@@ -12,11 +12,8 @@ from sorts import types, interpolation, population, propagator, radar
 from sorts.space_object import SpaceObject
 from sorts.schedule.priority_scheduling import priority_scheduling
 from sorts.controller import SparseTrackerController
-from sorts.simulation.stx_mrx_simulation import (
-    stx_mrx_simulation,
-    StxMrxSimulation,
-    SimulationUnit,
-)
+from sorts.simulation.funcs import ensure_directory_exist, safe_pickle
+from sorts.simulation.stx_mrx_simulation import stx_mrx_simulation, StxMrxSimulation, SimulationUnit
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -44,6 +41,11 @@ class MpiExample(sorts.MpiQueuedExecution):
         ##
         # prepare simulation environment
         ##
+
+        save_dname = f"[{datetime.now().replace(microsecond=0).isoformat(sep=" ").replace(":", ".").replace("-", ".")}Z] mpi"
+        save_dpath = Path(__file__).parent / ".." / ".." / "local_data" / save_dname
+        ensure_directory_exist(save_dpath)
+
         start_time = Time("2025-01-01 02:45:00")
         end_time = Time("2025-01-01 03:00:00")
         control_slice_duration = np.timedelta64(10_000, "us")  # 10ms
@@ -133,7 +135,7 @@ class MpiExample(sorts.MpiQueuedExecution):
         # TODO: probably better to make it an explicit dict instead of calling `locals()`
         # converted to dict to make it slightly safer
         sim_env = dict(locals())
-        self.safe_pickle(sim_env, "sim_env")
+        safe_pickle(sim_env, save_dpath / "sim_env")
 
         sim = StxMrxSimulation.from_controllers(spec_by_controllers)
         sim_units_params = sim.prepare_simulation_unit_params()
@@ -146,7 +148,7 @@ class MpiExample(sorts.MpiQueuedExecution):
         job_params: list[WParam] = [
             {
                 "param": sim_units_param,
-                "persist_dpath": self.persist_dpath,
+                "persist_dpath": save_dpath,
             }
             for sim_units_param in sim_units_params
         ]
@@ -165,7 +167,7 @@ class MpiExample(sorts.MpiQueuedExecution):
         max_snrs_time: list[types.Datetime64_us] = []
         max_snrs_spobj_id: list[int] = []
 
-        for sim_unit in stx_mrx_simulation.iter_mpi_simulation_results(self.persist_dpath):
+        for sim_unit in stx_mrx_simulation.iter_mpi_simulation_results(save_dpath):
             logger.info(f"processing result from SimulationUnit <{sim_unit.id}>")
 
             _SuK = SimulationUnit._K
@@ -193,7 +195,7 @@ class MpiExample(sorts.MpiQueuedExecution):
         ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d %H:%M:%S"))
         fig.autofmt_xdate()
         # ax.set_yscale("log")
-        plt.savefig(self.persist_dpath / "max_snr_vs_time.png", dpi=300, bbox_inches="tight")
+        plt.savefig(save_dpath / "max_snr_vs_time.png", dpi=300, bbox_inches="tight")
 
         logger.info(f"done generating plots")
 
@@ -225,13 +227,13 @@ class MpiExample(sorts.MpiQueuedExecution):
 
                 sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(param)
 
-                self.safe_pickle(sim_unit, persist_fname)
+                safe_pickle(sim_unit, persist_fpath)
                 logger.info(f"worker: {worker_proc_rank} | `SimulationUnit.simulate` start")
                 sim_unit.simulate()
 
                 # delete the file we saved earlier before saving again
                 persist_fpath.unlink(missing_ok=True)
-                self.safe_pickle(sim_unit, persist_fname)
+                safe_pickle(sim_unit, persist_fpath)
 
         except Exception as err:
             raise RuntimeError(
@@ -246,9 +248,7 @@ class MpiExample(sorts.MpiQueuedExecution):
         )
 
 
-dname = f"[{datetime.now().replace(microsecond=0).isoformat(sep=" ").replace(":", ".").replace("-", ".")}Z] mpi"
 execution = MpiExample(
-    save_dpath=Path(__file__).parent / ".." / ".." / "local_data" / dname,
     is_run_with_mpi=False,  # a convenience flag to switch between running mode for debugging
     # is_run_with_mpi = True  # a convenience flag to switch between running mode for debugging
 ).run()

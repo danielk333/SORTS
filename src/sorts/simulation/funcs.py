@@ -6,7 +6,8 @@ Functions for core functionalities of this subpackage
 
 # TODO: this module can be moved to top level as helper funcs of sorts pkg?
 
-import typing as t, random
+import typing as t, pickle
+from pathlib import Path
 import numpy as np
 import numpy.typing as npt
 from sorts.types import Datetime64_us, EcefStates, Float64_as_sec, Datetime_Like
@@ -137,3 +138,31 @@ def duplicate_and_perturbate_space_objects(
                 spobj.state._cart[idx - 1, 0] += pert_val[idx - 1]
 
     return spobjs_jacobian_tuples
+
+
+def ensure_directory_exist(dpath: str | Path):
+    """Check if the directory exist and create it if not"""
+
+    dpath = Path(dpath)
+
+    if not dpath.exists():
+        dpath.mkdir(parents=True)
+    assert dpath.exists()
+    assert dpath.is_dir()
+
+
+def safe_pickle(obj, fpath: str | Path):
+    """
+    Use pickle to save an object to the specified file path, with a few extra steps to make the write operation safer:
+    - The output directory will be created if not exists
+    - We write to an tmp file first then rename that file, as a simple way to reduce risk of corrupted files
+    """
+
+    fpath = Path(fpath)
+
+    ensure_directory_exist(fpath.parent)
+
+    fpath_tmp = fpath.with_suffix(fpath.suffix + ".tmp")
+    with open(fpath_tmp, "wb") as f:
+        pickle.dump(obj, f)
+    fpath_tmp.rename(fpath)
