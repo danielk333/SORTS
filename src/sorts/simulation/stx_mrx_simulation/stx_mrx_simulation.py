@@ -194,62 +194,6 @@ def find_passages(
     return passages_list
 
 
-# TODO: need better typing here, probably need to move some code to the MpiQueuedExecution class as well
-def mpi_worker_job(
-    comm: MPI.Intracomm,
-    master_proc_rank: int,
-    worker_proc_rank: int,
-    persist_dpath: Path,
-    param: FromPassagesOverTxRxStationPairParam,
-):
-    persist_fpath = persist_dpath / sim_unit_fname_tpl.format(id=param.id)
-
-    try:
-        if persist_fpath.exists():
-            logger.info(
-                f"worker: {worker_proc_rank} | SimulationUnit: {param.id} already completed, will load from the saved file instead"
-            )
-
-            with open(persist_fpath, "rb") as f:
-                sim_unit = pickle.load(f)
-
-        else:
-            # NOTE:
-            #   As a simple way to reduce risk of corrupted files,
-            #   we write to an tmp file first then rename that file
-            #
-            #   sim_unit is saved 2 times, 1 before running `simulate` and 1 after
-
-            sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(param)
-
-            persist_fpath_tmp = persist_fpath.with_suffix(persist_fpath.suffix + ".tmp")
-            with open(persist_fpath_tmp, "wb") as f:
-                pickle.dump(sim_unit, f)
-                persist_fpath_tmp.rename(persist_fpath)
-
-            logger.info(f"worker: {worker_proc_rank} | `SimulationUnit.simulate` start")
-            sim_unit.simulate()
-
-            persist_fpath_tmp = persist_fpath.with_suffix(persist_fpath.suffix + ".tmp")
-            with open(persist_fpath_tmp, "wb") as f:
-                pickle.dump(sim_unit, f)
-                # delete the file we saved earlier, then rename the new dump file
-                persist_fpath.unlink(missing_ok=True)
-                persist_fpath_tmp.rename(persist_fpath)
-
-    except Exception as err:
-        raise RuntimeError(
-            f"Runtime fail in worker: {worker_proc_rank} | SimulationUnit: {param.id}"
-        ) from err
-
-    obss = sim_unit.observations
-
-    comm.send(len(obss), dest=master_proc_rank)
-    logger.info(
-        f"worker: {worker_proc_rank} | SimulationUnit:{sim_unit.id} done with {len(obss)} observations"
-    )
-
-
 def iter_mpi_simulation_results(save_dir: Path):
     for fpath in save_dir.glob(sim_unit_fname_tpl.format(id="*")):
         with open(fpath, "rb") as f:

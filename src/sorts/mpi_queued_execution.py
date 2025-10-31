@@ -44,9 +44,7 @@ class MpiQueuedExecution(abc.ABC):
 
     master_proc_rank = 0
 
-    def __init__(self, save_dpath: str | Path, sim_unit_fname_tpl: str, is_run_with_mpi=True):
-        # TODO: is there a better way to pass and store this `sim_unit_fname_tpl`?
-        self.sim_unit_fname_tpl = sim_unit_fname_tpl
+    def __init__(self, save_dpath: str | Path, is_run_with_mpi=True):
         self.persist_dpath = Path(save_dpath)
         self.is_run_with_mpi = is_run_with_mpi
 

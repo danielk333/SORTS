@@ -1,4 +1,4 @@
-import logging, time, typing as t
+import logging, time, typing as t, pickle
 from pathlib import Path
 from datetime import datetime
 import numpy as np
@@ -36,6 +36,8 @@ class WParam(t.TypedDict):
 
 
 class MpiExample(sorts.MpiQueuedExecution):
+    sim_unit_fname_tpl = stx_mrx_simulation.sim_unit_fname_tpl
+
     def master_process(self):
         ##
         # prepare simulation environment
@@ -222,20 +224,48 @@ class MpiExample(sorts.MpiQueuedExecution):
     def worker_process(self, job_param):
         param = job_param["param"]
         persist_dpath = job_param["persist_dpath"]
+        persist_fname = self.sim_unit_fname_tpl.format(id=param.id)
+        persist_fpath = persist_dpath / persist_fname
+        worker_proc_rank = self.rank
 
-        stx_mrx_simulation.mpi_worker_job(
-            comm=self.comm,
-            master_proc_rank=self.master_proc_rank,
-            worker_proc_rank=self.rank,
-            persist_dpath=persist_dpath,
-            param=param,
+        try:
+            if persist_fpath.exists():
+                logger.info(
+                    f"worker: {worker_proc_rank} | SimulationUnit: {param.id} already completed, will load from the saved file instead"
+                )
+
+                with open(persist_fpath, "rb") as f:
+                    sim_unit = pickle.load(f)
+
+            else:
+                # NOTE: sim_unit is saved 2 times, 1 before running `simulate` and 1 after
+
+                sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(param)
+
+                self.pickle(sim_unit, persist_fname)
+                logger.info(f"worker: {worker_proc_rank} | `SimulationUnit.simulate` start")
+                sim_unit.simulate()
+
+                # delete the file we saved earlier, then rename the new dump file
+                persist_fpath.unlink(missing_ok=True)
+                self.pickle(sim_unit, persist_fname)
+
+        except Exception as err:
+            raise RuntimeError(
+                f"Runtime fail in worker: {worker_proc_rank} | SimulationUnit: {param.id}"
+            ) from err
+
+        obss = sim_unit.observations
+
+        self.comm.send(True, dest=self.master_proc_rank)
+        logger.info(
+            f"worker: {worker_proc_rank} | SimulationUnit:{sim_unit.id} done with {len(obss)} observations"
         )
 
 
 dname = f"[{datetime.now().replace(microsecond=0).isoformat(sep=" ").replace(":", ".").replace("-", ".")}Z] mpi"
 execution = MpiExample(
     save_dpath=Path(__file__).parent / ".." / ".." / "local_data" / dname,
-    sim_unit_fname_tpl=stx_mrx_simulation.sim_unit_fname_tpl,
     is_run_with_mpi=False,  # a convenience flag to switch between running mode for debugging
     # is_run_with_mpi = True  # a convenience flag to switch between running mode for debugging
 ).run()
