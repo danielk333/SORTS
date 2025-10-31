@@ -121,7 +121,7 @@ def find_passages(
 
 
 def duplicate_and_perturbate_space_objects(
-    spobjs: list[SpaceObject],
+    spobjs: t.Sequence[SpaceObject],
     pert_val: tuple[float, float, float, float, float, float] = (
         1e-3, 1e-3, 1e-3, 1e-5, 1e-5, 1e-5  # fmt: skip
     ),

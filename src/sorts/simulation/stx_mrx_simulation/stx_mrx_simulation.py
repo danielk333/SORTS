@@ -38,13 +38,13 @@ class Spec(t.TypedDict):
     """A TypedDict of params"""
 
     station_map: dict[StationId, Station]
-    station_id_pairs: list[tuple[StationId, StationId]]
+    station_id_pairs: t.Sequence[tuple[StationId, StationId]]
     schedule: Schedule
     exp_detail_map: ExperimentDetailMap
     epoch: Datetime_Like
     start_time: Datetime_Like
     end_time: Datetime_Like
-    space_objects: list[sorts.SpaceObject]
+    space_objects: t.Sequence[sorts.SpaceObject]
     dsec_sampler: SpaceObjectDsecSampler  # TODO: support different sampler for different obj?
     # TODO: we need to implement falback mechanism,
     #   e.g. a `Legendre8` `Interpolator` requires >=8 points, but sometime it might get less than that
@@ -54,12 +54,12 @@ class Spec(t.TypedDict):
 class SpecByControllers(t.TypedDict):
     """A TypedDict of params"""
 
-    controllers: list[controller.ControllerBase]
+    controllers: t.Sequence[controller.ControllerBase]
     schedule: Schedule
     epoch: Datetime_Like
     start_time: Datetime_Like
     end_time: Datetime_Like
-    space_objects: list[sorts.SpaceObject]
+    space_objects: t.Sequence[sorts.SpaceObject]
     dsec_sampler: SpaceObjectDsecSampler  # TODO: support different sampler for different obj?
     interpolator_class: type[Interpolator]
 
@@ -93,7 +93,7 @@ def sample_and_propagate_space_objects_states(
 
 
 def group_passages_by_tx_rx_station_pair(
-    passages: list[Passage],
+    passages: t.Sequence[Passage],
 ) -> dict[tuple[StationId, StationId], list[Passage]]:
     groupped_passages: dict[tuple[StationId, StationId], list[Passage]] = {}
 
@@ -112,9 +112,9 @@ def group_passages_by_tx_rx_station_pair(
 # TODO: its name is confusing with `prepare_simulation_unit_params`; and maybe its func can be merged as well?
 def derive_simulation_unit_params(
     spec: Spec,
-    passages_lists: list[list[Passage]],
-    spobjs_interpolators: list[Interpolator],
-    spobjs_jacobian_tuples: list[SpaceObjectJacobianTuple],
+    passages_lists: t.Sequence[t.Sequence[Passage]],
+    spobjs_interpolators: t.Sequence[Interpolator],
+    spobjs_jacobian_tuples: t.Sequence[SpaceObjectJacobianTuple],
 ) -> list[FromPassagesOverTxRxStationPairParam]:
     """
     Derive a list of param for the `from_passages_over_tx_rx_station_pair` constructor of `SimulationUnit`
