@@ -133,7 +133,7 @@ class MpiExample(sorts.MpiQueuedExecution):
         # TODO: probably better to make it an explicit dict instead of calling `locals()`
         # converted to dict to make it slightly safer
         sim_env = dict(locals())
-        self.pickle(sim_env, "sim_env")
+        self.safe_pickle(sim_env, "sim_env")
 
         sim = StxMrxSimulation.from_controllers(spec_by_controllers)
         sim_units_params = sim.prepare_simulation_unit_params()
@@ -225,13 +225,13 @@ class MpiExample(sorts.MpiQueuedExecution):
 
                 sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(param)
 
-                self.pickle(sim_unit, persist_fname)
+                self.safe_pickle(sim_unit, persist_fname)
                 logger.info(f"worker: {worker_proc_rank} | `SimulationUnit.simulate` start")
                 sim_unit.simulate()
 
-                # delete the file we saved earlier, then rename the new dump file
+                # delete the file we saved earlier before saving again
                 persist_fpath.unlink(missing_ok=True)
-                self.pickle(sim_unit, persist_fname)
+                self.safe_pickle(sim_unit, persist_fname)
 
         except Exception as err:
             raise RuntimeError(

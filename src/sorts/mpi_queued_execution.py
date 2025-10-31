@@ -70,7 +70,7 @@ class MpiQueuedExecution(abc.ABC):
         assert self.persist_dpath.exists()
         assert self.persist_dpath.is_dir()
 
-    def pickle(self, obj, rel_fpath: str | Path):
+    def safe_pickle(self, obj, rel_fpath: str | Path):
         """
         Use pickle to save an object to the specified location relative to the "save directory"
 
