@@ -12,7 +12,11 @@ from sorts import types, interpolation, population, propagator, radar
 from sorts.space_object import SpaceObject
 from sorts.schedule.priority_scheduling import priority_scheduling
 from sorts.controller import SparseTrackerController
-from sorts.simulation.funcs import ensure_directory_exist, safe_pickle
+from sorts.simulation.funcs import (
+    ensure_directory_exist,
+    safe_pickle,
+    duplicate_and_perturbate_space_objects,
+)
 from sorts.simulation.stx_mrx_simulation import stx_mrx_simulation, StxMrxSimulation, SimulationUnit
 
 logging.basicConfig(level=logging.DEBUG)
@@ -137,25 +141,30 @@ class MpiExample(sorts.MpiQueuedExecution):
         sim_env = dict(locals())
         safe_pickle(sim_env, save_dpath / "sim_env")
 
-        sim = StxMrxSimulation.from_controllers(spec_by_controllers)
-        sim_units_params = sim.prepare_simulation_unit_params()
+        # repeat the simulation for jacobian calculation
+        spobj_jacobian_tuples = duplicate_and_perturbate_space_objects(spobjs)
+        for idx, spobj_grp in enumerate(zip(*spobj_jacobian_tuples)):
+            sim = StxMrxSimulation.from_controllers(
+                {**spec_by_controllers, "space_objects": spobj_grp}
+            )
+            sim_units_params = sim.prepare_simulation_unit_params()
 
-        ##
-        # invoke `mpi_master_proc_loop` to dispatch jobs to mpi worker process
-        ##
-        calc_start_time = time.perf_counter()
+            ##
+            # invoke `mpi_master_proc_loop` to dispatch jobs to mpi worker process
+            ##
+            calc_start_time = time.perf_counter()
 
-        job_params: list[WParam] = [
-            {
-                "param": sim_units_param,
-                "persist_dpath": save_dpath,
-            }
-            for sim_units_param in sim_units_params
-        ]
-        self.mpi_master_proc_loop(job_params)
+            job_params: list[WParam] = [
+                {
+                    "param": sim_units_param,
+                    "persist_dpath": save_dpath / f"{idx}",
+                }
+                for sim_units_param in sim_units_params
+            ]
+            self.mpi_master_proc_loop(job_params)
 
-        calc_time = time.perf_counter() - calc_start_time
-        logger.info(f"mpi_master_proc_loop took {calc_time} sec")
+            calc_time = time.perf_counter() - calc_start_time
+            logger.info(f"mpi_master_proc_loop took {calc_time} sec")
 
         ##
         # analyze result

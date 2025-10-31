@@ -183,7 +183,6 @@ class FromPassagesOverTxRxStationPairParam:
     id: str
     passages: list[Passage]
     spobj: SpaceObject
-    spobj_jacobian_tuple: SpaceObjectJacobianTuple
     spobj_interp: Interpolator
     tx_station: Station
     rx_station: Station
