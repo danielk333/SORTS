@@ -13,11 +13,6 @@ from sorts.radar import Station
 from sorts.signals import hard_target_snr
 from sorts.interpolation import Interpolator
 from sorts.schedule import ExperimentDetailMap, Schedule
-from sorts.simulation.types import (
-    Passage,
-    SpaceObjectJacobianTuple,
-    SpaceObjectInterpolatorJacobianTuple,
-)
 
 
 CoordKey = t.Literal["multi_index", "time", "exp_num", "rx_simult_num", "enu", "e", "n", "u"]
@@ -64,7 +59,7 @@ assert_class_attributes_equal_to(_K, t.get_args(Key))
 _SK = schedule._K
 """Internal helper for accessing string keys consistently"""
 
-State = t.NewType("State", xr.Dataset)
+SimulationUnitState = t.NewType("SimulationUnitState", xr.Dataset)
 """
 A xarray `Dataset` with:
   ```
@@ -89,7 +84,7 @@ A xarray `Dataset` with:
 """
 
 
-def empty_state() -> State:
+def empty_state() -> SimulationUnitState:
     multi_index = pd.MultiIndex.from_arrays(
         [
             np.empty(0, dtype=np.int16),
@@ -116,10 +111,12 @@ def empty_state() -> State:
         },
     )
 
-    return State(state)
+    return SimulationUnitState(state)
 
 
-def filter_state_by_time_range(state: State, time_range: types.TimeRange_us) -> State:
+def filter_state_by_time_range(
+    state: SimulationUnitState, time_range: types.TimeRange_us
+) -> SimulationUnitState:
     mask = (state[_K.time] >= time_range[0]) & (state[_K.time] <= time_range[1])
     state_masked = state[{_K.multi_index: mask}]
 
@@ -127,12 +124,12 @@ def filter_state_by_time_range(state: State, time_range: types.TimeRange_us) -> 
 
 
 def calc_gain(
-    state: State,
+    state: SimulationUnitState,
     tx_stn: Station,
     rx_stn: Station,
     spobj_tx_enu: types.EnuCoordinates,
     spobj_rx_enu: types.EnuCoordinates,
-) -> State:
+) -> SimulationUnitState:
     # NOTE: used lazy import here to avoid circular import
     from .simulation_unit import _K
 
@@ -187,9 +184,7 @@ class FromPassagesOverTxRxStationPairParam:
     id: str
     passages: list[Passage]
     spobj: SpaceObject
-    spobj_jacobian_tuple: SpaceObjectJacobianTuple
     spobj_interp: Interpolator
-    spobj_interp_jacobian_tuple: SpaceObjectInterpolatorJacobianTuple
     tx_station: Station
     rx_station: Station
     schedule: Schedule
@@ -211,6 +206,9 @@ class SimulationUnit:
     _K = _K
     """shortcut to module attribute"""
 
+    FromPassagesOverTxRxStationPairParam = FromPassagesOverTxRxStationPairParam
+    """shortcut to module attribute"""
+
     def __init__(
         self,
         id: str,
@@ -220,7 +218,7 @@ class SimulationUnit:
         tx_station: Station,
         rx_station: Station,
         exp_detail_map: ExperimentDetailMap,
-        state: State,
+        state: SimulationUnitState,
     ):
         self.id = id
 
@@ -264,7 +262,7 @@ class SimulationUnit:
                 tx_station=param.tx_station,
                 rx_station=param.rx_station,
                 exp_detail_map=param.exp_detail_map,
-                state=State(empty_state()),
+                state=SimulationUnitState(empty_state()),
             )
 
         # NOTE: xarray simplify/collapse MultiIndex when filtering a level to an exact value,
@@ -325,7 +323,7 @@ class SimulationUnit:
             tx_station=param.tx_station,
             rx_station=param.rx_station,
             exp_detail_map=param.exp_detail_map,
-            state=State(state),
+            state=SimulationUnitState(state),
         )
 
     def simulate(self):
@@ -502,7 +500,7 @@ class Observation:
 
         return TxRxTuple(tx=tx_sch_obs, rx=rx_sch_obs)
 
-    def get_state_slice(self) -> State:
+    def get_state_slice(self) -> SimulationUnitState:
         """Get the subset of `State` data the corresponds to the the observation"""
 
         sim_state_slice = filter_state_by_time_range(self.sim_unit._state, self.passage.time_range)

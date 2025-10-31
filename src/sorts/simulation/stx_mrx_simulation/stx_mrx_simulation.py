@@ -1,12 +1,10 @@
 from __future__ import annotations
-import logging, typing as t, pickle, traceback, time
+import logging, typing as t, pickle
 from pathlib import Path
-from dataclasses import dataclass
 import numpy.typing as npt
 import pyorb
 import sorts
 from tqdm import tqdm
-from mpi4py import MPI
 from sorts import schedule, controller, simulation
 from sorts.types import Datetime_Like, Float64_as_sec, Datetime64_us, Float64_as_sec, EcefStates
 from sorts.utils import to_datetime64_us
@@ -14,11 +12,6 @@ from sorts.radar import Station, StationId
 from sorts.simulation import Passage
 from sorts.interpolation import Interpolator
 from sorts.schedule import Schedule, ExperimentDetailMap
-from sorts.simulation.types import (
-    SpaceObjectJacobianTuple,
-    SpaceObjectInterpolatorJacobianTuple,
-)
-from sorts.simulation.funcs import duplicate_and_perturbate_space_objects
 from sorts.simulation.stx_mrx_simulation.simulation_unit import (
     SimulationUnit,
     FromPassagesOverTxRxStationPairParam,
@@ -41,13 +34,13 @@ class Spec(t.TypedDict):
     """A TypedDict of params"""
 
     station_map: dict[StationId, Station]
-    station_id_pairs: list[tuple[StationId, StationId]]
+    station_id_pairs: t.Sequence[tuple[StationId, StationId]]
     schedule: Schedule
     exp_detail_map: ExperimentDetailMap
     epoch: Datetime_Like
     start_time: Datetime_Like
     end_time: Datetime_Like
-    space_objects: list[sorts.SpaceObject]
+    space_objects: t.Sequence[sorts.SpaceObject]
     dsec_sampler: SpaceObjectDsecSampler  # TODO: support different sampler for different obj?
     # TODO: we need to implement falback mechanism,
     #   e.g. a `Legendre8` `Interpolator` requires >=8 points, but sometime it might get less than that
@@ -57,12 +50,12 @@ class Spec(t.TypedDict):
 class SpecByControllers(t.TypedDict):
     """A TypedDict of params"""
 
-    controllers: list[controller.ControllerBase]
+    controllers: t.Sequence[controller.ControllerBase]
     schedule: Schedule
     epoch: Datetime_Like
     start_time: Datetime_Like
     end_time: Datetime_Like
-    space_objects: list[sorts.SpaceObject]
+    space_objects: t.Sequence[sorts.SpaceObject]
     dsec_sampler: SpaceObjectDsecSampler  # TODO: support different sampler for different obj?
     interpolator_class: type[Interpolator]
 
@@ -96,7 +89,7 @@ def sample_and_propagate_space_objects_states(
 
 
 def group_passages_by_tx_rx_station_pair(
-    passages: list[Passage],
+    passages: t.Sequence[Passage],
 ) -> dict[tuple[StationId, StationId], list[Passage]]:
     groupped_passages: dict[tuple[StationId, StationId], list[Passage]] = {}
 
@@ -115,10 +108,8 @@ def group_passages_by_tx_rx_station_pair(
 # TODO: its name is confusing with `prepare_simulation_unit_params`; and maybe its func can be merged as well?
 def derive_simulation_unit_params(
     spec: Spec,
-    passages_lists: list[list[Passage]],
-    spobjs_interpolators: list[Interpolator],
-    spobjs_jacobian_tuples: list[SpaceObjectJacobianTuple],
-    spobjs_interp_jacobian_tuples: list[SpaceObjectInterpolatorJacobianTuple],
+    passages_lists: t.Sequence[t.Sequence[Passage]],
+    spobjs_interpolators: t.Sequence[Interpolator],
 ) -> list[FromPassagesOverTxRxStationPairParam]:
     """
     Derive a list of param for the `from_passages_over_tx_rx_station_pair` constructor of `SimulationUnit`
@@ -128,18 +119,8 @@ def derive_simulation_unit_params(
 
     params: list[FromPassagesOverTxRxStationPairParam] = []
 
-    for (
-        spobj,
-        passages_of_a_spobj,
-        spobj_states_interp,
-        spobjs_jacobian_tuple,
-        spobjs_interp_jacobian_tuple,
-    ) in zip(
-        spec["space_objects"],
-        passages_lists,
-        spobjs_interpolators,
-        spobjs_jacobian_tuples,
-        spobjs_interp_jacobian_tuples,
+    for spobj, passages_of_a_spobj, spobj_states_interp in zip(
+        spec["space_objects"], passages_lists, spobjs_interpolators
     ):
         groupped_passages = group_passages_by_tx_rx_station_pair(passages_of_a_spobj)
 
@@ -156,9 +137,7 @@ def derive_simulation_unit_params(
                     id=str(len(params)),
                     passages=passages,
                     spobj=spobj,
-                    spobj_jacobian_tuple=spobjs_jacobian_tuple,
                     spobj_interp=spobj_states_interp,
-                    spobj_interp_jacobian_tuple=spobjs_interp_jacobian_tuple,
                     tx_station=tx_stn,
                     rx_station=rx_stn,
                     schedule=filtered_sch,
@@ -207,62 +186,6 @@ def find_passages(
         passages_list.append(passages_of_spobj)
 
     return passages_list
-
-
-# TODO: need better typing here, probably need to move some code to the MpiQueuedExecution class as well
-def mpi_worker_job(
-    comm: MPI.Intracomm,
-    master_proc_rank: int,
-    worker_proc_rank: int,
-    persist_dpath: Path,
-    param: FromPassagesOverTxRxStationPairParam,
-):
-    persist_fpath = persist_dpath / sim_unit_fname_tpl.format(id=param.id)
-
-    try:
-        if persist_fpath.exists():
-            logger.info(
-                f"worker: {worker_proc_rank} | SimulationUnit: {param.id} already completed, will load from the saved file instead"
-            )
-
-            with open(persist_fpath, "rb") as f:
-                sim_unit = pickle.load(f)
-
-        else:
-            # NOTE:
-            #   As a simple way to reduce risk of corrupted files,
-            #   we write to an tmp file first then rename that file
-            #
-            #   sim_unit is saved 2 times, 1 before running `simulate` and 1 after
-
-            sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(param)
-
-            persist_fpath_tmp = persist_fpath.with_suffix(persist_fpath.suffix + ".tmp")
-            with open(persist_fpath_tmp, "wb") as f:
-                pickle.dump(sim_unit, f)
-                persist_fpath_tmp.rename(persist_fpath)
-
-            logger.info(f"worker: {worker_proc_rank} | `SimulationUnit.simulate` start")
-            sim_unit.simulate()
-
-            persist_fpath_tmp = persist_fpath.with_suffix(persist_fpath.suffix + ".tmp")
-            with open(persist_fpath_tmp, "wb") as f:
-                pickle.dump(sim_unit, f)
-                # delete the file we saved earlier, then rename the new dump file
-                persist_fpath.unlink(missing_ok=True)
-                persist_fpath_tmp.rename(persist_fpath)
-
-    except Exception as err:
-        raise RuntimeError(
-            f"Runtime fail in worker: {worker_proc_rank} | SimulationUnit: {param.id}"
-        ) from err
-
-    obss = sim_unit.observations
-
-    comm.send(len(obss), dest=master_proc_rank)
-    logger.info(
-        f"worker: {worker_proc_rank} | SimulationUnit:{sim_unit.id} done with {len(obss)} observations"
-    )
 
 
 def iter_mpi_simulation_results(save_dir: Path):
@@ -339,16 +262,7 @@ class StxMrxSimulation:
         logger.debug("find_passages done")
 
         sim_units_param = derive_simulation_unit_params(
-            spec=self.spec,
-            passages_lists=passages_lists,
-            spobjs_interpolators=spobjs_interpolators,
-            spobjs_jacobian_tuples=duplicate_and_perturbate_space_objects(
-                spobjs=self.spec["space_objects"], pert_ratio=0.01 / 100
-            ),
-            # TODO: this is a dummy imple
-            spobjs_interp_jacobian_tuples=[
-                (interp, interp, interp, interp, interp, interp) for interp in spobjs_interpolators
-            ],
+            spec=self.spec, passages_lists=passages_lists, spobjs_interpolators=spobjs_interpolators
         )
         # filter away param with empty schedule
         sim_units_param = [

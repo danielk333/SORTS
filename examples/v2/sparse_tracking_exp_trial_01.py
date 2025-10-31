@@ -1,4 +1,4 @@
-import logging, typing as t
+import logging, time, typing as t, pickle
 from pathlib import Path
 from datetime import datetime
 import numpy as np
@@ -8,20 +8,20 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import sorts
-from sorts import (
-    types,
-    interpolation,
-    population,
-    propagator,
-    radar,
-)
+from sorts import types, interpolation, population, propagator, radar
 from sorts.space_object import SpaceObject
 from sorts.schedule.priority_scheduling import priority_scheduling
 from sorts.controller import SparseTrackerController
+from sorts.simulation.funcs import (
+    ensure_directory_exist,
+    safe_pickle,
+    duplicate_and_perturbate_space_objects,
+)
 from sorts.simulation.stx_mrx_simulation import (
     stx_mrx_simulation,
     StxMrxSimulation,
     SimulationUnit,
+    Observation,
 )
 
 logging.basicConfig(level=logging.DEBUG)
@@ -38,8 +38,23 @@ def dsec_sampler(orbit, start_time, end_time):
     return np.arange(0, (end_time - start_time) / np.timedelta64(1, "s"), 120, dtype=np.float64)
 
 
+class WParam(t.TypedDict):
+    param: SimulationUnit.FromPassagesOverTxRxStationPairParam
+    persist_dpath: Path
+
+
 class MpiExample(sorts.MpiQueuedExecution):
-    def prepare_master_process_environment(self):
+    sim_unit_fname_tpl = stx_mrx_simulation.sim_unit_fname_tpl
+
+    def master_process(self):
+        ##
+        # prepare simulation environment
+        ##
+
+        save_dname = f"[{datetime.now().replace(microsecond=0).isoformat(sep=" ").replace(":", ".").replace("-", ".")}Z] mpi"
+        save_dpath = Path(__file__).parent / ".." / ".." / "local_data" / save_dname
+        ensure_directory_exist(save_dpath)
+
         start_time = Time("2025-01-01 02:45:00")
         end_time = Time("2025-01-01 03:00:00")
         control_slice_duration = np.timedelta64(10_000, "us")  # 10ms
@@ -129,37 +144,81 @@ class MpiExample(sorts.MpiQueuedExecution):
         # TODO: probably better to make it an explicit dict instead of calling `locals()`
         # converted to dict to make it slightly safer
         sim_env = dict(locals())
+        safe_pickle(sim_env, save_dpath / "sim_env.pickle")
 
-        return sim_env
+        # repeat the simulation for all duplicates from perturbation
+        spobj_jacobian_tuples = duplicate_and_perturbate_space_objects(spobjs)
+        for idx, spobj_grp in enumerate(zip(*spobj_jacobian_tuples)):
+            save_subdpath = save_dpath / f"{idx}"
 
-    def create_simulation(self, menv):
-        return StxMrxSimulation.from_controllers(menv["spec_by_controllers"])
+            sim = StxMrxSimulation.from_controllers(
+                {**spec_by_controllers, "space_objects": spobj_grp}
+            )
+            safe_pickle(sim, save_subdpath / "sim.pickle")
 
-    def run_worker_job(self, persist_dpath, jab_param):
-        param = jab_param["param"]
-        persist_dpath = jab_param["persist_dpath"]
+            sim_units_params = sim.prepare_simulation_unit_params()
 
-        stx_mrx_simulation.mpi_worker_job(
-            comm=self.comm,
-            master_proc_rank=self.master_proc_rank,
-            worker_proc_rank=self.rank,
-            persist_dpath=persist_dpath,
-            param=param,
-        )
+            ##
+            # invoke `mpi_master_proc_loop` to dispatch jobs to mpi worker process
+            ##
+            calc_start_time = time.perf_counter()
 
-    def analyze_result(self, menv, sim, persist_dpath):
+            job_params: list[WParam] = [
+                {
+                    "param": sim_units_param,
+                    "persist_dpath": save_subdpath,
+                }
+                for sim_units_param in sim_units_params
+            ]
+            self.mpi_master_proc_loop(job_params)
+
+            calc_time = time.perf_counter() - calc_start_time
+            logger.info(f"mpi_master_proc_loop took {calc_time} sec")
+
+        ##
+        # analyze result
+        ##
+
+        # the analysis will mostly use the group of space objects without perturbation,
+        # the perturbated groups will be used for jacobian calculation
+        sim_unit_grps: list[list[SimulationUnit]] = []
+        for idx, _spobj_grp in enumerate(zip(*spobj_jacobian_tuples)):
+            save_subdpath = save_dpath / f"{idx}"
+            sim_unit_grps.append(
+                list(stx_mrx_simulation.iter_mpi_simulation_results(save_subdpath))
+            )
+
+        calc_start_time = time.perf_counter()
+
+        obss: list[stx_mrx_simulation.Observation] = []
         max_snrs_value = []
         max_snrs_time: list[types.Datetime64_us] = []
         max_snrs_spobj_id: list[int] = []
 
-        for sim_unit in stx_mrx_simulation.iter_mpi_simulation_results(persist_dpath):
+        save_subdpath = save_dpath / f"{0}"
+
+        jaco_sim_unit_tuple: tuple[SimulationUnit, ...]
+        for jaco_sim_unit_tuple in zip(*sim_unit_grps):
+
+            sim_unit, *pert_sim_units = jaco_sim_unit_tuple
+            spobj, *pert_spobjs = [su.space_object for su in jaco_sim_unit_tuple]
             logger.info(f"processing result from SimulationUnit <{sim_unit.id}>")
 
             _SuK = SimulationUnit._K
 
-            obss = sim_unit.observations
-            for obs in obss:
+            true_obss = sim_unit.observations
+            pert_obss_grp = [
+                su.observations for su in pert_sim_units
+            ]  # i.e. a list of 6 `list[Observation]`
+            obss.extend(true_obss)
+
+            jaco_obs_tuple: tuple[Observation, ...]
+            for jaco_obs_tuple in zip(true_obss, *pert_obss_grp):
+
+                obs, *pert_obss = jaco_obs_tuple
                 obs_state = obs.get_state_slice()
+                pert_obs_states = [obs.get_state_slice() for obs in pert_obss]
+
                 argmax_snr = t.cast(xr.DataArray, obs_state[_SuK.snr].argmax())
                 midx_max_snr = obs_state[{_SuK.multi_index: argmax_snr.item()}]
                 midx_max_snr_value = midx_max_snr[_SuK.snr].item()
@@ -169,27 +228,83 @@ class MpiExample(sorts.MpiQueuedExecution):
                 max_snrs_time.append(midx_max_snr_time)
                 max_snrs_spobj_id.append(sim_unit.space_object.oid)
 
-        # plotting
-        logger.info(f"start generating plots...")
+                # TODO: confirm with daniel
+                #       - the sign of the difference in the partial diff
+                #       - the dimension of the jacobian, seems like a (1, n) matrix in this case?
+                #         (so it's actually a gradient in this case, since two_way_range is a scala)
+                # calc the jacobian
+                jacobian = [(
+                      (pert_obs_states[idx][_SuK.two_way_range].to_numpy() - obs_state[_SuK.two_way_range].to_numpy())
+                    / (pert_spobjs[idx].state._cart[idx] - x)
+                ) for idx, x in enumerate(spobj.state._cart)] # fmt: skip
 
-        fig, ax = plt.subplots()
-        ax.set_title("snr vs time")
-        ax.scatter(max_snrs_time, max_snrs_value, s=3)
-        ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d %H:%M:%S"))
-        fig.autofmt_xdate()
-        ax.set_yscale("log")
-        plt.savefig(persist_dpath / "max_snr_vs_time.png", dpi=300, bbox_inches="tight")
+                logger.info(f"jacobian: {jacobian}")
 
-        logger.info(f"done generating plots")
+            # plotting
+            logger.info(f"start generating plots...")
+
+            fig, ax = plt.subplots()
+            ax.set_title("snr vs time")
+            ax.scatter(max_snrs_time, max_snrs_value, s=3)
+            ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d %H:%M:%S"))
+            fig.autofmt_xdate()
+            # ax.set_yscale("log")
+            plt.savefig(save_subdpath / "max_snr_vs_time.png", dpi=300, bbox_inches="tight")
+
+            logger.info(f"done generating plots")
+
+            print(f"len(obss): {len(obss)}")
+
+            calc_time = time.perf_counter() - calc_start_time
+            logger.info(f"result_analysis_fn took {calc_time} sec")
+
+        return
+
+    def worker_process(self, job_param):
+        param = job_param["param"]
+        persist_dpath = job_param["persist_dpath"]
+        persist_fname = self.sim_unit_fname_tpl.format(id=param.id)
+        persist_fpath = persist_dpath / persist_fname
+        worker_proc_rank = self.rank
+
+        try:
+            if persist_fpath.exists():
+                logger.info(
+                    f"worker: {worker_proc_rank} | SimulationUnit: {param.id} already completed, will load from the saved file instead"
+                )
+
+                with open(persist_fpath, "rb") as f:
+                    sim_unit = pickle.load(f)
+
+            else:
+                # NOTE: sim_unit is saved 2 times, 1 before running `simulate` and 1 after
+
+                sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(param)
+
+                safe_pickle(sim_unit, persist_fpath)
+                logger.info(f"worker: {worker_proc_rank} | `SimulationUnit.simulate` start")
+                sim_unit.simulate()
+
+                # delete the file we saved earlier before saving again
+                persist_fpath.unlink(missing_ok=True)
+                safe_pickle(sim_unit, persist_fpath)
+
+        except Exception as err:
+            raise RuntimeError(
+                f"Runtime fail in worker: {worker_proc_rank} | SimulationUnit: {param.id}"
+            ) from err
+
+        obss = sim_unit.observations
+
+        self.comm.send(True, dest=self.master_proc_rank)
+        logger.info(
+            f"worker: {worker_proc_rank} | SimulationUnit:{sim_unit.id} done with {len(obss)} observations"
+        )
 
 
-dname = f"[{datetime.now().replace(microsecond=0).isoformat(sep=" ").replace(":", ".").replace("-", ".")}Z] mpi"
 execution = MpiExample(
-    sim_unit_fname_tpl=stx_mrx_simulation.sim_unit_fname_tpl,
-).run(
-    persist_dpath=Path(__file__).parent / ".." / ".." / "local_data" / dname,
-    # is_run_with_mpi=True,  # a convenience flag to switch between running mode for debugging
     is_run_with_mpi=False,  # a convenience flag to switch between running mode for debugging
-)
+    # is_run_with_mpi = True  # a convenience flag to switch between running mode for debugging
+).run()
 
 exit()
