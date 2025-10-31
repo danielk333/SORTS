@@ -206,6 +206,9 @@ class SimulationUnit:
     _K = _K
     """shortcut to module attribute"""
 
+    FromPassagesOverTxRxStationPairParam = FromPassagesOverTxRxStationPairParam
+    """shortcut to module attribute"""
+
     def __init__(
         self,
         id: str,

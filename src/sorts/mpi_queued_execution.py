@@ -1,9 +1,8 @@
 from __future__ import annotations
 import logging, typing as t, pickle, traceback, time, abc
 from pathlib import Path
-from dataclasses import dataclass
 from mpi4py import MPI
-from sorts import StxMrxSimulation  #
+from sorts.simulation.stx_mrx_simulation import StxMrxSimulation, SimulationUnit
 
 
 logger = logging.getLogger(__name__)
@@ -16,7 +15,7 @@ class _MpiK:
     terminate: t.Final = "terminate"
 
 
-# NOTE: Resorted to using a rather loosely typed dict instead of setting a generic param of `MpiQueuedExecution`
+# NOTE: Resorted to using a loose `Mapping` type instead of setting a generic param of `MpiQueuedExecution`
 #       because it seems python does not infer generic param based on method signatures of subclasses.
 #       Which mean if the generic param are not provided when subclassing, they are considered as Any/Unknown.
 #
@@ -30,67 +29,72 @@ class _MpiK:
 #       Such feature is recently added in python 3.13, which is released on October 7, 2024.
 #       But at the moment of writing, we are on October 29, 2025 only
 #       and 3.13 is too new to be adopted as the baseline python version for a lib.
-MasterProcessEnvironment = dict[str, t.Any]
-"""A dict of `[str, Any]`. Cast to `TypedDict` for enhanced type safety."""
-
-
-class WorkerJobAssignment(t.TypedDict):
-    param: t.Any
-    persist_dpath: Path
+WorkerJobParam = t.Mapping
+"""Alias of `Mapping`. Cast to `TypedDict` for enhanced type safety."""
 
 
 class MpiQueuedExecution(abc.ABC):
+    """
+    NOTE: In typical usage, an instance of this class will be created on each MPI process, which means:
+        - Each instance will init it's attributes/properties independently at different time
+        - Attributes/Properties of the same name can end up having different value
+          (e.g. a timestamp attribute will have different value on each instance.)
+
+    """
+
     master_proc_rank = 0
 
-    def __init__(self, sim_unit_fname_tpl: str):
+    def __init__(self, save_dpath: str | Path, sim_unit_fname_tpl: str, is_run_with_mpi=True):
         # TODO: is there a better way to pass and store this `sim_unit_fname_tpl`?
         self.sim_unit_fname_tpl = sim_unit_fname_tpl
+        self.persist_dpath = Path(save_dpath)
+        self.is_run_with_mpi = is_run_with_mpi
 
         self.comm = MPI.COMM_WORLD
         self.rank = self.comm.Get_rank()
 
     @abc.abstractmethod
-    def prepare_master_process_environment(self) -> MasterProcessEnvironment:
+    def master_process(self) -> None:
         """
-        Prepare the "master_process_environment" and returns it.
+        The code that only ran on the master rank process.
+        - Must invoke the method `mpi_master_proc_loop` (at most once) to start dispatching job to workers.
+        """
 
-        The "master_process_environment" will be passed to subsequence master functions.
+    @abc.abstractmethod
+    def worker_process(self, job_param: WorkerJobParam) -> None:
+        """The code that only ran on the worker rank processes."""
+        ...
+
+    def ensure_save_dir(self):
+        if not self.persist_dpath.exists():
+            self.persist_dpath.mkdir(parents=True)
+        assert self.persist_dpath.exists()
+        assert self.persist_dpath.is_dir()
+
+    def pickle(self, obj, rel_fpath: str | Path):
+        """
+        Use pickle to save an object to the specified location relative to the "save directory"
 
         NOTE:
-            - This method will run in the master process.
-            - The "master_process_environment" is automatically peristed and must be serializable by pickle.
+            As a simple way to reduce risk of corrupted files,
+            we write to an tmp file first then rename that file
         """
-        ...
 
-    @abc.abstractmethod
-    def create_simulation(self, menv: MasterProcessEnvironment) -> StxMrxSimulation:
-        """NOTE: This method will run in the master process."""
-        ...
+        persist_fpath = self.persist_dpath / rel_fpath
+        persist_fpath_tmp = persist_fpath.with_suffix(persist_fpath.suffix + ".tmp")
+        with open(persist_fpath_tmp, "wb") as f:
+            pickle.dump(obj, f)
+        persist_fpath_tmp.rename(persist_fpath)
 
-    @abc.abstractmethod
-    def run_worker_job(self, persist_dpath: Path, jab_param: WorkerJobAssignment) -> None:
-        """NOTE: This method will run in the worker process."""
-        ...
+    def mpi_master_proc_loop(self, work_job_params: t.Sequence[WorkerJobParam]) -> None:
+        # short circuit to `fake_mpi_master_proc_loop` if `is_run_with_mpi` is False
+        if not self.is_run_with_mpi:
+            return self.fake_mpi_master_proc_loop(work_job_params)
 
-    @abc.abstractmethod
-    def analyze_result(
-        self, menv: MasterProcessEnvironment, sim: StxMrxSimulation, persist_dpath: Path
-    ) -> None:
-        """NOTE: This method will run in the master process."""
-        ...
-
-    def mpi_master_proc_loop(
-        self,
-        persist_dpath: Path,
-        menv: MasterProcessEnvironment,
-        sim: StxMrxSimulation,
-    ) -> None:
         rank_size = self.comm.Get_size()
 
         logger.debug(f"running in mpi with rank: {rank_size}")
         logger.info(f"master: {self.master_proc_rank} | simulation preparation start")
-
-        sim_units_param = sim.prepare_simulation_unit_params()
 
         ##
         # parallization section
@@ -101,34 +105,28 @@ class MpiQueuedExecution(abc.ABC):
 
         num_workers = self.comm.Get_size() - 1
         is_worker_idle_list = [True for _ in range(num_workers)]
-        next_sim_unit_param_idx = 0
-        processed_sim_unit_cnt = 0
+        next_work_job_param_idx = 0
+        processed_work_job_cnt = 0
 
-        while processed_sim_unit_cnt < len(sim_units_param):
-
-            # TODO: would be more robust to check ids in sim_units_param than looping next_sim_unit_idx
-            # send sim_unit if there is idle worker
-            if any(is_worker_idle_list) and next_sim_unit_param_idx < len(sim_units_param):
+        while processed_work_job_cnt < len(work_job_params):
+            # send next work_job_param if there is idle worker
+            if any(is_worker_idle_list) and next_work_job_param_idx < len(work_job_params):
                 idle_worker_idx = is_worker_idle_list.index(True)
                 idle_worker_rank = idle_worker_idx + 1
 
-                job_param: WorkerJobAssignment = {
-                    "param": sim_units_param[next_sim_unit_param_idx],
-                    "persist_dpath": persist_dpath,
-                }
+                job_param = work_job_params[next_work_job_param_idx]
                 self.comm.send(job_param, dest=idle_worker_rank)
 
                 logger.debug(
                     f"master: {self.master_proc_rank} | sent `SimulationUnit`"
-                    + f" <{sim_units_param[next_sim_unit_param_idx].id}>"
-                    + f" ({next_sim_unit_param_idx+1}/{len(sim_units_param)}) to worker {idle_worker_rank}"
+                    + f" ({next_work_job_param_idx+1}/{len(work_job_params)}) to worker {idle_worker_rank}"
                 )
 
                 is_worker_idle_list[idle_worker_idx] = False
-                next_sim_unit_param_idx += 1
+                next_work_job_param_idx += 1
 
+            # otherwise, wait for result
             else:
-                # otherwise, wait for result
                 logger.debug(f"master: {self.master_proc_rank} | awaiting results ...")
 
                 status = MPI.Status()
@@ -137,7 +135,7 @@ class MpiQueuedExecution(abc.ABC):
                 logger.debug(
                     f"master: {self.master_proc_rank} | received observation count: {recv_obss_cnt}, from worker: {worker_rank}"
                 )
-                processed_sim_unit_cnt += 1
+                processed_work_job_cnt += 1
 
                 is_worker_idle_list[worker_rank - 1] = True
 
@@ -157,7 +155,13 @@ class MpiQueuedExecution(abc.ABC):
         )
         logger.info(f"master: {self.master_proc_rank} | master main loop done,  returning...")
 
-    def mpi_worker_proc_loop(self, persist_dpath: Path) -> None:
+    def fake_mpi_master_proc_loop(self, work_job_params: t.Sequence[WorkerJobParam]) -> None:
+        """This will be ran instead of `mpi_master_proc_loop` when `is_run_with_mpi` is `False`"""
+
+        for work_job_param in work_job_params:
+            self.worker_process(work_job_param)
+
+    def mpi_worker_proc_loop(self) -> None:
         worker_proc_rank = self.rank
 
         while True:
@@ -170,65 +174,32 @@ class MpiQueuedExecution(abc.ABC):
                 self.comm.send(_MpiK.exit_ok, dest=self.master_proc_rank)  # reply an ack to master
                 exit()
 
-            # TODO: would be nice to get better type checking then just dict here
-            elif isinstance(msg, dict):
-                job_param = t.cast(WorkerJobAssignment, msg)
-                self.run_worker_job(persist_dpath, job_param)
+            elif isinstance(msg, t.Mapping):
+                job_param = t.cast(WorkerJobParam, msg)
+                self.worker_process(job_param)
 
             else:
                 # throw for unexpected msg
                 raise RuntimeError(f"worker: {worker_proc_rank} | received unexcepted msg: {msg}")
 
-    def run_with_mpi(self, persist_dpath: str | Path):
+    def run_with_mpi(self):
         try:
-            comm = MPI.COMM_WORLD
-            r = comm.Get_rank()
-            persist_dpath = Path(persist_dpath)
+            # master
+            if self.rank == self.master_proc_rank:
+                self.ensure_save_dir()
 
-            if r == self.master_proc_rank:  # master
-                ###
-                # simulation
-                ###
                 calc_start_time = time.perf_counter()
 
-                if not persist_dpath.exists():
-                    persist_dpath.mkdir(parents=True)
-                assert persist_dpath.exists()
-                assert persist_dpath.is_dir()
-
-                menv = self.prepare_master_process_environment()
-
-                # saving sim env
-                persist_fpath = persist_dpath / f"menv.pickle"
-                persist_fpath_tmp = persist_fpath.with_suffix(persist_fpath.suffix + ".tmp")
-                with open(persist_fpath_tmp, "wb") as f:
-                    pickle.dump(menv, f)
-                persist_fpath_tmp.rename(persist_fpath)
-
-                sim = self.create_simulation(menv)
-
-                self.mpi_master_proc_loop(persist_dpath=persist_dpath, menv=menv, sim=sim)
+                self.master_process()
 
                 calc_time = time.perf_counter() - calc_start_time
-                logger.info(f"master: {self.master_proc_rank} | simulation took {calc_time} sec")
-
-                ###
-                # result analysis
-                ###
-                calc_start_time = time.perf_counter()
-
-                logger.info(f"master: {self.master_proc_rank} | result_analysis_fn start")
-                self.analyze_result(menv=menv, sim=sim, persist_dpath=persist_dpath)
-
-                calc_time = time.perf_counter() - calc_start_time
-                logger.info(
-                    f"master: {self.master_proc_rank} | result_analysis_fn took {calc_time} sec"
-                )
+                logger.info(f"master_process took {calc_time} sec")
 
                 return
 
-            else:  # workers
-                self.mpi_worker_proc_loop(persist_dpath=persist_dpath)
+            # workers
+            else:
+                self.mpi_worker_proc_loop()
 
                 return
 
@@ -245,18 +216,17 @@ class MpiQueuedExecution(abc.ABC):
     def run_without_mpi(self):
         """Run the execution without MPI, mostly useful for debugging."""
 
-        menv = self.prepare_master_process_environment()
-        sim = self.create_simulation(menv)
+        self.ensure_save_dir()
 
         calc_start_time = time.perf_counter()
-        obss, sim_units = sim.run()
+
+        self.master_process()
+
         calc_time = time.perf_counter() - calc_start_time
-        logger.info(f"result_analysis_fn took {calc_time} sec")
+        logger.info(f"master_process took {calc_time} sec")
 
-        print(f"len(obss): {len(obss)}")
-
-    def run(self, persist_dpath: str | Path, is_run_with_mpi=True):
-        if is_run_with_mpi:
-            self.run_with_mpi(persist_dpath)
+    def run(self):
+        if self.is_run_with_mpi:
+            self.run_with_mpi()
         else:
             self.run_without_mpi()
