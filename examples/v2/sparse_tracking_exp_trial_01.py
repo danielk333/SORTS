@@ -235,8 +235,8 @@ class MpiExample(sorts.MpiQueuedExecution):
                 # calc the jacobian
                 jacobian = [(
                       (pert_obs_states[idx][_SuK.two_way_range].to_numpy() - obs_state[_SuK.two_way_range].to_numpy())
-                    / (pert_spobjs[idx].state._cart[idx] - x)
-                ) for idx, x in enumerate(spobj.state._cart)] # fmt: skip
+                    / (pert_spobjs[idx].state._cart[idx,0] - x)
+                ) for idx, x in enumerate(spobj.state._cart[:,0])] # fmt: skip
 
                 logger.info(f"jacobian: {jacobian}")
 
