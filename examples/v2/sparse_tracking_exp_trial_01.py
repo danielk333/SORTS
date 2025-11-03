@@ -57,7 +57,7 @@ class MpiExample(sorts.MpiQueuedExecution):
 
         start_time = Time("2025-01-01 02:45:00")
         end_time = Time("2025-01-01 03:00:00")
-        control_slice_duration = np.timedelta64(10_000, "us")  # 10ms
+        control_slice_duration = np.timedelta64(100_000, "us")  # 100ms
 
         radar_sys = sorts.get_radar("nostra", "example1")
         # TODO: these patching of station prop should be integrated into codebase

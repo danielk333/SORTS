@@ -48,7 +48,7 @@ class MpiExample(sorts.MpiQueuedExecution):
         start_time = Time("2025-01-01 02:45:00")
         # start_time = Time("2025-01-01 02:59:59")
         end_time = Time("2025-01-01 03:00:00")
-        control_slice_duration = np.timedelta64(10_000, "us")  # 10ms
+        control_slice_duration = np.timedelta64(100_000, "us")  # 100ms
 
         # radar_sys = sorts.get_radar("eiscat3d", "stage1-array")
         radar_sys = sorts.get_radar("nostra", "example1")
