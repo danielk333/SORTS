@@ -228,17 +228,21 @@ class MpiExample(sorts.MpiQueuedExecution):
                 max_snrs_time.append(midx_max_snr_time)
                 max_snrs_spobj_id.append(sim_unit.space_object.oid)
 
-                # TODO: confirm with daniel
-                #       - the sign of the difference in the partial diff
-                #       - the dimension of the jacobian, seems like a (1, n) matrix in this case?
-                #         (so it's actually a gradient in this case, since two_way_range is a scala)
                 # calc the jacobian
-                jacobian = [(
-                      (pert_obs_states[idx][_SuK.two_way_range].to_numpy() - obs_state[_SuK.two_way_range].to_numpy())
-                    / (pert_spobjs[idx].state._cart[idx,0] - x)
-                ) for idx, x in enumerate(spobj.state._cart[:,0])] # fmt: skip
+                num_meas = len(obs_state[_SuK.multi_index])  # num of measurements
+                num_var = len(spobj.state._cart[:, 0])  # num of independent variables
+                r_orig = obs_state[_SuK.two_way_range].to_numpy()
+                v_orig = obs_state[_SuK.two_way_range_rate].to_numpy()
+                J = np.zeros([num_meas * 2, num_var], dtype=np.float64)  # init the jacobian
+                for idx, x_orig in enumerate(spobj.state._cart[:, 0]):
+                    x_pert = pert_spobjs[idx].state._cart[idx, 0]
+                    r_pert = pert_obs_states[idx][_SuK.two_way_range].to_numpy()
+                    v_pert = pert_obs_states[idx][_SuK.two_way_range_rate].to_numpy()
 
-                logger.info(f"jacobian: {jacobian}")
+                    J[:num_meas, idx] = (r_pert - r_orig) / (x_pert - x_orig)
+                    J[num_meas:, idx] = (v_pert - v_orig) / (x_pert - x_orig)
+
+                logger.info(f"jacobian: {J}")
 
             # plotting
             logger.info(f"start generating plots...")
