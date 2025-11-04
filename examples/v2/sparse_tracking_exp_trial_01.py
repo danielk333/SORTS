@@ -242,7 +242,19 @@ class MpiExample(sorts.MpiQueuedExecution):
                     J[:num_meas, idx] = (r_pert - r_orig) / (x_pert - x_orig)
                     J[num_meas:, idx] = (v_pert - v_orig) / (x_pert - x_orig)
 
-                logger.info(f"jacobian: {J}")
+                logger.info(f"jacobian: {J}")  # TODO: just a place holder usage of the jacobian
+
+                # calc covariance matrix for error estimation of linearized orbit determination
+                r_stds_tx = 10.0
+                v_stds_tx = 5.0
+                Sigma_m_diag_elms = np.array(
+                    [r_stds_tx**2] * num_meas + [v_stds_tx**2] * num_meas, dtype=np.float64
+                )
+                Sigma_m_inv = np.diag(1.0 / Sigma_m_diag_elms)
+                Sigma_orb = np.linalg.inv(np.transpose(J) @ Sigma_m_inv @ J)
+                logger.info(
+                    f"Sigma_orb: {Sigma_orb}"
+                )  # TODO: just a place holder usage of the Sigma_orb
 
             # plotting
             logger.info(f"start generating plots...")
