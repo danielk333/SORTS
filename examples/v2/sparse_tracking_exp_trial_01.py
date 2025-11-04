@@ -25,6 +25,7 @@ from sorts.simulation.stx_mrx_simulation import (
 )
 
 logging.basicConfig(level=logging.DEBUG)
+logging.getLogger("matplotlib").setLevel(logging.WARNING) # suppress matplotlib logs below "warning"; fmt: skip;
 logger = logging.getLogger(__name__)
 logger.info("starting example")
 
