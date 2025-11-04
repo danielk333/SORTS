@@ -98,7 +98,7 @@ class SparseTrackerController(ControllerBase):
             space_object=param.space_object,
             epoch=to_datetime64_us(param.epoch),
             station_id_pairs=stn_pairs,
-            points_per_passage=3,
+            points_per_passage=param.points_per_passage,
             state=ControllerState.empty(),
         )
 
