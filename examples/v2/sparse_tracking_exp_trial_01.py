@@ -197,6 +197,7 @@ class MpiExample(sorts.MpiQueuedExecution):
 
         save_subdpath = save_dpath / f"{0}"
 
+        # a tuple of 7 SimulationUnit: (original x1,  ...perturbated x6)
         jaco_sim_unit_tuple: tuple[SimulationUnit, ...]
         for jaco_sim_unit_tuple in zip(*sim_unit_grps):
 
@@ -207,20 +208,24 @@ class MpiExample(sorts.MpiQueuedExecution):
             _SuK = SimulationUnit._K
 
             true_obss = sim_unit.observations
-            pert_obss_grp = [
-                su.observations for su in pert_sim_units
-            ]  # i.e. a list of 6 `list[Observation]`
+            pert_obss_grp = [su.observations for su in pert_sim_units] # i.e. a list of 6 `list[Observation]`; fmt: skip;
             obss.extend(true_obss)
 
+            # a tuple of 7 Observation: (original x1,  ...perturbated x6)
             jaco_obs_tuple: tuple[Observation, ...]
             for jaco_obs_tuple in zip(true_obss, *pert_obss_grp):
+                # calc the jacobian and Sigma_orb for each observation
+                true_obs, *pert_obss = jaco_obs_tuple
 
-                obs, *pert_obss = jaco_obs_tuple
-                obs_state = obs.get_state_slice()
+                true_obs_state = true_obs.get_state_slice()
+                # skip the calculation if snr is lower than some threshold
+                if true_obs_state[_SuK.snr].to_numpy().max() < 10 ** (12 / 10): # 12dB threshold; fmt: skip;
+                    continue
+
                 pert_obs_states = [obs.get_state_slice() for obs in pert_obss]
 
-                argmax_snr = t.cast(xr.DataArray, obs_state[_SuK.snr].argmax())
-                midx_max_snr = obs_state[{_SuK.multi_index: argmax_snr.item()}]
+                argmax_snr = t.cast(xr.DataArray, true_obs_state[_SuK.snr].argmax())
+                midx_max_snr = true_obs_state[{_SuK.multi_index: argmax_snr.item()}]
                 midx_max_snr_value = midx_max_snr[_SuK.snr].item()
                 midx_max_snr_time = midx_max_snr[_SuK.time].item()
 
@@ -229,10 +234,10 @@ class MpiExample(sorts.MpiQueuedExecution):
                 max_snrs_spobj_id.append(sim_unit.space_object.oid)
 
                 # calc the jacobian
-                num_meas = len(obs_state[_SuK.multi_index])  # num of measurements
+                num_meas = len(true_obs_state[_SuK.multi_index])  # num of measurements
                 num_var = len(spobj.state._cart[:, 0])  # num of independent variables
-                r_orig = obs_state[_SuK.two_way_range].to_numpy()
-                v_orig = obs_state[_SuK.two_way_range_rate].to_numpy()
+                r_orig = true_obs_state[_SuK.two_way_range].to_numpy()
+                v_orig = true_obs_state[_SuK.two_way_range_rate].to_numpy()
                 J = np.zeros([num_meas * 2, num_var], dtype=np.float64)  # init the jacobian
                 for idx, x_orig in enumerate(spobj.state._cart[:, 0]):
                     x_pert = pert_spobjs[idx].state._cart[idx, 0]
