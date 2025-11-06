@@ -6,7 +6,6 @@ dynamic = [
     "readme",
     "license",
 
-    # TODO: migrate them to pyproject.toml ?
     # used in `setup.cfg`, but does not cause warnings/errors
     # "license-files"
     # "authors",
