@@ -218,20 +218,28 @@ class MpiExample(sorts.MpiQueuedExecution):
                 # calc the jacobian and Sigma_orb for each observation
                 true_obs, *pert_obss = jaco_obs_tuple
 
+                # get the state corresponding to the observation, and filter it by snr
                 true_obs_state = true_obs.get_state_slice()
-                # skip the calculation if snr is lower than some threshold
-                if true_obs_state[_SuK.snr].to_numpy().max() < 10 ** (12 / 10): # 12dB threshold; fmt: skip;
+                above_thld_true_obs_state_idx = true_obs_state[_SuK.snr].to_numpy() < 10 ** (12 / 10) # 12dB threshold; fmt: skip;
+                true_obs_state = true_obs_state[{_SuK.multi_index: above_thld_true_obs_state_idx}]
+
+                # skip the calculation if we do not have enough datapoints above the threshold
+                if len(true_obs_state[_SuK.multi_index]) < 5:
                     continue
 
-                pert_obs_states = [obs.get_state_slice() for obs in pert_obss]
+                # get the same filtered state from the perturbated observations
+                pert_obs_states = [
+                    obs.get_state_slice()[{_SuK.multi_index: above_thld_true_obs_state_idx}]
+                    for obs in pert_obss
+                ]
 
                 argmax_snr = t.cast(xr.DataArray, true_obs_state[_SuK.snr].argmax())
-                midx_max_snr = true_obs_state[{_SuK.multi_index: argmax_snr.item()}]
-                midx_max_snr_value = midx_max_snr[_SuK.snr].item()
-                midx_max_snr_time = midx_max_snr[_SuK.time].item()
+                true_obs_state_at_max_snr = true_obs_state[{_SuK.multi_index: argmax_snr.item()}]
+                true_obs_state_max_snr_value = true_obs_state_at_max_snr[_SuK.snr].item()
+                true_obs_state_max_snr_time = true_obs_state_at_max_snr[_SuK.time].item()
 
-                max_snrs_value.append(midx_max_snr_value)
-                max_snrs_time.append(midx_max_snr_time)
+                max_snrs_value.append(true_obs_state_max_snr_value)
+                max_snrs_time.append(true_obs_state_max_snr_time)
                 max_snrs_spobj_id.append(sim_unit.space_object.oid)
 
                 # calc the jacobian
