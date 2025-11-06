@@ -81,7 +81,6 @@ class ExperimentDetail(t.TypedDict):
     "Duration of a control slice, in micro-second"
 
 
-# TODO: replace existing usage of `dict[int, ExperimentDetail]` by this type
 ExperimentDetailMap = dict[ExperimentId, ExperimentDetail]
 
 
