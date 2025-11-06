@@ -94,7 +94,6 @@ class ScheduleNdarrayDict(t.TypedDict):
     start_time: npt.NDArray[types.Datetime64_us]
     end_time: npt.NDArray[types.Datetime64_us]
 
-    # TODO: re-eval the size of `exp_num`, `stn_num`, `simult_num`
     exp_num: npt.NDArray[np.int16]
     stn_num: npt.NDArray[np.int16]
     simult_num: npt.NDArray[np.int16]
