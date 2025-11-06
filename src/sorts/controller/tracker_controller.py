@@ -3,7 +3,6 @@ import logging, typing as t
 import numpy as np
 import numpy.typing as npt
 import xarray as xr
-import bokeh.layouts as bokeh_layouts
 import pyant
 from sorts import radar, schedule
 from sorts.space_object import SpaceObject
@@ -18,7 +17,6 @@ from sorts.types import (
     Timedelta_Like,
 )
 from sorts.utils import to_datetime64_us, to_timedelta64_us
-from sorts import plots
 from .controller_base import ControllerBase
 
 logger = logging.getLogger(__name__)
@@ -108,30 +106,6 @@ def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
     output = resultant_sch
 
     return output
-
-
-# TODO: remove or adapt to ENU coord
-def plot_state_and_output(state: State, rx_schedules: t.Sequence[schedule.Schedule]):
-    pos_plot = plots.ecef_states_positions_plot(state["spobj_states"])
-    pos_plot.title = "ecef_states_positions_plot"
-
-    rx_skyplot_plots = []
-    for idx, rx_schedule in enumerate(rx_schedules):
-        rx_sch_dict = schedule.to_ndarrays(rx_schedule)
-        rx_skyplot_plot = plots.azel_skyplot(
-            rx_sch_dict["pointing"][0],
-            rx_sch_dict["pointing"][1],
-        )
-        rx_skyplot_plot.title = f"rx_skyplot_plot_{idx}"
-        rx_skyplot_plots.append(rx_skyplot_plot)
-
-    plot = bokeh_layouts.layout(
-        [
-            [pos_plot],
-            rx_skyplot_plots,
-        ]  # type: ignore
-    )
-    return plot
 
 
 class TrackerController(ControllerBase):

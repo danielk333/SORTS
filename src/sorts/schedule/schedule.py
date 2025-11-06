@@ -165,19 +165,6 @@ def from_ndarrays(data: ScheduleNdarrayDict) -> Schedule:
     return Schedule(sch)
 
 
-def to_ndarrays(sch: Schedule) -> ScheduleNdarrayDict:
-    arr_dict: ScheduleNdarrayDict = {
-        _K.start_time: sch[_K.start_time].to_numpy(),
-        _K.end_time: sch[_K.end_time].to_numpy(),
-        _K.exp_num: sch[_K.exp_num].to_numpy(),
-        _K.stn_num: sch[_K.stn_num].to_numpy(),
-        _K.simult_num: sch[_K.simult_num].to_numpy(),
-        _K.pointing: sch[_K.pointing].to_numpy(),
-    }
-
-    return arr_dict
-
-
 # TODO: remove?
 def to_dataframe(sch: Schedule) -> pd.DataFrame:
     df = pd.concat(

@@ -15,7 +15,6 @@ from .schedule import (
     default_station,
     empty,
     from_ndarrays,
-    to_ndarrays,
     to_dataframe,
     filter_by_time_range,
     filter_by_time_ranges,
