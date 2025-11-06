@@ -69,12 +69,12 @@ class ExperimentDetail(t.TypedDict):
 
     id: ExperimentId
 
-    coh_int_bandwidth: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-    ipp: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-    pulse_length: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
+    coh_int_bandwidth: float
+    ipp: float
+    pulse_length: float
     power: float
     bandwidth: float
-    duty_cycle: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
+    duty_cycle: float
     noise_temp: float
 
     slice_duration: types.Timedelta64_us
