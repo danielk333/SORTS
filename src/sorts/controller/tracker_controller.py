@@ -71,14 +71,12 @@ def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
     tx_sch_len = len(tx_sch_time)
 
     tx_sch = schedule.from_ndarrays(
-        {
-            "start_time": tx_sch_time,
-            "end_time": tx_sch_time + spec["exp_detail"]["slice_duration"],
-            "exp_num": np.full(tx_sch_len, spec["exp_detail"]["id"], dtype=np.int16),
-            "stn_num": np.full(tx_sch_len, spec["tx_station"].uid, dtype=np.int16),
-            "simult_num": np.full(tx_sch_len, 0, dtype=np.int16),
-            "pointing": tx_pointings,
-        }
+        start_time=tx_sch_time,
+        end_time=tx_sch_time + spec["exp_detail"]["slice_duration"],
+        exp_num=np.full(tx_sch_len, spec["exp_detail"]["id"], dtype=np.int16),
+        stn_num=np.full(tx_sch_len, spec["tx_station"].uid, dtype=np.int16),
+        simult_num=np.full(tx_sch_len, 0, dtype=np.int16),
+        pointing=tx_pointings,
     )
 
     rx_schs: list[schedule.Schedule] = []
@@ -90,14 +88,12 @@ def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
 
         rx_schs.append(
             schedule.from_ndarrays(
-                {
-                    "start_time": rx_sch_time,
-                    "end_time": rx_sch_time + spec["exp_detail"]["slice_duration"],
-                    "exp_num": np.full(rx_sch_len, spec["exp_detail"]["id"], dtype=np.int16),
-                    "stn_num": np.full(rx_sch_len, rx_stn.uid, dtype=np.int16),
-                    "simult_num": np.full(rx_sch_len, 0, dtype=np.int16),
-                    "pointing": rx_pointings,
-                }
+                start_time=rx_sch_time,
+                end_time=rx_sch_time + spec["exp_detail"]["slice_duration"],
+                exp_num=np.full(rx_sch_len, spec["exp_detail"]["id"], dtype=np.int16),
+                stn_num=np.full(rx_sch_len, rx_stn.uid, dtype=np.int16),
+                simult_num=np.full(rx_sch_len, 0, dtype=np.int16),
+                pointing=rx_pointings,
             )
         )
 

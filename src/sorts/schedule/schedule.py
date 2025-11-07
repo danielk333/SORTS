@@ -84,23 +84,6 @@ class ExperimentDetail(t.TypedDict):
 ExperimentDetailMap = dict[ExperimentId, ExperimentDetail]
 
 
-class ScheduleNdarrayDict(t.TypedDict):
-    """
-    A TypedDict, stores a collection of "control slices" (or "slices" in short).
-
-    Slice data are stored as columns of fields, each of which is a `ndarray`.
-    """
-
-    start_time: npt.NDArray[types.Datetime64_us]
-    end_time: npt.NDArray[types.Datetime64_us]
-
-    exp_num: npt.NDArray[np.int16]
-    stn_num: npt.NDArray[np.int16]
-    simult_num: npt.NDArray[np.int16]
-
-    pointing: types.EnuCoordinates
-
-
 XrDataArrayIndexer = xr.DataArray
 """Contains info to get a subset of entries from a `Schedule`"""
 
@@ -145,9 +128,16 @@ def empty() -> Schedule:
     return Schedule(sch)
 
 
-def from_ndarrays(data: ScheduleNdarrayDict) -> Schedule:
+def from_ndarrays(
+    start_time: npt.NDArray[types.Datetime64_us],
+    end_time: npt.NDArray[types.Datetime64_us],
+    exp_num: npt.NDArray[np.int16],
+    stn_num: npt.NDArray[np.int16],
+    simult_num: npt.NDArray[np.int16],
+    pointing: types.EnuCoordinates,
+) -> Schedule:
     multi_index = pd.MultiIndex.from_arrays(
-        [data[_K.exp_num], data[_K.stn_num], data[_K.simult_num], data[_K.start_time]],
+        [exp_num, stn_num, simult_num, start_time],
         names=(_K.exp_num, _K.stn_num, _K.simult_num, _K.start_time),
     )
 
@@ -157,8 +147,8 @@ def from_ndarrays(data: ScheduleNdarrayDict) -> Schedule:
             _K.enu: [_K.e, _K.n, _K.u],
         },
         data_vars={
-            _K.end_time: (_K.multi_index, data[_K.end_time]),
-            _K.pointing: ((_K.enu, _K.multi_index), data[_K.pointing]),
+            _K.end_time: (_K.multi_index, end_time),
+            _K.pointing: ((_K.enu, _K.multi_index), pointing),
         },
     )
 

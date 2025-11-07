@@ -82,18 +82,12 @@ def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
     tx_pointing_masked = tx_pointing[:, tx_mask]
 
     tx_sch = schedule.from_ndarrays(
-        {
-            "start_time": tx_slice_start_time_masked,
-            "end_time": tx_slice_start_time_masked + spec["exp_detail"]["slice_duration"],
-            "exp_num": np.full(
-                len(tx_slice_start_time_masked), spec["exp_detail"]["id"], dtype=np.int16
-            ),
-            "stn_num": np.full(
-                len(tx_slice_start_time_masked), spec["tx_station"].uid, dtype=np.int16
-            ),
-            "simult_num": np.full(len(tx_slice_start_time_masked), 0, dtype=np.int16),
-            "pointing": tx_pointing_masked,
-        }
+        start_time=tx_slice_start_time_masked,
+        end_time=tx_slice_start_time_masked + spec["exp_detail"]["slice_duration"],
+        exp_num=np.full(len(tx_slice_start_time_masked), spec["exp_detail"]["id"], dtype=np.int16),
+        stn_num=np.full(len(tx_slice_start_time_masked), spec["tx_station"].uid, dtype=np.int16),
+        simult_num=np.full(len(tx_slice_start_time_masked), 0, dtype=np.int16),
+        pointing=tx_pointing_masked,
     )
 
     # TODO: `rx_schedule_size` is a bit of a mismisnomer, as out-of-range entries might later be removed
@@ -144,16 +138,14 @@ def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
         rx_pointings_simult_num_masked = rx_pointings_simult_num[rx_mask]
 
         rx_sch = schedule.from_ndarrays(
-            {
-                "start_time": rx_slice_start_time_masked,
-                "end_time": rx_slice_start_time_masked + spec["exp_detail"]["slice_duration"],
-                "exp_num": np.full(
-                    len(rx_slice_start_time_masked), spec["exp_detail"]["id"], dtype=np.int16
-                ),
-                "stn_num": np.full(len(rx_slice_start_time_masked), rx_station.uid, dtype=np.int16),
-                "simult_num": rx_pointings_simult_num_masked,
-                "pointing": rx_pointing_masked,
-            }
+            start_time=rx_slice_start_time_masked,
+            end_time=rx_slice_start_time_masked + spec["exp_detail"]["slice_duration"],
+            exp_num=np.full(
+                len(rx_slice_start_time_masked), spec["exp_detail"]["id"], dtype=np.int16
+            ),
+            stn_num=np.full(len(rx_slice_start_time_masked), rx_station.uid, dtype=np.int16),
+            simult_num=rx_pointings_simult_num_masked,
+            pointing=rx_pointing_masked,
         )
 
         rx_schs.append(rx_sch)

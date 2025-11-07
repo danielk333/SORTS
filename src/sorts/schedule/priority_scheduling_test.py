@@ -20,43 +20,39 @@ def priority_scheduling_interleaved_schedule_test():
 
     # 30min long, 2hr intv
     sch_a = schedule.from_ndarrays(
-        {
-            _SK.start_time: np.arange(
-                np.datetime64("2025-01-01", "s"),
-                np.datetime64("2025-01-02", "s"),
-                np.timedelta64(3600 * 2, "s"),
-            ),
-            _SK.end_time: np.arange(
-                np.datetime64("2025-01-01 00:30:00", "s"),
-                np.datetime64("2025-01-02 00:00:01", "s"),
-                np.timedelta64(3600 * 2, "s"),
-            ),
-            _SK.exp_num: np.full(12, 0, dtype=np.int16),
-            _SK.stn_num: np.full(12, 0, dtype=np.int16),
-            _SK.simult_num: np.full(12, 0, dtype=np.int16),
-            _SK.pointing: np.full((3, 12), 0.0, dtype=np.float64),
-        },
+        start_time=np.arange(
+            np.datetime64("2025-01-01", "s"),
+            np.datetime64("2025-01-02", "s"),
+            np.timedelta64(3600 * 2, "s"),
+        ),
+        end_time=np.arange(
+            np.datetime64("2025-01-01 00:30:00", "s"),
+            np.datetime64("2025-01-02 00:00:01", "s"),
+            np.timedelta64(3600 * 2, "s"),
+        ),
+        exp_num=np.full(12, 0, dtype=np.int16),
+        stn_num=np.full(12, 0, dtype=np.int16),
+        simult_num=np.full(12, 0, dtype=np.int16),
+        pointing=np.full((3, 12), 0.0, dtype=np.float64),
     )
     sch_a = Schedule(sch_a)
 
     # 1hr long, 1hr intv
     sch_b = schedule.from_ndarrays(
-        {
-            _SK.start_time: np.arange(
-                np.datetime64("2025-01-01", "s"),
-                np.datetime64("2025-01-02", "s"),
-                np.timedelta64(3600, "s"),
-            ),
-            _SK.end_time: np.arange(
-                np.datetime64("2025-01-01 01:00:00", "s"),
-                np.datetime64("2025-01-02 00:00:01", "s"),
-                np.timedelta64(3600, "s"),
-            ),
-            _SK.exp_num: np.full(24, 1, dtype=np.int16),
-            _SK.stn_num: np.full(24, 0, dtype=np.int16),
-            _SK.simult_num: np.full(24, 0, dtype=np.int16),
-            _SK.pointing: np.full((3, 24), 1.0, dtype=np.float64),
-        }
+        start_time=np.arange(
+            np.datetime64("2025-01-01", "s"),
+            np.datetime64("2025-01-02", "s"),
+            np.timedelta64(3600, "s"),
+        ),
+        end_time=np.arange(
+            np.datetime64("2025-01-01 01:00:00", "s"),
+            np.datetime64("2025-01-02 00:00:01", "s"),
+            np.timedelta64(3600, "s"),
+        ),
+        exp_num=np.full(24, 1, dtype=np.int16),
+        stn_num=np.full(24, 0, dtype=np.int16),
+        simult_num=np.full(24, 0, dtype=np.int16),
+        pointing=np.full((3, 24), 1.0, dtype=np.float64),
     )
     sch_b = Schedule(sch_b)
 
