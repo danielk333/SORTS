@@ -9,7 +9,6 @@ from .schedule import (
     SimultaneousNum,
     ExperimentDetail,
     ExperimentDetailMap,
-    XrDataArrayIndexer,
     ExperimentIdStationIdPairsMap,
     default_station,
     empty,

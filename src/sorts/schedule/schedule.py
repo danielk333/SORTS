@@ -84,9 +84,6 @@ class ExperimentDetail(t.TypedDict):
 ExperimentDetailMap = dict[ExperimentId, ExperimentDetail]
 
 
-XrDataArrayIndexer = xr.DataArray
-"""Contains info to get a subset of entries from a `Schedule`"""
-
 ExperimentIdStationIdPairsMap = dict[ExperimentId, list[tuple[radar.StationId, radar.StationId]]]
 
 
