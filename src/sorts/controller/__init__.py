@@ -8,7 +8,6 @@ from . import (
 )
 
 from .controller_base import ControllerBase
-from .random_uniform_scans_controller import RandomUniformScansController
 from .fence_scan_controller import FenceScanController
 from .tracker_controller import TrackerController
 from .sparse_tracker_controller import SparseTrackerController
