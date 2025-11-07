@@ -92,14 +92,6 @@ class FenceScanController(ControllerBase):
     ) -> t.Self:
         """A constructor method"""
 
-        # TODO: update/adapt or remove?
-        # self._total_duration_s = (self.end_time - self.start_time).total_seconds()
-        # if self._total_duration_s < self.dwell_s:
-        #     raise RuntimeError(
-        #         f"The specified time range ({self.start_time.isoformat()} to {self.end_time.isoformat()}) "
-        #         + f"cannot be smaller than the dwell ({self.dwell_s} sec)."
-        #     )
-
         stn_pairs = [(tx_station.uid, rx_station.uid) for rx_station in rx_stations]
 
         ctrl = cls(
