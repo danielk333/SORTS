@@ -45,7 +45,6 @@ class State(t.TypedDict):
     """NOTE: It may contain out of range pointings"""
 
 
-# TODO: should we generate tx pointings at the specified ranges instead of normalized to 1?
 def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
     # The logic of this function:
     # 1. repeat the cycle of tx pointings from state to form the tx schedule
@@ -167,8 +166,6 @@ class FenceScanController(ControllerBase):
     - The preferred way to create instances of this class is via its class methods (e.g. `TrackerController.from_space_object`).
     - This class serve as a frontend to the `State` type in this module
     """
-
-    # TODO: the radar station computation capacity poses limit on the size of simutaneous `scan_range`, we should check/validate against it
 
     def __init__(self, spec: Spec, state: State | None):
         """
