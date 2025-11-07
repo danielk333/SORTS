@@ -1,5 +1,6 @@
 from __future__ import annotations
 import logging, math, typing as t
+from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 import xarray as xr
@@ -34,10 +35,8 @@ class Spec(t.TypedDict):
     station_id_pairs: list[tuple[radar.StationId, radar.StationId]]
 
 
-# TODO: can be dissolved?
-class State(t.TypedDict):
-    """A TypedDict of params"""
-
+@dataclass(kw_only=True)
+class ControllerState:
     start_time: Datetime64_us
     end_time: Datetime64_us
     tx_schedule_size: int
@@ -45,7 +44,7 @@ class State(t.TypedDict):
     """NOTE: It may contain out of range pointings"""
 
 
-def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
+def generate_from_state(spec: Spec, state: ControllerState) -> schedule.Schedule:
     # The logic of this function:
     # 1. repeat the cycle of tx pointings from state to form the tx schedule
     # 2. from the single cycle of tx pointings, we convert it into ECEF location coord and extend them by the `scan_range`
@@ -54,14 +53,14 @@ def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
     #    and then further back to pointings in ENU coord,
     #    and finally repeat them to form a rx schedule, for each rx station
 
-    pointings_per_cycle = state["tx_pointings_of_a_cycle"].shape[1]
+    pointings_per_cycle = state.tx_pointings_of_a_cycle.shape[1]
 
     # NOTE: for `np.arange` 'stop param,
     #   - we subtract 'slice_duration' so that only full slice are included
     #   - and add `+1` so that slice with time range `('end_time - 'slice_duration', 'end_time')` is included
     tx_slice_start_time: npt.NDArray[Datetime64_us] = np.arange(
-        state["start_time"],
-        state["end_time"] - spec["exp_detail"]["slice_duration"] + 1,
+        state.start_time,
+        state.end_time - spec["exp_detail"]["slice_duration"] + 1,
         spec["exp_detail"]["slice_duration"],
     )
 
@@ -69,9 +68,9 @@ def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
     # repeat a cycle of pointings until it is at least the size of `tx_schedule_size`,
     # then trim to exactly `tx_schedule_size` long
     tx_pointing: EnuCoordinates = np.tile(
-        state["tx_pointings_of_a_cycle"],
-        (state["tx_schedule_size"] + pointings_per_cycle - 1) // pointings_per_cycle,
-    )[:, : state["tx_schedule_size"]]
+        state.tx_pointings_of_a_cycle,
+        (state.tx_schedule_size + pointings_per_cycle - 1) // pointings_per_cycle,
+    )[:, : state.tx_schedule_size]
 
     # mask tx values by min_elevation requirement
     tx_mask = pointing_funcs.create_mask_by_min_elevation(
@@ -91,13 +90,13 @@ def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
 
     # TODO: `rx_schedule_size` is a bit of a mismisnomer, as out-of-range entries might later be removed
     rx_slice_start_time = tx_slice_start_time.repeat(len(spec["scan_range"]))
-    rx_schedule_size = state["tx_schedule_size"] * len(spec["scan_range"])
+    rx_schedule_size = state.tx_schedule_size * len(spec["scan_range"])
     rx_schs: list[schedule.Schedule] = []
     tx_pointings_of_a_cycle_without_translation_ecef: EcefCoordinates = enu_to_ecef(
         lat=spec["tx_station"].ecef_lat,
         lon=spec["tx_station"].ecef_lon,
         alt=spec["tx_station"].ecef_alt,
-        enu=state["tx_pointings_of_a_cycle"],
+        enu=state.tx_pointings_of_a_cycle,
         degrees=True,
     )
     rx_pointing_of_a_cycle_ecef: EcefCoordinates = (
@@ -167,13 +166,13 @@ class FenceScanController(ControllerBase):
     - This class serve as a frontend to the `State` type in this module
     """
 
-    def __init__(self, spec: Spec, state: State | None):
+    def __init__(self, spec: Spec, state: ControllerState | None):
         """
         NOTE: This is intended as an internal constructor, please use the constructor methods to create instances.
         """
 
         self.spec: Spec = spec
-        self.state: State | None = state
+        self.state: ControllerState | None = state
 
         self._cached_output: schedule.Schedule | None = None
 
@@ -248,18 +247,18 @@ class FenceScanController(ControllerBase):
             degrees=True,
         )
 
-        self.state = {
-            "start_time": start_time_np,
-            "end_time": end_time_np,
-            "tx_schedule_size": tx_schedule_size,
-            "tx_pointings_of_a_cycle": tx_pointings_of_a_cycle,
-        }
+        self.state = ControllerState(
+            start_time=start_time_np,
+            end_time=end_time_np,
+            tx_schedule_size=tx_schedule_size,
+            tx_pointings_of_a_cycle=tx_pointings_of_a_cycle,
+        )
 
         return self
 
     def generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> schedule.Schedule:
         self.compute_single_cycle_pointings(start_time, end_time)
-        state = t.cast(State, self.state)
+        state = t.cast(ControllerState, self.state)
 
         output = generate_from_state(spec=self.spec, state=state)
         self._cached_output = output
