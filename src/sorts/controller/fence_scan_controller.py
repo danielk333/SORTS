@@ -5,6 +5,7 @@ import numpy as np
 import numpy.typing as npt
 import xarray as xr
 from sorts import radar, schedule
+from sorts.const import min_datetime64_us
 from sorts.radar import Station
 from sorts.frames import enu_to_ecef, ecef_to_enu, sph_to_cart
 from sorts.types import (
@@ -42,6 +43,15 @@ class ControllerState:
     tx_schedule_size: int
     tx_pointings_of_a_cycle: EnuCoordinates
     """NOTE: It may contain out of range pointings"""
+
+    @classmethod
+    def empty(cls) -> t.Self:
+        return cls(
+            start_time=min_datetime64_us,
+            end_time=min_datetime64_us,
+            tx_schedule_size=0,
+            tx_pointings_of_a_cycle=np.empty((6,), dtype=np.float64),
+        )
 
 
 def generate_from_state(spec: Spec, state: ControllerState) -> schedule.Schedule:
@@ -166,13 +176,13 @@ class FenceScanController(ControllerBase):
     - This class serve as a frontend to the `State` type in this module
     """
 
-    def __init__(self, spec: Spec, state: ControllerState | None):
+    def __init__(self, spec: Spec, state: ControllerState):
         """
         NOTE: This is intended as an internal constructor, please use the constructor methods to create instances.
         """
 
         self.spec: Spec = spec
-        self.state: ControllerState | None = state
+        self.state: ControllerState = state
 
     @classmethod
     def from_scan_spec(
@@ -208,7 +218,7 @@ class FenceScanController(ControllerBase):
                 "exp_detail": exp_detail,
                 "station_id_pairs": stn_pairs,
             },
-            state=None,
+            state=ControllerState.empty(),
         )
 
         return ctrl
