@@ -177,8 +177,6 @@ def filter_by_time_range(sch: Schedule, time_range: types.TimeRange_us) -> Sched
     return ds_masked
 
 
-# TODO: this is very similar to `rx_time_mask: xr.DataArray = reduce(...)` in `simulation_unit.py`,
-#   maybe one of them can be dissolved?
 def filter_by_time_ranges(sch: Schedule, time_ranges: t.Sequence[types.TimeRange_us]) -> Schedule:
     resultant_mask: xr.DataArray = reduce(
         xr.ufuncs.logical_or,
