@@ -54,120 +54,6 @@ class ControllerState:
         )
 
 
-def generate_from_state(spec: Spec, state: ControllerState) -> schedule.Schedule:
-    # The logic of this function:
-    # 1. repeat the cycle of tx pointings from state to form the tx schedule
-    # 2. from the single cycle of tx pointings, we convert it into ECEF location coord and extend them by the `scan_range`
-    # 3. using the resultant location coords from previous step,
-    #    we convert them to rx station pointings of a cycle in ECEF coord,
-    #    and then further back to pointings in ENU coord,
-    #    and finally repeat them to form a rx schedule, for each rx station
-
-    pointings_per_cycle = state.tx_pointings_of_a_cycle.shape[1]
-
-    # NOTE: for `np.arange` 'stop param,
-    #   - we subtract 'slice_duration' so that only full slice are included
-    #   - and add `+1` so that slice with time range `('end_time - 'slice_duration', 'end_time')` is included
-    tx_slice_start_time: npt.NDArray[Datetime64_us] = np.arange(
-        state.start_time,
-        state.end_time - spec["exp_detail"]["slice_duration"] + 1,
-        spec["exp_detail"]["slice_duration"],
-    )
-
-    # TODO: `tx_schedule_size` is a bit of a mismisnomer, as out-of-range entries might later be removed
-    # repeat a cycle of pointings until it is at least the size of `tx_schedule_size`,
-    # then trim to exactly `tx_schedule_size` long
-    tx_pointing: EnuCoordinates = np.tile(
-        state.tx_pointings_of_a_cycle,
-        (state.tx_schedule_size + pointings_per_cycle - 1) // pointings_per_cycle,
-    )[:, : state.tx_schedule_size]
-
-    # mask tx values by min_elevation requirement
-    tx_mask = pointing_funcs.create_mask_by_min_elevation(
-        tx_pointing, spec["tx_station"].min_elevation
-    )
-    tx_slice_start_time_masked = tx_slice_start_time[tx_mask]
-    tx_pointing_masked = tx_pointing[:, tx_mask]
-
-    tx_sch = schedule.from_ndarrays(
-        start_time=tx_slice_start_time_masked,
-        end_time=tx_slice_start_time_masked + spec["exp_detail"]["slice_duration"],
-        exp_num=np.full(len(tx_slice_start_time_masked), spec["exp_detail"]["id"], dtype=np.int16),
-        stn_num=np.full(len(tx_slice_start_time_masked), spec["tx_station"].uid, dtype=np.int16),
-        simult_num=np.full(len(tx_slice_start_time_masked), 0, dtype=np.int16),
-        pointing=tx_pointing_masked,
-    )
-
-    # TODO: `rx_schedule_size` is a bit of a mismisnomer, as out-of-range entries might later be removed
-    rx_slice_start_time = tx_slice_start_time.repeat(len(spec["scan_range"]))
-    rx_schedule_size = state.tx_schedule_size * len(spec["scan_range"])
-    rx_schs: list[schedule.Schedule] = []
-    tx_pointings_of_a_cycle_without_translation_ecef: EcefCoordinates = enu_to_ecef(
-        lat=spec["tx_station"].ecef_lat,
-        lon=spec["tx_station"].ecef_lon,
-        alt=spec["tx_station"].ecef_alt,
-        enu=state.tx_pointings_of_a_cycle,
-        degrees=True,
-    )
-    rx_pointing_of_a_cycle_ecef: EcefCoordinates = (
-        tx_pointings_of_a_cycle_without_translation_ecef[:, :, np.newaxis]
-        * spec["scan_range"][np.newaxis, np.newaxis, :]
-        + spec["tx_station"].ecef[:, np.newaxis, np.newaxis]
-    ).reshape((3, -1))
-
-    for rx_station in spec["rx_stations"]:
-        rx_pointings_of_a_cycle_without_translation_ecef: EcefCoordinates = (
-            rx_pointing_of_a_cycle_ecef - rx_station.ecef[:, np.newaxis]
-        )
-        rx_pointings_of_a_cycle_enu: EnuCoordinates = ecef_to_enu(
-            lat=rx_station.ecef_lat,
-            lon=rx_station.ecef_lon,
-            alt=rx_station.ecef_alt,
-            ecef=rx_pointings_of_a_cycle_without_translation_ecef,
-            degrees=True,
-        )
-
-        # repeat a cycle of pointings until it is at least the size of `rx_schedule_size`
-        # then trim to exactly `rx_schedule_size` long
-        rx_pointings_enu: EnuCoordinates = np.tile(
-            rx_pointings_of_a_cycle_enu,
-            (rx_schedule_size + pointings_per_cycle - 1) // pointings_per_cycle,
-        )[:, :rx_schedule_size]
-        rx_pointings_simult_num = np.arange(rx_schedule_size) % len(spec["scan_range"])
-
-        # mask rx values by min_elevation requirement, and has a corresponding tx value
-        rx_mask_by_min_elevation = pointing_funcs.create_mask_by_min_elevation(
-            rx_pointings_enu, rx_station.min_elevation
-        )
-        rx_mask_by_tx_mask = np.isin(rx_slice_start_time, tx_slice_start_time_masked)
-        rx_mask = np.logical_and(rx_mask_by_min_elevation, rx_mask_by_tx_mask)
-        rx_slice_start_time_masked = rx_slice_start_time[rx_mask]
-        rx_pointing_masked = rx_pointings_enu[:, rx_mask]
-        rx_pointings_simult_num_masked = rx_pointings_simult_num[rx_mask]
-
-        rx_sch = schedule.from_ndarrays(
-            start_time=rx_slice_start_time_masked,
-            end_time=rx_slice_start_time_masked + spec["exp_detail"]["slice_duration"],
-            exp_num=np.full(
-                len(rx_slice_start_time_masked), spec["exp_detail"]["id"], dtype=np.int16
-            ),
-            stn_num=np.full(len(rx_slice_start_time_masked), rx_station.uid, dtype=np.int16),
-            simult_num=rx_pointings_simult_num_masked,
-            pointing=rx_pointing_masked,
-        )
-
-        rx_schs.append(rx_sch)
-
-    resultant_sch = xr.concat([tx_sch, *rx_schs], dim=schedule._K.multi_index)
-    resultant_sch = resultant_sch.sortby(schedule._K.start_time)
-    # TODO: re-eval if it is too brutal
-    # there will be duplicates if the tx station is also a rx station, we drop the duplicates here
-    resultant_sch = resultant_sch.drop_duplicates(schedule._K.multi_index)
-    output = resultant_sch
-
-    return output
-
-
 class FenceScanController(ControllerBase):
     """
     Generate schedule for a fence scaning pattern
@@ -265,9 +151,121 @@ class FenceScanController(ControllerBase):
         return self
 
     def generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> schedule.Schedule:
-        self.compute_single_cycle_pointings(start_time, end_time)
-        state = t.cast(ControllerState, self.state)
+        """Generate the schedules."""
 
-        output = generate_from_state(spec=self.spec, state=state)
+        # The logic of this function:
+        # 1. repeat the cycle of tx pointings from state to form the tx schedule
+        # 2. from the single cycle of tx pointings, we convert it into ECEF location coord and extend them by the `scan_range`
+        # 3. using the resultant location coords from previous step,
+        #    we convert them to rx station pointings of a cycle in ECEF coord,
+        #    and then further back to pointings in ENU coord,
+        #    and finally repeat them to form a rx schedule, for each rx station
+
+        self.compute_single_cycle_pointings(start_time, end_time)
+        pointings_per_cycle = self.state.tx_pointings_of_a_cycle.shape[1]
+
+        # NOTE: for `np.arange` 'stop param,
+        #   - we subtract 'slice_duration' so that only full slice are included
+        #   - and add `+1` so that slice with time range `('end_time - 'slice_duration', 'end_time')` is included
+        tx_slice_start_time: npt.NDArray[Datetime64_us] = np.arange(
+            self.state.start_time,
+            self.state.end_time - self.spec["exp_detail"]["slice_duration"] + 1,
+            self.spec["exp_detail"]["slice_duration"],
+        )
+
+        # TODO: `tx_schedule_size` is a bit of a mismisnomer, as out-of-range entries might later be removed
+        # repeat a cycle of pointings until it is at least the size of `tx_schedule_size`,
+        # then trim to exactly `tx_schedule_size` long
+        tx_pointing: EnuCoordinates = np.tile(
+            self.state.tx_pointings_of_a_cycle,
+            (self.state.tx_schedule_size + pointings_per_cycle - 1) // pointings_per_cycle,
+        )[:, : self.state.tx_schedule_size]
+
+        # mask tx values by min_elevation requirement
+        tx_mask = pointing_funcs.create_mask_by_min_elevation(
+            tx_pointing, self.spec["tx_station"].min_elevation
+        )
+        tx_slice_start_time_masked = tx_slice_start_time[tx_mask]
+        tx_pointing_masked = tx_pointing[:, tx_mask]
+
+        tx_sch = schedule.from_ndarrays(
+            start_time=tx_slice_start_time_masked,
+            end_time=tx_slice_start_time_masked + self.spec["exp_detail"]["slice_duration"],
+            exp_num=np.full(
+                len(tx_slice_start_time_masked), self.spec["exp_detail"]["id"], dtype=np.int16
+            ),
+            stn_num=np.full(
+                len(tx_slice_start_time_masked), self.spec["tx_station"].uid, dtype=np.int16
+            ),
+            simult_num=np.full(len(tx_slice_start_time_masked), 0, dtype=np.int16),
+            pointing=tx_pointing_masked,
+        )
+
+        # TODO: `rx_schedule_size` is a bit of a mismisnomer, as out-of-range entries might later be removed
+        rx_slice_start_time = tx_slice_start_time.repeat(len(self.spec["scan_range"]))
+        rx_schedule_size = self.state.tx_schedule_size * len(self.spec["scan_range"])
+        rx_schs: list[schedule.Schedule] = []
+        tx_pointings_of_a_cycle_without_translation_ecef: EcefCoordinates = enu_to_ecef(
+            lat=self.spec["tx_station"].ecef_lat,
+            lon=self.spec["tx_station"].ecef_lon,
+            alt=self.spec["tx_station"].ecef_alt,
+            enu=self.state.tx_pointings_of_a_cycle,
+            degrees=True,
+        )
+        rx_pointing_of_a_cycle_ecef: EcefCoordinates = (
+            tx_pointings_of_a_cycle_without_translation_ecef[:, :, np.newaxis]
+            * self.spec["scan_range"][np.newaxis, np.newaxis, :]
+            + self.spec["tx_station"].ecef[:, np.newaxis, np.newaxis]
+        ).reshape((3, -1))
+
+        for rx_station in self.spec["rx_stations"]:
+            rx_pointings_of_a_cycle_without_translation_ecef: EcefCoordinates = (
+                rx_pointing_of_a_cycle_ecef - rx_station.ecef[:, np.newaxis]
+            )
+            rx_pointings_of_a_cycle_enu: EnuCoordinates = ecef_to_enu(
+                lat=rx_station.ecef_lat,
+                lon=rx_station.ecef_lon,
+                alt=rx_station.ecef_alt,
+                ecef=rx_pointings_of_a_cycle_without_translation_ecef,
+                degrees=True,
+            )
+
+            # repeat a cycle of pointings until it is at least the size of `rx_schedule_size`
+            # then trim to exactly `rx_schedule_size` long
+            rx_pointings_enu: EnuCoordinates = np.tile(
+                rx_pointings_of_a_cycle_enu,
+                (rx_schedule_size + pointings_per_cycle - 1) // pointings_per_cycle,
+            )[:, :rx_schedule_size]
+            rx_pointings_simult_num = np.arange(rx_schedule_size) % len(self.spec["scan_range"])
+
+            # mask rx values by min_elevation requirement, and has a corresponding tx value
+            rx_mask_by_min_elevation = pointing_funcs.create_mask_by_min_elevation(
+                rx_pointings_enu, rx_station.min_elevation
+            )
+            rx_mask_by_tx_mask = np.isin(rx_slice_start_time, tx_slice_start_time_masked)
+            rx_mask = np.logical_and(rx_mask_by_min_elevation, rx_mask_by_tx_mask)
+            rx_slice_start_time_masked = rx_slice_start_time[rx_mask]
+            rx_pointing_masked = rx_pointings_enu[:, rx_mask]
+            rx_pointings_simult_num_masked = rx_pointings_simult_num[rx_mask]
+
+            rx_sch = schedule.from_ndarrays(
+                start_time=rx_slice_start_time_masked,
+                end_time=rx_slice_start_time_masked + self.spec["exp_detail"]["slice_duration"],
+                exp_num=np.full(
+                    len(rx_slice_start_time_masked), self.spec["exp_detail"]["id"], dtype=np.int16
+                ),
+                stn_num=np.full(len(rx_slice_start_time_masked), rx_station.uid, dtype=np.int16),
+                simult_num=rx_pointings_simult_num_masked,
+                pointing=rx_pointing_masked,
+            )
+
+            rx_schs.append(rx_sch)
+
+        resultant_sch = xr.concat([tx_sch, *rx_schs], dim=schedule._K.multi_index)
+        resultant_sch = resultant_sch.sortby(schedule._K.start_time)
+        # TODO: re-eval if it is too brutal
+        # there will be duplicates if the tx station is also a rx station, we drop the duplicates here
+        resultant_sch = resultant_sch.drop_duplicates(schedule._K.multi_index)
+        output = resultant_sch
 
         return output
