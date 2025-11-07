@@ -174,8 +174,6 @@ class FenceScanController(ControllerBase):
         self.spec: Spec = spec
         self.state: ControllerState | None = state
 
-        self._cached_output: schedule.Schedule | None = None
-
     @classmethod
     def from_scan_spec(
         cls,
@@ -261,6 +259,5 @@ class FenceScanController(ControllerBase):
         state = t.cast(ControllerState, self.state)
 
         output = generate_from_state(spec=self.spec, state=state)
-        self._cached_output = output
 
         return output
