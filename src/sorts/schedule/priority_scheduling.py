@@ -4,6 +4,7 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import xarray as xr
+from sorts.const import max_datetime64_us, min_datetime64_us
 from sorts import utils
 from . import schedule
 from .schedule import Schedule
@@ -11,10 +12,6 @@ from .schedule import Schedule
 
 logger = logging.getLogger(__name__)
 
-max_datetime64_us = np.datetime64(np.iinfo(np.int64).max, "us")
-min_datetime64_us = np.datetime64(
-    np.iinfo(np.int64).min + 1, "us"
-)  # +1 is needed, otherwise it will be NaT
 
 _SK = schedule._K
 
