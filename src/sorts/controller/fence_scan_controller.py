@@ -23,19 +23,6 @@ from .controller_base import ControllerBase
 logger = logging.getLogger(__name__)
 
 
-class Spec(t.TypedDict):
-    """A TypedDict of params"""
-
-    tx_station: Station
-    rx_stations: t.Sequence[Station]
-    azimuth: Float_as_deg
-    min_elevation: Float_as_deg
-    pointings_per_cycle: int
-    scan_range: npt.NDArray[Float64_as_m]
-    exp_detail: schedule.ExperimentDetail
-    station_id_pairs: list[tuple[radar.StationId, radar.StationId]]
-
-
 @dataclass(kw_only=True)
 class ControllerState:
     start_time: Datetime64_us
@@ -62,12 +49,31 @@ class FenceScanController(ControllerBase):
     - This class serve as a frontend to the `State` type in this module
     """
 
-    def __init__(self, spec: Spec, state: ControllerState):
+    def __init__(
+        self,
+        tx_station: Station,
+        rx_stations: t.Sequence[Station],
+        azimuth: Float_as_deg,
+        min_elevation: Float_as_deg,
+        pointings_per_cycle: int,
+        scan_range: npt.NDArray[Float64_as_m],
+        exp_detail: schedule.ExperimentDetail,
+        station_id_pairs: list[tuple[radar.StationId, radar.StationId]],
+        state: ControllerState,
+    ):
         """
         NOTE: This is intended as an internal constructor, please use the constructor methods to create instances.
         """
 
-        self.spec: Spec = spec
+        self.tx_station = tx_station
+        self.rx_stations = rx_stations
+        self.azimuth = azimuth
+        self.min_elevation = min_elevation
+        self.pointings_per_cycle = pointings_per_cycle
+        self.scan_range = scan_range
+        self.exp_detail = exp_detail
+        self.station_id_pairs = station_id_pairs
+
         self.state: ControllerState = state
 
     @classmethod
@@ -94,39 +100,37 @@ class FenceScanController(ControllerBase):
         stn_pairs = [(tx_station.uid, rx_station.uid) for rx_station in rx_stations]
 
         ctrl = cls(
-            spec={
-                "tx_station": tx_station,
-                "rx_stations": rx_stations,
-                "azimuth": azimuth,
-                "min_elevation": min_elevation,
-                "pointings_per_cycle": pointings_per_cycle,
-                "scan_range": scan_range,
-                "exp_detail": exp_detail,
-                "station_id_pairs": stn_pairs,
-            },
+            tx_station=tx_station,
+            rx_stations=rx_stations,
+            azimuth=azimuth,
+            min_elevation=min_elevation,
+            pointings_per_cycle=pointings_per_cycle,
+            scan_range=scan_range,
+            exp_detail=exp_detail,
+            station_id_pairs=stn_pairs,
             state=ControllerState.empty(),
         )
 
         return ctrl
 
     def get_experiment_detail(self) -> schedule.ExperimentDetail:
-        return self.spec["exp_detail"]
+        return self.exp_detail
 
     def get_experiment_id_station_id_pairs_map(self) -> schedule.ExperimentIdStationIdPairsMap:
-        return {self.spec["exp_detail"]["id"]: self.spec["station_id_pairs"]}
+        return {self.exp_detail["id"]: self.station_id_pairs}
 
     def get_station_map(self) -> dict[radar.StationId, radar.Station]:
         stn_map: dict[radar.StationId, radar.Station] = {}
 
-        stn_map[self.spec["tx_station"].uid] = self.spec["tx_station"]
-        stn_map.update(list([(stn.uid, stn) for stn in self.spec["rx_stations"]]))
+        stn_map[self.tx_station.uid] = self.tx_station
+        stn_map.update(list([(stn.uid, stn) for stn in self.rx_stations]))
 
         return stn_map
 
     def compute_single_cycle_pointings(self, start_time: Datetime_Like, end_time: Datetime_Like):
         """Do the computation then update the `state` property and return `self`."""
 
-        exp_detail = self.spec["exp_detail"]
+        exp_detail = self.exp_detail
 
         start_time_np = to_datetime64_us(start_time)
         end_time_np = to_datetime64_us(end_time)
@@ -134,9 +138,9 @@ class FenceScanController(ControllerBase):
 
         tx_pointings_of_a_cycle = sph_to_cart(
             pointing_funcs.fence_pattern(
-                azimuth=self.spec["azimuth"],
-                min_elevation=self.spec["min_elevation"],
-                pointings_per_cycle=self.spec["pointings_per_cycle"],
+                azimuth=self.azimuth,
+                min_elevation=self.min_elevation,
+                pointings_per_cycle=self.pointings_per_cycle,
             ),
             degrees=True,
         )
@@ -169,8 +173,8 @@ class FenceScanController(ControllerBase):
         #   - and add `+1` so that slice with time range `('end_time - 'slice_duration', 'end_time')` is included
         tx_slice_start_time: npt.NDArray[Datetime64_us] = np.arange(
             self.state.start_time,
-            self.state.end_time - self.spec["exp_detail"]["slice_duration"] + 1,
-            self.spec["exp_detail"]["slice_duration"],
+            self.state.end_time - self.exp_detail["slice_duration"] + 1,
+            self.exp_detail["slice_duration"],
         )
 
         # TODO: `tx_schedule_size` is a bit of a mismisnomer, as out-of-range entries might later be removed
@@ -183,42 +187,38 @@ class FenceScanController(ControllerBase):
 
         # mask tx values by min_elevation requirement
         tx_mask = pointing_funcs.create_mask_by_min_elevation(
-            tx_pointing, self.spec["tx_station"].min_elevation
+            tx_pointing, self.tx_station.min_elevation
         )
         tx_slice_start_time_masked = tx_slice_start_time[tx_mask]
         tx_pointing_masked = tx_pointing[:, tx_mask]
 
         tx_sch = schedule.from_ndarrays(
             start_time=tx_slice_start_time_masked,
-            end_time=tx_slice_start_time_masked + self.spec["exp_detail"]["slice_duration"],
-            exp_num=np.full(
-                len(tx_slice_start_time_masked), self.spec["exp_detail"]["id"], dtype=np.int16
-            ),
-            stn_num=np.full(
-                len(tx_slice_start_time_masked), self.spec["tx_station"].uid, dtype=np.int16
-            ),
+            end_time=tx_slice_start_time_masked + self.exp_detail["slice_duration"],
+            exp_num=np.full(len(tx_slice_start_time_masked), self.exp_detail["id"], dtype=np.int16),
+            stn_num=np.full(len(tx_slice_start_time_masked), self.tx_station.uid, dtype=np.int16),
             simult_num=np.full(len(tx_slice_start_time_masked), 0, dtype=np.int16),
             pointing=tx_pointing_masked,
         )
 
         # TODO: `rx_schedule_size` is a bit of a mismisnomer, as out-of-range entries might later be removed
-        rx_slice_start_time = tx_slice_start_time.repeat(len(self.spec["scan_range"]))
-        rx_schedule_size = self.state.tx_schedule_size * len(self.spec["scan_range"])
+        rx_slice_start_time = tx_slice_start_time.repeat(len(self.scan_range))
+        rx_schedule_size = self.state.tx_schedule_size * len(self.scan_range)
         rx_schs: list[schedule.Schedule] = []
         tx_pointings_of_a_cycle_without_translation_ecef: EcefCoordinates = enu_to_ecef(
-            lat=self.spec["tx_station"].ecef_lat,
-            lon=self.spec["tx_station"].ecef_lon,
-            alt=self.spec["tx_station"].ecef_alt,
+            lat=self.tx_station.ecef_lat,
+            lon=self.tx_station.ecef_lon,
+            alt=self.tx_station.ecef_alt,
             enu=self.state.tx_pointings_of_a_cycle,
             degrees=True,
         )
         rx_pointing_of_a_cycle_ecef: EcefCoordinates = (
             tx_pointings_of_a_cycle_without_translation_ecef[:, :, np.newaxis]
-            * self.spec["scan_range"][np.newaxis, np.newaxis, :]
-            + self.spec["tx_station"].ecef[:, np.newaxis, np.newaxis]
+            * self.scan_range[np.newaxis, np.newaxis, :]
+            + self.tx_station.ecef[:, np.newaxis, np.newaxis]
         ).reshape((3, -1))
 
-        for rx_station in self.spec["rx_stations"]:
+        for rx_station in self.rx_stations:
             rx_pointings_of_a_cycle_without_translation_ecef: EcefCoordinates = (
                 rx_pointing_of_a_cycle_ecef - rx_station.ecef[:, np.newaxis]
             )
@@ -236,7 +236,7 @@ class FenceScanController(ControllerBase):
                 rx_pointings_of_a_cycle_enu,
                 (rx_schedule_size + pointings_per_cycle - 1) // pointings_per_cycle,
             )[:, :rx_schedule_size]
-            rx_pointings_simult_num = np.arange(rx_schedule_size) % len(self.spec["scan_range"])
+            rx_pointings_simult_num = np.arange(rx_schedule_size) % len(self.scan_range)
 
             # mask rx values by min_elevation requirement, and has a corresponding tx value
             rx_mask_by_min_elevation = pointing_funcs.create_mask_by_min_elevation(
@@ -250,9 +250,9 @@ class FenceScanController(ControllerBase):
 
             rx_sch = schedule.from_ndarrays(
                 start_time=rx_slice_start_time_masked,
-                end_time=rx_slice_start_time_masked + self.spec["exp_detail"]["slice_duration"],
+                end_time=rx_slice_start_time_masked + self.exp_detail["slice_duration"],
                 exp_num=np.full(
-                    len(rx_slice_start_time_masked), self.spec["exp_detail"]["id"], dtype=np.int16
+                    len(rx_slice_start_time_masked), self.exp_detail["id"], dtype=np.int16
                 ),
                 stn_num=np.full(len(rx_slice_start_time_masked), rx_station.uid, dtype=np.int16),
                 simult_num=rx_pointings_simult_num_masked,
