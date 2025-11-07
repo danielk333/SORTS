@@ -1,7 +1,6 @@
 from . import (
     pointing_funcs,
     controller_base,
-    random_uniform_scans_controller,
     fence_scan_controller,
     tracker_controller,
     sparse_tracker_controller,
