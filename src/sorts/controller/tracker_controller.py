@@ -44,6 +44,9 @@ class TrackerController(ControllerBase):
     - This class serve as a frontend to the `State` type in this module
     """
 
+    ControllerState = ControllerState
+    """shortcut to module attribute"""
+
     def __init__(
         self,
         tx_station: Station,
