@@ -222,7 +222,7 @@ class StxMrxSimulation:
                 stn_id_pairs_set.update(pairs)
 
             exp_detail = ctrl.get_experiment_detail()
-            exp_detail_map[exp_detail["id"]] = exp_detail
+            exp_detail_map[exp_detail.id] = exp_detail
 
         return cls(
             spec={

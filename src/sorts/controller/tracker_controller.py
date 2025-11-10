@@ -124,7 +124,7 @@ class TrackerController(ControllerBase):
         return self.exp_detail
 
     def get_experiment_id_station_id_pairs_map(self) -> schedule.ExperimentIdStationIdPairsMap:
-        return {self.exp_detail["id"]: self.station_id_pairs}
+        return {self.exp_detail.id: self.station_id_pairs}
 
     def get_station_map(self) -> dict[radar.StationId, radar.Station]:
         stn_map: dict[radar.StationId, radar.Station] = {}
@@ -156,7 +156,7 @@ class TrackerController(ControllerBase):
         time: npt.NDArray[Datetime64_us] = np.arange(
             to_datetime64_us(start_time),
             to_datetime64_us(end_time) - to_timedelta64_us(slice_duration) + 1,
-            exp_detail["slice_duration"],
+            exp_detail.slice_duration,
         )
         dt: npt.NDArray[Timedelta64_us] = time - to_datetime64_us(self.epoch)
         dsec = t.cast(npt.NDArray[Float64_as_sec], dt.astype(np.float64) / 1e6)
@@ -176,7 +176,7 @@ class TrackerController(ControllerBase):
         """
 
         if start_time is not None and end_time is not None:
-            self.compute_ecef_states(start_time, end_time, self.exp_detail["slice_duration"])
+            self.compute_ecef_states(start_time, end_time, self.exp_detail.slice_duration)
 
         loc_zenith = np.array([0, 0, 1], dtype=np.float64)
 
@@ -211,8 +211,8 @@ class TrackerController(ControllerBase):
 
         tx_sch = schedule.from_ndarrays(
             start_time=tx_sch_time,
-            end_time=tx_sch_time + self.exp_detail["slice_duration"],
-            exp_num=np.full(tx_sch_len, self.exp_detail["id"], dtype=np.int16),
+            end_time=tx_sch_time + self.exp_detail.slice_duration,
+            exp_num=np.full(tx_sch_len, self.exp_detail.id, dtype=np.int16),
             stn_num=np.full(tx_sch_len, self.tx_station.uid, dtype=np.int16),
             simult_num=np.full(tx_sch_len, 0, dtype=np.int16),
             pointing=tx_pointings,
@@ -228,8 +228,8 @@ class TrackerController(ControllerBase):
             rx_schs.append(
                 schedule.from_ndarrays(
                     start_time=rx_sch_time,
-                    end_time=rx_sch_time + self.exp_detail["slice_duration"],
-                    exp_num=np.full(rx_sch_len, self.exp_detail["id"], dtype=np.int16),
+                    end_time=rx_sch_time + self.exp_detail.slice_duration,
+                    exp_num=np.full(rx_sch_len, self.exp_detail.id, dtype=np.int16),
                     stn_num=np.full(rx_sch_len, rx_stn.uid, dtype=np.int16),
                     simult_num=np.full(rx_sch_len, 0, dtype=np.int16),
                     pointing=rx_pointings,

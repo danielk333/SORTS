@@ -12,7 +12,7 @@ import numpy as np
 from astropy.time import Time
 from astropy.constants import R_earth  # type: ignore
 import pyant, pyorb
-from sorts import schedule
+from sorts import schedule, ExperimentDetail
 from sorts.types import Float64_as_sec, Float64_as_deg, Float_as_sec, Float_as_deg
 from sorts.utils import to_datetime64_us
 from sorts.interpolation import Legendre8
@@ -115,17 +115,17 @@ def south_to_north_circular_orbit_test():
         epoch=start_time,
         tx_station=test_stn,
         rx_stations=[test_stn],
-        exp_detail={
-            "id": 0,
-            "coh_int_bandwidth": 1.0,
-            "ipp": 1.0,
-            "pulse_length": 1.0,
-            "power": 5000000.0,
-            "bandwidth": 52.08333333333333,
-            "duty_cycle": 1.0,
-            "noise_temp": 150.0,
-            "slice_duration": control_slice_duration,
-        },
+        exp_detail=ExperimentDetail(
+            id=0,
+            coh_int_bandwidth=1.0,
+            ipp=1.0,
+            pulse_length=1.0,
+            power=5000000.0,
+            bandwidth=52.08333333333333,
+            duty_cycle=1.0,
+            noise_temp=150.0,
+            slice_duration=control_slice_duration,
+        ),
     )
 
     tracker_sch = tracker_ctrl.generate(start_time, end_time)

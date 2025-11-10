@@ -8,7 +8,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import sorts
-from sorts import types, interpolation, population, propagator, radar
+from sorts import types, interpolation, population, propagator, radar, ExperimentDetail
 from sorts.space_object import SpaceObject
 from sorts.schedule.priority_scheduling import priority_scheduling
 from sorts.controller import SparseTrackerController
@@ -101,17 +101,17 @@ class MpiExample(sorts.MpiQueuedExecution):
                 SparseTrackerController.FromSpaceObjectParam(
                     tx_station=tx_station,
                     rx_stations=[rx_station_0, rx_station_1],
-                    exp_detail={
-                        "id": exp_id,
-                        "coh_int_bandwidth": 1.0,
-                        "ipp": 1.0,
-                        "pulse_length": 1.0,
-                        "power": 5000000.0,
-                        "bandwidth": 52.08333333333333,
-                        "duty_cycle": 1.0,
-                        "noise_temp": 150.0,
-                        "slice_duration": control_slice_duration,
-                    },
+                    exp_detail=ExperimentDetail(
+                        id=exp_id,
+                        coh_int_bandwidth=1.0,
+                        ipp=1.0,
+                        pulse_length=1.0,
+                        power=5000000.0,
+                        bandwidth=52.08333333333333,
+                        duty_cycle=1.0,
+                        noise_temp=150.0,
+                        slice_duration=control_slice_duration,
+                    ),
                     space_object=spobj,
                     epoch=start_time,
                     points_per_passage=5,

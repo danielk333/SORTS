@@ -8,7 +8,16 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import sorts
-from sorts import types, interpolation, population, propagator, space_object, radar, controller
+from sorts import (
+    types,
+    interpolation,
+    population,
+    propagator,
+    space_object,
+    radar,
+    controller,
+    ExperimentDetail,
+)
 from sorts.schedule.priority_scheduling import priority_scheduling
 from sorts.simulation.funcs import ensure_directory_exist, safe_pickle
 from sorts.simulation.stx_mrx_simulation import stx_mrx_simulation, StxMrxSimulation, SimulationUnit
@@ -92,33 +101,33 @@ class MpiExample(sorts.MpiQueuedExecution):
             epoch=start_time,
             tx_station=tx_station,
             rx_stations=[rx_station_0, rx_station_1],
-            exp_detail={
-                "id": 0,
-                "coh_int_bandwidth": 1.0,
-                "ipp": 1.0,
-                "pulse_length": 1.0,
-                "power": 5000000.0,
-                "bandwidth": 52.08333333333333,
-                "duty_cycle": 1.0,
-                "noise_temp": 150.0,
-                "slice_duration": control_slice_duration,
-            },
+            exp_detail=ExperimentDetail(
+                id=0,
+                coh_int_bandwidth=1.0,
+                ipp=1.0,
+                pulse_length=1.0,
+                power=5000000.0,
+                bandwidth=52.08333333333333,
+                duty_cycle=1.0,
+                noise_temp=150.0,
+                slice_duration=control_slice_duration,
+            ),
         )
 
         fence_scan_ctrl = controller.FenceScanController.from_scan_spec(
             tx_station=tx_station,
             rx_stations=[rx_station_0, rx_station_1],
-            exp_detail={
-                "id": 1,
-                "coh_int_bandwidth": 1.0,
-                "ipp": 1.0,
-                "pulse_length": 1.0,
-                "power": 5000000.0,
-                "bandwidth": 52.08333333333333,
-                "duty_cycle": 1.0,
-                "noise_temp": 150.0,
-                "slice_duration": control_slice_duration,
-            },
+            exp_detail=ExperimentDetail(
+                id=1,
+                coh_int_bandwidth=1.0,
+                ipp=1.0,
+                pulse_length=1.0,
+                power=5000000.0,
+                bandwidth=52.08333333333333,
+                duty_cycle=1.0,
+                noise_temp=150.0,
+                slice_duration=control_slice_duration,
+            ),
             azimuth=90,  # sweep from east to west
             min_elevation=30,
             pointings_per_cycle=40,

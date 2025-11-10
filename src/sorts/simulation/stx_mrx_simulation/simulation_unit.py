@@ -347,15 +347,15 @@ class SimulationUnit:
         # TODO: do we need `ipps`?
         # TODO: do we need `duty_cycles`?
         powers = np.array(
-            [self.exp_detail_map[n]["power"] for n in self._state[_K.exp_num].to_numpy()],
+            [self.exp_detail_map[n].power for n in self._state[_K.exp_num].to_numpy()],
             dtype=np.float64,
         )
         bandwidths = np.array(
-            [self.exp_detail_map[n]["bandwidth"] for n in self._state[_K.exp_num].to_numpy()],
+            [self.exp_detail_map[n].bandwidth for n in self._state[_K.exp_num].to_numpy()],
             dtype=np.float64,
         )
         rx_noise_temps = np.array(
-            [self.exp_detail_map[n]["noise_temp"] for n in self._state[_K.exp_num].to_numpy()],
+            [self.exp_detail_map[n].noise_temp for n in self._state[_K.exp_num].to_numpy()],
             dtype=np.float64,
         )
 

@@ -4,6 +4,7 @@ Defines the NewType `Schedule` and functions for its functionalities
 
 from __future__ import annotations
 import logging, typing as t
+from dataclasses import dataclass
 from functools import reduce
 import numpy as np
 import numpy.typing as npt
@@ -64,9 +65,8 @@ ExperimentId = int
 """A unique int16 that identifies an experiment"""
 
 
-class ExperimentDetail(t.TypedDict):
-    """A TypedDict of params"""
-
+@dataclass(kw_only=True)
+class ExperimentDetail:
     id: ExperimentId
 
     coh_int_bandwidth: float

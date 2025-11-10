@@ -31,17 +31,17 @@ rx_station.uid = 1
 fence_scan_controller = FenceScanController.from_scan_spec(
     tx_station=tx_station,
     rx_stations=[rx_station],
-    exp_detail={
-        "id": 0,
-        "coh_int_bandwidth": 1.0,
-        "ipp": 1.0,
-        "pulse_length": 1.0,
-        "power": 5000000.0,
-        "bandwidth": 52.08333333333333,
-        "duty_cycle": 1.0,
-        "noise_temp": 150.0,
-        "slice_duration": np.timedelta64(10_000, "us"),  # 10ms
-    },
+    exp_detail=ExperimentDetail(
+        id=0,
+        coh_int_bandwidth=1.0,
+        ipp=1.0,
+        pulse_length=1.0,
+        power=5000000.0,
+        bandwidth=52.08333333333333,
+        duty_cycle=1.0,
+        noise_temp=150.0,
+        slice_duration=np.timedelta64(10_000, "us"),  # 10ms
+    ),
     azimuth=90,  # sweep from east to west
     min_elevation=30,
     pointings_per_cycle=40,

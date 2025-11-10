@@ -112,7 +112,7 @@ class FenceScanController(ControllerBase):
         return self.exp_detail
 
     def get_experiment_id_station_id_pairs_map(self) -> schedule.ExperimentIdStationIdPairsMap:
-        return {self.exp_detail["id"]: self.station_id_pairs}
+        return {self.exp_detail.id: self.station_id_pairs}
 
     def get_station_map(self) -> dict[radar.StationId, radar.Station]:
         stn_map: dict[radar.StationId, radar.Station] = {}
@@ -129,7 +129,7 @@ class FenceScanController(ControllerBase):
 
         start_time_np = to_datetime64_us(start_time)
         end_time_np = to_datetime64_us(end_time)
-        tx_schedule_size = math.floor((end_time_np - start_time_np) / exp_detail["slice_duration"])
+        tx_schedule_size = math.floor((end_time_np - start_time_np) / exp_detail.slice_duration)
 
         tx_pointings_of_a_cycle = sph_to_cart(
             pointing_funcs.fence_pattern(
@@ -168,8 +168,8 @@ class FenceScanController(ControllerBase):
         #   - and add `+1` so that slice with time range `('end_time - 'slice_duration', 'end_time')` is included
         tx_slice_start_time: npt.NDArray[Datetime64_us] = np.arange(
             self.state.start_time,
-            self.state.end_time - self.exp_detail["slice_duration"] + 1,
-            self.exp_detail["slice_duration"],
+            self.state.end_time - self.exp_detail.slice_duration + 1,
+            self.exp_detail.slice_duration,
         )
 
         # TODO: `tx_schedule_size` is a bit of a mismisnomer, as out-of-range entries might later be removed
@@ -189,8 +189,8 @@ class FenceScanController(ControllerBase):
 
         tx_sch = schedule.from_ndarrays(
             start_time=tx_slice_start_time_masked,
-            end_time=tx_slice_start_time_masked + self.exp_detail["slice_duration"],
-            exp_num=np.full(len(tx_slice_start_time_masked), self.exp_detail["id"], dtype=np.int16),
+            end_time=tx_slice_start_time_masked + self.exp_detail.slice_duration,
+            exp_num=np.full(len(tx_slice_start_time_masked), self.exp_detail.id, dtype=np.int16),
             stn_num=np.full(len(tx_slice_start_time_masked), self.tx_station.uid, dtype=np.int16),
             simult_num=np.full(len(tx_slice_start_time_masked), 0, dtype=np.int16),
             pointing=tx_pointing_masked,
@@ -245,9 +245,9 @@ class FenceScanController(ControllerBase):
 
             rx_sch = schedule.from_ndarrays(
                 start_time=rx_slice_start_time_masked,
-                end_time=rx_slice_start_time_masked + self.exp_detail["slice_duration"],
+                end_time=rx_slice_start_time_masked + self.exp_detail.slice_duration,
                 exp_num=np.full(
-                    len(rx_slice_start_time_masked), self.exp_detail["id"], dtype=np.int16
+                    len(rx_slice_start_time_masked), self.exp_detail.id, dtype=np.int16
                 ),
                 stn_num=np.full(len(rx_slice_start_time_masked), rx_station.uid, dtype=np.int16),
                 simult_num=rx_pointings_simult_num_masked,
