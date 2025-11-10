@@ -119,13 +119,13 @@ class TrackerController(ControllerBase):
     - This class serve as a frontend to the `State` type in this module
     """
 
-    def __init__(self, spec: Spec, state: ControllerState | None):
+    def __init__(self, spec: Spec, state: ControllerState):
         """
         NOTE: This is intended as an internal constructor, please use the constructor methods to create instances.
         """
 
         self.spec: Spec = spec
-        self.state: ControllerState | None = state
+        self.state: ControllerState = state
 
     @classmethod
     def from_ecef_states(
@@ -174,7 +174,7 @@ class TrackerController(ControllerBase):
                 "epoch": epoch,
                 "station_id_pairs": stn_pairs,
             },
-            state=None,
+            state=ControllerState.empty(),
         )
 
         return ctrl
