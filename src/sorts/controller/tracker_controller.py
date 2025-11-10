@@ -127,9 +127,6 @@ class TrackerController(ControllerBase):
         self.spec: Spec = spec
         self.state: ControllerState | None = state
 
-        self._cached_output: schedule.Schedule | None = None
-        """A cache of the latest `Output`, handy for plotting"""
-
     @classmethod
     def from_ecef_states(
         cls,
@@ -252,41 +249,5 @@ class TrackerController(ControllerBase):
             state = self.state
 
         output = generate_from_state(spec=self.spec, state=state)
-        self._cached_output = output
 
         return output
-
-    # TODO: can be removed?
-    def plot(self, start_time: Datetime_Like | None = None, end_time: Datetime_Like | None = None):
-        global plot_state_and_output
-
-        if self.state is None:
-            if start_time is not None and end_time is not None:
-                self.compute_ecef_states(
-                    start_time, end_time, self.spec["exp_detail"]["slice_duration"]
-                )
-                state = t.cast(ControllerState, self.state)
-            else:
-                raise RuntimeError(
-                    "Cannot plot TrackerController without valid state property."
-                    + " Please either provide the `start_time` and `end_time` param"
-                    + " or ensure it is set correctly using methods like `compute_ecef_states` or proper constructors."
-                )
-        else:
-            state = self.state
-
-        if self._cached_output is None:
-            if start_time is not None and end_time is not None:
-                cached_output = self.generate(start_time, end_time)
-                self._cached_output = cached_output
-            else:
-                raise RuntimeError(
-                    "Cannot plot TrackerController without valid output cache."
-                    + " Please either provide the `start_time` and `end_time` param"
-                    + " or ensure it is set correctly using methods like `compute_ecef_states` or proper constructors."
-                )
-        else:
-            cached_output = self._cached_output
-
-        p = plot_state_and_output(state, [cached_output])
-        return p
