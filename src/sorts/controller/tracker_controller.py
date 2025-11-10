@@ -47,70 +47,6 @@ class ControllerState:
         )
 
 
-def generate_from_state(spec: Spec, state: ControllerState) -> schedule.Schedule:
-    loc_zenith = np.array([0, 0, 1], dtype=np.float64)
-
-    # generate pointings
-    tx_pointings: EnuCoordinates = spec["tx_station"].enu(state.spobj_states[:3])
-
-    tx_pointings_zenith_ang = pyant.coordinates.vector_angle(loc_zenith, tx_pointings, degrees=True)
-    tx_el_in_range_mask = tx_pointings_zenith_ang <= 90.0 - spec["tx_station"].min_elevation
-    tx_pointings = tx_pointings[:, tx_el_in_range_mask]
-
-    rxs_pointings: list[EnuCoordinates] = []
-    rx_el_in_range_with_tx_masks: list[npt.NDArray[np.bool]] = []
-    pure_rx_stations = [stn for stn in spec["rx_stations"] if stn.uid != spec["tx_station"].uid]
-    for rx_station in pure_rx_stations:
-        rx_pointings: EnuCoordinates = rx_station.enu(state.spobj_states[:3])
-
-        rx_pointings_zenith_ang = pyant.coordinates.vector_angle(
-            loc_zenith, rx_pointings, degrees=True
-        )
-        rx_el_in_range_mask = rx_pointings_zenith_ang <= 90.0 - rx_station.min_elevation
-
-        rx_el_in_range_with_tx_mask = np.logical_and(tx_el_in_range_mask, rx_el_in_range_mask)
-        rx_el_in_range_with_tx_masks.append(rx_el_in_range_with_tx_mask)
-
-        rx_pointings = rx_pointings[:, rx_el_in_range_with_tx_mask]
-        rxs_pointings.append(rx_pointings)
-
-    tx_sch_time = state.spobj_time[tx_el_in_range_mask]
-    tx_sch_len = len(tx_sch_time)
-
-    tx_sch = schedule.from_ndarrays(
-        start_time=tx_sch_time,
-        end_time=tx_sch_time + spec["exp_detail"]["slice_duration"],
-        exp_num=np.full(tx_sch_len, spec["exp_detail"]["id"], dtype=np.int16),
-        stn_num=np.full(tx_sch_len, spec["tx_station"].uid, dtype=np.int16),
-        simult_num=np.full(tx_sch_len, 0, dtype=np.int16),
-        pointing=tx_pointings,
-    )
-
-    rx_schs: list[schedule.Schedule] = []
-    for rx_stn, rx_mask, rx_pointings in zip(
-        pure_rx_stations, rx_el_in_range_with_tx_masks, rxs_pointings
-    ):
-        rx_sch_time = state.spobj_time[rx_mask]
-        rx_sch_len = len(rx_sch_time)
-
-        rx_schs.append(
-            schedule.from_ndarrays(
-                start_time=rx_sch_time,
-                end_time=rx_sch_time + spec["exp_detail"]["slice_duration"],
-                exp_num=np.full(rx_sch_len, spec["exp_detail"]["id"], dtype=np.int16),
-                stn_num=np.full(rx_sch_len, rx_stn.uid, dtype=np.int16),
-                simult_num=np.full(rx_sch_len, 0, dtype=np.int16),
-                pointing=rx_pointings,
-            )
-        )
-
-    resultant_sch = xr.concat([tx_sch, *rx_schs], dim=schedule._K.multi_index)
-    resultant_sch = resultant_sch.sortby(schedule._K.start_time)
-    output = resultant_sch
-
-    return output
-
-
 class TrackerController(ControllerBase):
     """
     Generate pointing schedule that tracks a space object.
@@ -238,16 +174,71 @@ class TrackerController(ControllerBase):
             self.compute_ecef_states(
                 start_time, end_time, self.spec["exp_detail"]["slice_duration"]
             )
-            state = t.cast(ControllerState, self.state)
-        elif self.state is None:
-            raise RuntimeError(
-                "Cannot generate without valid state property."
-                + " Please either provide the `start_time` and `end_time` param"
-                + " or ensure it is set correctly using methods like `compute_ecef_states` or proper constructors."
-            )
-        else:
-            state = self.state
 
-        output = generate_from_state(spec=self.spec, state=state)
+        loc_zenith = np.array([0, 0, 1], dtype=np.float64)
+
+        # generate pointings
+        tx_pointings: EnuCoordinates = self.spec["tx_station"].enu(self.state.spobj_states[:3])
+
+        tx_pointings_zenith_ang = pyant.coordinates.vector_angle(
+            loc_zenith, tx_pointings, degrees=True
+        )
+        tx_el_in_range_mask = (
+            tx_pointings_zenith_ang <= 90.0 - self.spec["tx_station"].min_elevation
+        )
+        tx_pointings = tx_pointings[:, tx_el_in_range_mask]
+
+        rxs_pointings: list[EnuCoordinates] = []
+        rx_el_in_range_with_tx_masks: list[npt.NDArray[np.bool]] = []
+        pure_rx_stations = [
+            stn for stn in self.spec["rx_stations"] if stn.uid != self.spec["tx_station"].uid
+        ]
+        for rx_station in pure_rx_stations:
+            rx_pointings: EnuCoordinates = rx_station.enu(self.state.spobj_states[:3])
+
+            rx_pointings_zenith_ang = pyant.coordinates.vector_angle(
+                loc_zenith, rx_pointings, degrees=True
+            )
+            rx_el_in_range_mask = rx_pointings_zenith_ang <= 90.0 - rx_station.min_elevation
+
+            rx_el_in_range_with_tx_mask = np.logical_and(tx_el_in_range_mask, rx_el_in_range_mask)
+            rx_el_in_range_with_tx_masks.append(rx_el_in_range_with_tx_mask)
+
+            rx_pointings = rx_pointings[:, rx_el_in_range_with_tx_mask]
+            rxs_pointings.append(rx_pointings)
+
+        tx_sch_time = self.state.spobj_time[tx_el_in_range_mask]
+        tx_sch_len = len(tx_sch_time)
+
+        tx_sch = schedule.from_ndarrays(
+            start_time=tx_sch_time,
+            end_time=tx_sch_time + self.spec["exp_detail"]["slice_duration"],
+            exp_num=np.full(tx_sch_len, self.spec["exp_detail"]["id"], dtype=np.int16),
+            stn_num=np.full(tx_sch_len, self.spec["tx_station"].uid, dtype=np.int16),
+            simult_num=np.full(tx_sch_len, 0, dtype=np.int16),
+            pointing=tx_pointings,
+        )
+
+        rx_schs: list[schedule.Schedule] = []
+        for rx_stn, rx_mask, rx_pointings in zip(
+            pure_rx_stations, rx_el_in_range_with_tx_masks, rxs_pointings
+        ):
+            rx_sch_time = self.state.spobj_time[rx_mask]
+            rx_sch_len = len(rx_sch_time)
+
+            rx_schs.append(
+                schedule.from_ndarrays(
+                    start_time=rx_sch_time,
+                    end_time=rx_sch_time + self.spec["exp_detail"]["slice_duration"],
+                    exp_num=np.full(rx_sch_len, self.spec["exp_detail"]["id"], dtype=np.int16),
+                    stn_num=np.full(rx_sch_len, rx_stn.uid, dtype=np.int16),
+                    simult_num=np.full(rx_sch_len, 0, dtype=np.int16),
+                    pointing=rx_pointings,
+                )
+            )
+
+        resultant_sch = xr.concat([tx_sch, *rx_schs], dim=schedule._K.multi_index)
+        resultant_sch = resultant_sch.sortby(schedule._K.start_time)
+        output = resultant_sch
 
         return output
