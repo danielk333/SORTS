@@ -37,7 +37,7 @@ class ControllerState:
             start_time=min_datetime64_us,
             end_time=min_datetime64_us,
             tx_schedule_size=0,
-            tx_pointings_of_a_cycle=np.empty((6,), dtype=np.float64),
+            tx_pointings_of_a_cycle=np.empty((3, 0), dtype=np.float64),
         )
 
 
