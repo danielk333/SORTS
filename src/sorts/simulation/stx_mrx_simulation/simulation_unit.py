@@ -156,23 +156,13 @@ def calc_gain(
             gain_arr_list.append(np.empty(0, dtype=np.float64))
 
         else:
-            orig_beam_params = beam.parameters
-            mut_beam_params = beam.parameters.copy()
-            beam.parameters = mut_beam_params
-
-            for key, val in mut_beam_params.items():
-                if key == "pointing":
-                    beam.parameters["pointing"] = state[_K.tx_pointing].to_numpy()
-                if key in beam.parameters_shape:
-                    shape: tuple[int, ...] = beam.parameters_shape[key]
-                    beam.parameters[key] = np.broadcast_to(
-                        val.reshape((*shape, 1)), (*shape, vector_len)
-                    )
-                else:
-                    beam.parameters[key] = np.full(vector_len, val, dtype=np.float64)
-
-            gain_arr_list.append(beam.gain(spobj_stn_enu[:3]))
-            beam.parameters = orig_beam_params
+            beam_params: TheThing
+            beam: TheBeam
+            new_params = beam_params.replace_and_broadcast(
+                parameters=beam_params,
+                new_parameters=dict(pointing=state[_K.tx_pointing].to_numpy()),
+            )
+            gain_arr_list.append(beam.gain(spobj_stn_enu[:3], new_params))
 
     state[_K.gain_tx] = (_K.multi_index, gain_arr_list[0])
     state[_K.gain_rx] = (_K.multi_index, gain_arr_list[1])
