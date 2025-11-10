@@ -23,17 +23,6 @@ from .controller_base import ControllerBase
 logger = logging.getLogger(__name__)
 
 
-class Spec(t.TypedDict):
-    """A TypedDict of params"""
-
-    tx_station: Station
-    rx_stations: t.Sequence[Station]
-    exp_detail: schedule.ExperimentDetail
-    spobj: t.NotRequired[SpaceObject]
-    epoch: t.NotRequired[Datetime_Like]
-    station_id_pairs: list[tuple[radar.StationId, radar.StationId]]
-
-
 @dataclass(kw_only=True)
 class ControllerState:
     spobj_time: npt.NDArray[Datetime64_us]
@@ -55,12 +44,27 @@ class TrackerController(ControllerBase):
     - This class serve as a frontend to the `State` type in this module
     """
 
-    def __init__(self, spec: Spec, state: ControllerState):
+    def __init__(
+        self,
+        tx_station: Station,
+        rx_stations: t.Sequence[Station],
+        exp_detail: schedule.ExperimentDetail,
+        spobj: SpaceObject | None,
+        epoch: Datetime_Like | None,
+        station_id_pairs: list[tuple[radar.StationId, radar.StationId]],
+        state: ControllerState,
+    ):
         """
         NOTE: This is intended as an internal constructor, please use the constructor methods to create instances.
         """
 
-        self.spec: Spec = spec
+        self.tx_station = tx_station
+        self.rx_stations = rx_stations
+        self.exp_detail = exp_detail
+        self.station_id_pairs = station_id_pairs
+        self.spobj = spobj
+        self.epoch = epoch
+
         self.state: ControllerState = state
 
     @classmethod
@@ -77,12 +81,12 @@ class TrackerController(ControllerBase):
         stn_pairs = [(tx_station.uid, rx_station.uid) for rx_station in rx_stations]
 
         ctrl = cls(
-            spec={
-                "tx_station": tx_station,
-                "rx_stations": rx_stations,
-                "exp_detail": exp_detail,
-                "station_id_pairs": stn_pairs,
-            },
+            tx_station=tx_station,
+            rx_stations=rx_stations,
+            exp_detail=exp_detail,
+            spobj=None,
+            epoch=None,
+            station_id_pairs=stn_pairs,
             state=ControllerState(spobj_time=time, spobj_states=space_object_states),
         )
 
@@ -102,30 +106,28 @@ class TrackerController(ControllerBase):
         stn_pairs = [(tx_station.uid, rx_station.uid) for rx_station in rx_stations]
 
         ctrl = cls(
-            spec={
-                "tx_station": tx_station,
-                "rx_stations": rx_stations,
-                "exp_detail": exp_detail,
-                "spobj": spobj,
-                "epoch": epoch,
-                "station_id_pairs": stn_pairs,
-            },
+            tx_station=tx_station,
+            rx_stations=rx_stations,
+            exp_detail=exp_detail,
+            spobj=spobj,
+            epoch=epoch,
+            station_id_pairs=stn_pairs,
             state=ControllerState.empty(),
         )
 
         return ctrl
 
     def get_experiment_detail(self) -> schedule.ExperimentDetail:
-        return self.spec["exp_detail"]
+        return self.exp_detail
 
     def get_experiment_id_station_id_pairs_map(self) -> schedule.ExperimentIdStationIdPairsMap:
-        return {self.spec["exp_detail"]["id"]: self.spec["station_id_pairs"]}
+        return {self.exp_detail["id"]: self.station_id_pairs}
 
     def get_station_map(self) -> dict[radar.StationId, radar.Station]:
         stn_map: dict[radar.StationId, radar.Station] = {}
 
-        stn_map[self.spec["tx_station"].uid] = self.spec["tx_station"]
-        stn_map.update(list([(stn.uid, stn) for stn in self.spec["rx_stations"]]))
+        stn_map[self.tx_station.uid] = self.tx_station
+        stn_map.update(list([(stn.uid, stn) for stn in self.rx_stations]))
 
         return stn_map
 
@@ -134,16 +136,16 @@ class TrackerController(ControllerBase):
     ):
         """Do the computation then update the `state` property and return `self`."""
 
-        if "spobj" not in self.spec:
+        if self.spobj is None:
             raise RuntimeError(
                 "Cannot compute space object ECEF states without `spobj` in the `spec` prop."
             )
-        if "epoch" not in self.spec:
+        if self.epoch is None:
             raise RuntimeError(
                 "Cannot compute space object ECEF states without `epoch` in the `spec` prop."
             )
 
-        exp_detail: schedule.ExperimentDetail = self.spec["exp_detail"]
+        exp_detail: schedule.ExperimentDetail = self.exp_detail
 
         # NOTE: for `np.arange` 'stop param,
         #   - we subtract 'slice_duration' so that only full slice are included
@@ -153,10 +155,10 @@ class TrackerController(ControllerBase):
             to_datetime64_us(end_time) - to_timedelta64_us(slice_duration) + 1,
             exp_detail["slice_duration"],
         )
-        dt: npt.NDArray[Timedelta64_us] = time - to_datetime64_us(self.spec["epoch"])
+        dt: npt.NDArray[Timedelta64_us] = time - to_datetime64_us(self.epoch)
         dsec = t.cast(npt.NDArray[Float64_as_sec], dt.astype(np.float64) / 1e6)
 
-        ecefs = self.spec["spobj"].get_state(dsec)
+        ecefs = self.spobj.get_state(dsec)
 
         self.state = ControllerState(spobj_time=time, spobj_states=ecefs)
 
@@ -171,28 +173,22 @@ class TrackerController(ControllerBase):
         """
 
         if start_time is not None and end_time is not None:
-            self.compute_ecef_states(
-                start_time, end_time, self.spec["exp_detail"]["slice_duration"]
-            )
+            self.compute_ecef_states(start_time, end_time, self.exp_detail["slice_duration"])
 
         loc_zenith = np.array([0, 0, 1], dtype=np.float64)
 
         # generate pointings
-        tx_pointings: EnuCoordinates = self.spec["tx_station"].enu(self.state.spobj_states[:3])
+        tx_pointings: EnuCoordinates = self.tx_station.enu(self.state.spobj_states[:3])
 
         tx_pointings_zenith_ang = pyant.coordinates.vector_angle(
             loc_zenith, tx_pointings, degrees=True
         )
-        tx_el_in_range_mask = (
-            tx_pointings_zenith_ang <= 90.0 - self.spec["tx_station"].min_elevation
-        )
+        tx_el_in_range_mask = tx_pointings_zenith_ang <= 90.0 - self.tx_station.min_elevation
         tx_pointings = tx_pointings[:, tx_el_in_range_mask]
 
         rxs_pointings: list[EnuCoordinates] = []
         rx_el_in_range_with_tx_masks: list[npt.NDArray[np.bool]] = []
-        pure_rx_stations = [
-            stn for stn in self.spec["rx_stations"] if stn.uid != self.spec["tx_station"].uid
-        ]
+        pure_rx_stations = [stn for stn in self.rx_stations if stn.uid != self.tx_station.uid]
         for rx_station in pure_rx_stations:
             rx_pointings: EnuCoordinates = rx_station.enu(self.state.spobj_states[:3])
 
@@ -212,9 +208,9 @@ class TrackerController(ControllerBase):
 
         tx_sch = schedule.from_ndarrays(
             start_time=tx_sch_time,
-            end_time=tx_sch_time + self.spec["exp_detail"]["slice_duration"],
-            exp_num=np.full(tx_sch_len, self.spec["exp_detail"]["id"], dtype=np.int16),
-            stn_num=np.full(tx_sch_len, self.spec["tx_station"].uid, dtype=np.int16),
+            end_time=tx_sch_time + self.exp_detail["slice_duration"],
+            exp_num=np.full(tx_sch_len, self.exp_detail["id"], dtype=np.int16),
+            stn_num=np.full(tx_sch_len, self.tx_station.uid, dtype=np.int16),
             simult_num=np.full(tx_sch_len, 0, dtype=np.int16),
             pointing=tx_pointings,
         )
@@ -229,8 +225,8 @@ class TrackerController(ControllerBase):
             rx_schs.append(
                 schedule.from_ndarrays(
                     start_time=rx_sch_time,
-                    end_time=rx_sch_time + self.spec["exp_detail"]["slice_duration"],
-                    exp_num=np.full(rx_sch_len, self.spec["exp_detail"]["id"], dtype=np.int16),
+                    end_time=rx_sch_time + self.exp_detail["slice_duration"],
+                    exp_num=np.full(rx_sch_len, self.exp_detail["id"], dtype=np.int16),
                     stn_num=np.full(rx_sch_len, rx_stn.uid, dtype=np.int16),
                     simult_num=np.full(rx_sch_len, 0, dtype=np.int16),
                     pointing=rx_pointings,
