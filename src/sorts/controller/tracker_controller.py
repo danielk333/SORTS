@@ -1,5 +1,6 @@
 from __future__ import annotations
 import logging, typing as t
+from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 import xarray as xr
@@ -33,18 +34,24 @@ class Spec(t.TypedDict):
     station_id_pairs: list[tuple[radar.StationId, radar.StationId]]
 
 
-class State(t.TypedDict):
-    """A TypedDict of params"""
-
+@dataclass(kw_only=True)
+class ControllerState:
     spobj_time: npt.NDArray[Datetime64_us]
     spobj_states: EcefStates
 
+    @classmethod
+    def empty(cls) -> t.Self:
+        return cls(
+            spobj_time=np.empty(0, dtype="datetime64[us]"),
+            spobj_states=np.empty((6, 0), dtype=np.float64),
+        )
 
-def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
+
+def generate_from_state(spec: Spec, state: ControllerState) -> schedule.Schedule:
     loc_zenith = np.array([0, 0, 1], dtype=np.float64)
 
     # generate pointings
-    tx_pointings: EnuCoordinates = spec["tx_station"].enu(state["spobj_states"][:3])
+    tx_pointings: EnuCoordinates = spec["tx_station"].enu(state.spobj_states[:3])
 
     tx_pointings_zenith_ang = pyant.coordinates.vector_angle(loc_zenith, tx_pointings, degrees=True)
     tx_el_in_range_mask = tx_pointings_zenith_ang <= 90.0 - spec["tx_station"].min_elevation
@@ -54,7 +61,7 @@ def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
     rx_el_in_range_with_tx_masks: list[npt.NDArray[np.bool]] = []
     pure_rx_stations = [stn for stn in spec["rx_stations"] if stn.uid != spec["tx_station"].uid]
     for rx_station in pure_rx_stations:
-        rx_pointings: EnuCoordinates = rx_station.enu(state["spobj_states"][:3])
+        rx_pointings: EnuCoordinates = rx_station.enu(state.spobj_states[:3])
 
         rx_pointings_zenith_ang = pyant.coordinates.vector_angle(
             loc_zenith, rx_pointings, degrees=True
@@ -67,7 +74,7 @@ def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
         rx_pointings = rx_pointings[:, rx_el_in_range_with_tx_mask]
         rxs_pointings.append(rx_pointings)
 
-    tx_sch_time = state["spobj_time"][tx_el_in_range_mask]
+    tx_sch_time = state.spobj_time[tx_el_in_range_mask]
     tx_sch_len = len(tx_sch_time)
 
     tx_sch = schedule.from_ndarrays(
@@ -83,7 +90,7 @@ def generate_from_state(spec: Spec, state: State) -> schedule.Schedule:
     for rx_stn, rx_mask, rx_pointings in zip(
         pure_rx_stations, rx_el_in_range_with_tx_masks, rxs_pointings
     ):
-        rx_sch_time = state["spobj_time"][rx_mask]
+        rx_sch_time = state.spobj_time[rx_mask]
         rx_sch_len = len(rx_sch_time)
 
         rx_schs.append(
@@ -112,13 +119,13 @@ class TrackerController(ControllerBase):
     - This class serve as a frontend to the `State` type in this module
     """
 
-    def __init__(self, spec: Spec, state: State | None):
+    def __init__(self, spec: Spec, state: ControllerState | None):
         """
         NOTE: This is intended as an internal constructor, please use the constructor methods to create instances.
         """
 
         self.spec: Spec = spec
-        self.state: State | None = state
+        self.state: ControllerState | None = state
 
         self._cached_output: schedule.Schedule | None = None
         """A cache of the latest `Output`, handy for plotting"""
@@ -143,10 +150,7 @@ class TrackerController(ControllerBase):
                 "exp_detail": exp_detail,
                 "station_id_pairs": stn_pairs,
             },
-            state={
-                "spobj_time": time,
-                "spobj_states": space_object_states,
-            },
+            state=ControllerState(spobj_time=time, spobj_states=space_object_states),
         )
 
         return ctrl
@@ -221,10 +225,7 @@ class TrackerController(ControllerBase):
 
         ecefs = self.spec["spobj"].get_state(dsec)
 
-        self.state = {
-            "spobj_time": time,
-            "spobj_states": ecefs,
-        }
+        self.state = ControllerState(spobj_time=time, spobj_states=ecefs)
 
         return self
 
@@ -240,7 +241,7 @@ class TrackerController(ControllerBase):
             self.compute_ecef_states(
                 start_time, end_time, self.spec["exp_detail"]["slice_duration"]
             )
-            state = t.cast(State, self.state)
+            state = t.cast(ControllerState, self.state)
         elif self.state is None:
             raise RuntimeError(
                 "Cannot generate without valid state property."
@@ -264,7 +265,7 @@ class TrackerController(ControllerBase):
                 self.compute_ecef_states(
                     start_time, end_time, self.spec["exp_detail"]["slice_duration"]
                 )
-                state = t.cast(State, self.state)
+                state = t.cast(ControllerState, self.state)
             else:
                 raise RuntimeError(
                     "Cannot plot TrackerController without valid state property."
