@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 
 import numpy as np
-from .. import frames
-import pyant.coordinates
+import spacecoords
+from sorts import frames
 
 
 def set_station_ecef(station):
     station["ecef"] = frames.geodetic_to_ITRS(
         station["lat"], station["lon"], station["alt"], degrees=True
     )
-    ecef_lla = pyant.coordinates.cart_to_sph(station["ecef"], degrees=True)
+    ecef_lla = spacecoords.spherical.cart_to_sph(station["ecef"], degrees=True)
     station["ecef_lat"] = ecef_lla[1]
     station["ecef_lon"] = 90 - ecef_lla[0]
     station["ecef_alt"] = ecef_lla[2]
@@ -27,7 +27,7 @@ def field_of_view(station, states):
 
     enu_states = enu(station, states[:3, :])
 
-    zenith_ang = pyant.coordinates.vector_angle(zenith, enu_states, degrees=True)
+    zenith_ang = spacecoords.linalg.vector_angle(zenith, enu_states, degrees=True)
     check = zenith_ang < 90.0 - station.get("min_elevation", 0)
 
     return check

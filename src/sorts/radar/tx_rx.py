@@ -5,12 +5,10 @@ also defines physical antennas for RX and TX.
 """
 
 import numpy as np
-from sorts.types import Float_as_deg
-
+import spacecoords
 import pyant
-
-# Local import
-from .. import frames
+from sorts.types import Float_as_deg
+from sorts import frames
 
 StationId = int
 """A unique int16 that identifies a radar station"""
@@ -59,7 +57,7 @@ class Station(object):
         self.alt = alt
         self.min_elevation = min_elevation
         self.ecef = frames.geodetic_to_ITRS(lat, lon, alt, degrees=True)
-        ecef_lla = pyant.coordinates.cart_to_sph(self.ecef, degrees=True)
+        ecef_lla = spacecoords.spherical.cart_to_sph(self.ecef, degrees=True)
         self.ecef_lat = ecef_lla[1]
         self.ecef_lon = 90 - ecef_lla[0]
         self.ecef_alt = ecef_lla[2]
@@ -83,7 +81,7 @@ class Station(object):
 
         enu = self.enu(states[:3, :])
 
-        zenith_ang = pyant.coordinates.vector_angle(zenith, enu, degrees=True)
+        zenith_ang = spacecoords.linalg.vector_angle(zenith, enu, degrees=True)
         check = zenith_ang < 90.0 - self.min_elevation
 
         return check
@@ -94,7 +92,7 @@ class Station(object):
         self.lon = lon
         self.alt = alt
         self.ecef = frames.geodetic_to_ITRS(lat, lon, alt, degrees=True)
-        ecef_lla = pyant.coordinates.cart_to_sph(self.ecef, degrees=True)
+        ecef_lla = spacecoords.spherical.cart_to_sph(self.ecef, degrees=True)
         self.ecef_lat = ecef_lla[1]
         self.ecef_lon = 90 - ecef_lla[0]
         self.ecef_alt = ecef_lla[2]

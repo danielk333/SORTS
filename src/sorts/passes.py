@@ -10,8 +10,8 @@ import datetime
 
 import numpy as np
 import numpy.typing as npt
+import spacecoords
 import pyorb
-import pyant
 from sorts.types import Float64_as_sec
 
 # Local import
@@ -133,7 +133,7 @@ class Pass:
     @staticmethod
     def calculate_zenith_angle(enu, radians=False):
         """Zenith angle of the ENU coordinates."""
-        return pyant.coordinates.vector_angle(
+        return spacecoords.linalg.vector_angle(
             np.array([0, 0, 1], dtype=np.float64), enu[:3, :], degrees=not radians
         )
 
