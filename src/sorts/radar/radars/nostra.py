@@ -67,6 +67,7 @@ def gen_nostra(
         alt=0,
         beam=data["beam"].copy(),
         beam_parameters=data["beam_parameters"].copy(),
+        frequency=frequency,
         **rx_kw,
     )
     se_tx = TX(
@@ -75,6 +76,7 @@ def gen_nostra(
         alt=0,
         beam=data["beam"].copy(),
         beam_parameters=data["beam_parameters"].copy(),
+        frequency=frequency,
         **tx_kw,
     )
 
@@ -84,6 +86,7 @@ def gen_nostra(
         alt=0,
         beam=data["beam"].copy(),
         beam_parameters=data["beam_parameters"].copy(),
+        frequency=frequency,
         **rx_kw,
     )
     no_tx = TX(
@@ -92,6 +95,7 @@ def gen_nostra(
         alt=0,
         beam=data["beam"].copy(),
         beam_parameters=data["beam_parameters"].copy(),
+        frequency=frequency,
         **tx_kw,
     )
 
@@ -101,6 +105,7 @@ def gen_nostra(
         alt=0,
         beam=data["beam"].copy(),
         beam_parameters=data["beam_parameters"].copy(),
+        frequency=frequency,
         **rx_kw,
     )
     fi_tx = TX(
@@ -109,6 +114,7 @@ def gen_nostra(
         alt=0,
         beam=data["beam"].copy(),
         beam_parameters=data["beam_parameters"].copy(),
+        frequency=frequency,
         **tx_kw,
     )
     # define transmit and receive antennas for a radar network.
