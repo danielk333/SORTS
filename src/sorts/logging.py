@@ -1,7 +1,6 @@
 import logging
 
 
-# TODO: maybe add file handler for logging?
 # NOTE: here are some notes from danielk on logger setup/config
 #   we should see if the way we configure logging by default is good or not and refactor that as
 #   needed, e.g. if we look at

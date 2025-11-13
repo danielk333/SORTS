@@ -6,7 +6,6 @@ dynamic = [
     "readme",
     "license",
 
-    # TODO: migrate them to pyproject.toml ?
     # used in `setup.cfg`, but does not cause warnings/errors
     # "license-files"
     # "authors",
@@ -32,7 +31,7 @@ dependencies = [
     "astropy>=4.1",
     "xmlschema>=1.5.1",
     "pyorb>=0.5.4",
-    "pyant>=1.0",
+    "pyant>=1.1",
     "yappi>=1.4.0",
     "requests>=2.32.3",
     "pandas>=2.2.3",
@@ -88,6 +87,9 @@ sorts = ["py.typed"]
 
 [tool.black]
 line-length = 100
+
+[tool.pyright]
+reportPrivateImportUsage = "information"
 
 [tool.pytest.ini_options]
 minversion = "6.0"

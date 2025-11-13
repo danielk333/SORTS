@@ -13,6 +13,7 @@ from sorts.radar import Station
 from sorts.signals import hard_target_snr
 from sorts.interpolation import Interpolator
 from sorts.schedule import ExperimentDetailMap, Schedule
+from sorts.simulation import Passage
 
 
 CoordKey = t.Literal["multi_index", "time", "exp_num", "rx_simult_num", "enu", "e", "n", "u"]
@@ -130,48 +131,32 @@ def calc_gain(
     spobj_tx_enu: types.EnuCoordinates,
     spobj_rx_enu: types.EnuCoordinates,
 ) -> SimulationUnitState:
-    # NOTE: used lazy import here to avoid circular import
-    from .simulation_unit import _K
-
-    vector_len = len(state[_K.multi_index])
-
     # will be populated to [tx_gain_arr, rx_gain_arr]
     gain_arr_list: list[npt.NDArray[np.float64]] = []
 
     for beam, spobj_stn_enu in zip([tx_stn.beam, rx_stn.beam], [spobj_tx_enu, spobj_rx_enu]):
-        # we broadcast_to/reshape the beam params according to the input state length
-        # TODO: the `gain` method being dependent on beam's states are not helpful here;
-        #   we need a gain func that take all param as args
-        # NOTE: we need to mutate `beam.parameters` here,
-        #   but such mutation would create unexpect conditions if we directly mutate it.
-        #   therefore we mutate on a copy of `beam.parameters` and restore the original one afterwards
-        #   (since those `beam.parameters` are state that will be bounded with the life time of the object)
-        #   (e.g. if the same `tx_stn` is used in another `calc_gain`, the mutation from prev will persist)
-
         # early return for empty cases
         # NOTE: this is particularly needed because some `.gain` does not work with empty parameters (e.g. beam.parameters["pointing"])
         # TODO: add test case for empty case?
         if len(state[_K.multi_index]) == 0:
             gain_arr_list.append(np.empty(0, dtype=np.float64))
 
+        elif tx_stn.beam_parameters is None:
+            # TODO: remove this hack; see issues #25 for details
+            raise RuntimeError(
+                "A hack of injecting `beam_parameters` into `tx_stn.beam_parameters` is currently required for gain calculation"
+            )
+
         else:
-            orig_beam_params = beam.parameters
-            mut_beam_params = beam.parameters.copy()
-            beam.parameters = mut_beam_params
+            beam_parameters = tx_stn.beam_parameters
 
-            for key, val in mut_beam_params.items():
-                if key == "pointing":
-                    beam.parameters["pointing"] = state[_K.tx_pointing].to_numpy()
-                if key in beam.parameters_shape:
-                    shape: tuple[int, ...] = beam.parameters_shape[key]
-                    beam.parameters[key] = np.broadcast_to(
-                        val.reshape((*shape, 1)), (*shape, vector_len)
-                    )
-                else:
-                    beam.parameters[key] = np.full(vector_len, val, dtype=np.float64)
+            if "pointing" in tx_stn.beam_parameters.keys:
+                beam_parameters = tx_stn.beam_parameters.replace_and_broadcast(
+                    parameters=tx_stn.beam_parameters,
+                    new_parameters=dict(pointing=state[_K.tx_pointing].to_numpy()),
+                )
 
-            gain_arr_list.append(beam.gain(spobj_stn_enu[:3]))
-            beam.parameters = orig_beam_params
+            gain_arr_list.append(beam.gain(spobj_stn_enu[:3], beam_parameters))
 
     state[_K.gain_tx] = (_K.multi_index, gain_arr_list[0])
     state[_K.gain_rx] = (_K.multi_index, gain_arr_list[1])
@@ -332,6 +317,12 @@ class SimulationUnit:
         Will populate the prop `observations`
         """
 
+        if self.tx_station.wavelength is None:
+            # TODO: remove this hack; see issues #25 for details
+            raise RuntimeError(
+                "A hack of injecting `frequency` into `tx_stn.frequency` is currently required for calling `hard_target_snr`"
+            )
+
         epoch = to_datetime64_us(self.space_object.epoch)
         dsec = (self._state[_K.time] - epoch).astype(np.float64) * 1e-6
         spobj_states = self.space_object_interp.get_state(dsec)
@@ -346,15 +337,15 @@ class SimulationUnit:
         # TODO: do we need `ipps`?
         # TODO: do we need `duty_cycles`?
         powers = np.array(
-            [self.exp_detail_map[n]["power"] for n in self._state[_K.exp_num].to_numpy()],
+            [self.exp_detail_map[n].power for n in self._state[_K.exp_num].to_numpy()],
             dtype=np.float64,
         )
         bandwidths = np.array(
-            [self.exp_detail_map[n]["bandwidth"] for n in self._state[_K.exp_num].to_numpy()],
+            [self.exp_detail_map[n].bandwidth for n in self._state[_K.exp_num].to_numpy()],
             dtype=np.float64,
         )
         rx_noise_temps = np.array(
-            [self.exp_detail_map[n]["noise_temp"] for n in self._state[_K.exp_num].to_numpy()],
+            [self.exp_detail_map[n].noise_temp for n in self._state[_K.exp_num].to_numpy()],
             dtype=np.float64,
         )
 
@@ -369,7 +360,7 @@ class SimulationUnit:
         snr = hard_target_snr(
             gain_tx=self._state[_K.gain_tx].to_numpy(),
             gain_rx=self._state[_K.gain_rx].to_numpy(),
-            wavelength=self.tx_station.beam.wavelength,
+            wavelength=self.tx_station.wavelength,
             power_tx=powers,
             range_tx_m=range_tx,
             range_rx_m=range_rx,

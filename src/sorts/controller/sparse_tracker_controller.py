@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 import xarray as xr
-from sorts import radar, schedule, simulation
+from sorts import radar, schedule
 from sorts.utils import to_datetime64_us, to_timedelta64_us
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
@@ -108,7 +108,7 @@ class SparseTrackerController(ControllerBase):
         return self.exp_detail
 
     def get_experiment_id_station_id_pairs_map(self) -> schedule.ExperimentIdStationIdPairsMap:
-        return {self.exp_detail["id"]: self.station_id_pairs}
+        return {self.exp_detail.id: self.station_id_pairs}
 
     def get_station_map(self) -> dict[radar.StationId, radar.Station]:
         stn_map: dict[radar.StationId, radar.Station] = {}
@@ -133,7 +133,7 @@ class SparseTrackerController(ControllerBase):
         time: npt.NDArray[Datetime64_us] = np.arange(
             to_datetime64_us(start_time),
             to_datetime64_us(end_time) - to_timedelta64_us(slice_duration) + 1,
-            exp_detail["slice_duration"],
+            exp_detail.slice_duration,
         )
         dt: npt.NDArray[Timedelta64_us] = time - to_datetime64_us(self.epoch)
         dsec = t.cast(npt.NDArray[Float64_as_sec], dt.astype(np.float64) / 1e6)
@@ -147,7 +147,7 @@ class SparseTrackerController(ControllerBase):
     def generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> schedule.Schedule:
         """Generate the schedules."""
 
-        self.compute_ecef_states(start_time, end_time, self.exp_detail["slice_duration"])
+        self.compute_ecef_states(start_time, end_time, self.exp_detail.slice_duration)
 
         passages_of_spobj = find_simultaneous_passages(
             dt=(self.state.spobj_time - self.epoch) / np.timedelta64(1, "s"),
@@ -195,14 +195,12 @@ class SparseTrackerController(ControllerBase):
         tx_pointings = tx_pointings / np.linalg.norm(tx_pointings, axis=0)
 
         tx_sch = schedule.from_ndarrays(
-            {
-                "start_time": tx_sch_time,
-                "end_time": tx_sch_time + self.exp_detail["slice_duration"],
-                "exp_num": np.full(tx_sch_len, self.exp_detail["id"], dtype=np.int16),
-                "stn_num": np.full(tx_sch_len, self.tx_station.uid, dtype=np.int16),
-                "simult_num": np.full(tx_sch_len, 0, dtype=np.int16),
-                "pointing": tx_pointings,
-            }
+            start_time=tx_sch_time,
+            end_time=tx_sch_time + self.exp_detail.slice_duration,
+            exp_num=np.full(tx_sch_len, self.exp_detail.id, dtype=np.int16),
+            stn_num=np.full(tx_sch_len, self.tx_station.uid, dtype=np.int16),
+            simult_num=np.full(tx_sch_len, 0, dtype=np.int16),
+            pointing=tx_pointings,
         )
 
         rx_schs: list[schedule.Schedule] = []
@@ -212,14 +210,12 @@ class SparseTrackerController(ControllerBase):
 
             rx_schs.append(
                 schedule.from_ndarrays(
-                    {
-                        "start_time": tx_sch_time,
-                        "end_time": tx_sch_time + self.exp_detail["slice_duration"],
-                        "exp_num": np.full(tx_sch_len, self.exp_detail["id"], dtype=np.int16),
-                        "stn_num": np.full(tx_sch_len, rx_stn.uid, dtype=np.int16),
-                        "simult_num": np.full(tx_sch_len, 0, dtype=np.int16),
-                        "pointing": rx_pointings,
-                    }
+                    start_time=tx_sch_time,
+                    end_time=tx_sch_time + self.exp_detail.slice_duration,
+                    exp_num=np.full(tx_sch_len, self.exp_detail.id, dtype=np.int16),
+                    stn_num=np.full(tx_sch_len, rx_stn.uid, dtype=np.int16),
+                    simult_num=np.full(tx_sch_len, 0, dtype=np.int16),
+                    pointing=rx_pointings,
                 )
             )
 

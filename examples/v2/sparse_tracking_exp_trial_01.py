@@ -8,7 +8,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import sorts
-from sorts import types, interpolation, population, propagator, radar
+from sorts import types, interpolation, population, propagator, radar, ExperimentDetail
 from sorts.space_object import SpaceObject
 from sorts.schedule.priority_scheduling import priority_scheduling
 from sorts.controller import SparseTrackerController
@@ -60,7 +60,22 @@ class MpiExample(sorts.MpiQueuedExecution):
         end_time = Time("2025-01-01 03:00:00")
         control_slice_duration = np.timedelta64(100_000, "us")  # 100ms
 
-        radar_sys = sorts.get_radar("nostra", "example1")
+        radar_sys = sorts.radar.radars.nostra.gen_nostra(
+            frequency=3.2e9,
+            antenna_num=10_000,
+            antenna_spacing_lambda=0.5,
+            antenna_efficiency=0.6,
+            antenna_input_power=158,  # W
+            thermal_load=66.0,  # W
+            noise_figure_db=0.7,
+            amplifier_gain_db=18,
+            insertion_loss_db=0.35,
+            aperture_efficiency=0.4,
+            duty_cycle=0.2,
+            t_sky=10.0,
+            coherent_integration_time=0.04,
+            bandwidth_reduction_to_downsampling_ratio=10,
+        )
         # TODO: these patching of station prop should be integrated into codebase
         tx_station: radar.Station = radar_sys.tx[0]
         tx_station.uid = 0
@@ -101,17 +116,17 @@ class MpiExample(sorts.MpiQueuedExecution):
                 SparseTrackerController.FromSpaceObjectParam(
                     tx_station=tx_station,
                     rx_stations=[rx_station_0, rx_station_1],
-                    exp_detail={
-                        "id": exp_id,
-                        "coh_int_bandwidth": 1.0,
-                        "ipp": 1.0,
-                        "pulse_length": 1.0,
-                        "power": 5000000.0,
-                        "bandwidth": 52.08333333333333,
-                        "duty_cycle": 1.0,
-                        "noise_temp": 150.0,
-                        "slice_duration": control_slice_duration,
-                    },
+                    exp_detail=ExperimentDetail(
+                        id=exp_id,
+                        coh_int_bandwidth=1.0,
+                        ipp=1.0,
+                        pulse_length=1.0,
+                        power=5000000.0,
+                        bandwidth=52.08333333333333,
+                        duty_cycle=1.0,
+                        noise_temp=150.0,
+                        slice_duration=control_slice_duration,
+                    ),
                     space_object=spobj,
                     epoch=start_time,
                     points_per_passage=5,

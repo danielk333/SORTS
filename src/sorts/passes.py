@@ -10,15 +10,14 @@ import datetime
 
 import numpy as np
 import numpy.typing as npt
+import spacecoords
 import pyorb
-import pyant
 from sorts.types import Float64_as_sec
 
 # Local import
 from .signals import hard_target_snr
 
 
-# TODO: remove?
 class Pass:
     """Saves the local coordinate data for a single pass.
     Optionally also indicates the location of that pass in a bigger dataset.
@@ -134,7 +133,7 @@ class Pass:
     @staticmethod
     def calculate_zenith_angle(enu, radians=False):
         """Zenith angle of the ENU coordinates."""
-        return pyant.coordinates.vector_angle(
+        return spacecoords.linalg.vector_angle(
             np.array([0, 0, 1], dtype=np.float64), enu[:3, :], degrees=not radians
         )
 

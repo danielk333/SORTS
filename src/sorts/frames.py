@@ -19,7 +19,7 @@ try:
 except ImportError:
     SPK = None
 
-from pyant.coordinates import sph_to_cart, cart_to_sph, vector_angle
+from spacecoords.spherical import sph_to_cart
 
 logger = logging.getLogger(__name__)
 

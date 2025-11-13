@@ -7,7 +7,7 @@ from pathlib import Path
 from astropy.time import Time
 import logging
 import sorts
-from sorts import equidistant_sampling, schedule
+from sorts import equidistant_sampling, schedule, ExperimentDetail
 from sorts.interpolation import Legendre8, Linear
 from sorts.population import master_catalog, master_catalog_factor
 from sorts.propagator import SGP4
@@ -107,33 +107,33 @@ tracker_ctrl = TrackerController.from_space_object(
     epoch=start_time,
     tx_station=tx_station,
     rx_stations=[rx_station_0, rx_station_1],
-    exp_detail={
-        "id": 0,
-        "coh_int_bandwidth": 1.0,
-        "ipp": 1.0,
-        "pulse_length": 1.0,
-        "power": 5000000.0,
-        "bandwidth": 52.08333333333333,
-        "duty_cycle": 1.0,
-        "noise_temp": 150.0,
-        "slice_duration": control_slice_duration,
-    },
+    exp_detail=ExperimentDetail(
+        id=0,
+        coh_int_bandwidth=1.0,
+        ipp=1.0,
+        pulse_length=1.0,
+        power=5000000.0,
+        bandwidth=52.08333333333333,
+        duty_cycle=1.0,
+        noise_temp=150.0,
+        slice_duration=control_slice_duration,
+    ),
 )
 
 fence_scan_ctrl = FenceScanController.from_scan_spec(
     tx_station=tx_station,
     rx_stations=[rx_station_0, rx_station_1],
-    exp_detail={
-        "id": 1,
-        "coh_int_bandwidth": 1.0,
-        "ipp": 1.0,
-        "pulse_length": 1.0,
-        "power": 5000000.0,
-        "bandwidth": 52.08333333333333,
-        "duty_cycle": 1.0,
-        "noise_temp": 150.0,
-        "slice_duration": control_slice_duration,
-    },
+    exp_detail=ExperimentDetail(
+        id=1,
+        coh_int_bandwidth=1.0,
+        ipp=1.0,
+        pulse_length=1.0,
+        power=5000000.0,
+        bandwidth=52.08333333333333,
+        duty_cycle=1.0,
+        noise_temp=150.0,
+        slice_duration=control_slice_duration,
+    ),
     azimuth=90,  # sweep from east to west
     min_elevation=30,
     pointings_per_cycle=40,

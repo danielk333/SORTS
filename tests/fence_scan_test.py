@@ -22,7 +22,7 @@ import numpy as np
 from astropy.time import Time
 from astropy.constants import R_earth  # type: ignore
 import pyant, pyorb
-from sorts import schedule
+from sorts import schedule, ExperimentDetail
 from sorts.types import Float64_as_sec, Float64_as_deg, Float_as_sec, Float_as_m
 from sorts.utils import to_datetime64_us
 from sorts.frames import enu_to_ecef
@@ -60,13 +60,6 @@ simu_num = len(scan_ranges)
 
 _SK = schedule._K
 _SuK = stx_mrx_simulation.simulation_unit._K
-
-
-# NOTE: this is needed because the constructor of `pyant.models.Isotropic` accept no param as of 2025-10-16
-def isotropic_beam_at_freq(freq: float):
-    beam = pyant.models.Isotropic()
-    beam.parameters["frequency"] = freq
-    return beam
 
 
 def south_to_north_circular_orbit_test():
@@ -111,7 +104,9 @@ def south_to_north_circular_orbit_test():
         lon=0.0,
         alt=0.0,
         min_elevation=0.0,
-        beam=isotropic_beam_at_freq(233e6),  # same as eisat_3d
+        beam=pyant.models.Isotropic(),
+        frequency=233e6,  # same as eisat_3d
+        beam_parameters=pyant.models.IsotropicParams(),
         uid=0,
     )
 
@@ -123,7 +118,9 @@ def south_to_north_circular_orbit_test():
         lon=0.0,
         alt=0.0,
         min_elevation=0.0,
-        beam=isotropic_beam_at_freq(233e6),  # same as eisat_3d
+        beam=pyant.models.Isotropic(),
+        frequency=233e6,  # same as eisat_3d
+        beam_parameters=pyant.models.IsotropicParams(),
         uid=1,
     )
 
@@ -133,7 +130,9 @@ def south_to_north_circular_orbit_test():
         lon=0.0,
         alt=0.0,
         min_elevation=5.0,
-        beam=isotropic_beam_at_freq(233e6),  # same as eisat_3d
+        beam=pyant.models.Isotropic(),
+        frequency=233e6,  # same as eisat_3d
+        beam_parameters=pyant.models.IsotropicParams(),
         uid=2,
     )
 
@@ -143,17 +142,17 @@ def south_to_north_circular_orbit_test():
     fence_scan_ctrl = FenceScanController.from_scan_spec(
         tx_station=tx_0_stn,
         rx_stations=[rx_0_stn, rx_1_stn],
-        exp_detail={
-            "id": 0,
-            "coh_int_bandwidth": 1.0,
-            "ipp": 1.0,
-            "pulse_length": 1.0,
-            "power": 5000000.0,
-            "bandwidth": 52.08333333333333,
-            "duty_cycle": 1.0,
-            "noise_temp": 150.0,
-            "slice_duration": control_slice_duration,
-        },
+        exp_detail=ExperimentDetail(
+            id=0,
+            coh_int_bandwidth=1.0,
+            ipp=1.0,
+            pulse_length=1.0,
+            power=5000000.0,
+            bandwidth=52.08333333333333,
+            duty_cycle=1.0,
+            noise_temp=150.0,
+            slice_duration=control_slice_duration,
+        ),
         azimuth=90,  # sweep from east to west
         min_elevation=0,
         pointings_per_cycle=40,

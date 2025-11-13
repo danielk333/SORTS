@@ -4,6 +4,7 @@ Defines the NewType `Schedule` and functions for its functionalities
 
 from __future__ import annotations
 import logging, typing as t
+from dataclasses import dataclass
 from functools import reduce
 import numpy as np
 import numpy.typing as npt
@@ -64,47 +65,24 @@ ExperimentId = int
 """A unique int16 that identifies an experiment"""
 
 
-class ExperimentDetail(t.TypedDict):
-    """A TypedDict of params"""
-
+@dataclass(kw_only=True)
+class ExperimentDetail:
     id: ExperimentId
 
-    coh_int_bandwidth: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-    ipp: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
-    pulse_length: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
+    coh_int_bandwidth: float
+    ipp: float
+    pulse_length: float
     power: float
     bandwidth: float
-    duty_cycle: float  # TODO: invtg: not used in `sorts.signals.hard_target_snr`?
+    duty_cycle: float
     noise_temp: float
 
     slice_duration: types.Timedelta64_us
     "Duration of a control slice, in micro-second"
 
 
-# TODO: replace existing usage of `dict[int, ExperimentDetail]` by this type
 ExperimentDetailMap = dict[ExperimentId, ExperimentDetail]
 
-
-class ScheduleNdarrayDict(t.TypedDict):
-    """
-    A TypedDict, stores a collection of "control slices" (or "slices" in short).
-
-    Slice data are stored as columns of fields, each of which is a `ndarray`.
-    """
-
-    start_time: npt.NDArray[types.Datetime64_us]
-    end_time: npt.NDArray[types.Datetime64_us]
-
-    # TODO: re-eval the size of `exp_num`, `stn_num`, `simult_num`
-    exp_num: npt.NDArray[np.int16]
-    stn_num: npt.NDArray[np.int16]
-    simult_num: npt.NDArray[np.int16]
-
-    pointing: types.EnuCoordinates
-
-
-XrDataArrayIndexer = xr.DataArray
-"""Contains info to get a subset of entries from a `Schedule`"""
 
 ExperimentIdStationIdPairsMap = dict[ExperimentId, list[tuple[radar.StationId, radar.StationId]]]
 
@@ -147,9 +125,16 @@ def empty() -> Schedule:
     return Schedule(sch)
 
 
-def from_ndarrays(data: ScheduleNdarrayDict) -> Schedule:
+def from_ndarrays(
+    start_time: npt.NDArray[types.Datetime64_us],
+    end_time: npt.NDArray[types.Datetime64_us],
+    exp_num: npt.NDArray[np.int16],
+    stn_num: npt.NDArray[np.int16],
+    simult_num: npt.NDArray[np.int16],
+    pointing: types.EnuCoordinates,
+) -> Schedule:
     multi_index = pd.MultiIndex.from_arrays(
-        [data[_K.exp_num], data[_K.stn_num], data[_K.simult_num], data[_K.start_time]],
+        [exp_num, stn_num, simult_num, start_time],
         names=(_K.exp_num, _K.stn_num, _K.simult_num, _K.start_time),
     )
 
@@ -159,25 +144,12 @@ def from_ndarrays(data: ScheduleNdarrayDict) -> Schedule:
             _K.enu: [_K.e, _K.n, _K.u],
         },
         data_vars={
-            _K.end_time: (_K.multi_index, data[_K.end_time]),
-            _K.pointing: ((_K.enu, _K.multi_index), data[_K.pointing]),
+            _K.end_time: (_K.multi_index, end_time),
+            _K.pointing: ((_K.enu, _K.multi_index), pointing),
         },
     )
 
     return Schedule(sch)
-
-
-def to_ndarrays(sch: Schedule) -> ScheduleNdarrayDict:
-    arr_dict: ScheduleNdarrayDict = {
-        _K.start_time: sch[_K.start_time].to_numpy(),
-        _K.end_time: sch[_K.end_time].to_numpy(),
-        _K.exp_num: sch[_K.exp_num].to_numpy(),
-        _K.stn_num: sch[_K.stn_num].to_numpy(),
-        _K.simult_num: sch[_K.simult_num].to_numpy(),
-        _K.pointing: sch[_K.pointing].to_numpy(),
-    }
-
-    return arr_dict
 
 
 # TODO: remove?
@@ -205,8 +177,6 @@ def filter_by_time_range(sch: Schedule, time_range: types.TimeRange_us) -> Sched
     return ds_masked
 
 
-# TODO: this is very similar to `rx_time_mask: xr.DataArray = reduce(...)` in `simulation_unit.py`,
-#   maybe one of them can be dissolved?
 def filter_by_time_ranges(sch: Schedule, time_ranges: t.Sequence[types.TimeRange_us]) -> Schedule:
     resultant_mask: xr.DataArray = reduce(
         xr.ufuncs.logical_or,
