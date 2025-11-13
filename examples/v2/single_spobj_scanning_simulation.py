@@ -20,11 +20,26 @@ epoch = Time(53005.0, format="mjd", scale="utc")  # 2004-01-01 00:00:00Z
 start_time = Time("2004-01-01 00:00:00Z", format="iso", scale="utc")
 end_time = Time("2004-01-01 00:10:00Z", format="iso", scale="utc")  # 600 sec after start time
 
-eiscat3d = sorts.get_radar("eiscat3d", "stage1-array")
+nostra = sorts.radar.radars.nostra.gen_nostra(
+        frequency=3.2e9,
+        antenna_num=10_000,
+        antenna_spacing_lambda=0.5,
+        antenna_efficiency=0.6,
+        antenna_input_power=158,  # W
+        thermal_load=66.0,  # W
+        noise_figure_db=0.7,
+        amplifier_gain_db=18,
+        insertion_loss_db=0.35,
+        aperture_efficiency=0.4,
+        duty_cycle=0.2,
+        t_sky=10.0,
+        coherent_integration_time=0.04,
+        bandwidth_reduction_to_downsampling_ratio=10,
+)
 
-tx_station: sorts.Station = eiscat3d.tx[0]
+tx_station: sorts.Station = nostra.tx[0]
 tx_station.uid = 0
-rx_station: sorts.Station = eiscat3d.rx[0]
+rx_station: sorts.Station = nostra.rx[0]
 rx_station.uid = 1
 
 fence_scan_controller = FenceScanController.from_scan_spec(

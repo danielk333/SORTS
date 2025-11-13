@@ -191,10 +191,12 @@ class RX(Station):
         min_elevation,
         beam,
         noise,
+        beam_parameters = None, # hack for now - todo
         uid: StationId = 1,
     ):
         super().__init__(lat, lon, alt, min_elevation, beam, uid=uid)
         self.noise = noise
+        self.beam_parameters = beam_parameters
 
     def copy(self):
         st = RX(
@@ -243,6 +245,7 @@ class TX(Station):
         pulse_length=1e-3,
         ipp=10e-3,
         n_ipp=20,
+        beam_parameters = None, # hack for now - todo
         uid: StationId = 0,
     ):
         super().__init__(lat, lon, alt, min_elevation, beam, uid=uid)
@@ -254,6 +257,7 @@ class TX(Station):
         self.ipp = ipp
         self.n_ipp = n_ipp
         self.coh_int_bandwidth = 1.0 / (pulse_length * n_ipp)
+        self.beam_parameters = beam_parameters
 
     def copy(self):
         st = TX(
