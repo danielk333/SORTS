@@ -133,7 +133,7 @@ def estimate_radar_parameters(
         radar_power_draw=radar_power_draw,
         total_power_draw=total_power_draw,
         beam=beam,
-        param=param,
+        beam_parameters=param,
         half_power_angle=half_power_angle,
         effective_bandwidth=effective_bandwidth,
     )

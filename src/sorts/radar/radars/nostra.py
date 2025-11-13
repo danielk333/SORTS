@@ -66,7 +66,7 @@ def gen_nostra(
         lon=20.18,
         alt=0,
         beam=data["beam"].copy(),
-        beam_parameters=data["param"].copy(),
+        beam_parameters=data["beam_parameters"].copy(),
         **rx_kw,
     )
     se_tx = TX(
@@ -74,7 +74,7 @@ def gen_nostra(
         lon=20.18,
         alt=0,
         beam=data["beam"].copy(),
-        beam_parameters=data["param"].copy(),
+        beam_parameters=data["beam_parameters"].copy(),
         **tx_kw,
     )
 
@@ -83,7 +83,7 @@ def gen_nostra(
         lon=18.135,
         alt=0,
         beam=data["beam"].copy(),
-        beam_parameters=data["param"].copy(),
+        beam_parameters=data["beam_parameters"].copy(),
         **rx_kw,
     )
     no_tx = TX(
@@ -91,7 +91,7 @@ def gen_nostra(
         lon=18.135,
         alt=0,
         beam=data["beam"].copy(),
-        beam_parameters=data["param"].copy(),
+        beam_parameters=data["beam_parameters"].copy(),
         **tx_kw,
     )
 
