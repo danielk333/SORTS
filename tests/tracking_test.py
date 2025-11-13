@@ -49,13 +49,6 @@ _SK = schedule._K
 _SuK = stx_mrx_simulation.simulation_unit._K
 
 
-# NOTE: this is needed because the constructor of `pyant.models.Isotropic` accept no param as of 2025-10-16
-def isotropic_beam_at_freq(freq: float):
-    beam = pyant.models.Isotropic()
-    beam.parameters["frequency"] = freq
-    return beam
-
-
 def south_to_north_circular_orbit_test():
     earth_radius: np.float64 = R_earth.value  # in meters
     spobj_orbital_radius = 7000e3  # in meters
@@ -98,7 +91,9 @@ def south_to_north_circular_orbit_test():
         lon=0.0,
         alt=0.0,
         min_elevation=0.0,
-        beam=isotropic_beam_at_freq(233e6),  # same as eisat_3d
+        beam=pyant.models.Isotropic(),
+        frequency=233e6,  # same as eisat_3d
+        beam_parameters=pyant.models.IsotropicParams(),
         uid=0,
     )
 
