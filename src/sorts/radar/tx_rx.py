@@ -51,6 +51,8 @@ class Station(object):
         alt,
         min_elevation: Float_as_deg,
         beam: pyant.beam.Beam,
+        frequency: float | None = None,
+        beam_parameters: pyant.types.Parameters | None = None,
         uid: StationId = 0,
     ):
         self.lat = lat
@@ -66,6 +68,11 @@ class Station(object):
         self.enabled = True
         self.pointing_range = None
         self.uid = uid
+
+        # TODO: attributes `frequency`, `wavelength` and `beam_parameters` are a tmp hack
+        self.frequency = frequency
+        self.wavelength = None if frequency is None else speed_of_light / frequency
+        self.beam_parameters = beam_parameters
 
     def __repr__(self):
         return f"Station(uid={self.uid}, lat={self.lat}, lon={self.lon}, alt={self.alt})"
@@ -105,6 +112,9 @@ class Station(object):
             alt=self.alt,
             min_elevation=self.min_elevation,
             beam=self.beam.copy(),
+            frequency=self.frequency,
+            beam_parameters=self.beam_parameters,
+            uid=self.uid,
         )
         st.enabled = self.enabled
         return st
@@ -184,15 +194,21 @@ class RX(Station):
         min_elevation,
         beam,
         noise,
-        frequency: float,  # TODO: this is tmp hack
-        beam_parameters=None,  # TODO: this is tmp hack
+        frequency: float | None = None,
+        beam_parameters: pyant.types.Parameters | None = None,
         uid: StationId = 1,
     ):
-        super().__init__(lat, lon, alt, min_elevation, beam, uid=uid)
+        super().__init__(
+            lat=lat,
+            lon=lon,
+            alt=alt,
+            min_elevation=min_elevation,
+            beam=beam,
+            frequency=frequency,
+            beam_parameters=beam_parameters,
+            uid=uid,
+        )
         self.noise = noise
-        self.frequency = frequency
-        self.wavelength = speed_of_light / frequency
-        self.beam_parameters = beam_parameters
 
     def copy(self):
         st = RX(
@@ -203,6 +219,8 @@ class RX(Station):
             beam=self.beam.copy(),
             noise=self.noise,
             frequency=self.frequency,
+            beam_parameters=self.beam_parameters,
+            uid=self.uid,
         )
         st.enabled = self.enabled
         return st
@@ -238,15 +256,24 @@ class TX(Station):
         beam,
         power,
         bandwidth,
-        frequency: float,  # TODO: this is tmp hack
         duty_cycle,
         pulse_length=1e-3,
         ipp=10e-3,
         n_ipp=20,
-        beam_parameters=None,  # TODO: this is tmp hack
+        frequency: float | None = None,
+        beam_parameters: pyant.types.Parameters | None = None,
         uid: StationId = 0,
     ):
-        super().__init__(lat, lon, alt, min_elevation, beam, uid=uid)
+        super().__init__(
+            lat=lat,
+            lon=lon,
+            alt=alt,
+            min_elevation=min_elevation,
+            beam=beam,
+            frequency=frequency,
+            beam_parameters=beam_parameters,
+            uid=uid,
+        )
 
         self.bandwidth = bandwidth
         self.duty_cycle = duty_cycle
@@ -255,9 +282,6 @@ class TX(Station):
         self.ipp = ipp
         self.n_ipp = n_ipp
         self.coh_int_bandwidth = 1.0 / (pulse_length * n_ipp)
-        self.frequency = frequency
-        self.wavelength = speed_of_light / frequency
-        self.beam_parameters = beam_parameters
 
     def copy(self):
         st = TX(
@@ -273,6 +297,8 @@ class TX(Station):
             ipp=self.ipp,
             n_ipp=self.n_ipp,
             frequency=self.frequency,
+            beam_parameters=self.beam_parameters,
+            uid=self.uid,
         )
         st.enabled = self.enabled
         return st
