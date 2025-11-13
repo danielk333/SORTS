@@ -1,7 +1,7 @@
 import logging
 import numpy as np
 import numpy.typing as npt
-import pyant
+import spacecoords
 from sorts.types import Float_as_deg, AzelrCoordinates_DegM, EnuCoordinates
 
 logger = logging.getLogger(__name__)
@@ -46,7 +46,17 @@ def create_mask_by_min_elevation(
 ) -> npt.NDArray[np.bool]:
     loc_zenith = np.array([0, 0, 1], dtype=np.float64)
 
-    pointings_zenith_ang = pyant.coordinates.vector_angle(loc_zenith, pointings, degrees=True)
+    _pointings_zenith_ang = spacecoords.linalg.vector_angle(loc_zenith, pointings, degrees=True)
+    match _pointings_zenith_ang:
+        case np.ndarray():
+            pointings_zenith_ang = _pointings_zenith_ang
+        case float():
+            pointings_zenith_ang = np.array([_pointings_zenith_ang], dtype=np.float64)
+        case _:
+            raise RuntimeError(
+                f"unexpected type of `_pointings_zenith_ang`: {type(_pointings_zenith_ang)}"
+            )
+
     el_in_range_mask = pointings_zenith_ang <= 90.0 - min_elevation
 
     return el_in_range_mask

@@ -59,8 +59,22 @@ class MpiExample(sorts.MpiQueuedExecution):
         end_time = Time("2025-01-01 03:00:00")
         control_slice_duration = np.timedelta64(100_000, "us")  # 100ms
 
-        # radar_sys = sorts.get_radar("eiscat3d", "stage1-array")
-        radar_sys = sorts.get_radar("nostra", "example1")
+        radar_sys = sorts.radar.radars.nostra.gen_nostra(
+            frequency=3.2e9,
+            antenna_num=10_000,
+            antenna_spacing_lambda=0.5,
+            antenna_efficiency=0.6,
+            antenna_input_power=158,  # W
+            thermal_load=66.0,  # W
+            noise_figure_db=0.7,
+            amplifier_gain_db=18,
+            insertion_loss_db=0.35,
+            aperture_efficiency=0.4,
+            duty_cycle=0.2,
+            t_sky=10.0,
+            coherent_integration_time=0.04,
+            bandwidth_reduction_to_downsampling_ratio=10,
+        )
         # TODO: these patching of station prop should be integrated into codebase
         tx_station: radar.Station = radar_sys.tx[0]
         tx_station.uid = 0

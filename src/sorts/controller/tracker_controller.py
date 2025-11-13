@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 import xarray as xr
-import pyant
+import spacecoords
 from sorts import radar, schedule
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
@@ -183,7 +183,7 @@ class TrackerController(ControllerBase):
         # generate pointings
         tx_pointings: EnuCoordinates = self.tx_station.enu(self.state.spobj_states[:3])
 
-        tx_pointings_zenith_ang = pyant.coordinates.vector_angle(
+        tx_pointings_zenith_ang = spacecoords.linalg.vector_angle(
             loc_zenith, tx_pointings, degrees=True
         )
         tx_el_in_range_mask = tx_pointings_zenith_ang <= 90.0 - self.tx_station.min_elevation
@@ -195,7 +195,7 @@ class TrackerController(ControllerBase):
         for rx_station in pure_rx_stations:
             rx_pointings: EnuCoordinates = rx_station.enu(self.state.spobj_states[:3])
 
-            rx_pointings_zenith_ang = pyant.coordinates.vector_angle(
+            rx_pointings_zenith_ang = spacecoords.linalg.vector_angle(
                 loc_zenith, rx_pointings, degrees=True
             )
             rx_el_in_range_mask = rx_pointings_zenith_ang <= 90.0 - rx_station.min_elevation

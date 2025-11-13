@@ -4,7 +4,7 @@
 
 import numpy as np
 import scipy.constants
-import pyant
+import spacecoords
 import pyorb
 
 
@@ -68,7 +68,7 @@ def calculate_range_rate(enu):
 
 def calculate_zenith_angle(enu, radians=False):
     """Zenith angle of the ENU coordinates."""
-    return pyant.coordinates.vector_angle(
+    return spacecoords.linalg.vector_angle(
         np.array([0, 0, 1], dtype=np.float64), enu[:3, :], degrees=not radians
     )
 
