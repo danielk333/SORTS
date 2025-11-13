@@ -5,6 +5,7 @@ also defines physical antennas for RX and TX.
 """
 
 import numpy as np
+from scipy.constants import speed_of_light
 import spacecoords
 import pyant
 from sorts.types import Float_as_deg
@@ -108,14 +109,6 @@ class Station(object):
         st.enabled = self.enabled
         return st
 
-    @property
-    def frequency(self):
-        return self.beam.frequency
-
-    @property
-    def wavelength(self):
-        return self.beam.wavelength
-
     def enu(self, ecefs):
         """Converts a set of ECEF states to local ENU coordinates using geocentric zenith."""
         rel_ = ecefs.copy()
@@ -191,11 +184,14 @@ class RX(Station):
         min_elevation,
         beam,
         noise,
-        beam_parameters = None, # hack for now - todo
+        frequency: float,  # TODO: this is tmp hack
+        beam_parameters=None,  # TODO: this is tmp hack
         uid: StationId = 1,
     ):
         super().__init__(lat, lon, alt, min_elevation, beam, uid=uid)
         self.noise = noise
+        self.frequency = frequency
+        self.wavelength = speed_of_light / frequency
         self.beam_parameters = beam_parameters
 
     def copy(self):
@@ -206,6 +202,7 @@ class RX(Station):
             min_elevation=self.min_elevation,
             beam=self.beam.copy(),
             noise=self.noise,
+            frequency=self.frequency,
         )
         st.enabled = self.enabled
         return st
@@ -241,11 +238,12 @@ class TX(Station):
         beam,
         power,
         bandwidth,
+        frequency: float,  # TODO: this is tmp hack
         duty_cycle,
         pulse_length=1e-3,
         ipp=10e-3,
         n_ipp=20,
-        beam_parameters = None, # hack for now - todo
+        beam_parameters=None,  # TODO: this is tmp hack
         uid: StationId = 0,
     ):
         super().__init__(lat, lon, alt, min_elevation, beam, uid=uid)
@@ -257,6 +255,8 @@ class TX(Station):
         self.ipp = ipp
         self.n_ipp = n_ipp
         self.coh_int_bandwidth = 1.0 / (pulse_length * n_ipp)
+        self.frequency = frequency
+        self.wavelength = speed_of_light / frequency
         self.beam_parameters = beam_parameters
 
     def copy(self):
@@ -272,6 +272,7 @@ class TX(Station):
             pulse_length=self.pulse_length,
             ipp=self.ipp,
             n_ipp=self.n_ipp,
+            frequency=self.frequency,
         )
         st.enabled = self.enabled
         return st
