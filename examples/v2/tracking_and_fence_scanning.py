@@ -159,19 +159,17 @@ pickle_fpath = (
 )
 
 sim = StxMrxSimulation.from_controllers(
-    spec={
-        "controllers": [tracker_ctrl, fence_scan_ctrl],
-        "schedule": master_sch,
-        "epoch": start_time,
-        "start_time": start_time,
-        "end_time": end_time,
-        "space_objects": spobjs,
-        # "space_objects": [
-        #     o for i, o in enumerate(spobjs) if i in [0, 4, 5, 17]
-        # ],  # just picked a few from the whole list for now
-        "dsec_sampler": dsec_sampler,
-        "interpolator_class": Linear,
-    }
+    controllers=[tracker_ctrl, fence_scan_ctrl],
+    schedule=master_sch,
+    epoch=start_time,
+    start_time=start_time,
+    end_time=end_time,
+    space_objects=spobjs,
+    # space_objects=[
+    #     o for i, o in enumerate(spobjs) if i in [0, 4, 5, 17]
+    # ],  # just picked a few from the whole list for now
+    dsec_sampler=dsec_sampler,
+    interpolator_class=Linear,
 )
 
 calc_start_time = time.perf_counter()

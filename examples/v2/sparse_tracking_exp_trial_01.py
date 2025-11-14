@@ -145,18 +145,6 @@ class MpiExample(sorts.MpiQueuedExecution):
 
         master_sch = priority_scheduling(tracker_schs, exp_id_stn_id_pairs_map)
 
-        spec_by_controllers: stx_mrx_simulation.SpecByControllers = {
-            "controllers": tracker_ctrls,
-            "schedule": master_sch,
-            "epoch": start_time,
-            "start_time": start_time,
-            "end_time": end_time,
-            "space_objects": spobjs,
-            "dsec_sampler": dsec_sampler,
-            # "interpolator_class": interpolation.Legendre8,
-            "interpolator_class": interpolation.Linear,
-        }
-
         # TODO: probably better to make it an explicit dict instead of calling `locals()`
         # converted to dict to make it slightly safer
         sim_env = dict(locals())
@@ -168,7 +156,15 @@ class MpiExample(sorts.MpiQueuedExecution):
             save_subdpath = save_dpath / f"{idx}"
 
             sim = StxMrxSimulation.from_controllers(
-                {**spec_by_controllers, "space_objects": spobj_grp}
+                controllers=tracker_ctrls,
+                schedule=master_sch,
+                epoch=start_time,
+                start_time=start_time,
+                end_time=end_time,
+                space_objects=spobj_grp,
+                dsec_sampler=dsec_sampler,
+                # interpolator_class=interpolation.Legendre8,
+                interpolator_class=interpolation.Linear,
             )
             safe_pickle(sim, save_subdpath / "sim.pickle")
 

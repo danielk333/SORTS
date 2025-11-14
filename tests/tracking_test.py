@@ -126,16 +126,14 @@ def south_to_north_circular_orbit_test():
     tracker_sch = tracker_ctrl.generate(start_time, end_time)
 
     sim = StxMrxSimulation.from_controllers(
-        spec={
-            "controllers": [tracker_ctrl],
-            "schedule": tracker_sch,
-            "epoch": start_time,
-            "start_time": start_time,
-            "end_time": end_time,
-            "space_objects": [spobj],
-            "dsec_sampler": dsec_sampler,
-            "interpolator_class": Legendre8,
-        }
+        controllers=[tracker_ctrl],
+        schedule=tracker_sch,
+        epoch=start_time,
+        start_time=start_time,
+        end_time=end_time,
+        space_objects=[spobj],
+        dsec_sampler=dsec_sampler,
+        interpolator_class=Legendre8,
     )
 
     obss, sim_units = sim.run()
