@@ -26,7 +26,11 @@ sim_unit_fname_tpl = "sim_unit.{id}.pickle"
 
 class SpaceObjectDsecSampler(t.Protocol):
     def __call__(
-        self, orbit: pyorb.Orbit, start_time: Datetime_Like, end_time: Datetime_Like
+        self,
+        orbit: pyorb.Orbit,
+        epoch: Datetime_Like,
+        start_time: Datetime_Like,
+        end_time: Datetime_Like,
     ) -> npt.NDArray[Float64_as_sec]: ...
 
 
@@ -45,7 +49,9 @@ def sample_and_propagate_space_objects_states(
 
     spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]] = []
     for spobj in tqdm(spobjs, desc="sampling spobjs dt", total=len(spobjs)):
-        spobjs_smpl_dsec.append(sampler(spobj.state, start_time, end_time))
+        spobjs_smpl_dsec.append(
+            sampler(spobj.state, to_datetime64_us(spobj.epoch), start_time, end_time)
+        )
 
     spobjs_smpl_states: list[EcefStates] = []
     for spobj, spobj_smpl_dsec in tqdm(

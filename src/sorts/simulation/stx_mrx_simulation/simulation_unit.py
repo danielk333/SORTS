@@ -324,7 +324,7 @@ class SimulationUnit:
             )
 
         epoch = to_datetime64_us(self.space_object.epoch)
-        dsec = (self._state[_K.time] - epoch).astype(np.float64) * 1e-6
+        dsec = (self._state[_K.time] - epoch).to_numpy() / np.timedelta64(1, "s")
         spobj_states = self.space_object_interp.get_state(dsec)
         spobj_tx_enu = self.tx_station.enu(spobj_states)
         spobj_rx_enu = self.rx_station.enu(spobj_states)
