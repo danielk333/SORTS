@@ -30,23 +30,6 @@ class SpaceObjectDsecSampler(t.Protocol):
     ) -> npt.NDArray[Float64_as_sec]: ...
 
 
-class Spec(t.TypedDict):
-    """A TypedDict of params"""
-
-    station_map: dict[StationId, Station]
-    station_id_pairs: t.Sequence[tuple[StationId, StationId]]
-    schedule: Schedule
-    exp_detail_map: ExperimentDetailMap
-    epoch: Datetime_Like
-    start_time: Datetime_Like
-    end_time: Datetime_Like
-    space_objects: t.Sequence[sorts.SpaceObject]
-    dsec_sampler: SpaceObjectDsecSampler  # TODO: support different sampler for different obj?
-    # TODO: we need to implement falback mechanism,
-    #   e.g. a `Legendre8` `Interpolator` requires >=8 points, but sometime it might get less than that
-    interpolator_class: type[Interpolator]
-
-
 class SpecByControllers(t.TypedDict):
     """A TypedDict of params"""
 
@@ -107,7 +90,10 @@ def group_passages_by_tx_rx_station_pair(
 
 # TODO: its name is confusing with `prepare_simulation_unit_params`; and maybe its func can be merged as well?
 def derive_simulation_unit_params(
-    spec: Spec,
+    sch: Schedule,  # TODO rename this param to `schedule` after refactoring `schedule` module
+    station_map: dict[StationId, Station],
+    exp_detail_map: ExperimentDetailMap,
+    space_objects: t.Sequence[sorts.SpaceObject],
     passages_lists: t.Sequence[t.Sequence[Passage]],
     spobjs_interpolators: t.Sequence[Interpolator],
 ) -> list[FromPassagesOverTxRxStationPairParam]:
@@ -120,17 +106,15 @@ def derive_simulation_unit_params(
     params: list[FromPassagesOverTxRxStationPairParam] = []
 
     for spobj, passages_of_a_spobj, spobj_states_interp in zip(
-        spec["space_objects"], passages_lists, spobjs_interpolators
+        space_objects, passages_lists, spobjs_interpolators
     ):
         groupped_passages = group_passages_by_tx_rx_station_pair(passages_of_a_spobj)
 
         for stn_id_pair, passages in groupped_passages.items():
-            tx_stn = spec["station_map"][stn_id_pair[0]]
-            rx_stn = spec["station_map"][stn_id_pair[1]]
+            tx_stn = station_map[stn_id_pair[0]]
+            rx_stn = station_map[stn_id_pair[1]]
 
-            filtered_sch = schedule.filter_by_time_ranges(
-                spec["schedule"], [ps.time_range for ps in passages]
-            )
+            filtered_sch = schedule.filter_by_time_ranges(sch, [ps.time_range for ps in passages])
 
             params.append(
                 FromPassagesOverTxRxStationPairParam(
@@ -141,7 +125,7 @@ def derive_simulation_unit_params(
                     tx_station=tx_stn,
                     rx_station=rx_stn,
                     schedule=filtered_sch,
-                    exp_detail_map=spec["exp_detail_map"],
+                    exp_detail_map=exp_detail_map,
                 )
             )
 
@@ -149,7 +133,10 @@ def derive_simulation_unit_params(
 
 
 def find_passages(
-    spec: Spec,
+    station_map: dict[StationId, Station],
+    station_id_pairs: t.Sequence[tuple[StationId, StationId]],
+    space_objects: t.Sequence[sorts.SpaceObject],
+    epoch: Datetime_Like,
     spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]],
     spobjs_smpl_states: list[EcefStates],
 ) -> list[list[Passage]]:
@@ -162,15 +149,15 @@ def find_passages(
     passages_list: list[list[Passage]] = []
 
     for spobj, spobj_smpl_dsec, spobj_smpl_states in zip(
-        spec["space_objects"],
+        space_objects,
         spobjs_smpl_dsec,
         spobjs_smpl_states,
     ):
         passages_of_spobj: list[Passage] = []
 
-        for stn_id_pair in spec["station_id_pairs"]:
-            tx_stn = spec["station_map"][stn_id_pair[0]]
-            rx_stn = spec["station_map"][stn_id_pair[1]]
+        for stn_id_pair in station_id_pairs:
+            tx_stn = station_map[stn_id_pair[0]]
+            rx_stn = station_map[stn_id_pair[1]]
 
             passages_of_spobj.extend(
                 simulation.funcs.find_passages(
@@ -179,7 +166,7 @@ def find_passages(
                     states=spobj_smpl_states,
                     tx_station=tx_stn,
                     rx_station=rx_stn,
-                    epoch=spec["epoch"],
+                    epoch=epoch,
                 )
             )
 
@@ -202,8 +189,32 @@ class StxMrxSimulation:
     NOTE: This is intended as an internal constructor, please use the constructor methods to create instances.
     """
 
-    def __init__(self, spec: Spec):
-        self.spec: Spec = spec
+    def __init__(
+        self,
+        station_map: dict[StationId, Station],
+        station_id_pairs: t.Sequence[tuple[StationId, StationId]],
+        schedule: Schedule,
+        exp_detail_map: ExperimentDetailMap,
+        epoch: Datetime_Like,
+        start_time: Datetime_Like,
+        end_time: Datetime_Like,
+        space_objects: t.Sequence[sorts.SpaceObject],
+        dsec_sampler: SpaceObjectDsecSampler,
+        interpolator_class: type[Interpolator],
+    ):
+        self.station_map = station_map
+        self.station_id_pairs = station_id_pairs
+        self.schedule = schedule
+        self.exp_detail_map = exp_detail_map
+        self.epoch = epoch
+        self.start_time = start_time
+        self.end_time = end_time
+        self.space_objects = space_objects
+        self.dsec_sampler = dsec_sampler
+        # TODO: we need to implement falback mechanism,
+        #   e.g. a `Legendre8` `Interpolator` requires >=8 points, but sometime it might get less than that
+        self.interpolator_class = interpolator_class
+
         self.sim_units: list[SimulationUnit] = []
         self.obss: list[Observation] = []
 
@@ -225,44 +236,50 @@ class StxMrxSimulation:
             exp_detail_map[exp_detail.id] = exp_detail
 
         return cls(
-            spec={
-                "station_map": stn_map,
-                "station_id_pairs": list(stn_id_pairs_set),
-                "schedule": spec["schedule"],
-                "exp_detail_map": exp_detail_map,
-                "epoch": spec["epoch"],
-                "start_time": spec["start_time"],
-                "end_time": spec["end_time"],
-                "space_objects": spec["space_objects"],
-                "dsec_sampler": spec["dsec_sampler"],
-                "interpolator_class": spec["interpolator_class"],
-            }
+            station_map=stn_map,
+            station_id_pairs=list(stn_id_pairs_set),
+            schedule=spec["schedule"],
+            exp_detail_map=exp_detail_map,
+            epoch=spec["epoch"],
+            start_time=spec["start_time"],
+            end_time=spec["end_time"],
+            space_objects=spec["space_objects"],
+            dsec_sampler=spec["dsec_sampler"],
+            interpolator_class=spec["interpolator_class"],
         )
 
     def prepare_simulation_unit_params(self) -> list[FromPassagesOverTxRxStationPairParam]:
         spobjs_smpl_dsec, spobjs_smpl_states = sample_and_propagate_space_objects_states(
-            sampler=self.spec["dsec_sampler"],
-            spobjs=self.spec["space_objects"],
-            start_time=to_datetime64_us(self.spec["start_time"]),
-            end_time=to_datetime64_us(self.spec["end_time"]),
+            sampler=self.dsec_sampler,
+            spobjs=self.space_objects,
+            start_time=to_datetime64_us(self.start_time),
+            end_time=to_datetime64_us(self.end_time),
         )
         logger.debug("sample and propagate done")
 
         spobjs_interpolators = [
-            self.spec["interpolator_class"](spobj_smpl_states, spobj_smpl_dsec)
+            self.interpolator_class(spobj_smpl_states, spobj_smpl_dsec)
             for spobj_smpl_dsec, spobj_smpl_states in zip(spobjs_smpl_dsec, spobjs_smpl_states)
         ]
         logger.debug("interpolators done")
 
         passages_lists = find_passages(
-            spec=self.spec,
+            station_map=self.station_map,
+            station_id_pairs=self.station_id_pairs,
+            space_objects=self.space_objects,
+            epoch=self.epoch,
             spobjs_smpl_dsec=spobjs_smpl_dsec,
             spobjs_smpl_states=spobjs_smpl_states,
         )
         logger.debug("find_passages done")
 
         sim_units_param = derive_simulation_unit_params(
-            spec=self.spec, passages_lists=passages_lists, spobjs_interpolators=spobjs_interpolators
+            sch=self.schedule,
+            station_map=self.station_map,
+            exp_detail_map=self.exp_detail_map,
+            space_objects=self.space_objects,
+            passages_lists=passages_lists,
+            spobjs_interpolators=spobjs_interpolators,
         )
         # filter away param with empty schedule
         sim_units_param = [
