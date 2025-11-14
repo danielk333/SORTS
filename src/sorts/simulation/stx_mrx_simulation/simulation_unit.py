@@ -134,29 +134,33 @@ def calc_gain(
     # will be populated to [tx_gain_arr, rx_gain_arr]
     gain_arr_list: list[npt.NDArray[np.float64]] = []
 
-    for beam, spobj_stn_enu in zip([tx_stn.beam, rx_stn.beam], [spobj_tx_enu, spobj_rx_enu]):
+    for stn, spobj_stn_enu, pt_key in zip(
+        [tx_stn, rx_stn],
+        [spobj_tx_enu, spobj_rx_enu],
+        [_K.tx_pointing, _K.rx_pointing],
+    ):
         # early return for empty cases
         # NOTE: this is particularly needed because some `.gain` does not work with empty parameters (e.g. beam.parameters["pointing"])
         # TODO: add test case for empty case?
         if len(state[_K.multi_index]) == 0:
             gain_arr_list.append(np.empty(0, dtype=np.float64))
 
-        elif tx_stn.beam_parameters is None:
+        elif stn.beam_parameters is None:
             # TODO: remove this hack; see issues #25 for details
             raise RuntimeError(
                 "A hack of injecting `beam_parameters` into `tx_stn.beam_parameters` is currently required for gain calculation"
             )
 
         else:
-            beam_parameters = tx_stn.beam_parameters
+            beam_parameters = stn.beam_parameters
 
-            if "pointing" in tx_stn.beam_parameters.keys:
-                beam_parameters = tx_stn.beam_parameters.replace_and_broadcast(
-                    parameters=tx_stn.beam_parameters,
-                    new_parameters=dict(pointing=state[_K.tx_pointing].to_numpy()),
+            if "pointing" in stn.beam_parameters.keys:
+                beam_parameters = stn.beam_parameters.replace_and_broadcast(
+                    parameters=stn.beam_parameters,
+                    new_parameters=dict(pointing=state[pt_key].to_numpy()),
                 )
 
-            gain_arr_list.append(beam.gain(spobj_stn_enu[:3], beam_parameters))
+            gain_arr_list.append(stn.beam.gain(spobj_stn_enu[:3], beam_parameters))
 
     state[_K.gain_tx] = (_K.multi_index, gain_arr_list[0])
     state[_K.gain_rx] = (_K.multi_index, gain_arr_list[1])
