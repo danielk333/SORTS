@@ -51,35 +51,33 @@ fence_scan_controller = FenceScanController.from_scan_spec(
 sch = fence_scan_controller.generate(start_time, end_time)
 
 sim = StxMrxSimulation.from_controllers(
-    spec={
-        "controllers": [fence_scan_controller],
-        "schedule": sch,
-        "epoch": epoch,
-        "start_time": start_time,
-        "end_time": end_time,
-        "space_objects": [
-            sorts.SpaceObject(
-                sorts.propagator.SGP4,
-                propagator_options={"settings": {"out_frame": "ITRF"}},
-                a=7200e3,
-                e=0.02,
-                i=75,
-                raan=86,
-                aop=0,
-                mu0=60,
-                epoch=Time(epoch),
-                parameters={"d": 0.1},
-            )
-        ],
-        "dsec_sampler": lambda orbit, start_time, end_time: sorts.equidistant_sampling(
-            orbit=orbit,
-            start_t=(to_pydatetime(start_time) - to_pydatetime(epoch)).total_seconds(),
-            end_t=(to_pydatetime(end_time) - to_pydatetime(epoch)).total_seconds(),
-            max_dpos=1e3,
-        ),
-        # interpolator_class=sorts.interpolation.Legendre8,
-        "interpolator_class": sorts.interpolation.Linear,
-    }
+    controllers=[fence_scan_controller],
+    schedule=sch,
+    epoch=epoch,
+    start_time=start_time,
+    end_time=end_time,
+    space_objects=[
+        sorts.SpaceObject(
+            sorts.propagator.SGP4,
+            propagator_options={"settings": {"out_frame": "ITRF"}},
+            a=7200e3,
+            e=0.02,
+            i=75,
+            raan=86,
+            aop=0,
+            mu0=60,
+            epoch=Time(epoch),
+            parameters={"d": 0.1},
+        )
+    ],
+    dsec_sampler=lambda orbit, start_time, end_time: sorts.equidistant_sampling(
+        orbit=orbit,
+        start_t=(to_pydatetime(start_time) - to_pydatetime(epoch)).total_seconds(),
+        end_t=(to_pydatetime(end_time) - to_pydatetime(epoch)).total_seconds(),
+        max_dpos=1e3,
+    ),
+    # interpolator_class=sorts.interpolation.Legendre8,
+    interpolator_class=sorts.interpolation.Linear,
 )
 
 obss = sim.run()

@@ -30,19 +30,6 @@ class SpaceObjectDsecSampler(t.Protocol):
     ) -> npt.NDArray[Float64_as_sec]: ...
 
 
-class SpecByControllers(t.TypedDict):
-    """A TypedDict of params"""
-
-    controllers: t.Sequence[controller.ControllerBase]
-    schedule: Schedule
-    epoch: Datetime_Like
-    start_time: Datetime_Like
-    end_time: Datetime_Like
-    space_objects: t.Sequence[sorts.SpaceObject]
-    dsec_sampler: SpaceObjectDsecSampler  # TODO: support different sampler for different obj?
-    interpolator_class: type[Interpolator]
-
-
 def sample_and_propagate_space_objects_states(
     sampler: SpaceObjectDsecSampler,
     spobjs: t.Sequence[sorts.SpaceObject],
@@ -210,7 +197,7 @@ class StxMrxSimulation:
         self.start_time = start_time
         self.end_time = end_time
         self.space_objects = space_objects
-        self.dsec_sampler = dsec_sampler
+        self.dsec_sampler = dsec_sampler  # TODO: support different sampler for different obj?
         # TODO: we need to implement falback mechanism,
         #   e.g. a `Legendre8` `Interpolator` requires >=8 points, but sometime it might get less than that
         self.interpolator_class = interpolator_class
@@ -219,14 +206,24 @@ class StxMrxSimulation:
         self.obss: list[Observation] = []
 
     @classmethod
-    def from_controllers(cls, spec: SpecByControllers):
+    def from_controllers(
+        cls,
+        controllers: t.Sequence[controller.ControllerBase],
+        schedule: Schedule,
+        epoch: Datetime_Like,
+        start_time: Datetime_Like,
+        end_time: Datetime_Like,
+        space_objects: t.Sequence[sorts.SpaceObject],
+        dsec_sampler: SpaceObjectDsecSampler,
+        interpolator_class: type[Interpolator],
+    ):
         """A constructor method"""
 
         stn_map: dict[StationId, Station] = {}
         stn_id_pairs_set: set[tuple[StationId, StationId]] = set()
         exp_detail_map: schedule.ExperimentDetailMap = {}
 
-        for ctrl in spec["controllers"]:
+        for ctrl in controllers:
             stn_map.update(ctrl.get_station_map())
 
             for pairs in ctrl.get_experiment_id_station_id_pairs_map().values():
@@ -238,14 +235,14 @@ class StxMrxSimulation:
         return cls(
             station_map=stn_map,
             station_id_pairs=list(stn_id_pairs_set),
-            schedule=spec["schedule"],
+            schedule=schedule,
             exp_detail_map=exp_detail_map,
-            epoch=spec["epoch"],
-            start_time=spec["start_time"],
-            end_time=spec["end_time"],
-            space_objects=spec["space_objects"],
-            dsec_sampler=spec["dsec_sampler"],
-            interpolator_class=spec["interpolator_class"],
+            epoch=epoch,
+            start_time=start_time,
+            end_time=end_time,
+            space_objects=space_objects,
+            dsec_sampler=dsec_sampler,
+            interpolator_class=interpolator_class,
         )
 
     def prepare_simulation_unit_params(self) -> list[FromPassagesOverTxRxStationPairParam]:

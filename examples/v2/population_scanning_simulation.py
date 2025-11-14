@@ -105,17 +105,15 @@ if Path(pickle_fpath).is_file():
         calc_time: float = saved_data["calc_time"]
 else:
     sim = StxMrxSimulation.from_controllers(
-        spec={
-            "controllers": [fence_scan_controller],
-            "schedule": sch,
-            "epoch": epoch,
-            "start_time": start_time,
-            "end_time": end_time,
-            "space_objects": space_objects,
-            "dsec_sampler": dsec_sampler,
-            # "interpolator_class":sorts.interpolation.Legendre8,
-            "interpolator_class": sorts.interpolation.Linear,
-        }
+        controllers=[fence_scan_controller],
+        schedule=sch,
+        epoch=epoch,
+        start_time=start_time,
+        end_time=end_time,
+        space_objects=space_objects,
+        dsec_sampler=dsec_sampler,
+        # interpolator_class=sorts.interpolation.Legendre8,
+        interpolator_class=sorts.interpolation.Linear,
     )
     calc_start_time = time.perf_counter()
     obss = sim.run()
