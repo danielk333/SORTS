@@ -381,10 +381,16 @@ class SimulationUnit:
             np.linalg.norm(spobj_rx_enu[:3, :], axis=0),
         )
 
-        self._state[_K.two_way_range] = range_tx + range_rx
+        self._state[_K.two_way_range] = (
+            _K.multi_index,
+            range_tx + range_rx,
+        )
         v_tx = np.sum(spobj_tx_enu[:3, :] * spobj_tx_enu[3:, :], axis=0) / range_tx
         v_rx = np.sum(spobj_rx_enu[:3, :] * spobj_rx_enu[3:, :], axis=0) / range_rx
-        self._state[_K.two_way_range_rate] = v_tx + v_rx
+        self._state[_K.two_way_range_rate] = (
+            _K.multi_index,
+            v_tx + v_rx,
+        )
 
         obss = self.get_observations()
         self.observations = obss
