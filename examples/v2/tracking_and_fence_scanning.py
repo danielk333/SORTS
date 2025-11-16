@@ -91,15 +91,10 @@ spobjs = [tracked_spobj, *[spobj_pop.get_object(i) for i in range(spobj_pop.shap
 
 # we can also use a lambda function, but we cannot pickle the whole simulation in that case
 #  (python's pickle does not support lambda function)
-# def dsec_sampler(orbit, start_time, end_time):
-#     return sorts.equidistant_sampling(
-#         orbit=orbit,
-#         start_t=(to_pydatetime(start_time) - to_pydatetime(epoch)).total_seconds(),
-#         end_t=(to_pydatetime(end_time) - to_pydatetime(epoch)).total_seconds(),
-#         max_dpos=1e3,
-#     )
-def dsec_sampler(orbit, start_time, end_time):
-    return np.arange(0, (end_time - start_time) / np.timedelta64(1, "s"), 120, dtype=np.float64)
+def dsec_sampler(orbit, epoch, start_time, end_time):
+    dt = (end_time - start_time) / np.timedelta64(1, "s")
+    t0 = (start_time - epoch) / np.timedelta64(1, "s")
+    return np.arange(t0, t0 + dt, 120, dtype=np.float64)
 
 
 tracker_ctrl = TrackerController.from_space_object(

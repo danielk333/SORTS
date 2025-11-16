@@ -88,7 +88,7 @@ print(f"clamped population size: {len(space_objects)}")
 
 # we can also use a lambda function, but we cannot pickle the whole simulation in that case
 #  (python's pickle does not support lambda function)
-def dsec_sampler(orbit, start_time, end_time):
+def dsec_sampler(orbit, epoch, start_time, end_time):
     return sorts.equidistant_sampling(
         orbit=orbit,
         start_t=(to_pydatetime(start_time) - to_pydatetime(epoch)).total_seconds(),

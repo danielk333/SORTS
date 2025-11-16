@@ -136,8 +136,10 @@ def south_to_north_circular_orbit_test():
         uid=2,
     )
 
-    def dsec_sampler(orbit, start_time, end_time):
-        return np.arange(0, (end_time - start_time) / np.timedelta64(1, "s"), 30, dtype=np.float64)
+    def dsec_sampler(orbit, epoch, start_time, end_time):
+        dt = (end_time - start_time) / np.timedelta64(1, "s")
+        t0 = (start_time - epoch) / np.timedelta64(1, "s")
+        return np.arange(t0, t0 + dt, dsec_sampling_intv, dtype=np.float64)
 
     fence_scan_ctrl = FenceScanController.from_scan_spec(
         tx_station=tx_0_stn,

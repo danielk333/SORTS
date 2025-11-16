@@ -35,8 +35,10 @@ matplotlib.use("Agg")  # Use a non-GUI backend
 # TODO: we need a sampler class;
 #   this dsec_sampler func is move to top level because pickle won't work otherwise;
 #   class should work better with pickle;
-def dsec_sampler(orbit, start_time, end_time):
-    return np.arange(0, (end_time - start_time) / np.timedelta64(1, "s"), 120, dtype=np.float64)
+def dsec_sampler(orbit, epoch, start_time, end_time):
+    dt = (end_time - start_time) / np.timedelta64(1, "s")
+    t0 = (start_time - epoch) / np.timedelta64(1, "s")
+    return np.arange(t0, t0 + dt, 120, dtype=np.float64)
 
 
 class WParam(t.TypedDict):
