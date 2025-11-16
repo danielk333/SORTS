@@ -1,4 +1,4 @@
-import logging, time, typing as t, pickle
+import logging, time, typing as t, pickle, argparse
 from pathlib import Path
 from datetime import datetime
 import numpy as np
@@ -7,6 +7,7 @@ from astropy.time import Time
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from tqdm import tqdm
 import sorts
 from sorts import types, interpolation, population, propagator, radar, ExperimentDetail
 from sorts.space_object import SpaceObject
@@ -26,10 +27,24 @@ from sorts.simulation.stx_mrx_simulation import (
 
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger("matplotlib").setLevel(logging.WARNING) # suppress matplotlib logs below "warning"; fmt: skip;
+logging.getLogger("sorts.propagator").setLevel(logging.WARNING)
+logging.getLogger("sorts.frames").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 logger.info("starting example")
 
 matplotlib.use("Agg")  # Use a non-GUI backend
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--out_dir", type=Path, default=Path(__file__).parent / ".." / ".." / "local_data"
+)
+parser.add_argument(
+    "--master_catalog",
+    type=Path,
+    default=Path(__file__).parent / ".." / ".." / "local_data" / "celn_20090501_00.sim",
+    dest="catalog_fpath",
+)
+args = parser.parse_args()
 
 
 # TODO: we need a sampler class;
@@ -55,12 +70,14 @@ class MpiExample(sorts.MpiQueuedExecution):
         ##
 
         save_dname = f"[{datetime.now().replace(microsecond=0).isoformat(sep=" ").replace(":", ".").replace("-", ".")}Z] sparse_tracking_exp_trial_01"
-        save_dpath = Path(__file__).parent / ".." / ".." / "local_data" / save_dname
+        save_dpath = args.out_dir / save_dname
         ensure_directory_exist(save_dpath)
 
-        start_time = Time("2025-01-01 02:45:00")
+        start_time = Time("2025-01-01 00:00:00")
         end_time = Time("2025-01-01 03:00:00")
+        # end_time = Time("2025-01-02 00:00:00")
         control_slice_duration = np.timedelta64(100_000, "us")  # 100ms
+        coherent_integration_time = 0.04
 
         radar_sys = sorts.radar.radars.nostra.gen_nostra(
             frequency=3.2e9,
@@ -75,7 +92,7 @@ class MpiExample(sorts.MpiQueuedExecution):
             aperture_efficiency=0.4,
             duty_cycle=0.2,
             t_sky=10.0,
-            coherent_integration_time=0.04,
+            coherent_integration_time=coherent_integration_time,
             bandwidth_reduction_to_downsampling_ratio=10,
         )
         # TODO: these patching of station prop should be integrated into codebase
@@ -85,48 +102,37 @@ class MpiExample(sorts.MpiQueuedExecution):
         rx_station_0.uid = 1
         rx_station_1: radar.Station = radar_sys.rx[1]
         rx_station_1.uid = 2
+        rx_station_2: radar.Station = radar_sys.rx[2]
+        rx_station_2.uid = 3
 
-        known_spobj = SpaceObject(
-            oid=-1,
-            propagator=propagator.SGP4,
-            propagator_options={"settings": {"out_frame": "ITRF"}},
-            a=7200e3,
-            e=0.02,
-            i=75,
-            raan=86,
-            aop=0,
-            mu0=60,
-            epoch=start_time,
-            parameters={"d": 0.1},
-        )
-
-        catalog_fpath = Path(__file__).parent / ".." / ".." / "local_data" / "celn_20090501_00.sim"
         _spobj_pop = population.master_catalog(
-            catalog_fpath,
+            args.catalog_fpath,
+            mjd0=t.cast(float, start_time.mjd),
             propagator=propagator.SGP4,
             propagator_options={"settings": {"in_frame": "TEME", "out_frame": "ITRF"}},
         )
-        rand_seed = 120389
-        spobj_pop = population.master_catalog_factor(_spobj_pop, treshhold=1.0, seed=rand_seed)
-        spobjs = [
-            known_spobj,
-            *[spobj_pop.get_object(i) for i in range(spobj_pop.shape[0])][0:10],
-        ]
+        rand_seed = 1203
+        spobj_pop = population.master_catalog_factor(_spobj_pop, treshhold=1e-2, seed=rand_seed)
+        rng = np.random.default_rng(seed=rand_seed)
+        oids = rng.choice(len(spobj_pop), 5, replace=False)
+        spobjs = [spobj_pop.get_object(i) for i in oids]
 
         tracker_ctrls = [
             SparseTrackerController.from_space_object(
                 SparseTrackerController.FromSpaceObjectParam(
                     tx_station=tx_station,
-                    rx_stations=[rx_station_0, rx_station_1],
+                    rx_stations=[rx_station_0, rx_station_1, rx_station_2],
                     exp_detail=ExperimentDetail(
                         id=exp_id,
+                        # not used
                         coh_int_bandwidth=1.0,
                         ipp=1.0,
                         pulse_length=1.0,
-                        power=5000000.0,
-                        bandwidth=52.08333333333333,
                         duty_cycle=1.0,
-                        noise_temp=150.0,
+                        # --
+                        power=tx_station.power,
+                        bandwidth=1 / coherent_integration_time,
+                        noise_temp=rx_station_0.noise,
                         slice_duration=control_slice_duration,
                     ),
                     space_object=spobj,
@@ -137,9 +143,13 @@ class MpiExample(sorts.MpiQueuedExecution):
             for exp_id, spobj in enumerate(spobjs)
         ]
 
-        tracker_schs = [
-            tracker_ctrl.generate(start_time, end_time) for tracker_ctrl in tracker_ctrls
-        ]
+        pbar = tqdm(desc="Creating controllers", total=len(spobjs))
+        tracker_schs = []
+        for tracker_ctrl in tracker_ctrls:
+            tracker_schs.append(tracker_ctrl.generate(start_time, end_time))
+            pbar.update(1)
+        pbar.close()
+        del pbar  # otherwise will break pickle
 
         exp_id_stn_id_pairs_map = {}
         for tracker_ctrl in reversed(tracker_ctrls):
@@ -165,8 +175,8 @@ class MpiExample(sorts.MpiQueuedExecution):
                 end_time=end_time,
                 space_objects=spobj_grp,
                 dsec_sampler=dsec_sampler,
-                # interpolator_class=interpolation.Legendre8,
-                interpolator_class=interpolation.Linear,
+                interpolator_class=interpolation.Legendre8,
+                # interpolator_class=interpolation.Linear,
             )
             safe_pickle(sim, save_subdpath / "sim.pickle")
 
@@ -185,6 +195,7 @@ class MpiExample(sorts.MpiQueuedExecution):
                 for sim_units_param in sim_units_params
             ]
             self.mpi_master_proc_loop(job_params)
+            # note to self: barrier here for finish sim
 
             calc_time = time.perf_counter() - calc_start_time
             logger.info(f"mpi_master_proc_loop took {calc_time} sec")
@@ -206,14 +217,14 @@ class MpiExample(sorts.MpiQueuedExecution):
 
         obss: list[stx_mrx_simulation.Observation] = []
         max_snrs_value = []
-        max_snrs_time: list[types.Datetime64_us] = []
+        max_snrs_time = []
         max_snrs_spobj_id: list[int] = []
 
-        save_subdpath = save_dpath / f"{0}"
-
         # a tuple of 7 SimulationUnit: (original x1,  ...perturbated x6)
+        save_subdpath = save_dpath / "plots"
+        ensure_directory_exist(save_subdpath)
         jaco_sim_unit_tuple: tuple[SimulationUnit, ...]
-        for jaco_sim_unit_tuple in zip(*sim_unit_grps):
+        for idx, jaco_sim_unit_tuple in enumerate(zip(*sim_unit_grps)):
 
             sim_unit, *pert_sim_units = jaco_sim_unit_tuple
             spobj, *pert_spobjs = [su.space_object for su in jaco_sim_unit_tuple]
@@ -225,6 +236,8 @@ class MpiExample(sorts.MpiQueuedExecution):
             pert_obss_grp = [su.observations for su in pert_sim_units] # i.e. a list of 6 `list[Observation]`; fmt: skip;
             obss.extend(true_obss)
 
+            snrs_time = []
+            snrs = []
             # a tuple of 7 Observation: (original x1,  ...perturbated x6)
             jaco_obs_tuple: tuple[Observation, ...]
             for jaco_obs_tuple in zip(true_obss, *pert_obss_grp):
@@ -237,7 +250,7 @@ class MpiExample(sorts.MpiQueuedExecution):
                 true_obs_state = true_obs_state[{_SuK.multi_index: above_thld_true_obs_state_idx}]
 
                 # skip the calculation if we do not have enough datapoints above the threshold
-                if len(true_obs_state[_SuK.multi_index]) < 5:
+                if len(true_obs_state[_SuK.multi_index]) < 1:
                     continue
 
                 # get the same filtered state from the perturbated observations
@@ -253,6 +266,8 @@ class MpiExample(sorts.MpiQueuedExecution):
 
                 max_snrs_value.append(true_obs_state_max_snr_value)
                 max_snrs_time.append(true_obs_state_max_snr_time)
+                snrs_time.append(true_obs_state[_SuK.time].to_numpy())
+                snrs.append(true_obs_state[_SuK.snr].to_numpy())
                 max_snrs_spobj_id.append(sim_unit.space_object.oid)
 
                 # calc the jacobian
@@ -278,21 +293,26 @@ class MpiExample(sorts.MpiQueuedExecution):
                     [r_stds_tx**2] * num_meas + [v_stds_tx**2] * num_meas, dtype=np.float64
                 )
                 Sigma_m_inv = np.diag(1.0 / Sigma_m_diag_elms)
-                Sigma_orb = np.linalg.inv(np.transpose(J) @ Sigma_m_inv @ J)
+                try:
+                    Sigma_orb = np.linalg.inv(np.transpose(J) @ Sigma_m_inv @ J)
+                except np.linalg.LinAlgError:
+                    Sigma_orb = np.full((6, 6), np.nan, dtype=np.float64)
                 logger.info(
                     f"Sigma_orb: {Sigma_orb}"
                 )  # TODO: just a place holder usage of the Sigma_orb
 
             # plotting
-            logger.info(f"start generating plots...")
+            logger.info("start generating plots...")
+            snrs = np.concatenate(snrs)
+            snrs_time = np.concatenate(snrs_time)
 
             fig, ax = plt.subplots()
-            ax.set_title("snr vs time")
-            ax.scatter(max_snrs_time, max_snrs_value, s=3)
+            ax.set_title("snr dB vs time")
+            ax.scatter(snrs_time, 10 * np.log10(snrs), s=3)
             ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d %H:%M:%S"))
             fig.autofmt_xdate()
             # ax.set_yscale("log")
-            plt.savefig(save_subdpath / "max_snr_vs_time.png", dpi=300, bbox_inches="tight")
+            plt.savefig(save_subdpath / f"{idx}_max_snr_vs_time.png", dpi=300, bbox_inches="tight")
 
             logger.info(f"done generating plots")
 
