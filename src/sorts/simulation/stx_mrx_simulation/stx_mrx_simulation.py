@@ -168,6 +168,7 @@ def find_passages(
     return passages_list
 
 
+# TODO: should be tailored per experiment?
 def iter_mpi_simulation_results(save_dir: Path):
     for fpath in save_dir.glob(sim_unit_fname_tpl.format(id="*")):
         with open(fpath, "rb") as f:

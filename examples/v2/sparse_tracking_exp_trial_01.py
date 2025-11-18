@@ -10,7 +10,7 @@ import matplotlib.dates as mdates
 from tqdm import tqdm
 import sorts
 from sorts import types, interpolation, population, propagator, radar, ExperimentDetail
-from sorts.space_object import SpaceObject
+from sorts.space_object import SpaceObject, SpaceObjectId
 from sorts.schedule.priority_scheduling import priority_scheduling
 from sorts.controller import SparseTrackerController
 from sorts.simulation.funcs import (
@@ -46,6 +46,9 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
+spobj_dname_tpl = "spobj.{id}"
+pert_dname_tpl = "pert.{id}"
+
 
 # TODO: we need a sampler class;
 #   this dsec_sampler func is move to top level because pickle won't work otherwise;
@@ -58,7 +61,7 @@ def dsec_sampler(orbit, epoch, start_time, end_time):
 
 class WParam(t.TypedDict):
     param: SimulationUnit.FromPassagesOverTxRxStationPairParam
-    persist_dpath: Path
+    persist_fpath: Path
 
 
 class MpiExample(sorts.MpiQueuedExecution):
@@ -162,11 +165,13 @@ class MpiExample(sorts.MpiQueuedExecution):
         sim_env = dict(locals())
         safe_pickle(sim_env, save_dpath / "sim_env.pickle")
 
+        # a dict to hold the pickle fpath of 7 sim_units (true x1 + pert x6) of each spobj for easier result analysis later
+        sim_unit_fpath_grp_by_pert: dict[SpaceObjectId, dict[int, list[Path]]] = {}
+
         # repeat the simulation for all duplicates from perturbation
         spobj_jacobian_tuples = duplicate_and_perturbate_space_objects(spobjs)
-        for idx, spobj_grp in enumerate(zip(*spobj_jacobian_tuples)):
-            save_subdpath = save_dpath / f"{idx}"
-
+        spobj_grp_by_pert = list(zip(*spobj_jacobian_tuples)) # i.e. len 7, [true_spobj_list, pert_spobj_list...x6]; fmt: skip;
+        for pert_idx, spobj_grp in enumerate(spobj_grp_by_pert):
             sim = StxMrxSimulation.from_controllers(
                 controllers=tracker_ctrls,
                 schedule=master_sch,
@@ -178,7 +183,7 @@ class MpiExample(sorts.MpiQueuedExecution):
                 interpolator_class=interpolation.Legendre8,
                 # interpolator_class=interpolation.Linear,
             )
-            safe_pickle(sim, save_subdpath / "sim.pickle")
+            safe_pickle(sim, save_dpath / "sim" / pert_dname_tpl.format(id=pert_idx) / "sim.pickle")
 
             sim_units_params = sim.prepare_simulation_unit_params()
 
@@ -190,10 +195,24 @@ class MpiExample(sorts.MpiQueuedExecution):
             job_params: list[WParam] = [
                 {
                     "param": sim_units_param,
-                    "persist_dpath": save_subdpath,
+                    "persist_fpath": save_dpath
+                    / spobj_dname_tpl.format(id=sim_units_param.spobj.oid)
+                    / pert_dname_tpl.format(id=pert_idx)
+                    / self.sim_unit_fname_tpl.format(id=sim_units_param.id),
                 }
                 for sim_units_param in sim_units_params
             ]
+
+            for job_param in job_params:
+                spobj_id = job_param["param"].spobj.oid
+                if spobj_id not in sim_unit_fpath_grp_by_pert:
+                    sim_unit_fpath_grp_by_pert[spobj_id] = {}
+
+                if pert_idx not in sim_unit_fpath_grp_by_pert[spobj_id]:
+                    sim_unit_fpath_grp_by_pert[spobj_id][pert_idx] = [job_param["persist_fpath"]]
+                else:
+                    sim_unit_fpath_grp_by_pert[spobj_id][pert_idx].append(job_param["persist_fpath"]) # fmt: skip
+
             self.mpi_master_proc_loop(job_params)
             # note to self: barrier here for finish sim
 
@@ -206,13 +225,6 @@ class MpiExample(sorts.MpiQueuedExecution):
 
         # the analysis will mostly use the group of space objects without perturbation,
         # the perturbated groups will be used for jacobian calculation
-        sim_unit_grps: list[list[SimulationUnit]] = []
-        for idx, _spobj_grp in enumerate(zip(*spobj_jacobian_tuples)):
-            save_subdpath = save_dpath / f"{idx}"
-            sim_unit_grps.append(
-                list(stx_mrx_simulation.iter_mpi_simulation_results(save_subdpath))
-            )
-
         calc_start_time = time.perf_counter()
 
         obss: list[stx_mrx_simulation.Observation] = []
@@ -221,100 +233,121 @@ class MpiExample(sorts.MpiQueuedExecution):
         max_snrs_spobj_id: list[int] = []
 
         # a tuple of 7 SimulationUnit: (original x1,  ...perturbated x6)
-        save_subdpath = save_dpath / "plots"
-        ensure_directory_exist(save_subdpath)
-        jaco_sim_unit_tuple: tuple[SimulationUnit, ...]
-        for idx, jaco_sim_unit_tuple in enumerate(zip(*sim_unit_grps)):
+        for spobj_id in sim_unit_fpath_grp_by_pert:
 
-            sim_unit, *pert_sim_units = jaco_sim_unit_tuple
-            spobj, *pert_spobjs = [su.space_object for su in jaco_sim_unit_tuple]
-            logger.info(f"processing result from SimulationUnit <{sim_unit.id}>")
+            true_simult_sim_unit_set: list[SimulationUnit] = []
+            for fpath in sim_unit_fpath_grp_by_pert[spobj_id][0]:
+                with open(fpath, "rb") as f:
+                    true_simult_sim_unit_set.append(pickle.load(f))
+
+            pert_simult_sim_unit_sets: list[list[SimulationUnit]] = []
+            for i in range(6):
+                pert_simult_sim_unit_sets.append([])
+                for fpath in sim_unit_fpath_grp_by_pert[spobj_id][i + 1]:
+                    with open(fpath, "rb") as f:
+                        pert_simult_sim_unit_sets[i].append(pickle.load(f))
+
+            spobj = true_simult_sim_unit_set[0].space_object
+            pert_spobjs = [su[0].space_object for su in pert_simult_sim_unit_sets]
 
             _SuK = SimulationUnit._K
 
-            true_obss = sim_unit.observations
-            pert_obss_grp = [su.observations for su in pert_sim_units] # i.e. a list of 6 `list[Observation]`; fmt: skip;
-            obss.extend(true_obss)
+            sim_unit: SimulationUnit
+            pert_sim_units: list[SimulationUnit]
+            for sim_unit, *pert_sim_units in zip(
+                true_simult_sim_unit_set, *pert_simult_sim_unit_sets
+            ):
+                true_obss = sim_unit.observations
+                pert_obss_grp = [su.observations for su in pert_sim_units] # i.e. a list of 6 `list[Observation]`; fmt: skip;
+                obss.extend(true_obss)
 
-            snrs_time = []
-            snrs = []
-            # a tuple of 7 Observation: (original x1,  ...perturbated x6)
-            jaco_obs_tuple: tuple[Observation, ...]
-            for jaco_obs_tuple in zip(true_obss, *pert_obss_grp):
-                # calc the jacobian and Sigma_orb for each observation
-                true_obs, *pert_obss = jaco_obs_tuple
+                snrs_time = []
+                snrs = []
+                # a tuple of 7 Observation: (original x1,  ...perturbated x6)
+                jaco_obs_tuple: tuple[Observation, ...]
+                for jaco_obs_tuple in zip(true_obss, *pert_obss_grp):
+                    # calc the jacobian and Sigma_orb for each observation
+                    true_obs, *pert_obss = jaco_obs_tuple
 
-                # get the state corresponding to the observation, and filter it by snr
-                true_obs_state = true_obs.get_state_slice()
-                above_thld_true_obs_state_idx = true_obs_state[_SuK.snr].to_numpy() < 10 ** (12 / 10) # 12dB threshold; fmt: skip;
-                true_obs_state = true_obs_state[{_SuK.multi_index: above_thld_true_obs_state_idx}]
+                    # get the state corresponding to the observation, and filter it by snr
+                    true_obs_state = true_obs.get_state_slice()
+                    above_thld_true_obs_state_idx = true_obs_state[_SuK.snr].to_numpy() < 10 ** (12 / 10) # 12dB threshold; fmt: skip;
+                    true_obs_state = true_obs_state[
+                        {_SuK.multi_index: above_thld_true_obs_state_idx}
+                    ]
 
-                # skip the calculation if we do not have enough datapoints above the threshold
-                if len(true_obs_state[_SuK.multi_index]) < 1:
-                    continue
+                    # skip the calculation if we do not have enough datapoints above the threshold
+                    if len(true_obs_state[_SuK.multi_index]) < 1:
+                        continue
 
-                # get the same filtered state from the perturbated observations
-                pert_obs_states = [
-                    obs.get_state_slice()[{_SuK.multi_index: above_thld_true_obs_state_idx}]
-                    for obs in pert_obss
-                ]
+                    # get the same filtered state from the perturbated observations
+                    pert_obs_states = [
+                        obs.get_state_slice()[{_SuK.multi_index: above_thld_true_obs_state_idx}]
+                        for obs in pert_obss
+                    ]
 
-                argmax_snr = t.cast(xr.DataArray, true_obs_state[_SuK.snr].argmax())
-                true_obs_state_at_max_snr = true_obs_state[{_SuK.multi_index: argmax_snr.item()}]
-                true_obs_state_max_snr_value = true_obs_state_at_max_snr[_SuK.snr].item()
-                true_obs_state_max_snr_time = true_obs_state_at_max_snr[_SuK.time].item()
+                    argmax_snr = t.cast(xr.DataArray, true_obs_state[_SuK.snr].argmax())
+                    true_obs_state_at_max_snr = true_obs_state[
+                        {_SuK.multi_index: argmax_snr.item()}
+                    ]
+                    true_obs_state_max_snr_value = true_obs_state_at_max_snr[_SuK.snr].item()
+                    true_obs_state_max_snr_time = true_obs_state_at_max_snr[_SuK.time].item()
 
-                max_snrs_value.append(true_obs_state_max_snr_value)
-                max_snrs_time.append(true_obs_state_max_snr_time)
-                snrs_time.append(true_obs_state[_SuK.time].to_numpy())
-                snrs.append(true_obs_state[_SuK.snr].to_numpy())
-                max_snrs_spobj_id.append(sim_unit.space_object.oid)
+                    max_snrs_value.append(true_obs_state_max_snr_value)
+                    max_snrs_time.append(true_obs_state_max_snr_time)
+                    snrs_time.append(true_obs_state[_SuK.time].to_numpy())
+                    snrs.append(true_obs_state[_SuK.snr].to_numpy())
+                    max_snrs_spobj_id.append(sim_unit.space_object.oid)
 
-                # calc the jacobian
-                num_meas = len(true_obs_state[_SuK.multi_index])  # num of measurements
-                num_var = len(spobj.state._cart[:, 0])  # num of independent variables
-                r_orig = true_obs_state[_SuK.two_way_range].to_numpy()
-                v_orig = true_obs_state[_SuK.two_way_range_rate].to_numpy()
-                J = np.zeros([num_meas * 2, num_var], dtype=np.float64)  # init the jacobian
-                for idx, x_orig in enumerate(spobj.state._cart[:, 0]):
-                    x_pert = pert_spobjs[idx].state._cart[idx, 0]
-                    r_pert = pert_obs_states[idx][_SuK.two_way_range].to_numpy()
-                    v_pert = pert_obs_states[idx][_SuK.two_way_range_rate].to_numpy()
+                    # calc the jacobian
+                    num_meas = len(true_obs_state[_SuK.multi_index])  # num of measurements
+                    num_var = len(spobj.state._cart[:, 0])  # num of independent variables
+                    r_orig = true_obs_state[_SuK.two_way_range].to_numpy()
+                    v_orig = true_obs_state[_SuK.two_way_range_rate].to_numpy()
+                    J = np.zeros([num_meas * 2, num_var], dtype=np.float64)  # init the jacobian
+                    for pert_idx, x_orig in enumerate(spobj.state._cart[:, 0]):
+                        x_pert = pert_spobjs[pert_idx].state._cart[pert_idx, 0]
+                        r_pert = pert_obs_states[pert_idx][_SuK.two_way_range].to_numpy()
+                        v_pert = pert_obs_states[pert_idx][_SuK.two_way_range_rate].to_numpy()
 
-                    J[:num_meas, idx] = (r_pert - r_orig) / (x_pert - x_orig)
-                    J[num_meas:, idx] = (v_pert - v_orig) / (x_pert - x_orig)
+                        J[:num_meas, pert_idx] = (r_pert - r_orig) / (x_pert - x_orig)
+                        J[num_meas:, pert_idx] = (v_pert - v_orig) / (x_pert - x_orig)
 
-                logger.info(f"jacobian: {J}")  # TODO: just a place holder usage of the jacobian
+                    logger.info(f"jacobian: {J}")  # TODO: just a place holder usage of the jacobian
 
-                # calc covariance matrix for error estimation of linearized orbit determination
-                r_stds_tx = 10.0
-                v_stds_tx = 5.0
-                Sigma_m_diag_elms = np.array(
-                    [r_stds_tx**2] * num_meas + [v_stds_tx**2] * num_meas, dtype=np.float64
-                )
-                Sigma_m_inv = np.diag(1.0 / Sigma_m_diag_elms)
-                try:
-                    Sigma_orb = np.linalg.inv(np.transpose(J) @ Sigma_m_inv @ J)
-                except np.linalg.LinAlgError:
-                    Sigma_orb = np.full((6, 6), np.nan, dtype=np.float64)
-                logger.info(
-                    f"Sigma_orb: {Sigma_orb}"
-                )  # TODO: just a place holder usage of the Sigma_orb
+                    # calc covariance matrix for error estimation of linearized orbit determination
+                    r_stds_tx = 10.0
+                    v_stds_tx = 5.0
+                    Sigma_m_diag_elms = np.array(
+                        [r_stds_tx**2] * num_meas + [v_stds_tx**2] * num_meas, dtype=np.float64
+                    )
+                    Sigma_m_inv = np.diag(1.0 / Sigma_m_diag_elms)
+                    try:
+                        Sigma_orb = np.linalg.inv(np.transpose(J) @ Sigma_m_inv @ J)
+                    except np.linalg.LinAlgError:
+                        Sigma_orb = np.full((6, 6), np.nan, dtype=np.float64)
+                    logger.info(
+                        f"Sigma_orb: {Sigma_orb}"
+                    )  # TODO: just a place holder usage of the Sigma_orb
 
             # plotting
-            logger.info("start generating plots...")
-            snrs = np.concatenate(snrs)
-            snrs_time = np.concatenate(snrs_time)
+            # save_subdpath = save_dpath / "plots"
+            # ensure_directory_exist(save_subdpath)
+            # logger.info("start generating plots...")
+            # snrs = np.concatenate(snrs)
+            # snrs_time = np.concatenate(snrs_time)
 
-            fig, ax = plt.subplots()
-            ax.set_title("snr dB vs time")
-            ax.scatter(snrs_time, 10 * np.log10(snrs), s=3)
-            ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d %H:%M:%S"))
-            fig.autofmt_xdate()
-            # ax.set_yscale("log")
-            plt.savefig(save_subdpath / f"{idx}_max_snr_vs_time.png", dpi=300, bbox_inches="tight")
+            # fig, ax = plt.subplots()
+            # ax.set_title("snr dB vs time")
+            # ax.scatter(snrs_time, 10 * np.log10(snrs), s=3)
+            # ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d %H:%M:%S"))
+            # fig.autofmt_xdate()
+            # # ax.set_yscale("log")
+            # plt.savefig(
+            #     save_subdpath / f"{pert_idx}_max_snr_vs_time.png", dpi=300, bbox_inches="tight"
+            # )
 
-            logger.info(f"done generating plots")
+            # logger.info(f"done generating plots")
 
             print(f"len(obss): {len(obss)}")
 
@@ -324,10 +357,10 @@ class MpiExample(sorts.MpiQueuedExecution):
         return
 
     def worker_process(self, job_param):
+        job_param = t.cast(WParam, job_param)
+
         param = job_param["param"]
-        persist_dpath = job_param["persist_dpath"]
-        persist_fname = self.sim_unit_fname_tpl.format(id=param.id)
-        persist_fpath = persist_dpath / persist_fname
+        persist_fpath = job_param["persist_fpath"]
         worker_proc_rank = self.rank
 
         try:
@@ -344,6 +377,7 @@ class MpiExample(sorts.MpiQueuedExecution):
 
                 sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(param)
 
+                ensure_directory_exist(persist_fpath.parent)
                 safe_pickle(sim_unit, persist_fpath)
                 logger.info(f"worker: {worker_proc_rank} | `SimulationUnit.simulate` start")
                 sim_unit.simulate()
