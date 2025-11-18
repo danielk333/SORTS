@@ -70,6 +70,8 @@ import pyorb
 from astropy.time import Time, TimeDelta
 from sorts.types import EcefStates
 
+SpaceObjectId = int
+
 
 class SpaceObject(object):
     """Encapsulates a object in space who's dynamics is governed in time by a propagator.
@@ -146,7 +148,7 @@ class SpaceObject(object):
         propagator_args={},
         parameters={},
         epoch=Time(57125.7729, format="mjd"),
-        oid=1,
+        oid: SpaceObjectId = 1,
         **kwargs,
     ):
         self.oid = oid

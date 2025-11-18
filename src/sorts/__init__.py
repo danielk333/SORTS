@@ -61,7 +61,7 @@ from . import correlator
 from . import propagator
 
 # classes
-from .space_object import SpaceObject
+from .space_object import SpaceObject, SpaceObjectId
 from .population import Population
 from .propagator import Propagator
 from .radar import Scan
