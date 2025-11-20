@@ -75,6 +75,22 @@ def calc_jacobian(
     # num of measurements
     num_meas = len(obs_jaco_tuple_multistatic_set[0][0].get_state_slice()[_SuK.multi_index])
 
+    # TODO: remove, prints for debugging ---
+    obs_idx = 0
+    print(
+        (
+            "len(obs_state_jaco_tuple_multistatic_set[0][obs_idx].get_state_slice()[_SuK.time])",
+            len(obs_jaco_tuple_multistatic_set[0][obs_idx].get_state_slice()[_SuK.multi_index]),
+            len(obs_jaco_tuple_multistatic_set[1][obs_idx].get_state_slice()[_SuK.multi_index]),
+            len(obs_jaco_tuple_multistatic_set[2][obs_idx].get_state_slice()[_SuK.multi_index]),
+        )
+    )
+    print("obs_state_jaco_tuple_multistatic_set[0][obs_idx].passage")
+    print(obs_jaco_tuple_multistatic_set[0][obs_idx].passage)
+    print(obs_jaco_tuple_multistatic_set[1][obs_idx].passage)
+    print(obs_jaco_tuple_multistatic_set[2][obs_idx].passage)
+    # ---
+
     if any(
         [
             len(obs_state_jaco_tuple[0].get_state_slice()[_SuK.multi_index]) != num_meas
@@ -153,8 +169,8 @@ class MpiExample(sorts.MpiQueuedExecution):
         ensure_directory_exist(save_dpath)
 
         start_time = Time("2025-01-01 00:00:00")
-        end_time = Time("2025-01-01 03:00:00")
-        # end_time = Time("2025-01-02 00:00:00")
+        # end_time = Time("2025-01-01 03:00:00")
+        end_time = Time("2025-01-02 00:00:00")  # remove: adj for debugging
         control_slice_duration = np.timedelta64(100_000, "us")  # 100ms
         coherent_integration_time = 0.04
 
@@ -194,7 +210,10 @@ class MpiExample(sorts.MpiQueuedExecution):
         spobj_pop = population.master_catalog_factor(_spobj_pop, treshhold=1e-2, seed=rand_seed)
         rng = np.random.default_rng(seed=rand_seed)
         oids = rng.choice(len(spobj_pop), 5, replace=False)
-        spobjs = [spobj_pop.get_object(oid) for oid in oids]
+        # spobjs = [spobj_pop.get_object(i) for i in oids]
+        spobjs = [
+            spobj_pop.get_object(oid) for oid in oids if oid == 33244
+        ]  # remove: adj for debugging
 
         tracker_ctrls = [
             SparseTrackerController.from_space_object(
