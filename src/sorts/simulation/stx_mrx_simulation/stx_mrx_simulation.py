@@ -101,6 +101,8 @@ def derive_simulation_unit_params(
     for spobj, passages_of_a_spobj, spobj_states_interp in zip(
         space_objects, passages_lists, spobjs_interpolators
     ):
+        _SK = schedule._K
+
         groupped_passages = group_passages_by_tx_rx_station_pair(passages_of_a_spobj)
 
         for stn_id_pair, passages in groupped_passages.items():
@@ -108,6 +110,18 @@ def derive_simulation_unit_params(
             rx_stn = station_map[stn_id_pair[1]]
 
             filtered_sch = schedule.filter_by_time_ranges(sch, [ps.time_range for ps in passages])
+
+            # filter by station id
+            filtered_sch = filtered_sch.loc[
+                {
+                    _SK.multi_index: (
+                        slice(None),
+                        (stn_id_pair[0], stn_id_pair[1]),
+                        slice(None),
+                        slice(None),
+                    )
+                }
+            ]
 
             params.append(
                 FromPassagesOverTxRxStationPairParam(
