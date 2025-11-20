@@ -5,6 +5,7 @@ import numpy.typing as npt
 import pyorb
 import sorts
 from tqdm import tqdm
+# TODO: fix `schedule` namespace overlap issues in this file
 from sorts import schedule, controller, simulation
 from sorts.types import Datetime_Like, Float64_as_sec, Datetime64_us, Float64_as_sec, EcefStates
 from sorts.utils import to_datetime64_us
@@ -239,10 +240,12 @@ class StxMrxSimulation:
         interpolator_class: type[Interpolator],
     ):
         """A constructor method"""
+        # TODO: - the exp details are already computed outside? Should the `controllers` field be
+        # removed? or this classmethod? or what?
 
         stn_map: dict[StationId, Station] = {}
         stn_id_pairs_set: set[tuple[StationId, StationId]] = set()
-        exp_detail_map: schedule.ExperimentDetailMap = {}
+        exp_detail_map: ExperimentDetailMap = {}
 
         for ctrl in controllers:
             stn_map.update(ctrl.get_station_map())

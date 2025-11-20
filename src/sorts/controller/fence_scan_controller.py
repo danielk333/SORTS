@@ -73,6 +73,10 @@ class FenceScanController(ControllerBase):
         self.azimuth = azimuth
         self.min_elevation = min_elevation
         self.pointings_per_cycle = pointings_per_cycle
+        # TODO: probably make a new scan controller that can do optimal scan range selection based
+        # on angle between the tx and rx beam (as the angle goes to 0 the range step goes to
+        # infinity because the important parameter is the range overlap of the rx beam on the tx
+        # beam)
         self.scan_range = scan_range
         self.exp_detail = exp_detail
         self.station_id_pairs = station_id_pairs
@@ -151,6 +155,9 @@ class FenceScanController(ControllerBase):
 
     def generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> schedule.Schedule:
         """Generate the schedules."""
+        # TODO: write schedule to disk generally and then chunk load it as needed in the actual
+        # simulation, the general simulation pattern will be "1. propagate objects and generate
+        # states and make schedule, 2. run simulation, 3. analyze results"
 
         # The logic of this function:
         # 1. repeat the cycle of tx pointings from state to form the tx schedule
