@@ -11,7 +11,7 @@ import matplotlib.dates as mdates
 from tqdm import tqdm
 import sorts
 from sorts import interpolation, population, propagator, radar, ExperimentDetail
-from sorts.types import Tuple_7
+from sorts.types import Tuple_3, Tuple_7
 from sorts.space_object import SpaceObject, SpaceObjectId
 from sorts.schedule.priority_scheduling import priority_scheduling
 from sorts.controller import SparseTrackerController
@@ -67,17 +67,18 @@ def dsec_sampler(orbit, epoch, start_time, end_time):
 def calc_jacobian(
     true_spobj: SpaceObject,
     pert_spobjs: list[SpaceObject],
-    obs_state_jaco_tuple_multistatic_set: t.Sequence[Tuple_7[SimulationUnitState]],
+    obs_jaco_tuple_multistatic_set: t.Sequence[Tuple_7[Observation]],
 ) -> npt.NDArray[np.float64]:
-    multistatic_size = len(obs_state_jaco_tuple_multistatic_set)
+    multistatic_size = len(obs_jaco_tuple_multistatic_set)
     idp_vars = true_spobj.state._cart[:, 0]  # independent variables
 
     # num of measurements
-    num_meas = len(obs_state_jaco_tuple_multistatic_set[0][0][_SuK.multi_index])
+    num_meas = len(obs_jaco_tuple_multistatic_set[0][0].get_state_slice()[_SuK.multi_index])
+
     if any(
         [
-            len(obs_state_jaco_tuple[0][_SuK.multi_index]) != num_meas
-            for obs_state_jaco_tuple in obs_state_jaco_tuple_multistatic_set
+            len(obs_state_jaco_tuple[0].get_state_slice()[_SuK.multi_index]) != num_meas
+            for obs_state_jaco_tuple in obs_jaco_tuple_multistatic_set
         ]
     ):
         raise RuntimeError(
@@ -89,8 +90,12 @@ def calc_jacobian(
     # init the jacobian
     J = np.zeros([num_meas * 2 * multistatic_size, len(idp_vars)], dtype=np.float64)
 
-    for multistatic_idx, obs_state_jaco_tuple in enumerate(obs_state_jaco_tuple_multistatic_set):
-        true_obs_state, *pert_obs_states = obs_state_jaco_tuple
+    for multistatic_idx, obs_jaco_tuple in enumerate(obs_jaco_tuple_multistatic_set):
+        true_obs, *pert_obs = obs_jaco_tuple
+
+        true_obs_state = true_obs.get_state_slice()
+        pert_obs_states = [obs.get_state_slice() for obs in pert_obs]
+
         r_orig = true_obs_state[_SuK.two_way_range].to_numpy()
         v_orig = true_obs_state[_SuK.two_way_range_rate].to_numpy()
 
@@ -189,7 +194,7 @@ class MpiExample(sorts.MpiQueuedExecution):
         spobj_pop = population.master_catalog_factor(_spobj_pop, treshhold=1e-2, seed=rand_seed)
         rng = np.random.default_rng(seed=rand_seed)
         oids = rng.choice(len(spobj_pop), 5, replace=False)
-        spobjs = [spobj_pop.get_object(i) for i in oids]
+        spobjs = [spobj_pop.get_object(oid) for oid in oids]
 
         tracker_ctrls = [
             SparseTrackerController.from_space_object(
@@ -320,9 +325,9 @@ class MpiExample(sorts.MpiQueuedExecution):
             pert_spobjs = [su[0].space_object for su in pert_sim_unit_multistatic_sets]
 
             # gather the observations into a list of tuples of 7 for jacobian calculation
-            obs_state_jaco_tuple_per_multistatic_source: list[
-                list[Tuple_7[SimulationUnitState]]
-            ] = [[] for _ in range(len(true_sim_unit_multistatic_set))]
+            obs_jaco_tuple_per_multistatic_source: list[list[Tuple_7[Observation]]] = [
+                [] for _ in range(len(true_sim_unit_multistatic_set))
+            ]
             for multistatic_idx, sim_units in enumerate(
                 zip(true_sim_unit_multistatic_set, *pert_sim_unit_multistatic_sets)
             ):
@@ -332,50 +337,23 @@ class MpiExample(sorts.MpiQueuedExecution):
 
                 obss.extend(sim_unit.observations)
 
-                # a tuple of 7 Observation: (original x1,  ...perturbated x6)
-                for obs_jaco_tuple in zip(
-                    sim_unit.observations, *(su.observations for su in pert_sim_units)
-                ):
-                    # redeclared the interation var to add type info, and then unpack it
-                    obs_jaco_tuple: Tuple_7[Observation] = obs_jaco_tuple
-                    true_obs, *pert_obss = obs_jaco_tuple
+                obs_jaco_tuple_per_multistatic_source[multistatic_idx] = list(
+                    zip(sim_unit.observations, *(su.observations for su in pert_sim_units))
+                )
 
-                    # get the state corresponding to the observation, and filter it by snr
-                    true_obs_state = true_obs.get_state_slice()
-                    above_thld_true_obs_state_idx = true_obs_state[_SuK.snr].to_numpy() < 10 ** (12 / 10) # 12dB threshold; fmt: skip;
-                    true_obs_state = true_obs_state[
-                        {_SuK.multi_index: above_thld_true_obs_state_idx}
-                    ]
-
-                    # skip the calculation if we do not have enough datapoints above the threshold
-                    if len(true_obs_state[_SuK.multi_index]) < 1:
-                        continue
-
-                    # get the same filtered state from the perturbated observations
-                    pert_obs_states = [
-                        obs.get_state_slice()[{_SuK.multi_index: above_thld_true_obs_state_idx}]
-                        for obs in pert_obss
-                    ]
-
-                    obs_state_jaco_tuple = t.cast(
-                        Tuple_7[SimulationUnitState],
-                        (true_obs_state, *pert_obs_states),
-                    )
-                    obs_state_jaco_tuple_per_multistatic_source[multistatic_idx].append(
-                        obs_state_jaco_tuple
-                    )
-
-            # TODO: `obs_state_jaco_tuple_multistatic_set_list` need better naming, and recheck logic for safety?
-            obs_state_jaco_tuple_multistatic_set_list: list[tuple[Tuple_7[SimulationUnitState]]] = (
-                list(zip(*obs_state_jaco_tuple_per_multistatic_source))
+            # TODO: `obs_jaco_tuple_multistatic_set_list` need better naming, and recheck logic for safety?
+            obs_jaco_tuple_multistatic_set_list: list[Tuple_3[Tuple_7[Observation]]] = list(
+                zip(*obs_jaco_tuple_per_multistatic_source)
             )
 
-            for obs_state_jaco_tuple_multistatic_set in obs_state_jaco_tuple_multistatic_set_list:
+            for obs_jaco_tuple_multistatic_set in obs_jaco_tuple_multistatic_set_list:
+                # TODO: add back snr threshold filter
+                # TODO: min `_SuK.multi_index` len filtering? (e.g. 1 or 5)
                 # calc the jacobian
                 J = calc_jacobian(
                     true_spobj=spobj,
                     pert_spobjs=pert_spobjs,
-                    obs_state_jaco_tuple_multistatic_set=obs_state_jaco_tuple_multistatic_set,
+                    obs_jaco_tuple_multistatic_set=obs_jaco_tuple_multistatic_set,
                 )
                 logger.info(f"jacobian: {J}")  # TODO: just a place holder usage of the jacobian; fmt: skip;
 
