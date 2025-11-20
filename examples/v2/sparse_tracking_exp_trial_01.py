@@ -99,7 +99,7 @@ def calc_jacobian(
             r_pert = pert_obs_states[pert_idx][_SuK.two_way_range].to_numpy()
             v_pert = pert_obs_states[pert_idx][_SuK.two_way_range_rate].to_numpy()
 
-            j_r_stt = multistatic_idx * multistatic_size
+            j_r_stt = multistatic_idx * num_meas * 2
             j_r_end = j_r_stt + num_meas
             j_v_stt = j_r_end
             j_v_end = j_v_stt + num_meas
