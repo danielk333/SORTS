@@ -11,6 +11,7 @@ import numpy.typing as npt
 from datetime import datetime, timedelta
 from astropy.time import Time, TimeDelta
 
+
 Datetime64_us = np.datetime64
 "`numpy` `datetime64` in `us` resolution"
 
@@ -117,3 +118,8 @@ EcefStates = NDArray_6xN[np.float64]
 class TxRxTuple[TxType, RxType](t.NamedTuple):
     tx: TxType
     rx: RxType
+
+
+type Tuple_3[T] = tuple[T, T, T]
+type Tuple_6[T] = tuple[T, T, T, T, T, T]
+type Tuple_7[T] = tuple[T, T, T, T, T, T, T]

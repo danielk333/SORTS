@@ -2,6 +2,7 @@ import logging, time, typing as t, pickle, argparse
 from pathlib import Path
 from datetime import datetime
 import numpy as np
+import numpy.typing as npt
 import xarray as xr
 from astropy.time import Time
 import matplotlib
@@ -9,7 +10,8 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from tqdm import tqdm
 import sorts
-from sorts import types, interpolation, population, propagator, radar, ExperimentDetail
+from sorts import interpolation, population, propagator, radar, ExperimentDetail
+from sorts.types import Tuple_7
 from sorts.space_object import SpaceObject, SpaceObjectId
 from sorts.schedule.priority_scheduling import priority_scheduling
 from sorts.controller import SparseTrackerController
@@ -22,6 +24,7 @@ from sorts.simulation.stx_mrx_simulation import (
     stx_mrx_simulation,
     StxMrxSimulation,
     SimulationUnit,
+    SimulationUnitState,
     Observation,
 )
 
@@ -46,6 +49,8 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
+_SuK = SimulationUnit._K
+
 spobj_dname_tpl = "spobj.{id}"
 pert_dname_tpl = "pert.{id}"
 
@@ -57,6 +62,72 @@ def dsec_sampler(orbit, epoch, start_time, end_time):
     dt = (end_time - start_time) / np.timedelta64(1, "s")
     t0 = (start_time - epoch) / np.timedelta64(1, "s")
     return np.arange(t0, t0 + dt, 120, dtype=np.float64)
+
+
+def calc_jacobian(
+    true_spobj: SpaceObject,
+    pert_spobjs: list[SpaceObject],
+    obs_state_jaco_tuple_multistatic_set: t.Sequence[Tuple_7[SimulationUnitState]],
+) -> npt.NDArray[np.float64]:
+    multistatic_size = len(obs_state_jaco_tuple_multistatic_set)
+    idp_vars = true_spobj.state._cart[:, 0]  # independent variables
+
+    # num of measurements
+    num_meas = len(obs_state_jaco_tuple_multistatic_set[0][0][_SuK.multi_index])
+    if any(
+        [
+            len(obs_state_jaco_tuple[0][_SuK.multi_index]) != num_meas
+            for obs_state_jaco_tuple in obs_state_jaco_tuple_multistatic_set
+        ]
+    ):
+        raise RuntimeError(
+            "multistatic measurement assumption violated;"
+            + 'the true observation in the jacobian tuple (i.e. the 0th item) across the "multistatic_set" '
+            + "should have the same size."
+        )
+
+    # init the jacobian
+    J = np.zeros([num_meas * 2 * multistatic_size, len(idp_vars)], dtype=np.float64)
+
+    for multistatic_idx, obs_state_jaco_tuple in enumerate(obs_state_jaco_tuple_multistatic_set):
+        true_obs_state, *pert_obs_states = obs_state_jaco_tuple
+        r_orig = true_obs_state[_SuK.two_way_range].to_numpy()
+        v_orig = true_obs_state[_SuK.two_way_range_rate].to_numpy()
+
+        for pert_idx, x_orig in enumerate(idp_vars):
+            x_pert = pert_spobjs[pert_idx].state._cart[pert_idx, 0]
+            r_pert = pert_obs_states[pert_idx][_SuK.two_way_range].to_numpy()
+            v_pert = pert_obs_states[pert_idx][_SuK.two_way_range_rate].to_numpy()
+
+            j_r_stt = multistatic_idx * multistatic_size
+            j_r_end = j_r_stt + num_meas
+            j_v_stt = j_r_end
+            j_v_end = j_v_stt + num_meas
+
+            J[j_r_stt:j_r_end, pert_idx] = (r_pert - r_orig) / (x_pert - x_orig)
+            J[j_v_stt:j_v_end, pert_idx] = (v_pert - v_orig) / (x_pert - x_orig)
+
+    return J
+
+
+def calc_covariance_matrix(jacobian: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
+    J = jacobian
+    num_rows = J.shape[0]
+
+    r_stds_tx = 10.0
+    v_stds_tx = 5.0
+
+    Sigma_m_diag_elms = np.array(
+        [r_stds_tx**2] * num_rows + [v_stds_tx**2] * num_rows, dtype=np.float64
+    )
+    Sigma_m_inv = np.diag(1.0 / Sigma_m_diag_elms)
+
+    try:
+        Sigma_orb = np.linalg.inv(np.transpose(J) @ Sigma_m_inv @ J)
+    except np.linalg.LinAlgError:
+        Sigma_orb = np.full((6, 6), np.nan, dtype=np.float64)
+
+    return t.cast(npt.NDArray[np.float64], Sigma_orb)
 
 
 class WParam(t.TypedDict):
@@ -228,46 +299,46 @@ class MpiExample(sorts.MpiQueuedExecution):
         calc_start_time = time.perf_counter()
 
         obss: list[stx_mrx_simulation.Observation] = []
-        max_snrs_value = []
-        max_snrs_time = []
-        max_snrs_spobj_id: list[int] = []
 
-        # a tuple of 7 SimulationUnit: (original x1,  ...perturbated x6)
         for spobj_id in sim_unit_fpath_grp_by_pert:
 
-            true_simult_sim_unit_set: list[SimulationUnit] = []
+            # the set of sim_units for a multistatic radar, without perturbation
+            true_sim_unit_multistatic_set: list[SimulationUnit] = []
             for fpath in sim_unit_fpath_grp_by_pert[spobj_id][0]:
                 with open(fpath, "rb") as f:
-                    true_simult_sim_unit_set.append(pickle.load(f))
+                    true_sim_unit_multistatic_set.append(pickle.load(f))
 
-            pert_simult_sim_unit_sets: list[list[SimulationUnit]] = []
+            # a list of 6 sets of sim_units for a multistatic radar, with perturbation
+            pert_sim_unit_multistatic_sets: list[list[SimulationUnit]] = []
             for i in range(6):
-                pert_simult_sim_unit_sets.append([])
+                pert_sim_unit_multistatic_sets.append([])
                 for fpath in sim_unit_fpath_grp_by_pert[spobj_id][i + 1]:
                     with open(fpath, "rb") as f:
-                        pert_simult_sim_unit_sets[i].append(pickle.load(f))
+                        pert_sim_unit_multistatic_sets[i].append(pickle.load(f))
 
-            spobj = true_simult_sim_unit_set[0].space_object
-            pert_spobjs = [su[0].space_object for su in pert_simult_sim_unit_sets]
+            spobj = true_sim_unit_multistatic_set[0].space_object
+            pert_spobjs = [su[0].space_object for su in pert_sim_unit_multistatic_sets]
 
-            _SuK = SimulationUnit._K
-
-            sim_unit: SimulationUnit
-            pert_sim_units: list[SimulationUnit]
-            for sim_unit, *pert_sim_units in zip(
-                true_simult_sim_unit_set, *pert_simult_sim_unit_sets
+            # gather the observations into a list of tuples of 7 for jacobian calculation
+            obs_state_jaco_tuple_per_multistatic_source: list[
+                list[Tuple_7[SimulationUnitState]]
+            ] = [[] for _ in range(len(true_sim_unit_multistatic_set))]
+            for multistatic_idx, sim_units in enumerate(
+                zip(true_sim_unit_multistatic_set, *pert_sim_unit_multistatic_sets)
             ):
-                true_obss = sim_unit.observations
-                pert_obss_grp = [su.observations for su in pert_sim_units] # i.e. a list of 6 `list[Observation]`; fmt: skip;
-                obss.extend(true_obss)
+                # redeclared the interation var to add type info, and then unpack it
+                sim_units: Tuple_7[SimulationUnit] = sim_units
+                sim_unit, *pert_sim_units = sim_units
 
-                snrs_time = []
-                snrs = []
+                obss.extend(sim_unit.observations)
+
                 # a tuple of 7 Observation: (original x1,  ...perturbated x6)
-                jaco_obs_tuple: tuple[Observation, ...]
-                for jaco_obs_tuple in zip(true_obss, *pert_obss_grp):
-                    # calc the jacobian and Sigma_orb for each observation
-                    true_obs, *pert_obss = jaco_obs_tuple
+                for obs_jaco_tuple in zip(
+                    sim_unit.observations, *(su.observations for su in pert_sim_units)
+                ):
+                    # redeclared the interation var to add type info, and then unpack it
+                    obs_jaco_tuple: Tuple_7[Observation] = obs_jaco_tuple
+                    true_obs, *pert_obss = obs_jaco_tuple
 
                     # get the state corresponding to the observation, and filter it by snr
                     true_obs_state = true_obs.get_state_slice()
@@ -286,68 +357,31 @@ class MpiExample(sorts.MpiQueuedExecution):
                         for obs in pert_obss
                     ]
 
-                    argmax_snr = t.cast(xr.DataArray, true_obs_state[_SuK.snr].argmax())
-                    true_obs_state_at_max_snr = true_obs_state[
-                        {_SuK.multi_index: argmax_snr.item()}
-                    ]
-                    true_obs_state_max_snr_value = true_obs_state_at_max_snr[_SuK.snr].item()
-                    true_obs_state_max_snr_time = true_obs_state_at_max_snr[_SuK.time].item()
-
-                    max_snrs_value.append(true_obs_state_max_snr_value)
-                    max_snrs_time.append(true_obs_state_max_snr_time)
-                    snrs_time.append(true_obs_state[_SuK.time].to_numpy())
-                    snrs.append(true_obs_state[_SuK.snr].to_numpy())
-                    max_snrs_spobj_id.append(sim_unit.space_object.oid)
-
-                    # calc the jacobian
-                    num_meas = len(true_obs_state[_SuK.multi_index])  # num of measurements
-                    num_var = len(spobj.state._cart[:, 0])  # num of independent variables
-                    r_orig = true_obs_state[_SuK.two_way_range].to_numpy()
-                    v_orig = true_obs_state[_SuK.two_way_range_rate].to_numpy()
-                    J = np.zeros([num_meas * 2, num_var], dtype=np.float64)  # init the jacobian
-                    for pert_idx, x_orig in enumerate(spobj.state._cart[:, 0]):
-                        x_pert = pert_spobjs[pert_idx].state._cart[pert_idx, 0]
-                        r_pert = pert_obs_states[pert_idx][_SuK.two_way_range].to_numpy()
-                        v_pert = pert_obs_states[pert_idx][_SuK.two_way_range_rate].to_numpy()
-
-                        J[:num_meas, pert_idx] = (r_pert - r_orig) / (x_pert - x_orig)
-                        J[num_meas:, pert_idx] = (v_pert - v_orig) / (x_pert - x_orig)
-
-                    logger.info(f"jacobian: {J}")  # TODO: just a place holder usage of the jacobian
-
-                    # calc covariance matrix for error estimation of linearized orbit determination
-                    r_stds_tx = 10.0
-                    v_stds_tx = 5.0
-                    Sigma_m_diag_elms = np.array(
-                        [r_stds_tx**2] * num_meas + [v_stds_tx**2] * num_meas, dtype=np.float64
+                    obs_state_jaco_tuple = t.cast(
+                        Tuple_7[SimulationUnitState],
+                        (true_obs_state, *pert_obs_states),
                     )
-                    Sigma_m_inv = np.diag(1.0 / Sigma_m_diag_elms)
-                    try:
-                        Sigma_orb = np.linalg.inv(np.transpose(J) @ Sigma_m_inv @ J)
-                    except np.linalg.LinAlgError:
-                        Sigma_orb = np.full((6, 6), np.nan, dtype=np.float64)
-                    logger.info(
-                        f"Sigma_orb: {Sigma_orb}"
-                    )  # TODO: just a place holder usage of the Sigma_orb
+                    obs_state_jaco_tuple_per_multistatic_source[multistatic_idx].append(
+                        obs_state_jaco_tuple
+                    )
 
-            # plotting
-            # save_subdpath = save_dpath / "plots"
-            # ensure_directory_exist(save_subdpath)
-            # logger.info("start generating plots...")
-            # snrs = np.concatenate(snrs)
-            # snrs_time = np.concatenate(snrs_time)
+            # TODO: `obs_state_jaco_tuple_multistatic_set_list` need better naming, and recheck logic for safety?
+            obs_state_jaco_tuple_multistatic_set_list: list[tuple[Tuple_7[SimulationUnitState]]] = (
+                list(zip(*obs_state_jaco_tuple_per_multistatic_source))
+            )
 
-            # fig, ax = plt.subplots()
-            # ax.set_title("snr dB vs time")
-            # ax.scatter(snrs_time, 10 * np.log10(snrs), s=3)
-            # ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d %H:%M:%S"))
-            # fig.autofmt_xdate()
-            # # ax.set_yscale("log")
-            # plt.savefig(
-            #     save_subdpath / f"{pert_idx}_max_snr_vs_time.png", dpi=300, bbox_inches="tight"
-            # )
+            for obs_state_jaco_tuple_multistatic_set in obs_state_jaco_tuple_multistatic_set_list:
+                # calc the jacobian
+                J = calc_jacobian(
+                    true_spobj=spobj,
+                    pert_spobjs=pert_spobjs,
+                    obs_state_jaco_tuple_multistatic_set=obs_state_jaco_tuple_multistatic_set,
+                )
+                logger.info(f"jacobian: {J}")  # TODO: just a place holder usage of the jacobian; fmt: skip;
 
-            # logger.info(f"done generating plots")
+                # calc covariance matrix for error estimation of linearized orbit determination
+                Sigma_orb = calc_covariance_matrix
+                logger.info(f"Sigma_orb: {Sigma_orb}")  # TODO: just a place holder usage of the Sigma_orb; fmt: skip;
 
             print(f"len(obss): {len(obss)}")
 
