@@ -134,10 +134,10 @@ class TrackerController(ControllerBase):
 
         return stn_map
 
-    def compute_ecef_states(
+    def _compute_controller_state(
         self, start_time: Datetime_Like, end_time: Datetime_Like, slice_duration: Timedelta_Like
-    ):
-        """Do the computation then update the `state` property and return `self`."""
+    ) -> ControllerState:
+        """Do the computation and return the updated `state` property."""
 
         if self.spobj is None:
             raise RuntimeError(
@@ -163,9 +163,9 @@ class TrackerController(ControllerBase):
 
         ecefs = self.spobj.get_state(dsec)
 
-        self.state = ControllerState(spobj_time=time, spobj_states=ecefs)
+        state = ControllerState(spobj_time=time, spobj_states=ecefs)
 
-        return self
+        return state
 
     def generate(
         self, start_time: Datetime_Like | None = None, end_time: Datetime_Like | None = None
@@ -176,7 +176,9 @@ class TrackerController(ControllerBase):
         """
 
         if start_time is not None and end_time is not None:
-            self.compute_ecef_states(start_time, end_time, self.exp_detail.slice_duration)
+            self.state = self._compute_controller_state(
+                start_time, end_time, self.exp_detail.slice_duration
+            )
 
         loc_zenith = np.array([0, 0, 1], dtype=np.float64)
 

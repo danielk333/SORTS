@@ -118,10 +118,10 @@ class SparseTrackerController(ControllerBase):
 
         return stn_map
 
-    def compute_ecef_states(
+    def _compute_controller_state(
         self, start_time: Datetime_Like, end_time: Datetime_Like, slice_duration: Timedelta_Like
-    ):
-        """Do the computation then update the `state` property and return `self`."""
+    ) -> ControllerState:
+        """Do the computation and return the updated `state` property."""
 
         exp_detail: scheduling.ExperimentDetail = self.exp_detail
 
@@ -140,14 +140,16 @@ class SparseTrackerController(ControllerBase):
 
         ecefs = self.space_object.get_state(dsec)
 
-        self.state = ControllerState(spobj_time=time, spobj_states=ecefs)
+        state = ControllerState(spobj_time=time, spobj_states=ecefs)
 
-        return self
+        return state
 
     def generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> scheduling.Schedule:
         """Generate the schedules."""
 
-        self.compute_ecef_states(start_time, end_time, self.exp_detail.slice_duration)
+        self.state = self._compute_controller_state(
+            start_time, end_time, self.exp_detail.slice_duration
+        )
 
         passages_of_spobj = find_simultaneous_passages(
             dt=(self.state.spobj_time - self.epoch) / np.timedelta64(1, "s"),

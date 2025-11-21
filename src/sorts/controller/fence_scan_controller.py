@@ -126,8 +126,8 @@ class FenceScanController(ControllerBase):
 
         return stn_map
 
-    def compute_single_cycle_pointings(self, start_time: Datetime_Like, end_time: Datetime_Like):
-        """Do the computation then update the `state` property and return `self`."""
+    def _compute_controller_state(self, start_time: Datetime_Like, end_time: Datetime_Like) -> ControllerState:
+       """Do the computation and return the updated `state` property."""
 
         exp_detail = self.exp_detail
 
@@ -144,14 +144,14 @@ class FenceScanController(ControllerBase):
             degrees=True,
         )
 
-        self.state = ControllerState(
+        state = ControllerState(
             start_time=start_time_np,
             end_time=end_time_np,
             tx_schedule_size=tx_schedule_size,
             tx_pointings_of_a_cycle=tx_pointings_of_a_cycle,
         )
 
-        return self
+        return state
 
     def generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> scheduling.Schedule:
         """Generate the schedules."""
@@ -167,7 +167,7 @@ class FenceScanController(ControllerBase):
         #    and then further back to pointings in ENU coord,
         #    and finally repeat them to form a rx schedule, for each rx station
 
-        self.compute_single_cycle_pointings(start_time, end_time)
+        self.state = self._compute_controller_state(start_time, end_time)
         pointings_per_cycle = self.state.tx_pointings_of_a_cycle.shape[1]
 
         # NOTE: for `np.arange` 'stop param,
