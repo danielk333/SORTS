@@ -55,10 +55,9 @@ class MpiExample(sorts.MpiQueuedExecution):
         save_dpath = Path(__file__).parent / ".." / ".." / "local_data" / save_dname
         ensure_directory_exist(save_dpath)
 
-        # 15min runtime
-        start_time = Time("2025-01-01 02:45:00")
-        # start_time = Time("2025-01-01 02:59:59")
-        end_time = Time("2025-01-01 03:00:00")
+        # 3hrs runtime
+        start_time = Time("2025-01-01 02:00:00")
+        end_time = Time("2025-01-01 05:00:00")
         control_slice_duration = np.timedelta64(100_000, "us")  # 100ms
 
         radar_sys = sorts.radar.radars.nostra.gen_nostra(
