@@ -82,59 +82,6 @@ def group_passages_by_tx_rx_station_pair(
     return groupped_passages
 
 
-# TODO: its name is confusing with `prepare_simulation_unit_params`; and maybe its func can be merged as well?
-def derive_simulation_unit_params(
-    sch: Schedule,  # TODO rename this param to `schedule` after refactoring `schedule` module
-    station_map: dict[StationId, Station],
-    exp_detail_map: ExperimentDetailMap,
-    space_objects: t.Sequence[sorts.SpaceObject],
-    passages_lists: t.Sequence[t.Sequence[Passage]],
-    spobjs_interpolators: t.Sequence[Interpolator],
-) -> list[FromPassagesOverTxRxStationPairParam]:
-    """
-    Derive a list of param for the `from_passages_over_tx_rx_station_pair` constructor of `SimulationUnit`
-
-    NOTE: Integers (casted to `str`) are used as `SimulationUnit`s' id
-    """
-
-    params: list[FromPassagesOverTxRxStationPairParam] = []
-
-    for spobj, passages_of_a_spobj, spobj_states_interp in zip(
-        space_objects, passages_lists, spobjs_interpolators
-    ):
-        _SK = scheduling._K
-
-        groupped_passages = group_passages_by_tx_rx_station_pair(passages_of_a_spobj)
-
-        for stn_id_pair, passages in groupped_passages.items():
-            tx_stn = station_map[stn_id_pair[0]]
-            rx_stn = station_map[stn_id_pair[1]]
-
-            filtered_sch = scheduling.filter_by_time_ranges(sch, [ps.time_range for ps in passages])
-
-            # filter by station id
-            multi_index_stn_ids_mask = xr.ufuncs.logical_or(
-                filtered_sch[_SK.multi_index][_SK.stn_num] == stn_id_pair[0],
-                filtered_sch[_SK.multi_index][_SK.stn_num] == stn_id_pair[1],
-            )
-            filtered_sch = filtered_sch[{_SK.multi_index: multi_index_stn_ids_mask}]
-
-            params.append(
-                FromPassagesOverTxRxStationPairParam(
-                    id=str(len(params)),
-                    passages=passages,
-                    spobj=spobj,
-                    spobj_interp=spobj_states_interp,
-                    tx_station=tx_stn,
-                    rx_station=rx_stn,
-                    schedule=filtered_sch,
-                    exp_detail_map=exp_detail_map,
-                )
-            )
-
-    return params
-
-
 def find_passages(
     station_map: dict[StationId, Station],
     station_id_pairs: t.Sequence[tuple[StationId, StationId]],
@@ -289,14 +236,43 @@ class StxMrxSimulation:
         )
         logger.debug("find_passages done")
 
-        sim_units_param = derive_simulation_unit_params(
-            sch=self.schedule,
-            station_map=self.station_map,
-            exp_detail_map=self.exp_detail_map,
-            space_objects=self.space_objects,
-            passages_lists=passages_lists,
-            spobjs_interpolators=spobjs_interpolators,
-        )
+        sim_units_param: list[FromPassagesOverTxRxStationPairParam] = []
+        for spobj, passages_of_a_spobj, spobj_states_interp in zip(
+            self.space_objects, passages_lists, spobjs_interpolators
+        ):
+            _SK = scheduling._K
+
+            groupped_passages = group_passages_by_tx_rx_station_pair(passages_of_a_spobj)
+
+            for stn_id_pair, passages in groupped_passages.items():
+                tx_stn = self.station_map[stn_id_pair[0]]
+                rx_stn = self.station_map[stn_id_pair[1]]
+
+                filtered_sch = scheduling.filter_by_time_ranges(
+                    self.schedule, [ps.time_range for ps in passages]
+                )
+
+                # filter by station id
+                multi_index_stn_ids_mask = xr.ufuncs.logical_or(
+                    filtered_sch[_SK.multi_index][_SK.stn_num] == stn_id_pair[0],
+                    filtered_sch[_SK.multi_index][_SK.stn_num] == stn_id_pair[1],
+                )
+                filtered_sch = filtered_sch[{_SK.multi_index: multi_index_stn_ids_mask}]
+
+                # NOTE: Integers (casted to `str`) are used as `SimulationUnit`s' id
+                sim_units_param.append(
+                    FromPassagesOverTxRxStationPairParam(
+                        id=str(len(sim_units_param)),
+                        passages=passages,
+                        spobj=spobj,
+                        spobj_interp=spobj_states_interp,
+                        tx_station=tx_stn,
+                        rx_station=rx_stn,
+                        schedule=filtered_sch,
+                        exp_detail_map=self.exp_detail_map,
+                    )
+                )
+
         # filter away param with empty schedule
         sim_units_param = [
             p for p in sim_units_param if len(p.schedule[scheduling._K.multi_index]) > 0
