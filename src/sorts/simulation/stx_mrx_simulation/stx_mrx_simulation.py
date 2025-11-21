@@ -2,6 +2,7 @@ from __future__ import annotations
 import logging, typing as t, pickle
 from pathlib import Path
 import numpy.typing as npt
+import xarray as xr
 import pyorb
 import sorts
 from tqdm import tqdm
@@ -112,16 +113,11 @@ def derive_simulation_unit_params(
             filtered_sch = scheduling.filter_by_time_ranges(sch, [ps.time_range for ps in passages])
 
             # filter by station id
-            filtered_sch = filtered_sch.loc[
-                {
-                    _SK.multi_index: (
-                        slice(None),
-                        (stn_id_pair[0], stn_id_pair[1]),
-                        slice(None),
-                        slice(None),
-                    )
-                }
-            ]
+            multi_index_stn_ids_mask = xr.ufuncs.logical_or(
+                filtered_sch[_SK.multi_index][_SK.stn_num] == stn_id_pair[0],
+                filtered_sch[_SK.multi_index][_SK.stn_num] == stn_id_pair[1],
+            )
+            filtered_sch = filtered_sch[{_SK.multi_index: multi_index_stn_ids_mask}]
 
             params.append(
                 FromPassagesOverTxRxStationPairParam(
