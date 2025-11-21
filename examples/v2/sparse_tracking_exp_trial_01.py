@@ -217,26 +217,24 @@ class MpiExample(sorts.MpiQueuedExecution):
 
         tracker_ctrls = [
             SparseTrackerController.from_space_object(
-                SparseTrackerController.FromSpaceObjectParam(
-                    tx_station=tx_station,
-                    rx_stations=[rx_station_0, rx_station_1, rx_station_2],
-                    exp_detail=ExperimentDetail(
-                        id=exp_id,
-                        # not used
-                        coh_int_bandwidth=1.0,
-                        ipp=1.0,
-                        pulse_length=1.0,
-                        duty_cycle=1.0,
-                        # --
-                        power=tx_station.power,
-                        bandwidth=1 / coherent_integration_time,
-                        noise_temp=rx_station_0.noise,
-                        slice_duration=control_slice_duration,
-                    ),
-                    space_object=spobj,
-                    epoch=start_time,
-                    points_per_passage=5,
-                )
+                tx_station=tx_station,
+                rx_stations=[rx_station_0, rx_station_1, rx_station_2],
+                exp_detail=ExperimentDetail(
+                    id=exp_id,
+                    # not used
+                    coh_int_bandwidth=1.0,
+                    ipp=1.0,
+                    pulse_length=1.0,
+                    duty_cycle=1.0,
+                    # --
+                    power=tx_station.power,
+                    bandwidth=1 / coherent_integration_time,
+                    noise_temp=rx_station_0.noise,
+                    slice_duration=control_slice_duration,
+                ),
+                space_object=spobj,
+                epoch=start_time,
+                points_per_passage=5,
             )
             for exp_id, spobj in enumerate(spobjs)
         ]

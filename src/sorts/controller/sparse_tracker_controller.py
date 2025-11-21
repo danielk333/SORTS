@@ -24,16 +24,6 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass(kw_only=True)
-class FromSpaceObjectParam:
-    tx_station: Station
-    rx_stations: t.Sequence[Station]
-    exp_detail: scheduling.ExperimentDetail
-    space_object: SpaceObject
-    epoch: Datetime_Like
-    points_per_passage: int
-
-
-@dataclass(kw_only=True)
 class ControllerState:
     spobj_time: npt.NDArray[Datetime64_us]
     spobj_states: EcefStates
@@ -53,9 +43,6 @@ class SparseTrackerController(ControllerBase):
     - The preferred way to create instances of this class is via its class methods (e.g. `TrackerController.from_space_object`).
     - This class serve as a frontend to the `State` type in this module
     """
-
-    FromSpaceObjectParam = FromSpaceObjectParam
-    """shortcut to module attribute"""
 
     ControllerState = ControllerState
     """shortcut to module attribute"""
@@ -86,19 +73,27 @@ class SparseTrackerController(ControllerBase):
         self.state = state
 
     @classmethod
-    def from_space_object(cls, param: FromSpaceObjectParam) -> t.Self:
+    def from_space_object(
+        cls,
+        tx_station: Station,
+        rx_stations: t.Sequence[Station],
+        exp_detail: scheduling.ExperimentDetail,
+        space_object: SpaceObject,
+        epoch: Datetime_Like,
+        points_per_passage: int,
+    ) -> t.Self:
         """A constructor method"""
 
-        stn_pairs = [(param.tx_station.uid, rx_station.uid) for rx_station in param.rx_stations]
+        stn_pairs = [(tx_station.uid, rx_station.uid) for rx_station in rx_stations]
 
         ctrl = cls(
-            tx_station=param.tx_station,
-            rx_stations=param.rx_stations,
-            exp_detail=param.exp_detail,
-            space_object=param.space_object,
-            epoch=to_datetime64_us(param.epoch),
+            tx_station=tx_station,
+            rx_stations=rx_stations,
+            exp_detail=exp_detail,
+            space_object=space_object,
+            epoch=to_datetime64_us(epoch),
             station_id_pairs=stn_pairs,
-            points_per_passage=param.points_per_passage,
+            points_per_passage=points_per_passage,
             state=ControllerState.empty(),
         )
 
