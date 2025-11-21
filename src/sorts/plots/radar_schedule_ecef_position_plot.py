@@ -2,9 +2,9 @@ import numpy.typing as npt
 import pandas as pd
 import bokeh.models as bokeh_models
 import bokeh.layouts as bokeh_layouts
-from sorts import schedule
+from sorts import scheduling
 from sorts.types import EcefStates, Datetime64_us
-from sorts.schedule import Schedule
+from sorts.scheduling import Schedule
 from .schedule_plot import _schedule_plot_from_cds
 from .azel_skyplot import _azel_skyplot_cds_cols, _azel_skyplot_from_cds
 from .ecef_states_positions_plot import (
@@ -16,9 +16,9 @@ from .ecef_states_positions_plot import (
 def _radar_schedule_ecef_position_plot_cds_df(
     ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], sch: Schedule
 ):
-    _SK = schedule._K
+    _SK = scheduling._K
 
-    df = schedule.to_dataframe(sch)
+    df = scheduling.to_dataframe(sch)
 
     # bokeh requires str type for categorical axis
     df[_SK.exp_num] = df[_SK.exp_num].astype(str)
@@ -45,7 +45,7 @@ def _radar_schedule_ecef_position_plot_cds_df(
 def radar_schedule_ecef_position_plot(
     ecefs: EcefStates, ecefs_time: npt.NDArray[Datetime64_us], sch: Schedule
 ):
-    _SK = schedule._K
+    _SK = scheduling._K
 
     df = _radar_schedule_ecef_position_plot_cds_df(ecefs=ecefs, ecefs_time=ecefs_time, sch=sch)
 

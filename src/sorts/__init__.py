@@ -25,11 +25,11 @@ clibsorts = ctypes.cdll.LoadLibrary(str(__libpath__))
 ##
 from . import types
 from . import utils
-from . import schedule
+from . import scheduling
 from . import controller
 from . import simulation
 
-from .schedule import Schedule, ExperimentDetail
+from .scheduling import Schedule, ExperimentDetail
 from .controller import TrackerController, FenceScanController
 from .simulation import StxMrxSimulation
 from .mpi_queued_execution import MpiQueuedExecution

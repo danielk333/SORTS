@@ -5,14 +5,13 @@ import numpy.typing as npt
 import pyorb
 import sorts
 from tqdm import tqdm
-# TODO: fix `schedule` namespace overlap issues in this file
-from sorts import schedule, controller, simulation
+from sorts import scheduling, controller, simulation
 from sorts.types import Datetime_Like, Float64_as_sec, Datetime64_us, Float64_as_sec, EcefStates
 from sorts.utils import to_datetime64_us
 from sorts.radar import Station, StationId
 from sorts.simulation import Passage
 from sorts.interpolation import Interpolator
-from sorts.schedule import Schedule, ExperimentDetailMap
+from sorts.scheduling import Schedule, ExperimentDetailMap
 from sorts.simulation.stx_mrx_simulation.simulation_unit import (
     SimulationUnit,
     FromPassagesOverTxRxStationPairParam,
@@ -102,7 +101,7 @@ def derive_simulation_unit_params(
     for spobj, passages_of_a_spobj, spobj_states_interp in zip(
         space_objects, passages_lists, spobjs_interpolators
     ):
-        _SK = schedule._K
+        _SK = scheduling._K
 
         groupped_passages = group_passages_by_tx_rx_station_pair(passages_of_a_spobj)
 
@@ -110,7 +109,7 @@ def derive_simulation_unit_params(
             tx_stn = station_map[stn_id_pair[0]]
             rx_stn = station_map[stn_id_pair[1]]
 
-            filtered_sch = schedule.filter_by_time_ranges(sch, [ps.time_range for ps in passages])
+            filtered_sch = scheduling.filter_by_time_ranges(sch, [ps.time_range for ps in passages])
 
             # filter by station id
             filtered_sch = filtered_sch.loc[
@@ -304,7 +303,7 @@ class StxMrxSimulation:
         )
         # filter away param with empty schedule
         sim_units_param = [
-            p for p in sim_units_param if len(p.schedule[schedule._K.multi_index]) > 0
+            p for p in sim_units_param if len(p.schedule[scheduling._K.multi_index]) > 0
         ]
         logger.info(f"prepare_simulation_unit_params done")
 

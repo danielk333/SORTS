@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 import xarray as xr
-from sorts import radar, schedule
+from sorts import radar, scheduling
 from sorts.const import min_datetime64_us
 from sorts.radar import Station
 from sorts.frames import enu_to_ecef, ecef_to_enu, sph_to_cart
@@ -60,7 +60,7 @@ class FenceScanController(ControllerBase):
         min_elevation: Float_as_deg,
         pointings_per_cycle: int,
         scan_range: npt.NDArray[Float64_as_m],
-        exp_detail: schedule.ExperimentDetail,
+        exp_detail: scheduling.ExperimentDetail,
         station_id_pairs: list[tuple[radar.StationId, radar.StationId]],
         state: ControllerState,
     ):
@@ -92,7 +92,7 @@ class FenceScanController(ControllerBase):
         min_elevation: Float_as_deg,
         pointings_per_cycle: int,
         scan_range: npt.NDArray[Float64_as_m],
-        exp_detail: schedule.ExperimentDetail,
+        exp_detail: scheduling.ExperimentDetail,
     ) -> t.Self:
         """A constructor method"""
 
@@ -112,10 +112,10 @@ class FenceScanController(ControllerBase):
 
         return ctrl
 
-    def get_experiment_detail(self) -> schedule.ExperimentDetail:
+    def get_experiment_detail(self) -> scheduling.ExperimentDetail:
         return self.exp_detail
 
-    def get_experiment_id_station_id_pairs_map(self) -> schedule.ExperimentIdStationIdPairsMap:
+    def get_experiment_id_station_id_pairs_map(self) -> scheduling.ExperimentIdStationIdPairsMap:
         return {self.exp_detail.id: self.station_id_pairs}
 
     def get_station_map(self) -> dict[radar.StationId, radar.Station]:
@@ -153,7 +153,7 @@ class FenceScanController(ControllerBase):
 
         return self
 
-    def generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> schedule.Schedule:
+    def generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> scheduling.Schedule:
         """Generate the schedules."""
         # TODO: write schedule to disk generally and then chunk load it as needed in the actual
         # simulation, the general simulation pattern will be "1. propagate objects and generate
@@ -194,7 +194,7 @@ class FenceScanController(ControllerBase):
         tx_slice_start_time_masked = tx_slice_start_time[tx_mask]
         tx_pointing_masked = tx_pointing[:, tx_mask]
 
-        tx_sch = schedule.from_ndarrays(
+        tx_sch = scheduling.from_ndarrays(
             start_time=tx_slice_start_time_masked,
             end_time=tx_slice_start_time_masked + self.exp_detail.slice_duration,
             exp_num=np.full(len(tx_slice_start_time_masked), self.exp_detail.id, dtype=np.int16),
@@ -206,7 +206,7 @@ class FenceScanController(ControllerBase):
         # TODO: `rx_schedule_size` is a bit of a mismisnomer, as out-of-range entries might later be removed
         rx_slice_start_time = tx_slice_start_time.repeat(len(self.scan_range))
         rx_schedule_size = self.state.tx_schedule_size * len(self.scan_range)
-        rx_schs: list[schedule.Schedule] = []
+        rx_schs: list[scheduling.Schedule] = []
         tx_pointings_of_a_cycle_without_translation_ecef: EcefCoordinates = enu_to_ecef(
             lat=self.tx_station.ecef_lat,
             lon=self.tx_station.ecef_lon,
@@ -250,7 +250,7 @@ class FenceScanController(ControllerBase):
             rx_pointing_masked = rx_pointings_enu[:, rx_mask]
             rx_pointings_simult_num_masked = rx_pointings_simult_num[rx_mask]
 
-            rx_sch = schedule.from_ndarrays(
+            rx_sch = scheduling.from_ndarrays(
                 start_time=rx_slice_start_time_masked,
                 end_time=rx_slice_start_time_masked + self.exp_detail.slice_duration,
                 exp_num=np.full(
@@ -263,11 +263,11 @@ class FenceScanController(ControllerBase):
 
             rx_schs.append(rx_sch)
 
-        resultant_sch = xr.concat([tx_sch, *rx_schs], dim=schedule._K.multi_index)
-        resultant_sch = resultant_sch.sortby(schedule._K.start_time)
+        resultant_sch = xr.concat([tx_sch, *rx_schs], dim=scheduling._K.multi_index)
+        resultant_sch = resultant_sch.sortby(scheduling._K.start_time)
         # TODO: re-eval if it is too brutal
         # there will be duplicates if the tx station is also a rx station, we drop the duplicates here
-        resultant_sch = resultant_sch.drop_duplicates(schedule._K.multi_index)
+        resultant_sch = resultant_sch.drop_duplicates(scheduling._K.multi_index)
         output = resultant_sch
 
         return output

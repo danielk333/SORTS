@@ -7,7 +7,7 @@ from pathlib import Path
 from astropy.time import Time
 import logging
 import sorts
-from sorts import equidistant_sampling, schedule, ExperimentDetail
+from sorts import equidistant_sampling, scheduling, ExperimentDetail
 from sorts.interpolation import Legendre8, Linear
 from sorts.population import master_catalog, master_catalog_factor
 from sorts.propagator import SGP4
@@ -15,7 +15,7 @@ from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.radar.radars import get_radar
 from sorts.utils import to_datetime64_us, to_pydatetime
-from sorts.schedule.priority_scheduling import priority_scheduling
+from sorts.scheduling.priority_scheduling import priority_scheduling
 from sorts.controller import TrackerController, FenceScanController
 from sorts.simulation import StxMrxSimulation
 

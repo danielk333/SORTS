@@ -5,7 +5,7 @@ import numpy as np
 import numpy.typing as npt
 import xarray as xr
 import spacecoords
-from sorts import radar, schedule
+from sorts import radar, scheduling
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.types import (
@@ -51,7 +51,7 @@ class TrackerController(ControllerBase):
         self,
         tx_station: Station,
         rx_stations: t.Sequence[Station],
-        exp_detail: schedule.ExperimentDetail,
+        exp_detail: scheduling.ExperimentDetail,
         spobj: SpaceObject | None,
         epoch: Datetime_Like | None,
         station_id_pairs: list[tuple[radar.StationId, radar.StationId]],
@@ -77,7 +77,7 @@ class TrackerController(ControllerBase):
         space_object_states: EcefStates,
         tx_station: Station,
         rx_stations: t.Sequence[Station],
-        exp_detail: schedule.ExperimentDetail,
+        exp_detail: scheduling.ExperimentDetail,
     ) -> t.Self:
         """A constructor method"""
 
@@ -102,7 +102,7 @@ class TrackerController(ControllerBase):
         epoch: Datetime_Like,
         tx_station: Station,
         rx_stations: t.Sequence[Station],
-        exp_detail: schedule.ExperimentDetail,
+        exp_detail: scheduling.ExperimentDetail,
     ) -> t.Self:
         """A constructor method"""
 
@@ -120,10 +120,10 @@ class TrackerController(ControllerBase):
 
         return ctrl
 
-    def get_experiment_detail(self) -> schedule.ExperimentDetail:
+    def get_experiment_detail(self) -> scheduling.ExperimentDetail:
         return self.exp_detail
 
-    def get_experiment_id_station_id_pairs_map(self) -> schedule.ExperimentIdStationIdPairsMap:
+    def get_experiment_id_station_id_pairs_map(self) -> scheduling.ExperimentIdStationIdPairsMap:
         return {self.exp_detail.id: self.station_id_pairs}
 
     def get_station_map(self) -> dict[radar.StationId, radar.Station]:
@@ -148,7 +148,7 @@ class TrackerController(ControllerBase):
                 "Cannot compute space object ECEF states without `epoch` in the `spec` prop."
             )
 
-        exp_detail: schedule.ExperimentDetail = self.exp_detail
+        exp_detail: scheduling.ExperimentDetail = self.exp_detail
 
         # NOTE: for `np.arange` 'stop param,
         #   - we subtract 'slice_duration' so that only full slice are included
@@ -169,7 +169,7 @@ class TrackerController(ControllerBase):
 
     def generate(
         self, start_time: Datetime_Like | None = None, end_time: Datetime_Like | None = None
-    ) -> schedule.Schedule:
+    ) -> scheduling.Schedule:
         """
         Generate the schedules.
         `start_time` and `end_time` should be omitted if this instance is created from `TrackerController.from_ecef_states`
@@ -209,7 +209,7 @@ class TrackerController(ControllerBase):
         tx_sch_time = self.state.spobj_time[tx_el_in_range_mask]
         tx_sch_len = len(tx_sch_time)
 
-        tx_sch = schedule.from_ndarrays(
+        tx_sch = scheduling.from_ndarrays(
             start_time=tx_sch_time,
             end_time=tx_sch_time + self.exp_detail.slice_duration,
             exp_num=np.full(tx_sch_len, self.exp_detail.id, dtype=np.int16),
@@ -218,7 +218,7 @@ class TrackerController(ControllerBase):
             pointing=tx_pointings,
         )
 
-        rx_schs: list[schedule.Schedule] = []
+        rx_schs: list[scheduling.Schedule] = []
         for rx_stn, rx_mask, rx_pointings in zip(
             pure_rx_stations, rx_el_in_range_with_tx_masks, rxs_pointings
         ):
@@ -226,7 +226,7 @@ class TrackerController(ControllerBase):
             rx_sch_len = len(rx_sch_time)
 
             rx_schs.append(
-                schedule.from_ndarrays(
+                scheduling.from_ndarrays(
                     start_time=rx_sch_time,
                     end_time=rx_sch_time + self.exp_detail.slice_duration,
                     exp_num=np.full(rx_sch_len, self.exp_detail.id, dtype=np.int16),
@@ -236,8 +236,8 @@ class TrackerController(ControllerBase):
                 )
             )
 
-        resultant_sch = xr.concat([tx_sch, *rx_schs], dim=schedule._K.multi_index)
-        resultant_sch = resultant_sch.sortby(schedule._K.start_time)
+        resultant_sch = xr.concat([tx_sch, *rx_schs], dim=scheduling._K.multi_index)
+        resultant_sch = resultant_sch.sortby(scheduling._K.start_time)
         output = resultant_sch
 
         return output

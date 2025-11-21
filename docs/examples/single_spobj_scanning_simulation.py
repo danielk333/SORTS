@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from astropy.time import Time
 import sorts
-from sorts import ExperimentDetail, FenceScanController, StxMrxSimulation, schedule
+from sorts import ExperimentDetail, FenceScanController, StxMrxSimulation, scheduling
 from sorts.utils import to_pydatetime, to_datetime64_us
 
 
@@ -83,10 +83,10 @@ sim = StxMrxSimulation.from_controllers(
 obss = sim.run()
 
 obs = obss[0]
-rx_sch_pass_mask = schedule.create_mask_by_time_range(
+rx_sch_pass_mask = scheduling.create_mask_by_time_range(
     sim.spec["rx_schedules"][0], obs["experiment_passage"]["time_range"]
 )
-rx_sch_pass = schedule.filter_by_mask(sim.spec["rx_schedules"][0], rx_sch_pass_mask)
+rx_sch_pass = scheduling.filter_by_mask(sim.spec["rx_schedules"][0], rx_sch_pass_mask)
 
 ##
 # do some plottings

@@ -5,14 +5,14 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import xarray as xr
-from sorts import types, radar, schedule
+from sorts import types, radar, scheduling
 from sorts.types import TxRxTuple
 from sorts.utils import assert_class_attributes_equal_to, to_datetime64_us
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.signals import hard_target_snr
 from sorts.interpolation import Interpolator
-from sorts.schedule import ExperimentDetailMap, Schedule
+from sorts.scheduling import ExperimentDetailMap, Schedule
 from sorts.simulation import Passage
 
 
@@ -57,7 +57,7 @@ class _K:
 
 assert_class_attributes_equal_to(_K, t.get_args(Key))
 
-_SK = schedule._K
+_SK = scheduling._K
 """Internal helper for accessing string keys consistently"""
 
 SimulationUnitState = t.NewType("SimulationUnitState", xr.Dataset)
@@ -411,16 +411,16 @@ class SimulationUnit:
 
 
 ObservationStationScheduleIndexer = tuple[
-    schedule.ExperimentId,
+    scheduling.ExperimentId,
     radar.StationId,
-    schedule.SimultaneousNum,
+    scheduling.SimultaneousNum,
     npt.NDArray[types.Datetime64_us],
 ]
 ObservationScheduleIndexer = TxRxTuple[
     ObservationStationScheduleIndexer, ObservationStationScheduleIndexer
 ]
 ObservationStateIndexer = tuple[
-    schedule.ExperimentId, schedule.SimultaneousNum, npt.NDArray[types.Datetime64_us]
+    scheduling.ExperimentId, scheduling.SimultaneousNum, npt.NDArray[types.Datetime64_us]
 ]
 
 
@@ -429,8 +429,8 @@ class Observation:
         self,
         passage: Passage,
         sim_unit: SimulationUnit,
-        exp_id: schedule.ExperimentId,
-        simult_num: schedule.SimultaneousNum,
+        exp_id: scheduling.ExperimentId,
+        simult_num: scheduling.SimultaneousNum,
     ):
         self.passage = passage
         self.sim_unit = sim_unit
@@ -444,7 +444,7 @@ class Observation:
         multi_index = t.cast(pd.MultiIndex, state_slice.indexes[_K.multi_index])
 
         unique_exp_id_simult_num_pairs: list[
-            tuple[schedule.ExperimentId, schedule.SimultaneousNum]
+            tuple[scheduling.ExperimentId, scheduling.SimultaneousNum]
         ] = (multi_index.droplevel(_K.time).unique().to_list())
 
         obss = [
@@ -475,7 +475,7 @@ class Observation:
     def index_into_schedule(self, sch: Schedule) -> TxRxTuple[Schedule, Schedule]:
         """Returns subset of schedules, in `(tx_scheule, tx_schedule` that corresponds to the observation"""
 
-        tx_sch_obs = schedule.filter_by_time_range(sch, self.passage.time_range)
+        tx_sch_obs = scheduling.filter_by_time_range(sch, self.passage.time_range)
         tx_sch_obs = tx_sch_obs.loc[
             {
                 _SK.multi_index: (
@@ -487,7 +487,7 @@ class Observation:
             }
         ]
 
-        rx_sch_obs = schedule.filter_by_time_range(sch, self.passage.time_range)
+        rx_sch_obs = scheduling.filter_by_time_range(sch, self.passage.time_range)
         rx_sch_obs = rx_sch_obs.loc[
             {
                 _SK.multi_index: (

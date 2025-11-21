@@ -12,7 +12,7 @@ import numpy as np
 from astropy.time import Time
 from astropy.constants import R_earth  # type: ignore
 import pyant, pyorb
-from sorts import schedule, ExperimentDetail
+from sorts import scheduling, ExperimentDetail
 from sorts.types import Float64_as_sec, Float64_as_deg, Float_as_sec, Float_as_deg
 from sorts.utils import to_datetime64_us
 from sorts.interpolation import Legendre8
@@ -45,7 +45,7 @@ control_slice_duration = np.timedelta64(1_000_000, "us")  # 1s
 dt_equality_thld = control_slice_duration / 2
 dsec_sampling_intv: Float_as_sec = 30
 
-_SK = schedule._K
+_SK = scheduling._K
 _SuK = stx_mrx_simulation.simulation_unit._K
 
 

@@ -13,7 +13,7 @@ import sorts
 from sorts import interpolation, population, propagator, radar, ExperimentDetail
 from sorts.types import Tuple_3, Tuple_7
 from sorts.space_object import SpaceObject, SpaceObjectId
-from sorts.schedule.priority_scheduling import priority_scheduling
+from sorts.scheduling.priority_scheduling import priority_scheduling
 from sorts.controller import SparseTrackerController
 from sorts.simulation.funcs import (
     ensure_directory_exist,

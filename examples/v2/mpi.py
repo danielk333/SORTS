@@ -18,7 +18,7 @@ from sorts import (
     controller,
     ExperimentDetail,
 )
-from sorts.schedule.priority_scheduling import priority_scheduling
+from sorts.scheduling.priority_scheduling import priority_scheduling
 from sorts.simulation.funcs import ensure_directory_exist, safe_pickle
 from sorts.simulation.stx_mrx_simulation import stx_mrx_simulation, StxMrxSimulation, SimulationUnit
 
