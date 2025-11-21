@@ -126,8 +126,10 @@ class FenceScanController(ControllerBase):
 
         return stn_map
 
-    def _compute_controller_state(self, start_time: Datetime_Like, end_time: Datetime_Like) -> ControllerState:
-       """Do the computation and return the updated `state` property."""
+    def _compute_controller_state(
+        self, start_time: Datetime_Like, end_time: Datetime_Like
+    ) -> ControllerState:
+        """Do the computation and return the updated `state` property."""
 
         exp_detail = self.exp_detail
 
@@ -153,8 +155,9 @@ class FenceScanController(ControllerBase):
 
         return state
 
-    def generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> scheduling.Schedule:
+    def _generate(self) -> scheduling.Schedule:
         """Generate the schedules."""
+
         # TODO: write schedule to disk generally and then chunk load it as needed in the actual
         # simulation, the general simulation pattern will be "1. propagate objects and generate
         # states and make schedule, 2. run simulation, 3. analyze results"
@@ -167,7 +170,6 @@ class FenceScanController(ControllerBase):
         #    and then further back to pointings in ENU coord,
         #    and finally repeat them to form a rx schedule, for each rx station
 
-        self.state = self._compute_controller_state(start_time, end_time)
         pointings_per_cycle = self.state.tx_pointings_of_a_cycle.shape[1]
 
         # NOTE: for `np.arange` 'stop param,
@@ -271,3 +273,11 @@ class FenceScanController(ControllerBase):
         output = resultant_sch
 
         return output
+
+    def generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> scheduling.Schedule:
+        """Generate the schedules."""
+
+        self.state = self._compute_controller_state(start_time, end_time)
+        sch = self._generate()
+
+        return sch

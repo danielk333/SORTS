@@ -167,18 +167,8 @@ class TrackerController(ControllerBase):
 
         return state
 
-    def generate(
-        self, start_time: Datetime_Like | None = None, end_time: Datetime_Like | None = None
-    ) -> scheduling.Schedule:
-        """
-        Generate the schedules.
-        `start_time` and `end_time` should be omitted if this instance is created from `TrackerController.from_ecef_states`
-        """
-
-        if start_time is not None and end_time is not None:
-            self.state = self._compute_controller_state(
-                start_time, end_time, self.exp_detail.slice_duration
-            )
+    def _generate(self) -> scheduling.Schedule:
+        """Generate the schedules."""
 
         loc_zenith = np.array([0, 0, 1], dtype=np.float64)
 
@@ -243,3 +233,20 @@ class TrackerController(ControllerBase):
         output = resultant_sch
 
         return output
+
+    def generate(
+        self, start_time: Datetime_Like | None = None, end_time: Datetime_Like | None = None
+    ) -> scheduling.Schedule:
+        """
+        Generate the schedules.
+        `start_time` and `end_time` should be omitted if this instance is created from `TrackerController.from_ecef_states`
+        """
+
+        if start_time is not None and end_time is not None:
+            self.state = self._compute_controller_state(
+                start_time, end_time, self.exp_detail.slice_duration
+            )
+
+        sch = self._generate()
+
+        return sch

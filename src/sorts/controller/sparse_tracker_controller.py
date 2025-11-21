@@ -144,12 +144,8 @@ class SparseTrackerController(ControllerBase):
 
         return state
 
-    def generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> scheduling.Schedule:
+    def _generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> scheduling.Schedule:
         """Generate the schedules."""
-
-        self.state = self._compute_controller_state(
-            start_time, end_time, self.exp_detail.slice_duration
-        )
 
         passages_of_spobj = find_simultaneous_passages(
             dt=(self.state.spobj_time - self.epoch) / np.timedelta64(1, "s"),
@@ -226,3 +222,13 @@ class SparseTrackerController(ControllerBase):
         output = resultant_sch
 
         return output
+
+    def generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> scheduling.Schedule:
+        """Generate the schedules."""
+
+        self.state = self._compute_controller_state(
+            start_time, end_time, self.exp_detail.slice_duration
+        )
+        sch = self._generate(start_time, end_time)
+
+        return sch
