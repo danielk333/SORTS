@@ -184,6 +184,12 @@ class StxMrxSimulation:
         """A constructor method"""
         # TODO: - the exp details are already computed outside? Should the `controllers` field be
         # removed? or this classmethod? or what?
+        #
+        # Notes from Hin, 2025-11-21:
+        #   - both `exp_id_stn_id_pairs_map` and `ExperimentDetail` are currently owned by the controller;
+        #   - the func `priority_scheduling` evolved to requires `exp_id_stn_id_pairs_map` at some point,
+        #     and therefore it is sometimes found as an explicitly variable in simulation experiment file as well
+        #   - we can re-work info flow later but this is needed atm
 
         stn_map: dict[StationId, Station] = {}
         stn_id_pairs_set: set[tuple[StationId, StationId]] = set()
