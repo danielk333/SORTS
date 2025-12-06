@@ -60,14 +60,18 @@ Float64_as_deg = np.float64
 Float64_as_rad = np.float64
 "`numpy` `float64` as angle in radians"
 
+# TODO: make sure these comments make sense
 NDArray_3x1 = npt.NDArray
 "(3,) shaped ndarray (i.e. a single 3D vector)"
 
 NDArray_6x1 = npt.NDArray
 "(6,) shaped ndarray (i.e. a single 6D vector)"
 
+NDArray_N = npt.NDArray
+"(n,) shaped ndarray (i.e. a single `n`D vector)"
+
 NDArray_3xN = npt.NDArray
-"(3,n) shaped ndarray (i.e. `3` 1D vectors of length `n`)"
+"(3,n) shaped ndarray (i.e. `3` rows and `n` columns)"
 
 NDArray_6xN = npt.NDArray
 "(6,n) shaped ndarray (i.e. `6` 1D vectors of length `n`)"
