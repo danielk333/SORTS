@@ -15,6 +15,7 @@ def orbit_grid(
     longitude_of_ascending_node_samples: NDArray_N,
     mean_anomaly_samples: NDArray_N,
     diameter_samples: NDArray_N,
+    mjd0: NDArray_N | float = 53005.0,
     propagator=None,
     propagator_options={},
     propagator_args={},
@@ -60,7 +61,7 @@ def orbit_grid(
     pop.data["aop"] = grids[3]
     pop.data["raan"] = grids[4]
     pop.data["mu0"] = grids[5]
-    pop.data["mjd0"] = 53005.0
+    pop.data["mjd0"] = mjd0
     pop.data["d"] = grids[6]
     pop.data["C_D"] = 2.3
 
