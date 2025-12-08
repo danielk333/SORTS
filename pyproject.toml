@@ -1,89 +1,96 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "sorts"
-version = "0.1.0"
-dynamic = [
-    "description",
-    "readme",
-    "license",
-
-    # used in `setup.cfg`, but does not cause warnings/errors
-    # "license-files"
-    # "authors",
-    # "classifiers",
-    # "scripts",
-    # "entry-points",
-
-    # not used in setup.cfg
-    # "maintainers",
-    # "keywords",
-    # "urls",
-    # "gui-scripts",
-]
+description = "Space Object Radar Tracking Simulator"
+version = "5.0.0-rc.1"
 requires-python = ">=3.12"
-dependencies = [
-    "h5py>=3.2.1",
-    "matplotlib>=2.2.2",
-    "numpy>=1.14.3",
-    "scipy>=1.1.0",
-    "sgp4>=2.7",
-    "tabulate>=0.8.7",
-    "tqdm>=4.46.0",
-    "astropy>=4.1",
-    "xmlschema>=1.5.1",
-    "pyorb>=0.5.4",
-    "pyant>=1.1",
-    "yappi>=1.4.0",
-    "requests>=2.32.3",
-    "pandas>=2.2.3",
-    "pyqt6>=6.8.1",
-    "bokeh>=3.7.3",
-    "jupyter-bokeh>=4.0.5",
-    "jupyterlab>=4.4.4",
-    "lets-plot>=4.6.2",
-    "panel>=1.7.4",
-    "pyproj>=3.7.1",
-    "pyvista>=0.45.2",
-    "xarray>=2025.8.0",
-    "bottleneck>=1.5.0",
-    "mpi4py>=4.1.0",
-    "h5netcdf>=1.6.4",
+readme = { file = "README.md", content-type = "text/markdown" }
+authors = [
+  { name = "Daniel Kastinen", email = "daniel.kastinen@irf.se" },
+  { name = "Tsz-Hin Heung" },
+  { name = "Juha Vierinen" },
 ]
+license = { file = "LICENSE" }
+maintainers = [{ name = "Daniel Kastinen", email = "daniel.kastinen@irf.se" }]
+classifiers = [
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering :: Physics",
+  "Operating System :: Unix",
+]
+# TODO: this is way to many deps, i think many are not used
+dependencies = [
+  "h5py>=3.2.1",
+  "matplotlib>=2.2.2",
+  "numpy>=1.14.3",
+  "scipy>=1.1.0",
+  "sgp4>=2.7",
+  "tabulate>=0.8.7",
+  "tqdm>=4.46.0",
+  "astropy>=4.1",
+  "xmlschema>=1.5.1",
+  "pyorb>=0.5.4",
+  "pyant>=1.1",
+  "yappi>=1.4.0",
+  "requests>=2.32.3",
+  "pandas>=2.2.3",
+  "pyqt6>=6.8.1",
+  "bokeh>=3.7.3",
+  "jupyter-bokeh>=4.0.5",
+  "jupyterlab>=4.4.4",
+  "lets-plot>=4.6.2",
+  "panel>=1.7.4",
+  "pyproj>=3.7.1",
+  "pyvista>=0.45.2",
+  "xarray>=2025.8.0",
+  "bottleneck>=1.5.0",
+  "mpi4py>=4.1.0",
+  "h5netcdf>=1.6.4",
+]
+
+
+[project.urls]
+Documentation = "https://danielk.developer.irf.se/sorts/"
+Repository = "https://github.com/danielk333/sorts"
 
 [project.optional-dependencies]
 spacetrack = ["spacetrack>=1.0.1"]
 jupyter = [
-    "ipykernel>=6.29.5",
-    "ipywidgets>=8.1.7",
-    "jupyter-bokeh>=4.0.5",
-    "jupyterlab>=4.4.4",
+  "ipykernel>=6.29.5",
+  "ipywidgets>=8.1.7",
+  "jupyter-bokeh>=4.0.5",
+  "jupyterlab>=4.4.4",
 ]
 dev = [
-    "pytest>=6.2.5",
-    "flake8>=4.0.1",
-    "wheel>=0.37.0",
-    "build>=0.7.0",
-    "twine>=3.4.2",
-    "pytest-cov>= 4.1.0",
-    "matplotlib>=3.5.1",
-    "ipykernel>=6.9.1",
-    "radon>=5.1.0",
-    "numpydoc>=1.2",
-    "pre-commit> 3.0.0",
-    "black>=23.3.0",
-    "auditwheel>=5.4.0",
-    "patchelf>=0.14",
-    "watchfiles>=1.1.0",
-    "mkdocs>=1.6.1",
-    "mkdocs-gen-files>=0.5.0",
-    "mkdocstrings[python]>=0.30.0",
-    "mkdocs-section-index>=0.3.10",
-    "mkdocs-literate-nav>=0.6.2",
-    "jupytext>=1.17.2",
-    "mkdocs-jupyter>=0.25.1",
+  "pytest>=6.2.5",
+  "flake8>=4.0.1",
+  "wheel>=0.37.0",
+  "build>=0.7.0",
+  "twine>=3.4.2",
+  "pytest-cov>= 4.1.0",
+  "matplotlib>=3.5.1",
+  "ipykernel>=6.9.1",
+  "radon>=5.1.0",
+  "numpydoc>=1.2",
+  "pre-commit> 3.0.0",
+  "black>=23.3.0",
+  "auditwheel>=5.4.0",
+  "patchelf>=0.14",
+  "watchfiles>=1.1.0",
+  "mkdocs>=1.6.1",
+  "mkdocs-gen-files>=0.5.0",
+  "mkdocstrings[python]>=0.30.0",
+  "mkdocs-section-index>=0.3.10",
+  "mkdocs-literate-nav>=0.6.2",
+  "jupytext>=1.17.2",
+  "mkdocs-jupyter>=0.25.1",
 ]
 
 [tool.setuptools.package-data]
-sorts = ["py.typed"]
+sorts = ["py.typed", "data/*"]
 
 [tool.black]
 line-length = 100
