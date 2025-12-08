@@ -146,6 +146,7 @@ Frames = t.Literal[
     "HCRF",
 ]
 GravModels = t.Literal["WGS84"]
+StateType = t.Literal["kepler", "cartesian"]
 
 
 @dataclass
