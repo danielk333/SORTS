@@ -40,6 +40,12 @@ prop.settings.out_frame = "GCRS"
 states_gcrs = prop.propagate(spobj, t)
 
 
+# or we can propagate the epoch of the object
+new_spobj = prop.propagate_to_new_epoch(spobj, 3600.0)
+print(f"{spobj=}\n{spobj.state}")
+print(f"{new_spobj=}\n{new_spobj.state}")
+
+
 fig = plt.figure(figsize=(15, 15))
 ax = fig.add_subplot(121, projection="3d")
 ax.plot(states_itrs[0, :], states_itrs[1, :], states_itrs[2, :], "-b")

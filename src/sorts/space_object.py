@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
 """Defines a space object. Encapsulates orbital elements, propagation and related methods."""
-from typing import Any
-from dataclasses import dataclass
+from copy import deepcopy
+from typing import Any, Self
+from dataclasses import dataclass, fields
 
 import numpy as np
 from pyorb import Orbit, M_earth
@@ -26,6 +27,14 @@ class SpaceObject:
     epoch: Time
     properties: dict[str, Any]
     object_id: int = 0
+
+    def copy(self) -> Self:
+        kwargs = {key: deepcopy(getattr(self, key)) for key in self.keys}
+        return self.__class__(**kwargs)
+
+    @property
+    def keys(self) -> list[str]:
+        return [key.name for key in fields(self)]
 
     @classmethod
     def from_kepler(
@@ -69,7 +78,7 @@ class SpaceObject:
         )
 
     def __repr__(self):
-        return f"SpaceObject(oid={self.oid})"
+        return f"SpaceObject(oid={self.object_id} @ {self.epoch.iso})"
 
     @property
     def d(self) -> float:

@@ -20,31 +20,22 @@ class Propagator(ABC, Generic[S]):
         for key in self.settings.keys:
             logger.debug(f"Propagator:settings:{key} = {getattr(self.settings, key)}")
 
-    def propagate_to_new_epoch(self, space_object, dt: TimeDelta | float):
+    def propagate_to_new_epoch(
+        self,
+        space_object: SpaceObject,
+        dt: Time | TimeDelta | float,
+        copy: bool = True,
+    ) -> SpaceObject:
         """Propagate and change the epoch of this space object if the state is a `pyorb.Orbit`."""
-        pass
-        # if "in_frame" in self.propagator.settings and "out_frame" in self.propagator.settings:
-        #     out_frame = self.propagator.settings["out_frame"]
-        #     self.propagator.set(out_frame=self.propagator.settings["in_frame"])
-        #
-        #     state = self.get_state(np.array([dt], dtype=np.float64))
-        #
-        #     self.propagator.set(out_frame=out_frame)
-        # else:
-        #     state = self.get_state(np.array([dt], dtype=np.float64))
-        #
-        # self.epoch = self.epoch + TimeDelta(dt, format="sec")
-        #
-        # x, y, z, vx, vy, vz = state.flatten()
-        #
-        # self.update(
-        #     x=x,
-        #     y=y,
-        #     z=z,
-        #     vx=vx,
-        #     vy=vy,
-        #     vz=vz,
-        # )
+        dt = space_object.to_relative_time(dt)[0]
+        new_cart = self.propagate(space_object, dt)
+        if len(new_cart.shape) < 2:
+            new_cart.shape = (new_cart.size, 1)
+        obj = space_object.copy() if copy else space_object
+        obj.state.cartesian = new_cart
+        obj.state.calculate_kepler()
+        obj.epoch += TimeDelta(dt, format="sec")
+        return obj
 
     @abstractmethod
     def propagate(self, space_object: SpaceObject, times: Time | TimeDelta | NDArray_N):

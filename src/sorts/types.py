@@ -4,7 +4,7 @@ Shared types in this package.
 (Types might live in their own module instead of here if it improves readability,
 and the imports can be worked around, e.g, by `if t.TYPE_CHECKING`)
 """
-
+from copy import deepcopy
 from dataclasses import dataclass, fields
 import typing as t
 import numpy as np
@@ -146,6 +146,10 @@ Frames = t.Literal[
 
 @dataclass
 class Settings:
+    def copy(self: S) -> S:
+        kwargs = {key: deepcopy(getattr(self, key)) for key in self.keys}
+        return self.__class__(**kwargs)
+
     @property
     def keys(self) -> list[str]:
         return [key.name for key in fields(self)]
