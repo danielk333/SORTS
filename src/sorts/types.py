@@ -5,6 +5,7 @@ Shared types in this package.
 and the imports can be worked around, e.g, by `if t.TYPE_CHECKING`)
 """
 
+from dataclasses import dataclass, fields
 import typing as t
 import numpy as np
 import numpy.typing as npt
@@ -127,3 +128,24 @@ class TxRxTuple[TxType, RxType](t.NamedTuple):
 type Tuple_3[T] = tuple[T, T, T]
 type Tuple_6[T] = tuple[T, T, T, T, T, T]
 type Tuple_7[T] = tuple[T, T, T, T, T, T, T]
+
+S = t.TypeVar("S", bound="Settings")
+
+Frames = t.Literal[
+    "TEME",
+    "ITRS",
+    "ITRF",
+    "ICRS",
+    "ICRF",
+    "GCRS",
+    "GCRF",
+    "HCRS",
+    "HCRF",
+]
+
+
+@dataclass
+class Settings:
+    @property
+    def keys(self) -> list[str]:
+        return [key.name for key in fields(self)]

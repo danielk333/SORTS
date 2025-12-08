@@ -12,35 +12,27 @@ __all__ = [
     "Propagator",
 ]
 
-# TODO: discuss with daniel if he is okay with this import guard
-if importlib.util.find_spec("orekit") is not None:
-    from .orekit import Orekit
-
-    __all__.append("Orekit")
-else:
-    Orekit = None
-
-try:
-    from .pysgp4 import SGP4
-
-    __all__.append("SGP4")
-except ImportError:
-    SGP4 = None
-
-try:
-    from .rebound import Rebound
-
-    __all__.append("Rebound")
-except ImportError:
-    Rebound = None
-
-from .kepler import Kepler
+from .kepler import Kepler, KeplerSettings
 
 __all__.append("Kepler")
+__all__.append("KeplerSettings")
 
-if importlib.util.find_spec("poliastro") is not None:
-    from .poliastro import TwoBody
-
-    __all__.append("TwoBody")
-else:
-    TwoBody = None
+# if importlib.util.find_spec("orekit") is not None:
+#     from .orekit import Orekit
+#
+#     __all__.append("Orekit")
+#
+# if importlib.util.find_spec("sgp4") is not None:
+#     from .pysgp4 import SGP4
+#
+#     __all__.append("SGP4")
+#
+# if importlib.util.find_spec("rebound") is not None:
+#     from .rebound import Rebound
+#
+#     __all__.append("Rebound")
+#
+# if importlib.util.find_spec("poliastro") is not None:
+#     from .poliastro import TwoBody
+#
+#     __all__.append("TwoBody")
