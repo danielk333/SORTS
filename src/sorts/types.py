@@ -71,6 +71,9 @@ NDArray_6x1 = npt.NDArray
 NDArray_N = npt.NDArray
 "(n,) shaped ndarray (i.e. a single `n`D vector)"
 
+NDArray_6 = npt.NDArray
+"(6,) shaped ndarray (i.e. a single `6`D vector)"
+
 NDArray_3xN = npt.NDArray
 "(3,n) shaped ndarray (i.e. `3` rows and `n` columns)"
 
@@ -142,6 +145,7 @@ Frames = t.Literal[
     "HCRS",
     "HCRF",
 ]
+GravModels = t.Literal["WGS84"]
 
 
 @dataclass

@@ -1,73 +1,48 @@
 #!/usr/bin/env python
 
-"""rapper for the SGP4 propagator
-
-"""
-
-# Python standard import
+"""wrapper for the SGP4 propagator"""
 import logging
-from copy import copy
-
-# Third party import
+from dataclasses import dataclass
 import numpy as np
 from astropy.time import Time, TimeDelta
 import scipy.optimize
 import pyorb
-
 import sgp4
 from sgp4.api import Satrec, SGP4_ERRORS
 import sgp4.earth_gravity
 
-# Local import
+from sorts.types import Settings, GravModels, NDArray_6, Frames
 from .base import Propagator
-from .. import dates
-from .. import frames
 
 logger = logging.getLogger(__name__)
 
 
-class SGP4(Propagator):
+@dataclass
+class Sgp4Settings(Settings):
+    out_frame: Frames = "TEME"
+    gravity_model: GravModels = "WGS84"
+    teme_to_tle_max_iter: int = 300
+    teme_to_tle_minimize_start_samples: int = 1
+    teme_to_tle_minimize_start_stds: NDArray_6 = np.array([10.0, 0.01, 1.0, 2.0, 2.0, 2.0])
+    teme_to_tle_minimize_bounds: list[tuple[float, float]] = [
+        (6371.0, np.inf),
+        (0, 1),
+        (0, np.pi),
+        (0, 2 * np.pi),
+        (0, 2 * np.pi),
+        (0, 2 * np.pi),
+    ]
+
+
+class Sgp4(Propagator[Sgp4Settings]):
     """Propagator class implementing the SGP4 propagator.
-
-    Frame options are found in the `sorts.frames.convert` function.
-
-    :ivar str in_frame: String identifying the input frame.
-    :ivar str out_frame: String identifying the output frame.
-
-    :param str in_frame: String identifying the input frame.
-    :param str out_frame: String identifying the output frame.
     """
 
-    DEFAULT_SETTINGS = copy(Propagator.DEFAULT_SETTINGS)
-    DEFAULT_SETTINGS.update(
-        dict(
-            out_frame="TEME",
-            in_frame="TEME",
-            gravity_model="WGS84",
-            TEME_to_TLE_max_iter=300,
-            tle_input=False,
-            TEME_TO_TLE_minimize_start_samples=1,
-            TEME_TO_TLE_minimize_start_stds=np.array([10.0, 0.01, 1.0, 2.0, 2.0, 2.0]),
-            TEME_TO_TLE_minimize_bounds=[
-                (6371.0, np.inf),
-                (0, 1),
-                (0, np.pi),
-                (0, 2 * np.pi),
-                (0, 2 * np.pi),
-                (0, 2 * np.pi),
-            ],
-        )
-    )
-
-    def __init__(self, settings=None, **kwargs):
-        super(SGP4, self).__init__(settings=settings, **kwargs)
-        logger.debug(f"sorts.propagator.SGP4:init")
+    def __init__(self, settings: Sgp4Settings):
+        super().__init__(settings=settings)
 
         self.sgp4_mjd0 = Time("1949-12-31 00:00:00", format="iso", scale="ut1").mjd
         self.rho0 = 2.461e-5 / 6378.135e3  # kg/m^2/m
-
-        self.grav_ind = getattr(sgp4.api, self.settings["gravity_model"].upper())
-        self.grav_model = getattr(sgp4.earth_gravity, self.settings["gravity_model"].lower())
 
     @staticmethod
     def get_TLE_parameters(line1, line2, gravity_model="WGS84"):
@@ -177,6 +152,9 @@ class SGP4(Propagator):
 
         """
         logger.debug(f"SGP4:propagate:len(t) = {len(t)}")
+
+        self.grav_ind = getattr(sgp4.api, self.settings["gravity_model"].upper())
+        self.grav_model = getattr(sgp4.earth_gravity, self.settings["gravity_model"].lower())
 
         if self.settings["tle_input"]:
             if isinstance(state0, np.ndarray):

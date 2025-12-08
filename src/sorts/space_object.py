@@ -37,6 +37,10 @@ class SpaceObject:
         return [key.name for key in fields(self)]
 
     @classmethod
+    def from_tle(cls):
+        raise NotImplementedError("todo")
+
+    @classmethod
     def from_kepler(
         cls,
         semi_major_axis: float,
