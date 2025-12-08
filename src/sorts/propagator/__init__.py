@@ -17,6 +17,9 @@ from .kepler import Kepler, KeplerSettings
 __all__.append("Kepler")
 __all__.append("KeplerSettings")
 
+Rebound = None
+SGP4 = None
+
 # if importlib.util.find_spec("orekit") is not None:
 #     from .orekit import Orekit
 #

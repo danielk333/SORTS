@@ -7,7 +7,7 @@ from dataclasses import dataclass
 import numpy as np
 from astropy.time import TimeDelta, Time
 from .base import Propagator
-from sorts.types import Settings, Frames
+from sorts.types import Settings, Frames, NDArray_N
 from sorts.space_object import SpaceObject
 import spacecoords.celestial as cel
 
@@ -31,20 +31,15 @@ class Kepler(Propagator[KeplerSettings]):
 
     """
 
-    def propagate(self, space_object: SpaceObject, t: TimeDelta | float, epoch: Time):
+    def propagate(self, space_object: SpaceObject, times: Time | TimeDelta | NDArray_N):
         logger.debug("Kepler:propagate")
-        if isinstance(t, TimeDelta):
-            tv = t.sec
-        else:
-            tv = t
-        if not isinstance(tv, np.ndarray):
-            tv = np.array([tv])
+        tv = space_object.to_relative_time(times)
 
         orb = space_object.state.copy()
         if space_object.frame != self.settings.internal_frame:
-            orb.cartesian = cel.convert(
-                epoch,
-                orb.cartesian,
+            orb._cart = cel.convert(
+                space_object.epoch,
+                orb._cart,
                 in_frame=space_object.frame,
                 out_frame=self.settings.internal_frame,
                 frame_kwargs={},
@@ -53,7 +48,6 @@ class Kepler(Propagator[KeplerSettings]):
 
         orb.direct_update = False
         orb.auto_update = False
-        orb.degrees = False
         orb.solver_options = dict(
             tol=self.settings.numerical_tolerance,
             max_iter=self.settings.max_iterations,
@@ -61,14 +55,15 @@ class Kepler(Propagator[KeplerSettings]):
         )
 
         orb.add(num=len(tv) - 1)
-        orb._kep[:, 1:] = orb._kep[:, 0][:, None]
-        orb.mean_anomaly = np.mod(orb.mean_anomaly + orb.mean_motion * tv, 2 * np.pi)
+        kep0 = orb._kep[:, 0]
+        orb._kep[:, :] = kep0[:, None]
+        orb.propagate(tv)
         orb.calculate_cartesian()
 
         if self.settings.out_frame != self.settings.internal_frame:
-            orb.cartesian = cel.convert(
-                epoch,
-                orb.cartesian,
+            orb._cart = cel.convert(
+                space_object.epoch + TimeDelta(tv, format="sec"),
+                orb._cart,
                 in_frame=self.settings.internal_frame,
                 out_frame=self.settings.out_frame,
                 frame_kwargs={},

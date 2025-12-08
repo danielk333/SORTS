@@ -11,14 +11,14 @@ from .version import __version__
 logger = logging.getLogger(__name__)
 
 # Find suffix
-suffix = sysconfig.get_config_var("EXT_SUFFIX")
-if suffix is None:
-    suffix = ".so"
-
-__sortspath__ = pathlib.Path(__file__).resolve().parent
-__libpath__ = __sortspath__ / ("clibsorts" + suffix)
-
-clibsorts = ctypes.cdll.LoadLibrary(str(__libpath__))
+# suffix = sysconfig.get_config_var("EXT_SUFFIX")
+# if suffix is None:
+#     suffix = ".so"
+#
+# __sortspath__ = pathlib.Path(__file__).resolve().parent
+# __libpath__ = __sortspath__ / ("clibsorts" + suffix)
+#
+# clibsorts = ctypes.cdll.LoadLibrary(str(__libpath__))
 
 ##
 # v2 imports
@@ -61,7 +61,7 @@ from . import correlator
 from . import propagator
 
 # classes
-from .space_object import SpaceObject, SpaceObjectId
+from .space_object import SpaceObject
 from .population import Population
 from .propagator import Propagator
 from .radar import Scan
