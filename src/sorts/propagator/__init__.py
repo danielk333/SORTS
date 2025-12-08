@@ -17,18 +17,17 @@ from .kepler import Kepler, KeplerSettings
 __all__.append("Kepler")
 __all__.append("KeplerSettings")
 
+if importlib.util.find_spec("sgp4") is not None:
+    from .pysgp4 import Sgp4, Sgp4Settings
+    __all__.append("Sgp4")
+
 Rebound = None
-SGP4 = None
 
 # if importlib.util.find_spec("orekit") is not None:
 #     from .orekit import Orekit
 #
 #     __all__.append("Orekit")
 #
-# if importlib.util.find_spec("sgp4") is not None:
-#     from .pysgp4 import SGP4
-#
-#     __all__.append("SGP4")
 #
 # if importlib.util.find_spec("rebound") is not None:
 #     from .rebound import Rebound

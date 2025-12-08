@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 """wrapper for the SGP4 propagator"""
+from typing import Any
 import logging
 from dataclasses import dataclass
 import numpy as np
@@ -10,33 +11,138 @@ import pyorb
 import sgp4
 from sgp4.api import Satrec, SGP4_ERRORS
 import sgp4.earth_gravity
+import spacecoords.celestial as cel
 
-from sorts.types import Settings, GravModels, NDArray_6, Frames
+from sorts.utils import convert_to_relative_time
+from sorts.space_object import SpaceObject
+from sorts.types import Settings, GravModels, NDArray_6, Frames, NDArray_6xN, NDArray_N
 from .base import Propagator
 
 logger = logging.getLogger(__name__)
+
+
+def _sgp4_elems2cart(
+    kep: NDArray_6xN | NDArray_6,
+    grav_model,
+) -> NDArray_6xN | NDArray_6:
+    """Orbital elements to cartesian coordinates.
+    Wrap pyorb-function to use mean anomaly, km and reversed order on aoe and raan.
+    Output in SI.
+
+    Neglecting mass is sufficient for this calculation
+    (the standard gravitational parameter is 24 orders larger then the change).
+    """
+    _kep = kep.copy()
+    _kep[0, ...] *= 1e3
+    tmp = _kep[4, ...].copy()
+    _kep[4, ...] = _kep[3, ...]
+    _kep[3, ...] = tmp
+    _kep[5, ...] = pyorb.mean_to_true(_kep[5, ...], _kep[1, ...], degrees=False)
+    cart = pyorb.kep_to_cart(_kep, mu=grav_model.mu * 1e9, degrees=False)
+    return cart
+
+
+def _cart2sgp4_elems(
+    cart: NDArray_6xN | NDArray_6,
+    grav_model,
+    degrees: bool = False,
+) -> NDArray_6xN | NDArray_6:
+    """Cartesian coordinates to orbital elements.
+    Wrap pyorb-function to use mean anomaly, km and reversed order on aoe and raan.
+
+    Neglecting mass is sufficient for this calculation
+    (the standard gravitational parameter is 24 orders larger then the change).
+    """
+    kep = pyorb.cart_to_kep(cart, mu=grav_model.mu * 1e9, degrees=False)
+    kep[0, ...] *= 1e-3
+    tmp = kep[4, ...].copy()
+    kep[4, ...] = kep[3, ...]
+    kep[3, ...] = tmp
+    kep[5, ...] = pyorb.true_to_mean(kep[5, ...], kep[1, ...], degrees=False)
+    return kep
+
+
+def kep_to_mean_elements(orb: pyorb.Orbit, degrees: bool = False) -> NDArray_6xN:
+    """Orbital elements to the convention used by mean elements. Input assumes SI units.
+
+    Neglecting mass is sufficient for this calculation
+    (the standard gravitational parameter is 24 orders larger then the change).
+    """
+    kep = np.empty_like(orb._kep)
+    kep[0, ...] = orb.a * 1e3
+    kep[1, ...] = orb.e
+    kep[2, ...] = orb.i
+    kep[3, ...] = orb.Omega
+    kep[4, ...] = orb.omega
+    kep[5, ...] = orb.mean_anomaly
+
+    if orb.degrees and not degrees:
+        kep[2:, :] = np.radians(kep[2:, :])
+    elif not orb.degrees and degrees:
+        kep[2:, :] = np.degrees(kep[2:, :])
+
+    return kep
+
+
+def get_TLE_parameters(
+    line1: str, line2: str, gravity_model: GravModels = "WGS84"
+) -> dict[str, Any]:
+    line1, line2 = line_decode(line1), line_decode(line2)
+
+    grav_ind = getattr(sgp4.api, gravity_model.upper())
+    satellite = Satrec.twoline2rv(line1, line2, grav_ind)
+    ret = {}
+    for key in ["bstar", "satnum", "jdsatepochF", "jdsatepoch"]:
+        ret[key] = getattr(satellite, key)
+    return ret
+
+
+def line_decode(line: str | np.bytes_) -> str:
+    if isinstance(line, np.bytes_):
+        rline = str(line.astype("U"))
+    elif not isinstance(line, str):
+        try:
+            rline = line.decode()
+        except (UnicodeDecodeError, AttributeError):
+            pass
+    else:
+        rline = line
+
+    return rline
+
+
+def get_B(properties):
+    if "B" in properties:
+        B = properties["B"]
+    elif "A" in properties and "m" in properties:
+        B = 0.5 * properties.get("C_D", 2.3) * properties["A"] / properties["m"]
+    else:
+        B = 0
+    return B
 
 
 @dataclass
 class Sgp4Settings(Settings):
     out_frame: Frames = "TEME"
     gravity_model: GravModels = "WGS84"
+    mean_elements_input: bool = False
+    tol: float = 1e-5
+    tol_v: float = 1e-7
     teme_to_tle_max_iter: int = 300
     teme_to_tle_minimize_start_samples: int = 1
-    teme_to_tle_minimize_start_stds: NDArray_6 = np.array([10.0, 0.01, 1.0, 2.0, 2.0, 2.0])
-    teme_to_tle_minimize_bounds: list[tuple[float, float]] = [
+    teme_to_tle_minimize_start_stds: tuple[float, ...] = (10.0, 0.01, 1.0, 2.0, 2.0, 2.0)
+    teme_to_tle_minimize_bounds: tuple[tuple[float, float], ...] = (
         (6371.0, np.inf),
         (0, 1),
         (0, np.pi),
         (0, 2 * np.pi),
         (0, 2 * np.pi),
         (0, 2 * np.pi),
-    ]
+    )
 
 
 class Sgp4(Propagator[Sgp4Settings]):
-    """Propagator class implementing the SGP4 propagator.
-    """
+    """Propagator class implementing the SGP4 propagator."""
 
     def __init__(self, settings: Sgp4Settings):
         super().__init__(settings=settings)
@@ -44,71 +150,41 @@ class Sgp4(Propagator[Sgp4Settings]):
         self.sgp4_mjd0 = Time("1949-12-31 00:00:00", format="iso", scale="ut1").mjd
         self.rho0 = 2.461e-5 / 6378.135e3  # kg/m^2/m
 
-    @staticmethod
-    def get_TLE_parameters(line1, line2, gravity_model="WGS84"):
-        line1, line2 = SGP4.line_decode(line1), SGP4.line_decode(line2)
-
-        grav_ind = getattr(sgp4.api, gravity_model.upper())
-        satellite = Satrec.twoline2rv(line1, line2, grav_ind)
-        ret = {}
-        for key in ["bstar", "satnum", "jdsatepochF", "jdsatepoch"]:
-            ret[key] = getattr(satellite, key)
-        return ret
-
-    @staticmethod
-    def line_decode(line):
-        if isinstance(line, np.bytes_):
-            line = line.astype("U")
-        elif not isinstance(line, str):
-            try:
-                line = line.decode()
-            except (UnicodeDecodeError, AttributeError):
-                pass
-
-        return line
-
-    def propagate_tle(self, t, line1, line2, **kwargs):
+    def propagate_tle(
+        self,
+        line1: str,
+        line2: str,
+        times: Time | TimeDelta | NDArray_N,
+    ) -> NDArray_6xN:
         """Propagate a TLE pair"""
 
-        line1, line2 = SGP4.line_decode(line1), SGP4.line_decode(line2)
+        grav_ind = getattr(sgp4.api, self.settings.gravity_model.upper())
+        # grav_model = getattr(sgp4.earth_gravity, self.settings.gravity_model.lower())
+        line1, line2 = line_decode(line1), line_decode(line2)
 
-        satellite = Satrec.twoline2rv(line1, line2, self.grav_ind)
+        satellite = Satrec.twoline2rv(line1, line2, grav_ind)
 
         epoch = Time(satellite.jdsatepoch + satellite.jdsatepochF, format="jd", scale="utc")
         logger.debug(f"SGP4:propagate_tle:epoch={epoch}")
+        tv = convert_to_relative_time(epoch, times)
+        td = TimeDelta(tv, format="sec")
 
-        t, epoch = self.convert_time(t, epoch)
-        times = epoch + t
+        times = epoch + td
 
         jd_f = times.jd2
         jd0 = times.jd1
 
         if isinstance(jd_f, float) or isinstance(jd_f, int):
             states = np.empty((6,), dtype=np.float64)
-
             error, r, v = satellite.sgp4(jd0, jd_f)
-
-            if error != 0:
-                logger.error(f"SGP4:propagate:steps:{SGP4_ERRORS[error]}")
-
             states[:3] = r
             states[3:] = v
             errors = [error]
         else:
             states = np.empty((6, jd_f.size), dtype=np.float64)
-
-            if self.settings["heartbeat"]:
-                errors = []
-                for tind in range(jd_f.size):
-                    error, r, v = satellite.sgp4(jd0[tind], jd_f[tind])
-                    errors.append(error)
-                    states[:3, tind] = r
-                    states[3:, tind] = v
-                    self.heartbeat(jd0[tind] + jd_f[tind], states[:, tind], satellite=satellite)
-            else:
-                errors, r, v = satellite.sgp4_array(jd0, jd_f)
-                states[:3, ...] = r.T
-                states[3:, ...] = v.T
+            errors, r, v = satellite.sgp4_array(jd0, jd_f)
+            states[:3, ...] = r.T
+            states[3:, ...] = v.T
 
         for ind, err in enumerate(errors):
             if err != 0:
@@ -116,136 +192,121 @@ class Sgp4(Propagator[Sgp4Settings]):
 
         states *= 1e3  # km to m, km/s to m/s
 
-        states = frames.convert(
-            times,
-            states,
-            in_frame="TEME",
-            out_frame=self.settings["out_frame"],
-        )
+        if self.settings.out_frame != "TEME":
+            states = cel.convert(
+                times,
+                states,
+                in_frame="TEME",
+                out_frame=self.settings.out_frame,
+                frame_kwargs={},
+            )
 
         return states
 
-    def propagate(self, t, state0, epoch=None, **kwargs):
+    def propagate(
+        self,
+        space_object: SpaceObject,
+        times: Time | TimeDelta | NDArray_N,
+    ) -> NDArray_6xN:
         """Propagate a state
 
-        #TODO: UPDATE THIS DOCSTRING
-
-        All state-vector are given in SI units.
-
-        Keyword arguments contain only information needed for ballistic coefficient :code:`B` used by SGP4. Either :code:`B` or :code:`C_D`, :code:`A` and :code:`m` must be supplied.
-        They also contain a option to give angles in radians or degrees. By default input is assumed to be degrees.
+        Keyword arguments contain only information needed for ballistic coefficient
+        `B` used by SGP4. Either `B` or `C_D`, `A` and `m` must be supplied.
+        They also contain a option to give angles in radians or degrees.
+        By default input is assumed to be degrees.
 
         **Frame:**
 
-        The input frame is ECI (TEME) for orbital elements and Cartesian. The output frame is as standard ECEF (ITRF). But can be set to TEME.
+        The input frame is ECI (TEME) for orbital elements and Cartesian.
+        The output frame is as standard ECEF (ITRF). But can be set to TEME.
 
-        :param float/list/numpy.ndarray/astropy.time.TimeDelta t: Time to propagate relative the initial state epoch.
-        :param float/astropy.time.Time epoch: The epoch of the initial state.
-        :param numpy.ndarray state0: 6-D Cartesian state vector in SI-units.
-        :param float B: Ballistic coefficient
-        :param float C_D: Drag coefficient
-        :param float A: Cross-sectional Area
-        :param float m: Mass
-        :param bool radians: If true, all angles are assumed to be in radians.
-        :param bool SGP4_mean_elements: If True, the input is not cartesian state but SGP4 mean elements.
-        :return: 6-D Cartesian state vectors in SI-units.
-
+        - B: Ballistic coefficient
+        - C_D: Drag coefficient
+        - A: Cross-sectional Area
+        - m: Mass
         """
-        logger.debug(f"SGP4:propagate:len(t) = {len(t)}")
-
-        self.grav_ind = getattr(sgp4.api, self.settings["gravity_model"].upper())
-        self.grav_model = getattr(sgp4.earth_gravity, self.settings["gravity_model"].lower())
-
-        if self.settings["tle_input"]:
-            if isinstance(state0, np.ndarray):
-                if state0.size == 1:
-                    state0 = state0[0]
-            line1, line2 = state0
-            states = self.propagate_tle(t, line1, line2, **kwargs)
-
-            return states
-
-        if epoch is None:
-            raise ValueError("Need epoch when propagating state and not TLE")
-
-        t, epoch = self.convert_time(t, epoch)
-
-        epoch0 = epoch.mjd - self.sgp4_mjd0
-        times = epoch + t
-
-        if "B" in kwargs:
-            B = kwargs.pop("B")
+        logger.debug("SGP4:propagate")
+        if space_object.state.num > 1:
+            t_samps = space_object.properties["state_sample_times"]
         else:
-            B = 0.5 * kwargs.pop("C_D", 2.3) * kwargs.pop("A", 1.0) / kwargs.pop("m", 1.0)
+            t_samps = None
 
+        tv = convert_to_relative_time(space_object.epoch, times)
+        td = TimeDelta(tv, format="sec")
+        t = space_object.epoch + td
+
+        sgp4_epoch = space_object.epoch.mjd - self.sgp4_mjd0
+
+        B = get_B(space_object.properties)
         logger.debug(f"SGP4:propagate:B = {B}")
+        state0 = space_object.state.copy()
 
-        input_mean = kwargs.get("SGP4_mean_elements", False)
-        input_mean_cart = kwargs.get("SGP4_mean_cartesian", False)
-        if input_mean_cart:
-            state0 = self._cart2sgp4_elems(state0)
-            state0[0, ...] *= 1e3  # km to m
-            kwargs["radians"] = True
-            input_mean = True
-
-        if input_mean:
-            if self.settings["in_frame"] != "TEME":
-                raise Exception(
-                    f'Cannot input mean elements in other frame than TEME (currently set to "{self.settings["in_frame"]}")'
-                )
-            mean_elements = state0.copy()
-            if not kwargs.get("radians", False):
-                mean_elements[2:, ...] = np.radians(mean_elements[2:, ...])
-            mean_elements[0, ...] *= 1e-3  # m to km
-
-        else:
-            if isinstance(state0, pyorb.Orbit):
-                state0_cart = np.squeeze(state0.cartesian)
-            else:
-                state0_cart = state0
-
-            state0_cart = frames.convert(
-                epoch,
-                state0_cart,
-                in_frame=self.settings["in_frame"],
+        if space_object.frame != "TEME":
+            state0._cart = cel.convert(
+                space_object.epoch,
+                state0._cart,
+                in_frame=space_object.frame,
                 out_frame="TEME",
+                frame_kwargs={},
+            )
+            state0.calculate_kepler()
+
+        if self.settings.mean_elements_input:
+            mean_elements = state0._kep
+        else:
+            mean_elements = self.TEME_to_TLE(
+                state0._cart,
+                t=t_samps,
+                epoch=space_object.epoch,
+                B=B,
+                tol=self.settings.tol,
+                tol_v=self.settings.tol_v,
             )
 
-            if state0_cart.size > 6:
-                t_samps = kwargs.get("state_sample_times")
-            else:
-                t_samps = None
-
-            mean_elements = self.TEME_to_TLE(state0_cart, t=t_samps, epoch=epoch, B=B, kepler=False)
-
-            if np.any(np.isnan(mean_elements)):
-                raise Exception("Could not compute SGP4 initial state: {}".format(mean_elements))
+        if np.any(np.isnan(mean_elements)):
+            raise Exception("Could not compute SGP4 initial state: {}".format(mean_elements))
 
         states = self.propagate_mean_elements(
-            times.jd1, times.jd2, mean_elements, epoch0, B, **kwargs
+            t.jd1,
+            t.jd2,
+            mean_elements,
+            sgp4_epoch,
+            B,
         )
 
-        states = frames.convert(
-            times,
-            states,
-            in_frame="TEME",
-            out_frame=self.settings["out_frame"],
-        )
+        if self.settings.out_frame != "TEME":
+            states = cel.convert(
+                t,
+                states,
+                in_frame="TEME",
+                out_frame=self.settings.out_frame,
+                frame_kwargs={},
+            )
 
         logger.debug("SGP4:propagate:completed")
 
         return states
 
-    def get_mean_elements(self, line1, line2, radians=False):
-        """Extract the mean elements in SI units (a [m], e [1], inc [deg], raan [deg], aop [deg], mu [deg]), B-parameter (not bstar) and epoch from a two line element pair."""
+    def get_mean_elements(
+        self,
+        line1: str,
+        line2: str,
+        radians: bool = False,
+    ) -> tuple[NDArray_6, float, Time]:
+        """Extract the mean elements in SI units (a [m], e [1], inc [deg],
+        raan [deg], aop [deg], mu [deg]), B-parameter (not bstar) and epoch
+        from a two line element pair.
+        """
 
-        line1, line2 = SGP4.line_decode(line1), SGP4.line_decode(line2)
+        grav_ind = getattr(sgp4.api, self.settings.gravity_model.upper())
+        grav_model = getattr(sgp4.earth_gravity, self.settings.gravity_model.lower())
+        line1, line2 = line_decode(line1), line_decode(line2)
 
         xpdotp = 1440.0 / (2.0 * np.pi)  # 229.1831180523293
 
-        satrec = Satrec.twoline2rv(line1, line2, self.grav_ind)
+        satrec = Satrec.twoline2rv(line1, line2, grav_ind)
 
-        B = satrec.bstar / (self.grav_model.radiusearthkm * 1e3) * 2 / self.rho0
+        B = satrec.bstar / (grav_model.radiusearthkm * 1e3) * 2 / self.rho0
 
         epoch = Time(satrec.jdsatepoch + satrec.jdsatepochF, format="jd", scale="utc")
 
@@ -253,7 +314,7 @@ class Sgp4(Propagator[Sgp4Settings]):
 
         n0 = satrec.no_kozai * xpdotp / (86400.0 / (2 * np.pi))
 
-        mean_elements[0] = (np.sqrt(self.grav_model.mu) / n0) ** (2.0 / 3.0) * 1e3
+        mean_elements[0] = (np.sqrt(grav_model.mu) / n0) ** (2.0 / 3.0) * 1e3
         mean_elements[1] = satrec.ecco
         mean_elements[2] = satrec.inclo
         mean_elements[3] = satrec.nodeo
@@ -264,23 +325,32 @@ class Sgp4(Propagator[Sgp4Settings]):
 
         return mean_elements, B, epoch
 
-    def propagate_mean_elements(self, jd0, jd_f, mean_elements, epoch0, B, **kwargs):
+    def propagate_mean_elements(
+        self,
+        jd0: NDArray_N | float,
+        jd_f: NDArray_N | float,
+        mean_elements: NDArray_6,
+        sgp4_epoch: float,
+        B: float,
+    ) -> NDArray_6xN | NDArray_6:
         """Propagate sgp4 mean elements."""
 
+        grav_ind = getattr(sgp4.api, self.settings.gravity_model.upper())
+        grav_model = getattr(sgp4.earth_gravity, self.settings.gravity_model.lower())
         # Compute ballistic coefficient
         bstar = 0.5 * B * self.rho0  # B* in [1/m] using Density at q0[kg/m^3]
-        n0 = np.sqrt(self.grav_model.mu) / ((mean_elements[0]) ** 1.5)
+        n0 = np.sqrt(grav_model.mu) / ((mean_elements[0]) ** 1.5)
 
         # Scaling
         n0 = n0 * (86400.0 / (2 * np.pi))  # Convert to [rev/d]
-        bstar = bstar * (self.grav_model.radiusearthkm * 1e3)  # Convert from [1/m] to [1/R_EARTH]
+        bstar = bstar * (grav_model.radiusearthkm * 1e3)  # Convert from [1/m] to [1/R_EARTH]
 
         satellite = Satrec()
         satellite.sgp4init(
-            self.grav_ind,  # gravity model
+            grav_ind,  # gravity model
             "i",  # 'a' = old AFSPC mode, 'i' = improved mode
-            int(kwargs.get("oid", 42)),  # satnum: Satellite number
-            epoch0,  # epoch: days since 1949 December 31 00:00 UT
+            42,  # satnum: Satellite number
+            sgp4_epoch,  # epoch: days since 1949 December 31 00:00 UT
             bstar,  # bstar: drag coefficient (/earth radii)
             0.0,  # [IGNORED BY SGP4] ndot: ballistic coefficient (revs/day)
             0.0,  # [IGNORED BY SGP4] nddot: second derivative of mean motion (revs/day^3)
@@ -294,57 +364,43 @@ class Sgp4(Propagator[Sgp4Settings]):
 
         if isinstance(jd_f, float) or isinstance(jd_f, int):
             states = np.empty((6,), dtype=np.float64)
-
             error, r, v = satellite.sgp4(jd0, jd_f)
-
-            if error != 0:
-                logger.error(f"SGP4:propagate:step:{SGP4_ERRORS[error]}")
-
             states[:3] = r
             states[3:] = v
-
+            errors = [error]
         else:
             states = np.empty((6, jd_f.size), dtype=np.float64)
+            errors, r, v = satellite.sgp4_array(jd0, jd_f)
+            states[:3, ...] = r.T
+            states[3:, ...] = v.T
 
-            if self.settings["heartbeat"]:
-                errors = []
-                for tind in range(jd_f.size):
-                    error, r, v = satellite.sgp4(jd0[tind], jd_f[tind])
-                    errors.append(error)
-                    states[:3, tind] = r
-                    states[3:, tind] = v
-                    self.heartbeat(jd0[tind] + jd_f[tind], states[:, tind], satellite=satellite)
-            else:
-                errors, r, v = satellite.sgp4_array(jd0, jd_f)
-                states[:3, ...] = r.T
-                states[3:, ...] = v.T
-
-            for ind, err in enumerate(errors):
-                if err != 0:
-                    logger.error(f"SGP4:propagate:step-{ind}:{SGP4_ERRORS[err]}")
+        for ind, err in enumerate(errors):
+            if err != 0:
+                logger.error(f"SGP4:propagate:step-{ind}:{SGP4_ERRORS[err]}")
 
         states *= 1e3  # km to m and km/s to m/s
 
         return states
 
-    def TEME_to_TLE_OPTIM(self, state, epoch, t=None, B=0.0, kepler=False, tol=1e-8, tol_v=1e-9):
+    def TEME_to_TLE_OPTIM(
+        self,
+        cart: NDArray_6xN | NDArray_6,
+        epoch: Time,
+        t: NDArray_N | None = None,
+        B: float = 0.0,
+        tol: float = 1e-8,
+        tol_v: float = 1e-9,
+    ) -> NDArray_6:
         """Convert osculating orbital elements in TEME
         to mean elements used in two line element sets (TLE's).
-
-        :param numpy.ndarray kep: Osculating State (position and velocity) vector in m and m/s, TEME frame. If :code:`kepler = True` then state is osculating orbital elements, in m and radians. Orbital elements are semi major axis (m), orbital eccentricity, orbital inclination (radians), right ascension of ascending node (radians), argument of perigee (radians), mean anomaly (radians)
-        :param bool kepler: Indicates if input state is kepler elements or cartesian.
-        :param float epoch0: Epoch in days since 1949 December 31 00:00 UT
-        :param float tol: Wanted precision in position of mean element conversion in m.
-        :param float tol_v: Wanted precision in velocity mean element conversion in m/s.
-        :return: mean elements of: semi major axis (km), orbital eccentricity, orbital inclination (radians), right ascension of ascending node (radians), argument of perigee (radians), mean anomaly (radians)
-        :rtype: numpy.ndarray
         """
         logger.debug("SGP4:TEME_to_TLE_OPTIM")
+        grav_model = getattr(sgp4.earth_gravity, self.settings.gravity_model.lower())
 
-        if len(state.shape) == 1:
-            state.shape = (state.size, 1)
+        if len(cart.shape) == 1:
+            cart.shape = (cart.size, 1)
 
-        if state.shape[1] > 1 and t is None:
+        if cart.shape[1] > 1 and t is None:
             raise ValueError(
                 'Cannot convert TEME sampling to TLE without sample times "state_sample_times"'
             )
@@ -354,34 +410,29 @@ class Sgp4(Propagator[Sgp4Settings]):
         t_min = np.argmin(np.abs(t))
         if t[t_min] > 1e-6:
             raise ValueError(
-                "There is not sampling point at the epoch (t=0) to use as initial guess..."
+                "There is no sampling point at the epoch (t=0) to use as initial guess..."
             )
 
-        if kepler:
-            state_cart = self._sgp4_elems2cart(state)
-            init_elements = state[:, t_min]
-        else:
-            state_cart = state
-            init_elements = self._cart2sgp4_elems(state_cart[:, t_min])
+        init_elements = _cart2sgp4_elems(cart[:, t_min], grav_model=grav_model, degrees=False)
 
-        tv = epoch + TimeDelta(t, format="sec")
+        t = epoch + TimeDelta(t, format="sec")
 
         def find_mean_elems(mean_elements):
             # Mean elements and osculating state
             state_osc = self.propagate_mean_elements(
-                tv.jd1,
-                tv.jd2,
+                t.jd1,
+                t.jd2,
                 mean_elements,
                 epoch.mjd - self.sgp4_mjd0,
                 B=B,
             )
 
-            d = state_cart - state_osc
+            d = cart - state_osc
             return np.mean(np.linalg.norm(d, axis=0))
 
-        dx_std = self.settings["TEME_TO_TLE_minimize_start_stds"]
-        samps = self.settings["TEME_TO_TLE_minimize_start_samples"]
-        bounds = self.settings["TEME_TO_TLE_minimize_bounds"]
+        dx_std = np.array(self.settings.teme_to_tle_minimize_start_stds)
+        samps = self.settings.teme_to_tle_minimize_start_samples
+        bounds = self.settings.teme_to_tle_minimize_bounds
 
         opt_res = None
         for j in range(samps):
@@ -405,74 +456,87 @@ class Sgp4(Propagator[Sgp4Settings]):
                 },
             )
             if j > 0:
-                if _opt_res.fun < opt_res.fun:
+                if _opt_res.fun < opt_res.fun:  # type: ignore
                     opt_res = _opt_res
             else:
                 opt_res = _opt_res
 
-        mean_elements = opt_res.x
+        mean_elements = opt_res.x  # type: ignore
 
-        logger.debug(f"SGP4:TEME_to_TLE_OPTIM:completed")
+        logger.debug("SGP4:TEME_to_TLE_OPTIM:completed")
 
         return mean_elements
 
-    def TEME_to_TLE(self, state, epoch, t=None, B=0.0, kepler=False, tol=1e-5, tol_v=1e-7):
+    def TEME_to_TLE(
+        self,
+        cart: NDArray_6xN | NDArray_6,
+        epoch: Time,
+        t: NDArray_N | None = None,
+        B: float = 0.0,
+        tol: float = 1e-5,
+        tol_v: float = 1e-7,
+    ) -> NDArray_6:
         """Convert osculating orbital elements in TEME
         to mean elements used in two line element sets (TLE's).
 
-        :param numpy.ndarray kep: Osculating State (position and velocity) vector in m and m/s, TEME frame. If :code:`kepler = True` then state is osculating orbital elements, in m and radians. Orbital elements are semi major axis (m), orbital eccentricity, orbital inclination (radians), right ascension of ascending node (radians), argument of perigee (radians), mean anomaly (radians)
-        :param bool kepler: Indicates if input state is kepler elements or cartesian.
-        :param astropy.time.Time epoch: Epoch of the orbit
-        :param float tol: Wanted precision in position of mean element conversion in m.
-        :param float tol_v: Wanted precision in velocity mean element conversion in m/s.
-        :return: mean elements of: semi major axis (km), orbital eccentricity, orbital inclination (radians), right ascension of ascending node (radians), argument of perigee (radians), mean anomaly (radians)
-        :rtype: numpy.ndarray
+        Parameters
+        ----------
+        cart
+            Osculating State (position and velocity) vector in m and m/s,
+            TEME frame.
+        tol
+            Wanted precision in position of mean element conversion in m.
+        tol_v
+            Wanted precision in velocity mean element conversion in m/s.
+
+        Notes
+        ----------
+        mean elements of:
+        - semi major axis (km)
+        - orbital eccentricity
+        - orbital inclination (radians)
+        - right ascension of ascending node (radians)
+        - argument of perigee (radians)
+        - mean anomaly (radians)
+
         """
         logger.debug("SGP4:TEME_to_TLE")
-
         mean_elements = None
+        grav_model = getattr(sgp4.earth_gravity, self.settings.gravity_model.lower())
 
-        if len(state.shape) > 1:
-            if state.size > 6:
+        if len(cart.shape) > 1:
+            if cart.size > 6:
                 mean_elements = self.TEME_to_TLE_OPTIM(
-                    state,
+                    cart,
                     epoch=epoch,
                     t=t,
                     B=B,
-                    kepler=kepler,
                     tol=tol,
                     tol_v=tol_v,
                 )
 
-                logger.debug(f"SGP4:TEME_to_TLE:completed")
+                logger.debug("SGP4:TEME_to_TLE:completed")
 
                 return mean_elements
             else:
-                state.shape = (state.size,)
+                cart.shape = (cart.size,)
 
-        if kepler:
-            state_mean = self._sgp4_elems2cart(state)
-            state_cart = state_mean.copy()
-        else:
-            state_mean = state.copy()
-            state_cart = state
-
-        iter_max = self.settings["TEME_to_TLE_max_iter"]  # Maximum number of iterations
-
+        state_mean = np.empty_like(cart)
+        iter_max = self.settings.teme_to_tle_max_iter
         dr = 0
         dv = 0
         # Iterative determination of mean elements
         for it in range(iter_max):
             # Mean elements and osculating state
-            mean_elements = self._cart2sgp4_elems(state_mean)
+            mean_elements = _cart2sgp4_elems(state_mean, grav_model, degrees=False)
 
             if it > 0 and mean_elements[1] > 1:
-                # Assumptions of osculation within slope not working, go to general minimization algorithms
+                # Assumptions of osculation within slope not working
+                # go to general minimization algorithms
                 mean_elements = self.TEME_to_TLE_OPTIM(
-                    state_cart,
+                    cart,
                     epoch=epoch,
                     B=B,
-                    kepler=False,
                     tol=tol,
                     tol_v=tol_v,
                 )
@@ -487,7 +551,7 @@ class Sgp4(Propagator[Sgp4Settings]):
             )
 
             # Correction of mean state vector
-            d = state_cart - state_osc
+            d = cart - state_osc
             state_mean += d
             if it > 0:
                 dr_old = dr
@@ -498,12 +562,12 @@ class Sgp4(Propagator[Sgp4Settings]):
 
             if it > 0:
                 if dr_old < dr or dv_old < dv:
-                    # Assumptions of osculation within slope not working, go to general minimization algorithms
+                    # Assumptions of osculation within slope not working
+                    # go to general minimization algorithms
                     mean_elements = self.TEME_to_TLE_OPTIM(
-                        state_cart,
+                        cart,
                         epoch=epoch,
                         B=B,
-                        kepler=False,
                         tol=tol,
                         tol_v=tol_v,
                     )
@@ -514,41 +578,13 @@ class Sgp4(Propagator[Sgp4Settings]):
             if it == iter_max - 1:
                 # Iterative method not working, go to general minimization algorithms
                 mean_elements = self.TEME_to_TLE_OPTIM(
-                    state_cart,
+                    cart,
                     epoch=epoch,
                     B=B,
-                    kepler=False,
                     tol=tol,
                     tol_v=tol_v,
                 )
 
-        logger.debug(f"SGP4:TEME_to_TLE:completed")
+        logger.debug("SGP4:TEME_to_TLE:completed")
 
-        return mean_elements
-
-    def _sgp4_elems2cart(self, kep):
-        """Orbital elements to cartesian coordinates. Wrap pyorb-function to use mean anomaly, km and reversed order on aoe and raan. Output in SI.
-
-        Neglecting mass is sufficient for this calculation (the standard gravitational parameter is 24 orders larger then the change).
-        """
-        _kep = kep.copy()
-        _kep[0, ...] *= 1e3
-        tmp = _kep[4, ...].copy()
-        _kep[4, ...] = _kep[3, ...]
-        _kep[3, ...] = tmp
-        _kep[5, ...] = pyorb.mean_to_true(_kep[5, ...], _kep[1, ...], degrees=False)
-        cart = pyorb.kep_to_cart(_kep, mu=self.grav_model.mu * 1e9, degrees=False)
-        return cart
-
-    def _cart2sgp4_elems(self, cart, degrees=False):
-        """Cartesian coordinates to orbital elements. Wrap pyorb-function to use mean anomaly, km and reversed order on aoe and raan.
-
-        Neglecting mass is sufficient for this calculation (the standard gravitational parameter is 24 orders larger then the change).
-        """
-        kep = pyorb.cart_to_kep(cart, mu=self.grav_model.mu * 1e9, degrees=False)
-        kep[0, ...] *= 1e-3
-        tmp = kep[4, ...].copy()
-        kep[4, ...] = kep[3, ...]
-        kep[3, ...] = tmp
-        kep[5, ...] = pyorb.true_to_mean(kep[5, ...], kep[1, ...], degrees=False)
-        return kep
+        return mean_elements  # type: ignore

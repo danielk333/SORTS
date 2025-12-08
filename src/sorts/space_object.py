@@ -100,18 +100,6 @@ class SpaceObject:
             )
         return diam
 
-    def to_relative_time(self, times: Time | TimeDelta | NDArray_N) -> NDArray_N:
-        if isinstance(times, TimeDelta):
-            tv = times.sec
-        elif isinstance(times, Time):
-            tv = (times - self.epoch).sec
-        else:
-            tv = times  # assume input is in seconds
-
-        if not isinstance(tv, np.ndarray):
-            tv = np.array([tv])
-        return tv
-
     def __str__(self):
         p = "\nSpace object {}: {}:\n".format(self.oid, repr(self.epoch))
         p += str(self.state) + "\n"

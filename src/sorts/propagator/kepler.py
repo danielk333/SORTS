@@ -7,8 +7,9 @@ from dataclasses import dataclass
 import numpy as np
 from astropy.time import TimeDelta, Time
 from .base import Propagator
-from sorts.types import Settings, Frames, NDArray_N
+from sorts.types import Settings, Frames, NDArray_N, NDArray_6xN
 from sorts.space_object import SpaceObject
+from sorts.utils import convert_to_relative_time
 import spacecoords.celestial as cel
 
 logger = logging.getLogger(__name__)
@@ -31,9 +32,13 @@ class Kepler(Propagator[KeplerSettings]):
 
     """
 
-    def propagate(self, space_object: SpaceObject, times: Time | TimeDelta | NDArray_N):
+    def propagate(
+        self,
+        space_object: SpaceObject,
+        times: Time | TimeDelta | NDArray_N,
+    ) -> NDArray_6xN:
         logger.debug("Kepler:propagate")
-        tv = space_object.to_relative_time(times)
+        tv = convert_to_relative_time(space_object.epoch, times)
 
         orb = space_object.state.copy()
         if space_object.frame != self.settings.internal_frame:

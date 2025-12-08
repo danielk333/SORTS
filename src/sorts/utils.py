@@ -3,7 +3,28 @@ from datetime import datetime, timedelta
 import numpy as np
 import numpy.typing as npt
 from astropy.time import Time, TimeDelta
-from sorts.types import Datetime64_us, Float64_as_deg, Datetime_Like, Timedelta64_us, Timedelta_Like
+from sorts.types import (
+    Datetime64_us,
+    Float64_as_deg,
+    Datetime_Like,
+    Timedelta64_us,
+    Timedelta_Like,
+    NDArray_N,
+)
+
+
+def convert_to_relative_time(epoch: Time, times: Time | TimeDelta | NDArray_N) -> NDArray_N:
+    """Convert absolute or relative times to relative time"""
+    if isinstance(times, TimeDelta):
+        tv = times.sec
+    elif isinstance(times, Time):
+        tv = (times - epoch).sec
+    else:
+        tv = times  # assume input is in seconds
+
+    if not isinstance(tv, np.ndarray):
+        tv = np.array([tv])
+    return tv
 
 
 def wrap_latitudes_longitudes(

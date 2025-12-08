@@ -9,7 +9,7 @@ import numpy as np
 from astropy.time import Time
 import pyorb
 
-from ..propagator import SGP4
+from ..propagator import Sgp4
 from .population import Population
 
 
@@ -28,7 +28,7 @@ def tle_catalog(
 
     *Numerical propagator assumptions:*
     To propagate with a numerical propagator one needs to make assumptions.
-       * Density is :math:`5\cdot 10^3 \;\frac{kg}{m^3}`.
+       * Density is $5\\cdot 10^3 \\;\\frac{kg}{m^3}$.
        * Object is a sphere
        * Drag coefficient is 2.3.
 
@@ -53,7 +53,7 @@ def tle_catalog(
 
     tle_size = len(tles)
 
-    prop = SGP4(
+    prop = Sgp4(
         settings=dict(
             out_frame="TEME",
             tle_input=True,

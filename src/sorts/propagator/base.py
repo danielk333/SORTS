@@ -8,7 +8,8 @@ import logging
 from abc import ABC, abstractmethod
 
 from astropy.time import Time, TimeDelta
-from sorts.types import S, NDArray_N
+from sorts.types import S, NDArray_N, NDArray_6xN
+from sorts.utils import convert_to_relative_time
 from sorts.space_object import SpaceObject
 
 logger = logging.getLogger(__name__)
@@ -27,7 +28,7 @@ class Propagator(ABC, Generic[S]):
         copy: bool = True,
     ) -> SpaceObject:
         """Propagate and change the epoch of this space object if the state is a `pyorb.Orbit`."""
-        dt = space_object.to_relative_time(dt)[0]
+        dt = convert_to_relative_time(space_object.epoch, dt)[0]
         new_cart = self.propagate(space_object, dt)
         if len(new_cart.shape) < 2:
             new_cart.shape = (new_cart.size, 1)
@@ -38,7 +39,11 @@ class Propagator(ABC, Generic[S]):
         return obj
 
     @abstractmethod
-    def propagate(self, space_object: SpaceObject, times: Time | TimeDelta | NDArray_N):
+    def propagate(
+        self,
+        space_object: SpaceObject,
+        times: Time | TimeDelta | NDArray_N,
+    ) -> NDArray_6xN:
         """Propagate a state
 
         This function uses key-word argument to supply additional information
