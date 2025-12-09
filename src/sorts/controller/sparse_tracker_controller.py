@@ -12,28 +12,30 @@ from sorts.types import (
     EcefStates,
     Datetime64_us,
     Timedelta64_us,
-    Float64_as_sec,
     EnuCoordinates,
     Datetime_Like,
-    Timedelta_Like,
 )
-from sorts.simulation.funcs import find_simultaneous_passages
+from sorts.simulation.types import SimultaneousPassage
 from .controller_base import ControllerBase
+from sorts.interpolation import Interpolator
 
 logger = logging.getLogger(__name__)
 
 
-@dataclass(kw_only=True)
-class ControllerState:
-    spobj_time: npt.NDArray[Datetime64_us]
-    spobj_states: EcefStates
-
-    @classmethod
-    def empty(cls) -> t.Self:
-        return cls(
-            spobj_time=np.empty(0, dtype="datetime64[us]"),
-            spobj_states=np.empty((6, 0), dtype=np.float64),
-        )
+# TODO: this is probably a very general thing that can be just a
+# standard type in `types`, we could then pass these around to e.g. the
+# interpolator
+# @dataclass
+# class ControllerState:
+#     spobj_time: npt.NDArray[Datetime64_us]
+#     spobj_states: EcefStates
+#
+#     @classmethod
+#     def empty(cls) -> t.Self:
+#         return cls(
+#             spobj_time=np.empty(0, dtype="datetime64[us]"),
+#             spobj_states=np.empty((6, 0), dtype=np.float64),
+#         )
 
 
 class SparseTrackerController(ControllerBase):
@@ -44,9 +46,6 @@ class SparseTrackerController(ControllerBase):
     - This class serve as a frontend to the `State` type in this module
     """
 
-    ControllerState = ControllerState
-    """shortcut to module attribute"""
-
     def __init__(
         self,
         tx_station: Station,
@@ -56,7 +55,7 @@ class SparseTrackerController(ControllerBase):
         epoch: Datetime64_us,
         station_id_pairs: list[tuple[radar.StationId, radar.StationId]],
         points_per_passage: int,
-        state: ControllerState,
+        interpolator: Interpolator,
     ):
         """
         NOTE: This is intended as an internal constructor, please use the constructor methods to create instances.
@@ -70,7 +69,7 @@ class SparseTrackerController(ControllerBase):
         self.station_id_pairs = station_id_pairs
         self.points_per_passage = points_per_passage
 
-        self.state = state
+        self.interpolator = interpolator
 
     @classmethod
     def from_space_object(
@@ -81,6 +80,7 @@ class SparseTrackerController(ControllerBase):
         space_object: SpaceObject,
         epoch: Datetime_Like,
         points_per_passage: int,
+        interpolator: Interpolator,
     ) -> t.Self:
         """A constructor method"""
 
@@ -94,7 +94,7 @@ class SparseTrackerController(ControllerBase):
             epoch=to_datetime64_us(epoch),
             station_id_pairs=stn_pairs,
             points_per_passage=points_per_passage,
-            state=ControllerState.empty(),
+            interpolator=interpolator,
         )
 
         return ctrl
@@ -113,52 +113,16 @@ class SparseTrackerController(ControllerBase):
 
         return stn_map
 
-    def _compute_controller_state(
-        self, start_time: Datetime_Like, end_time: Datetime_Like, slice_duration: Timedelta_Like
-    ) -> ControllerState:
-        """Do the computation and return the updated `state` property."""
-
-        exp_detail: scheduling.ExperimentDetail = self.exp_detail
-
-        # NOTE: for `np.arange` 'stop param,
-        #   - we subtract 'slice_duration' so that only full slice are included
-        #   - and add `+1` so that slice with time range `('end_time - 'slice_duration', 'end_time')` is included
-        # TODO: use sampler method for this to ensure efficient propagator usage which has already
-        # been defined for the other steps of the simulation
-        time: npt.NDArray[Datetime64_us] = np.arange(
-            to_datetime64_us(start_time),
-            to_datetime64_us(end_time) - to_timedelta64_us(slice_duration) + 1,
-            exp_detail.slice_duration,
-        )
-        dt: npt.NDArray[Timedelta64_us] = time - to_datetime64_us(self.epoch)
-        dsec = t.cast(npt.NDArray[Float64_as_sec], dt.astype(np.float64) / 1e6)
-
-        ecefs = self.space_object.get_state(dsec)
-
-        state = ControllerState(spobj_time=time, spobj_states=ecefs)
-
-        return state
-
-    def _generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> scheduling.Schedule:
+    def generate(self, passages_of_spobj: list[SimultaneousPassage]) -> scheduling.Schedule:
         """Generate the schedules."""
-
-        passages_of_spobj = find_simultaneous_passages(
-            dt=(self.state.spobj_time - self.epoch) / np.timedelta64(1, "s"),
-            space_object=self.space_object,
-            states=self.state.spobj_states[:3, ...],
-            tx_station=self.tx_station,
-            rx_stations=self.rx_stations,
-            epoch=self.epoch,
-        )
-
         # early return for empty case
         if len(passages_of_spobj) == 0:
             return scheduling.empty()
 
         tx_sch_index_list = []
         for ps in passages_of_spobj:
-            start_time, end_time = ps.time_range
-            passage_time = (end_time - start_time) / np.timedelta64(1, "s")
+            pstart_time, pend_time = ps.time_range
+            passage_time = (pend_time - pstart_time) / np.timedelta64(1, "s")
             relative_time_sampling = np.linspace(
                 0.0, passage_time, num=self.points_per_passage + 2, endpoint=True
             )
@@ -171,7 +135,7 @@ class SparseTrackerController(ControllerBase):
                     np.abs(
                         (
                             relative_time_sampling[ind] * np.timedelta64(1, "s")
-                            + start_time
+                            + pstart_time
                             - self.state.spobj_time
                         )
                         / np.timedelta64(1, "s")
@@ -217,13 +181,3 @@ class SparseTrackerController(ControllerBase):
         output = resultant_sch
 
         return output
-
-    def generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> scheduling.Schedule:
-        """Generate the schedules."""
-
-        self.state = self._compute_controller_state(
-            start_time, end_time, self.exp_detail.slice_duration
-        )
-        sch = self._generate(start_time, end_time)
-
-        return sch
