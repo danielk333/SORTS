@@ -101,7 +101,7 @@ class SpaceObject:
         return diam
 
     def __str__(self):
-        p = "\nSpace object {}: {}:\n".format(self.oid, repr(self.epoch))
+        p = f"\nSpace object {self.object_id}: {repr(self.epoch)}:\n"
         p += str(self.state) + "\n"
-        p += "Parameters: " + ", ".join([f"{key}={val}" for key, val in self.parameters.items()])
+        p += "Parameters: " + ", ".join([f"{key}={val}" for key, val in self.properties.items()])
         return p

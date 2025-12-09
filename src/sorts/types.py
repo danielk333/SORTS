@@ -132,6 +132,8 @@ type Tuple_3[T] = tuple[T, T, T]
 type Tuple_6[T] = tuple[T, T, T, T, T, T]
 type Tuple_7[T] = tuple[T, T, T, T, T, T, T]
 
+IndexLike = int | list[int] | tuple[int] | NDArray_N | slice
+
 S = t.TypeVar("S", bound="Settings")
 
 Frames = t.Literal[
@@ -147,6 +149,7 @@ Frames = t.Literal[
 ]
 GravModels = t.Literal["WGS84"]
 StateType = t.Literal["kepler", "cartesian"]
+AnomalyType = t.Literal["mean", "eccentric", "true"]
 
 
 @dataclass
