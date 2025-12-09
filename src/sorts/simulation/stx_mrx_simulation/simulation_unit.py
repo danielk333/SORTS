@@ -433,6 +433,7 @@ class Observation:
         exp_id: scheduling.ExperimentId,
         simult_num: scheduling.SimultaneousNum,
     ):
+        # todo: update for collecting passage and multi passage
         self.passage = passage
         self.sim_unit = sim_unit
         self.exp_id = exp_id
@@ -460,7 +461,9 @@ class Observation:
             [
                 "Observation(",
                 f"    time_range={self.passage.time_range}",
-                f"    spobj_id={self.sim_unit.space_object.oid}, tx_stn_id={self.passage.tx_station.uid}, rx_stn_id={self.passage.rx_station.uid}",
+                f"    spobj_id={self.sim_unit.space_object.object_id}",
+                f"    tx_stn_id={self.passage.tx_station.uid},"
+                f"    rx_stn_id={self.passage.rx_stations[0].uid}",
                 f"    exp_id={self.exp_id}, simult_num={self.simult_num}",
                 ")",
             ]
@@ -493,7 +496,7 @@ class Observation:
             {
                 _SK.multi_index: (
                     self.exp_id,
-                    self.passage.rx_station.uid,
+                    self.passage.rx_stations[0].uid,
                     self.simult_num,
                     slice(None),
                 )

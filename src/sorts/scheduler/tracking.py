@@ -138,7 +138,7 @@ class Tracking(Scheduler):
                 ctrl = self.controller(
                     radar=self.radar, t=t, t0=0.0, ecefs=states[:3, :], **self.controller_args
                 )
-                ctrl.meta["target"] = f"Object {self.space_objects[ind].oid}"
+                ctrl.meta["target"] = f"Object {self.space_objects[ind].object_id}"
                 ctrls.append(ctrl)
 
             else:
@@ -154,7 +154,7 @@ class Tracking(Scheduler):
                     ctrl = self.controller(
                         radar=self.radar, t=t, t0=0.0, ecefs=states[:3, :], **self.controller_args
                     )
-                    ctrl.meta["target"] = f"Object {self.space_objects[ind].oid}"
+                    ctrl.meta["target"] = f"Object {self.space_objects[ind].object_id}"
                     ctrl.meta["pass"] = pass_ind
                     ctrls.append(ctrl)
 
