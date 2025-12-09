@@ -131,6 +131,7 @@ class TxRxTuple[TxType, RxType](t.NamedTuple):
 type Tuple_3[T] = tuple[T, T, T]
 type Tuple_6[T] = tuple[T, T, T, T, T, T]
 type Tuple_7[T] = tuple[T, T, T, T, T, T, T]
+type SpaceObjectId = int
 
 IndexLike = int | list[int] | tuple[int] | NDArray_N | slice
 

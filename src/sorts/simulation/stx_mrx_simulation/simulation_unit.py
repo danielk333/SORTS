@@ -195,6 +195,7 @@ class SimulationUnit:
     _K = _K
     """shortcut to module attribute"""
 
+    # todo: my type checker is complaining over these shortcuts?
     FromPassagesOverTxRxStationPairParam = FromPassagesOverTxRxStationPairParam
     """shortcut to module attribute"""
 

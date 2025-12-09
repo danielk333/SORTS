@@ -119,35 +119,26 @@ class SparseTrackerController(ControllerBase):
         if len(passages_of_spobj) == 0:
             return scheduling.empty()
 
-        tx_sch_index_list = []
+        observation_times_relative = []
+        observation_times = []
         for ps in passages_of_spobj:
             pstart_time, pend_time = ps.time_range
+            t0 = (pstart_time - ps.epoch) / np.timedelta64(1, "s")
             passage_time = (pend_time - pstart_time) / np.timedelta64(1, "s")
             relative_time_sampling = np.linspace(
                 0.0, passage_time, num=self.points_per_passage + 2, endpoint=True
             )
             relative_time_sampling = relative_time_sampling[1:-1]
-            # TODO: once the propagator sampling has been changed, use a interpolator here instead
-            # at the cadence that the propagator currently uses
-            pass_tx_index = np.empty((self.points_per_passage,), dtype=np.int64)
-            for ind in range(self.points_per_passage):
-                pass_tx_index[ind] = np.argmin(
-                    np.abs(
-                        (
-                            relative_time_sampling[ind] * np.timedelta64(1, "s")
-                            + pstart_time
-                            - self.state.spobj_time
-                        )
-                        / np.timedelta64(1, "s")
-                    )
-                )
-            tx_sch_index_list.append(pass_tx_index)
+            observation_times_relative.append(t0 + relative_time_sampling)
+            rel_us = (relative_time_sampling * 1e6).astype("timedelta64[us]")
+            observation_times.append(pstart_time + rel_us)
 
-        tx_sch_index = np.concatenate(tx_sch_index_list)
-        tx_sch_time = self.state.spobj_time[tx_sch_index]
+        # todo: this can be cleaned up quite a lot i feel like
+        tx_sch_time_rel = np.concatenate(observation_times_relative)
+        tx_sch_time = np.concatenate(observation_times)
         tx_sch_len = len(tx_sch_time)
         tx_pointings: EnuCoordinates = self.tx_station.enu(
-            self.state.spobj_states[:3, tx_sch_index]
+            self.interpolator.get_state(tx_sch_time_rel)
         )
         tx_pointings = tx_pointings / np.linalg.norm(tx_pointings, axis=0)
 
@@ -162,7 +153,7 @@ class SparseTrackerController(ControllerBase):
 
         rx_schs: list[scheduling.Schedule] = []
         for rx_stn in self.rx_stations:
-            rx_pointings: EnuCoordinates = rx_stn.enu(self.state.spobj_states[:3, tx_sch_index])
+            rx_pointings: EnuCoordinates = rx_stn.enu(self.interpolator.get_state(tx_sch_time))
             rx_pointings = rx_pointings / np.linalg.norm(rx_pointings, axis=0)
 
             rx_schs.append(
