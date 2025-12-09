@@ -117,7 +117,7 @@ def get_B(properties):
     elif "A" in properties and "m" in properties:
         B = 0.5 * properties.get("C_D", 2.3) * properties["A"] / properties["m"]
     else:
-        B = 0
+        B = 0.0
     return B
 
 
@@ -210,15 +210,8 @@ class Sgp4(Propagator[Sgp4Settings]):
     ) -> NDArray_6xN:
         """Propagate a state
 
-        Keyword arguments contain only information needed for ballistic coefficient
+        `space_object` properties only information needed for ballistic coefficient
         `B` used by SGP4. Either `B` or `C_D`, `A` and `m` must be supplied.
-        They also contain a option to give angles in radians or degrees.
-        By default input is assumed to be degrees.
-
-        **Frame:**
-
-        The input frame is ECI (TEME) for orbital elements and Cartesian.
-        The output frame is as standard ECEF (ITRF). But can be set to TEME.
 
         - B: Ballistic coefficient
         - C_D: Drag coefficient
@@ -252,7 +245,7 @@ class Sgp4(Propagator[Sgp4Settings]):
             state0.calculate_kepler()
 
         if self.settings.mean_elements_input:
-            mean_elements = state0._kep
+            mean_elements = kep_to_mean_elements(state0, degrees=False)
         else:
             mean_elements = self.TEME_to_TLE(
                 state0._cart,
@@ -521,7 +514,7 @@ class Sgp4(Propagator[Sgp4Settings]):
             else:
                 cart.shape = (cart.size,)
 
-        state_mean = np.empty_like(cart)
+        state_mean = cart.copy()
         iter_max = self.settings.teme_to_tle_max_iter
         dr = 0
         dv = 0
