@@ -2,9 +2,9 @@
 
 """Defines grid sampled populations over some parameters."""
 import numpy as np
-
+from astropy.time import Time
 from .population import Population
-from ..types import NDArray_N
+from sorts.types import NDArray_N, Frames
 
 
 def orbit_grid(
@@ -15,32 +15,9 @@ def orbit_grid(
     longitude_of_ascending_node_samples: NDArray_N,
     mean_anomaly_samples: NDArray_N,
     diameter_samples: NDArray_N,
-    mjd0: NDArray_N | float = 53005.0,
-    propagator=None,
-    propagator_options={},
-    propagator_args={},
+    frame: Frames = "GCRS",
+    epoch_mjd: NDArray_N | float = 53005.0,
 ):
-    pop = Population(
-        fields=[
-            "oid",
-            "a",
-            "e",
-            "i",
-            "aop",
-            "raan",
-            "mu0",
-            "mjd0",
-            "d",
-            "C_D",
-        ],
-        dtypes=["int"] + ["float64"] * 9,
-        space_object_fields=["d", "C_D"],
-        state_fields=["a", "e", "i", "aop", "raan", "mu0"],
-        epoch_field={"field": "mjd0", "format": "mjd", "scale": "utc"},
-        propagator=propagator,
-        propagator_options=propagator_options,
-        propagator_args=propagator_args,
-    )
     samples = [
         semi_major_axis_samples,
         eccentricity_samples,
@@ -53,16 +30,22 @@ def orbit_grid(
     grids = [x.flatten() for x in np.meshgrid(*samples)]
     size = grids[0].size
 
-    pop.allocate(size)
-    pop.data["oid"] = np.arange(size)
-    pop.data["a"] = grids[0]
-    pop.data["e"] = grids[1]
-    pop.data["i"] = grids[2]
-    pop.data["aop"] = grids[3]
-    pop.data["raan"] = grids[4]
-    pop.data["mu0"] = grids[5]
-    pop.data["mjd0"] = mjd0
-    pop.data["d"] = grids[6]
-    pop.data["C_D"] = 2.3
-
+    pop = Population(
+        states=np.stack(grids[:-1]),
+        epochs=Time(
+            np.full((size,), epoch_mjd, dtype=np.float64),
+            format="mjd",
+            scale="utc",
+        ),
+        frame=frame,
+        parameters={"d": grids[-1]},
+        object_ids=np.arange(size),
+        state_format="kepler",
+        anomly_type="mean",
+        dtypes={"id": np.int64},
+        default_dtype=np.float64,
+        epoch_format="mjd",
+        epoch_scale="utc",
+        degrees=True,
+    )
     return pop

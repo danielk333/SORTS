@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
 """Defines a population of space objects in the form of a class."""
+from pathlib import Path
+from typing import Self, Callable, Any
 import copy
-import pathlib
 from collections import defaultdict, OrderedDict
 from functools import reduce
 
@@ -13,7 +14,7 @@ import pyorb
 from tabulate import tabulate
 from astropy.time import Time
 
-from sorts.types import StateType, NDArray_6xN, NDArray_N
+from sorts.types import StateType, NDArray_6xN, NDArray_N, IndexLike, AnomalyType, Frames
 from sorts.space_object import SpaceObject
 
 
@@ -29,14 +30,19 @@ class Population:
         self,
         states: NDArray_6xN,
         epochs: Time,
+        frame: Frames,
         parameters: dict[str, NDArray_N],
         object_ids: NDArray_N | None,
         state_format: StateType = "kepler",
+        anomly_type: AnomalyType = "mean",
         dtypes: dict[str, npt.DTypeLike] | None = None,
         default_dtype: npt.DTypeLike = np.float64,
         epoch_format: str = "mjd",
         epoch_scale: str = "utc",
+        degrees: bool = True,
     ):
+        self.data: npt.NDArray
+
         assert states.shape[1] == len(epochs)
         match state_format:
             case "kepler":
@@ -53,9 +59,13 @@ class Population:
                     "Unicode [U] numpy strings, try using ASCII [S] strings instead."
                 )
         self.state_fields = state_keys
+        self.property_fields = list(parameters.keys())
         self.state_format = state_format
         self.epoch_format = epoch_format
         self.epoch_scale = epoch_scale
+        self.anomly_type = anomly_type
+        self.degrees = degrees
+        self.frame = frame
 
         data_keys = ["id", "epoch"] + state_keys + list(parameters.keys())
         self.dtypes = OrderedDict()
@@ -65,8 +75,8 @@ class Population:
 
         self.allocate(len(epochs))
         self.data["id"] = np.arange(len(epochs)) if object_ids is None else object_ids
-        self.data["epoch"] = getattr(epochs, epoch_format).values
-        for key, ind in enumerate(state_keys):
+        self.data["epoch"] = epochs.to_value(epoch_format)
+        for ind, key in enumerate(state_keys):
             self.data[key] = states[ind, :]
         for key, vals in parameters.items():
             self.data[key] = vals
@@ -74,14 +84,14 @@ class Population:
     def __len__(self) -> int:
         return len(self.data)
 
-    def copy(self):
+    def copy(self) -> Self:
         """Return a copy of the current Population instance."""
         pop = Population()
         raise NotImplementedError()
         pop.data = self.data.copy()
         return pop
 
-    def delete(self, inds):
+    def delete(self, inds: IndexLike):
         """Remove the rows according to the given indices.
         Supports single index, iterable of indices and slices.
         """
@@ -89,7 +99,7 @@ class Population:
             inds = [inds]
         elif isinstance(inds, slice):
             _inds = range(self.data.shape[0])
-            inds = _inds[inds]
+            inds = list(_inds[inds])
         elif not (isinstance(inds, list) or isinstance(inds, np.ndarray)):
             raise Exception("Cannot delete indecies given with type {}".format(type(inds)))
 
@@ -98,28 +108,9 @@ class Population:
             mask[ind] = False
         self.data = self.data[mask]
 
-    def filter(self, col, fun):
-        """Filters the population using a boolean function, keeping true values.
-
-        :param str col: Column to filter, must match exactly one entry in the :code:`header` attribute.
-        :param function fun: Function that returns boolean array used for filtering.
-
-        **Example:**
-
-        Filter Master population keeping only objects below 45.0 degrees inclination.
-
-        .. code-block:: python
-
-            from population_library import master_catalog
-
-            master = master_catalog()
-            master.filter(
-                col='i',
-                fun=lambda inc: inc < 45.0,
-            )
-
-        """
-        if col in self.fields:
+    def filter(self, col: str, fun: Callable[[Any], bool]):
+        """Filters the population using a boolean function, keeping true values."""
+        if col in self.cols:
             mask = np.full((self.data.shape[0],), True, dtype=bool)
             for row in range(self.data.shape[0]):
                 mask[row] = fun(self.data[col][row])
@@ -127,7 +118,7 @@ class Population:
         else:
             raise Exception("No such column: {}".format(col))
 
-    def unique(self, target_epoch=None, col="oid"):
+    def unique(self, target_epoch=None, col="id"):
         """Reduces a population by eliminating duplicates with same oid.
 
         If target_epoch is not given, keep the latest instance found.
@@ -147,7 +138,7 @@ class Population:
                 vmap[val].pop(0)
                 continue
 
-            epochs = self.data[self.epoch_field["field"]][vmap[val]]
+            epochs = self.data["epoch"][vmap[val]]
             order = np.argsort(epochs)[::-1]  # vmap[val][order[0]] is latest
             if target_epoch is None:
                 vmap[val].pop(order[0])
@@ -163,8 +154,13 @@ class Population:
         self.delete(deletions)
 
     @property
+    def cols(self):
+        """The columns"""
+        return list(self.dtypes.keys())
+
+    @property
     def keys(self):
-        """The  property."""
+        """The columns"""
         return list(self.dtypes.keys())
 
     @property
@@ -173,7 +169,7 @@ class Population:
         shape = (len(self.data), len(self.keys))
         return shape
 
-    def allocate(self, length):
+    def allocate(self, length: int):
         """Allocate the internal data array for assignment of objects.
 
         **Warning:** This removes all internal data.
@@ -183,121 +179,94 @@ class Population:
             _dtype.append((name, dt))
         self.data = np.empty((length,), dtype=_dtype)
 
-    def get_states(self, n=None, named=True, dtype=None):
+    def get_states(
+        self,
+        row_indecies: IndexLike | None = None,
+        dtype: npt.DTypeLike | None = None,
+    ):
         """Use the defined state parameters to get a copy of the states"""
-        return self.get_fields(fields=self.state_fields, n=n, named=named, dtype=dtype)
+        return self.get_fields(fields=self.state_fields, row_indecies=row_indecies, dtype=dtype)
 
-    def get_fields(self, fields, n=None, named=True, dtype=None):
+    def get_fields(
+        self,
+        fields: list[str],
+        row_indecies: IndexLike | None = None,
+        dtype: npt.DTypeLike | None = None,
+    ) -> npt.NDArray:
         """Get the orbital elements for one row from internal data array.
-
-        :param int/slice/list n: Row number(s).
-        :param list fields: List of fields to get data for
-        :param bool named: return a named numpy array or a unnamed one. If True, all dtypes are cast as the first fields.
+        If the `dtype` is not `None`, a structured numpy array is returned,
+        otherwise all data from the fields is typecast to the given `dtype`.
         """
-        if n is None:
-            n = slice(None, None, None)  # all
+        if row_indecies is None:
+            row_indecies = slice(None, None, None)  # all
 
-        states = self.data[n][fields]
-        if not named:
-            if dtype is None:
-                dtype = states.dtype[0]
+        states = self.data[row_indecies][fields]
+        if dtype is not None:
             states_ = np.empty((len(states), len(fields)), dtype=dtype)
-            for ind, key in enumerate(states.dtype.names):
+
+            for ind, key in enumerate(fields):
                 states_[:, ind] = states[key].astype(dtype)
             states = states_
-            del states_
 
         return states
 
-    def get_orbit(self, n, fields=None, M_cent=pyorb.M_earth, degrees=True, anomaly="mean"):
+    def get_orbit(
+        self,
+        row_indecies: IndexLike | None = None,
+        M_cent: float = pyorb.M_earth,
+    ) -> pyorb.Orbit:
         """Get the one row from the population as a :class:`pyorb.Orbit` instance."""
-        raise NotImplementedError()
+        if row_indecies is None:
+            row_indecies = slice(None, None, None)  # all
 
-        if fields is None:
-            fields = self.state_fields
-
+        fields = self.state_fields
         kwargs = {}
-
+        if isinstance(row_indecies, int):
+            size = 1
+        else:
+            size = len(np.arange(len(self.data))[row_indecies])
         for key in fields:
-            kwargs[key] = self.data[n][key]
-
-        # TODO: generalize this better
-        if "aop" in kwargs:
-            kwargs["omega"] = kwargs.pop("aop")
-        if "raan" in kwargs:
-            kwargs["Omega"] = kwargs.pop("raan")
-        if "mu0" in kwargs:
-            kwargs["anom"] = kwargs.pop("mu0")
-
-        for key in ["X", "Y", "Z", "VX", "VY", "VZ"]:
-            if key in kwargs:
-                kwargs[key.lower()] = kwargs.pop(key)
+            kwargs[key] = self.data[row_indecies][key]
 
         obj = pyorb.Orbit(
             M0=M_cent,
-            degrees=degrees,
-            type=anomaly,
+            degrees=self.degrees,
+            type=self.anomly_type,
             auto_update=True,
             direct_update=True,
-            num=1,
+            num=size,
             **kwargs,
         )
         return obj
 
-    def get_object(self, n):
-        """Get the one row from the population as a :class:`space_object.SpaceObject` instance."""
-        parameters = {}
-        raise NotImplementedError()
-        if self.space_object_fields is not None:
-            for key in self.space_object_fields:
-                parameters[key] = self.data[key][n]
+    def get_object(
+        self,
+        index: int,
+        M_cent: float = pyorb.M_earth,
+    ) -> SpaceObject:
+        """Get the one row from the population as a `SpaceObject` instance."""
 
-        cart_state = True
-        kep_state = True
-        for key in pyorb.Orbit.CARTESIAN:
-            if key not in self.state_fields:
-                cart_state = False
-        for key in ["a", "e", "i"]:
-            if key not in self.state_fields:
-                kep_state = False
-        if "omega" not in self.state_fields and "aop" not in self.state_fields:
-            kep_state = False
-        if "Omega" not in self.state_fields and "raan" not in self.state_fields:
-            kep_state = False
-        if "anom" not in self.state_fields and "mu0" not in self.state_fields:
-            kep_state = False
-
-        kwargs = {}
-        if kep_state or cart_state:
-            for key in self.state_fields:
-                kwargs[key] = self.data[n][key]
-        else:
-            kwargs["state"] = self.data[n][self.state_fields]
-
-        if "oid" in self.fields:
-            kwargs["oid"] = self.data[n]["oid"]
-
+        orb = self.get_orbit(index, M_cent=M_cent)
         obj = SpaceObject(
-            propagator=self.propagator,
-            propagator_options=self.propagator_options,
-            propagator_args=self.propagator_args,
-            parameters=parameters,
-            epoch=Time(
-                self.data[self.epoch_field["field"]][n],
-                format=self.epoch_field["format"],
-                scale=self.epoch_field["scale"],
-            ),
-            **kwargs,
+            state=orb,
+            frame=self.frame,
+            epoch=Time(self.data["epoch"][index], format=self.epoch_format, scale=self.epoch_scale),
+            properties={key: self.data[key][index] for key in self.property_fields},
+            object_id=self.data["id"][index],
         )
         return obj
 
-    def print(self, n=None, fields=None):
-        if n is None:
-            n = slice(None, None, None)
+    def print(
+        self,
+        row_indecies: IndexLike | None = None,
+        fields: list[str] | None = None,
+    ) -> str:
+        if row_indecies is None:
+            row_indecies = slice(None, None, None)
         if fields is None:
-            fields = self.fields
+            fields = self.keys
 
-        data = self.data[n][fields]
+        data = self.data[row_indecies][fields]
 
         if isinstance(data, np.void):
             data = [[x for x in data]]
@@ -324,34 +293,48 @@ class Population:
         for obj in self:
             yield obj
 
-    def save(self, fname):
-        raise NotImplementedError()
+    def save(self, fname: Path | str):
         if isinstance(fname, str):
-            fname = pathlib.Path(fname)
+            fname = Path(fname)
 
         with h5py.File(fname, "w") as hf:
             hf.create_dataset("data", data=self.data)
-            hf.attrs["fields"] = self.fields
-            hf.attrs["space_object_fields"] = self.space_object_fields
-            hf.attrs["dtypes"] = self.dtypes
-            hf.attrs["epoch_field"] = [x for x in self.epoch_field.items()]
             hf.attrs["state_fields"] = self.state_fields
+            hf.attrs["property_fields"] = self.property_fields
+            hf.attrs["state_format"] = self.state_format
+            hf.attrs["epoch_format"] = self.epoch_format
+            hf.attrs["epoch_scale"] = self.epoch_scale
+            hf.attrs["anomly_type"] = self.anomly_type
+            hf.attrs["degrees"] = self.degrees
+            hf.attrs["frame"] = self.frame
 
     @classmethod
-    def load(cls, fname):
-        raise NotImplementedError()
+    def load(cls, fname: Path | str) -> Self:
         if isinstance(fname, str):
-            fname = pathlib.Path(fname)
+            fname = Path(fname)
 
         with h5py.File(fname, "r") as hf:
+            state_fields = copy.deepcopy(hf.attrs["state_fields"].tolist())
+            data = hf["data"][()]
+            dtypes = {key: data.dtype[key] for key in data.dtype.names}
             pop = cls(
-                fields=copy.deepcopy(hf.attrs["fields"].tolist()),
-                dtypes=copy.deepcopy(hf.attrs["dtypes"].tolist()),
-                space_object_fields=copy.deepcopy(hf.attrs["space_object_fields"].tolist()),
-                state_fields=copy.deepcopy(hf.attrs["state_fields"].tolist()),
-                epoch_field={key: val for key, val in hf.attrs["epoch_field"]},
+                states=np.stack([data[key] for key in state_fields]),
+                epochs=Time(
+                    data["epoch"],
+                    format=hf.attrs["epoch_format"],
+                    scale=hf.attrs["epoch_scale"],
+                ),
+                frame=hf.attrs["frame"],
+                parameters={
+                    key: data[key] for key in copy.deepcopy(hf.attrs["property_fields"].tolist())
+                },
+                object_ids=data["id"],
+                state_format=hf.attrs["state_format"],
+                anomly_type=hf.attrs["anomly_type"],
+                dtypes=dtypes,
+                epoch_format=hf.attrs["epoch_format"],
+                epoch_scale=hf.attrs["epoch_scale"],
+                degrees=hf.attrs["degrees"],
             )
-
-            pop.data = hf["data"][()]
 
         return pop
