@@ -35,7 +35,6 @@ def gen_nostra(
         noise_figure_db=noise_figure_db,
         amplifier_gain_db=amplifier_gain_db,
         insertion_loss_db=insertion_loss_db,
-        aperture_efficiency=aperture_efficiency,
         computation_power_draw_scaling=1,
         t_sky=t_sky,
         duty_cycle=duty_cycle,
