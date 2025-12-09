@@ -17,7 +17,6 @@ def estimate_radar_parameters(
     noise_figure_db,
     amplifier_gain_db,
     insertion_loss_db,
-    aperture_efficiency,
     duty_cycle=0.1,
     computation_power_draw_scaling=2,
     t_sky=30,

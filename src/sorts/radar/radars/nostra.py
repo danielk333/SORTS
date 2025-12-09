@@ -19,11 +19,10 @@ def gen_nostra(
     noise_figure_db,
     amplifier_gain_db,
     insertion_loss_db,
-    aperture_efficiency,
     duty_cycle,
     t_sky,
     coherent_integration_time,
-    bandwidth_reduction_to_downsampling_ratio,
+    bandwidth_limit_ratio,
 ):
     """The NOSTRA system."""
     data = estimate_radar_parameters(
@@ -43,7 +42,7 @@ def gen_nostra(
         reference_snr_db=1,
         reference_ranges=[1000e3],
         coherent_integration_time=coherent_integration_time,
-        bandwidth_reduction_to_downsampling_ratio=bandwidth_reduction_to_downsampling_ratio,
+        bandwidth_limit_ratio=bandwidth_limit_ratio,
     )
 
     dwell_time = coherent_integration_time / duty_cycle
