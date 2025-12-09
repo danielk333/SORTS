@@ -25,7 +25,7 @@ def find_simultaneous_passages(
     rx_stations: t.Sequence[Station],
     epoch: Datetime_Like,
     fov_kw=None,
-) -> list[SimultaneousPassage]:
+) -> list[Passage]:
     """
     Finds all passages that are simultaneously inside all tx, rx stations' FOV.
     """
@@ -33,7 +33,7 @@ def find_simultaneous_passages(
 
     epoch = to_datetime64_us(epoch)
 
-    passages: list[SimultaneousPassage] = []
+    passages: list[Passage] = []
     if fov_kw is None:
         fov_kw = {}
 
@@ -72,7 +72,7 @@ def find_simultaneous_passages(
 
         time_range = (start_time, end_time)
         passages.append(
-            SimultaneousPassage(
+            Passage(
                 space_object=space_object,
                 tx_station=tx_station,
                 rx_stations=list(rx_stations),
@@ -106,18 +106,6 @@ def find_passages(
         epoch=epoch,
         fov_kw=fov_kw,
     )
-
-    passages = [
-        Passage(
-            space_object=ps.space_object,
-            tx_station=ps.tx_station,
-            rx_station=rx_station,
-            epoch=ps.epoch,
-            time_range=ps.time_range,
-        )
-        for ps in passages
-    ]
-
     return passages
 
 

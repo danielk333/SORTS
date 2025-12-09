@@ -15,7 +15,7 @@ from sorts.types import (
     EnuCoordinates,
     Datetime_Like,
 )
-from sorts.simulation.types import SimultaneousPassage
+from sorts.simulation.types import Passage
 from .controller_base import ControllerBase
 from sorts.interpolation import Interpolator
 
@@ -113,7 +113,7 @@ class SparseTrackerController(ControllerBase):
 
         return stn_map
 
-    def generate(self, passages_of_spobj: list[SimultaneousPassage]) -> scheduling.Schedule:
+    def generate(self, passages_of_spobj: list[Passage]) -> scheduling.Schedule:
         """Generate the schedules."""
         # early return for empty case
         if len(passages_of_spobj) == 0:
