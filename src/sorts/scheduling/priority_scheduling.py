@@ -46,6 +46,7 @@ def _inject_intermediate_columns(sch: Schedule) -> Schedule:
 
 
 def _propagate_cummax_start_time_cummax_end_time(merged_sch: Schedule) -> Schedule:
+    # todo: why is this needed? need some more logic explanation
     merged_sch[_IK.cummax_start_time] = (
         t.cast(pd.Series, merged_sch[_IK.cummax_start_time].to_pandas())
         .groupby(level=[_SK.stn_num])

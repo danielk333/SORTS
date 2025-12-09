@@ -133,7 +133,7 @@ type Tuple_6[T] = tuple[T, T, T, T, T, T]
 type Tuple_7[T] = tuple[T, T, T, T, T, T, T]
 type SpaceObjectId = int
 
-IndexLike = int | list[int] | tuple[int] | NDArray_N | slice
+IndexLike = int | list[int] | tuple[int] | NDArray_N | slice | np.integer
 
 S = t.TypeVar("S", bound="Settings")
 

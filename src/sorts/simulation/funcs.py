@@ -6,13 +6,14 @@ Functions for core functionalities of this subpackage
 
 # TODO: this module can be moved to top level as helper funcs of sorts pkg?
 
+import matplotlib.pyplot as plt
 from dataclasses import dataclass
 import typing as t
 import pickle
 from pathlib import Path
 import numpy as np
 import numpy.typing as npt
-from astropy.time import Time
+from astropy.time import Time, TimeDelta
 from sorts.types import Datetime64_us, EcefStates, Float64_as_sec, Datetime_Like
 from sorts.utils import to_datetime64_us
 from sorts.radar import Station
@@ -25,9 +26,11 @@ from sorts.population import Population
 
 @dataclass
 class InterpolatedPropagation:
+    # todo: investigate if we can just sidestep most of the `datetime64` and just use `Time`?
     times: npt.NDArray[Datetime64_us]
     states: EcefStates
     interpolator: Interpolator
+    epoch: Datetime64_us
 
     @classmethod
     def from_space_objects(
@@ -44,16 +47,21 @@ class InterpolatedPropagation:
         for spobj in space_objects:
             t0 = (start_time - spobj.epoch).sec
             t_obj = np.arange(t0, t0 + dt, time_step, dtype=np.float64)
-
             itrs_states = propagator.propagate(spobj, t_obj)
+
             interp = interpolator_class(itrs_states, t_obj)
             pint = cls(
-                times=spobj.epoch.datetime64 + t_obj,
+                times=(spobj.epoch + TimeDelta(t_obj, format="sec")).datetime64,
                 states=itrs_states,
                 interpolator=interp,
+                epoch=spobj.epoch.datetime64,
             )
             prop_interps.append(pint)
         return prop_interps
+
+    @property
+    def relative_seconds(self):
+        return (self.times - self.epoch) / np.timedelta64(1, "s")
 
 
 def find_simultaneous_passages(
@@ -101,13 +109,13 @@ def find_simultaneous_passages(
         if len(ps_inds) == 0:
             continue
 
-        start_time: Datetime64_us = t.cast(
-            np.timedelta64, (dt[ps_inds[0]] * 1e6).astype("timedelta64[us]")
-        ) + np.datetime64(epoch)
+        start_time: Datetime64_us = (
+            t.cast(np.timedelta64, (dt[ps_inds[0]] * 1e6).astype("timedelta64[us]")) + epoch
+        )
 
-        end_time: Datetime64_us = t.cast(
-            np.timedelta64, (dt[ps_inds[-1]] * 1e6).astype("timedelta64[us]")
-        ) + np.datetime64(epoch)
+        end_time: Datetime64_us = (
+            t.cast(np.timedelta64, (dt[ps_inds[-1]] * 1e6).astype("timedelta64[us]")) + epoch
+        )
 
         time_range = (start_time, end_time)
         passages.append(
@@ -148,7 +156,7 @@ def find_passages(
 
 
 def duplicate_and_perturbate_space_objects(
-    spobjs: t.Sequence[SpaceObject],
+    space_objects: t.Sequence[SpaceObject],
     propagator: Propagator,
     interpolator_class: t.Type[Interpolator],
     start_time: Time,
@@ -157,29 +165,42 @@ def duplicate_and_perturbate_space_objects(
     pert_val: tuple[float, float, float, float, float, float] = (
         1e-3, 1e-3, 1e-3, 1e-5, 1e-5, 1e-5  # fmt: skip
     ),
-) -> list[tuple[SpaceObjectJacobianTuple, InterpolatedPropagation]]:
+) -> list[tuple[list[SpaceObject], list[InterpolatedPropagation]]]:
+    """list-structure indexes over perturbation and then two items per input sequence"""
     # duplicate list items
-    spobjs_jacobian_tuples = [
-        (spobj, spobj.copy(), spobj.copy(), spobj.copy(), spobj.copy(), spobj.copy(), spobj.copy())
-        for spobj in spobjs
-    ]
+    perturbed_objects = []
 
-    # perturbate
-    for spobjs_jacobian_tuple in spobjs_jacobian_tuples:
-        for idx, spobj in enumerate(spobjs_jacobian_tuple):
-            # the original spobj are left intact
-            if idx != 0:
-                spobj.state._cart[idx - 1, 0] += pert_val[idx - 1]
+    # perturbate all state variables and leave one original
+    # i.e. len 7, [true_spobj_list, pert_spobj_list...x6]
+    for idx in range(7):
+        spobjs = []
+        for spobj in space_objects:
+            # the original spobj are left intact, the rest are copied and perturbed
+            if idx == 0:
+                new_obj = spobj
+            else:
+                new_obj = spobj.copy()
+                new_obj.state._cart[idx - 1, 0] += pert_val[idx - 1]
+                # to make sure both variants are updated in case
+                # automatic update has been turned off
+                new_obj.state.calculate_kepler()
+            spobjs.append(new_obj)
 
-    prop_interps = InterpolatedPropagation.from_space_objects(
-        space_objects=spobjs,
-        propagator=propagator,
-        interpolator_class=interpolator_class,
-        start_time=start_time,
-        end_time=end_time,
-        time_step=time_step,
-    )
-    return list(zip(spobjs_jacobian_tuples, prop_interps))
+        prop_interps = InterpolatedPropagation.from_space_objects(
+            space_objects=spobjs,
+            propagator=propagator,
+            interpolator_class=interpolator_class,
+            start_time=start_time,
+            end_time=end_time,
+            time_step=time_step,
+        )
+        perturbed_objects.append(
+            (
+                spobjs,
+                prop_interps,
+            )
+        )
+    return perturbed_objects
 
 
 def ensure_directory_exist(dpath: str | Path):

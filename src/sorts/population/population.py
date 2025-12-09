@@ -221,10 +221,11 @@ class Population:
 
         fields = self.state_fields
         kwargs = {}
-        if isinstance(row_indecies, int):
+        if isinstance(row_indecies, int) or isinstance(row_indecies, np.integer):
             size = 1
         else:
             size = len(np.arange(len(self.data))[row_indecies])
+
         for key in fields:
             kwargs[key] = self.data[row_indecies][key]
 

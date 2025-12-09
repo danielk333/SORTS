@@ -1,17 +1,18 @@
 from __future__ import annotations
 import logging, typing as t, pickle
 from pathlib import Path
+import numpy as np
 import numpy.typing as npt
 import xarray as xr
 import pyorb
 import sorts
 from tqdm import tqdm
 from sorts import scheduling, controller, simulation
-from sorts.types import Datetime_Like, Float64_as_sec, Datetime64_us, Float64_as_sec, EcefStates
+from sorts.types import Datetime_Like, Float64_as_sec, Datetime64_us, EcefStates
 from sorts.utils import to_datetime64_us
 from sorts.radar import Station, StationId
 from sorts.simulation import Passage
-from sorts.interpolation import Interpolator
+from sorts.simulation.funcs import InterpolatedPropagation
 from sorts.scheduling import Schedule, ExperimentDetailMap
 from sorts.simulation.stx_mrx_simulation.simulation_unit import (
     SimulationUnit,
@@ -71,8 +72,9 @@ def group_passages_by_tx_rx_station_pair(
     groupped_passages: dict[tuple[StationId, StationId], list[Passage]] = {}
 
     for passage in passages:
+        # todo: make sure this is not broken
         tx_station_id = passage.tx_station.uid
-        rx_station_id = passage.rx_station.uid
+        rx_station_id = passage.rx_stations[0].uid
 
         if (tx_station_id, rx_station_id) in groupped_passages:
             groupped_passages[(tx_station_id, rx_station_id)].append(passage)
@@ -150,8 +152,7 @@ class StxMrxSimulation:
         start_time: Datetime_Like,
         end_time: Datetime_Like,
         space_objects: t.Sequence[sorts.SpaceObject],
-        dsec_sampler: SpaceObjectDsecSampler,
-        interpolator_class: type[Interpolator],
+        interpolated_propagations: t.Sequence[InterpolatedPropagation],
     ):
         self.station_map = station_map
         self.station_id_pairs = station_id_pairs
@@ -161,10 +162,7 @@ class StxMrxSimulation:
         self.start_time = start_time
         self.end_time = end_time
         self.space_objects = space_objects
-        self.dsec_sampler = dsec_sampler  # TODO: support different sampler for different obj?
-        # TODO: we need to implement falback mechanism,
-        #   e.g. a `Legendre8` `Interpolator` requires >=8 points, but sometime it might get less than that
-        self.interpolator_class = interpolator_class
+        self.interpolated_propagations = interpolated_propagations
 
         self.sim_units: list[SimulationUnit] = []
         self.obss: list[Observation] = []
@@ -178,8 +176,7 @@ class StxMrxSimulation:
         start_time: Datetime_Like,
         end_time: Datetime_Like,
         space_objects: t.Sequence[sorts.SpaceObject],
-        dsec_sampler: SpaceObjectDsecSampler,
-        interpolator_class: type[Interpolator],
+        interpolated_propagations: t.Sequence[InterpolatedPropagation],
     ):
         """A constructor method"""
         # TODO: - the exp details are already computed outside? Should the `controllers` field be
@@ -213,32 +210,25 @@ class StxMrxSimulation:
             start_time=start_time,
             end_time=end_time,
             space_objects=space_objects,
-            dsec_sampler=dsec_sampler,
-            interpolator_class=interpolator_class,
+            interpolated_propagations=interpolated_propagations,
         )
 
     def prepare_simulation_unit_params(self) -> list[FromPassagesOverTxRxStationPairParam]:
-        spobjs_smpl_dsec, spobjs_smpl_states = sample_and_propagate_space_objects_states(
-            sampler=self.dsec_sampler,
-            spobjs=self.space_objects,
-            start_time=to_datetime64_us(self.start_time),
-            end_time=to_datetime64_us(self.end_time),
-        )
-        logger.debug("sample and propagate done")
-
-        spobjs_interpolators = [
-            self.interpolator_class(spobj_smpl_states, spobj_smpl_dsec)
-            for spobj_smpl_dsec, spobj_smpl_states in zip(spobjs_smpl_dsec, spobjs_smpl_states)
+        epoch = to_datetime64_us(self.epoch)
+        # todo: this is ugly and can be fixed
+        dsecs = [
+            (interp.times - epoch) / np.timedelta64(1, "s")
+            for interp in self.interpolated_propagations
         ]
-        logger.debug("interpolators done")
-
+        states = [interp.states for interp in self.interpolated_propagations]
+        spobjs_interpolators = [interp.interpolator for interp in self.interpolated_propagations]
         passages_lists = find_passages(
             station_map=self.station_map,
             station_id_pairs=self.station_id_pairs,
             space_objects=self.space_objects,
             epoch=self.epoch,
-            spobjs_smpl_dsec=spobjs_smpl_dsec,
-            spobjs_smpl_states=spobjs_smpl_states,
+            spobjs_smpl_dsec=dsecs,
+            spobjs_smpl_states=states,
         )
         logger.debug("find_passages done")
 
@@ -283,7 +273,7 @@ class StxMrxSimulation:
         sim_units_param = [
             p for p in sim_units_param if len(p.schedule[scheduling._K.multi_index]) > 0
         ]
-        logger.info(f"prepare_simulation_unit_params done")
+        logger.info("prepare_simulation_unit_params done")
 
         return sim_units_param
 

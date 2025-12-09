@@ -372,7 +372,7 @@ class SimulationUnit:
             diameter=self.space_object.d,
             bandwidth=bandwidths,
             rx_noise_temp=rx_noise_temps,
-            radar_albedo=self.space_object.parameters.get("radar_albedo", 1.0),
+            radar_albedo=self.space_object.properties.get("radar_albedo", 1.0),
         )
         self._state[_K.snr] = (_K.multi_index, snr)
 

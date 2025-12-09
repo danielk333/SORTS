@@ -215,8 +215,8 @@ class ObservedParameters(Scheduler):
         else:
             diam = None
 
-        spin_period = space_object.parameters.get("spin_period", None)
-        radar_albedo = space_object.parameters.get("radar_albedo", 1.0)
+        spin_period = space_object.properties.get("spin_period", None)
+        radar_albedo = space_object.properties.get("radar_albedo", 1.0)
 
         # t is always in scheduler relative time
         # t_samp is in space object relative time if there is a scheduler epoch, otherwise it is assumed that the epoch are the same

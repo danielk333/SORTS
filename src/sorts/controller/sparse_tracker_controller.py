@@ -125,12 +125,15 @@ class SparseTrackerController(ControllerBase):
             pstart_time, pend_time = ps.time_range
             t0 = (pstart_time - ps.epoch) / np.timedelta64(1, "s")
             passage_time = (pend_time - pstart_time) / np.timedelta64(1, "s")
+
             relative_time_sampling = np.linspace(
                 0.0, passage_time, num=self.points_per_passage + 2, endpoint=True
             )
             relative_time_sampling = relative_time_sampling[1:-1]
+
             observation_times_relative.append(t0 + relative_time_sampling)
-            rel_us = (relative_time_sampling * 1e6).astype("timedelta64[us]")
+            rel_us = (relative_time_sampling.copy() * 1e6).astype("timedelta64[us]")
+
             observation_times.append(pstart_time + rel_us)
 
         # todo: this can be cleaned up quite a lot i feel like
@@ -138,7 +141,7 @@ class SparseTrackerController(ControllerBase):
         tx_sch_time = np.concatenate(observation_times)
         tx_sch_len = len(tx_sch_time)
         tx_pointings: EnuCoordinates = self.tx_station.enu(
-            self.interpolator.get_state(tx_sch_time_rel)
+            self.interpolator.get_state(tx_sch_time_rel)[:3, :]
         )
         tx_pointings = tx_pointings / np.linalg.norm(tx_pointings, axis=0)
 
@@ -153,7 +156,9 @@ class SparseTrackerController(ControllerBase):
 
         rx_schs: list[scheduling.Schedule] = []
         for rx_stn in self.rx_stations:
-            rx_pointings: EnuCoordinates = rx_stn.enu(self.interpolator.get_state(tx_sch_time))
+            rx_pointings: EnuCoordinates = rx_stn.enu(
+                self.interpolator.get_state(tx_sch_time_rel)[:3, :]
+            )
             rx_pointings = rx_pointings / np.linalg.norm(rx_pointings, axis=0)
 
             rx_schs.append(
