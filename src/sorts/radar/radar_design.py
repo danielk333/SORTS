@@ -24,7 +24,7 @@ def estimate_radar_parameters(
     reference_snr_db=10.0,
     reference_ranges=1000e3,
     coherent_integration_time=0.02,
-    bandwidth_reduction_to_downsampling_ratio=10,
+    bandwidth_limit_ratio=10,
 ):
     """
     todo
@@ -47,9 +47,7 @@ def estimate_radar_parameters(
     radius = np.sqrt(antenna_num / np.pi) * size
 
     # just based on the aperture
-    # todo: look in the books for a good reference for this
-    # todo: FIGURE out what the aperture efficiency actually models and how to estimate it????
-    directivity = 4 * (np.pi * radius) ** 2 / lam**2 * aperture_efficiency
+    directivity = 4 * (np.pi * radius) ** 2 / lam**2
 
     # the peak gain, this is an approximation in the main lobe since
     # the gain will no longer be "directive gain" when divided by
@@ -86,10 +84,10 @@ def estimate_radar_parameters(
     #
     # F = 1 + T_noise / T_ref
     # F = SNR_in / SNR_out
-    insertion_loss = 10 ** (insertion_loss_db / 10)
     amplifier_gain = 10 ** (amplifier_gain_db / 10)
     noise_figure = 10 ** (noise_figure_db / 10)
-    t_noise = amplifier_gain * t_sky / insertion_loss + (noise_figure - 1) * T_REF
+    t_noise = amplifier_gain * t_sky + (noise_figure - 1) * T_REF
+    t_noise = t_noise / bandwidth_limit_ratio
 
     # Then coherent integration will happen, and here, whatever our sampling frequency is gets
     # removed by the fact that we are coherently integrating, and all that matters is the coherent
@@ -100,15 +98,11 @@ def estimate_radar_parameters(
         lam,
         tx_power,
         10 ** (reference_snr_db / 10),
-        coherent_integration_time=coherent_integration_time
-        * bandwidth_reduction_to_downsampling_ratio,
+        coherent_integration_time=coherent_integration_time,
         effective_noise_temperature=t_noise,
         radar_albedo=1.0,
     )
-    effective_bandwidth = 1 / (
-        coherent_integration_time * bandwidth_reduction_to_downsampling_ratio
-    )
-
+    effective_bandwidth = 1 / coherent_integration_time
     minimum_diameter = [
         hard_target_diameter(
             beam.peak_gain,
