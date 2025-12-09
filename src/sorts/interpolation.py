@@ -27,7 +27,7 @@ class Interpolator(ABC):
         self.t = np.atleast_1d(t)
 
     @abstractmethod
-    def get_state(self, t, **kwargs) -> npt.NDArray:
+    def get_state(self, t) -> npt.NDArray:
         pass
 
 
