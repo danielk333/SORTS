@@ -196,7 +196,7 @@ class SimulationUnit:
     """shortcut to module attribute"""
 
     # todo: my type checker is complaining over these shortcuts?
-    FromPassagesOverTxRxStationPairParam = FromPassagesOverTxRxStationPairParam
+    # FromPassagesOverTxRxStationPairParam = FromPassagesOverTxRxStationPairParam
     """shortcut to module attribute"""
 
     def __init__(
@@ -225,6 +225,9 @@ class SimulationUnit:
 
         self.observations: list[Observation] = []
 
+    # todo: this param should maybe be expanded so the components are arguments, or a more
+    # generalized units should be made: i think this might be too specialized as a data carrier?
+    # will it be useful outside of this function call?
     @classmethod
     def from_passages_over_tx_rx_station_pair(
         cls, param: FromPassagesOverTxRxStationPairParam
@@ -425,6 +428,8 @@ ObservationStateIndexer = tuple[
 ]
 
 
+# TODO: i dont understand why this does not seem to actually contain any data? everything seems to
+# be in the simulation units? maybe parts of the simulations units could be moved here or vice versa
 class Observation:
     def __init__(
         self,

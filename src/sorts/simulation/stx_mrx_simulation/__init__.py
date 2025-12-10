@@ -7,4 +7,9 @@ from .stx_mrx_simulation import (
     iter_mpi_simulation_results,
     StxMrxSimulation,
 )
-from .simulation_unit import SimulationUnit, Observation, SimulationUnitState
+from .simulation_unit import (
+    SimulationUnit,
+    Observation,
+    SimulationUnitState,
+    FromPassagesOverTxRxStationPairParam,
+)
