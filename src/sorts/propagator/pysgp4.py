@@ -128,6 +128,9 @@ class Sgp4Settings(Settings):
     mean_elements_input: bool = False
     tol: float = 1e-5
     tol_v: float = 1e-7
+    sample_space_object_kepler_orbit: bool = False
+    kepler_samples: int = 100
+    kepler_extent: float = 0.2
     teme_to_tle_max_iter: int = 300
     teme_to_tle_minimize_start_samples: int = 1
     teme_to_tle_minimize_start_stds: tuple[float, ...] = (10.0, 0.01, 1.0, 2.0, 2.0, 2.0)
@@ -246,15 +249,22 @@ class Sgp4(Propagator[Sgp4Settings]):
 
         if self.settings.mean_elements_input:
             mean_elements = kep_to_mean_elements(state0, degrees=False)
+            if len(mean_elements.shape) > 2:
+                mean_elements.shape = (mean_elements.size,)
         else:
-            mean_elements = self.TEME_to_TLE(
-                state0._cart,
-                t=t_samps,
-                epoch=space_object.epoch,
-                B=B,
-                tol=self.settings.tol,
-                tol_v=self.settings.tol_v,
-            )
+            if self.settings.sample_space_object_kepler_orbit:
+                mean_elements = self.space_object_to_mean_elements(
+                    space_object,
+                )
+            else:
+                mean_elements = self.TEME_to_TLE(
+                    state0._cart,
+                    t=t_samps,
+                    epoch=space_object.epoch,
+                    B=B,
+                    tol=self.settings.tol,
+                    tol_v=self.settings.tol_v,
+                )
 
         if np.any(np.isnan(mean_elements)):
             raise Exception("Could not compute SGP4 initial state: {}".format(mean_elements))
@@ -581,3 +591,28 @@ class Sgp4(Propagator[Sgp4Settings]):
         logger.debug("SGP4:TEME_to_TLE:completed")
 
         return mean_elements  # type: ignore
+
+    def space_object_to_mean_elements(
+        self,
+        space_object: SpaceObject,
+    ) -> NDArray_6:
+        assert space_object.state.num <= 1
+        samples = self.settings.kepler_samples
+        max_ang = 360.0 if space_object.state.degrees else 2 * np.pi
+        max_ang *= self.settings.kepler_extent
+
+        _orb = space_object.state.copy()
+        _orb.allocate(samples)
+        _orb._kep[()] = space_object.state._kep[()]
+        _orb._kep[5, :] = np.linspace(-max_ang/2, max_ang/2, num=samples, endpoint=False)
+        _orb.calculate_cartesian()
+        t_vec = _orb.mean_anomaly / _orb.mean_motion
+
+        return self.TEME_to_TLE_OPTIM(
+            cart=_orb._cart,
+            epoch=space_object.epoch,
+            t=t_vec,
+            B=get_B(space_object.properties),
+            tol=self.settings.tol,
+            tol_v=self.settings.tol_v,
+        )

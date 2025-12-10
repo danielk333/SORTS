@@ -230,7 +230,6 @@ class StxMrxSimulation:
             spobjs_smpl_dsec=dsecs,
             spobjs_smpl_states=states,
         )
-        # print(f"{self}")
         # for obj, objps in enumerate(passages_lists):
         #     print(f"- {obj}")
         #     for ps in objps:
