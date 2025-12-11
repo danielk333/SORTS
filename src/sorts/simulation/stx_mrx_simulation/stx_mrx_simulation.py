@@ -146,7 +146,7 @@ class StxMrxSimulation:
         self,
         station_map: dict[StationId, Station],
         station_id_pairs: t.Sequence[tuple[StationId, StationId]],
-        schedule: Schedule,
+        schedule: t.Sequence[Schedule] | Schedule,
         exp_detail_map: ExperimentDetailMap,
         epoch: Datetime_Like,
         start_time: Datetime_Like,
@@ -171,7 +171,7 @@ class StxMrxSimulation:
     def from_controllers(
         cls,
         controllers: t.Sequence[controller.ControllerBase],
-        schedule: Schedule,
+        schedule: t.Sequence[Schedule] | Schedule,
         epoch: Datetime_Like,
         start_time: Datetime_Like,
         end_time: Datetime_Like,
@@ -215,6 +215,7 @@ class StxMrxSimulation:
 
     def prepare_simulation_unit_params(self) -> list[FromPassagesOverTxRxStationPairParam]:
         epoch = to_datetime64_us(self.epoch)
+
         # todo: this is ugly and can be fixed
         dsecs = [
             (interp.times - epoch) / np.timedelta64(1, "s")
@@ -237,8 +238,11 @@ class StxMrxSimulation:
         logger.debug("find_passages done")
 
         sim_units_param: list[FromPassagesOverTxRxStationPairParam] = []
-        for spobj, passages_of_a_spobj, spobj_states_interp in zip(
-            self.space_objects, passages_lists, spobjs_interpolators
+        for spobj, passages_of_a_spobj, spobj_states_interp, spobj_ind in zip(
+            self.space_objects,
+            passages_lists,
+            spobjs_interpolators,
+            range(len(self.space_objects)),
         ):
             _SK = scheduling._K
 
@@ -247,9 +251,13 @@ class StxMrxSimulation:
             for stn_id_pair, passages in groupped_passages.items():
                 tx_stn = self.station_map[stn_id_pair[0]]
                 rx_stn = self.station_map[stn_id_pair[1]]
+                if isinstance(self.schedule, xr.Dataset):
+                    sched = self.schedule
+                else:
+                    sched = self.schedule[spobj_ind]
 
                 filtered_sch = scheduling.filter_by_time_ranges(
-                    self.schedule, [ps.time_range for ps in passages]
+                    sched, [ps.time_range for ps in passages]
                 )
 
                 # filter by station id
