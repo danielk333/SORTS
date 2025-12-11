@@ -6,7 +6,6 @@ Functions for core functionalities of this subpackage
 
 # TODO: this module can be moved to top level as helper funcs of sorts pkg?
 
-import matplotlib.pyplot as plt
 from dataclasses import dataclass
 import typing as t
 import pickle
@@ -14,11 +13,11 @@ from pathlib import Path
 import numpy as np
 import numpy.typing as npt
 from astropy.time import Time, TimeDelta
-from sorts.types import Datetime64_us, EcefStates, Float64_as_sec, Datetime_Like
+from sorts.types import Datetime64_us, EcefStates, Float64_as_sec, Datetime_Like, StateType
 from sorts.utils import to_datetime64_us
 from sorts.radar import Station
 from sorts.space_object import SpaceObject
-from .types import Passage, SpaceObjectJacobianTuple
+from .types import Passage
 from sorts.interpolation import Interpolator
 from sorts.propagator import Propagator
 from sorts.population import Population
@@ -162,6 +161,7 @@ def duplicate_and_perturbate_space_objects(
     start_time: Time,
     end_time: Time,
     time_step: float,
+    perturbation_format: StateType = "cartesian",
     pert_val: tuple[float, float, float, float, float, float] = (
         1e-3, 1e-3, 1e-3, 1e-5, 1e-5, 1e-5  # fmt: skip
     ),
@@ -171,7 +171,7 @@ def duplicate_and_perturbate_space_objects(
     perturbed_objects = []
 
     # perturbate all state variables and leave one original
-    # i.e. len 7, [true_spobj_list, pert_spobj_list...x6]
+    # i.e. len 7, [(true_spobj_list, true_prop list), (pert_spobj_prop_list, ...) ...x6]
     for idx in range(7):
         spobjs = []
         for spobj in space_objects:
@@ -180,10 +180,14 @@ def duplicate_and_perturbate_space_objects(
                 new_obj = spobj
             else:
                 new_obj = spobj.copy()
-                new_obj.state._cart[idx - 1, 0] += pert_val[idx - 1]
-                # to make sure both variants are updated in case
-                # automatic update has been turned off
-                new_obj.state.calculate_kepler()
+
+                match perturbation_format:
+                    case "kepler":
+                        new_obj.state._kep[idx - 1, 0] += pert_val[idx - 1]
+                        new_obj.state.calculate_cartesian()
+                    case "cartesian":
+                        new_obj.state._cart[idx - 1, 0] += pert_val[idx - 1]
+                        new_obj.state.calculate_kepler()
             spobjs.append(new_obj)
 
         prop_interps = InterpolatedPropagation.from_space_objects(
