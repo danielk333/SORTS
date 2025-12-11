@@ -12,6 +12,7 @@ import pickle
 from pathlib import Path
 import numpy as np
 import numpy.typing as npt
+from tqdm import tqdm
 from astropy.time import Time, TimeDelta
 from sorts.types import Datetime64_us, EcefStates, Float64_as_sec, Datetime_Like, StateType
 from sorts.utils import to_datetime64_us
@@ -40,9 +41,12 @@ class InterpolatedPropagation:
         start_time: Time,
         end_time: Time,
         time_step: float,
+        progress: bool = False,
     ) -> list[t.Self]:
         dt = (end_time - start_time).sec
         prop_interps = []
+        if progress:
+            pbar = tqdm(desc="Propagating", total=len(space_objects))
         for spobj in space_objects:
             t0 = (start_time - spobj.epoch).sec
             t_obj = np.arange(t0, t0 + dt, time_step, dtype=np.float64)
@@ -56,6 +60,10 @@ class InterpolatedPropagation:
                 epoch=spobj.epoch.datetime64,
             )
             prop_interps.append(pint)
+            if progress:
+                pbar.update(1)
+        if progress:
+            pbar.close()
         return prop_interps
 
     @property
@@ -165,6 +173,7 @@ def duplicate_and_perturbate_space_objects(
     pert_val: tuple[float, float, float, float, float, float] = (
         1e-3, 1e-3, 1e-3, 1e-5, 1e-5, 1e-5  # fmt: skip
     ),
+    progress: bool = False,
 ) -> list[tuple[list[SpaceObject], list[InterpolatedPropagation]]]:
     """list-structure indexes over perturbation and then two items per input sequence"""
     # duplicate list items
@@ -172,6 +181,8 @@ def duplicate_and_perturbate_space_objects(
 
     # perturbate all state variables and leave one original
     # i.e. len 7, [(true_spobj_list, true_prop list), (pert_spobj_prop_list, ...) ...x6]
+    if progress:
+        pbar = tqdm(desc="Perturbations", position=1, total=7)
     for idx in range(7):
         spobjs = []
         for spobj in space_objects:
@@ -197,6 +208,7 @@ def duplicate_and_perturbate_space_objects(
             start_time=start_time,
             end_time=end_time,
             time_step=time_step,
+            progress=progress,
         )
         perturbed_objects.append(
             (
@@ -204,6 +216,10 @@ def duplicate_and_perturbate_space_objects(
                 prop_interps,
             )
         )
+        if progress:
+            pbar.update(1)
+    if progress:
+        pbar.close()
     return perturbed_objects
 
 

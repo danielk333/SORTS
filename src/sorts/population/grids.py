@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 """Defines grid sampled populations over some parameters."""
+from typing import Any
 import numpy as np
 from astropy.time import Time
 from .population import Population
@@ -17,6 +18,7 @@ def orbit_grid(
     diameter_samples: NDArray_N,
     frame: Frames = "GCRS",
     epoch_mjd: NDArray_N | float = 53005.0,
+    additional_parameters: dict[str, Any] = None,
 ):
     samples = [
         semi_major_axis_samples,
@@ -29,6 +31,9 @@ def orbit_grid(
     ]
     grids = [x.flatten() for x in np.meshgrid(*samples)]
     size = grids[0].size
+    parameters = {"d": grids[-1]}
+    if additional_parameters is not None:
+        parameters.update(additional_parameters)
 
     pop = Population(
         states=np.stack(grids[:-1]),
@@ -38,7 +43,7 @@ def orbit_grid(
             scale="utc",
         ),
         frame=frame,
-        parameters={"d": grids[-1]},
+        parameters=parameters,
         object_ids=np.arange(size),
         state_format="kepler",
         anomly_type="mean",
