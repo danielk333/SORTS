@@ -69,7 +69,7 @@ def kep_to_mean_elements(orb: pyorb.Orbit, degrees: bool = False) -> NDArray_6xN
     (the standard gravitational parameter is 24 orders larger then the change).
     """
     kep = np.empty_like(orb._kep)
-    kep[0, ...] = orb.a * 1e3
+    kep[0, ...] = orb.a * 1e-3
     kep[1, ...] = orb.e
     kep[2, ...] = orb.i
     kep[3, ...] = orb.Omega
@@ -249,6 +249,7 @@ class Sgp4(Propagator[Sgp4Settings]):
 
         if self.settings.mean_elements_input:
             mean_elements = kep_to_mean_elements(state0, degrees=False)
+            assert mean_elements.size == 6, "Can not propagate multiple objects"
             if len(mean_elements.shape) > 2:
                 mean_elements.shape = (mean_elements.size,)
         else:
