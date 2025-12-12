@@ -112,10 +112,16 @@ def line_decode(line: str | np.bytes_) -> str:
 
 
 def get_B(properties):
+    # TODO: we need a way to specify which properties can exist and what they are somehow....
     if "B" in properties:
         B = properties["B"]
+    elif "area_to_mass" in properties:
+        B = 0.5 * properties.get("C_D", 2.3) * properties["area_to_mass"]
     elif "A" in properties and "m" in properties:
         B = 0.5 * properties.get("C_D", 2.3) * properties["A"] / properties["m"]
+    elif "d" in properties and "m" in properties:
+        A = np.pi * (properties["d"] / 2) ** 2
+        B = 0.5 * properties.get("C_D", 2.3) * A / properties["m"]
     else:
         B = 0.0
     return B
