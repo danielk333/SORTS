@@ -19,6 +19,7 @@ def orbit_grid(
     frame: Frames = "GCRS",
     epoch_mjd: NDArray_N | float = 53005.0,
     additional_parameters: dict[str, Any] = None,
+    degrees: bool = True,
 ):
     samples = [
         semi_major_axis_samples,
@@ -51,6 +52,6 @@ def orbit_grid(
         default_dtype=np.float64,
         epoch_format="mjd",
         epoch_scale="utc",
-        degrees=True,
+        degrees=degrees,
     )
     return pop
