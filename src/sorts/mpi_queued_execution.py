@@ -8,6 +8,10 @@ from mpi4py import MPI
 logger = logging.getLogger(__name__)
 
 
+class WorkerError(RuntimeError):
+    pass
+
+
 class _MpiK:
     """Internal helper for accessing string constant consistently"""
 
@@ -162,7 +166,13 @@ class MpiQueuedExecution(abc.ABC):
 
             elif isinstance(msg, t.Mapping):
                 job_param = t.cast(WorkerJobParam, msg)
-                self.worker_process(job_param)
+                try:
+                    self.worker_process(job_param)
+                except BaseException as exc:
+                    raise WorkerError(
+                        "Error during job:\n "
+                        + "\n".join([f"{key}: val" for key, val in job_param.items()])
+                    ) from exc
 
             else:
                 # throw for unexpected msg
