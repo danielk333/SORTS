@@ -232,6 +232,7 @@ class SimulationUnit:
     def from_passages_over_tx_rx_station_pair(
         cls, param: FromPassagesOverTxRxStationPairParam
     ) -> t.Self:
+        # TODO: the logic inside this function is not super clear - it needs clarification
         id = param.id
         passages = param.passages
         spobj = param.spobj
