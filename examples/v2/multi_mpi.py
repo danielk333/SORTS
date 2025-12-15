@@ -29,5 +29,5 @@ class Mpi2(MpiBase):
     pass
 
 
-res1 = Mpi1(is_run_with_mpi=True).run()
+res1 = Mpi1(is_run_with_mpi=True, progress=True).run()
 res2 = Mpi2(is_run_with_mpi=True).run()

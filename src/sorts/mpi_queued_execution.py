@@ -1,5 +1,7 @@
 from __future__ import annotations
+from tqdm import tqdm
 import logging, typing as t, traceback, time, abc
+import sys
 from mpi4py import MPI
 
 
@@ -47,12 +49,13 @@ class MpiQueuedExecution(abc.ABC):
 
     master_proc_rank = 0
 
-    def __init__(self, is_run_with_mpi=True):
+    def __init__(self, is_run_with_mpi=True, progress=False):
         self.is_run_with_mpi = is_run_with_mpi
 
         self.comm = MPI.COMM_WORLD
         self.rank = self.comm.Get_rank()
         self.num_workers = self.comm.Get_size() - 1
+        self.progress = progress
 
     @abc.abstractmethod
     def master_process(self) -> None:
@@ -82,6 +85,8 @@ class MpiQueuedExecution(abc.ABC):
         is_worker_idle_list = [True for _ in range(self.num_workers)]
         next_work_job_param_idx = 0
         processed_work_job_cnt = 0
+        if self.progress:
+            pbar = tqdm("MPI worker progress", total=len(work_job_params), file=sys.stdout)
 
         while processed_work_job_cnt < len(work_job_params):
             # send next work_job_param if there is idle worker
@@ -109,9 +114,13 @@ class MpiQueuedExecution(abc.ABC):
                 worker_rank = status.Get_source()
 
                 processed_work_job_cnt += 1
+                if self.progress:
+                    pbar.update(1)
 
                 is_worker_idle_list[worker_rank - 1] = True
 
+        if self.progress:
+            pbar.close()
         logger.info(f"master: {self.master_proc_rank} | master proc loop done,  returning...")
 
     def _mpi_master_proc_loop_without_mpi(
