@@ -121,15 +121,22 @@ class MpiQueuedExecution(abc.ABC):
 
         if self.progress:
             pbar.close()
-        logger.info(f"master: {self.master_proc_rank} | master proc loop done,  returning...")
+        logger.info(f"master: {self.master_proc_rank} | master proc loop done, returning...")
 
     def _mpi_master_proc_loop_without_mpi(
         self, work_job_params: t.Sequence[WorkerJobParam]
     ) -> None:
         """This will be ran instead of `mpi_master_proc_loop` when `is_run_with_mpi` is `False`"""
 
+        if self.progress:
+            pbar = tqdm("Worker progress", total=len(work_job_params), file=sys.stdout)
         for work_job_param in work_job_params:
             self.worker_process(work_job_param)
+            if self.progress:
+                pbar.update(1)
+        if self.progress:
+            pbar.close()
+        logger.info("master proc loop done, returning...")
 
     def mpi_master_proc_loop(self, work_job_params: t.Sequence[WorkerJobParam]) -> None:
         if self.is_run_with_mpi:
