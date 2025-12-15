@@ -153,6 +153,7 @@ class StxMrxSimulation:
         end_time: Datetime_Like,
         space_objects: t.Sequence[sorts.SpaceObject],
         interpolated_propagations: t.Sequence[InterpolatedPropagation],
+        passages: dict[int, list[Passage]] | None = None,
         progress: bool = False,
     ):
         self.station_map = station_map
@@ -165,6 +166,7 @@ class StxMrxSimulation:
         self.space_objects = space_objects
         self.interpolated_propagations = interpolated_propagations
         self.progress = progress
+        self.passages = passages
 
         # indexed by space object index in spobj list
         self.sim_units: dict[int, list[SimulationUnit]] = {}
@@ -180,6 +182,7 @@ class StxMrxSimulation:
         end_time: Datetime_Like,
         space_objects: t.Sequence[sorts.SpaceObject],
         interpolated_propagations: t.Sequence[InterpolatedPropagation],
+        passages: dict[int, list[Passage]] | None = None,
     ):
         """A constructor method"""
         # TODO: - the exp details are already computed outside? Should the `controllers` field be
@@ -214,6 +217,7 @@ class StxMrxSimulation:
             end_time=end_time,
             space_objects=space_objects,
             interpolated_propagations=interpolated_propagations,
+            passages=passages,
         )
 
     def prepare_simulation_unit_params(
@@ -227,19 +231,22 @@ class StxMrxSimulation:
             for interp in self.interpolated_propagations
         ]
         states = [interp.states for interp in self.interpolated_propagations]
-        passages_map = find_passages(
-            station_map=self.station_map,
-            station_id_pairs=self.station_id_pairs,
-            space_objects=self.space_objects,
-            epoch=self.epoch,
-            spobjs_smpl_dsec=dsecs,
-            spobjs_smpl_states=states,
-        )
-        # for obj, objps in enumerate(passages_lists):
-        #     print(f"- {obj}")
-        #     for ps in objps:
-        #         print(f"--  {ps.time_range[0]}")
-        logger.debug("find_passages done")
+        if self.passages is None:
+            passages_map = find_passages(
+                station_map=self.station_map,
+                station_id_pairs=self.station_id_pairs,
+                space_objects=self.space_objects,
+                epoch=self.epoch,
+                spobjs_smpl_dsec=dsecs,
+                spobjs_smpl_states=states,
+            )
+            # for obj, objps in enumerate(passages_lists):
+            #     print(f"- {obj}")
+            #     for ps in objps:
+            #         print(f"--  {ps.time_range[0]}")
+            logger.debug("find_passages done")
+        else:
+            passages_map = self.passages
 
         sim_units_param: dict[int, list[FromPassagesOverTxRxStationPairParam]] = {}
         for spobj_idx, spobj in enumerate(self.space_objects):
