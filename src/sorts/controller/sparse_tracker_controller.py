@@ -121,10 +121,15 @@ class SparseTrackerController(ControllerBase):
 
         observation_times_relative = []
         observation_times = []
+        min_time_needed = (
+            self.points_per_passage * self.exp_detail.slice_duration / np.timedelta64(1, "s")
+        )
         for ps in passages_of_spobj:
             pstart_time, pend_time = ps.time_range
             t0 = (pstart_time - ps.epoch) / np.timedelta64(1, "s")
             passage_time = (pend_time - pstart_time) / np.timedelta64(1, "s")
+            if passage_time <= min_time_needed:
+                continue
 
             relative_time_sampling = np.linspace(
                 0.0, passage_time, num=self.points_per_passage + 2, endpoint=True
