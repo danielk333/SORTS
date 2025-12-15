@@ -91,20 +91,20 @@ def find_passages(
     epoch: Datetime_Like,
     spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]],
     spobjs_smpl_states: list[EcefStates],
-) -> list[list[Passage]]:
+) -> dict[int, list[Passage]]:
     """
     Find passages for each space objects over the simulation period.
 
     Returns a `list[Passage]` per space object.
     """
 
-    passages_list: list[list[Passage]] = []
+    passages_map: dict[int, list[Passage]] = {}
 
-    for spobj, spobj_smpl_dsec, spobj_smpl_states in zip(
+    for spobj_idx, (spobj, spobj_smpl_dsec, spobj_smpl_states) in enumerate(zip(
         space_objects,
         spobjs_smpl_dsec,
         spobjs_smpl_states,
-    ):
+    )):
         passages_of_spobj: list[Passage] = []
 
         for stn_id_pair in station_id_pairs:
@@ -122,9 +122,9 @@ def find_passages(
                 )
             )
 
-        passages_list.append(passages_of_spobj)
+        passages_map[spobj_idx] = passages_of_spobj
 
-    return passages_list
+    return passages_map
 
 
 # TODO: should be tailored per experiment?
@@ -146,13 +146,14 @@ class StxMrxSimulation:
         self,
         station_map: dict[StationId, Station],
         station_id_pairs: t.Sequence[tuple[StationId, StationId]],
-        schedule: t.Sequence[Schedule] | Schedule,
+        schedule: Schedule,
         exp_detail_map: ExperimentDetailMap,
         epoch: Datetime_Like,
         start_time: Datetime_Like,
         end_time: Datetime_Like,
         space_objects: t.Sequence[sorts.SpaceObject],
         interpolated_propagations: t.Sequence[InterpolatedPropagation],
+        progress: bool = False,
     ):
         self.station_map = station_map
         self.station_id_pairs = station_id_pairs
@@ -163,15 +164,17 @@ class StxMrxSimulation:
         self.end_time = end_time
         self.space_objects = space_objects
         self.interpolated_propagations = interpolated_propagations
+        self.progress = progress
 
-        self.sim_units: list[SimulationUnit] = []
-        self.obss: list[Observation] = []
+        # indexed by space object index in spobj list
+        self.sim_units: dict[int, list[SimulationUnit]] = {}
+        self.obss: dict[int, list[Observation]] = {}
 
     @classmethod
     def from_controllers(
         cls,
         controllers: t.Sequence[controller.ControllerBase],
-        schedule: t.Sequence[Schedule] | Schedule,
+        schedule: Schedule,
         epoch: Datetime_Like,
         start_time: Datetime_Like,
         end_time: Datetime_Like,
@@ -213,7 +216,9 @@ class StxMrxSimulation:
             interpolated_propagations=interpolated_propagations,
         )
 
-    def prepare_simulation_unit_params(self) -> list[FromPassagesOverTxRxStationPairParam]:
+    def prepare_simulation_unit_params(
+        self,
+    ) -> dict[int, list[FromPassagesOverTxRxStationPairParam]]:
         epoch = to_datetime64_us(self.epoch)
 
         # todo: this is ugly and can be fixed
@@ -222,8 +227,7 @@ class StxMrxSimulation:
             for interp in self.interpolated_propagations
         ]
         states = [interp.states for interp in self.interpolated_propagations]
-        spobjs_interpolators = [interp.interpolator for interp in self.interpolated_propagations]
-        passages_lists = find_passages(
+        passages_map = find_passages(
             station_map=self.station_map,
             station_id_pairs=self.station_id_pairs,
             space_objects=self.space_objects,
@@ -237,13 +241,12 @@ class StxMrxSimulation:
         #         print(f"--  {ps.time_range[0]}")
         logger.debug("find_passages done")
 
-        sim_units_param: list[FromPassagesOverTxRxStationPairParam] = []
-        for spobj, passages_of_a_spobj, spobj_states_interp, spobj_ind in zip(
-            self.space_objects,
-            passages_lists,
-            spobjs_interpolators,
-            range(len(self.space_objects)),
-        ):
+        sim_units_param: dict[int, list[FromPassagesOverTxRxStationPairParam]] = {}
+        for spobj_idx, spobj in enumerate(self.space_objects):
+            sim_unit_params: list[FromPassagesOverTxRxStationPairParam] = []
+
+            spobj_states_interp = self.interpolated_propagations[spobj_idx].interpolator
+            passages_of_a_spobj = passages_map[spobj_idx]
             _SK = scheduling._K
 
             groupped_passages = group_passages_by_tx_rx_station_pair(passages_of_a_spobj)
@@ -251,10 +254,7 @@ class StxMrxSimulation:
             for stn_id_pair, passages in groupped_passages.items():
                 tx_stn = self.station_map[stn_id_pair[0]]
                 rx_stn = self.station_map[stn_id_pair[1]]
-                if isinstance(self.schedule, xr.Dataset):
-                    sched = self.schedule
-                else:
-                    sched = self.schedule[spobj_ind]
+                sched = self.schedule
 
                 filtered_sch = scheduling.filter_by_time_ranges(
                     sched, [ps.time_range for ps in passages]
@@ -268,7 +268,7 @@ class StxMrxSimulation:
                 filtered_sch = filtered_sch[{_SK.multi_index: multi_index_stn_ids_mask}]
 
                 # NOTE: Integers (casted to `str`) are used as `SimulationUnit`s' id
-                sim_units_param.append(
+                sim_unit_params.append(
                     FromPassagesOverTxRxStationPairParam(
                         id=str(len(sim_units_param)),
                         passages=passages,
@@ -280,34 +280,40 @@ class StxMrxSimulation:
                         exp_detail_map=self.exp_detail_map,
                     )
                 )
+            sim_unit_params = [
+                p for p in sim_unit_params if len(p.schedule[scheduling._K.multi_index]) > 0
+            ]
+            sim_units_param[spobj_idx] = sim_unit_params
 
         # filter away param with empty schedule
-        sim_units_param = [
-            p for p in sim_units_param if len(p.schedule[scheduling._K.multi_index]) > 0
-        ]
         logger.info("prepare_simulation_unit_params done")
 
         return sim_units_param
 
-    def run(self) -> tuple[list[Observation], list[SimulationUnit]]:
+    def run(self) -> tuple[dict[int, list[Observation]], dict[int, list[SimulationUnit]]]:
         logger.debug("starting stx mrx sim")
 
-        self.sim_units = []
-        self.obss = []
+        self.sim_units = {}
+        self.obss = {}
 
         sim_units_param = self.prepare_simulation_unit_params()
 
-        pbar = tqdm(desc="simulating", total=len(sim_units_param))
+        if self.progress:
+            pbar = tqdm(desc="simulating", total=len(sim_units_param))
 
-        for param in sim_units_param:
-            sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(param)
-            self.sim_units.append(sim_unit)
+        for spobj_idx, params in sim_units_param.items():
+            self.sim_units[spobj_idx] = []
+            self.obss[spobj_idx] = []
+            for param in params:
+                sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(param)
+                self.sim_units[spobj_idx].append(sim_unit)
 
-            sim_unit.simulate()
-            self.obss.extend(sim_unit.observations)
-            pbar.update(1)
+                sim_unit.simulate()
+                self.obss[spobj_idx].extend(sim_unit.observations)
+            if self.progress:
+                pbar.update(1)
+        if self.progress:
+            pbar.close()
         logger.debug("simulation done")
-
-        pbar.close()
 
         return self.obss, self.sim_units
