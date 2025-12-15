@@ -57,6 +57,7 @@ class MpiQueuedExecution(abc.ABC):
         self.num_workers = self.comm.Get_size() - 1
         self.progress = progress
 
+    # TODO: maybe this can take kwargs that are passed from run?
     @abc.abstractmethod
     def master_process(self) -> None:
         """
