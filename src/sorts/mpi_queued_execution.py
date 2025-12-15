@@ -171,7 +171,7 @@ class MpiQueuedExecution(abc.ABC):
                 except BaseException as exc:
                     raise WorkerError(
                         "Error during job:\n "
-                        + "\n".join([f"{key}: val" for key, val in job_param.items()])
+                        + "\n".join([f"{key}: {val}" for key, val in job_param.items()])
                     ) from exc
 
             else:
