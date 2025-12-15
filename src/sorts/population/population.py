@@ -44,11 +44,11 @@ class Population:
         self.data: npt.NDArray
 
         assert states.shape[1] == len(epochs)
-        match state_format:
-            case "kepler":
-                state_keys = pyorb.Orbit.KEPLER
-            case "cartesian":
-                state_keys = pyorb.Orbit.CARTESIAN
+        if state_format == "kepler":
+            state_keys = pyorb.Orbit.KEPLER
+        elif state_format == "cartesian":
+            state_keys = pyorb.Orbit.CARTESIAN
+
         if dtypes is None:
             dtypes = {}
 
