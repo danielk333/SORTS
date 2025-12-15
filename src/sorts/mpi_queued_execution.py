@@ -13,6 +13,11 @@ class _MpiK:
     terminate: t.Final = "terminate"
 
 
+# TODO:
+# The architecture of this class could use a nice diagram, its really general purpose which is super
+# nice! But to avoid tracing out the control flow manually, a diagram could shortcut someone looking
+# at this for the first time
+
 # NOTE: Resorted to using a loose `Mapping` type instead of setting a generic param of `MpiQueuedExecution`
 #       because it seems python does not infer generic param based on method signatures of subclasses.
 #       Which mean if the generic param are not provided when subclassing, they are considered as Any/Unknown.
@@ -134,7 +139,9 @@ class MpiQueuedExecution(abc.ABC):
                 # exit if `_MpiK.terminate` is received
                 logger.info(f"worker: {worker_proc_rank} | exiting...")
                 self.comm.send(_MpiK.exit_ok, dest=self.master_proc_rank)  # reply an ack to master
-                exit()
+
+                # break here to allow for further execution of workers later
+                break
 
             elif isinstance(msg, t.Mapping):
                 job_param = t.cast(WorkerJobParam, msg)
