@@ -43,21 +43,17 @@ class InterpolatedPropagation:
         time_step: float,
         progress: bool = False,
     ) -> list[t.Self]:
-        dt = (end_time - start_time).sec
         prop_interps = []
         if progress:
             pbar = tqdm(desc="Propagating", total=len(space_objects))
         for spobj in space_objects:
-            t0 = (start_time - spobj.epoch).sec
-            t_obj = np.arange(t0, t0 + dt, time_step, dtype=np.float64)
-            itrs_states = propagator.propagate(spobj, t_obj)
-
-            interp = interpolator_class(itrs_states, t_obj)
-            pint = cls(
-                times=(spobj.epoch + TimeDelta(t_obj, format="sec")).datetime64,
-                states=itrs_states,
-                interpolator=interp,
-                epoch=spobj.epoch.datetime64,
+            pint = cls.from_space_object(
+                spobj,
+                propagator,
+                interpolator_class,
+                start_time,
+                end_time,
+                time_step,
             )
             prop_interps.append(pint)
             if progress:
@@ -65,6 +61,30 @@ class InterpolatedPropagation:
         if progress:
             pbar.close()
         return prop_interps
+
+    @classmethod
+    def from_space_object(
+        cls,
+        space_objects: SpaceObject,
+        propagator: Propagator,
+        interpolator_class: t.Type[Interpolator],
+        start_time: Time,
+        end_time: Time,
+        time_step: float,
+    ) -> t.Self:
+        dt = (end_time - start_time).sec
+        t0 = (start_time - space_objects.epoch).sec
+        t_obj = np.arange(t0, t0 + dt, time_step, dtype=np.float64)
+        itrs_states = propagator.propagate(space_objects, t_obj)
+
+        interp = interpolator_class(itrs_states, t_obj)
+        pint = cls(
+            times=(space_objects.epoch + TimeDelta(t_obj, format="sec")).datetime64,
+            states=itrs_states,
+            interpolator=interp,
+            epoch=space_objects.epoch.datetime64,
+        )
+        return pint
 
     @property
     def relative_seconds(self):
@@ -162,8 +182,8 @@ def find_passages(
     return passages
 
 
-def duplicate_and_perturbate_space_objects(
-    space_objects: t.Sequence[SpaceObject],
+def duplicate_and_perturbate_space_object(
+    space_object: SpaceObject,
     propagator: Propagator,
     interpolator_class: t.Type[Interpolator],
     start_time: Time,
@@ -173,53 +193,36 @@ def duplicate_and_perturbate_space_objects(
     pert_val: tuple[float, float, float, float, float, float] = (
         1e-3, 1e-3, 1e-3, 1e-5, 1e-5, 1e-5  # fmt: skip
     ),
-    progress: bool = False,
-) -> list[tuple[list[SpaceObject], list[InterpolatedPropagation]]]:
-    """list-structure indexes over perturbation and then two items per input sequence"""
+) -> list[tuple[SpaceObject, InterpolatedPropagation]]:
+    """TODO: detail structure"""
     # duplicate list items
     perturbed_objects = []
 
     # perturbate all state variables and leave one original
     # i.e. len 7, [(true_spobj_list, true_prop list), (pert_spobj_prop_list, ...) ...x6]
-    if progress:
-        pbar = tqdm(desc="Perturbations", position=1, total=7)
     for idx in range(7):
-        spobjs = []
-        for spobj in space_objects:
-            # the original spobj are left intact, the rest are copied and perturbed
-            if idx == 0:
-                new_obj = spobj
-            else:
-                new_obj = spobj.copy()
+        # the original spobj are left intact, the rest are copied and perturbed
+        if idx == 0:
+            new_obj = space_object
+        else:
+            new_obj = space_object.copy()
 
-                match perturbation_format:
-                    case "kepler":
-                        new_obj.state._kep[idx - 1, 0] += pert_val[idx - 1]
-                        new_obj.state.calculate_cartesian()
-                    case "cartesian":
-                        new_obj.state._cart[idx - 1, 0] += pert_val[idx - 1]
-                        new_obj.state.calculate_kepler()
-            spobjs.append(new_obj)
+            if perturbation_format == "kepler":
+                new_obj.state._kep[idx - 1, 0] += pert_val[idx - 1]
+                new_obj.state.calculate_cartesian()
+            elif perturbation_format == "cartesian":
+                new_obj.state._cart[idx - 1, 0] += pert_val[idx - 1]
+                new_obj.state.calculate_kepler()
 
-        prop_interps = InterpolatedPropagation.from_space_objects(
-            space_objects=spobjs,
+        prop_interp = InterpolatedPropagation.from_space_object(
+            space_objects=new_obj,
             propagator=propagator,
             interpolator_class=interpolator_class,
             start_time=start_time,
             end_time=end_time,
             time_step=time_step,
-            progress=progress,
         )
-        perturbed_objects.append(
-            (
-                spobjs,
-                prop_interps,
-            )
-        )
-        if progress:
-            pbar.update(1)
-    if progress:
-        pbar.close()
+        perturbed_objects.append((new_obj, prop_interp, ))
     return perturbed_objects
 
 
