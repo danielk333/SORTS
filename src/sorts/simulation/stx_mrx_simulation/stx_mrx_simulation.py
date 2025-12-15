@@ -286,7 +286,7 @@ class StxMrxSimulation:
             sim_units_param[spobj_idx] = sim_unit_params
 
         # filter away param with empty schedule
-        logger.info("prepare_simulation_unit_params done")
+        logger.debug("prepare_simulation_unit_params done")
 
         return sim_units_param
 
