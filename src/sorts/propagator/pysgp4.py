@@ -256,7 +256,7 @@ class Sgp4(Propagator[Sgp4Settings]):
         if self.settings.mean_elements_input:
             mean_elements = kep_to_mean_elements(state0, degrees=False)
             assert mean_elements.size == 6, "Can not propagate multiple objects"
-            if len(mean_elements.shape) > 2:
+            if len(mean_elements.shape) >= 2:
                 mean_elements.shape = (mean_elements.size,)
         else:
             if self.settings.sample_space_object_kepler_orbit:
@@ -611,7 +611,7 @@ class Sgp4(Propagator[Sgp4Settings]):
         _orb = space_object.state.copy()
         _orb.allocate(samples)
         _orb._kep[()] = space_object.state._kep[()]
-        _orb._kep[5, :] = np.linspace(-max_ang/2, max_ang/2, num=samples, endpoint=False)
+        _orb._kep[5, :] = np.linspace(-max_ang / 2, max_ang / 2, num=samples, endpoint=False)
         _orb.calculate_cartesian()
         t_vec = _orb.mean_anomaly / _orb.mean_motion
 
