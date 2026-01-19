@@ -38,13 +38,6 @@ dependencies = [
   "requests>=2.32.3",
   "pandas>=2.2.3",
   "pyqt6>=6.8.1",
-  "bokeh>=3.7.3",
-  "jupyter-bokeh>=4.0.5",
-  "jupyterlab>=4.4.4",
-  "lets-plot>=4.6.2",
-  "panel>=1.7.4",
-  "pyproj>=3.7.1",
-  "pyvista>=0.45.2",
   "xarray>=2025.8.0",
   "bottleneck>=1.5.0",
   "mpi4py>=4.1.0",
@@ -58,12 +51,7 @@ Repository = "https://github.com/danielk333/sorts"
 
 [project.optional-dependencies]
 spacetrack = ["spacetrack>=1.0.1"]
-jupyter = [
-  "ipykernel>=6.29.5",
-  "ipywidgets>=8.1.7",
-  "jupyter-bokeh>=4.0.5",
-  "jupyterlab>=4.4.4",
-]
+jupyter = ["ipykernel>=6.29.5", "ipywidgets>=8.1.7", "jupyterlab>=4.4.4"]
 dev = [
   "pytest>=6.2.5",
   "flake8>=4.0.1",
