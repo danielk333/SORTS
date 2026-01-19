@@ -50,7 +50,6 @@ from . import dates
 from . import plotting
 
 # from . import controller_v1
-from . import scheduler
 from . import passes
 from . import errors
 from . import io
@@ -68,7 +67,6 @@ from .propagator import Propagator
 from .radar import Scan
 from .radar import Station, TX, RX
 from .controller_v1 import RadarController
-from .scheduler import Scheduler
 from .passes import Pass
 from .errors import Errors
 from .simulation_v1 import Simulation
