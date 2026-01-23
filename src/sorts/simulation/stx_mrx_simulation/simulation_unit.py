@@ -16,10 +16,15 @@ from sorts.scheduling import ExperimentDetailMap, Schedule
 from sorts.simulation import Passage
 
 
-CoordKey = t.Literal["multi_index", "time", "exp_num", "rx_simult_num", "enu", "e", "n", "u"]
-DataKey = t.Literal[
-    "tx_pointing",
-    "rx_pointing",
+# TODO: remove key `multi_index`
+IndexKey = t.Literal["multi_index", "time", "exp_num", "rx_simult_num"]
+ColKey = t.Literal[
+    "tx_pointing_e",
+    "tx_pointing_n",
+    "tx_pointing_u",
+    "rx_pointing_e",
+    "rx_pointing_n",
+    "rx_pointing_u",
     "exp_num",
     "gain_tx",
     "gain_rx",
@@ -29,9 +34,10 @@ DataKey = t.Literal[
     "two_way_range",
     "two_way_range_rate",
 ]
-Key = t.Literal[DataKey, CoordKey]
+Key = t.Literal[ColKey, IndexKey]
 
 
+# TODO: remove key `multi_index`
 # TODO: updated the name with tx/rx as suffix to prefix
 class _K:
     """Internal helper for accessing string keys consistently"""
@@ -40,12 +46,12 @@ class _K:
     time: t.Final = "time"
     exp_num: t.Final = "exp_num"
     rx_simult_num: t.Final = "rx_simult_num"
-    enu: t.Final = "enu"
-    e: t.Final = "e"
-    n: t.Final = "n"
-    u: t.Final = "u"
-    tx_pointing: t.Final = "tx_pointing"
-    rx_pointing: t.Final = "rx_pointing"
+    tx_pointing_e: t.Final = "tx_pointing_e"
+    tx_pointing_n: t.Final = "tx_pointing_n"
+    tx_pointing_u: t.Final = "tx_pointing_u"
+    rx_pointing_e: t.Final = "rx_pointing_e"
+    rx_pointing_n: t.Final = "rx_pointing_n"
+    rx_pointing_u: t.Final = "rx_pointing_u"
     gain_tx: t.Final = "gain_tx"
     gain_rx: t.Final = "gain_rx"
     snr: t.Final = "snr"
@@ -60,28 +66,22 @@ assert_class_attributes_equal_to(_K, t.get_args(Key))
 _SK = scheduling._K
 """Internal helper for accessing string keys consistently"""
 
-SimulationUnitState = t.NewType("SimulationUnitState", xr.Dataset)
+SimulationUnitState = t.NewType("SimulationUnitState", pd.DataFrame)
 """
-A xarray `Dataset` with:
-  ```
-  Dimensions:        (multi_index: n, enu: 3)
-  Coordinates:
-    * multi_index    (multi_index) object MultiIndex ('exp_num', 'rx_simult_num', 'time')
-    * time           (multi_index) datetime64[us]
-    * exp_num        (multi_index) int16
-    * rx_simult_num  (multi_index) int16
-    * enu            (enu) 'e' 'n' 'u'
-  Data variables:
-      tx_pointing    (enu, multi_index) float64
-      rx_pointing    (enu, multi_index) float64
-      gain_tx        (multi_index) float64
-      gain_rx        (multi_index) float64
-      snr            (multi_index) float64
-      tx_range       (multi_index) float64
-      rx_range       (multi_index) float64
-      two_way_range  (multi_index) float64
-      two_way_range_rate  (multi_index) float64
-  ```
+A pandas `DataFrame` with:
+```
+Index: MultiIndex('exp_num', 'rx_simult_num', 'time')
+Cols:
+    tx_pointing         float64
+    rx_pointing         float64
+    gain_tx             float64
+    gain_rx             float64
+    snr                 float64
+    tx_range            float64
+    rx_range            float64
+    two_way_range       float64
+    two_way_range_rate  float64
+```
 """
 
 
@@ -95,21 +95,18 @@ def empty_state() -> SimulationUnitState:
         names=(_K.exp_num, _K.rx_simult_num, _K.time),
     )
 
-    state = xr.Dataset(
-        coords={
-            **xr.Coordinates.from_pandas_multiindex(multi_index, _K.multi_index),
-            _K.enu: [_K.e, _K.n, _K.u],
+    state = pd.DataFrame(
+        {
+            # tx pointing enu
+            _K.tx_pointing_e: np.empty(0, dtype=np.float64),
+            _K.tx_pointing_n: np.empty(0, dtype=np.float64),
+            _K.tx_pointing_u: np.empty(0, dtype=np.float64),
+            # rx pointing enu
+            _K.rx_pointing_e: np.empty(0, dtype=np.float64),
+            _K.rx_pointing_n: np.empty(0, dtype=np.float64),
+            _K.rx_pointing_u: np.empty(0, dtype=np.float64),
         },
-        data_vars={
-            # NOTE: we used `.loc` instead of `reindex` here because we cannot get `reindex` working
-            # TODO: investigate why `reindex` won't work
-            #   not working: `tx_sch[_SK.pointing].reindex({_SK.multi_index: [(np.datetime64("2025-01-01 02:45:01", "us"), 0, 0), ...]})`
-            _K.tx_pointing: (
-                (_K.enu, _K.multi_index),
-                np.empty((3, 0), dtype=np.float64),
-            ),
-            _K.rx_pointing: ((_K.enu, _K.multi_index), np.empty((3, 0), dtype=np.float64)),
-        },
+        index=multi_index,
     )
 
     return SimulationUnitState(state)
@@ -118,8 +115,11 @@ def empty_state() -> SimulationUnitState:
 def filter_state_by_time_range(
     state: SimulationUnitState, time_range: types.TimeRange_us
 ) -> SimulationUnitState:
-    mask = (state[_K.time] >= time_range[0]) & (state[_K.time] <= time_range[1])
-    state_masked = state[{_K.multi_index: mask}]
+    mask = (
+        (state.index.get_level_values(_K.time) >= time_range[0])
+        & (state.index.get_level_values(_K.time) <= time_range[1])
+    ) # fmt: skip
+    state_masked = state[mask]
 
     return state_masked
 
@@ -134,15 +134,18 @@ def calc_gain(
     # will be populated to [tx_gain_arr, rx_gain_arr]
     gain_arr_list: list[npt.NDArray[np.float64]] = []
 
-    for stn, spobj_stn_enu, pt_key in zip(
+    for stn, spobj_stn_enu, pt_keys in zip(
         [tx_stn, rx_stn],
         [spobj_tx_enu, spobj_rx_enu],
-        [_K.tx_pointing, _K.rx_pointing],
+        [
+            [_K.tx_pointing_e, _K.tx_pointing_n, _K.tx_pointing_u],
+            [_K.rx_pointing_e, _K.rx_pointing_n, _K.rx_pointing_u],
+        ],
     ):
         # early return for empty cases
         # NOTE: this is particularly needed because some `.gain` does not work with empty parameters (e.g. beam.parameters["pointing"])
         # TODO: add test case for empty case?
-        if len(state[_K.multi_index]) == 0:
+        if len(state) == 0:
             gain_arr_list.append(np.empty(0, dtype=np.float64))
 
         elif stn.beam_parameters is None:
@@ -157,13 +160,13 @@ def calc_gain(
             if "pointing" in stn.beam_parameters.keys:
                 beam_parameters = stn.beam_parameters.replace_and_broadcast(
                     parameters=stn.beam_parameters,
-                    new_parameters=dict(pointing=state[pt_key].to_numpy()),
+                    new_parameters=dict(pointing=state[pt_keys].T.to_numpy()),
                 )
 
             gain_arr_list.append(stn.beam.gain(spobj_stn_enu[:3], beam_parameters))
 
-    state[_K.gain_tx] = (_K.multi_index, gain_arr_list[0])
-    state[_K.gain_rx] = (_K.multi_index, gain_arr_list[1])
+    state[_K.gain_tx] = gain_arr_list[0]
+    state[_K.gain_rx] = gain_arr_list[1]
 
     return state
 
@@ -290,23 +293,26 @@ class SimulationUnit:
             _SK.multi_index,
         )
 
-        state = xr.Dataset(
-            coords={
-                **xr.Coordinates.from_pandas_multiindex(multi_index, _K.multi_index),
-                _K.enu: [_K.e, _K.n, _K.u],
+        # NOTE: we used `.loc` instead of `reindex` here because we cannot get `reindex` working
+        # TODO: investigate why `reindex` won't work
+        #   not working: `tx_sch[_SK.pointing].reindex({_SK.multi_index: [(np.datetime64("2025-01-01 02:45:01", "us"), 0, 0), ...]})`
+        tx_pointing = tx_schdata[_SK.pointing].loc[
+            {_SK.multi_index: tx_reindex_selector[_SK.multi_index]}
+        ]
+        rx_pointing = rx_schdata[_SK.pointing]
+
+        state = pd.DataFrame(
+            {
+                # tx pointing enu
+                _K.tx_pointing_e: tx_pointing.loc[{_SK.enu: _SK.e}].to_numpy(),
+                _K.tx_pointing_n: tx_pointing.loc[{_SK.enu: _SK.n}].to_numpy(),
+                _K.tx_pointing_u: tx_pointing.loc[{_SK.enu: _SK.u}].to_numpy(),
+                # rx pointing enu
+                _K.rx_pointing_e: rx_pointing.loc[{_SK.enu: _SK.e}].to_numpy(),
+                _K.rx_pointing_n: rx_pointing.loc[{_SK.enu: _SK.n}].to_numpy(),
+                _K.rx_pointing_u: rx_pointing.loc[{_SK.enu: _SK.u}].to_numpy(),
             },
-            data_vars={
-                # NOTE: we used `.loc` instead of `reindex` here because we cannot get `reindex` working
-                # TODO: investigate why `reindex` won't work
-                #   not working: `tx_sch[_SK.pointing].reindex({_SK.multi_index: [(np.datetime64("2025-01-01 02:45:01", "us"), 0, 0), ...]})`
-                _K.tx_pointing: (
-                    (_K.enu, _K.multi_index),
-                    tx_schdata[_SK.pointing]
-                    .loc[{_SK.multi_index: tx_reindex_selector[_SK.multi_index]}]
-                    .to_numpy(),
-                ),
-                _K.rx_pointing: ((_K.enu, _K.multi_index), rx_schdata[_SK.pointing].to_numpy()),
-            },
+            index=multi_index,
         )
 
         return cls(
@@ -333,7 +339,10 @@ class SimulationUnit:
             )
 
         epoch = to_datetime64_us(self.space_object.epoch)
-        dsec = (self._state[_K.time] - epoch).to_numpy() / np.timedelta64(1, "s")
+        dsec = (
+            (self._state.index.get_level_values(_K.time).to_numpy() - epoch)
+            / np.timedelta64(1, "s")
+        ) # fmt: skip
         spobj_states = self.space_object_interp.get_state(dsec)
         spobj_tx_enu = self.tx_station.enu(spobj_states)
         spobj_rx_enu = self.rx_station.enu(spobj_states)
@@ -346,15 +355,24 @@ class SimulationUnit:
         # TODO: do we need `ipps`?
         # TODO: do we need `duty_cycles`?
         powers = np.array(
-            [self.exp_detail_map[n].power for n in self._state[_K.exp_num].to_numpy()],
+            [
+                self.exp_detail_map[n].power
+                for n in self._state.index.get_level_values(_K.exp_num).to_numpy()
+            ],
             dtype=np.float64,
         )
         bandwidths = np.array(
-            [self.exp_detail_map[n].bandwidth for n in self._state[_K.exp_num].to_numpy()],
+            [
+                self.exp_detail_map[n].bandwidth
+                for n in self._state.index.get_level_values(_K.exp_num).to_numpy()
+            ],
             dtype=np.float64,
         )
         rx_noise_temps = np.array(
-            [self.exp_detail_map[n].noise_temp for n in self._state[_K.exp_num].to_numpy()],
+            [
+                self.exp_detail_map[n].noise_temp
+                for n in self._state.index.get_level_values(_K.exp_num).to_numpy()
+            ],
             dtype=np.float64,
         )
 
@@ -378,28 +396,16 @@ class SimulationUnit:
             rx_noise_temp=rx_noise_temps,
             radar_albedo=self.space_object.properties.get("radar_albedo", 1.0),
         )
-        self._state[_K.snr] = (_K.multi_index, snr)
+        self._state[_K.snr] = snr
 
-        self._state[_K.tx_range] = (
-            _K.multi_index,
-            np.linalg.norm(spobj_tx_enu[:3, :], axis=0),
-        )
+        self._state[_K.tx_range] = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
 
-        self._state[_K.rx_range] = (
-            _K.multi_index,
-            np.linalg.norm(spobj_rx_enu[:3, :], axis=0),
-        )
+        self._state[_K.rx_range] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
 
-        self._state[_K.two_way_range] = (
-            _K.multi_index,
-            range_tx + range_rx,
-        )
+        self._state[_K.two_way_range] = range_tx + range_rx
         v_tx = np.sum(spobj_tx_enu[:3, :] * spobj_tx_enu[3:, :], axis=0) / range_tx
         v_rx = np.sum(spobj_rx_enu[:3, :] * spobj_rx_enu[3:, :], axis=0) / range_rx
-        self._state[_K.two_way_range_rate] = (
-            _K.multi_index,
-            v_tx + v_rx,
-        )
+        self._state[_K.two_way_range_rate] = v_tx + v_rx
 
         obss = self.get_observations()
         self.observations = obss
@@ -449,11 +455,9 @@ class Observation:
     def from_passage(cls, passage: Passage, sim_unit: SimulationUnit) -> list[t.Self]:
         state_slice = filter_state_by_time_range(sim_unit._state, passage.time_range)
 
-        multi_index = t.cast(pd.MultiIndex, state_slice.indexes[_K.multi_index])
-
         unique_exp_id_simult_num_pairs: list[
             tuple[scheduling.ExperimentId, scheduling.SimultaneousNum]
-        ] = (multi_index.droplevel(_K.time).unique().to_list())
+        ] = (state_slice.index.droplevel(_K.time).unique().to_list())
 
         obss = [
             cls(passage=passage, sim_unit=sim_unit, exp_id=exp_id, simult_num=simult_num)
@@ -476,9 +480,11 @@ class Observation:
         )
 
     def get_time_arr(self):
-        time_arr = filter_state_by_time_range(self.sim_unit._state, self.passage.time_range)[
-            _K.time
-        ].to_numpy()
+        time_arr = (
+            filter_state_by_time_range(self.sim_unit._state, self.passage.time_range)
+            .index.get_level_values(_K.time)
+            .to_numpy()
+        )
 
         return time_arr
 
@@ -517,11 +523,12 @@ class Observation:
         sim_state_slice = filter_state_by_time_range(self.sim_unit._state, self.passage.time_range)
 
         # NOTE: early return for empty case; `loc` method does not work with non-existent selection
-        if len(sim_state_slice[_K.multi_index]) == 0:
+        if len(sim_state_slice) == 0:
             return sim_state_slice
 
         sim_state_slice = sim_state_slice.loc[
-            {_K.multi_index: (self.exp_id, self.simult_num, slice(None))}
+            # NOTE: seems typing does not support passing tuple for MultiIndex yet
+            (self.exp_id, self.simult_num, slice(None))  # type: ignore
         ]
 
         return sim_state_slice
