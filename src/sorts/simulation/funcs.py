@@ -65,7 +65,7 @@ class InterpolatedPropagation:
     @classmethod
     def from_space_object(
         cls,
-        space_objects: SpaceObject,
+        space_object: SpaceObject,
         propagator: Propagator,
         interpolator_class: t.Type[Interpolator],
         start_time: Time,
@@ -73,16 +73,16 @@ class InterpolatedPropagation:
         time_step: float,
     ) -> t.Self:
         dt = (end_time - start_time).sec
-        t0 = (start_time - space_objects.epoch).sec
+        t0 = (start_time - space_object.epoch).sec
         t_obj = np.arange(t0, t0 + dt, time_step, dtype=np.float64)
-        itrs_states = propagator.propagate(space_objects, t_obj)
+        itrs_states = propagator.propagate(space_object, t_obj)
 
         interp = interpolator_class(itrs_states, t_obj)
         pint = cls(
-            times=(space_objects.epoch + TimeDelta(t_obj, format="sec")).datetime64,
+            times=(space_object.epoch + TimeDelta(t_obj, format="sec")).datetime64,
             states=itrs_states,
             interpolator=interp,
-            epoch=space_objects.epoch.datetime64,
+            epoch=space_object.epoch.datetime64,
         )
         return pint
 
@@ -215,14 +215,19 @@ def duplicate_and_perturbate_space_object(
                 new_obj.state.calculate_kepler()
 
         prop_interp = InterpolatedPropagation.from_space_object(
-            space_objects=new_obj,
+            space_object=new_obj,
             propagator=propagator,
             interpolator_class=interpolator_class,
             start_time=start_time,
             end_time=end_time,
             time_step=time_step,
         )
-        perturbed_objects.append((new_obj, prop_interp, ))
+        perturbed_objects.append(
+            (
+                new_obj,
+                prop_interp,
+            )
+        )
     return perturbed_objects
 
 
