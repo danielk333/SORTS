@@ -74,7 +74,7 @@ class MpiQueuedExecution(abc.ABC):
         """The code that only ran on the worker rank processes."""
         ...
 
-    def _mpi_master_proc_loop_with_mpi(self, work_job_params: t.Sequence[WorkerJobParam]) -> None:
+    def _mpi_master_proc_loop_with_mpi(self, worker_job_params: t.Sequence[WorkerJobParam]) -> None:
         rank_size = self.comm.Get_size()
 
         logger.debug(f"running in mpi with rank: {rank_size}")
@@ -91,20 +91,20 @@ class MpiQueuedExecution(abc.ABC):
         next_work_job_param_idx = 0
         processed_work_job_cnt = 0
         if self.progress:
-            pbar = tqdm("MPI worker progress", total=len(work_job_params), file=sys.stdout)
+            pbar = tqdm("MPI worker progress", total=len(worker_job_params), file=sys.stdout)
 
-        while processed_work_job_cnt < len(work_job_params):
+        while processed_work_job_cnt < len(worker_job_params):
             # send next work_job_param if there is idle worker
-            if any(is_worker_idle_list) and next_work_job_param_idx < len(work_job_params):
+            if any(is_worker_idle_list) and next_work_job_param_idx < len(worker_job_params):
                 idle_worker_idx = is_worker_idle_list.index(True)
                 idle_worker_rank = idle_worker_idx + 1
 
-                job_param = work_job_params[next_work_job_param_idx]
+                job_param = worker_job_params[next_work_job_param_idx]
                 self.comm.send(job_param, dest=idle_worker_rank)
 
                 logger.debug(
                     f"master: {self.master_proc_rank} | sent `SimulationUnit`"
-                    + f" ({next_work_job_param_idx+1}/{len(work_job_params)}) to worker {idle_worker_rank}"
+                    + f" ({next_work_job_param_idx+1}/{len(worker_job_params)}) to worker {idle_worker_rank}"
                 )
 
                 is_worker_idle_list[idle_worker_idx] = False
@@ -129,13 +129,13 @@ class MpiQueuedExecution(abc.ABC):
         logger.info(f"master: {self.master_proc_rank} | master proc loop done, returning...")
 
     def _mpi_master_proc_loop_without_mpi(
-        self, work_job_params: t.Sequence[WorkerJobParam]
+        self, worker_job_params: t.Sequence[WorkerJobParam]
     ) -> None:
         """This will be ran instead of `mpi_master_proc_loop` when `is_run_with_mpi` is `False`"""
 
         if self.progress:
-            pbar = tqdm("Worker progress", total=len(work_job_params), file=sys.stdout)
-        for work_job_param in work_job_params:
+            pbar = tqdm("Worker progress", total=len(worker_job_params), file=sys.stdout)
+        for work_job_param in worker_job_params:
             self.worker_process(work_job_param)
             if self.progress:
                 pbar.update(1)
@@ -143,11 +143,11 @@ class MpiQueuedExecution(abc.ABC):
             pbar.close()
         logger.info("master proc loop done, returning...")
 
-    def mpi_master_proc_loop(self, work_job_params: t.Sequence[WorkerJobParam]) -> None:
+    def mpi_master_proc_loop(self, worker_job_params: t.Sequence[WorkerJobParam]) -> None:
         if self.is_run_with_mpi:
-            return self._mpi_master_proc_loop_with_mpi(work_job_params)
+            return self._mpi_master_proc_loop_with_mpi(worker_job_params)
         else:
-            return self._mpi_master_proc_loop_without_mpi(work_job_params)
+            return self._mpi_master_proc_loop_without_mpi(worker_job_params)
 
     def mpi_worker_proc_loop(self) -> None:
         worker_proc_rank = self.rank
