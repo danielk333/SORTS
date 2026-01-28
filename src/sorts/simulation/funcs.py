@@ -24,9 +24,16 @@ from sorts.propagator import Propagator
 from sorts.population import Population
 
 
+# TODO: should we move it outside of `funcs` module?
 @dataclass
 class InterpolatedPropagation:
     # todo: investigate if we can just sidestep most of the `datetime64` and just use `Time`?
+    #
+    #       comment from Hin:
+    #       I actually prefer to get away from `Time`
+    #       as soon as we are outside of the user facing APIs.
+    #       It is because `datetime64` is what `numpy` uses then we will risk
+    #       having type convertions pops up in random locations in the core computation codes
     times: npt.NDArray[Datetime64_us]
     states: EcefStates
     interpolator: Interpolator

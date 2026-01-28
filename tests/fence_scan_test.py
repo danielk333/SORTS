@@ -22,16 +22,16 @@ import numpy as np
 from astropy.time import Time
 from astropy.constants import R_earth  # type: ignore
 import pyant, pyorb
-from sorts import scheduling, ExperimentDetail
+from sorts import scheduling, ExperimentDetail, interpolation
 from sorts.types import Float64_as_sec, Float64_as_deg, Float_as_sec, Float_as_m
 from sorts.utils import to_datetime64_us
 from sorts.frames import enu_to_ecef
-from sorts.interpolation import Legendre8
-from sorts.propagator import Kepler
+from sorts.propagator import Kepler, KeplerSettings
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.controller.fence_scan_controller import FenceScanController
 from sorts.simulation import stx_mrx_simulation, StxMrxSimulation
+from sorts.simulation.funcs import InterpolatedPropagation
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -45,6 +45,9 @@ def setup_function():
     print()
 
 
+earth_radius: np.float64 = R_earth.value  # in meters
+spobj_orbital_radius = 7000e3  # in meters
+
 float_equality_thld = 1e-9
 # TODO: re-eval this threshold
 pointing_range_equality_thld: Float_as_m = 1e-6
@@ -55,7 +58,7 @@ control_slice_duration = np.timedelta64(1_000_000, "us")  # 1s
 
 dt_equality_thld = control_slice_duration
 dsec_sampling_intv: Float_as_sec = 30
-scan_ranges = np.array([10, 7e6], dtype=np.float64)
+scan_ranges = np.array([10, spobj_orbital_radius], dtype=np.float64)
 simu_num = len(scan_ranges)
 
 _SK = scheduling._K
@@ -63,8 +66,6 @@ _SuK = stx_mrx_simulation.simulation_unit._K
 
 
 def south_to_north_circular_orbit_test():
-    earth_radius: np.float64 = R_earth.value  # in meters
-    spobj_orbital_radius = 7000e3  # in meters
     spobj_orbital_period: Float64_as_sec = pyorb.orbital_period(
         spobj_orbital_radius, pyorb.GM_earth
     )
@@ -85,18 +86,26 @@ def south_to_north_circular_orbit_test():
         int(1e6), "us"
     )  # simulation end time
 
-    spobj = SpaceObject(
-        oid=0,
-        propagator=Kepler,
-        propagator_options={"settings": {"in_frame": "GCRS", "out_frame": "GCRS"}},
-        a=spobj_orbital_radius,
-        e=0,
-        i=90,
-        raan=0,
-        aop=0,
-        mu0=180,
-        epoch=start_time,
-        parameters={"d": 1.0},  # diameter of the spobj
+    spobj = SpaceObject.from_kepler(
+        semi_major_axis=spobj_orbital_radius,
+        eccentricity=0,
+        inclination=90,
+        argument_of_periapsis=0,
+        longitude_of_ascending_node=0,
+        mean_anomaly=180,
+        epoch=Time("2025-12-8T00:00:00", format="isot", scale="utc"),
+        frame="GCRS",
+        properties={"d": 1.0},  # diameter of the spobj
+        degrees=True,
+    )
+
+    prop_interp = InterpolatedPropagation.from_space_object(
+        space_object=spobj,
+        propagator=Kepler(KeplerSettings()),
+        interpolator_class=interpolation.Legendre8,
+        start_time=start_time,
+        end_time=Time(end_time),
+        time_step=dsec_sampling_intv,
     )
 
     tx_0_stn = Station(
@@ -136,11 +145,6 @@ def south_to_north_circular_orbit_test():
         uid=2,
     )
 
-    def dsec_sampler(orbit, epoch, start_time, end_time):
-        dt = (end_time - start_time) / np.timedelta64(1, "s")
-        t0 = (start_time - epoch) / np.timedelta64(1, "s")
-        return np.arange(t0, t0 + dt, dsec_sampling_intv, dtype=np.float64)
-
     fence_scan_ctrl = FenceScanController.from_scan_spec(
         tx_station=tx_0_stn,
         rx_stations=[rx_0_stn, rx_1_stn],
@@ -170,19 +174,18 @@ def south_to_north_circular_orbit_test():
         start_time=start_time,
         end_time=end_time,
         space_objects=[spobj],
-        dsec_sampler=dsec_sampler,
-        interpolator_class=Legendre8,
+        interpolated_propagations=[prop_interp],
     )
 
-    obss, sim_units = sim.run()
+    obss_dict, sim_units_dict = sim.run()
 
     # assert the number of `Passage`, `SimulationUnit` and `Observation` are expected
-    assert len(sim_units) == 2
-    assert len(sim_units[0].passages) == 1
-    assert len(sim_units[1].passages) == 1
-    assert len(obss) == 3
+    assert sum(len(sim_unit_list) for sim_unit_list in sim_units_dict.values()) == 2 # 2 `SimulationUnit` in total; fmt: skip
+    assert len(sim_units_dict[0][0].passages) == 1  # each unit has 1 `Passage`
+    assert len(sim_units_dict[0][1].passages) == 1  # each unit has 1 `Passage`
+    assert sum(len(obss_list) for obss_list in obss_dict.values()) == 3 # 3 `SimulationUnit` in total; fmt: skip
 
-    for obs in obss:
+    for obs in obss_dict[0]:
         rx_schedule_slice = obs.index_into_schedule(fence_sch).rx
         simult_num = rx_schedule_slice[_SK.simult_num][0]
 
@@ -190,7 +193,7 @@ def south_to_north_circular_orbit_test():
         assert (rx_schedule_slice[_SK.simult_num] == simult_num).all()
 
         # the checks below only make sense for rx station 0
-        if obs.passage.rx_station.uid != 0:
+        if obs.passage.rx_stations[0].uid != 0:
             continue
 
         # assert that we are pointing at scan_ranges
@@ -215,23 +218,23 @@ def south_to_north_circular_orbit_test():
     # is the same as those with same `time` but from "1st rx station, 2nd scan range"
     obs_ref = next(
         obs
-        for obs in obss
+        for obs in obss_dict[0]
         if obs.passage.tx_station.uid == tx_0_stn.uid
-        and obs.passage.rx_station.uid == rx_0_stn.uid
+        and obs.passage.rx_stations[0].uid == rx_0_stn.uid
         and obs.index_into_schedule(fence_sch).rx[_SK.simult_num][0] == 1  # i.e. the 2nd scan range
     )
 
     obs_subj = next(
         obs
-        for obs in obss
+        for obs in obss_dict[0]
         if obs.passage.tx_station.uid == tx_0_stn.uid
-        and obs.passage.rx_station.uid == rx_1_stn.uid
+        and obs.passage.rx_stations[0].uid == rx_1_stn.uid
         and obs.index_into_schedule(fence_sch).rx[_SK.simult_num][0] == 1  # i.e. the 2nd scan range
     )
 
-    obs_ref_rx_station = obs_ref.passage.rx_station
+    obs_ref_rx_station = obs_ref.passage.rx_stations[0]
     obs_ref_state_slice = obs_ref.get_state_slice()
-    obs_subj_rx_station = obs_subj.passage.rx_station
+    obs_subj_rx_station = obs_subj.passage.rx_stations[0]
     obs_subj_state_slice = obs_subj.get_state_slice()
 
     obs_subj_pointings_in_ecef = (
