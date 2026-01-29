@@ -1,6 +1,5 @@
 from __future__ import annotations
 import logging, typing as t
-from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 import xarray as xr
@@ -8,32 +7,13 @@ import spacecoords
 from sorts import radar, scheduling
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
-from sorts.types import (
-    EcefStates,
-    Datetime64_us,
-    Timedelta64_us,
-    Float64_as_sec,
-    EnuCoordinates,
-    Datetime_Like,
-    Timedelta_Like,
-)
-from sorts.utils import to_datetime64_us, to_timedelta64_us
+from sorts.types import Datetime64_us, EnuCoordinates, Datetime_Like
+from sorts.utils import to_datetime64_us
 from .controller_base import ControllerBase
+from sorts.interpolation import Interpolator
+from sorts.simulation.funcs import InterpolatedPropagation
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass(kw_only=True)
-class ControllerState:
-    spobj_time: npt.NDArray[Datetime64_us]
-    spobj_states: EcefStates
-
-    @classmethod
-    def empty(cls) -> t.Self:
-        return cls(
-            spobj_time=np.empty(0, dtype="datetime64[us]"),
-            spobj_states=np.empty((6, 0), dtype=np.float64),
-        )
 
 
 class TrackerController(ControllerBase):
@@ -41,21 +21,17 @@ class TrackerController(ControllerBase):
     Generate pointing schedule that tracks a space object.
 
     - The preferred way to create instances of this class is via its class methods (e.g. `TrackerController.from_space_object`).
-    - This class serve as a frontend to the `State` type in this module
     """
-
-    ControllerState = ControllerState
-    """shortcut to module attribute"""
 
     def __init__(
         self,
         tx_station: Station,
         rx_stations: t.Sequence[Station],
         exp_detail: scheduling.ExperimentDetail,
-        spobj: SpaceObject | None,
-        epoch: Datetime_Like | None,
+        space_object: SpaceObject,
+        epoch: Datetime64_us,
         station_id_pairs: list[tuple[radar.StationId, radar.StationId]],
-        state: ControllerState,
+        interpolated_propagation: InterpolatedPropagation,
     ):
         """
         NOTE: This is intended as an internal constructor, please use the constructor methods to create instances.
@@ -64,45 +40,20 @@ class TrackerController(ControllerBase):
         self.tx_station = tx_station
         self.rx_stations = rx_stations
         self.exp_detail = exp_detail
-        self.station_id_pairs = station_id_pairs
-        self.spobj = spobj
+        self.space_object = space_object
         self.epoch = epoch
-
-        self.state: ControllerState = state
-
-    @classmethod
-    def from_ecef_states(
-        cls,
-        time: npt.NDArray[Datetime64_us],
-        space_object_states: EcefStates,
-        tx_station: Station,
-        rx_stations: t.Sequence[Station],
-        exp_detail: scheduling.ExperimentDetail,
-    ) -> t.Self:
-        """A constructor method"""
-
-        stn_pairs = [(tx_station.uid, rx_station.uid) for rx_station in rx_stations]
-
-        ctrl = cls(
-            tx_station=tx_station,
-            rx_stations=rx_stations,
-            exp_detail=exp_detail,
-            spobj=None,
-            epoch=None,
-            station_id_pairs=stn_pairs,
-            state=ControllerState(spobj_time=time, spobj_states=space_object_states),
-        )
-
-        return ctrl
+        self.station_id_pairs = station_id_pairs
+        self.interpolated_propagation = interpolated_propagation
 
     @classmethod
     def from_space_object(
         cls,
-        spobj: SpaceObject,
-        epoch: Datetime_Like,
         tx_station: Station,
         rx_stations: t.Sequence[Station],
         exp_detail: scheduling.ExperimentDetail,
+        space_object: SpaceObject,
+        epoch: Datetime_Like,
+        interpolated_propagation: InterpolatedPropagation,
     ) -> t.Self:
         """A constructor method"""
 
@@ -112,10 +63,10 @@ class TrackerController(ControllerBase):
             tx_station=tx_station,
             rx_stations=rx_stations,
             exp_detail=exp_detail,
-            spobj=spobj,
-            epoch=epoch,
+            space_object=space_object,
+            epoch=to_datetime64_us(epoch),
             station_id_pairs=stn_pairs,
-            state=ControllerState.empty(),
+            interpolated_propagation=interpolated_propagation,
         )
 
         return ctrl
@@ -134,46 +85,13 @@ class TrackerController(ControllerBase):
 
         return stn_map
 
-    def _compute_controller_state(
-        self, start_time: Datetime_Like, end_time: Datetime_Like, slice_duration: Timedelta_Like
-    ) -> ControllerState:
-        """Do the computation and return the updated `state` property."""
-
-        if self.spobj is None:
-            raise RuntimeError(
-                "Cannot compute space object ECEF states without `spobj` in the `spec` prop."
-            )
-        if self.epoch is None:
-            raise RuntimeError(
-                "Cannot compute space object ECEF states without `epoch` in the `spec` prop."
-            )
-
-        exp_detail: scheduling.ExperimentDetail = self.exp_detail
-
-        # NOTE: for `np.arange` 'stop param,
-        #   - we subtract 'slice_duration' so that only full slice are included
-        #   - and add `+1` so that slice with time range `('end_time - 'slice_duration', 'end_time')` is included
-        time: npt.NDArray[Datetime64_us] = np.arange(
-            to_datetime64_us(start_time),
-            to_datetime64_us(end_time) - to_timedelta64_us(slice_duration) + 1,
-            exp_detail.slice_duration,
-        )
-        dt: npt.NDArray[Timedelta64_us] = time - to_datetime64_us(self.epoch)
-        dsec = t.cast(npt.NDArray[Float64_as_sec], dt.astype(np.float64) / 1e6)
-
-        ecefs = self.spobj.get_state(dsec)
-
-        state = ControllerState(spobj_time=time, spobj_states=ecefs)
-
-        return state
-
-    def _generate(self) -> scheduling.Schedule:
+    def generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> scheduling.Schedule:
         """Generate the schedules."""
 
         loc_zenith = np.array([0, 0, 1], dtype=np.float64)
 
         # generate pointings
-        tx_pointings: EnuCoordinates = self.tx_station.enu(self.state.spobj_states[:3])
+        tx_pointings: EnuCoordinates = self.tx_station.enu(self.interpolated_propagation.states[:3])
 
         tx_pointings_zenith_ang = spacecoords.linalg.vector_angle(
             loc_zenith, tx_pointings, degrees=True
@@ -185,7 +103,7 @@ class TrackerController(ControllerBase):
         rx_el_in_range_with_tx_masks: list[npt.NDArray[np.bool]] = []
         pure_rx_stations = [stn for stn in self.rx_stations if stn.uid != self.tx_station.uid]
         for rx_station in pure_rx_stations:
-            rx_pointings: EnuCoordinates = rx_station.enu(self.state.spobj_states[:3])
+            rx_pointings: EnuCoordinates = rx_station.enu(self.interpolated_propagation.states[:3])
 
             rx_pointings_zenith_ang = spacecoords.linalg.vector_angle(
                 loc_zenith, rx_pointings, degrees=True
@@ -198,7 +116,7 @@ class TrackerController(ControllerBase):
             rx_pointings = rx_pointings[:, rx_el_in_range_with_tx_mask]
             rxs_pointings.append(rx_pointings)
 
-        tx_sch_time = self.state.spobj_time[tx_el_in_range_mask]
+        tx_sch_time = self.interpolated_propagation.times[tx_el_in_range_mask]
         tx_sch_len = len(tx_sch_time)
 
         tx_sch = scheduling.from_ndarrays(
@@ -214,7 +132,7 @@ class TrackerController(ControllerBase):
         for rx_stn, rx_mask, rx_pointings in zip(
             pure_rx_stations, rx_el_in_range_with_tx_masks, rxs_pointings
         ):
-            rx_sch_time = self.state.spobj_time[rx_mask]
+            rx_sch_time = self.interpolated_propagation.times[rx_mask]
             rx_sch_len = len(rx_sch_time)
 
             rx_schs.append(
@@ -233,20 +151,3 @@ class TrackerController(ControllerBase):
         output = resultant_sch
 
         return output
-
-    def generate(
-        self, start_time: Datetime_Like | None = None, end_time: Datetime_Like | None = None
-    ) -> scheduling.Schedule:
-        """
-        Generate the schedules.
-        `start_time` and `end_time` should be omitted if this instance is created from `TrackerController.from_ecef_states`
-        """
-
-        if start_time is not None and end_time is not None:
-            self.state = self._compute_controller_state(
-                start_time, end_time, self.exp_detail.slice_duration
-            )
-
-        sch = self._generate()
-
-        return sch

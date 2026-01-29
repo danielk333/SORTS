@@ -75,7 +75,7 @@ def south_to_north_circular_orbit_test():
     )
     passage_duration: Float64_as_sec = passage_angular_duration / 360 * spobj_orbital_period
 
-    start_time = Time("2025-01-01 02:45:00")  # simulation start time
+    start_time = Time("2025-01-01T02:45:00", format="isot", scale="utc")  # simulation start time
     expected_passage_start_time = to_datetime64_us(start_time) + (
         spobj_orbital_period - passage_duration
     ) / 2 * np.timedelta64(int(1e6), "us")
@@ -93,7 +93,7 @@ def south_to_north_circular_orbit_test():
         argument_of_periapsis=0,
         longitude_of_ascending_node=0,
         mean_anomaly=180,
-        epoch=Time("2025-12-8T00:00:00", format="isot", scale="utc"),
+        epoch=start_time,
         frame="GCRS",
         properties={"d": 1.0},  # diameter of the spobj
         degrees=True,
@@ -183,7 +183,7 @@ def south_to_north_circular_orbit_test():
     assert sum(len(sim_unit_list) for sim_unit_list in sim_units_dict.values()) == 2 # 2 `SimulationUnit` in total; fmt: skip
     assert len(sim_units_dict[0][0].passages) == 1  # each unit has 1 `Passage`
     assert len(sim_units_dict[0][1].passages) == 1  # each unit has 1 `Passage`
-    assert sum(len(obss_list) for obss_list in obss_dict.values()) == 3 # 3 `SimulationUnit` in total; fmt: skip
+    assert sum(len(obss_list) for obss_list in obss_dict.values()) == 3 # 3 `Observaition` in total; fmt: skip
 
     for obs in obss_dict[0]:
         rx_schedule_slice = obs.index_into_schedule(fence_sch).rx
