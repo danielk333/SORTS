@@ -112,7 +112,7 @@ class MpiExample(sorts.MpiQueuedExecution):
         spobjs = [tracked_spobj, spobj_pop.get_object(20)]
 
         tracker_ctrl = controller.TrackerController.from_space_object(
-            spobj=tracked_spobj,
+            space_object=tracked_spobj,
             epoch=start_time,
             tx_station=tx_station,
             rx_stations=[rx_station_0, rx_station_1],

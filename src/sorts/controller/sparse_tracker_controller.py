@@ -22,28 +22,11 @@ from sorts.interpolation import Interpolator
 logger = logging.getLogger(__name__)
 
 
-# TODO: this is probably a very general thing that can be just a
-# standard type in `types`, we could then pass these around to e.g. the
-# interpolator
-# @dataclass
-# class ControllerState:
-#     spobj_time: npt.NDArray[Datetime64_us]
-#     spobj_states: EcefStates
-#
-#     @classmethod
-#     def empty(cls) -> t.Self:
-#         return cls(
-#             spobj_time=np.empty(0, dtype="datetime64[us]"),
-#             spobj_states=np.empty((6, 0), dtype=np.float64),
-#         )
-
-
 class SparseTrackerController(ControllerBase):
     """
     Generate pointing schedule that tracks a space object.
 
     - The preferred way to create instances of this class is via its class methods (e.g. `TrackerController.from_space_object`).
-    - This class serve as a frontend to the `State` type in this module
     """
 
     def __init__(

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-"""Interpolation functions.
-
+"""
+Interpolation functions.
 """
 
 # TODO: unit tests for interpolators!!!
@@ -11,6 +11,8 @@ import numpy as np
 import numpy.typing as npt
 
 
+# TODO: should rename to `InterpolatedSpaceObject`? or it should no longer mimics the behavior of `SpaceObject`?
+# TODO: maybe we can just use `InterpolatedPropagation` instead?
 class Interpolator(ABC):
     """Base Interpolation class that mimics the behavior of :code:`SpaceObject` so that a `Interpolator` instance can be used instead.
 
