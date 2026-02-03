@@ -8,9 +8,9 @@ we use `mkdocs` ([link](https://www.mkdocs.org/)) and `mkdocstrings` ([link](htt
 
 use this to install the packages
 ```bash
-uv sync --all-extras`
+uv sync --all-extras
 
 # the sorts bundling info does not work well with `uv` at the moment
 # so a separate install using `pip` sorts itself is needed.
-pip install -e .
+uv pip install -e .
 ```
