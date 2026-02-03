@@ -8,11 +8,6 @@ rank = comm.Get_rank()
 sleep_sigma = 0.1
 
 
-# `MpiQueuedExecution` is a helper abstract class for using mpi.
-# The `master_process` passes a sequence of mapping object to workers by calling `self.mpi_master_proc_loop`,
-# each `worker_process` will receive one of the mapping object as param, until the sequence runs out.
-
-
 # `ParallelizableStep1` is a minimal `MpiQueuedExecution` implementation
 class ParallelizableStep1(sorts.MpiQueuedExecution):
 

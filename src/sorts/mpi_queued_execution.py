@@ -20,11 +20,6 @@ class _MpiK:
     worker_process_return_ok: t.Final = "worker_process_return_ok"
 
 
-# TODO:
-# The architecture of this class could use a nice diagram, its really general purpose which is super
-# nice! But to avoid tracing out the control flow manually, a diagram could shortcut someone looking
-# at this for the first time
-
 # NOTE: Resorted to using a loose `Mapping` type instead of setting a generic param of `MpiQueuedExecution`
 #       because it seems python does not infer generic param based on method signatures of subclasses.
 #       Which mean if the generic param are not provided when subclassing, they are considered as Any/Unknown.
@@ -45,12 +40,48 @@ WorkerJobParam = t.Mapping
 
 class MpiQueuedExecution(abc.ABC):
     """
+    `MpiQueuedExecution` is a helper abstract class for using MPI.
+
+    It will allocate one MPI process as master process (rank 0) and allocate the reset as worker process (rank >0),
+    and automatically dispatch jobs to workers, until the list of jobs is exhausted.
+    A job is just a python mapping object.
+
+    The param `is_run_with_mpi` is mostly for debugging. It adjusts code routing so no MPI is used/referenced
+    during execution, so we can run it in a single process (without MPI) and attach debugger easily.
+
+    Diagram:
+    ```
+    +----------------------------------------------------------------------------------+
+    |    When executed with MPI:                                                       |
+    |                                                                                  |
+    |    +------------------+   +------------------+  +------------------+  +-+        |
+    |    |MPI process rank 0|   |MPI process rank 1|  |MPI process rank 2|  | |        |
+    |    |                  |   |                  |  |                  |  | |        |
+    |    |      master      |   |      worker      |  |      worker      |  | |        |
+    |    |      [jobs]      |   |      job_0       |  |      job_1       |  | |        |
+    |    +------------------+   +------------------+  +------------------+  +-+ ...    |
+    |                                                                                  |
+    +----------------------------------------------------------------------------------+
+    ```
+
+    ## Usage:
+    Subclass `MpiQueuedExecution`.
+
+    Implement `master_process` and invoke `self.mpi_master_proc_loop` inside it exactly once.
+    It takes a sequence of mapping object as param, and will distribute one item from the list
+    to a idle worker process until the list is exhausted.
+
+    Implement `worker_process`. It will receive one of the mapping object from master process as param.
+
+    Instantiate the subclass and invoke its `run` method
+
     NOTE: In typical usage, an instance of this class will be created on each MPI process, which means:
         - Each instance will init it's attributes/properties independently at different time
         - Attributes/Properties of the same name can end up having different value
           (e.g. a timestamp attribute will have different value on each instance.)
-
     """
+
+    # TODO: spawn MPI process from this class instead of using relying on external `mpiexec`.
 
     master_proc_rank = 0
 
