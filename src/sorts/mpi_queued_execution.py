@@ -70,7 +70,7 @@ class MpiQueuedExecution(abc.ABC):
         """
 
     @abc.abstractmethod
-    def worker_process(self, job_param: WorkerJobParam) -> None:
+    def worker_process(self, worker_job_param: WorkerJobParam) -> None:
         """The code that only ran on the worker rank processes."""
         ...
 
@@ -90,6 +90,8 @@ class MpiQueuedExecution(abc.ABC):
         is_worker_idle_list = [True for _ in range(self.num_workers)]
         next_work_job_param_idx = 0
         processed_work_job_cnt = 0
+
+        pbar = None
         if self.progress:
             pbar = tqdm("MPI worker progress", total=len(worker_job_params), file=sys.stdout)
 
@@ -119,13 +121,14 @@ class MpiQueuedExecution(abc.ABC):
                 worker_rank = status.Get_source()
 
                 processed_work_job_cnt += 1
-                if self.progress:
+                if self.progress and pbar is not None:
                     pbar.update(1)
 
                 is_worker_idle_list[worker_rank - 1] = True
 
-        if self.progress:
+        if self.progress and pbar is not None:
             pbar.close()
+
         logger.info(f"master: {self.master_proc_rank} | master proc loop done, returning...")
 
     def _mpi_master_proc_loop_without_mpi(
@@ -133,14 +136,17 @@ class MpiQueuedExecution(abc.ABC):
     ) -> None:
         """This will be ran instead of `mpi_master_proc_loop` when `is_run_with_mpi` is `False`"""
 
+        pbar = None
         if self.progress:
             pbar = tqdm("Worker progress", total=len(worker_job_params), file=sys.stdout)
+
         for work_job_param in worker_job_params:
             self.worker_process(work_job_param)
-            if self.progress:
+            if self.progress and pbar is not None:
                 pbar.update(1)
-        if self.progress:
+        if self.progress and pbar is not None:
             pbar.close()
+
         logger.info("master proc loop done, returning...")
 
     def mpi_master_proc_loop(self, worker_job_params: t.Sequence[WorkerJobParam]) -> None:
