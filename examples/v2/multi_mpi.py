@@ -8,26 +8,41 @@ rank = comm.Get_rank()
 sleep_sigma = 0.1
 
 
-class MpiBase(sorts.MpiQueuedExecution):
+# `MpiQueuedExecution` is a helper abstract class for using mpi.
+# The `master_process` passes a sequence of mapping object to workers by calling `self.mpi_master_proc_loop`,
+# each `worker_process` will receive one of the mapping object as param, until the sequence runs out.
+
+
+# `ParallelizableStep1` is a minimal `MpiQueuedExecution` implementation
+class ParallelizableStep1(sorts.MpiQueuedExecution):
 
     def master_process(self):
         np.random.seed(123)
-        tasks = [{"id": ind, "sleep": np.abs(np.random.randn()) * sleep_sigma} for ind in range(20)]
-        self.mpi_master_proc_loop(tasks)
+        worker_job_params = [{"id": i} for i in range(20)]
+        self.mpi_master_proc_loop(worker_job_params)
 
-    def worker_process(self, task):
-        time.sleep(task["sleep"])
-        print(f"{self.__class__.__name__} {rank=}, task id=", task["id"])
-        self.comm.send(True, dest=self.master_proc_rank)
+    def worker_process(self, worker_job_param):
+        print(f"{self.__class__.__name__} {rank=}, task id=", worker_job_param["id"])
 
 
-class Mpi1(MpiBase):
-    pass
+# `ParallelizableStep2` adds sleep in `worker_process` to demonstrate the parallel execution more clearly
+class ParallelizableStep2(sorts.MpiQueuedExecution):
+
+    def master_process(self):
+        np.random.seed(123)
+        worker_job_params = [
+            {"id": ind, "sleep": np.abs(np.random.randn()) * sleep_sigma} for ind in range(20)
+        ]
+        self.mpi_master_proc_loop(worker_job_params)
+
+    def worker_process(self, worker_job_param):
+        time.sleep(worker_job_param["sleep"])
+        print(f"{self.__class__.__name__} {rank=}, task id=", worker_job_param["id"])
 
 
-class Mpi2(MpiBase):
-    pass
-
-
-res1 = Mpi1(is_run_with_mpi=True, progress=True).run()
-res2 = Mpi2(is_run_with_mpi=True).run()
+# to leverage mpi,
+# - run this file with `mpiexec` e.g, `mpiexec -n 7 python <path_to_this_file>`
+# - set `is_run_with_mpi=True`
+# - set `progress=True` to enable terminal progress bar
+res2 = ParallelizableStep1(is_run_with_mpi=True).run()
+res1 = ParallelizableStep2(is_run_with_mpi=True, progress=True).run()

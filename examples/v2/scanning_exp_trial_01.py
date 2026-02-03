@@ -432,7 +432,6 @@ class MpiExample(sorts.MpiQueuedExecution):
 
         obss = sim_unit.observations
 
-        self.comm.send(True, dest=self.master_proc_rank)
         logger.info(
             f"worker: {worker_proc_rank} | SimulationUnit:{sim_unit.id} done with {len(obss)} observations"
         )

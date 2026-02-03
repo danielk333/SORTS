@@ -17,6 +17,7 @@ class _MpiK:
 
     exit_ok: t.Final = "exit_ok"
     terminate: t.Final = "terminate"
+    worker_process_return_ok: t.Final = "worker_process_return_ok"
 
 
 # TODO:
@@ -174,6 +175,7 @@ class MpiQueuedExecution(abc.ABC):
                 job_param = t.cast(WorkerJobParam, msg)
                 try:
                     self.worker_process(job_param)
+                    self.comm.send(_MpiK.worker_process_return_ok, dest=self.master_proc_rank)
                 except BaseException as exc:
                     raise WorkerError(
                         "Error during job:\n "
