@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 logger.info("starting example")
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--out_dir", type=Path, default=Path(__file__).parent.parent / "data")
+parser.add_argument("--out_dir", type=Path, default=Path(__file__).parent / "local_data")
 parser.add_argument("--name", type=str, default="sparse_tracking_simulation_with_mpi")
 parser.add_argument("--clobber", action="store_true")
 parser.add_argument("--antennas", type=int, default=10_000)
