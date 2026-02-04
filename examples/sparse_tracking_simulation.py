@@ -141,15 +141,13 @@ def prepare_simulation(args) -> tuple[SimulationParams, population.Population]:
     return prm, spobj_pop
 
 
-class Propagate(sorts.MpiQueuedExecution):
-    def master_process(self):
-        prm, spobj_pop = prepare_simulation(args)
+def propagate():
+    prm, spobj_pop = prepare_simulation(args)
 
-        spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
-        worker_job_params = [{"spobj": spobj, "prm": prm} for spobj in spobjs]
-        self.mpi_master_proc_loop(worker_job_params)
+    spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
+    worker_job_params = [{"spobj": spobj, "prm": prm} for spobj in spobjs]
 
-    def worker_process(self, worker_job_param):
+    for worker_job_param in worker_job_params:
         prm = worker_job_param["prm"]
         spobj = worker_job_param["spobj"]
         obj_pth = prm.save_dpath / f"space_object_{spobj.object_id}"
@@ -180,15 +178,13 @@ class Propagate(sorts.MpiQueuedExecution):
                 safe_pickle(true_prop, prop_interp_pth)
 
 
-class SimulateObs(sorts.MpiQueuedExecution):
-    def master_process(self):
-        prm, spobj_pop = prepare_simulation(args)
+def simulate_obs():
+    prm, spobj_pop = prepare_simulation(args)
 
-        spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
-        worker_job_params = [{"id": spobj.object_id, "prm": prm} for spobj in spobjs]
-        self.mpi_master_proc_loop(worker_job_params)
+    spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
+    worker_job_params = [{"id": spobj.object_id, "prm": prm} for spobj in spobjs]
 
-    def worker_process(self, worker_job_param):
+    for worker_job_param in worker_job_params:
         prm = worker_job_param["prm"]
         object_id = worker_job_param["id"]
         obj_pth = prm.save_dpath / f"space_object_{object_id}"
@@ -258,21 +254,5 @@ class SimulateObs(sorts.MpiQueuedExecution):
             safe_pickle(sim, obs_pth)
 
 
-try:
-    from mpi4py import MPI
-
-    pool_size = MPI.COMM_WORLD.Get_size()
-    rank = MPI.COMM_WORLD.Get_rank()
-except ImportError:
-    pool_size = 1
-    rank = 0
-
-Propagate(
-    progress=True,
-    is_run_with_mpi=pool_size > 1,
-).run()
-
-SimulateObs(
-    progress=True,
-    is_run_with_mpi=pool_size > 1,
-).run()
+propagate()
+simulate_obs()
