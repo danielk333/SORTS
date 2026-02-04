@@ -23,6 +23,7 @@ from sorts.simulation.funcs import (
 from sorts.simulation.stx_mrx_simulation import (
     stx_mrx_simulation,
     StxMrxSimulation,
+    simulation_unit,
     SimulationUnit,
     SimulationUnitState,
     Observation,
@@ -152,7 +153,7 @@ def calc_covariance_matrix(jacobian: npt.NDArray[np.float64]) -> npt.NDArray[np.
 
 
 class WParam(t.TypedDict):
-    param: SimulationUnit.FromPassagesOverTxRxStationPairParam
+    param: simulation_unit.FromPassagesOverTxRxStationPairParam
     persist_fpath: Path
 
 

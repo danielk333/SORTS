@@ -20,7 +20,12 @@ from sorts import (
 )
 from sorts.scheduling.priority_scheduling import priority_scheduling
 from sorts.simulation.funcs import ensure_directory_exist, safe_pickle
-from sorts.simulation.stx_mrx_simulation import stx_mrx_simulation, StxMrxSimulation, SimulationUnit
+from sorts.simulation.stx_mrx_simulation import (
+    stx_mrx_simulation,
+    StxMrxSimulation,
+    simulation_unit,
+    SimulationUnit,
+)
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -39,7 +44,7 @@ def dsec_sampler(orbit, epoch, start_time, end_time):
 
 
 class WParam(t.TypedDict):
-    param: SimulationUnit.FromPassagesOverTxRxStationPairParam
+    param: simulation_unit.FromPassagesOverTxRxStationPairParam
     persist_dpath: Path
 
 
