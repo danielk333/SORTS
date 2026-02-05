@@ -28,9 +28,6 @@ parser.add_argument("--clobber", action="store_true")
 parser.add_argument("--antennas", type=int, default=10_000)
 args = parser.parse_args()
 
-spobj_dname_tpl = "spobj.{id}"
-pert_dname_tpl = "pert.{id}"
-
 R_earth = 6371e3
 
 
