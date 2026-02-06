@@ -1,5 +1,5 @@
 # Configuration
 
-WIP
+For configuration `sorts` itself, please refer to `installation` documentation.
 
-(there is not much to configure atm though)
+For configuration of simulation using `sorts`, please refer to example files.

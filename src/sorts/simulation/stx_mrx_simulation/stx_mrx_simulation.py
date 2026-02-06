@@ -100,11 +100,13 @@ def find_passages(
 
     passages_map: dict[int, list[Passage]] = {}
 
-    for spobj_idx, (spobj, spobj_smpl_dsec, spobj_smpl_states) in enumerate(zip(
-        space_objects,
-        spobjs_smpl_dsec,
-        spobjs_smpl_states,
-    )):
+    for spobj_idx, (spobj, spobj_smpl_dsec, spobj_smpl_states) in enumerate(
+        zip(
+            space_objects,
+            spobjs_smpl_dsec,
+            spobjs_smpl_states,
+        )
+    ):
         passages_of_spobj: list[Passage] = []
 
         for stn_id_pair in station_id_pairs:
@@ -305,6 +307,7 @@ class StxMrxSimulation:
 
         sim_units_param = self.prepare_simulation_unit_params()
 
+        pbar = None
         if self.progress:
             pbar = tqdm(desc="simulating", total=len(sim_units_param))
 
@@ -317,9 +320,9 @@ class StxMrxSimulation:
 
                 sim_unit.simulate()
                 self.obss[spobj_idx].extend(sim_unit.observations)
-            if self.progress:
+            if self.progress and pbar is not None:
                 pbar.update(1)
-        if self.progress:
+        if self.progress and pbar is not None:
             pbar.close()
         logger.debug("simulation done")
 

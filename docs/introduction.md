@@ -1,4 +1,3 @@
 # Introduction
 
-WIP
-(Introduction and `index.md`) can be merged?
+<!-- TODO: @Daniel need your input here. -->

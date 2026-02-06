@@ -17,12 +17,8 @@ class _MpiK:
 
     exit_ok: t.Final = "exit_ok"
     terminate: t.Final = "terminate"
+    worker_process_return_ok: t.Final = "worker_process_return_ok"
 
-
-# TODO:
-# The architecture of this class could use a nice diagram, its really general purpose which is super
-# nice! But to avoid tracing out the control flow manually, a diagram could shortcut someone looking
-# at this for the first time
 
 # NOTE: Resorted to using a loose `Mapping` type instead of setting a generic param of `MpiQueuedExecution`
 #       because it seems python does not infer generic param based on method signatures of subclasses.
@@ -44,12 +40,48 @@ WorkerJobParam = t.Mapping
 
 class MpiQueuedExecution(abc.ABC):
     """
+    `MpiQueuedExecution` is a helper abstract class for using MPI.
+
+    It will allocate one MPI process as master process (rank 0) and allocate the reset as worker process (rank >0),
+    and automatically dispatch jobs to workers, until the list of jobs is exhausted.
+    A job is just a python mapping object.
+
+    The param `is_run_with_mpi` is mostly for debugging. It adjusts code routing so no MPI is used/referenced
+    during execution, so we can run it in a single process (without MPI) and attach debugger easily.
+
+    Diagram:
+    ```
+    +----------------------------------------------------------------------------------+
+    |    When executed with MPI:                                                       |
+    |                                                                                  |
+    |    +------------------+   +------------------+  +------------------+  +-+        |
+    |    |MPI process rank 0|   |MPI process rank 1|  |MPI process rank 2|  | |        |
+    |    |                  |   |                  |  |                  |  | |        |
+    |    |      master      |   |      worker      |  |      worker      |  | |        |
+    |    |      [jobs]      |   |      job_0       |  |      job_1       |  | |        |
+    |    +------------------+   +------------------+  +------------------+  +-+ ...    |
+    |                                                                                  |
+    +----------------------------------------------------------------------------------+
+    ```
+
+    ## Usage:
+    Subclass `MpiQueuedExecution`.
+
+    Implement `master_process` and invoke `self.mpi_master_proc_loop` inside it exactly once.
+    It takes a sequence of mapping object as param, and will distribute one item from the list
+    to a idle worker process until the list is exhausted.
+
+    Implement `worker_process`. It will receive one of the mapping object from master process as param.
+
+    Instantiate the subclass and invoke its `run` method
+
     NOTE: In typical usage, an instance of this class will be created on each MPI process, which means:
         - Each instance will init it's attributes/properties independently at different time
         - Attributes/Properties of the same name can end up having different value
           (e.g. a timestamp attribute will have different value on each instance.)
-
     """
+
+    # TODO: spawn MPI process from this class instead of using relying on external `mpiexec`.
 
     master_proc_rank = 0
 
@@ -70,7 +102,7 @@ class MpiQueuedExecution(abc.ABC):
         """
 
     @abc.abstractmethod
-    def worker_process(self, job_param: WorkerJobParam) -> None:
+    def worker_process(self, worker_job_param: WorkerJobParam) -> None:
         """The code that only ran on the worker rank processes."""
         ...
 
@@ -90,6 +122,8 @@ class MpiQueuedExecution(abc.ABC):
         is_worker_idle_list = [True for _ in range(self.num_workers)]
         next_work_job_param_idx = 0
         processed_work_job_cnt = 0
+
+        pbar = None
         if self.progress:
             pbar = tqdm("MPI worker progress", total=len(worker_job_params), file=sys.stdout)
 
@@ -119,13 +153,14 @@ class MpiQueuedExecution(abc.ABC):
                 worker_rank = status.Get_source()
 
                 processed_work_job_cnt += 1
-                if self.progress:
+                if self.progress and pbar is not None:
                     pbar.update(1)
 
                 is_worker_idle_list[worker_rank - 1] = True
 
-        if self.progress:
+        if self.progress and pbar is not None:
             pbar.close()
+
         logger.info(f"master: {self.master_proc_rank} | master proc loop done, returning...")
 
     def _mpi_master_proc_loop_without_mpi(
@@ -133,14 +168,17 @@ class MpiQueuedExecution(abc.ABC):
     ) -> None:
         """This will be ran instead of `mpi_master_proc_loop` when `is_run_with_mpi` is `False`"""
 
+        pbar = None
         if self.progress:
             pbar = tqdm("Worker progress", total=len(worker_job_params), file=sys.stdout)
+
         for work_job_param in worker_job_params:
             self.worker_process(work_job_param)
-            if self.progress:
+            if self.progress and pbar is not None:
                 pbar.update(1)
-        if self.progress:
+        if self.progress and pbar is not None:
             pbar.close()
+
         logger.info("master proc loop done, returning...")
 
     def mpi_master_proc_loop(self, worker_job_params: t.Sequence[WorkerJobParam]) -> None:
@@ -168,6 +206,7 @@ class MpiQueuedExecution(abc.ABC):
                 job_param = t.cast(WorkerJobParam, msg)
                 try:
                     self.worker_process(job_param)
+                    self.comm.send(_MpiK.worker_process_return_ok, dest=self.master_proc_rank)
                 except BaseException as exc:
                     raise WorkerError(
                         "Error during job:\n "
