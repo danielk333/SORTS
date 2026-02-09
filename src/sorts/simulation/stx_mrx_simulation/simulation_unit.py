@@ -191,7 +191,7 @@ class SimulationUnit:
     Notes about the state data:
     - It is stored in a private attribute `_state`
     - It can contain data for more than 1 passage
-    - The dataset does not always contains all the key defined in `DataKey`,
+    - The dataset does not always contains all the columns,
       which ones are available depends on what calculation have been done.
     """
 
