@@ -3,7 +3,7 @@ Defines the NewType `Schedule` and functions for its functionalities
 """
 
 from __future__ import annotations
-import logging, typing as t
+import logging, typing as t, enum, pathlib, sqlite3
 from dataclasses import dataclass
 from functools import reduce
 import numpy as np
@@ -15,11 +15,17 @@ from sorts import types, utils, radar
 
 logger = logging.getLogger(__name__)
 
-CoordKey = t.Literal[
-    "multi_index", "start_time", "exp_num", "stn_num", "simult_num", "enu", "e", "n", "u"
-]
-DataKey = t.Literal["end_time", "pointing"]
-Key = t.Literal[DataKey, CoordKey]
+
+class ScheduleKey(enum.StrEnum):
+    index = "index"  # type: ignore ; seems type checker might confuse this with the `index` method from `str`
+    exp_num = "exp_num"
+    stn_num = "stn_num"
+    simult_num = "simult_num"
+    start_time = "start_time"
+    end_time = "end_time"
+    pointing_e = "pointing_e"
+    pointing_n = "pointing_n"
+    pointing_u = "pointing_u"
 
 
 class _K:
@@ -37,8 +43,6 @@ class _K:
     end_time: t.Final = "end_time"
     pointing: t.Final = "pointing"
 
-
-utils.assert_class_attributes_equal_to(_K, t.get_args(Key))
 
 Schedule = t.NewType("Schedule", xr.Dataset)
 """
@@ -85,19 +89,6 @@ ExperimentDetailMap = dict[ExperimentId, ExperimentDetail]
 
 
 ExperimentIdStationIdPairsMap = dict[ExperimentId, list[tuple[radar.StationId, radar.StationId]]]
-
-
-# TODO: this helper should ideally be part of radar module/subpackage,
-#   but we can move it after that module is refactored
-def default_station():
-    return radar.Station(
-        lat=0.0,
-        lon=0.0,
-        alt=0.0,
-        min_elevation=0.0,
-        beam=None,  # might not work when the `Station` typing is tightened
-        uid=0,
-    )
 
 
 def empty() -> Schedule:
@@ -152,23 +143,6 @@ def from_ndarrays(
     return Schedule(sch)
 
 
-# TODO: remove?
-def to_dataframe(sch: Schedule) -> pd.DataFrame:
-    df = pd.concat(
-        t.cast(
-            list[pd.DataFrame],
-            [
-                sch[_K.end_time].transpose().to_pandas(),
-                sch[_K.pointing].transpose().to_pandas(),
-            ],
-        ),
-        axis=1,
-        copy=False,
-    ).reset_index()
-
-    return df
-
-
 def filter_by_time_range(sch: Schedule, time_range: types.TimeRange_us) -> Schedule:
     mask = (sch[_K.start_time] >= time_range[0]) & (sch[_K.end_time] <= time_range[1])
 
@@ -189,3 +163,158 @@ def filter_by_time_ranges(sch: Schedule, time_ranges: t.Sequence[types.TimeRange
     ds_masked = sch[{_K.multi_index: resultant_mask}]
 
     return ds_masked
+
+
+ScheduleDataframe = t.NewType("ScheduleDataframe", pd.DataFrame)
+"""
+A pandas `DataFrame` which:
+- Has an index without name or named as `"index"`
+- Contains all the following columns
+    ```
+    - "exp_num":     np.int16
+    - "stn_num":     np.int16
+    - "simult_num":  np.int16
+    - "start_time":  "datetime64[us]"
+    - "end_time":    "datetime64[us]"
+    - "pointing_e":  np.float64
+    - "pointing_n":  np.float64
+    - "pointing_u":  np.float64
+    ```
+
+The keys are available as enum `ScheduleKey` for consistent access.
+"""
+ScheduleDbConnection = t.NewType("ScheduleDbConnection", sqlite3.Connection)
+
+
+class ScheduleValidationError(Exception):
+    pass
+
+
+class ScheduleDb:
+    """Contains the schedule of radar station(s), and can it related data"""
+
+    def __init__(self, db: ScheduleDbConnection, dataframe_names: list[str]):
+        """
+        NOTE: This is intended as an internal constructor, please use the constructor methods to create instances.
+        """
+
+        self._db = db
+        self.dataframe_names = dataframe_names
+
+    @classmethod
+    def empty(cls, db: str | pathlib.Path | sqlite3.Connection = ":memory:") -> t.Self:
+        """Constructor for empty object."""
+
+        if isinstance(db, sqlite3.Connection):
+            db_conn = db
+        else:
+            db_conn = sqlite3.connect(db)
+
+        db_conn.execute("PRAGMA foreign_keys = ON")
+
+        return cls(db=ScheduleDbConnection(db_conn), dataframe_names=[])
+
+    def add_dataframe(self, df: ScheduleDataframe, name: str):
+        """
+        Insert the dataframe as a table in DB.
+
+        Args:
+            name: Will be used as DB table name.
+        """
+
+        df.to_sql(name, self._db, if_exists="replace")
+
+    def read_dataframe(self, table_name: str) -> ScheduleDataframe:
+        """Find the correspond dataframe in DB by name."""
+
+        df = pd.read_sql_query(
+            f"SELECT * FROM {table_name}",
+            self._db,
+            index_col=ScheduleKey.index,
+            dtype={
+                ScheduleKey.exp_num: "int16",
+                ScheduleKey.stn_num: "int16",
+                ScheduleKey.simult_num: "int16",
+                ScheduleKey.start_time: "datetime64[us]",
+                ScheduleKey.end_time: "datetime64[us]",
+                ScheduleKey.pointing_e: "float64",
+                ScheduleKey.pointing_n: "float64",
+                ScheduleKey.pointing_u: "float64",
+            },
+        )
+
+        return ScheduleDataframe(df)
+
+
+def validate_schedule_dataframe(df: pd.DataFrame) -> ScheduleDataframe:
+    """
+    Validate a pandas `DataFrame` against the definition of `ScheduleDataframe`.
+
+    See the docs of `ScheduleDataframe` for its definition.
+
+    Returns:
+        The original DataFrame casted into a `ScheduleDataframe`.
+
+    Raises:
+        `ScheduleValidationError`
+    """
+
+    if not (df.index.name is None or df.index.name == "index"):
+        raise ScheduleValidationError("DataFrame index name is not `None` or `'index'`")
+
+    if not {key.value for key in ScheduleKey if key != ScheduleKey.index}.issubset(df.columns):
+        raise ScheduleValidationError("One or more column is missing from the DataFrame")
+
+    if df.dtypes[ScheduleKey.exp_num] != "int16":
+        raise ScheduleValidationError("Column 'exp_num' is not numpy dtype 'int16'")
+    if df.dtypes[ScheduleKey.stn_num] != "int16":
+        raise ScheduleValidationError("Column 'stn_num' is not numpy dtype 'int16'")
+    if df.dtypes[ScheduleKey.simult_num] != "int16":
+        raise ScheduleValidationError("Column 'simult_num' is not numpy dtype 'int16'")
+
+    if df.dtypes[ScheduleKey.start_time] != "datetime64[us]":
+        raise ScheduleValidationError("Column 'start_time' is not numpy dtype 'datetime64[us]'")
+    if df.dtypes[ScheduleKey.end_time] != "datetime64[us]":
+        raise ScheduleValidationError("Column 'end_time' is not numpy dtype 'datetime64[us]'")
+
+    if df.dtypes[ScheduleKey.pointing_e] != "float64":
+        raise ScheduleValidationError("Column 'pointing_e' is not numpy dtype 'float64'")
+    if df.dtypes[ScheduleKey.pointing_n] != "float64":
+        raise ScheduleValidationError("Column 'pointing_n' is not numpy dtype 'float64'")
+    if df.dtypes[ScheduleKey.pointing_u] != "float64":
+        raise ScheduleValidationError("Column 'pointing_u' is not numpy dtype 'float64'")
+
+    return ScheduleDataframe(df)
+
+
+def schedule_dataframe_from_rows(rows: list[list[t.Any]]) -> ScheduleDataframe:
+    """Create an empty `ScheduleDataframe` from rows of data."""
+
+    # NOTE: Constructing `DataFrame` from `Series` seems to be the only safe way to ensure
+    #       the datetime resolution is not overrided into `'ns'` from pandas's type infer attempt.
+
+    if len(rows) == 0:
+        cols = [[] for key in ScheduleKey if key != ScheduleKey.index]
+    else:
+        cols = list(zip(*rows))
+
+    df = pd.DataFrame(
+        {
+            ScheduleKey.exp_num: pd.Series(cols[0], dtype=np.int16),
+            ScheduleKey.stn_num: pd.Series(cols[1], dtype=np.int16),
+            ScheduleKey.simult_num: pd.Series(cols[2], dtype=np.int16),
+            ScheduleKey.start_time: pd.Series(cols[3], dtype="datetime64[us]"),
+            ScheduleKey.end_time: pd.Series(cols[4], dtype="datetime64[us]"),
+            ScheduleKey.pointing_e: pd.Series(cols[5], dtype=np.float64),
+            ScheduleKey.pointing_n: pd.Series(cols[6], dtype=np.float64),
+            ScheduleKey.pointing_u: pd.Series(cols[7], dtype=np.float64),
+        }
+    )
+
+    return ScheduleDataframe(df)
+
+
+def empty_schedule_dataframe() -> ScheduleDataframe:
+    """Create an empty `ScheduleDataframe`"""
+
+    return ScheduleDataframe(schedule_dataframe_from_rows([]))
