@@ -199,7 +199,7 @@ class ScheduleDb:
         """
 
         self._db = db
-        self.dataframe_names = dataframe_names
+        self.dataframe_names = set(dataframe_names)
 
     @classmethod
     def empty(cls, db: str | pathlib.Path | sqlite3.Connection = ":memory:") -> t.Self:
@@ -217,18 +217,20 @@ class ScheduleDb:
     def add_dataframe(self, df: ScheduleDataframe, name: str):
         """
         Insert the dataframe as a table in DB.
+        Existing table with the same name will be replaced.
 
         Args:
             name: Will be used as DB table name.
         """
 
         df.to_sql(name, self._db, if_exists="replace")
+        self.dataframe_names.add(name)
 
-    def read_dataframe(self, table_name: str) -> ScheduleDataframe:
+    def get_dataframe(self, name: str) -> ScheduleDataframe:
         """Find the correspond dataframe in DB by name."""
 
         df = pd.read_sql_query(
-            f"SELECT * FROM {table_name}",
+            f"SELECT * FROM {name}",
             self._db,
             index_col=ScheduleKey.index,
             dtype={
@@ -244,6 +246,12 @@ class ScheduleDb:
         )
 
         return ScheduleDataframe(df)
+
+    def remove_dataframe(self, name: str):
+        """Remove a dataframe from the DB by name."""
+
+        self._db.execute(f"DROP TABLE IF EXISTS {name}")
+        self.dataframe_names.remove(name)
 
 
 def validate_schedule_dataframe(df: pd.DataFrame) -> ScheduleDataframe:

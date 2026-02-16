@@ -24,6 +24,7 @@ def empty_schedule_dataframe_test():
 def sql_db_round_trip_test():
     import sqlite3
 
+    # db_conn = sqlite3.connect("./test.sqlite")  # use this if an actual db file is preferred
     db_conn = sqlite3.connect(":memory:")
     sdb = scheduling.ScheduleDb.empty(db_conn)
 
@@ -36,7 +37,7 @@ def sql_db_round_trip_test():
 
     df_name = "test"
     sdb.add_dataframe(df, df_name)
-    df_read = sdb.read_dataframe(df_name)
+    df_read = sdb.get_dataframe(df_name)
 
     assert df.equals(df_read)
 
