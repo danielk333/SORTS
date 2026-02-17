@@ -4,6 +4,7 @@ Defines the NewType `Schedule` and functions for its functionalities
 
 from __future__ import annotations
 import logging, typing as t, enum, pathlib, sqlite3
+from collections import OrderedDict
 from dataclasses import dataclass
 from functools import reduce
 import numpy as np
@@ -215,7 +216,8 @@ class ScheduleDb:
         """
 
         self._db = db
-        self.dataframe_names = set(dataframe_names)
+        self.dataframe_names = OrderedDict.fromkeys(dataframe_names)
+        """NOTE: It is an `OrderedDict` that maps to `None` because python does not have `OrderedSet` by default."""
 
     @classmethod
     def empty(cls, db: str | pathlib.Path | sqlite3.Connection = ":memory:") -> t.Self:
@@ -240,7 +242,7 @@ class ScheduleDb:
         """
 
         df.to_sql(name, self._db, if_exists="replace")
-        self.dataframe_names.add(name)
+        self.dataframe_names.update([(name, None)])
 
     def get_dataframe(self, name: str) -> ScheduleDataframe:
         """Find the correspond dataframe in DB by name."""
@@ -258,47 +260,70 @@ class ScheduleDb:
         """Remove a dataframe from the DB by name."""
 
         self._db.execute(f"DROP TABLE IF EXISTS {name}")
-        self.dataframe_names.remove(name)
+        self.dataframe_names.pop(name)
 
-    def priority_scheduling(self):
-        df = pd.read_sql_query(
-            f"""
-            WITH stn_table AS (
-                SELECT 
-                    row_number() OVER () AS id -- add a int id column
+    def priority_scheduling(
+        self, names: list[str] | None = None, priorities: list[int] | None = None
+    ):
+        """
+        Generate a combined schedule for the specified table name.
+
+        Args:
+            names: The list of table name to combine.
+                If `None`, the `dataframe_names` property will be used.
+                Defaults to `None`.
+            priorities: The list of priority correspondign to the table names.
+                Must have the same length as the `names` param.
+                If `None`, a list of `[0, ...]` will be used.
+                Defaults to `None`.
+        """
+
+        if names is None:
+            names = list(self.dataframe_names)
+
+        if priorities is None:
+            priorities = [0 for _ in names]
+
+        sql = f"""
+            WITH sch_table AS (
+                SELECT
+                    row_number() OVER () AS rid -- add a int id column
                     ,*
                 FROM (
-                    SELECT *, 0 AS priority FROM exp_00
-                    UNION ALL
-                    SELECT *, 1 AS priority FROM exp_01_collide_with_00
+                    {"\nUNION ALL\n".join([
+                        f'SELECT {p} AS priority, * FROM "{n}"' for n, p in zip(names, priorities)
+                    ])}
                 )
-                WHERE stn_num = 0
             ),
             conflicts AS (
-                SELECT og.id
-                FROM stn_table AS og
-                JOIN stn_table AS cp
-                    -- prevent self-comparison
-                    ON og.id != cp.id
-                    -- NOTE: we do not use `og.id < cp.id`
-                    -- because ordering is important (due to priority)
-                    -- i.e. comparing (1,2) is different from (2,1)
+                SELECT cp.exp_num, cp.start_time
+                FROM sch_table AS og
+                JOIN sch_table AS cp
+                    -- on same radar station
+                    ON og.stn_num = cp.stn_num
+                    -- and different exp_num. (also prevent self-comparison of the same row)
+                    AND og.exp_num != cp.exp_num
                 WHERE og.start_time < cp.end_time
                 AND og.end_time > cp.start_time
-                -- lower priority number means more important
-                -- for equal priority, the first one 
-                AND og.priority <= cp.priority 
+                AND (
+                    -- lower priority number means more important
+                    -- for equal priority, the first one 
+                    og.priority < cp.priority
+                    OR (og.priority = cp.priority AND og.rid < cp.rid)
+                )
             )
+            -- in the current implementation, we assume entries from all other radar stations
+            -- of the same experiment have to be removed as well
             SELECT {",".join([f'"{k}"' for k in ScheduleKey])}
-            FROM stn_table
-            WHERE id NOT IN (SELECT id FROM conflicts)
-            ;""",
-            self._db,
-            index_col=ScheduleKey.index,
-            dtype=scheduleDataframeDtypes,
+            FROM sch_table
+            WHERE (exp_num, start_time) NOT IN (SELECT exp_num, start_time FROM conflicts)
+            ;"""
+
+        df = pd.read_sql_query(
+            sql, self._db, index_col=ScheduleKey.index, dtype=scheduleDataframeDtypes
         )
 
-        return df
+        return ScheduleDataframe(df)
 
 
 def validate_schedule_dataframe(df: pd.DataFrame) -> ScheduleDataframe:

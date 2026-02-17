@@ -44,8 +44,8 @@ def sql_db_round_trip_test():
 
 
 def priority_scheduling_test():
-    db_conn = sqlite3.connect("./test.sqlite")  # use this if an actual db file is preferred
-    # db_conn = sqlite3.connect(":memory:")
+    # db_conn = sqlite3.connect("./test.sqlite")  # use this if an actual db file is preferred
+    db_conn = sqlite3.connect(":memory:")
     sdb = scheduling.ScheduleDb.empty(db_conn)
 
     sdb.add_dataframe(
@@ -59,11 +59,28 @@ def priority_scheduling_test():
 
     sdb.add_dataframe(
         scheduling.schedule_dataframe_from_rows([
-            [0,0,0, pd.Timestamp("2026-02-11 00:01:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:01:59.123456789", unit="us"), 0.1,0.2,0.3],
+            [1,0,0, pd.Timestamp("2026-02-11 00:01:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:01:59.123456789", unit="us"), 0.1,0.2,0.3],
+            [1,1,0, pd.Timestamp("2026-02-11 00:01:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:01:59.123456789", unit="us"), 0.1,0.2,0.3],
         ]), # fmt: skip
-        "exp_01_collide_with_00",
+        "exp_01",
     )
 
-    # TODO: union all exp tables in the query and change return type of priority_scheduling
-    df = sdb.priority_scheduling()
+    sdb.add_dataframe(
+        scheduling.schedule_dataframe_from_rows([
+            [2,0,0, pd.Timestamp("2026-02-11 00:01:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:01:59.123456789", unit="us"), 0.1,0.2,0.3],
+            [2,1,0, pd.Timestamp("2026-02-11 00:02:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:02:59.123456789", unit="us"), 0.1,0.2,0.3],
+        ]), # fmt: skip
+        "exp_02",
+    )
+
+    sdf = sdb.priority_scheduling()
+
+    assert (
+        1 not in sdf[ScheduleKey.exp_num].values
+    ), "Entries with the same `exp_num` and `start_time` are not removed together."
+
+    assert (
+        2 in sdf[ScheduleKey.exp_num].values
+    ), "Entries with the same `exp_num` but different `start_time` should not be removed together."
+
     return
