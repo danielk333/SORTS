@@ -262,7 +262,7 @@ class ScheduleDb:
         self._db.execute(f"DROP TABLE IF EXISTS {name}")
         self.dataframe_names.pop(name)
 
-    def priority_scheduling(
+    def schedule_by_priority(
         self, names: list[str] | None = None, priorities: list[int] | None = None
     ):
         """

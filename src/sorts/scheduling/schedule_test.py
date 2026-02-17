@@ -43,7 +43,7 @@ def sql_db_round_trip_test():
     return
 
 
-def priority_scheduling_test():
+def schedule_by_priority_test():
     # db_conn = sqlite3.connect("./test.sqlite")  # use this if an actual db file is preferred
     db_conn = sqlite3.connect(":memory:")
     sdb = scheduling.ScheduleDb.empty(db_conn)
@@ -73,7 +73,7 @@ def priority_scheduling_test():
         "exp_02",
     )
 
-    sdf = sdb.priority_scheduling()
+    sdf = sdb.schedule_by_priority(["exp_00", "exp_01", "exp_02"], [0, 1, 0])
 
     assert (
         1 not in sdf[ScheduleKey.exp_num].values
