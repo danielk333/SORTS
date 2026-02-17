@@ -208,7 +208,12 @@ class ScheduleValidationError(Exception):
 
 
 class ScheduleDb:
-    """Contains the schedule of radar station(s), and can it related data"""
+    """
+    Contains the schedule of radar station(s), and can it related data.
+
+    NOTE: datetime in DB are stored as ISO 8601 string,
+        with space instead of `T` as separator.
+    """
 
     def __init__(self, db: ScheduleDbConnection, dataframe_names: list[str]):
         """
@@ -263,7 +268,11 @@ class ScheduleDb:
         self.dataframe_names.pop(name)
 
     def schedule_by_priority(
-        self, names: list[str] | None = None, priorities: list[int] | None = None
+        self,
+        names: list[str] | None = None,
+        priorities: list[int] | None = None,
+        start_time: types.Datetime_Like | None = None,
+        end_time: types.Datetime_Like | None = None,
     ):
         """
         Generate a combined schedule for the specified table name.
@@ -294,6 +303,9 @@ class ScheduleDb:
                         f'SELECT {p} AS priority, * FROM "{n}"' for n, p in zip(names, priorities)
                     ])}
                 )
+                WHERE TRUE -- a dummpy condiditon to make injecting additional clause below easier
+                    {f"AND start_time >= '{utils.to_pydatetime(start_time).isoformat(sep=" ")}'" if start_time is not None else ""}
+                    {f"AND end_time <= '{utils.to_pydatetime(end_time).isoformat(sep=" ")}'" if end_time is not None else ""}
             ),
             conflicts AS (
                 SELECT cp.exp_num, cp.start_time

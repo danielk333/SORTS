@@ -53,6 +53,7 @@ def schedule_by_priority_test():
             [0,0,0, pd.Timestamp("2026-02-11 00:00:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:00:59.123456789", unit="us"), 0.1,0.2,0.3],
             [0,0,0, pd.Timestamp("2026-02-11 00:01:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:01:59.123456789", unit="us"), 0.1,0.2,0.3],
             [0,0,0, pd.Timestamp("2026-02-11 00:02:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:02:59.123456789", unit="us"), 0.1,0.2,0.3],
+            [0,0,0, pd.Timestamp("2027-02-11 00:02:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:02:59.123456789", unit="us"), 0.1,0.2,0.3],
         ]), # fmt: skip
         "exp_00",
     )
@@ -73,7 +74,11 @@ def schedule_by_priority_test():
         "exp_02",
     )
 
-    sdf = sdb.schedule_by_priority(["exp_00", "exp_01", "exp_02"], [0, 1, 0])
+    start_time = "2026-02-11"
+    end_time = "2026-03-11"
+    sdf = sdb.schedule_by_priority(
+        ["exp_00", "exp_01", "exp_02"], [0, 1, 0], start_time=start_time, end_time=end_time
+    )
 
     assert (
         1 not in sdf[ScheduleKey.exp_num].values
@@ -82,5 +87,10 @@ def schedule_by_priority_test():
     assert (
         2 in sdf[ScheduleKey.exp_num].values
     ), "Entries with the same `exp_num` but different `start_time` should not be removed together."
+
+    assert (
+        all(sdf[ScheduleKey.start_time] >= start_time)
+        and all(sdf[ScheduleKey.end_time] <= end_time)
+    ), "Entries outside of specified time range should not be included." # fmt: skip
 
     return
