@@ -9,6 +9,7 @@ from functools import reduce
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
+import pandas._typing as pdt
 import xarray as xr
 from sorts import types, utils, radar
 
@@ -185,6 +186,21 @@ The keys are available as enum `ScheduleKey` for consistent access.
 """
 ScheduleDbConnection = t.NewType("ScheduleDbConnection", sqlite3.Connection)
 
+scheduleDataframeDtypes: t.Final[dict[t.Hashable, pdt.Dtype]] = {
+    ScheduleKey.exp_num: "int16",
+    ScheduleKey.stn_num: "int16",
+    ScheduleKey.simult_num: "int16",
+    ScheduleKey.start_time: "datetime64[us]",
+    ScheduleKey.end_time: "datetime64[us]",
+    ScheduleKey.pointing_e: "float64",
+    ScheduleKey.pointing_n: "float64",
+    ScheduleKey.pointing_u: "float64",
+}
+"""
+The dtypes of a `ScheduleDataframe` expressed in a python dict. 
+Useful for certain pandas IO methods.
+"""
+
 
 class ScheduleValidationError(Exception):
     pass
@@ -233,16 +249,7 @@ class ScheduleDb:
             f"SELECT * FROM {name}",
             self._db,
             index_col=ScheduleKey.index,
-            dtype={
-                ScheduleKey.exp_num: "int16",
-                ScheduleKey.stn_num: "int16",
-                ScheduleKey.simult_num: "int16",
-                ScheduleKey.start_time: "datetime64[us]",
-                ScheduleKey.end_time: "datetime64[us]",
-                ScheduleKey.pointing_e: "float64",
-                ScheduleKey.pointing_n: "float64",
-                ScheduleKey.pointing_u: "float64",
-            },
+            dtype=scheduleDataframeDtypes,
         )
 
         return ScheduleDataframe(df)
@@ -252,6 +259,46 @@ class ScheduleDb:
 
         self._db.execute(f"DROP TABLE IF EXISTS {name}")
         self.dataframe_names.remove(name)
+
+    def priority_scheduling(self):
+        df = pd.read_sql_query(
+            f"""
+            WITH stn_table AS (
+                SELECT 
+                    row_number() OVER () AS id -- add a int id column
+                    ,*
+                FROM (
+                    SELECT *, 0 AS priority FROM exp_00
+                    UNION ALL
+                    SELECT *, 1 AS priority FROM exp_01_collide_with_00
+                )
+                WHERE stn_num = 0
+            ),
+            conflicts AS (
+                SELECT og.id
+                FROM stn_table AS og
+                JOIN stn_table AS cp
+                    -- prevent self-comparison
+                    ON og.id != cp.id
+                    -- NOTE: we do not use `og.id < cp.id`
+                    -- because ordering is important (due to priority)
+                    -- i.e. comparing (1,2) is different from (2,1)
+                WHERE og.start_time < cp.end_time
+                AND og.end_time > cp.start_time
+                -- lower priority number means more important
+                -- for equal priority, the first one 
+                AND og.priority <= cp.priority 
+            )
+            SELECT {",".join([f'"{k}"' for k in ScheduleKey])}
+            FROM stn_table
+            WHERE id NOT IN (SELECT id FROM conflicts)
+            ;""",
+            self._db,
+            index_col=ScheduleKey.index,
+            dtype=scheduleDataframeDtypes,
+        )
+
+        return df
 
 
 def validate_schedule_dataframe(df: pd.DataFrame) -> ScheduleDataframe:

@@ -1,3 +1,4 @@
+import sqlite3
 import numpy as np
 import pandas as pd
 from sorts import scheduling
@@ -22,8 +23,6 @@ def empty_schedule_dataframe_test():
 
 
 def sql_db_round_trip_test():
-    import sqlite3
-
     # db_conn = sqlite3.connect("./test.sqlite")  # use this if an actual db file is preferred
     db_conn = sqlite3.connect(":memory:")
     sdb = scheduling.ScheduleDb.empty(db_conn)
@@ -41,4 +40,30 @@ def sql_db_round_trip_test():
 
     assert df.equals(df_read)
 
+    return
+
+
+def priority_scheduling_test():
+    db_conn = sqlite3.connect("./test.sqlite")  # use this if an actual db file is preferred
+    # db_conn = sqlite3.connect(":memory:")
+    sdb = scheduling.ScheduleDb.empty(db_conn)
+
+    sdb.add_dataframe(
+        scheduling.schedule_dataframe_from_rows([
+            [0,0,0, pd.Timestamp("2026-02-11 00:00:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:00:59.123456789", unit="us"), 0.1,0.2,0.3],
+            [0,0,0, pd.Timestamp("2026-02-11 00:01:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:01:59.123456789", unit="us"), 0.1,0.2,0.3],
+            [0,0,0, pd.Timestamp("2026-02-11 00:02:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:02:59.123456789", unit="us"), 0.1,0.2,0.3],
+        ]), # fmt: skip
+        "exp_00",
+    )
+
+    sdb.add_dataframe(
+        scheduling.schedule_dataframe_from_rows([
+            [0,0,0, pd.Timestamp("2026-02-11 00:01:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:01:59.123456789", unit="us"), 0.1,0.2,0.3],
+        ]), # fmt: skip
+        "exp_01_collide_with_00",
+    )
+
+    # TODO: union all exp tables in the query and change return type of priority_scheduling
+    df = sdb.priority_scheduling()
     return
