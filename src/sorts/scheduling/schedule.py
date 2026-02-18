@@ -380,7 +380,7 @@ def validate_schedule_dataframe(df: pd.DataFrame) -> ScheduleDataframe:
 
 
 def schedule_dataframe_from_rows(rows: list[list[t.Any]]) -> ScheduleDataframe:
-    """Create an empty `ScheduleDataframe` from rows of data."""
+    """Create a `ScheduleDataframe` from rows of data."""
 
     # NOTE: Constructing `DataFrame` from `Series` seems to be the only safe way to ensure
     #       the datetime resolution is not overrided into `'ns'` from pandas's type infer attempt.
@@ -403,10 +403,66 @@ def schedule_dataframe_from_rows(rows: list[list[t.Any]]) -> ScheduleDataframe:
         }
     )
 
-    return ScheduleDataframe(df)
+    return validate_schedule_dataframe(df)
+
+
+def schedule_dataframe_from_series(
+    exp_num: pd.Series,
+    stn_num: pd.Series,
+    simult_num: pd.Series,
+    start_time: pd.Series,
+    end_time: pd.Series,
+    pointing_e: pd.Series,
+    pointing_n: pd.Series,
+    pointing_u: pd.Series,
+) -> ScheduleDataframe:
+    """Create an `ScheduleDataframe` from columns of pandas `Series`."""
+
+    df = pd.DataFrame(
+        {
+            ScheduleKey.exp_num: exp_num,
+            ScheduleKey.stn_num: stn_num,
+            ScheduleKey.simult_num: simult_num,
+            ScheduleKey.start_time: start_time,
+            ScheduleKey.end_time: end_time,
+            ScheduleKey.pointing_e: pointing_e,
+            ScheduleKey.pointing_n: pointing_n,
+            ScheduleKey.pointing_u: pointing_u,
+        }
+    )
+
+    return validate_schedule_dataframe(df)
+
+
+def schedule_dataframe_from_ndarrays(
+    exp_num: npt.NDArray,
+    stn_num: npt.NDArray,
+    simult_num: npt.NDArray,
+    start_time: npt.NDArray,
+    end_time: npt.NDArray,
+    pointing_e: npt.NDArray,
+    pointing_n: npt.NDArray,
+    pointing_u: npt.NDArray,
+) -> ScheduleDataframe:
+    """Create an empty `ScheduleDataframe` from columns of numpy `ndarray`."""
+
+    df = pd.DataFrame(
+        {
+            ScheduleKey.exp_num: pd.Series(exp_num, dtype=np.int16),
+            ScheduleKey.stn_num: pd.Series(stn_num, dtype=np.int16),
+            ScheduleKey.simult_num: pd.Series(simult_num, dtype=np.int16),
+            ScheduleKey.start_time: pd.Series(start_time, dtype="datetime64[us]"),
+            ScheduleKey.end_time: pd.Series(end_time, dtype="datetime64[us]"),
+            ScheduleKey.pointing_e: pd.Series(pointing_e, dtype=np.float64),
+            ScheduleKey.pointing_n: pd.Series(pointing_n, dtype=np.float64),
+            ScheduleKey.pointing_u: pd.Series(pointing_u, dtype=np.float64),
+        }
+    )
+
+    return validate_schedule_dataframe(df)
 
 
 def empty_schedule_dataframe() -> ScheduleDataframe:
     """Create an empty `ScheduleDataframe`"""
 
-    return ScheduleDataframe(schedule_dataframe_from_rows([]))
+    return schedule_dataframe_from_rows([])

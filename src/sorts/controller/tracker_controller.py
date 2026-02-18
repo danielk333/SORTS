@@ -2,7 +2,7 @@ from __future__ import annotations
 import logging, typing as t
 import numpy as np
 import numpy.typing as npt
-import xarray as xr
+import pandas as pd
 import spacecoords
 from sorts import radar, scheduling
 from sorts.space_object import SpaceObject
@@ -10,7 +10,6 @@ from sorts.radar import Station
 from sorts.types import Datetime64_us, EnuCoordinates, Datetime_Like
 from sorts.utils import to_datetime64_us
 from .controller_base import ControllerBase
-from sorts.interpolation import Interpolator
 from sorts.simulation.funcs import InterpolatedPropagation
 
 logger = logging.getLogger(__name__)
@@ -85,7 +84,10 @@ class TrackerController(ControllerBase):
 
         return stn_map
 
-    def generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> scheduling.Schedule:
+    # TODO: `start_time` and `end_time` are not used atm, remove or adj the logic
+    def generate(
+        self, start_time: Datetime_Like, end_time: Datetime_Like
+    ) -> scheduling.ScheduleDataframe:
         """Generate the schedules."""
 
         loc_zenith = np.array([0, 0, 1], dtype=np.float64)
@@ -119,16 +121,18 @@ class TrackerController(ControllerBase):
         tx_sch_time = self.interpolated_propagation.times[tx_el_in_range_mask]
         tx_sch_len = len(tx_sch_time)
 
-        tx_sch = scheduling.from_ndarrays(
-            start_time=tx_sch_time,
-            end_time=tx_sch_time + self.exp_detail.slice_duration,
+        tx_sch = scheduling.schedule_dataframe_from_ndarrays(
             exp_num=np.full(tx_sch_len, self.exp_detail.id, dtype=np.int16),
             stn_num=np.full(tx_sch_len, self.tx_station.uid, dtype=np.int16),
             simult_num=np.full(tx_sch_len, 0, dtype=np.int16),
-            pointing=tx_pointings,
+            start_time=tx_sch_time,
+            end_time=tx_sch_time + self.exp_detail.slice_duration,
+            pointing_e=tx_pointings[0, :],
+            pointing_n=tx_pointings[1, :],
+            pointing_u=tx_pointings[2, :],
         )
 
-        rx_schs: list[scheduling.Schedule] = []
+        rx_schs: list[scheduling.ScheduleDataframe] = []
         for rx_stn, rx_mask, rx_pointings in zip(
             pure_rx_stations, rx_el_in_range_with_tx_masks, rxs_pointings
         ):
@@ -136,18 +140,19 @@ class TrackerController(ControllerBase):
             rx_sch_len = len(rx_sch_time)
 
             rx_schs.append(
-                scheduling.from_ndarrays(
-                    start_time=rx_sch_time,
-                    end_time=rx_sch_time + self.exp_detail.slice_duration,
+                scheduling.schedule_dataframe_from_ndarrays(
                     exp_num=np.full(rx_sch_len, self.exp_detail.id, dtype=np.int16),
                     stn_num=np.full(rx_sch_len, rx_stn.uid, dtype=np.int16),
                     simult_num=np.full(rx_sch_len, 0, dtype=np.int16),
-                    pointing=rx_pointings,
+                    start_time=rx_sch_time,
+                    end_time=rx_sch_time + self.exp_detail.slice_duration,
+                    pointing_e=rx_pointings[0, :],
+                    pointing_n=rx_pointings[1, :],
+                    pointing_u=rx_pointings[2, :],
                 )
             )
 
-        resultant_sch = xr.concat([tx_sch, *rx_schs], dim=scheduling._K.multi_index)
-        resultant_sch = resultant_sch.sortby(scheduling._K.start_time)
-        output = resultant_sch
+        resultant_sch = scheduling.ScheduleDataframe((pd.concat([tx_sch, *rx_schs])))
+        resultant_sch = resultant_sch.sort_values(by=scheduling.ScheduleKey.start_time)
 
-        return output
+        return resultant_sch

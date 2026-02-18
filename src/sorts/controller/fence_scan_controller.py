@@ -3,7 +3,7 @@ import logging, math, typing as t
 from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
-import xarray as xr
+import pandas as pd
 from sorts import radar, scheduling
 from sorts.const import min_datetime64_us
 from sorts.radar import Station
@@ -155,7 +155,7 @@ class FenceScanController(ControllerBase):
 
         return state
 
-    def _generate(self) -> scheduling.Schedule:
+    def _generate(self) -> scheduling.ScheduleDataframe:
         """Generate the schedules."""
 
         # TODO: write schedule to disk generally and then chunk load it as needed in the actual
@@ -196,19 +196,21 @@ class FenceScanController(ControllerBase):
         tx_slice_start_time_masked = tx_slice_start_time[tx_mask]
         tx_pointing_masked = tx_pointing[:, tx_mask]
 
-        tx_sch = scheduling.from_ndarrays(
-            start_time=tx_slice_start_time_masked,
-            end_time=tx_slice_start_time_masked + self.exp_detail.slice_duration,
+        tx_sch = scheduling.schedule_dataframe_from_ndarrays(
             exp_num=np.full(len(tx_slice_start_time_masked), self.exp_detail.id, dtype=np.int16),
             stn_num=np.full(len(tx_slice_start_time_masked), self.tx_station.uid, dtype=np.int16),
             simult_num=np.full(len(tx_slice_start_time_masked), 0, dtype=np.int16),
-            pointing=tx_pointing_masked,
+            start_time=tx_slice_start_time_masked,
+            end_time=tx_slice_start_time_masked + self.exp_detail.slice_duration,
+            pointing_e=tx_pointing_masked[0, :],
+            pointing_n=tx_pointing_masked[1, :],
+            pointing_u=tx_pointing_masked[2, :],
         )
 
         # TODO: `rx_schedule_size` is a bit of a mismisnomer, as out-of-range entries might later be removed
         rx_slice_start_time = tx_slice_start_time.repeat(len(self.scan_range))
         rx_schedule_size = self.state.tx_schedule_size * len(self.scan_range)
-        rx_schs: list[scheduling.Schedule] = []
+        rx_schs: list[scheduling.ScheduleDataframe] = []
         tx_pointings_of_a_cycle_without_translation_ecef: EcefCoordinates = enu_to_ecef(
             lat=self.tx_station.ecef_lat,
             lon=self.tx_station.ecef_lon,
@@ -252,29 +254,32 @@ class FenceScanController(ControllerBase):
             rx_pointing_masked = rx_pointings_enu[:, rx_mask]
             rx_pointings_simult_num_masked = rx_pointings_simult_num[rx_mask]
 
-            rx_sch = scheduling.from_ndarrays(
-                start_time=rx_slice_start_time_masked,
-                end_time=rx_slice_start_time_masked + self.exp_detail.slice_duration,
+            rx_sch = scheduling.schedule_dataframe_from_ndarrays(
                 exp_num=np.full(
                     len(rx_slice_start_time_masked), self.exp_detail.id, dtype=np.int16
                 ),
                 stn_num=np.full(len(rx_slice_start_time_masked), rx_station.uid, dtype=np.int16),
                 simult_num=rx_pointings_simult_num_masked,
-                pointing=rx_pointing_masked,
+                start_time=rx_slice_start_time_masked,
+                end_time=rx_slice_start_time_masked + self.exp_detail.slice_duration,
+                pointing_e=rx_pointing_masked[0, :],
+                pointing_n=rx_pointing_masked[1, :],
+                pointing_u=rx_pointing_masked[2, :],
             )
 
             rx_schs.append(rx_sch)
 
-        resultant_sch = xr.concat([tx_sch, *rx_schs], dim=scheduling._K.multi_index)
-        resultant_sch = resultant_sch.sortby(scheduling._K.start_time)
+        resultant_sch = scheduling.ScheduleDataframe((pd.concat([tx_sch, *rx_schs])))
+        resultant_sch = resultant_sch.sort_values(by=scheduling.ScheduleKey.start_time)
         # TODO: re-eval if it is too brutal
         # there will be duplicates if the tx station is also a rx station, we drop the duplicates here
-        resultant_sch = resultant_sch.drop_duplicates(scheduling._K.multi_index)
-        output = resultant_sch
+        resultant_sch = resultant_sch.drop_duplicates()
 
-        return output
+        return resultant_sch
 
-    def generate(self, start_time: Datetime_Like, end_time: Datetime_Like) -> scheduling.Schedule:
+    def generate(
+        self, start_time: Datetime_Like, end_time: Datetime_Like
+    ) -> scheduling.ScheduleDataframe:
         """Generate the schedules."""
 
         self.state = self._compute_controller_state(start_time, end_time)
