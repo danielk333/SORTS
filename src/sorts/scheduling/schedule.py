@@ -241,7 +241,7 @@ class ScheduleDb:
         if isinstance(db, sqlite3.Connection):
             db_conn = db
         else:
-            db_conn = sqlite3.connect(db, autocommit=False)
+            db_conn = sqlite3.connect(db, autocommit=False, timeout=15.0)
 
         db_conn.execute("PRAGMA foreign_keys = ON")
 
