@@ -76,9 +76,11 @@ def schedule_by_priority_test():
 
     start_time = "2026-02-11"
     end_time = "2026-03-11"
-    sdf = sdb.schedule_by_priority(
+    sdb.schedule_by_priority(
         ["exp_00", "exp_01", "exp_02"], [0, 1, 0], start_time=start_time, end_time=end_time
     )
+
+    sdf = sdb.get_dataframe(sdb.combined_schedule_name)
 
     assert (
         1 not in sdf[ScheduleKey.exp_num].values

@@ -218,7 +218,12 @@ class ScheduleDb:
         with space instead of `T` as separator.
     """
 
-    def __init__(self, db: ScheduleDbConnection, dataframe_names: list[str]):
+    def __init__(
+        self,
+        db: ScheduleDbConnection,
+        dataframe_names: list[str],
+        combined_schedule_name: str = "_combined_schedule",
+    ):
         """
         NOTE: This is intended as an internal constructor, please use the constructor methods to create instances.
         """
@@ -226,6 +231,8 @@ class ScheduleDb:
         self._db = db
         self.dataframe_names = OrderedDict.fromkeys(dataframe_names)
         """NOTE: It is an `OrderedDict` that maps to `None` because python does not have `OrderedSet` by default."""
+
+        self.combined_schedule_name = combined_schedule_name
 
     @classmethod
     def empty(cls, db: str | pathlib.Path | sqlite3.Connection = ":memory:") -> t.Self:
@@ -253,7 +260,7 @@ class ScheduleDb:
         self.dataframe_names.update([(name, None)])
 
     def get_dataframe(self, name: str) -> ScheduleDataframe:
-        """Find the correspond dataframe in DB by name."""
+        """Read the a table by name from DB into `ScheduleDataframe`."""
 
         df = pd.read_sql_query(
             f"SELECT * FROM {name}",
@@ -275,9 +282,12 @@ class ScheduleDb:
         priorities: list[int] | None = None,
         start_time: types.Datetime_Like | None = None,
         end_time: types.Datetime_Like | None = None,
+        combined_schedule_name: str | None = None,
     ):
         """
-        Generate a combined schedule for the specified table name.
+        Generate a combined schedule for the specified table name and store it in DB.
+        The resultant schedule is stored in the table `combined_schedule_name`,
+        which defaults to `self.combined_schedule_name`.
 
         Args:
             names: The list of table name to combine.
@@ -287,6 +297,7 @@ class ScheduleDb:
                 Must have the same length as the `names` param.
                 If `None`, a list of `[0, ...]` will be used.
                 Defaults to `None`.
+            combined_schedule_name: The name of the resultant schedule. Defaults to `self.combined_schedule_name`.
         """
 
         if names is None:
@@ -295,7 +306,13 @@ class ScheduleDb:
         if priorities is None:
             priorities = [0 for _ in names]
 
+        if combined_schedule_name is None:
+            combined_schedule_name = self.combined_schedule_name
+
         sql = f"""
+            DROP TABLE IF EXISTS {combined_schedule_name};
+
+            CREATE TABLE {combined_schedule_name} AS
             WITH sch_table AS (
                 SELECT
                     row_number() OVER () AS rid -- add a int id column
@@ -337,9 +354,7 @@ class ScheduleDb:
             ORDER BY start_time ASC, end_time ASC, simult_num ASC, stn_num ASC, exp_num ASC
             ;"""
 
-        df = pd.read_sql_query(sql, self._db, dtype=scheduleDataframeDtypes)
-
-        return ScheduleDataframe(df)
+        self._db.execute(sql)
 
 
 def validate_schedule_dataframe(df: pd.DataFrame) -> ScheduleDataframe:
