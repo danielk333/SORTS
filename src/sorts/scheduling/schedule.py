@@ -311,9 +311,9 @@ class ScheduleDb:
             combined_schedule_name = self.combined_schedule_name
 
         sql = f"""
-            DROP TABLE IF EXISTS {combined_schedule_name};
+            DROP TABLE IF EXISTS "{combined_schedule_name}";
 
-            CREATE TABLE {combined_schedule_name} AS
+            CREATE TABLE "{combined_schedule_name}" AS
             WITH sch_table AS (
                 SELECT
                     row_number() OVER () AS rid -- add a int id column
@@ -325,7 +325,7 @@ class ScheduleDb:
                 )
                 WHERE TRUE -- a dummpy condiditon to make injecting additional clause below easier
                     {f"AND start_time >= '{utils.to_pydatetime(start_time).isoformat(sep=" ")}'" if start_time is not None else ""}
-                    {f"AND end_time <= '{utils.to_pydatetime(end_time).isoformat(sep=" ")}'" if end_time is not None else ""}
+                    {f"AND end_time < '{utils.to_pydatetime(end_time).isoformat(sep=" ")}'" if end_time is not None else ""}
             ),
             conflicts AS (
                 SELECT cp.exp_num, cp.start_time
@@ -336,13 +336,13 @@ class ScheduleDb:
                     -- and different exp_num. (also prevent self-comparison of the same row)
                     AND og.exp_num != cp.exp_num
                 WHERE og.start_time < cp.end_time
-                AND og.end_time > cp.start_time
-                AND (
-                    -- lower priority number means more important
-                    -- for equal priority, the first one 
-                    og.priority < cp.priority
-                    OR (og.priority = cp.priority AND og.rid < cp.rid)
-                )
+                    AND og.end_time > cp.start_time
+                    AND (
+                        -- lower priority number means more important
+                        -- for equal priority, the first one 
+                        og.priority < cp.priority
+                        OR (og.priority = cp.priority AND og.rid < cp.rid)
+                    )
             )
             -- in the current implementation, we assume entries from all other radar stations
             -- of the same experiment have to be removed as well
@@ -357,6 +357,83 @@ class ScheduleDb:
 
         self._db.executescript(sql)
         self._db.commit()
+
+    TxRxPointingPairs = t.NewType("TxRxPointingPairs", pd.DataFrame)
+    """
+    A pandas `Dataframe` with 
+    ```
+    Columns:
+        exp_num        int16
+        rx_stn_num     int16
+        rx_simult_num  int16
+        time           datetime64[us]
+        tx_pointing_e  float64
+        tx_pointing_n  float64
+        tx_pointing_u  float64
+        rx_pointing_e  float64
+        rx_pointing_n  float64
+        rx_pointing_u  float64
+    ```
+    """
+
+    def get_tx_rx_pointing_pairs(
+        self,
+        start_time: types.Datetime_Like,
+        end_time: types.Datetime_Like,
+        tx_stn_num: int,
+        rx_stn_num: int,
+    ) -> TxRxPointingPairs:
+
+        df = pd.read_sql_query(
+            f"""
+            WITH rx_sch AS (
+                SELECT *
+                FROM "{self.combined_schedule_name}"
+                WHERE stn_num = {rx_stn_num}
+                    AND start_time >= '{utils.to_pydatetime(start_time).isoformat(sep=" ")}'
+                    AND end_time < '{utils.to_pydatetime(end_time).isoformat(sep=" ")}'
+            ),
+            tx_sch AS (
+                SELECT *
+                FROM "{self.combined_schedule_name}"
+                WHERE stn_num = {tx_stn_num}
+                    AND start_time >= '{utils.to_pydatetime(start_time).isoformat(sep=" ")}'
+                    AND end_time < '{utils.to_pydatetime(end_time).isoformat(sep=" ")}'
+            )
+            SELECT
+                rx_sch.exp_num AS exp_num
+                ,rx_sch.stn_num AS rx_stn_num
+                ,rx_sch.simult_num AS rx_simult_num
+                ,rx_sch.start_time AS time
+                ,tx_sch.pointing_e AS tx_pointing_e
+                ,tx_sch.pointing_n AS tx_pointing_n
+                ,tx_sch.pointing_u AS tx_pointing_u
+                ,rx_sch.pointing_e AS rx_pointing_e
+                ,rx_sch.pointing_n AS rx_pointing_n
+                ,rx_sch.pointing_u AS rx_pointing_u
+            FROM rx_sch
+                JOIN tx_sch
+                ON rx_sch.start_time = tx_sch.start_time
+                AND rx_sch.end_time = tx_sch.end_time
+                AND rx_sch.exp_num = tx_sch.exp_num
+            ;""",
+            self._db,
+            # TODO: replace hard-coded string key here by StrEnum
+            dtype={
+                "exp_num": "int16",
+                "rx_stn_num": "int16",
+                "rx_simult_num": "int16",
+                "time": "datetime64[us]",
+                "tx_pointing_e": "float64",
+                "tx_pointing_n": "float64",
+                "tx_pointing_u": "float64",
+                "rx_pointing_e": "float64",
+                "rx_pointing_n": "float64",
+                "rx_pointing_u": "float64",
+            },
+        )
+
+        return self.TxRxPointingPairs(df)
 
 
 def validate_schedule_dataframe(df: pd.DataFrame) -> ScheduleDataframe:

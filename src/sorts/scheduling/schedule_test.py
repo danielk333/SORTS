@@ -1,4 +1,4 @@
-import sqlite3
+import sqlite3, typing as t
 import numpy as np
 import pandas as pd
 from sorts import scheduling
@@ -80,19 +80,65 @@ def schedule_by_priority_test():
         ["exp_00", "exp_01", "exp_02"], [0, 1, 0], start_time=start_time, end_time=end_time
     )
 
-    sdf = sdb.get_dataframe(sdb.combined_schedule_name)
+    df = sdb.get_dataframe(sdb.combined_schedule_name)
 
     assert (
-        1 not in sdf[ScheduleKey.exp_num].values
+        1 not in df[ScheduleKey.exp_num].values
     ), "Entries with the same `exp_num` and `start_time` are not removed together."
 
     assert (
-        2 in sdf[ScheduleKey.exp_num].values
+        2 in df[ScheduleKey.exp_num].values
     ), "Entries with the same `exp_num` but different `start_time` should not be removed together."
 
     assert (
-        all(sdf[ScheduleKey.start_time] >= start_time)
-        and all(sdf[ScheduleKey.end_time] <= end_time)
+        all(df[ScheduleKey.start_time] >= start_time)
+        and all(df[ScheduleKey.end_time] <= end_time)
     ), "Entries outside of specified time range should not be included." # fmt: skip
+
+    return
+
+
+def get_tx_rx_pointing_pairs_test():
+    # db_conn = sqlite3.connect("./test.sqlite")  # use this if an actual db file is preferred
+    db_conn = sqlite3.connect(":memory:")
+    sdb = scheduling.ScheduleDb.empty(db_conn)
+
+    # tx rows
+    tx_rows = [
+        [0,0,0, np.datetime64("2026-02-11 00:00:00.123456", "us"), np.datetime64("2026-02-11 00:00:59.123456", "us"), 0.1,0.2,0.3],
+        [0,0,0, np.datetime64("2026-02-11 00:02:00.123456", "us"), np.datetime64("2026-02-11 00:02:59.123456", "us"), 0.1,0.2,0.3],
+    ] # fmt: skip
+
+    # rx rows, without corresponding tx
+    rx_rows_wo_tx = [
+        [0,1,0, np.datetime64("2026-02-11 00:01:00.123456", "us"), np.datetime64("2026-02-11 00:01:59.123456", "us"), 0.1,0.2,0.3],
+        [0,1,1, np.datetime64("2026-02-11 00:01:00.123456", "us"), np.datetime64("2026-02-11 00:01:59.123456", "us"), 0.1,0.2,0.3],
+        [0,1,2, np.datetime64("2026-02-11 00:01:00.123456", "us"), np.datetime64("2026-02-11 00:01:59.123456", "us"), 0.1,0.2,0.3],
+    ] # fmt: skip
+
+    # rx rows, with corresponding tx
+    rx_rows_w_tx =[
+        [0,1,0, np.datetime64("2026-02-11 00:02:00.123456", "us"), np.datetime64("2026-02-11 00:02:59.123456", "us"), 0.1,0.2,0.3], 
+        [0,1,1, np.datetime64("2026-02-11 00:02:00.123456", "us"), np.datetime64("2026-02-11 00:02:59.123456", "us"), 0.1,0.2,0.3], 
+        [0,1,2, np.datetime64("2026-02-11 00:02:00.123456", "us"), np.datetime64("2026-02-11 00:02:59.123456", "us"), 0.1,0.2,0.3], 
+    ] # fmt: skip
+
+    rows = [*tx_rows, *rx_rows_wo_tx, *rx_rows_w_tx]
+
+    sdb.add_dataframe(
+        scheduling.schedule_dataframe_from_rows(rows),
+        sdb.combined_schedule_name,
+    )
+
+    df = sdb.get_tx_rx_pointing_pairs(
+        start_time="2026-02-01", end_time="2026-03-01", tx_stn_num=0, rx_stn_num=1
+    )
+
+    # TODO: replace hard-coded string key here by StrEnum
+    assert all(
+        df.loc[t.cast(t.Any, (0, ["exp_num", "rx_stn_num", "time"]))]
+        == [rx_rows_w_tx[0][0], rx_rows_w_tx[0][1], rx_rows_w_tx[0][3]]
+    )
+    assert all(df["rx_simult_num"] == [rx_rows_w_tx[0][2], rx_rows_w_tx[1][2], rx_rows_w_tx[2][2]])
 
     return
