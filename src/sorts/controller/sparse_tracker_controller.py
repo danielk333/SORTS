@@ -1,17 +1,13 @@
 from __future__ import annotations
 import logging, typing as t
-from dataclasses import dataclass
 import numpy as np
-import numpy.typing as npt
-import xarray as xr
+import pandas as pd
 from sorts import radar, scheduling
-from sorts.utils import to_datetime64_us, to_timedelta64_us
+from sorts.utils import to_datetime64_us
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.types import (
-    EcefStates,
     Datetime64_us,
-    Timedelta64_us,
     EnuCoordinates,
     Datetime_Like,
 )
@@ -96,11 +92,11 @@ class SparseTrackerController(ControllerBase):
 
         return stn_map
 
-    def generate(self, passages_of_spobj: list[Passage]) -> scheduling.Schedule:
+    def generate(self, passages_of_spobj: list[Passage]) -> scheduling.ScheduleDataframe:
         """Generate the schedules."""
         # early return for empty case
         if len(passages_of_spobj) == 0:
-            return scheduling.empty()
+            return scheduling.empty_schedule_dataframe()
 
         observation_times_relative = []
         observation_times = []
@@ -133,16 +129,18 @@ class SparseTrackerController(ControllerBase):
         )
         tx_pointings = tx_pointings / np.linalg.norm(tx_pointings, axis=0)
 
-        tx_sch = scheduling.from_ndarrays(
-            start_time=tx_sch_time,
-            end_time=tx_sch_time + self.exp_detail.slice_duration,
+        tx_sch = scheduling.schedule_dataframe_from_ndarrays(
             exp_num=np.full(tx_sch_len, self.exp_detail.id, dtype=np.int16),
             stn_num=np.full(tx_sch_len, self.tx_station.uid, dtype=np.int16),
             simult_num=np.full(tx_sch_len, 0, dtype=np.int16),
-            pointing=tx_pointings,
+            start_time=tx_sch_time,
+            end_time=tx_sch_time + self.exp_detail.slice_duration,
+            pointing_e=tx_pointings[0, :],
+            pointing_n=tx_pointings[1, :],
+            pointing_u=tx_pointings[2, :],
         )
 
-        rx_schs: list[scheduling.Schedule] = []
+        rx_schs: list[scheduling.ScheduleDataframe] = []
         for rx_stn in self.rx_stations:
             rx_pointings: EnuCoordinates = rx_stn.enu(
                 self.interpolator.get_state(tx_sch_time_rel)[:3, :]
@@ -150,18 +148,19 @@ class SparseTrackerController(ControllerBase):
             rx_pointings = rx_pointings / np.linalg.norm(rx_pointings, axis=0)
 
             rx_schs.append(
-                scheduling.from_ndarrays(
-                    start_time=tx_sch_time,
-                    end_time=tx_sch_time + self.exp_detail.slice_duration,
+                scheduling.schedule_dataframe_from_ndarrays(
                     exp_num=np.full(tx_sch_len, self.exp_detail.id, dtype=np.int16),
                     stn_num=np.full(tx_sch_len, rx_stn.uid, dtype=np.int16),
                     simult_num=np.full(tx_sch_len, 0, dtype=np.int16),
-                    pointing=rx_pointings,
+                    start_time=tx_sch_time,
+                    end_time=tx_sch_time + self.exp_detail.slice_duration,
+                    pointing_e=rx_pointings[0, :],
+                    pointing_n=rx_pointings[1, :],
+                    pointing_u=rx_pointings[2, :],
                 )
             )
 
-        resultant_sch = xr.concat([tx_sch, *rx_schs], dim=scheduling._K.multi_index)
-        resultant_sch = resultant_sch.sortby(scheduling._K.start_time)
-        output = resultant_sch
+        resultant_sch = scheduling.ScheduleDataframe((pd.concat([tx_sch, *rx_schs])))
+        resultant_sch = resultant_sch.sort_values(by=scheduling.ScheduleKey.start_time)
 
-        return output
+        return resultant_sch
