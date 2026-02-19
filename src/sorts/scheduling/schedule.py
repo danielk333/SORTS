@@ -184,6 +184,8 @@ A pandas `DataFrame` which:
     ```
 
 The keys are available as enum `ScheduleKey` for consistent access.
+
+NOTE: This is intended as an internal constructor, please use the constructor functions to create instances.
 """
 
 ScheduleDbConnection = t.NewType("ScheduleDbConnection", sqlite3.Connection)
@@ -247,7 +249,7 @@ class ScheduleDb:
             name: Will be used as DB table name.
         """
 
-        df.to_sql(name, self._db, if_exists="replace")
+        df.to_sql(name, self._db, if_exists="replace", index=False)
         self.dataframe_names.update([(name, None)])
 
     def get_dataframe(self, name: str) -> ScheduleDataframe:
@@ -256,7 +258,6 @@ class ScheduleDb:
         df = pd.read_sql_query(
             f"SELECT * FROM {name}",
             self._db,
-            index_col=ScheduleKey.index,
             dtype=scheduleDataframeDtypes,
         )
 
@@ -328,17 +329,15 @@ class ScheduleDb:
             -- in the current implementation, we assume entries from all other radar stations
             -- of the same experiment have to be removed as well
             SELECT 
-                "index"
-                ,exp_num, stn_num, simult_num
+                exp_num, stn_num, simult_num
                 ,start_time, end_time
                 ,pointing_e, pointing_n, pointing_u
             FROM sch_table
             WHERE (exp_num, start_time) NOT IN (SELECT exp_num, start_time FROM conflicts)
+            ORDER BY start_time ASC, end_time ASC, simult_num ASC, stn_num ASC, exp_num ASC
             ;"""
 
-        df = pd.read_sql_query(
-            sql, self._db, index_col=ScheduleKey.index, dtype=scheduleDataframeDtypes
-        )
+        df = pd.read_sql_query(sql, self._db, dtype=scheduleDataframeDtypes)
 
         return ScheduleDataframe(df)
 
