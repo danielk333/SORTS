@@ -185,6 +185,7 @@ A pandas `DataFrame` which:
 
 The keys are available as enum `ScheduleKey` for consistent access.
 """
+
 ScheduleDbConnection = t.NewType("ScheduleDbConnection", sqlite3.Connection)
 
 scheduleDataframeDtypes: t.Final[dict[t.Hashable, pdt.Dtype]] = {
@@ -326,7 +327,11 @@ class ScheduleDb:
             )
             -- in the current implementation, we assume entries from all other radar stations
             -- of the same experiment have to be removed as well
-            SELECT {",".join([f'"{k}"' for k in ScheduleKey])}
+            SELECT 
+                "index"
+                ,exp_num, stn_num, simult_num
+                ,start_time, end_time
+                ,pointing_e, pointing_n, pointing_u
             FROM sch_table
             WHERE (exp_num, start_time) NOT IN (SELECT exp_num, start_time FROM conflicts)
             ;"""
@@ -351,7 +356,7 @@ def validate_schedule_dataframe(df: pd.DataFrame) -> ScheduleDataframe:
         `ScheduleValidationError`
     """
 
-    if not (df.index.name is None or df.index.name == "index"):
+    if not (df.index.name is None or df.index.name == ScheduleKey.index):
         raise ScheduleValidationError("DataFrame index name is not `None` or `'index'`")
 
     if not {key.value for key in ScheduleKey if key != ScheduleKey.index}.issubset(df.columns):
