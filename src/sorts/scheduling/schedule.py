@@ -241,7 +241,7 @@ class ScheduleDb:
         if isinstance(db, sqlite3.Connection):
             db_conn = db
         else:
-            db_conn = sqlite3.connect(db)
+            db_conn = sqlite3.connect(db, autocommit=False)
 
         db_conn.execute("PRAGMA foreign_keys = ON")
 
@@ -257,6 +257,7 @@ class ScheduleDb:
         """
 
         df.to_sql(name, self._db, if_exists="replace", index=False)
+        self._db.commit()
         self.dataframe_names.update([(name, None)])
 
     def get_dataframe(self, name: str) -> ScheduleDataframe:
@@ -354,7 +355,8 @@ class ScheduleDb:
             ORDER BY start_time ASC, end_time ASC, simult_num ASC, stn_num ASC, exp_num ASC
             ;"""
 
-        self._db.execute(sql)
+        self._db.executescript(sql)
+        self._db.commit()
 
 
 def validate_schedule_dataframe(df: pd.DataFrame) -> ScheduleDataframe:
