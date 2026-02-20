@@ -93,31 +93,6 @@ ExperimentDetailMap = dict[ExperimentId, ExperimentDetail]
 ExperimentIdStationIdPairsMap = dict[ExperimentId, list[tuple[radar.StationId, radar.StationId]]]
 
 
-def empty() -> Schedule:
-    multi_index = pd.MultiIndex.from_arrays(
-        [
-            np.empty(0, dtype=np.int16),
-            np.empty(0, dtype=np.int16),
-            np.empty(0, dtype=np.int16),
-            np.empty(0, dtype="datetime64[us]"),
-        ],
-        names=(_K.exp_num, _K.stn_num, _K.simult_num, _K.start_time),
-    )
-
-    sch = xr.Dataset(
-        coords={
-            **xr.Coordinates.from_pandas_multiindex(multi_index, _K.multi_index),
-            _K.enu: [_K.e, _K.n, _K.u],
-        },
-        data_vars={
-            _K.end_time: (_K.multi_index, np.empty(0, dtype="datetime64[us]")),
-            _K.pointing: ((_K.enu, _K.multi_index), np.empty((3, 0), dtype=np.float64)),
-        },
-    )
-
-    return Schedule(sch)
-
-
 def from_ndarrays(
     start_time: npt.NDArray[types.Datetime64_us],
     end_time: npt.NDArray[types.Datetime64_us],
