@@ -222,6 +222,66 @@ class ScheduleDb:
 
         return cls(db=ScheduleDbConnection(db_conn), dataframe_names=[])
 
+    @classmethod
+    def from_schedule_dataframes(
+        cls,
+        dfs: list[ScheduleDataframe],
+        names: list[str],
+        db: str | pathlib.Path | sqlite3.Connection = ":memory:",
+    ) -> t.Self:
+        """Create a `ScheduleDb` from a list of `ScheduleDataframe` and their names."""
+
+        schedule_db = cls.empty(db)
+        for df, name in zip(dfs, names, strict=True):
+            schedule_db.add_dataframe(df, name)
+
+        return schedule_db
+
+    def __getstate__(self):
+        """Customize pickle read."""
+
+        state = self.__dict__.copy()
+
+        # replace `_db` by
+        # - a path string if it is a file
+        # - a dump if it is an in-memory database
+        match self._db.execute("PRAGMA database_list").fetchone()[2]:
+            case "":
+                state["_db_dump"] = "\n".join([line for line in self._db.iterdump()])
+            case str() as fpath:
+                state["_db_fpath"] = fpath
+            case other:
+                raise RuntimeError(f"Unexcepted db path value {other}.")
+        state.pop("_db", None)
+
+        return state
+
+    def __setstate__(self, state):
+        """Customize pickle write."""
+
+        self.__dict__.update(state)
+
+        # restore `_db`
+        db_dump = state.pop("_db_dump", None)
+        db_fpath = state.pop("_db_fpath", None)
+
+        if db_dump is not None:
+            db_conn = sqlite3.connect(":memory:", autocommit=True, timeout=15.0)
+            db_conn.executescript(db_dump)  # executes all SQL at once
+            db_conn.commit()
+
+            self._db = db_conn
+
+        elif db_fpath is not None:
+            db_conn = sqlite3.connect(db_fpath, autocommit=True, timeout=15.0)
+
+        else:
+            raise RuntimeError(
+                "Unable to restore the backing db, both `_db_dump` and `_db_fpath` are not found in the pickle."
+            )
+
+        state.pop("_db_fpath", None)
+
     def add_dataframe(self, df: ScheduleDataframe, name: str):
         """
         Insert the dataframe as a table in DB.
