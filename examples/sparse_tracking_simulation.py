@@ -193,8 +193,9 @@ def simulate_obs():
         spobjs = [tup[0] for tup in perturbed_object_groups]
         prop_interps = [tup[1] for tup in perturbed_object_groups]
 
-        sim_pth = obj_pth / "simulation_unit.pickle"
-        if prm.clobber or not sim_pth.exists():
+        sim_pth = prm.save_dpath / "simulation.sqlite"
+        is_write_save_file = prm.clobber or not sim_pth.exists()
+        if is_write_save_file:
             passages = find_simultaneous_passages(
                 dt=(prop_interp.times - prm.start_time.datetime64) / np.timedelta64(1, "s"),
                 space_object=spobj,
@@ -238,17 +239,16 @@ def simulate_obs():
                 end_time=prm.end_time,
                 space_objects=spobjs,
                 interpolated_propagations=prop_interps,
+                save_fpath=sim_pth,
                 passages=passage_groups,
             )
-            safe_pickle(sim, sim_pth)
+            sim.save(sim_pth)
         else:
-            with open(sim_pth, "rb") as fh:
-                sim = pickle.load(fh)
+            sim = StxMrxSimulation.load(sim_pth)
 
-        obs_pth = obj_pth / "simulation_unit_completed.pickle"
-        if prm.clobber or not obs_pth.exists():
             sim.run()
-            safe_pickle(sim, obs_pth)
+        if is_write_save_file:
+            sim.save(sim_pth)
 
 
 propagate()

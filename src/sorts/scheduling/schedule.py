@@ -193,11 +193,12 @@ class ScheduleDb:
         with space instead of `T` as separator.
     """
 
+    combined_schedule_name: t.Final = "_combined_schedule"
+
     def __init__(
         self,
         db: ScheduleDbConnection,
         dataframe_names: list[str],
-        combined_schedule_name: str = "_combined_schedule",
     ):
         """
         NOTE: This is intended as an internal constructor, please use the constructor methods to create instances.
@@ -207,8 +208,6 @@ class ScheduleDb:
         self.dataframe_names = OrderedDict.fromkeys(dataframe_names)
         """NOTE: It is an `OrderedDict` that maps to `None` because python does not have `OrderedSet` by default."""
 
-        self.combined_schedule_name = combined_schedule_name
-
     @classmethod
     def empty(cls, db: str | pathlib.Path | sqlite3.Connection = ":memory:") -> t.Self:
         """Constructor for empty object."""
@@ -216,9 +215,10 @@ class ScheduleDb:
         if isinstance(db, sqlite3.Connection):
             db_conn = db
         else:
-            db_conn = sqlite3.connect(db, autocommit=False, timeout=15.0)
+            db_conn = sqlite3.connect(db, autocommit=True, timeout=15.0)
 
         db_conn.execute("PRAGMA foreign_keys = ON")
+        db_conn.execute("PRAGMA journal_mode = WAL")
 
         return cls(db=ScheduleDbConnection(db_conn), dataframe_names=[])
 
