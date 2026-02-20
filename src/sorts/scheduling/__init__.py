@@ -1,4 +1,4 @@
-from . import priority_scheduling, schedule
+# TODO: `schedule` module can now be moved into `scheduling` directly
 from .schedule import (
     ScheduleKey,
     ScheduleDataframe,
@@ -16,10 +16,7 @@ from .schedule import (
     ExperimentDetail,
     ExperimentDetailMap,
     ExperimentIdStationIdPairsMap,
-    empty,
     from_ndarrays,
     filter_by_time_range,
     filter_by_time_ranges,
 )
-
-# TODO: adj module and/or func name so func 'priority_scheduling' can be exported here
