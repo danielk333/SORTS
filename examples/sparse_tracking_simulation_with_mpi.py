@@ -5,7 +5,7 @@ import numpy as np
 import numpy.typing as npt
 from astropy.time import Time
 import sorts
-from sorts import interpolation, population, propagator, radar, ExperimentDetail
+from sorts import interpolation, population, propagator, radar, ExperimentDetail, scheduling
 from sorts.controller import SparseTrackerController
 from sorts.simulation.funcs import (
     ensure_directory_exist,
@@ -231,12 +231,16 @@ class SimulateObs(sorts.MpiQueuedExecution):
             )
 
             tracker_sch = tracker_ctrl.generate(passages)
+            schedule_db = scheduling.ScheduleDb.from_schedule_dataframes(
+                [tracker_sch], ["tracker_sch"], obj_pth / "schedule.sqlite"
+            )
+            schedule_db.schedule_by_priority()
             # make sure the same passage data is used for all perturbed objects
             passage_groups = {idx: passages for idx in range(len(spobjs))}
 
             sim = StxMrxSimulation.from_controllers(
                 controllers=[tracker_ctrl],
-                schedule=tracker_sch,
+                schedule=schedule_db,
                 epoch=prm.start_time,
                 start_time=prm.start_time,
                 end_time=prm.end_time,

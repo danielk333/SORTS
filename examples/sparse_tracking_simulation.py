@@ -228,7 +228,7 @@ def simulate_obs():
 
             tracker_sch = tracker_ctrl.generate(passages)
             schedule_db = scheduling.ScheduleDb.from_schedule_dataframes(
-                [tracker_sch], ["tracker_sch"], prm.save_dpath / "schedule.sqlite"
+                [tracker_sch], ["tracker_sch"], obj_pth / "schedule.sqlite"
             )
             schedule_db.schedule_by_priority()
 
