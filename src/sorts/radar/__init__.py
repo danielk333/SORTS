@@ -5,4 +5,5 @@
 from .scans import Scan
 from .tx_rx import Station, TX, RX, StationId
 
+from .radar import Radar
 from .radars import get_radar, list_radars
