@@ -3,6 +3,7 @@ import logging, typing as t, pathlib, sqlite3
 from collections import OrderedDict
 import pandas as pd
 from sorts import types, utils
+from sorts.simulation.stx_mrx_simulation.simulation_unit import _K as SimulationUnitKey
 from .schedule_dataframe import ScheduleDataframe, scheduleDataframeDtypes
 
 
@@ -226,7 +227,6 @@ class ScheduleDb:
     ```
     Columns:
         exp_num        int16
-        rx_stn_num     int16
         rx_simult_num  int16
         time           datetime64[us]
         tx_pointing_e  float64
@@ -264,7 +264,6 @@ class ScheduleDb:
             )
             SELECT
                 rx_sch.exp_num AS exp_num
-                ,rx_sch.stn_num AS rx_stn_num
                 ,rx_sch.simult_num AS rx_simult_num
                 ,rx_sch.start_time AS time
                 ,tx_sch.pointing_e AS tx_pointing_e
@@ -280,18 +279,16 @@ class ScheduleDb:
                 AND rx_sch.exp_num = tx_sch.exp_num
             ;""",
             self._db,
-            # TODO: replace hard-coded string key here by StrEnum
             dtype={
-                "exp_num": "int16",
-                "rx_stn_num": "int16",
-                "rx_simult_num": "int16",
-                "time": "datetime64[us]",
-                "tx_pointing_e": "float64",
-                "tx_pointing_n": "float64",
-                "tx_pointing_u": "float64",
-                "rx_pointing_e": "float64",
-                "rx_pointing_n": "float64",
-                "rx_pointing_u": "float64",
+                SimulationUnitKey.exp_num: "int16",
+                SimulationUnitKey.rx_simult_num: "int16",
+                SimulationUnitKey.time: "datetime64[us]",
+                SimulationUnitKey.tx_pointing_e: "float64",
+                SimulationUnitKey.tx_pointing_n: "float64",
+                SimulationUnitKey.tx_pointing_u: "float64",
+                SimulationUnitKey.rx_pointing_e: "float64",
+                SimulationUnitKey.rx_pointing_n: "float64",
+                SimulationUnitKey.rx_pointing_u: "float64",
             },
         )
 
