@@ -4,14 +4,14 @@ from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from sorts import types, radar, schedule
+from sorts import types, radar
 from sorts.types import TxRxTuple
 from sorts.utils import assert_class_attributes_equal_to, to_datetime64_us
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.signals import hard_target_snr
 from sorts.interpolation import Interpolator
-from sorts.schedule import ExperimentDetailMap, ScheduleDataframe, ScheduleKey
+from sorts.schedule import ScheduleDataframe, ScheduleKey
 from sorts.simulation import Passage
 
 
@@ -180,7 +180,7 @@ class FromPassagesOverTxRxStationPairParam:
     tx_station: Station
     rx_station: Station
     tx_rx_pointing_pairs: pd.DataFrame # TODO: this is a tmp solution, should refactor this type and dataflow; # fmt: skip
-    exp_detail_map: ExperimentDetailMap
+    exp_detail_map: types.ExperimentDetailMap
 
 
 # TODO: re-eval: `Station`` can be taken from `Passage`, but empty `list[Passage]` would be an issue in that case.
@@ -210,7 +210,7 @@ class SimulationUnit:
         passages: list[Passage],
         tx_station: Station,
         rx_station: Station,
-        exp_detail_map: ExperimentDetailMap,
+        exp_detail_map: types.ExperimentDetailMap,
         state: SimulationUnitState,
     ):
         self.id = id
@@ -364,16 +364,16 @@ class SimulationUnit:
 
 
 ObservationStationScheduleIndexer = tuple[
-    schedule.ExperimentId,
+    types.ExperimentId,
     radar.StationId,
-    schedule.SimultaneousNum,
+    types.SimultaneousNum,
     npt.NDArray[types.Datetime64_us],
 ]
 ObservationScheduleIndexer = TxRxTuple[
     ObservationStationScheduleIndexer, ObservationStationScheduleIndexer
 ]
 ObservationStateIndexer = tuple[
-    schedule.ExperimentId, schedule.SimultaneousNum, npt.NDArray[types.Datetime64_us]
+    types.ExperimentId, types.SimultaneousNum, npt.NDArray[types.Datetime64_us]
 ]
 
 
@@ -384,8 +384,8 @@ class Observation:
         self,
         passage: Passage,
         sim_unit: SimulationUnit,
-        exp_id: schedule.ExperimentId,
-        simult_num: schedule.SimultaneousNum,
+        exp_id: types.ExperimentId,
+        simult_num: types.SimultaneousNum,
     ):
         # todo: update for collecting passage and multi passage
         self.passage = passage
@@ -397,9 +397,9 @@ class Observation:
     def from_passage(cls, passage: Passage, sim_unit: SimulationUnit) -> list[t.Self]:
         state_slice = filter_state_by_time_range(sim_unit._state, passage.time_range)
 
-        unique_exp_id_simult_num_pairs: list[
-            tuple[schedule.ExperimentId, schedule.SimultaneousNum]
-        ] = (state_slice.index.droplevel(_K.time).unique().to_list())
+        unique_exp_id_simult_num_pairs: list[tuple[types.ExperimentId, types.SimultaneousNum]] = (
+            state_slice.index.droplevel(_K.time).unique().to_list()
+        )
 
         obss = [
             cls(passage=passage, sim_unit=sim_unit, exp_id=exp_id, simult_num=simult_num)

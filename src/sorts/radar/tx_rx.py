@@ -14,12 +14,6 @@ from sorts import frames
 StationId = int
 """A unique int16 that identifies a radar station"""
 
-"""
-A structured unique identifer for a station of a radar.
-
-Intended to be used as the uid of a `Station` object.
-"""
-
 
 class Station(object):
     """A radar station.

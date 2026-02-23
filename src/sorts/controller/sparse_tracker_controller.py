@@ -2,7 +2,7 @@ from __future__ import annotations
 import logging, typing as t
 import numpy as np
 import pandas as pd
-from sorts import radar, schedule
+from sorts import types, radar, schedule
 from sorts.utils import to_datetime64_us
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
@@ -29,7 +29,7 @@ class SparseTrackerController(ControllerBase):
         self,
         tx_station: Station,
         rx_stations: t.Sequence[Station],
-        exp_detail: schedule.ExperimentDetail,
+        exp_detail: types.ExperimentDetail,
         space_object: SpaceObject,
         epoch: Datetime64_us,
         station_id_pairs: list[tuple[radar.StationId, radar.StationId]],
@@ -55,7 +55,7 @@ class SparseTrackerController(ControllerBase):
         cls,
         tx_station: Station,
         rx_stations: t.Sequence[Station],
-        exp_detail: schedule.ExperimentDetail,
+        exp_detail: types.ExperimentDetail,
         space_object: SpaceObject,
         epoch: Datetime_Like,
         points_per_passage: int,
@@ -78,10 +78,10 @@ class SparseTrackerController(ControllerBase):
 
         return ctrl
 
-    def get_experiment_detail(self) -> schedule.ExperimentDetail:
+    def get_experiment_detail(self) -> types.ExperimentDetail:
         return self.exp_detail
 
-    def get_experiment_id_station_id_pairs_map(self) -> schedule.ExperimentIdStationIdPairsMap:
+    def get_experiment_id_station_id_pairs_map(self) -> types.ExperimentIdStationIdPairsMap:
         return {self.exp_detail.id: self.station_id_pairs}
 
     def get_station_map(self) -> dict[radar.StationId, radar.Station]:

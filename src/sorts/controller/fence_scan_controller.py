@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from sorts import radar, schedule
+from sorts import types, radar, schedule
 from sorts.const import min_datetime64_us
 from sorts.radar import Station
 from sorts.frames import enu_to_ecef, ecef_to_enu, sph_to_cart
@@ -60,7 +60,7 @@ class FenceScanController(ControllerBase):
         min_elevation: Float_as_deg,
         pointings_per_cycle: int,
         scan_range: npt.NDArray[Float64_as_m],
-        exp_detail: schedule.ExperimentDetail,
+        exp_detail: types.ExperimentDetail,
         station_id_pairs: list[tuple[radar.StationId, radar.StationId]],
         state: ControllerState,
     ):
@@ -92,7 +92,7 @@ class FenceScanController(ControllerBase):
         min_elevation: Float_as_deg,
         pointings_per_cycle: int,
         scan_range: npt.NDArray[Float64_as_m],
-        exp_detail: schedule.ExperimentDetail,
+        exp_detail: types.ExperimentDetail,
     ) -> t.Self:
         """A constructor method"""
 
@@ -112,10 +112,10 @@ class FenceScanController(ControllerBase):
 
         return ctrl
 
-    def get_experiment_detail(self) -> schedule.ExperimentDetail:
+    def get_experiment_detail(self) -> types.ExperimentDetail:
         return self.exp_detail
 
-    def get_experiment_id_station_id_pairs_map(self) -> schedule.ExperimentIdStationIdPairsMap:
+    def get_experiment_id_station_id_pairs_map(self) -> types.ExperimentIdStationIdPairsMap:
         return {self.exp_detail.id: self.station_id_pairs}
 
     def get_station_map(self) -> dict[radar.StationId, radar.Station]:

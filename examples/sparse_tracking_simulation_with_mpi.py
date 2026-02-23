@@ -5,7 +5,7 @@ import numpy as np
 import numpy.typing as npt
 from astropy.time import Time
 import sorts
-from sorts import interpolation, population, propagator, radar, ExperimentDetail, schedule
+from sorts import types, interpolation, population, propagator, radar, schedule
 from sorts.controller import SparseTrackerController
 from sorts.simulation.funcs import (
     ensure_directory_exist,
@@ -211,7 +211,7 @@ class SimulateObs(sorts.MpiQueuedExecution):
             tracker_ctrl = SparseTrackerController.from_space_object(
                 tx_station=prm.tx_station,
                 rx_stations=prm.rx_stations,
-                exp_detail=ExperimentDetail(
+                exp_detail=types.ExperimentDetail(
                     id=0,
                     # not used
                     coh_int_bandwidth=1.0,

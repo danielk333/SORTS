@@ -4,7 +4,7 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import spacecoords
-from sorts import radar, schedule
+from sorts import types, radar, schedule
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.types import Datetime64_us, EnuCoordinates, Datetime_Like
@@ -26,7 +26,7 @@ class TrackerController(ControllerBase):
         self,
         tx_station: Station,
         rx_stations: t.Sequence[Station],
-        exp_detail: schedule.ExperimentDetail,
+        exp_detail: types.ExperimentDetail,
         space_object: SpaceObject,
         epoch: Datetime64_us,
         station_id_pairs: list[tuple[radar.StationId, radar.StationId]],
@@ -49,7 +49,7 @@ class TrackerController(ControllerBase):
         cls,
         tx_station: Station,
         rx_stations: t.Sequence[Station],
-        exp_detail: schedule.ExperimentDetail,
+        exp_detail: types.ExperimentDetail,
         space_object: SpaceObject,
         epoch: Datetime_Like,
         interpolated_propagation: InterpolatedPropagation,
@@ -70,10 +70,10 @@ class TrackerController(ControllerBase):
 
         return ctrl
 
-    def get_experiment_detail(self) -> schedule.ExperimentDetail:
+    def get_experiment_detail(self) -> types.ExperimentDetail:
         return self.exp_detail
 
-    def get_experiment_id_station_id_pairs_map(self) -> schedule.ExperimentIdStationIdPairsMap:
+    def get_experiment_id_station_id_pairs_map(self) -> types.ExperimentIdStationIdPairsMap:
         return {self.exp_detail.id: self.station_id_pairs}
 
     def get_station_map(self) -> dict[radar.StationId, radar.Station]:

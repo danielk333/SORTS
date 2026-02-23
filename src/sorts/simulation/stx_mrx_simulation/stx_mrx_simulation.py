@@ -7,13 +7,12 @@ import pandas as pd
 import pyorb
 import sorts
 from tqdm import tqdm
-from sorts import schedule, controller, simulation
+from sorts import types, schedule, controller, simulation
 from sorts.types import Datetime_Like, Float64_as_sec, Datetime64_us, EcefStates
 from sorts.utils import to_datetime64_us
 from sorts.radar import Station, StationId
 from sorts.simulation import Passage
-from sorts.simulation.funcs import InterpolatedPropagation, ensure_directory_exist
-from sorts.schedule import ExperimentDetailMap
+from sorts.simulation.funcs import InterpolatedPropagation
 from sorts.simulation.stx_mrx_simulation.simulation_unit import (
     SimulationUnit,
     FromPassagesOverTxRxStationPairParam,
@@ -151,7 +150,7 @@ class StxMrxSimulation:
         station_map: dict[StationId, Station],
         station_id_pairs: t.Sequence[tuple[StationId, StationId]],
         schedule_db: schedule.ScheduleDb,
-        exp_detail_map: ExperimentDetailMap,
+        exp_detail_map: types.ExperimentDetailMap,
         epoch: Datetime_Like,
         start_time: Datetime_Like,
         end_time: Datetime_Like,
@@ -202,7 +201,7 @@ class StxMrxSimulation:
 
         stn_map: dict[StationId, Station] = {}
         stn_id_pairs_set: set[tuple[StationId, StationId]] = set()
-        exp_detail_map: ExperimentDetailMap = {}
+        exp_detail_map: types.ExperimentDetailMap = {}
 
         for ctrl in controllers:
             stn_map.update(ctrl.get_station_map())

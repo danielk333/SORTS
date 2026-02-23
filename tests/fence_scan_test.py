@@ -22,7 +22,7 @@ import numpy as np
 from astropy.time import Time
 from astropy.constants import R_earth  # type: ignore
 import pyant, pyorb
-from sorts import schedule, ExperimentDetail, interpolation
+from sorts import types, schedule, interpolation
 from sorts.types import Float64_as_sec, Float64_as_deg, Float_as_sec, Float_as_m
 from sorts.utils import to_datetime64_us
 from sorts.frames import enu_to_ecef
@@ -148,7 +148,7 @@ def south_to_north_circular_orbit_test():
     fence_scan_ctrl = FenceScanController.from_scan_spec(
         tx_station=tx_0_stn,
         rx_stations=[rx_0_stn, rx_1_stn],
-        exp_detail=ExperimentDetail(
+        exp_detail=types.ExperimentDetail(
             id=0,
             coh_int_bandwidth=1.0,
             ipp=1.0,

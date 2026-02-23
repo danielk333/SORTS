@@ -23,13 +23,8 @@ logger = logging.getLogger(__name__)
 ##
 # v2 imports
 ##
-from . import types
-from . import utils
-from . import schedule
-from . import controller
-from . import simulation
+from . import types, utils, schedule, controller, simulation
 
-from .schedule import ExperimentDetail
 from .controller import TrackerController, FenceScanController
 from .simulation import StxMrxSimulation
 from .mpi_queued_execution import MpiQueuedExecution

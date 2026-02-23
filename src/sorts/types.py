@@ -4,6 +4,7 @@ Shared types in this package.
 (Types might live in their own module instead of here if it improves readability,
 and the imports can be worked around, e.g, by `if t.TYPE_CHECKING`)
 """
+
 from copy import deepcopy
 from dataclasses import dataclass, fields
 import typing as t
@@ -151,6 +152,37 @@ Frames = t.Literal[
 GravModels = t.Literal["WGS84"]
 StateType = t.Literal["kepler", "cartesian"]
 AnomalyType = t.Literal["mean", "eccentric", "true"]
+
+SimultaneousNum = int
+"""An int16 that corresponds to the order in simultaneous pointings"""
+
+ExperimentId = int
+"""A unique int16 that identifies an experiment"""
+
+StationId = int
+"""A unique int16 that identifies a radar station"""
+
+
+@dataclass(kw_only=True)
+class ExperimentDetail:
+    id: ExperimentId
+
+    coh_int_bandwidth: float
+    ipp: float
+    pulse_length: float
+    power: float
+    bandwidth: float
+    duty_cycle: float
+    noise_temp: float
+
+    slice_duration: Timedelta64_us
+    "Duration of a control slice, in micro-second"
+
+
+ExperimentDetailMap = dict[ExperimentId, ExperimentDetail]
+
+
+ExperimentIdStationIdPairsMap = dict[ExperimentId, list[tuple[StationId, StationId]]]
 
 
 @dataclass
