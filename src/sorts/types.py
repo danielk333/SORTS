@@ -64,17 +64,14 @@ Float64_as_rad = np.float64
 "`numpy` `float64` as angle in radians"
 
 # TODO: make sure these comments make sense
-NDArray_3x1 = npt.NDArray
+NDArray_3 = npt.NDArray
 "(3,) shaped ndarray (i.e. a single 3D vector)"
 
-NDArray_6x1 = npt.NDArray
+NDArray_6 = npt.NDArray
 "(6,) shaped ndarray (i.e. a single 6D vector)"
 
 NDArray_N = npt.NDArray
 "(n,) shaped ndarray (i.e. a single `n`D vector)"
-
-NDArray_6 = npt.NDArray
-"(6,) shaped ndarray (i.e. a single `6`D vector)"
 
 NDArray_3xN = npt.NDArray
 "(3,n) shaped ndarray (i.e. `3` rows and `n` columns)"
@@ -88,7 +85,7 @@ NDArray_Nx3 = npt.NDArray
 NDArray_Nx6 = npt.NDArray
 "(n, 6) shaped ndarray (i.e. `n` 6D vectors)"
 
-EnuCoordinate = NDArray_3x1[np.float64]
+EnuCoordinate = NDArray_3[np.float64]
 "ENU cartesian coordinate, a (3,) shaped ndarray of `float64` (i.e. a single 3D vector)"
 
 EnuCoordinates = NDArray_3xN[np.float64]
