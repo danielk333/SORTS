@@ -247,7 +247,7 @@ class SimulationUnit:
 
         # early return for empty cases
         # TODO: add test case for empty case?
-        if len(passages) == 0 or not len(param.tx_rx_pointing_pairs) == 0:
+        if len(passages) == 0 or len(param.tx_rx_pointing_pairs) == 0:
             return cls(
                 id=id,
                 spobj=spobj,
