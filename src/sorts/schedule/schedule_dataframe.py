@@ -153,17 +153,15 @@ def from_ndarrays(
 ) -> ScheduleDataframe:
     """Create an empty `ScheduleDataframe` from columns of numpy `ndarray`."""
 
-    df = pd.DataFrame(
-        {
-            ScheduleKey.exp_num: pd.Series(exp_num, dtype=np.int16),
-            ScheduleKey.stn_num: pd.Series(stn_num, dtype=np.int16),
-            ScheduleKey.simult_num: pd.Series(simult_num, dtype=np.int16),
-            ScheduleKey.start_time: pd.Series(start_time, dtype="datetime64[us]"),
-            ScheduleKey.end_time: pd.Series(end_time, dtype="datetime64[us]"),
-            ScheduleKey.pointing_e: pd.Series(pointing_e, dtype=np.float64),
-            ScheduleKey.pointing_n: pd.Series(pointing_n, dtype=np.float64),
-            ScheduleKey.pointing_u: pd.Series(pointing_u, dtype=np.float64),
-        }
+    df = from_series(
+        exp_num=pd.Series(exp_num, dtype=np.int16),
+        stn_num=pd.Series(stn_num, dtype=np.int16),
+        simult_num=pd.Series(simult_num, dtype=np.int16),
+        start_time=pd.Series(start_time, dtype="datetime64[us]"),
+        end_time=pd.Series(end_time, dtype="datetime64[us]"),
+        pointing_e=pd.Series(pointing_e, dtype=np.float64),
+        pointing_n=pd.Series(pointing_n, dtype=np.float64),
+        pointing_u=pd.Series(pointing_u, dtype=np.float64),
     )
 
     return validate(df)
