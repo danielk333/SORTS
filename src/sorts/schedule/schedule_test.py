@@ -1,8 +1,8 @@
 import sqlite3, typing as t
 import numpy as np
 import pandas as pd
-from sorts import scheduling
-from sorts.scheduling import ScheduleKey
+from sorts import schedule
+from sorts.schedule import ScheduleKey
 
 
 def setup_function():
@@ -16,8 +16,8 @@ def setup_function():
 
 
 def empty_schedule_dataframe_test():
-    df = scheduling.empty_schedule_dataframe()
-    scheduling.validate_schedule_dataframe(df)
+    df = schedule.empty_schedule_dataframe()
+    schedule.validate_schedule_dataframe(df)
 
     return
 
@@ -25,9 +25,9 @@ def empty_schedule_dataframe_test():
 def sql_db_round_trip_test():
     # db_conn = sqlite3.connect("./test.sqlite")  # use this if an actual db file is preferred
     db_conn = sqlite3.connect(":memory:")
-    sdb = scheduling.ScheduleDb.empty(db_conn)
+    sdb = schedule.ScheduleDb.empty(db_conn)
 
-    df = scheduling.schedule_dataframe_from_rows(
+    df = schedule.schedule_dataframe_from_rows(
         [
             [0,0,0, pd.Timestamp("2026-02-11 02:00:00.123456789", unit="us"), pd.Timestamp("2026-02-11 03:00:00.123456789", unit="us"), 0,0,0], # fmt: skip
             [0,1,2, pd.Timestamp("2026-02-11 02:00:00.123456789", unit="us"), pd.Timestamp("2026-02-11 03:00:00.123456789", unit="us"), 0.3,0.4,0.5], # fmt: skip
@@ -46,10 +46,10 @@ def sql_db_round_trip_test():
 def schedule_by_priority_test():
     # db_conn = sqlite3.connect("./test.sqlite")  # use this if an actual db file is preferred
     db_conn = sqlite3.connect(":memory:")
-    sdb = scheduling.ScheduleDb.empty(db_conn)
+    sdb = schedule.ScheduleDb.empty(db_conn)
 
     sdb.add_dataframe(
-        scheduling.schedule_dataframe_from_rows([
+        schedule.schedule_dataframe_from_rows([
             [0,0,0, pd.Timestamp("2026-02-11 00:00:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:00:59.123456789", unit="us"), 0.1,0.2,0.3],
             [0,0,0, pd.Timestamp("2026-02-11 00:01:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:01:59.123456789", unit="us"), 0.1,0.2,0.3],
             [0,0,0, pd.Timestamp("2026-02-11 00:02:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:02:59.123456789", unit="us"), 0.1,0.2,0.3],
@@ -59,7 +59,7 @@ def schedule_by_priority_test():
     )
 
     sdb.add_dataframe(
-        scheduling.schedule_dataframe_from_rows([
+        schedule.schedule_dataframe_from_rows([
             [1,0,0, pd.Timestamp("2026-02-11 00:01:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:01:59.123456789", unit="us"), 0.1,0.2,0.3],
             [1,1,0, pd.Timestamp("2026-02-11 00:01:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:01:59.123456789", unit="us"), 0.1,0.2,0.3],
         ]), # fmt: skip
@@ -67,7 +67,7 @@ def schedule_by_priority_test():
     )
 
     sdb.add_dataframe(
-        scheduling.schedule_dataframe_from_rows([
+        schedule.schedule_dataframe_from_rows([
             [2,0,0, pd.Timestamp("2026-02-11 00:01:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:01:59.123456789", unit="us"), 0.1,0.2,0.3],
             [2,1,0, pd.Timestamp("2026-02-11 00:02:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:02:59.123456789", unit="us"), 0.1,0.2,0.3],
         ]), # fmt: skip
@@ -101,7 +101,7 @@ def schedule_by_priority_test():
 def get_tx_rx_pointing_pairs_test():
     # db_conn = sqlite3.connect("./test.sqlite")  # use this if an actual db file is preferred
     db_conn = sqlite3.connect(":memory:")
-    sdb = scheduling.ScheduleDb.empty(db_conn)
+    sdb = schedule.ScheduleDb.empty(db_conn)
 
     # tx rows
     tx_rows = [
@@ -118,15 +118,15 @@ def get_tx_rx_pointing_pairs_test():
 
     # rx rows, with corresponding tx
     rx_rows_w_tx =[
-        [0,1,0, np.datetime64("2026-02-11 00:02:00.123456", "us"), np.datetime64("2026-02-11 00:02:59.123456", "us"), 0.1,0.2,0.3], 
-        [0,1,1, np.datetime64("2026-02-11 00:02:00.123456", "us"), np.datetime64("2026-02-11 00:02:59.123456", "us"), 0.1,0.2,0.3], 
-        [0,1,2, np.datetime64("2026-02-11 00:02:00.123456", "us"), np.datetime64("2026-02-11 00:02:59.123456", "us"), 0.1,0.2,0.3], 
+        [0,1,0, np.datetime64("2026-02-11 00:02:00.123456", "us"), np.datetime64("2026-02-11 00:02:59.123456", "us"), 0.1,0.2,0.3],
+        [0,1,1, np.datetime64("2026-02-11 00:02:00.123456", "us"), np.datetime64("2026-02-11 00:02:59.123456", "us"), 0.1,0.2,0.3],
+        [0,1,2, np.datetime64("2026-02-11 00:02:00.123456", "us"), np.datetime64("2026-02-11 00:02:59.123456", "us"), 0.1,0.2,0.3],
     ] # fmt: skip
 
     rows = [*tx_rows, *rx_rows_wo_tx, *rx_rows_w_tx]
 
     sdb.add_dataframe(
-        scheduling.schedule_dataframe_from_rows(rows),
+        schedule.schedule_dataframe_from_rows(rows),
         sdb.combined_schedule_name,
     )
 

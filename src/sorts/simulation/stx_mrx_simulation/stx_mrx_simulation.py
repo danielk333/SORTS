@@ -7,13 +7,13 @@ import pandas as pd
 import pyorb
 import sorts
 from tqdm import tqdm
-from sorts import scheduling, controller, simulation
+from sorts import schedule, controller, simulation
 from sorts.types import Datetime_Like, Float64_as_sec, Datetime64_us, EcefStates
 from sorts.utils import to_datetime64_us
 from sorts.radar import Station, StationId
 from sorts.simulation import Passage
 from sorts.simulation.funcs import InterpolatedPropagation, ensure_directory_exist
-from sorts.scheduling import ExperimentDetailMap
+from sorts.schedule import ExperimentDetailMap
 from sorts.simulation.stx_mrx_simulation.simulation_unit import (
     SimulationUnit,
     FromPassagesOverTxRxStationPairParam,
@@ -150,7 +150,7 @@ class StxMrxSimulation:
         self,
         station_map: dict[StationId, Station],
         station_id_pairs: t.Sequence[tuple[StationId, StationId]],
-        schedule_db: scheduling.ScheduleDb,
+        schedule_db: schedule.ScheduleDb,
         exp_detail_map: ExperimentDetailMap,
         epoch: Datetime_Like,
         start_time: Datetime_Like,
@@ -180,7 +180,7 @@ class StxMrxSimulation:
     def from_controllers(
         cls,
         controllers: t.Sequence[controller.ControllerBase],
-        schedule: scheduling.ScheduleDb,
+        schedule: schedule.ScheduleDb,
         epoch: Datetime_Like,
         start_time: Datetime_Like,
         end_time: Datetime_Like,

@@ -12,7 +12,7 @@ import numpy as np
 from astropy.time import Time
 from astropy.constants import R_earth  # type: ignore
 import pyant, pyorb
-from sorts import scheduling, ExperimentDetail, interpolation
+from sorts import schedule, ExperimentDetail, interpolation
 from sorts.types import Float64_as_sec, Float64_as_deg, Float_as_sec, Float_as_deg
 from sorts.utils import to_datetime64_us
 from sorts.propagator import Kepler, KeplerSettings
@@ -48,7 +48,7 @@ control_slice_duration = np.timedelta64(1_000_000, "us")  # 1s
 dsec_sampling_intv: Float_as_sec = 30
 dt_equality_thld = dsec_sampling_intv * 0.2  # TODO: need to eval this value with Daniel
 
-_SK = scheduling._K
+_SK = schedule._K
 _SuK = stx_mrx_simulation.simulation_unit._K
 
 

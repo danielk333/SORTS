@@ -4,14 +4,14 @@ from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from sorts import types, radar, scheduling
+from sorts import types, radar, schedule
 from sorts.types import TxRxTuple
 from sorts.utils import assert_class_attributes_equal_to, to_datetime64_us
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.signals import hard_target_snr
 from sorts.interpolation import Interpolator
-from sorts.scheduling import ExperimentDetailMap, ScheduleDataframe, ScheduleKey
+from sorts.schedule import ExperimentDetailMap, ScheduleDataframe, ScheduleKey
 from sorts.simulation import Passage
 
 
@@ -364,16 +364,16 @@ class SimulationUnit:
 
 
 ObservationStationScheduleIndexer = tuple[
-    scheduling.ExperimentId,
+    schedule.ExperimentId,
     radar.StationId,
-    scheduling.SimultaneousNum,
+    schedule.SimultaneousNum,
     npt.NDArray[types.Datetime64_us],
 ]
 ObservationScheduleIndexer = TxRxTuple[
     ObservationStationScheduleIndexer, ObservationStationScheduleIndexer
 ]
 ObservationStateIndexer = tuple[
-    scheduling.ExperimentId, scheduling.SimultaneousNum, npt.NDArray[types.Datetime64_us]
+    schedule.ExperimentId, schedule.SimultaneousNum, npt.NDArray[types.Datetime64_us]
 ]
 
 
@@ -384,8 +384,8 @@ class Observation:
         self,
         passage: Passage,
         sim_unit: SimulationUnit,
-        exp_id: scheduling.ExperimentId,
-        simult_num: scheduling.SimultaneousNum,
+        exp_id: schedule.ExperimentId,
+        simult_num: schedule.SimultaneousNum,
     ):
         # todo: update for collecting passage and multi passage
         self.passage = passage
@@ -398,7 +398,7 @@ class Observation:
         state_slice = filter_state_by_time_range(sim_unit._state, passage.time_range)
 
         unique_exp_id_simult_num_pairs: list[
-            tuple[scheduling.ExperimentId, scheduling.SimultaneousNum]
+            tuple[schedule.ExperimentId, schedule.SimultaneousNum]
         ] = (state_slice.index.droplevel(_K.time).unique().to_list())
 
         obss = [

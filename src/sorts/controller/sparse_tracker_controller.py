@@ -2,7 +2,7 @@ from __future__ import annotations
 import logging, typing as t
 import numpy as np
 import pandas as pd
-from sorts import radar, scheduling
+from sorts import radar, schedule
 from sorts.utils import to_datetime64_us
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
@@ -29,7 +29,7 @@ class SparseTrackerController(ControllerBase):
         self,
         tx_station: Station,
         rx_stations: t.Sequence[Station],
-        exp_detail: scheduling.ExperimentDetail,
+        exp_detail: schedule.ExperimentDetail,
         space_object: SpaceObject,
         epoch: Datetime64_us,
         station_id_pairs: list[tuple[radar.StationId, radar.StationId]],
@@ -55,7 +55,7 @@ class SparseTrackerController(ControllerBase):
         cls,
         tx_station: Station,
         rx_stations: t.Sequence[Station],
-        exp_detail: scheduling.ExperimentDetail,
+        exp_detail: schedule.ExperimentDetail,
         space_object: SpaceObject,
         epoch: Datetime_Like,
         points_per_passage: int,
@@ -78,10 +78,10 @@ class SparseTrackerController(ControllerBase):
 
         return ctrl
 
-    def get_experiment_detail(self) -> scheduling.ExperimentDetail:
+    def get_experiment_detail(self) -> schedule.ExperimentDetail:
         return self.exp_detail
 
-    def get_experiment_id_station_id_pairs_map(self) -> scheduling.ExperimentIdStationIdPairsMap:
+    def get_experiment_id_station_id_pairs_map(self) -> schedule.ExperimentIdStationIdPairsMap:
         return {self.exp_detail.id: self.station_id_pairs}
 
     def get_station_map(self) -> dict[radar.StationId, radar.Station]:
@@ -92,11 +92,11 @@ class SparseTrackerController(ControllerBase):
 
         return stn_map
 
-    def generate(self, passages_of_spobj: list[Passage]) -> scheduling.ScheduleDataframe:
+    def generate(self, passages_of_spobj: list[Passage]) -> schedule.ScheduleDataframe:
         """Generate the schedules."""
         # early return for empty case
         if len(passages_of_spobj) == 0:
-            return scheduling.empty_schedule_dataframe()
+            return schedule.empty_schedule_dataframe()
 
         observation_times_relative = []
         observation_times = []
@@ -129,7 +129,7 @@ class SparseTrackerController(ControllerBase):
         )
         tx_pointings = tx_pointings / np.linalg.norm(tx_pointings, axis=0)
 
-        tx_sch = scheduling.schedule_dataframe_from_ndarrays(
+        tx_sch = schedule.schedule_dataframe_from_ndarrays(
             exp_num=np.full(tx_sch_len, self.exp_detail.id, dtype=np.int16),
             stn_num=np.full(tx_sch_len, self.tx_station.uid, dtype=np.int16),
             simult_num=np.full(tx_sch_len, 0, dtype=np.int16),
@@ -140,7 +140,7 @@ class SparseTrackerController(ControllerBase):
             pointing_u=tx_pointings[2, :],
         )
 
-        rx_schs: list[scheduling.ScheduleDataframe] = []
+        rx_schs: list[schedule.ScheduleDataframe] = []
         for rx_stn in self.rx_stations:
             rx_pointings: EnuCoordinates = rx_stn.enu(
                 self.interpolator.get_state(tx_sch_time_rel)[:3, :]
@@ -148,7 +148,7 @@ class SparseTrackerController(ControllerBase):
             rx_pointings = rx_pointings / np.linalg.norm(rx_pointings, axis=0)
 
             rx_schs.append(
-                scheduling.schedule_dataframe_from_ndarrays(
+                schedule.schedule_dataframe_from_ndarrays(
                     exp_num=np.full(tx_sch_len, self.exp_detail.id, dtype=np.int16),
                     stn_num=np.full(tx_sch_len, rx_stn.uid, dtype=np.int16),
                     simult_num=np.full(tx_sch_len, 0, dtype=np.int16),
@@ -160,7 +160,7 @@ class SparseTrackerController(ControllerBase):
                 )
             )
 
-        resultant_sch = scheduling.ScheduleDataframe((pd.concat([tx_sch, *rx_schs])))
-        resultant_sch = resultant_sch.sort_values(by=scheduling.ScheduleKey.start_time)
+        resultant_sch = schedule.ScheduleDataframe((pd.concat([tx_sch, *rx_schs])))
+        resultant_sch = resultant_sch.sort_values(by=schedule.ScheduleKey.start_time)
 
         return resultant_sch

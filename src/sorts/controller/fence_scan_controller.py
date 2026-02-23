@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from sorts import radar, scheduling
+from sorts import radar, schedule
 from sorts.const import min_datetime64_us
 from sorts.radar import Station
 from sorts.frames import enu_to_ecef, ecef_to_enu, sph_to_cart
@@ -60,7 +60,7 @@ class FenceScanController(ControllerBase):
         min_elevation: Float_as_deg,
         pointings_per_cycle: int,
         scan_range: npt.NDArray[Float64_as_m],
-        exp_detail: scheduling.ExperimentDetail,
+        exp_detail: schedule.ExperimentDetail,
         station_id_pairs: list[tuple[radar.StationId, radar.StationId]],
         state: ControllerState,
     ):
@@ -92,7 +92,7 @@ class FenceScanController(ControllerBase):
         min_elevation: Float_as_deg,
         pointings_per_cycle: int,
         scan_range: npt.NDArray[Float64_as_m],
-        exp_detail: scheduling.ExperimentDetail,
+        exp_detail: schedule.ExperimentDetail,
     ) -> t.Self:
         """A constructor method"""
 
@@ -112,10 +112,10 @@ class FenceScanController(ControllerBase):
 
         return ctrl
 
-    def get_experiment_detail(self) -> scheduling.ExperimentDetail:
+    def get_experiment_detail(self) -> schedule.ExperimentDetail:
         return self.exp_detail
 
-    def get_experiment_id_station_id_pairs_map(self) -> scheduling.ExperimentIdStationIdPairsMap:
+    def get_experiment_id_station_id_pairs_map(self) -> schedule.ExperimentIdStationIdPairsMap:
         return {self.exp_detail.id: self.station_id_pairs}
 
     def get_station_map(self) -> dict[radar.StationId, radar.Station]:
@@ -155,7 +155,7 @@ class FenceScanController(ControllerBase):
 
         return state
 
-    def _generate(self) -> scheduling.ScheduleDataframe:
+    def _generate(self) -> schedule.ScheduleDataframe:
         """Generate the schedules."""
 
         # TODO: write schedule to disk generally and then chunk load it as needed in the actual
@@ -196,7 +196,7 @@ class FenceScanController(ControllerBase):
         tx_slice_start_time_masked = tx_slice_start_time[tx_mask]
         tx_pointing_masked = tx_pointing[:, tx_mask]
 
-        tx_sch = scheduling.schedule_dataframe_from_ndarrays(
+        tx_sch = schedule.schedule_dataframe_from_ndarrays(
             exp_num=np.full(len(tx_slice_start_time_masked), self.exp_detail.id, dtype=np.int16),
             stn_num=np.full(len(tx_slice_start_time_masked), self.tx_station.uid, dtype=np.int16),
             simult_num=np.full(len(tx_slice_start_time_masked), 0, dtype=np.int16),
@@ -210,7 +210,7 @@ class FenceScanController(ControllerBase):
         # TODO: `rx_schedule_size` is a bit of a mismisnomer, as out-of-range entries might later be removed
         rx_slice_start_time = tx_slice_start_time.repeat(len(self.scan_range))
         rx_schedule_size = self.state.tx_schedule_size * len(self.scan_range)
-        rx_schs: list[scheduling.ScheduleDataframe] = []
+        rx_schs: list[schedule.ScheduleDataframe] = []
         tx_pointings_of_a_cycle_without_translation_ecef: EcefCoordinates = enu_to_ecef(
             lat=self.tx_station.ecef_lat,
             lon=self.tx_station.ecef_lon,
@@ -254,7 +254,7 @@ class FenceScanController(ControllerBase):
             rx_pointing_masked = rx_pointings_enu[:, rx_mask]
             rx_pointings_simult_num_masked = rx_pointings_simult_num[rx_mask]
 
-            rx_sch = scheduling.schedule_dataframe_from_ndarrays(
+            rx_sch = schedule.schedule_dataframe_from_ndarrays(
                 exp_num=np.full(
                     len(rx_slice_start_time_masked), self.exp_detail.id, dtype=np.int16
                 ),
@@ -269,8 +269,8 @@ class FenceScanController(ControllerBase):
 
             rx_schs.append(rx_sch)
 
-        resultant_sch = scheduling.ScheduleDataframe((pd.concat([tx_sch, *rx_schs])))
-        resultant_sch = resultant_sch.sort_values(by=scheduling.ScheduleKey.start_time)
+        resultant_sch = schedule.ScheduleDataframe((pd.concat([tx_sch, *rx_schs])))
+        resultant_sch = resultant_sch.sort_values(by=schedule.ScheduleKey.start_time)
         # TODO: re-eval if it is too brutal
         # there will be duplicates if the tx station is also a rx station, we drop the duplicates here
         resultant_sch = resultant_sch.drop_duplicates()
@@ -279,7 +279,7 @@ class FenceScanController(ControllerBase):
 
     def generate(
         self, start_time: Datetime_Like, end_time: Datetime_Like
-    ) -> scheduling.ScheduleDataframe:
+    ) -> schedule.ScheduleDataframe:
         """Generate the schedules."""
 
         self.state = self._compute_controller_state(start_time, end_time)

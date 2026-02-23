@@ -25,11 +25,11 @@ logger = logging.getLogger(__name__)
 ##
 from . import types
 from . import utils
-from . import scheduling
+from . import schedule
 from . import controller
 from . import simulation
 
-from .scheduling import ExperimentDetail
+from .schedule import ExperimentDetail
 from .controller import TrackerController, FenceScanController
 from .simulation import StxMrxSimulation
 from .mpi_queued_execution import MpiQueuedExecution

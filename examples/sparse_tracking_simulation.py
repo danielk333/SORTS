@@ -5,7 +5,7 @@ import numpy as np
 import numpy.typing as npt
 from astropy.time import Time
 import sorts
-from sorts import interpolation, population, propagator, radar, ExperimentDetail, scheduling
+from sorts import interpolation, population, propagator, radar, ExperimentDetail, schedule
 from sorts.controller import SparseTrackerController
 from sorts.simulation.funcs import (
     ensure_directory_exist,
@@ -227,7 +227,7 @@ def simulate_obs():
             )
 
             tracker_sch = tracker_ctrl.generate(passages)
-            schedule_db = scheduling.ScheduleDb.from_schedule_dataframes(
+            schedule_db = schedule.ScheduleDb.from_schedule_dataframes(
                 [tracker_sch], ["tracker_sch"], obj_pth / "schedule.sqlite"
             )
             schedule_db.schedule_by_priority()

@@ -4,7 +4,7 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import spacecoords
-from sorts import radar, scheduling
+from sorts import radar, schedule
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.types import Datetime64_us, EnuCoordinates, Datetime_Like
@@ -26,7 +26,7 @@ class TrackerController(ControllerBase):
         self,
         tx_station: Station,
         rx_stations: t.Sequence[Station],
-        exp_detail: scheduling.ExperimentDetail,
+        exp_detail: schedule.ExperimentDetail,
         space_object: SpaceObject,
         epoch: Datetime64_us,
         station_id_pairs: list[tuple[radar.StationId, radar.StationId]],
@@ -49,7 +49,7 @@ class TrackerController(ControllerBase):
         cls,
         tx_station: Station,
         rx_stations: t.Sequence[Station],
-        exp_detail: scheduling.ExperimentDetail,
+        exp_detail: schedule.ExperimentDetail,
         space_object: SpaceObject,
         epoch: Datetime_Like,
         interpolated_propagation: InterpolatedPropagation,
@@ -70,10 +70,10 @@ class TrackerController(ControllerBase):
 
         return ctrl
 
-    def get_experiment_detail(self) -> scheduling.ExperimentDetail:
+    def get_experiment_detail(self) -> schedule.ExperimentDetail:
         return self.exp_detail
 
-    def get_experiment_id_station_id_pairs_map(self) -> scheduling.ExperimentIdStationIdPairsMap:
+    def get_experiment_id_station_id_pairs_map(self) -> schedule.ExperimentIdStationIdPairsMap:
         return {self.exp_detail.id: self.station_id_pairs}
 
     def get_station_map(self) -> dict[radar.StationId, radar.Station]:
@@ -87,7 +87,7 @@ class TrackerController(ControllerBase):
     # TODO: `start_time` and `end_time` are not used atm, remove or adj the logic
     def generate(
         self, start_time: Datetime_Like, end_time: Datetime_Like
-    ) -> scheduling.ScheduleDataframe:
+    ) -> schedule.ScheduleDataframe:
         """Generate the schedules."""
 
         loc_zenith = np.array([0, 0, 1], dtype=np.float64)
@@ -121,7 +121,7 @@ class TrackerController(ControllerBase):
         tx_sch_time = self.interpolated_propagation.times[tx_el_in_range_mask]
         tx_sch_len = len(tx_sch_time)
 
-        tx_sch = scheduling.schedule_dataframe_from_ndarrays(
+        tx_sch = schedule.schedule_dataframe_from_ndarrays(
             exp_num=np.full(tx_sch_len, self.exp_detail.id, dtype=np.int16),
             stn_num=np.full(tx_sch_len, self.tx_station.uid, dtype=np.int16),
             simult_num=np.full(tx_sch_len, 0, dtype=np.int16),
@@ -132,7 +132,7 @@ class TrackerController(ControllerBase):
             pointing_u=tx_pointings[2, :],
         )
 
-        rx_schs: list[scheduling.ScheduleDataframe] = []
+        rx_schs: list[schedule.ScheduleDataframe] = []
         for rx_stn, rx_mask, rx_pointings in zip(
             pure_rx_stations, rx_el_in_range_with_tx_masks, rxs_pointings
         ):
@@ -140,7 +140,7 @@ class TrackerController(ControllerBase):
             rx_sch_len = len(rx_sch_time)
 
             rx_schs.append(
-                scheduling.schedule_dataframe_from_ndarrays(
+                schedule.schedule_dataframe_from_ndarrays(
                     exp_num=np.full(rx_sch_len, self.exp_detail.id, dtype=np.int16),
                     stn_num=np.full(rx_sch_len, rx_stn.uid, dtype=np.int16),
                     simult_num=np.full(rx_sch_len, 0, dtype=np.int16),
@@ -152,7 +152,7 @@ class TrackerController(ControllerBase):
                 )
             )
 
-        resultant_sch = scheduling.ScheduleDataframe((pd.concat([tx_sch, *rx_schs])))
-        resultant_sch = resultant_sch.sort_values(by=scheduling.ScheduleKey.start_time)
+        resultant_sch = schedule.ScheduleDataframe((pd.concat([tx_sch, *rx_schs])))
+        resultant_sch = resultant_sch.sort_values(by=schedule.ScheduleKey.start_time)
 
         return resultant_sch

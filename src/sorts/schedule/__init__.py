@@ -1,4 +1,3 @@
-# TODO: `schedule` module can now be moved into `scheduling` directly
 from .schedule import (
     ScheduleKey,
     ScheduleDataframe,
