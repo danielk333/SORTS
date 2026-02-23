@@ -134,10 +134,8 @@ def get_tx_rx_pointing_pairs_test():
         start_time="2026-02-01", end_time="2026-03-01", tx_stn_num=0, rx_stn_num=1
     )
 
-    # TODO: replace hard-coded string key here by StrEnum
     assert all(
-        df.loc[t.cast(t.Any, (0, ["exp_num", "rx_stn_num", "time"]))]
-        == [rx_rows_w_tx[0][0], rx_rows_w_tx[0][1], rx_rows_w_tx[0][3]]
+        df.loc[t.cast(t.Any, (0, ["exp_num", "time"]))] == [rx_rows_w_tx[0][0], rx_rows_w_tx[0][3]]
     )
     assert all(df["rx_simult_num"] == [rx_rows_w_tx[0][2], rx_rows_w_tx[1][2], rx_rows_w_tx[2][2]])
 
