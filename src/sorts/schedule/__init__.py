@@ -1,4 +1,4 @@
-from . import types, schedule, schedule_dataframe
+from . import types, schedule_db, schedule_dataframe
 
 from .types import (
     ScheduleKey,
@@ -8,7 +8,7 @@ from .types import (
     ExperimentDetailMap,
     ExperimentIdStationIdPairsMap,
 )
-from .schedule import (
+from .schedule_db import (
     ScheduleDbConnection,
     ScheduleDb,
 )
