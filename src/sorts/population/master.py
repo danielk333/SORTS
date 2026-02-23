@@ -19,7 +19,7 @@ def master_catalog(
 ):
     """Return the master catalog specified in the input file as a population instance. The catalog only contains the master sampling objects and not an actual realization of the population using the factor.
 
-    **Note:** MASTER catalog files are usually (# TODO: confirm) in TEME frame
+    **Note:** MASTER catalog files are usually(?) in TEME frame
 
     The format of the input master files is:
 
@@ -46,6 +46,8 @@ def master_catalog(
     :return: Master catalog
     :rtype: population.Population
     """
+    # TODO: confirms if MASTER catalog files are actually usually in TEME frame, then update the docstring
+
     master_raw = np.genfromtxt(input_file)
     i = [0, 5, 6, 7, 8, 9, 10]
     var = ["oid", "a", "e", "i", "raan", "aop", "mu0"]

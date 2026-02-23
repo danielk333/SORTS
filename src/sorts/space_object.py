@@ -38,7 +38,8 @@ class SpaceObject:
 
     @classmethod
     def from_tle(cls):
-        raise NotImplementedError("todo")
+        # TODO: implement or remove?
+        raise NotImplementedError()
 
     @classmethod
     def from_kepler(

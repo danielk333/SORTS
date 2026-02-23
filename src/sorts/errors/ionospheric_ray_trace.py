@@ -32,7 +32,7 @@ def calculate_delay(
     frequency,
     elevation,
 ):
-    """TODO: Docstring"""
+    # TODO: Docstring
 
     if Point is None or gcoord is None:
         raise ImportError("pyglow must be installed to calculate delay")
@@ -82,7 +82,7 @@ def ray_trace(
     elevation,
     azimuth,
 ):
-    """TODO: Docstring"""
+    # TODO: Docstring
 
     if Point is None or gcoord is None:
         raise ImportError("pyglow must be installed to ray trace")
@@ -260,7 +260,7 @@ def ray_trace_error(
     ionosphere=False,
     error_std=0.05,
 ):
-    """TODO: Docstring"""
+    # TODO: Docstring
 
     if Point is None or gcoord is None:
         raise ImportError("pyglow must be installed to ray trace")
@@ -412,11 +412,14 @@ def ray_trace_error(
 
 
 def ionospheric_error(time, elevation=90.0, n_samp=20, frequency=233e6, error_std=0.05):
-    """TODO: Docstring
-
-    # estimate using sampling what the ray-tracing error is
-    # return error in microseconds, round-trip time units.
     """
+    Estimate using sampling what the ray-tracing error is.
+
+    Returns:
+        Error in microseconds, round-trip time units.
+    """
+    # TODO: Docstring
+
     prop_errors = np.zeros([n_samp, 100])
     prop_error_mean = np.zeros(100)
     prop_error_std = np.zeros(100)

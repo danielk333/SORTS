@@ -25,11 +25,9 @@ def estimate_radar_parameters(
     coherent_integration_time=0.02,
     bandwidth_limit_ratio=10,
 ):
-    """
-    todo
+    """ref: kildal book, other books."""
+    # TODO: docstring
 
-    ref: kildal book, other books
-    """
     lam = scipy.constants.c / frequency
 
     tx_power = antenna_num * antenna_input_power

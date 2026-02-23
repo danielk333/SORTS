@@ -109,8 +109,6 @@ def write_xml_oem(state_data, cov_data=None, meta=None, file=None):
     creaate and validate xml for OEM message
     write xml file resource
 
-    #TODO: finish this docstring
-
     assumes UTC input times
 
     It is assumed that the covariance matrix reference frame is the same as
@@ -126,6 +124,8 @@ def write_xml_oem(state_data, cov_data=None, meta=None, file=None):
         input for the `COMMENT` field for the data section rather then a
         `DATA_COMMENT` field in the meta data section.
     """
+    # TODO: finish this docstring
+
     if meta is None:
         meta = {}
     # originator
@@ -496,7 +496,9 @@ def write_xml_tdm(data, meta, file=None):
 
 
 def read_txt_oem(fname):
-    """Read the txt format of oem, TODO: generalize and document"""
+    """Read the txt format of oem."""
+    # TODO: generalize and document
+    
     meta = {"COMMENT": ""}
 
     _dtype = [

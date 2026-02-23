@@ -71,7 +71,7 @@ def group_passages_by_tx_rx_station_pair(
     groupped_passages: dict[tuple[StationId, StationId], list[Passage]] = {}
 
     for passage in passages:
-        # todo: make sure this is not broken
+        # TODO: make sure this is not broken
         tx_station_id = passage.tx_station.uid
         rx_station_id = passage.rx_stations[0].uid
 
@@ -230,7 +230,7 @@ class StxMrxSimulation:
     ) -> dict[int, list[FromPassagesOverTxRxStationPairParam]]:
         epoch = to_datetime64_us(self.epoch)
 
-        # todo: this is ugly and can be fixed
+        # TODO: this is ugly and can be fixed
         dsecs = [
             (interp.times - epoch) / np.timedelta64(1, "s")
             for interp in self.interpolated_propagations

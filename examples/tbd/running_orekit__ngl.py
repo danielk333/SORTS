@@ -1,11 +1,8 @@
-
 """
 Petri's notebooks don't all work unchanged for Orekit 9.x,
 trying to see what it must look like to work with 10.x
-
-### TODO @Tom: fix this to be an actually usable example, if this is not useful, remove from repository.
-
 """
+# TODO: @Tom: fix this to be an actually usable example, if this is not useful, remove from repository.
 
 
 ################################################################################

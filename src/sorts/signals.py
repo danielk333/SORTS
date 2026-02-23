@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 
-"""This module is used to define the radar network configuration.
-
-TODO: wrong module description?
-
-"""
+"""This module is used to define the radar network configuration."""
+# TODO: wrong module description?
 
 import typing as t
 import numpy as np
@@ -26,9 +23,7 @@ def rayleigh_separatrix_range(
     The range at which the Optical-to-Rayleigh change occurs given the input parameters.
     """
 
-    rx_noise = (
-        scipy.constants.k * effective_noise_temperature / coherent_integration_time
-    )
+    rx_noise = scipy.constants.k * effective_noise_temperature / coherent_integration_time
     power = snr * rx_noise / radar_albedo
     separatrix_diameter = wavelength / (np.pi * np.sqrt(3.0))
     r = (
@@ -229,12 +224,11 @@ def hard_target_diameter(
 
 
 def incoherent_snr(p_s, p_n, epsilon=0.05, B=10.0, t_incoh=3600.0):
-    """Calculate the incoherent SNR based on ????
+    """Calculate the incoherent SNR based on ????"""
+    # TODO: Finish docstring
+    # TODO: generalize theory??
+    # TODO: Juha knows
 
-    TODO: Finish docstring
-    TODO: generalize theory??
-    TODO: Juha knows
-    """
     snr = p_s / p_n
     t_epsilon = ((p_s + p_n) ** 2.0) / (epsilon**2.0 * p_s**2.0 * B)
 
@@ -261,18 +255,21 @@ def doppler_spread_hard_target_snr(
     radar_albedo=0.1,
 ):
     """
-    t_obs = observation duration
+    Args:
+        t_obs: observation duration
 
-    #TODO: Double check the "bandwidth" parameter to see that it is actually
-    # defined and used correctly
 
-    returns:
-    snr - signal to noise ratio using coherent integration, when doing object discovery with a
-          limited coherent integration duration and no incoherent integration
-    snr_incoh - the signal to noise ratio using incoherent integration, when using a priori
-                orbital elements to assist in coherent integration and incoherent integration.
-                coherent integration length is determined by t_obs (seconds)
+    Returns:
+        A tuple of `(snr_coh, snr_incoh)`.
+
+        snr: signal to noise ratio using coherent integration, when doing object discovery with a
+            limited coherent integration duration and no incoherent integration
+        snr_incoh: the signal to noise ratio using incoherent integration, when using a priori
+            orbital elements to assist in coherent integration and incoherent integration.
+            coherent integration length is determined by t_obs (seconds)
     """
+    # TODO: Double check the "bandwidth" parameter to see that it is actually
+    # defined and used correctly
 
     doppler_bandwidth = 4 * np.pi * diameter / (wavelength * spin_period)
 

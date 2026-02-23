@@ -27,7 +27,7 @@ from sorts.population import Population
 # TODO: should we move it outside of `funcs` module?
 @dataclass
 class InterpolatedPropagation:
-    # todo: investigate if we can just sidestep most of the `datetime64` and just use `Time`?
+    # TODO: investigate if we can just sidestep most of the `datetime64` and just use `Time`?
     #
     #       comment from Hin:
     #       I actually prefer to get away from `Time`
@@ -201,7 +201,8 @@ def duplicate_and_perturbate_space_object(
         1e-3, 1e-3, 1e-3, 1e-5, 1e-5, 1e-5  # fmt: skip
     ),
 ) -> list[tuple[SpaceObject, InterpolatedPropagation]]:
-    """TODO: detail structure"""
+    # TODO: detail structure/explanation in docstring
+
     # duplicate list items
     perturbed_objects = []
 

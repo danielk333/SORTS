@@ -345,11 +345,9 @@ def ecef_to_enu(lat, lon, alt, ecef, degrees=True):
 
 
 def azel_to_ecef(lat, lon, alt, az, el, degrees=True):
-    """Radar pointing (az,el) using geocentric zenith to unit vector in
-    ECEF, not including translation.
+    """Radar pointing (az,el) using geocentric zenith to unit vector in ECEF, not including translation."""
+    # TODO: Docstring
 
-    TODO: Docstring
-    """
     shape = (3,)
 
     if isinstance(az, np.ndarray):

@@ -53,8 +53,6 @@ def kepler_scatter(o, **options):
     :param numpy.ndarray o: Rows are distinct orbits and columns are orbital elements in the order a, e, i, omega, Omega
     :param options:  dictionary containing all the optional settings
 
-    #TODO: this needs updating
-
     Currently the options fields are:
         :marker [char]: the marker type
         :size [int]: the size of the marker
@@ -90,6 +88,8 @@ def kepler_scatter(o, **options):
 
 
     """
+    # TODO: docstring needs updating
+
     if not isinstance(o, np.ndarray):
         o = np.array(o)
 

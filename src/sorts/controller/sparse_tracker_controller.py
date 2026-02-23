@@ -120,7 +120,7 @@ class SparseTrackerController(ControllerBase):
 
             observation_times.append(pstart_time + rel_us)
 
-        # todo: this can be cleaned up quite a lot i feel like
+        # TODO: this can be cleaned up quite a lot i feel like
         tx_sch_time_rel = np.concatenate(observation_times_relative)
         tx_sch_time = np.concatenate(observation_times)
         tx_sch_len = len(tx_sch_time)

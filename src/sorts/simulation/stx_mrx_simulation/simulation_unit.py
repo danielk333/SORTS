@@ -156,7 +156,7 @@ class SimulationUnit:
     _K = _K
     """shortcut to module attribute"""
 
-    # todo: my type checker is complaining over these shortcuts?
+    # TODO: my type checker is complaining over these shortcuts?
     # FromPassagesOverTxRxStationPairParam = FromPassagesOverTxRxStationPairParam
     """shortcut to module attribute"""
 
@@ -186,7 +186,7 @@ class SimulationUnit:
 
         self.observations: list[Observation] = []
 
-    # todo: this param should maybe be expanded so the components are arguments, or a more
+    # TODO: this param should maybe be expanded so the components are arguments, or a more
     # generalized units should be made: i think this might be too specialized as a data carrier?
     # will it be useful outside of this function call?
     @classmethod
@@ -345,7 +345,7 @@ class Observation:
         exp_id: types.ExperimentId,
         simult_num: types.SimultaneousNum,
     ):
-        # todo: update for collecting passage and multi passage
+        # TODO: update for collecting passage and multi passage
         self.passage = passage
         self.sim_unit = sim_unit
         self.exp_id = exp_id

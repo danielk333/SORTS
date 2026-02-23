@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-
-"""#TODO
-
-"""
-
 import logging
 import numpy as np
 
