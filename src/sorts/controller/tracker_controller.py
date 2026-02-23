@@ -121,7 +121,7 @@ class TrackerController(ControllerBase):
         tx_sch_time = self.interpolated_propagation.times[tx_el_in_range_mask]
         tx_sch_len = len(tx_sch_time)
 
-        tx_sch = schedule.schedule_dataframe_from_ndarrays(
+        tx_sch = schedule.schedule_dataframe.from_ndarrays(
             exp_num=np.full(tx_sch_len, self.exp_detail.id, dtype=np.int16),
             stn_num=np.full(tx_sch_len, self.tx_station.uid, dtype=np.int16),
             simult_num=np.full(tx_sch_len, 0, dtype=np.int16),
@@ -140,7 +140,7 @@ class TrackerController(ControllerBase):
             rx_sch_len = len(rx_sch_time)
 
             rx_schs.append(
-                schedule.schedule_dataframe_from_ndarrays(
+                schedule.schedule_dataframe.from_ndarrays(
                     exp_num=np.full(rx_sch_len, self.exp_detail.id, dtype=np.int16),
                     stn_num=np.full(rx_sch_len, rx_stn.uid, dtype=np.int16),
                     simult_num=np.full(rx_sch_len, 0, dtype=np.int16),

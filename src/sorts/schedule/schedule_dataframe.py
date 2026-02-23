@@ -45,7 +45,7 @@ Useful for certain pandas IO methods.
 """
 
 
-def validate_schedule_dataframe(df: pd.DataFrame) -> ScheduleDataframe:
+def validate(df: pd.DataFrame) -> ScheduleDataframe:
     """
     Validate a pandas `DataFrame` against the definition of `ScheduleDataframe`.
 
@@ -86,7 +86,7 @@ def validate_schedule_dataframe(df: pd.DataFrame) -> ScheduleDataframe:
     return ScheduleDataframe(df)
 
 
-def schedule_dataframe_from_rows(rows: list[list[t.Any]]) -> ScheduleDataframe:
+def from_rows(rows: list[list[t.Any]]) -> ScheduleDataframe:
     """Create a `ScheduleDataframe` from rows of data."""
 
     # NOTE: Constructing `DataFrame` from `Series` seems to be the only safe way to ensure
@@ -110,10 +110,10 @@ def schedule_dataframe_from_rows(rows: list[list[t.Any]]) -> ScheduleDataframe:
         }
     )
 
-    return validate_schedule_dataframe(df)
+    return validate(df)
 
 
-def schedule_dataframe_from_series(
+def from_series(
     exp_num: pd.Series,
     stn_num: pd.Series,
     simult_num: pd.Series,
@@ -138,10 +138,10 @@ def schedule_dataframe_from_series(
         }
     )
 
-    return validate_schedule_dataframe(df)
+    return validate(df)
 
 
-def schedule_dataframe_from_ndarrays(
+def from_ndarrays(
     exp_num: npt.NDArray,
     stn_num: npt.NDArray,
     simult_num: npt.NDArray,
@@ -166,10 +166,10 @@ def schedule_dataframe_from_ndarrays(
         }
     )
 
-    return validate_schedule_dataframe(df)
+    return validate(df)
 
 
-def empty_schedule_dataframe() -> ScheduleDataframe:
+def empty() -> ScheduleDataframe:
     """Create an empty `ScheduleDataframe`"""
 
-    return schedule_dataframe_from_rows([])
+    return from_rows([])

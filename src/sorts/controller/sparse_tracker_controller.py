@@ -96,7 +96,7 @@ class SparseTrackerController(ControllerBase):
         """Generate the schedules."""
         # early return for empty case
         if len(passages_of_spobj) == 0:
-            return schedule.empty_schedule_dataframe()
+            return schedule.schedule_dataframe.empty()
 
         observation_times_relative = []
         observation_times = []
@@ -129,7 +129,7 @@ class SparseTrackerController(ControllerBase):
         )
         tx_pointings = tx_pointings / np.linalg.norm(tx_pointings, axis=0)
 
-        tx_sch = schedule.schedule_dataframe_from_ndarrays(
+        tx_sch = schedule.schedule_dataframe.from_ndarrays(
             exp_num=np.full(tx_sch_len, self.exp_detail.id, dtype=np.int16),
             stn_num=np.full(tx_sch_len, self.tx_station.uid, dtype=np.int16),
             simult_num=np.full(tx_sch_len, 0, dtype=np.int16),
@@ -148,7 +148,7 @@ class SparseTrackerController(ControllerBase):
             rx_pointings = rx_pointings / np.linalg.norm(rx_pointings, axis=0)
 
             rx_schs.append(
-                schedule.schedule_dataframe_from_ndarrays(
+                schedule.schedule_dataframe.from_ndarrays(
                     exp_num=np.full(tx_sch_len, self.exp_detail.id, dtype=np.int16),
                     stn_num=np.full(tx_sch_len, rx_stn.uid, dtype=np.int16),
                     simult_num=np.full(tx_sch_len, 0, dtype=np.int16),

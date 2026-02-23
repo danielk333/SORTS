@@ -196,7 +196,7 @@ class FenceScanController(ControllerBase):
         tx_slice_start_time_masked = tx_slice_start_time[tx_mask]
         tx_pointing_masked = tx_pointing[:, tx_mask]
 
-        tx_sch = schedule.schedule_dataframe_from_ndarrays(
+        tx_sch = schedule.schedule_dataframe.from_ndarrays(
             exp_num=np.full(len(tx_slice_start_time_masked), self.exp_detail.id, dtype=np.int16),
             stn_num=np.full(len(tx_slice_start_time_masked), self.tx_station.uid, dtype=np.int16),
             simult_num=np.full(len(tx_slice_start_time_masked), 0, dtype=np.int16),
@@ -254,7 +254,7 @@ class FenceScanController(ControllerBase):
             rx_pointing_masked = rx_pointings_enu[:, rx_mask]
             rx_pointings_simult_num_masked = rx_pointings_simult_num[rx_mask]
 
-            rx_sch = schedule.schedule_dataframe_from_ndarrays(
+            rx_sch = schedule.schedule_dataframe.from_ndarrays(
                 exp_num=np.full(
                     len(rx_slice_start_time_masked), self.exp_detail.id, dtype=np.int16
                 ),

@@ -2,7 +2,7 @@ import sqlite3, typing as t
 import numpy as np
 import pandas as pd
 from sorts import schedule
-from sorts.schedule import ScheduleKey
+from sorts.schedule import ScheduleKey, schedule_dataframe
 
 
 def setup_function():
@@ -16,8 +16,8 @@ def setup_function():
 
 
 def empty_schedule_dataframe_test():
-    df = schedule.empty_schedule_dataframe()
-    schedule.validate_schedule_dataframe(df)
+    df = schedule_dataframe.empty()
+    schedule_dataframe.validate(df)
 
     return
 
@@ -27,7 +27,7 @@ def sql_db_round_trip_test():
     db_conn = sqlite3.connect(":memory:")
     sdb = schedule.ScheduleDb.empty(db_conn)
 
-    df = schedule.schedule_dataframe_from_rows(
+    df = schedule_dataframe.from_rows(
         [
             [0,0,0, pd.Timestamp("2026-02-11 02:00:00.123456789", unit="us"), pd.Timestamp("2026-02-11 03:00:00.123456789", unit="us"), 0,0,0], # fmt: skip
             [0,1,2, pd.Timestamp("2026-02-11 02:00:00.123456789", unit="us"), pd.Timestamp("2026-02-11 03:00:00.123456789", unit="us"), 0.3,0.4,0.5], # fmt: skip
@@ -49,7 +49,7 @@ def schedule_by_priority_test():
     sdb = schedule.ScheduleDb.empty(db_conn)
 
     sdb.add_dataframe(
-        schedule.schedule_dataframe_from_rows([
+        schedule_dataframe.from_rows([
             [0,0,0, pd.Timestamp("2026-02-11 00:00:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:00:59.123456789", unit="us"), 0.1,0.2,0.3],
             [0,0,0, pd.Timestamp("2026-02-11 00:01:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:01:59.123456789", unit="us"), 0.1,0.2,0.3],
             [0,0,0, pd.Timestamp("2026-02-11 00:02:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:02:59.123456789", unit="us"), 0.1,0.2,0.3],
@@ -59,7 +59,7 @@ def schedule_by_priority_test():
     )
 
     sdb.add_dataframe(
-        schedule.schedule_dataframe_from_rows([
+        schedule_dataframe.from_rows([
             [1,0,0, pd.Timestamp("2026-02-11 00:01:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:01:59.123456789", unit="us"), 0.1,0.2,0.3],
             [1,1,0, pd.Timestamp("2026-02-11 00:01:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:01:59.123456789", unit="us"), 0.1,0.2,0.3],
         ]), # fmt: skip
@@ -67,7 +67,7 @@ def schedule_by_priority_test():
     )
 
     sdb.add_dataframe(
-        schedule.schedule_dataframe_from_rows([
+        schedule_dataframe.from_rows([
             [2,0,0, pd.Timestamp("2026-02-11 00:01:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:01:59.123456789", unit="us"), 0.1,0.2,0.3],
             [2,1,0, pd.Timestamp("2026-02-11 00:02:00.123456789", unit="us"), pd.Timestamp("2026-02-11 00:02:59.123456789", unit="us"), 0.1,0.2,0.3],
         ]), # fmt: skip
@@ -126,7 +126,7 @@ def get_tx_rx_pointing_pairs_test():
     rows = [*tx_rows, *rx_rows_wo_tx, *rx_rows_w_tx]
 
     sdb.add_dataframe(
-        schedule.schedule_dataframe_from_rows(rows),
+        schedule_dataframe.from_rows(rows),
         sdb.combined_schedule_name,
     )
 
