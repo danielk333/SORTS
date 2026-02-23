@@ -29,7 +29,7 @@ from . import scheduling
 from . import controller
 from . import simulation
 
-from .scheduling import Schedule, ExperimentDetail
+from .scheduling import ExperimentDetail
 from .controller import TrackerController, FenceScanController
 from .simulation import StxMrxSimulation
 from .mpi_queued_execution import MpiQueuedExecution
@@ -75,6 +75,7 @@ from .simulation_v1 import Simulation
 from .radar import get_radar, list_radars
 from .correlator import correlate
 from .passes import equidistant_sampling
+
 # from .passes import find_passes, find_simultaneous_passes, group_passes
 from .signals import hard_target_snr
 from .simulation_v1 import (

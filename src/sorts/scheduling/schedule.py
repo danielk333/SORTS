@@ -11,7 +11,6 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import pandas._typing as pdt
-import xarray as xr
 from sorts import types, utils, radar
 
 
@@ -46,24 +45,6 @@ class _K:
     pointing: t.Final = "pointing"
 
 
-Schedule = t.NewType("Schedule", xr.Dataset)
-"""
-A xarray `Dataset` of:
-  ```
-  Dimensions:      (multi_index: n, enu: 3)
-  Coordinates:
-    * multi_index  (multi_index) object MultiIndex ('exp_num', 'stn_num', 'simult_num', 'start_time')
-    * start_time   (multi_index) datetime64[us]
-    * exp_num      (multi_index) int16
-    * stn_num      (multi_index) int16
-    * simult_num   (multi_index) int16
-    * enu          (enu) 'e' 'n' 'u'
-  Data variables:
-      end_time     (multi_index) datetime64[us]
-      pointing     (enu, multi_index) float64
-  ```
-"""
-
 SimultaneousNum = int
 """An int16 that corresponds to the order in simultaneous pointings"""
 
@@ -91,33 +72,6 @@ ExperimentDetailMap = dict[ExperimentId, ExperimentDetail]
 
 
 ExperimentIdStationIdPairsMap = dict[ExperimentId, list[tuple[radar.StationId, radar.StationId]]]
-
-
-def from_ndarrays(
-    start_time: npt.NDArray[types.Datetime64_us],
-    end_time: npt.NDArray[types.Datetime64_us],
-    exp_num: npt.NDArray[np.int16],
-    stn_num: npt.NDArray[np.int16],
-    simult_num: npt.NDArray[np.int16],
-    pointing: types.EnuCoordinates,
-) -> Schedule:
-    multi_index = pd.MultiIndex.from_arrays(
-        [exp_num, stn_num, simult_num, start_time],
-        names=(_K.exp_num, _K.stn_num, _K.simult_num, _K.start_time),
-    )
-
-    sch = xr.Dataset(
-        coords={
-            **xr.Coordinates.from_pandas_multiindex(multi_index, _K.multi_index),
-            _K.enu: [_K.e, _K.n, _K.u],
-        },
-        data_vars={
-            _K.end_time: (_K.multi_index, end_time),
-            _K.pointing: ((_K.enu, _K.multi_index), pointing),
-        },
-    )
-
-    return Schedule(sch)
 
 
 ScheduleDataframe = t.NewType("ScheduleDataframe", pd.DataFrame)

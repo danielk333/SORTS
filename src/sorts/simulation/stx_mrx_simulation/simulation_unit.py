@@ -4,7 +4,6 @@ from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-import xarray as xr
 from sorts import types, radar, scheduling
 from sorts.types import TxRxTuple
 from sorts.utils import assert_class_attributes_equal_to, to_datetime64_us
