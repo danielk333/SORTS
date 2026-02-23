@@ -251,9 +251,6 @@ class SimulationUnit:
         range_rx: npt.NDArray[types.Float64_as_m] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
 
         # TODO: can likely use assignment by slice/indexing instead of looping
-        # TODO: do we need `pulse_lengths`?
-        # TODO: do we need `ipps`?
-        # TODO: do we need `duty_cycles`?
         powers = np.array(
             [
                 self.exp_detail_map[n].power
