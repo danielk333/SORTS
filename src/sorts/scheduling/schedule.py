@@ -6,7 +6,6 @@ from __future__ import annotations
 import logging, typing as t, enum, pathlib, sqlite3
 from collections import OrderedDict
 from dataclasses import dataclass
-from functools import reduce
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
@@ -27,22 +26,6 @@ class ScheduleKey(enum.StrEnum):
     pointing_e = "pointing_e"
     pointing_n = "pointing_n"
     pointing_u = "pointing_u"
-
-
-class _K:
-    """Internal helper class for accessing string keys consistently"""
-
-    multi_index: t.Final = "multi_index"
-    start_time: t.Final = "start_time"
-    exp_num: t.Final = "exp_num"
-    stn_num: t.Final = "stn_num"
-    simult_num: t.Final = "simult_num"
-    enu: t.Final = "enu"
-    e: t.Final = "e"
-    n: t.Final = "n"
-    u: t.Final = "u"
-    end_time: t.Final = "end_time"
-    pointing: t.Final = "pointing"
 
 
 SimultaneousNum = int

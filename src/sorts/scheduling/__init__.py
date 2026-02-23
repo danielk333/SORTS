@@ -9,7 +9,6 @@ from .schedule import (
     schedule_dataframe_from_series,
     schedule_dataframe_from_ndarrays,
     empty_schedule_dataframe,
-    _K,
     ExperimentId,
     SimultaneousNum,
     ExperimentDetail,

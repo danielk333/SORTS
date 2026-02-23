@@ -62,9 +62,6 @@ class _K:
 
 assert_class_attributes_equal_to(_K, t.get_args(Key))
 
-_SK = scheduling._K
-"""Internal helper for accessing string keys consistently"""
-
 SimulationUnitState = t.NewType("SimulationUnitState", pd.DataFrame)
 """
 A pandas `DataFrame` with:
