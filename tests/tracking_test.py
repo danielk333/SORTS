@@ -48,7 +48,7 @@ control_slice_duration = np.timedelta64(1_000_000, "us")  # 1s
 dsec_sampling_intv: Float_as_sec = 30
 dt_equality_thld = dsec_sampling_intv * 0.2  # TODO: need to eval this value with Daniel
 
-_SK = schedule._K
+_SK = schedule.ScheduleKey
 _SuK = stx_mrx_simulation.simulation_unit._K
 
 

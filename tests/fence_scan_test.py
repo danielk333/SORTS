@@ -61,7 +61,7 @@ dsec_sampling_intv: Float_as_sec = 30
 scan_ranges = np.array([10, spobj_orbital_radius], dtype=np.float64)
 simu_num = len(scan_ranges)
 
-_SK = schedule._K
+_SK = schedule.ScheduleKey
 _SuK = stx_mrx_simulation.simulation_unit._K
 
 
