@@ -12,7 +12,7 @@ from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.signals import hard_target_snr
 from sorts.interpolation import Interpolator
-from sorts.scheduling import ExperimentDetailMap, Schedule, ScheduleKey
+from sorts.scheduling import ExperimentDetailMap, ScheduleDataframe, ScheduleKey
 from sorts.simulation import Passage
 
 
@@ -434,31 +434,23 @@ class Observation:
 
         return time_arr
 
-    def index_into_schedule(self, sch: Schedule) -> TxRxTuple[Schedule, Schedule]:
+    def index_into_schedule_dataframe(
+        self, df: ScheduleDataframe
+    ) -> TxRxTuple[ScheduleDataframe, ScheduleDataframe]:
         """Returns subset of schedules, in `(tx_scheule, rx_schedule)` that corresponds to the observation"""
 
-        tx_sch_obs = scheduling.filter_by_time_range(sch, self.passage.time_range)
-        tx_sch_obs = tx_sch_obs.loc[
-            {
-                _SK.multi_index: (
-                    self.exp_id,
-                    self.passage.tx_station.uid,
-                    0,  # NOTE: we only support single simultaneous tx pointing
-                    slice(None),
-                )
-            }
+        tx_sch_obs = df[
+            (df[ScheduleKey.exp_num] == self.exp_id)
+            & (df[ScheduleKey.stn_num] == self.passage.tx_station.uid)
+            & (df[ScheduleKey.start_time] >= self.passage.time_range[0])
+            & (df[ScheduleKey.end_time] <= self.passage.time_range[1])
         ]
 
-        rx_sch_obs = scheduling.filter_by_time_range(sch, self.passage.time_range)
-        rx_sch_obs = rx_sch_obs.loc[
-            {
-                _SK.multi_index: (
-                    self.exp_id,
-                    self.passage.rx_stations[0].uid,
-                    self.simult_num,
-                    slice(None),
-                )
-            }
+        rx_sch_obs = df[
+            (df[ScheduleKey.exp_num] == self.exp_id)
+            & (df[ScheduleKey.stn_num] != self.passage.tx_station.uid)
+            & (df[ScheduleKey.start_time] >= self.passage.time_range[0])
+            & (df[ScheduleKey.end_time] <= self.passage.time_range[1])
         ]
 
         return TxRxTuple(tx=tx_sch_obs, rx=rx_sch_obs)
