@@ -1,19 +1,19 @@
 from __future__ import annotations
-import logging, typing as t, pickle
+import logging, typing as t, pickle, sqlite3
 from pathlib import Path
 import numpy as np
 import numpy.typing as npt
-import xarray as xr
+import pandas as pd
 import pyorb
 import sorts
 from tqdm import tqdm
-from sorts import scheduling, controller, simulation
+from sorts import schedule, controller, simulation
 from sorts.types import Datetime_Like, Float64_as_sec, Datetime64_us, EcefStates
 from sorts.utils import to_datetime64_us
 from sorts.radar import Station, StationId
 from sorts.simulation import Passage
-from sorts.simulation.funcs import InterpolatedPropagation
-from sorts.scheduling import Schedule, ExperimentDetailMap
+from sorts.simulation.funcs import InterpolatedPropagation, ensure_directory_exist
+from sorts.schedule import ExperimentDetailMap
 from sorts.simulation.stx_mrx_simulation.simulation_unit import (
     SimulationUnit,
     FromPassagesOverTxRxStationPairParam,
@@ -144,11 +144,13 @@ class StxMrxSimulation:
     NOTE: This is intended as an internal constructor, please use the constructor methods to create instances.
     """
 
+    save_table_name: t.Final = "_StxMrxSimulation"
+
     def __init__(
         self,
         station_map: dict[StationId, Station],
         station_id_pairs: t.Sequence[tuple[StationId, StationId]],
-        schedule: Schedule,
+        schedule_db: schedule.ScheduleDb,
         exp_detail_map: ExperimentDetailMap,
         epoch: Datetime_Like,
         start_time: Datetime_Like,
@@ -160,7 +162,7 @@ class StxMrxSimulation:
     ):
         self.station_map = station_map
         self.station_id_pairs = station_id_pairs
-        self.schedule = schedule
+        self.schedule_db = schedule_db
         self.exp_detail_map = exp_detail_map
         self.epoch = epoch
         self.start_time = start_time
@@ -178,7 +180,7 @@ class StxMrxSimulation:
     def from_controllers(
         cls,
         controllers: t.Sequence[controller.ControllerBase],
-        schedule: Schedule,
+        schedule: schedule.ScheduleDb,
         epoch: Datetime_Like,
         start_time: Datetime_Like,
         end_time: Datetime_Like,
@@ -196,6 +198,8 @@ class StxMrxSimulation:
         #     and therefore it is sometimes found as an explicitly variable in simulation experiment file as well
         #   - we can re-work info flow later but this is needed atm
 
+        schedule_db = schedule
+
         stn_map: dict[StationId, Station] = {}
         stn_id_pairs_set: set[tuple[StationId, StationId]] = set()
         exp_detail_map: ExperimentDetailMap = {}
@@ -212,7 +216,7 @@ class StxMrxSimulation:
         return cls(
             station_map=stn_map,
             station_id_pairs=list(stn_id_pairs_set),
-            schedule=schedule,
+            schedule_db=schedule_db,
             exp_detail_map=exp_detail_map,
             epoch=epoch,
             start_time=start_time,
@@ -256,25 +260,25 @@ class StxMrxSimulation:
 
             spobj_states_interp = self.interpolated_propagations[spobj_idx].interpolator
             passages_of_a_spobj = passages_map[spobj_idx]
-            _SK = scheduling._K
 
             groupped_passages = group_passages_by_tx_rx_station_pair(passages_of_a_spobj)
 
             for stn_id_pair, passages in groupped_passages.items():
                 tx_stn = self.station_map[stn_id_pair[0]]
                 rx_stn = self.station_map[stn_id_pair[1]]
-                sched = self.schedule
 
-                filtered_sch = scheduling.filter_by_time_ranges(
-                    sched, [ps.time_range for ps in passages]
+                tx_rx_pointing_pairs = pd.concat(
+                    [
+                        self.schedule_db.get_tx_rx_pointing_pairs(
+                            start_time=ps.time_range[0],
+                            end_time=ps.time_range[1],
+                            tx_stn_num=stn_id_pair[0],
+                            rx_stn_num=stn_id_pair[1],
+                        )
+                        for ps in passages
+                    ]
                 )
-
-                # filter by station id
-                multi_index_stn_ids_mask = xr.ufuncs.logical_or(
-                    filtered_sch[_SK.multi_index][_SK.stn_num] == stn_id_pair[0],
-                    filtered_sch[_SK.multi_index][_SK.stn_num] == stn_id_pair[1],
-                )
-                filtered_sch = filtered_sch[{_SK.multi_index: multi_index_stn_ids_mask}]
+                tx_rx_pointing_pairs = tx_rx_pointing_pairs.sort_values(by=SimulationUnit._K.time)
 
                 # NOTE: Integers (casted to `str`) are used as `SimulationUnit`s' id
                 sim_unit_params.append(
@@ -285,13 +289,11 @@ class StxMrxSimulation:
                         spobj_interp=spobj_states_interp,
                         tx_station=tx_stn,
                         rx_station=rx_stn,
-                        schedule=filtered_sch,
+                        tx_rx_pointing_pairs=tx_rx_pointing_pairs,
                         exp_detail_map=self.exp_detail_map,
                     )
                 )
-            sim_unit_params = [
-                p for p in sim_unit_params if len(p.schedule[scheduling._K.multi_index]) > 0
-            ]
+            sim_unit_params = [p for p in sim_unit_params if len(p.tx_rx_pointing_pairs) > 0]
             sim_units_param[spobj_idx] = sim_unit_params
 
         # filter away param with empty schedule

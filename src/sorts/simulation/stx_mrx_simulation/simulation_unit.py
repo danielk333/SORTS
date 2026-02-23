@@ -4,15 +4,14 @@ from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-import xarray as xr
-from sorts import types, radar, scheduling
+from sorts import types, radar, schedule
 from sorts.types import TxRxTuple
 from sorts.utils import assert_class_attributes_equal_to, to_datetime64_us
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.signals import hard_target_snr
 from sorts.interpolation import Interpolator
-from sorts.scheduling import ExperimentDetailMap, Schedule
+from sorts.schedule import ExperimentDetailMap, ScheduleDataframe, ScheduleKey
 from sorts.simulation import Passage
 
 
@@ -63,17 +62,18 @@ class _K:
 
 assert_class_attributes_equal_to(_K, t.get_args(Key))
 
-_SK = scheduling._K
-"""Internal helper for accessing string keys consistently"""
-
 SimulationUnitState = t.NewType("SimulationUnitState", pd.DataFrame)
 """
 A pandas `DataFrame` with:
 ```
 Index: MultiIndex('exp_num', 'rx_simult_num', 'time')
 Cols:
-    tx_pointing         float64
-    rx_pointing         float64
+    tx_pointing_e       float64
+    tx_pointing_n       float64
+    tx_pointing_u       float64
+    rx_pointing_e       float64
+    rx_pointing_n       float64
+    rx_pointing_u       float64
     gain_tx             float64
     gain_rx             float64
     snr                 float64
@@ -179,7 +179,7 @@ class FromPassagesOverTxRxStationPairParam:
     spobj_interp: Interpolator
     tx_station: Station
     rx_station: Station
-    schedule: Schedule
+    tx_rx_pointing_pairs: pd.DataFrame # TODO: this is a tmp solution, should refactor this type and dataflow; # fmt: skip
     exp_detail_map: ExperimentDetailMap
 
 
@@ -191,7 +191,7 @@ class SimulationUnit:
     Notes about the state data:
     - It is stored in a private attribute `_state`
     - It can contain data for more than 1 passage
-    - The dataset does not always contains all the key defined in `DataKey`,
+    - The dataset does not always contains all the columns,
       which ones are available depends on what calculation have been done.
     """
 
@@ -240,17 +240,10 @@ class SimulationUnit:
         passages = param.passages
         spobj = param.spobj
         spobj_interp = param.spobj_interp
-        tx_station = param.tx_station
-        rx_station = param.rx_station
 
         # early return for empty cases
-        # NOTE: this is particularly needed because `.loc` will throw KeyError for non-existence keys
         # TODO: add test case for empty case?
-        if (
-            len(passages) == 0
-            or not (param.schedule[_SK.stn_num] == tx_station.uid).any()
-            or not (param.schedule[_SK.stn_num] == rx_station.uid).any()
-        ):
+        if len(passages) == 0 or len(param.tx_rx_pointing_pairs) == 0:
             return cls(
                 id=id,
                 spobj=spobj,
@@ -262,58 +255,7 @@ class SimulationUnit:
                 state=SimulationUnitState(empty_state()),
             )
 
-        # NOTE: xarray simplify/collapse MultiIndex when filtering a level to an exact value,
-        #   we filter on the top level "multi_index' with a tuple here to prevent it
-        tx_schdata = param.schedule.loc[
-            {_SK.multi_index: (slice(None), tx_station.uid, slice(None), slice(None))}
-        ]
-        rx_schdata = param.schedule.loc[
-            {_SK.multi_index: (slice(None), rx_station.uid, slice(None), slice(None))}
-        ]
-
-        rx_time = rx_schdata[_SK.start_time].to_numpy()
-        rx_exp_num = rx_schdata[_SK.exp_num].to_numpy()
-        rx_simult_num = rx_schdata[_SK.simult_num].to_numpy()
-
-        multi_index = pd.MultiIndex.from_arrays(
-            [rx_exp_num, rx_simult_num, rx_time],
-            names=(_K.exp_num, _K.rx_simult_num, _K.time),
-        )
-
-        tx_reindex_selector = xr.Coordinates.from_pandas_multiindex(
-            pd.MultiIndex.from_arrays(
-                [
-                    rx_exp_num,
-                    np.full(len(rx_time), param.tx_station.uid, dtype=np.int16),
-                    np.full(len(rx_time), 0, dtype=np.int16),  # assuming single tx
-                    rx_time,
-                ],
-                names=(_SK.exp_num, _SK.stn_num, _SK.simult_num, _SK.start_time),
-            ),
-            _SK.multi_index,
-        )
-
-        # NOTE: we used `.loc` instead of `reindex` here because we cannot get `reindex` working
-        # TODO: investigate why `reindex` won't work
-        #   not working: `tx_sch[_SK.pointing].reindex({_SK.multi_index: [(np.datetime64("2025-01-01 02:45:01", "us"), 0, 0), ...]})`
-        tx_pointing = tx_schdata[_SK.pointing].loc[
-            {_SK.multi_index: tx_reindex_selector[_SK.multi_index]}
-        ]
-        rx_pointing = rx_schdata[_SK.pointing]
-
-        state = pd.DataFrame(
-            {
-                # tx pointing enu
-                _K.tx_pointing_e: tx_pointing.loc[{_SK.enu: _SK.e}].to_numpy(),
-                _K.tx_pointing_n: tx_pointing.loc[{_SK.enu: _SK.n}].to_numpy(),
-                _K.tx_pointing_u: tx_pointing.loc[{_SK.enu: _SK.u}].to_numpy(),
-                # rx pointing enu
-                _K.rx_pointing_e: rx_pointing.loc[{_SK.enu: _SK.e}].to_numpy(),
-                _K.rx_pointing_n: rx_pointing.loc[{_SK.enu: _SK.n}].to_numpy(),
-                _K.rx_pointing_u: rx_pointing.loc[{_SK.enu: _SK.u}].to_numpy(),
-            },
-            index=multi_index,
-        )
+        state = param.tx_rx_pointing_pairs.set_index([_K.exp_num, _K.rx_simult_num, _K.time])
 
         return cls(
             id=id,
@@ -422,16 +364,16 @@ class SimulationUnit:
 
 
 ObservationStationScheduleIndexer = tuple[
-    scheduling.ExperimentId,
+    schedule.ExperimentId,
     radar.StationId,
-    scheduling.SimultaneousNum,
+    schedule.SimultaneousNum,
     npt.NDArray[types.Datetime64_us],
 ]
 ObservationScheduleIndexer = TxRxTuple[
     ObservationStationScheduleIndexer, ObservationStationScheduleIndexer
 ]
 ObservationStateIndexer = tuple[
-    scheduling.ExperimentId, scheduling.SimultaneousNum, npt.NDArray[types.Datetime64_us]
+    schedule.ExperimentId, schedule.SimultaneousNum, npt.NDArray[types.Datetime64_us]
 ]
 
 
@@ -442,8 +384,8 @@ class Observation:
         self,
         passage: Passage,
         sim_unit: SimulationUnit,
-        exp_id: scheduling.ExperimentId,
-        simult_num: scheduling.SimultaneousNum,
+        exp_id: schedule.ExperimentId,
+        simult_num: schedule.SimultaneousNum,
     ):
         # todo: update for collecting passage and multi passage
         self.passage = passage
@@ -456,7 +398,7 @@ class Observation:
         state_slice = filter_state_by_time_range(sim_unit._state, passage.time_range)
 
         unique_exp_id_simult_num_pairs: list[
-            tuple[scheduling.ExperimentId, scheduling.SimultaneousNum]
+            tuple[schedule.ExperimentId, schedule.SimultaneousNum]
         ] = (state_slice.index.droplevel(_K.time).unique().to_list())
 
         obss = [
@@ -488,31 +430,23 @@ class Observation:
 
         return time_arr
 
-    def index_into_schedule(self, sch: Schedule) -> TxRxTuple[Schedule, Schedule]:
-        """Returns subset of schedules, in `(tx_scheule, tx_schedule` that corresponds to the observation"""
+    def index_into_schedule_dataframe(
+        self, df: ScheduleDataframe
+    ) -> TxRxTuple[ScheduleDataframe, ScheduleDataframe]:
+        """Returns subset of schedules, in `(tx_scheule, rx_schedule)` that corresponds to the observation"""
 
-        tx_sch_obs = scheduling.filter_by_time_range(sch, self.passage.time_range)
-        tx_sch_obs = tx_sch_obs.loc[
-            {
-                _SK.multi_index: (
-                    self.exp_id,
-                    self.passage.tx_station.uid,
-                    0,  # NOTE: we only support single simultaneous tx pointing
-                    slice(None),
-                )
-            }
+        tx_sch_obs = df[
+            (df[ScheduleKey.exp_num] == self.exp_id)
+            & (df[ScheduleKey.stn_num] == self.passage.tx_station.uid)
+            & (df[ScheduleKey.start_time] >= self.passage.time_range[0])
+            & (df[ScheduleKey.end_time] <= self.passage.time_range[1])
         ]
 
-        rx_sch_obs = scheduling.filter_by_time_range(sch, self.passage.time_range)
-        rx_sch_obs = rx_sch_obs.loc[
-            {
-                _SK.multi_index: (
-                    self.exp_id,
-                    self.passage.rx_stations[0].uid,
-                    self.simult_num,
-                    slice(None),
-                )
-            }
+        rx_sch_obs = df[
+            (df[ScheduleKey.exp_num] == self.exp_id)
+            & (df[ScheduleKey.stn_num] != self.passage.tx_station.uid)
+            & (df[ScheduleKey.start_time] >= self.passage.time_range[0])
+            & (df[ScheduleKey.end_time] <= self.passage.time_range[1])
         ]
 
         return TxRxTuple(tx=tx_sch_obs, rx=rx_sch_obs)

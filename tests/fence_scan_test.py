@@ -22,7 +22,7 @@ import numpy as np
 from astropy.time import Time
 from astropy.constants import R_earth  # type: ignore
 import pyant, pyorb
-from sorts import scheduling, ExperimentDetail, interpolation
+from sorts import schedule, ExperimentDetail, interpolation
 from sorts.types import Float64_as_sec, Float64_as_deg, Float_as_sec, Float_as_m
 from sorts.utils import to_datetime64_us
 from sorts.frames import enu_to_ecef
@@ -61,7 +61,7 @@ dsec_sampling_intv: Float_as_sec = 30
 scan_ranges = np.array([10, spobj_orbital_radius], dtype=np.float64)
 simu_num = len(scan_ranges)
 
-_SK = scheduling._K
+_SK = schedule.ScheduleKey
 _SuK = stx_mrx_simulation.simulation_unit._K
 
 
@@ -186,7 +186,7 @@ def south_to_north_circular_orbit_test():
     assert sum(len(obss_list) for obss_list in obss_dict.values()) == 3 # 3 `Observaition` in total; fmt: skip
 
     for obs in obss_dict[0]:
-        rx_schedule_slice = obs.index_into_schedule(fence_sch).rx
+        rx_schedule_slice = obs.index_into_schedule_dataframe(fence_sch).rx
         simult_num = rx_schedule_slice[_SK.simult_num][0]
 
         # assert that simult_num is the same over the same observation
@@ -221,7 +221,8 @@ def south_to_north_circular_orbit_test():
         for obs in obss_dict[0]
         if obs.passage.tx_station.uid == tx_0_stn.uid
         and obs.passage.rx_stations[0].uid == rx_0_stn.uid
-        and obs.index_into_schedule(fence_sch).rx[_SK.simult_num][0] == 1  # i.e. the 2nd scan range
+        and obs.index_into_schedule_dataframe(fence_sch).rx[_SK.simult_num][0]
+        == 1  # i.e. the 2nd scan range
     )
 
     obs_subj = next(
@@ -229,7 +230,8 @@ def south_to_north_circular_orbit_test():
         for obs in obss_dict[0]
         if obs.passage.tx_station.uid == tx_0_stn.uid
         and obs.passage.rx_stations[0].uid == rx_1_stn.uid
-        and obs.index_into_schedule(fence_sch).rx[_SK.simult_num][0] == 1  # i.e. the 2nd scan range
+        and obs.index_into_schedule_dataframe(fence_sch).rx[_SK.simult_num][0]
+        == 1  # i.e. the 2nd scan range
     )
 
     obs_ref_rx_station = obs_ref.passage.rx_stations[0]
