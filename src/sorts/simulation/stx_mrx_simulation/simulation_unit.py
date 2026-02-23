@@ -6,7 +6,7 @@ import numpy.typing as npt
 import pandas as pd
 from sorts import types, radar
 from sorts.types import TxRxTuple
-from sorts.utils import assert_class_attributes_equal_to, to_datetime64_us
+from sorts.utils import to_datetime64_us
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.signals import hard_target_snr
@@ -15,52 +15,10 @@ from sorts.schedule import ScheduleDataframe, ScheduleKey
 from sorts.simulation import Passage
 
 
-# TODO: remove key `multi_index`
-IndexKey = t.Literal["multi_index", "time", "exp_num", "rx_simult_num"]
-ColKey = t.Literal[
-    "tx_pointing_e",
-    "tx_pointing_n",
-    "tx_pointing_u",
-    "rx_pointing_e",
-    "rx_pointing_n",
-    "rx_pointing_u",
-    "exp_num",
-    "gain_tx",
-    "gain_rx",
-    "snr",
-    "tx_range",
-    "rx_range",
-    "two_way_range",
-    "two_way_range_rate",
-]
-Key = t.Literal[ColKey, IndexKey]
+# TODO: remove or give it a better name
+_K = types.SimulationUnitKey
+"""Internal helper for accessing string keys consistently"""
 
-
-# TODO: remove key `multi_index`
-# TODO: updated the name with tx/rx as suffix to prefix
-class _K:
-    """Internal helper for accessing string keys consistently"""
-
-    multi_index: t.Final = "multi_index"
-    time: t.Final = "time"
-    exp_num: t.Final = "exp_num"
-    rx_simult_num: t.Final = "rx_simult_num"
-    tx_pointing_e: t.Final = "tx_pointing_e"
-    tx_pointing_n: t.Final = "tx_pointing_n"
-    tx_pointing_u: t.Final = "tx_pointing_u"
-    rx_pointing_e: t.Final = "rx_pointing_e"
-    rx_pointing_n: t.Final = "rx_pointing_n"
-    rx_pointing_u: t.Final = "rx_pointing_u"
-    gain_tx: t.Final = "gain_tx"
-    gain_rx: t.Final = "gain_rx"
-    snr: t.Final = "snr"
-    tx_range: t.Final = "tx_range"
-    rx_range: t.Final = "rx_range"
-    two_way_range: t.Final = "two_way_range"
-    two_way_range_rate: t.Final = "two_way_range_rate"
-
-
-assert_class_attributes_equal_to(_K, t.get_args(Key))
 
 SimulationUnitState = t.NewType("SimulationUnitState", pd.DataFrame)
 """

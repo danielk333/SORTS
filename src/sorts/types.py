@@ -5,6 +5,7 @@ Shared types in this package.
 and the imports can be worked around, e.g, by `if t.TYPE_CHECKING`)
 """
 
+import enum
 from copy import deepcopy
 from dataclasses import dataclass, fields
 import typing as t
@@ -183,6 +184,28 @@ ExperimentDetailMap = dict[ExperimentId, ExperimentDetail]
 
 
 ExperimentIdStationIdPairsMap = dict[ExperimentId, list[tuple[StationId, StationId]]]
+
+
+# TODO: remove key `multi_index`
+# TODO: updated the name with tx/rx as suffix to prefix
+class SimulationUnitKey(enum.StrEnum):
+    multi_index = "multi_index"
+    time = "time"
+    exp_num = "exp_num"
+    rx_simult_num = "rx_simult_num"
+    tx_pointing_e = "tx_pointing_e"
+    tx_pointing_n = "tx_pointing_n"
+    tx_pointing_u = "tx_pointing_u"
+    rx_pointing_e = "rx_pointing_e"
+    rx_pointing_n = "rx_pointing_n"
+    rx_pointing_u = "rx_pointing_u"
+    gain_tx = "gain_tx"
+    gain_rx = "gain_rx"
+    snr = "snr"
+    tx_range = "tx_range"
+    rx_range = "rx_range"
+    two_way_range = "two_way_range"
+    two_way_range_rate = "two_way_range_rate"
 
 
 @dataclass

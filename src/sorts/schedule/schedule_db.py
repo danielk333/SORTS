@@ -3,7 +3,7 @@ import logging, typing as t, pathlib, sqlite3
 from collections import OrderedDict
 import pandas as pd
 from sorts import types, utils
-from sorts.simulation.stx_mrx_simulation.simulation_unit import _K as SimulationUnitKey
+from sorts.types import SimulationUnitKey
 from .schedule_dataframe import ScheduleDataframe, scheduleDataframeDtypes
 
 
