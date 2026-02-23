@@ -128,18 +128,6 @@ def filter_by_time_range(sch: Schedule, time_range: types.TimeRange_us) -> Sched
     return ds_masked
 
 
-def filter_by_time_ranges(sch: Schedule, time_ranges: t.Sequence[types.TimeRange_us]) -> Schedule:
-    resultant_mask: xr.DataArray = reduce(
-        xr.ufuncs.logical_or,
-        [
-            (sch[_K.start_time] >= time_range[0]) & (sch[_K.end_time] <= time_range[1])
-            for time_range in time_ranges
-        ],
-    )
-
-    ds_masked = sch[{_K.multi_index: resultant_mask}]
-
-    return ds_masked
 
 
 ScheduleDataframe = t.NewType("ScheduleDataframe", pd.DataFrame)
@@ -176,7 +164,7 @@ scheduleDataframeDtypes: t.Final[dict[t.Hashable, pdt.Dtype]] = {
     ScheduleKey.pointing_u: "float64",
 }
 """
-The dtypes of a `ScheduleDataframe` expressed in a python dict. 
+The dtypes of a `ScheduleDataframe` expressed in a python dict.
 Useful for certain pandas IO methods.
 """
 
@@ -374,14 +362,14 @@ class ScheduleDb:
                     AND og.end_time > cp.start_time
                     AND (
                         -- lower priority number means more important
-                        -- for equal priority, the first one 
+                        -- for equal priority, the first one
                         og.priority < cp.priority
                         OR (og.priority = cp.priority AND og.rid < cp.rid)
                     )
             )
             -- in the current implementation, we assume entries from all other radar stations
             -- of the same experiment have to be removed as well
-            SELECT 
+            SELECT
                 exp_num, stn_num, simult_num
                 ,start_time, end_time
                 ,pointing_e, pointing_n, pointing_u
@@ -395,7 +383,7 @@ class ScheduleDb:
 
     TxRxPointingPairs = t.NewType("TxRxPointingPairs", pd.DataFrame)
     """
-    A pandas `Dataframe` with 
+    A pandas `Dataframe` with
     ```
     Columns:
         exp_num        int16

@@ -18,5 +18,4 @@ from .schedule import (
     ExperimentIdStationIdPairsMap,
     from_ndarrays,
     filter_by_time_range,
-    filter_by_time_ranges,
 )

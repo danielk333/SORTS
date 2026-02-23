@@ -435,7 +435,7 @@ class Observation:
         return time_arr
 
     def index_into_schedule(self, sch: Schedule) -> TxRxTuple[Schedule, Schedule]:
-        """Returns subset of schedules, in `(tx_scheule, tx_schedule` that corresponds to the observation"""
+        """Returns subset of schedules, in `(tx_scheule, rx_schedule)` that corresponds to the observation"""
 
         tx_sch_obs = scheduling.filter_by_time_range(sch, self.passage.time_range)
         tx_sch_obs = tx_sch_obs.loc[
