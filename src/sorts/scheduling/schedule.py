@@ -120,16 +120,6 @@ def from_ndarrays(
     return Schedule(sch)
 
 
-def filter_by_time_range(sch: Schedule, time_range: types.TimeRange_us) -> Schedule:
-    mask = (sch[_K.start_time] >= time_range[0]) & (sch[_K.end_time] <= time_range[1])
-
-    ds_masked = sch[{_K.multi_index: mask}]
-
-    return ds_masked
-
-
-
-
 ScheduleDataframe = t.NewType("ScheduleDataframe", pd.DataFrame)
 """
 A pandas `DataFrame` which:
