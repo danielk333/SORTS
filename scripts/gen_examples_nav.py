@@ -8,7 +8,7 @@ import mkdocs_gen_files
 from mkdocs_gen_files.nav import Nav
 
 project_root_dpath = Path(__file__).parent.parent
-docs_example_dpath = project_root_dpath / "docs" / "examples"
+docs_example_dpath = project_root_dpath / "examples"
 
 nav = Nav()
 

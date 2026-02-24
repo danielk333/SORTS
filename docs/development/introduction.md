@@ -14,3 +14,9 @@ uv sync --all-extras
 # so a separate install using `pip` sorts itself is needed.
 uv pip install -e .
 ```
+
+## Documentation compilation
+
+Use this command in the root folder. For details please refer to [MkDocs documentation](https://www.mkdocs.org/).
+` mkdocs serve`
+
