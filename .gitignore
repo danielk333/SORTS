@@ -124,4 +124,5 @@ site
 # local files
 /local_data/*
 /local_scripts/*
+/docs/**/local_data/*
 /mounted_data
