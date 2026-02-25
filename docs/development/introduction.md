@@ -20,6 +20,22 @@ uv pip install -e .
 Use this command in the root folder. For details please refer to [MkDocs documentation](https://www.mkdocs.org/).
 ` mkdocs serve`
 
-## A note about the placement of `examples` directory
+## Additional notes about the `docs` directory
+
+### Placement of `examples` directory
+
 The `examples` folder are located inside the `docs` directory because
 [`mkdocs` does not work well for files that sit outside of the `docs_dir`](https://github.com/mkdocs/mkdocs/discussions/2911).
+
+### The `docs_ignore` directory
+
+It exist because it seems some mkdocs plugin cannot
+exclude directories nicely.
+
+e.g.
+```yml
+- mkdocs-jupyter:
+    # globbing only works on single level
+    # so `"_ignore/**/*"` actually only exactly exclude `"_ignore/<folder>/<file>"`
+    ignore: ["_ignore/**/*"]
+```
