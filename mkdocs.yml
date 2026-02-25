@@ -5,6 +5,10 @@ theme:
   highlightjs: false
 
 site_name: Space Object Radar Tracking Simulator (SORTS)
+
+extra_css:
+- docs.css
+
 nav:
 - introduction.md
 - installation.md
