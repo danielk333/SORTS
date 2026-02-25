@@ -24,26 +24,17 @@ root_mod_dpath = src_dpath / "sorts"  # path for top level `sorts` module
 api_docs_dpath = project_root_dpath / "docs" / "api_reference"  # path for api docs directory
 
 
-# we only gen api docs for some specific modules for now
-target_mod_paths: list[Path] = [
-    root_mod_dpath / "types.py",
-    root_mod_dpath / "utils.py",
-    root_mod_dpath / "schedule",
-    root_mod_dpath / "controller",
-    root_mod_dpath / "simulation",
+ignore_dpaths: list[Path] = [
+    root_mod_dpath / "controller_v1",
+    root_mod_dpath / "simulation_v1.py",
 ]
 
-# among the paths we want to generate api docs for,
-# we gather the paths for all python files, recursively.
+# we gather the paths for all python files, recursively,
+# and exclude certain modules from docs generation
 resultant_fpaths: list[Path] = []
-for mod_path in target_mod_paths:
-    if mod_path.is_file():
+for mod_path in root_mod_dpath.rglob("*.py"):
+    if not any([mod_path.is_relative_to(ignore_dpath) for ignore_dpath in ignore_dpaths]):
         resultant_fpaths.append(mod_path)
-    elif mod_path.is_dir():
-        resultant_fpaths.extend(mod_path.rglob("*.py"))
-    else:
-        print(f'path: "{mod_path}" is either file or directory, skipping')
-
 
 # for each path in the gathered file paths,
 # we generate a file that contains `mkdocstrings` autodoc specifier `::: package.subpackage.module`,
