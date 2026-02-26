@@ -5,12 +5,15 @@ theme:
   highlightjs: false
 
 site_name: Space Object Radar Tracking Simulator (SORTS)
+
+extra_css:
+- docs.css
+
 nav:
 - introduction.md
 - installation.md
 - configuration.md
-- tutorial.md
-- manual.md
+- Tutorial: tutorial/
 - Examples: examples/
 - API Reference: api_reference/
 - Development:
@@ -21,6 +24,7 @@ plugins:
 - gen-files:
     scripts:
     - scripts/gen_api_ref_pages.py
+    - scripts/gen_tutorial_nav.py
     - scripts/gen_examples_nav.py
 - literate-nav:
     nav_file: nav.md

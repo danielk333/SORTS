@@ -18,10 +18,11 @@ import mkdocs_gen_files
 from mkdocs_gen_files.nav import Nav
 
 project_root_dpath = Path(__file__).parent.parent
-docs_example_dpath = project_root_dpath / "docs" / "examples"  # path for docs examples directory
+docs_example_dpath = project_root_dpath / "docs" / "tutorial"
 
 
 resultant_fpaths: list[Path] = [
+    *docs_example_dpath.rglob("*.md"),
     *docs_example_dpath.rglob("*.py"),
     *docs_example_dpath.rglob("*.ipynb"),
 ]

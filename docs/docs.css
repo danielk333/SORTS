@@ -1,0 +1,12 @@
+/* add some space after the "Source code in xxx" line/block */
+.doc-contents {
+    margin-bottom: 3ch;
+}
+
+/*
+   do not show tree expansion icon if there is nothing to expand.
+   the selection works by checking if the parent has a sibling `ul` elm with empty class attr
+*/
+a.current:has(+ ul[class=""]) button.toctree-expand {
+    display: none;
+}
