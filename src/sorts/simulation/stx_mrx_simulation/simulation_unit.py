@@ -153,9 +153,6 @@ class SimulationUnit:
       which ones are available depends on what calculation have been done.
     """
 
-    _K = _K
-    """shortcut to module attribute"""
-
     # TODO: my type checker is complaining over these shortcuts?
     # FromPassagesOverTxRxStationPairParam = FromPassagesOverTxRxStationPairParam
     """shortcut to module attribute"""
