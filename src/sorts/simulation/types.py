@@ -4,6 +4,7 @@ Shared types in this subpackage.
 (Types might live in their own module instead of here if it improves readability,
 and the imports can be worked around, e.g, by `if t.TYPE_CHECKING`)
 """
+
 # TODO: probably move this out to the other types files??
 
 from dataclasses import dataclass
@@ -22,9 +23,3 @@ class Passage:
     epoch: types.Datetime64_us
     time_range: types.TimeRange_us
     """The start time and end time of the passage, a right-open interval"""
-
-
-SpaceObjectJacobianTuple = tuple[
-    SpaceObject, SpaceObject, SpaceObject, SpaceObject, SpaceObject, SpaceObject, SpaceObject
-]
-"""A tuple of 7 `SpaceObject`, the first one is the original one and the next 6 are perturbated versions."""
