@@ -1,8 +1,8 @@
 # Development
 
-Repository ([link](https://github.com/danielk333/sorts))
+Link to the [repository](https://github.com/danielk333/sorts).
 
-we use `mkdocs` ([link](https://www.mkdocs.org/)) and `mkdocstrings` ([link](https://mkdocstrings.github.io/)) for documentations.
+We use [`mkdocs`](https://www.mkdocs.org/) and [`mkdocstrings`](https://mkdocstrings.github.io/) for documentations.
 
 ## Development setup
 
