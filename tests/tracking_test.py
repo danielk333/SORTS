@@ -12,7 +12,7 @@ import numpy as np
 from astropy.time import Time
 from astropy.constants import R_earth  # type: ignore
 import pyant, pyorb
-from sorts import types, schedule, interpolation
+from sorts import types, schedule, interpolation, simulation
 from sorts.types import Float64_as_sec, Float64_as_deg, Float_as_sec, Float_as_deg
 from sorts.utils import to_datetime64_us
 from sorts.propagator import Kepler, KeplerSettings
@@ -20,7 +20,7 @@ from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.controller.tracker_controller import TrackerController
 from sorts.interpolated_propagation import InterpolatedPropagation
-from sorts.simulation import stx_mrx_simulation, StxMrxSimulation
+from sorts.simulation import StxMrxSimulation
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -49,7 +49,7 @@ dsec_sampling_intv: Float_as_sec = 30
 dt_equality_thld = dsec_sampling_intv * 0.2  # TODO: need to eval this value with Daniel
 
 _SK = schedule.ScheduleKey
-_SuK = stx_mrx_simulation.SimulationUnitKey
+_SuK = simulation.SimulationUnitKey
 
 
 def south_to_north_circular_orbit_test():

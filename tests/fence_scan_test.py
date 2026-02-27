@@ -22,7 +22,7 @@ import numpy as np
 from astropy.time import Time
 from astropy.constants import R_earth  # type: ignore
 import pyant, pyorb
-from sorts import types, schedule, interpolation
+from sorts import types, schedule, interpolation, simulation
 from sorts.types import Float64_as_sec, Float64_as_deg, Float_as_sec, Float_as_m
 from sorts.utils import to_datetime64_us
 from sorts.frames import enu_to_ecef
@@ -31,7 +31,7 @@ from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.controller.fence_scan_controller import FenceScanController
 from sorts.interpolated_propagation import InterpolatedPropagation
-from sorts.simulation import stx_mrx_simulation, StxMrxSimulation
+from sorts.simulation import StxMrxSimulation
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -62,7 +62,7 @@ scan_ranges = np.array([10, spobj_orbital_radius], dtype=np.float64)
 simu_num = len(scan_ranges)
 
 _SK = schedule.ScheduleKey
-_SuK = stx_mrx_simulation.SimulationUnitKey
+_SuK = simulation.SimulationUnitKey
 
 
 def south_to_north_circular_orbit_test():
