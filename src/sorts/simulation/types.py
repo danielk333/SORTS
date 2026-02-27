@@ -5,14 +5,11 @@ Shared types in this subpackage.
 and the imports can be worked around, e.g, by `if t.TYPE_CHECKING`)
 """
 
-# TODO: probably move this out to the other types files??
-
 from dataclasses import dataclass
 from sorts import types, radar
 from sorts.space_object import SpaceObject
 
 
-# TODO: can be combined with type 'Passage'?
 @dataclass(kw_only=True)
 class Passage:
     """Represent a passage of a space object over the field of view of a single TX, multiple simultaneous RX radar stations."""
