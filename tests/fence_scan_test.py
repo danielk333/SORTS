@@ -62,7 +62,7 @@ scan_ranges = np.array([10, spobj_orbital_radius], dtype=np.float64)
 simu_num = len(scan_ranges)
 
 _SK = schedule.ScheduleKey
-_SuK = stx_mrx_simulation.simulation_unit._K
+_SuK = stx_mrx_simulation.SimulationUnitKey
 
 
 def south_to_north_circular_orbit_test():

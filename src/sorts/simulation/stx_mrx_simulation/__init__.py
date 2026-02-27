@@ -1,4 +1,4 @@
-from . import simulation_unit, stx_mrx_simulation
+from . import simulation_unit, stx_mrx_simulation, simulation_unit_state
 from .stx_mrx_simulation import (
     SpaceObjectDsecSampler,
     sample_and_propagate_space_objects_states,
@@ -8,8 +8,9 @@ from .stx_mrx_simulation import (
     StxMrxSimulation,
 )
 from .simulation_unit import (
+    SimulationUnitKey,
     SimulationUnit,
     Observation,
-    SimulationUnitState,
     FromPassagesOverTxRxStationPairParam,
 )
+from .simulation_unit_state import SimulationUnitState

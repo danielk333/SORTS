@@ -49,7 +49,7 @@ dsec_sampling_intv: Float_as_sec = 30
 dt_equality_thld = dsec_sampling_intv * 0.2  # TODO: need to eval this value with Daniel
 
 _SK = schedule.ScheduleKey
-_SuK = stx_mrx_simulation.simulation_unit._K
+_SuK = stx_mrx_simulation.SimulationUnitKey
 
 
 def south_to_north_circular_orbit_test():
