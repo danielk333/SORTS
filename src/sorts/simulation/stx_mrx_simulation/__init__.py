@@ -8,9 +8,11 @@ from .stx_mrx_simulation import (
     StxMrxSimulation,
 )
 from .simulation_unit import (
-    SimulationUnitKey,
     SimulationUnit,
     Observation,
     FromPassagesOverTxRxStationPairParam,
 )
 from .simulation_unit_state import SimulationUnitState
+
+# for semantic/logical import/export
+from sorts.types import SimulationUnitKey
