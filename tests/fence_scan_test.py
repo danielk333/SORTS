@@ -22,16 +22,21 @@ import numpy as np
 from astropy.time import Time
 from astropy.constants import R_earth  # type: ignore
 import pyant, pyorb
-from sorts import types, schedule, interpolation, simulation
 from sorts.types import Float64_as_sec, Float64_as_deg, Float_as_sec, Float_as_m
 from sorts.utils import to_datetime64_us
 from sorts.frames import enu_to_ecef
-from sorts.propagator import Kepler, KeplerSettings
-from sorts.space_object import SpaceObject
-from sorts.radar import Station
-from sorts.controller.fence_scan_controller import FenceScanController
-from sorts.interpolated_propagation import InterpolatedPropagation
-from sorts.simulation import StxMrxSimulation
+from sorts import (
+    types,
+    schedule,
+    interpolation,
+    simulation,
+    radar,
+    propagator,
+    controller,
+    SpaceObject,
+    InterpolatedPropagation,
+    StxMrxSimulation,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -101,14 +106,14 @@ def south_to_north_circular_orbit_test():
 
     prop_interp = InterpolatedPropagation.from_space_object(
         space_object=spobj,
-        propagator=Kepler(KeplerSettings()),
+        propagator=propagator.Kepler(propagator.KeplerSettings()),
         interpolator_class=interpolation.Legendre8,
         start_time=start_time,
         end_time=Time(end_time),
         time_step=dsec_sampling_intv,
     )
 
-    tx_0_stn = Station(
+    tx_0_stn = radar.Station(
         lat=0.0,
         lon=0.0,
         alt=0.0,
@@ -122,7 +127,7 @@ def south_to_north_circular_orbit_test():
     # NOTE: physically the same as tx_0_stn, but has a different id;
     #   this is done so that we can retain both tx and rx pointings in the schedule,
     #   as FenceScanController will drop the rx entries if both tx and rx use the same station.
-    rx_0_stn = Station(
+    rx_0_stn = radar.Station(
         lat=0.0,
         lon=0.0,
         alt=0.0,
@@ -134,7 +139,7 @@ def south_to_north_circular_orbit_test():
     )
 
     # An offseted station for testing behaviours related to `min_elevation`
-    rx_1_stn = Station(
+    rx_1_stn = radar.Station(
         lat=1e-2,
         lon=0.0,
         alt=0.0,
@@ -145,7 +150,7 @@ def south_to_north_circular_orbit_test():
         uid=2,
     )
 
-    fence_scan_ctrl = FenceScanController.from_scan_spec(
+    fence_scan_ctrl = controller.FenceScanController.from_scan_spec(
         tx_station=tx_0_stn,
         rx_stations=[rx_0_stn, rx_1_stn],
         exp_detail=types.ExperimentDetail(

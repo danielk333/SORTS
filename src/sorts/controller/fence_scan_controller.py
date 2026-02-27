@@ -4,10 +4,6 @@ from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from sorts import types, radar, schedule
-from sorts.const import min_datetime64_us
-from sorts.radar import Station
-from sorts.frames import enu_to_ecef, ecef_to_enu, sph_to_cart
 from sorts.types import (
     Float_as_deg,
     Datetime64_us,
@@ -17,6 +13,7 @@ from sorts.types import (
     Datetime_Like,
 )
 from sorts.utils import to_datetime64_us
+from sorts import const, types, frames, radar, schedule
 from . import pointing_funcs
 from .controller_base import ControllerBase
 
@@ -34,8 +31,8 @@ class ControllerState:
     @classmethod
     def empty(cls) -> t.Self:
         return cls(
-            start_time=min_datetime64_us,
-            end_time=min_datetime64_us,
+            start_time=const.min_datetime64_us,
+            end_time=const.min_datetime64_us,
             tx_schedule_size=0,
             tx_pointings_of_a_cycle=np.empty((3, 0), dtype=np.float64),
         )
@@ -54,8 +51,8 @@ class FenceScanController(ControllerBase):
 
     def __init__(
         self,
-        tx_station: Station,
-        rx_stations: t.Sequence[Station],
+        tx_station: radar.Station,
+        rx_stations: t.Sequence[radar.Station],
         azimuth: Float_as_deg,
         min_elevation: Float_as_deg,
         pointings_per_cycle: int,
@@ -86,8 +83,8 @@ class FenceScanController(ControllerBase):
     @classmethod
     def from_scan_spec(
         cls,
-        tx_station: Station,
-        rx_stations: t.Sequence[Station],
+        tx_station: radar.Station,
+        rx_stations: t.Sequence[radar.Station],
         azimuth: Float_as_deg,
         min_elevation: Float_as_deg,
         pointings_per_cycle: int,
@@ -137,7 +134,7 @@ class FenceScanController(ControllerBase):
         end_time_np = to_datetime64_us(end_time)
         tx_schedule_size = math.floor((end_time_np - start_time_np) / exp_detail.slice_duration)
 
-        tx_pointings_of_a_cycle = sph_to_cart(
+        tx_pointings_of_a_cycle = frames.sph_to_cart(
             pointing_funcs.fence_pattern(
                 azimuth=self.azimuth,
                 min_elevation=self.min_elevation,
@@ -211,7 +208,7 @@ class FenceScanController(ControllerBase):
         rx_slice_start_time = tx_slice_start_time.repeat(len(self.scan_range))
         rx_schedule_size = self.state.tx_schedule_size * len(self.scan_range)
         rx_schs: list[schedule.ScheduleDataframe] = []
-        tx_pointings_of_a_cycle_without_translation_ecef: EcefCoordinates = enu_to_ecef(
+        tx_pointings_of_a_cycle_without_translation_ecef: EcefCoordinates = frames.enu_to_ecef(
             lat=self.tx_station.ecef_lat,
             lon=self.tx_station.ecef_lon,
             alt=self.tx_station.ecef_alt,
@@ -228,7 +225,7 @@ class FenceScanController(ControllerBase):
             rx_pointings_of_a_cycle_without_translation_ecef: EcefCoordinates = (
                 rx_pointing_of_a_cycle_ecef - rx_station.ecef[:, np.newaxis]
             )
-            rx_pointings_of_a_cycle_enu: EnuCoordinates = ecef_to_enu(
+            rx_pointings_of_a_cycle_enu: EnuCoordinates = frames.ecef_to_enu(
                 lat=rx_station.ecef_lat,
                 lon=rx_station.ecef_lon,
                 alt=rx_station.ecef_alt,

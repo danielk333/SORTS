@@ -2,18 +2,12 @@ from __future__ import annotations
 import logging, typing as t
 import numpy as np
 import pandas as pd
-from sorts import types, radar, schedule
 from sorts.utils import to_datetime64_us
+from sorts.types import Datetime64_us, EnuCoordinates, Datetime_Like
 from sorts.space_object import SpaceObject
-from sorts.radar import Station
-from sorts.types import (
-    Datetime64_us,
-    EnuCoordinates,
-    Datetime_Like,
-)
 from sorts.simulation.types import Passage
+from sorts import types, radar, schedule, interpolation
 from .controller_base import ControllerBase
-from sorts.interpolation import Interpolator
 
 logger = logging.getLogger(__name__)
 
@@ -27,14 +21,14 @@ class SparseTrackerController(ControllerBase):
 
     def __init__(
         self,
-        tx_station: Station,
-        rx_stations: t.Sequence[Station],
+        tx_station: radar.Station,
+        rx_stations: t.Sequence[radar.Station],
         exp_detail: types.ExperimentDetail,
         space_object: SpaceObject,
         epoch: Datetime64_us,
         station_id_pairs: list[tuple[radar.StationId, radar.StationId]],
         points_per_passage: int,
-        interpolator: Interpolator,
+        interpolator: interpolation.Interpolator,
     ):
         """
         NOTE: This is intended as an internal constructor, please use the constructor methods to create instances.
@@ -53,13 +47,13 @@ class SparseTrackerController(ControllerBase):
     @classmethod
     def from_space_object(
         cls,
-        tx_station: Station,
-        rx_stations: t.Sequence[Station],
+        tx_station: radar.Station,
+        rx_stations: t.Sequence[radar.Station],
         exp_detail: types.ExperimentDetail,
         space_object: SpaceObject,
         epoch: Datetime_Like,
         points_per_passage: int,
-        interpolator: Interpolator,
+        interpolator: interpolation.Interpolator,
     ) -> t.Self:
         """A constructor method"""
 

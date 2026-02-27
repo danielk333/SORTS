@@ -12,15 +12,20 @@ import numpy as np
 from astropy.time import Time
 from astropy.constants import R_earth  # type: ignore
 import pyant, pyorb
-from sorts import types, schedule, interpolation, simulation
 from sorts.types import Float64_as_sec, Float64_as_deg, Float_as_sec, Float_as_deg
 from sorts.utils import to_datetime64_us
-from sorts.propagator import Kepler, KeplerSettings
-from sorts.space_object import SpaceObject
-from sorts.radar import Station
-from sorts.controller.tracker_controller import TrackerController
-from sorts.interpolated_propagation import InterpolatedPropagation
-from sorts.simulation import StxMrxSimulation
+from sorts import (
+    types,
+    schedule,
+    interpolation,
+    simulation,
+    radar,
+    propagator,
+    controller,
+    SpaceObject,
+    InterpolatedPropagation,
+    StxMrxSimulation,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -88,14 +93,14 @@ def south_to_north_circular_orbit_test():
 
     prop_interp = InterpolatedPropagation.from_space_object(
         space_object=spobj,
-        propagator=Kepler(KeplerSettings()),
+        propagator=propagator.Kepler(propagator.KeplerSettings()),
         interpolator_class=interpolation.Legendre8,
         start_time=start_time,
         end_time=Time(end_time),
         time_step=dsec_sampling_intv,
     )
 
-    test_stn = Station(
+    test_stn = radar.Station(
         lat=0.0,
         lon=0.0,
         alt=0.0,
@@ -106,7 +111,7 @@ def south_to_north_circular_orbit_test():
         uid=0,
     )
 
-    tracker_ctrl = TrackerController.from_space_object(
+    tracker_ctrl = controller.TrackerController.from_space_object(
         space_object=spobj,
         epoch=start_time,
         tx_station=test_stn,

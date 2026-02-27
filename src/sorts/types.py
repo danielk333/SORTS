@@ -129,6 +129,7 @@ type SpaceObjectId = int
 
 IndexLike = int | list[int] | tuple[int] | NDArray_N | slice | np.integer
 
+# TODO: better naming
 S = t.TypeVar("S", bound="Settings")
 
 Frames = t.Literal[

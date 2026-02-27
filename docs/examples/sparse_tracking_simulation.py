@@ -4,9 +4,15 @@ from pathlib import Path
 import numpy as np
 import numpy.typing as npt
 from astropy.time import Time
-import sorts
-from sorts import types, interpolation, population, propagator, radar, schedule
-from sorts.controller import SparseTrackerController
+from sorts import (
+    controller,
+    interpolation,
+    population,
+    propagator,
+    radar,
+    schedule,
+    ExperimentDetail,
+)
 from sorts.simulation.funcs import (
     ensure_directory_exist,
     safe_pickle,
@@ -43,8 +49,8 @@ class SimulationParams:
     time_step: float
     rand_seed: int
     grid_size: tuple[int, int]
-    tx_station: sorts.radar.Station
-    rx_stations: t.Sequence[sorts.radar.Station]
+    tx_station: radar.Station
+    rx_stations: t.Sequence[radar.Station]
     prop: propagator.Propagator
     oids: npt.NDArray[np.int64]
     clobber: bool
@@ -62,7 +68,7 @@ def prepare_simulation(args) -> tuple[SimulationParams, population.Population]:
     rand_seed = 1203
     start_time = Time("2025-01-01 00:00:00")
     time_slice = coherent_integration_time / duty_cycle
-    radar_sys = sorts.radar.radars.nostra.gen_nostra(
+    radar_sys = radar.radars.nostra.gen_nostra(
         frequency=3.2e9,
         antenna_num=args.antennas,
         antenna_spacing_lambda=0.65,
@@ -204,10 +210,10 @@ def simulate_obs():
                 epoch=prm.start_time.datetime64,
             )
 
-            tracker_ctrl = SparseTrackerController.from_space_object(
+            tracker_ctrl = controller.SparseTrackerController.from_space_object(
                 tx_station=prm.tx_station,
                 rx_stations=prm.rx_stations,
-                exp_detail=types.ExperimentDetail(
+                exp_detail=ExperimentDetail(
                     id=0,
                     # not used
                     coh_int_bandwidth=1.0,
