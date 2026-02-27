@@ -11,13 +11,13 @@ from sorts import types, schedule, controller, simulation
 from sorts.types import Datetime_Like, Float64_as_sec, Datetime64_us, EcefStates
 from sorts.utils import to_datetime64_us
 from sorts.radar import Station, StationId
-from sorts.simulation.stx_mrx_simulation.simulation_unit import (
+from .types import Passage
+from .interpolated_propagation import InterpolatedPropagation
+from .simulation_unit import (
     SimulationUnit,
     FromPassagesOverTxRxStationPairParam,
     Observation,
 )
-from ..types import Passage
-from ..interpolated_propagation import InterpolatedPropagation
 
 logger = logging.getLogger(__name__)
 

@@ -13,7 +13,7 @@ from sorts.signals import hard_target_snr
 from sorts.interpolation import Interpolator
 from sorts.schedule import ScheduleDataframe, ScheduleKey
 from . import simulation_unit_state
-from ..types import Passage
+from .types import Passage
 
 
 @dataclass
