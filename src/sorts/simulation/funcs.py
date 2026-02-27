@@ -14,10 +14,10 @@ from sorts.types import Datetime64_us, EcefStates, Float64_as_sec, Datetime_Like
 from sorts.utils import to_datetime64_us
 from sorts.radar import Station
 from sorts.space_object import SpaceObject
-from .types import Passage
 from sorts.interpolation import Interpolator
 from sorts.propagator import Propagator
-from .interpolated_propagation import InterpolatedPropagation
+from sorts.interpolated_propagation import InterpolatedPropagation
+from .types import Passage
 
 
 def find_simultaneous_passages(

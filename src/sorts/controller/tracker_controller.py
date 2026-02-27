@@ -9,8 +9,8 @@ from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.types import Datetime64_us, EnuCoordinates, Datetime_Like
 from sorts.utils import to_datetime64_us
+from sorts.interpolated_propagation import InterpolatedPropagation
 from .controller_base import ControllerBase
-from sorts.simulation import InterpolatedPropagation
 
 logger = logging.getLogger(__name__)
 
