@@ -12,8 +12,8 @@ from sorts.radar import Station
 from sorts.signals import hard_target_snr
 from sorts.interpolation import Interpolator
 from sorts.schedule import ScheduleDataframe, ScheduleKey
-from sorts.simulation import Passage
 from . import simulation_unit_state
+from ..types import Passage
 
 
 @dataclass

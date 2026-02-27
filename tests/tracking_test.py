@@ -20,7 +20,7 @@ from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.controller.tracker_controller import TrackerController
 from sorts.simulation import stx_mrx_simulation, StxMrxSimulation
-from sorts.simulation.funcs import InterpolatedPropagation
+from sorts.simulation import InterpolatedPropagation
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

@@ -10,7 +10,7 @@ from sorts.radar import Station
 from sorts.types import Datetime64_us, EnuCoordinates, Datetime_Like
 from sorts.utils import to_datetime64_us
 from .controller_base import ControllerBase
-from sorts.simulation.funcs import InterpolatedPropagation
+from sorts.simulation import InterpolatedPropagation
 
 logger = logging.getLogger(__name__)
 

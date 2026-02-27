@@ -1,9 +1,4 @@
-"""
-Shared types in this subpackage.
-
-(Types might live in their own module instead of here if it improves readability,
-and the imports can be worked around, e.g, by `if t.TYPE_CHECKING`)
-"""
+"""Shared types in this subpackage."""
 
 from dataclasses import dataclass
 from sorts import types, radar
