@@ -1,5 +1,5 @@
 from __future__ import annotations
-import logging, typing as t, pickle, sqlite3
+import logging, typing as t, pickle
 from pathlib import Path
 import numpy as np
 import numpy.typing as npt
@@ -11,9 +11,9 @@ from sorts import types, schedule, controller, simulation
 from sorts.types import Datetime_Like, Float64_as_sec, Datetime64_us, EcefStates
 from sorts.utils import to_datetime64_us
 from sorts.radar import Station, StationId
-from sorts.simulation import Passage
-from sorts.simulation.funcs import InterpolatedPropagation
-from sorts.simulation.stx_mrx_simulation.simulation_unit import (
+from sorts.interpolated_propagation import InterpolatedPropagation
+from .types import Passage
+from .simulation_unit import (
     SimulationUnit,
     FromPassagesOverTxRxStationPairParam,
     Observation,
@@ -277,7 +277,9 @@ class StxMrxSimulation:
                         for ps in passages
                     ]
                 )
-                tx_rx_pointing_pairs = tx_rx_pointing_pairs.sort_values(by=SimulationUnit._K.time)
+                tx_rx_pointing_pairs = tx_rx_pointing_pairs.sort_values(
+                    by=types.SimulationUnitKey.time
+                )
 
                 # NOTE: Integers (casted to `str`) are used as `SimulationUnit`s' id
                 sim_unit_params.append(

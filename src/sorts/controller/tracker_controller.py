@@ -4,13 +4,12 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import spacecoords
-from sorts import types, radar, schedule
-from sorts.space_object import SpaceObject
-from sorts.radar import Station
 from sorts.types import Datetime64_us, EnuCoordinates, Datetime_Like
 from sorts.utils import to_datetime64_us
+from sorts.space_object import SpaceObject
+from sorts.interpolated_propagation import InterpolatedPropagation
+from sorts import types, radar, schedule
 from .controller_base import ControllerBase
-from sorts.simulation.funcs import InterpolatedPropagation
 
 logger = logging.getLogger(__name__)
 
@@ -24,8 +23,8 @@ class TrackerController(ControllerBase):
 
     def __init__(
         self,
-        tx_station: Station,
-        rx_stations: t.Sequence[Station],
+        tx_station: radar.Station,
+        rx_stations: t.Sequence[radar.Station],
         exp_detail: types.ExperimentDetail,
         space_object: SpaceObject,
         epoch: Datetime64_us,
@@ -47,8 +46,8 @@ class TrackerController(ControllerBase):
     @classmethod
     def from_space_object(
         cls,
-        tx_station: Station,
-        rx_stations: t.Sequence[Station],
+        tx_station: radar.Station,
+        rx_stations: t.Sequence[radar.Station],
         exp_detail: types.ExperimentDetail,
         space_object: SpaceObject,
         epoch: Datetime_Like,

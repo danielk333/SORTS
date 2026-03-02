@@ -1,9 +1,4 @@
-"""
-Shared types in this package.
-
-(Types might live in their own module instead of here if it improves readability,
-and the imports can be worked around, e.g, by `if t.TYPE_CHECKING`)
-"""
+"""Shared types in this package."""
 
 import enum
 from copy import deepcopy
@@ -134,6 +129,7 @@ type SpaceObjectId = int
 
 IndexLike = int | list[int] | tuple[int] | NDArray_N | slice | np.integer
 
+# TODO: better naming
 S = t.TypeVar("S", bound="Settings")
 
 Frames = t.Literal[
@@ -181,6 +177,22 @@ ExperimentDetailMap = dict[ExperimentId, ExperimentDetail]
 
 
 ExperimentIdStationIdPairsMap = dict[ExperimentId, list[tuple[StationId, StationId]]]
+
+
+class ScheduleKey(enum.StrEnum):
+    index = "index"  # type: ignore ; seems type checker might confuse this with the `index` method from `str`
+    exp_num = "exp_num"
+    stn_num = "stn_num"
+    simult_num = "simult_num"
+    start_time = "start_time"
+    end_time = "end_time"
+    pointing_e = "pointing_e"
+    pointing_n = "pointing_n"
+    pointing_u = "pointing_u"
+
+
+class ScheduleValidationError(Exception):
+    pass
 
 
 # TODO: remove key `multi_index`

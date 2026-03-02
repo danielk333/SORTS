@@ -4,16 +4,20 @@ from pathlib import Path
 import numpy as np
 import numpy.typing as npt
 from astropy.time import Time
-import sorts
-from sorts import types, interpolation, population, propagator, radar, schedule
-from sorts.controller import SparseTrackerController
-from sorts.simulation.funcs import (
-    ensure_directory_exist,
-    safe_pickle,
-    duplicate_and_perturbate_space_object,
-    find_simultaneous_passages,
+from sorts import (
+    utils,
+    controller,
+    interpolation,
+    population,
+    propagator,
+    radar,
+    schedule,
+    simulation,
+    ExperimentDetail,
+    MpiQueuedExecution,
+    StxMrxSimulation,
 )
-from sorts.simulation.stx_mrx_simulation import StxMrxSimulation
+
 
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger("sorts.propagator").setLevel(logging.WARNING)
@@ -43,8 +47,8 @@ class SimulationParams:
     time_step: float
     rand_seed: int
     grid_size: tuple[int, int]
-    tx_station: sorts.radar.Station
-    rx_stations: t.Sequence[sorts.radar.Station]
+    tx_station: radar.Station
+    rx_stations: t.Sequence[radar.Station]
     prop: propagator.Propagator
     oids: npt.NDArray[np.int64]
     clobber: bool
@@ -62,7 +66,7 @@ def prepare_simulation(args) -> tuple[SimulationParams, population.Population]:
     rand_seed = 1203
     start_time = Time("2025-01-01 00:00:00")
     time_slice = coherent_integration_time / duty_cycle
-    radar_sys = sorts.radar.radars.nostra.gen_nostra(
+    radar_sys = radar.radars.nostra.gen_nostra(
         frequency=3.2e9,
         antenna_num=args.antennas,
         antenna_spacing_lambda=0.65,
@@ -132,13 +136,13 @@ def prepare_simulation(args) -> tuple[SimulationParams, population.Population]:
         clobber=args.clobber,
         rng=rng,
     )
-    ensure_directory_exist(prm.save_dpath)
-    ensure_directory_exist(prm.plot_dpath)
+    utils.ensure_directory_exist(prm.save_dpath)
+    utils.ensure_directory_exist(prm.plot_dpath)
 
     return prm, spobj_pop
 
 
-class Propagate(sorts.MpiQueuedExecution):
+class Propagate(MpiQueuedExecution):
     def master_process(self):
         prm, spobj_pop = prepare_simulation(args)
 
@@ -150,11 +154,11 @@ class Propagate(sorts.MpiQueuedExecution):
         prm = worker_job_param["prm"]
         spobj = worker_job_param["spobj"]
         obj_pth = prm.save_dpath / f"space_object_{spobj.object_id}"
-        ensure_directory_exist(obj_pth)
+        utils.ensure_directory_exist(obj_pth)
 
         pert_pth = obj_pth / "pert_obj_propagation_interpolation.pickle"
         if prm.clobber or not pert_pth.exists():
-            perturbed_object_groups = duplicate_and_perturbate_space_object(
+            perturbed_object_groups = simulation.duplicate_and_perturbate_space_object(
                 space_object=spobj,
                 propagator=prm.prop,
                 interpolator_class=interpolation.Legendre8,
@@ -166,18 +170,18 @@ class Propagate(sorts.MpiQueuedExecution):
                     1e-3, 1e-5, 1e-5, 1e-5, 1e-5, 1e-3  # fmt: skip
                 ),
             )
-            safe_pickle(perturbed_object_groups, pert_pth)
+            utils.safe_pickle(perturbed_object_groups, pert_pth)
 
             spobj_pth = obj_pth / "spboj_data.pickle"
             prop_interp_pth = obj_pth / "propagation_interpolation.pickle"
             true_spobj, true_prop = perturbed_object_groups[0]
             if prm.clobber or not spobj_pth.exists():
-                safe_pickle(true_spobj, spobj_pth)
+                utils.safe_pickle(true_spobj, spobj_pth)
             if prm.clobber or not prop_interp_pth.exists():
-                safe_pickle(true_prop, prop_interp_pth)
+                utils.safe_pickle(true_prop, prop_interp_pth)
 
 
-class SimulateObs(sorts.MpiQueuedExecution):
+class SimulateObs(MpiQueuedExecution):
     def master_process(self):
         prm, spobj_pop = prepare_simulation(args)
 
@@ -199,7 +203,7 @@ class SimulateObs(sorts.MpiQueuedExecution):
 
         sim_pth = obj_pth / "simulation_unit.pickle"
         if prm.clobber or not sim_pth.exists():
-            passages = find_simultaneous_passages(
+            passages = simulation.find_simultaneous_passages(
                 dt=(prop_interp.times - prm.start_time.datetime64) / np.timedelta64(1, "s"),
                 space_object=spobj,
                 states=prop_interp.states[:3, ...],
@@ -208,10 +212,10 @@ class SimulateObs(sorts.MpiQueuedExecution):
                 epoch=prm.start_time.datetime64,
             )
 
-            tracker_ctrl = SparseTrackerController.from_space_object(
+            tracker_ctrl = controller.SparseTrackerController.from_space_object(
                 tx_station=prm.tx_station,
                 rx_stations=prm.rx_stations,
-                exp_detail=types.ExperimentDetail(
+                exp_detail=ExperimentDetail(
                     id=0,
                     # not used
                     coh_int_bandwidth=1.0,
@@ -248,7 +252,7 @@ class SimulateObs(sorts.MpiQueuedExecution):
                 interpolated_propagations=prop_interps,
                 passages=passage_groups,
             )
-            safe_pickle(sim, sim_pth)
+            utils.safe_pickle(sim, sim_pth)
         else:
             with open(sim_pth, "rb") as fh:
                 sim = pickle.load(fh)
@@ -256,7 +260,7 @@ class SimulateObs(sorts.MpiQueuedExecution):
         obs_pth = obj_pth / "simulation_unit_completed.pickle"
         if prm.clobber or not obs_pth.exists():
             sim.run()
-            safe_pickle(sim, obs_pth)
+            utils.safe_pickle(sim, obs_pth)
 
 
 try:
