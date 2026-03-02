@@ -1,5 +1,5 @@
 from __future__ import annotations
-import logging, typing as t, pickle, sqlite3
+import logging, typing as t, pickle
 from pathlib import Path
 import numpy as np
 import numpy.typing as npt

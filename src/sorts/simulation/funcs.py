@@ -1,12 +1,8 @@
 """
-Functions for core functionalities in this subpackage.
+Functions that do not belong to a particular subpackage.
 """
 
-# TODO: this module can be moved to top level as helper funcs of sorts pkg?
-
 import typing as t
-import pickle
-from pathlib import Path
 import numpy as np
 import numpy.typing as npt
 from astropy.time import Time
@@ -159,31 +155,3 @@ def duplicate_and_perturbate_space_object(
             )
         )
     return perturbed_objects
-
-
-def ensure_directory_exist(dpath: str | Path):
-    """Check if the directory exist and create it if not"""
-
-    dpath = Path(dpath)
-
-    if not dpath.exists():
-        dpath.mkdir(parents=True)
-    assert dpath.exists()
-    assert dpath.is_dir()
-
-
-def safe_pickle(obj, fpath: str | Path):
-    """
-    Use pickle to save an object to the specified file path, with a few extra steps to make the write operation safer:
-    - The output directory will be created if not exists
-    - We write to an tmp file first then rename that file, as a simple way to reduce risk of corrupted files
-    """
-
-    fpath = Path(fpath)
-
-    ensure_directory_exist(fpath.parent)
-
-    fpath_tmp = fpath.with_suffix(fpath.suffix + ".tmp")
-    with open(fpath_tmp, "wb") as f:
-        pickle.dump(obj, f)
-    fpath_tmp.rename(fpath)
