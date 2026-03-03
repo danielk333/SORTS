@@ -1,6 +1,5 @@
 """Shared types in this package."""
 
-import enum
 from copy import deepcopy
 from dataclasses import dataclass, fields
 import typing as t
@@ -178,22 +177,6 @@ ExperimentDetailMap = dict[ExperimentId, ExperimentDetail]
 
 
 ExperimentIdStationIdPairsMap = dict[ExperimentId, list[tuple[StationId, StationId]]]
-
-
-class ScheduleKey(enum.StrEnum):
-    index = "index"  # type: ignore ; seems type checker might confuse this with the `index` method from `str`
-    exp_num = "exp_num"
-    stn_num = "stn_num"
-    simult_num = "simult_num"
-    start_time = "start_time"
-    end_time = "end_time"
-    pointing_e = "pointing_e"
-    pointing_n = "pointing_n"
-    pointing_u = "pointing_u"
-
-
-class ScheduleValidationError(Exception):
-    pass
 
 
 @dataclass

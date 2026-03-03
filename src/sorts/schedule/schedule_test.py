@@ -1,8 +1,7 @@
 import sqlite3, typing as t
 import numpy as np
 import pandas as pd
-from sorts import schedule
-from sorts.schedule import ScheduleKey, schedule_dataframe
+from . import schedule_dataframe, ScheduleDb, ScheduleKey
 
 
 def setup_function():
@@ -25,7 +24,7 @@ def empty_schedule_dataframe_test():
 def sql_db_round_trip_test():
     # db_conn = sqlite3.connect("./test.sqlite")  # use this if an actual db file is preferred
     db_conn = sqlite3.connect(":memory:")
-    sdb = schedule.ScheduleDb.empty(db_conn)
+    sdb = ScheduleDb.empty(db_conn)
 
     df = schedule_dataframe.from_rows(
         [
@@ -46,7 +45,7 @@ def sql_db_round_trip_test():
 def schedule_by_priority_test():
     # db_conn = sqlite3.connect("./test.sqlite")  # use this if an actual db file is preferred
     db_conn = sqlite3.connect(":memory:")
-    sdb = schedule.ScheduleDb.empty(db_conn)
+    sdb = ScheduleDb.empty(db_conn)
 
     sdb.add_dataframe(
         schedule_dataframe.from_rows([
@@ -101,7 +100,7 @@ def schedule_by_priority_test():
 def get_tx_rx_pointing_pairs_test():
     # db_conn = sqlite3.connect("./test.sqlite")  # use this if an actual db file is preferred
     db_conn = sqlite3.connect(":memory:")
-    sdb = schedule.ScheduleDb.empty(db_conn)
+    sdb = ScheduleDb.empty(db_conn)
 
     # tx rows
     tx_rows = [

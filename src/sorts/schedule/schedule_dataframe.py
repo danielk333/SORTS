@@ -4,7 +4,7 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import pandas._typing as pdt
-from sorts.types import ScheduleKey, ScheduleValidationError
+from .types import ScheduleKey, ScheduleValidationError
 
 logger = logging.getLogger(__name__)
 
