@@ -7,12 +7,11 @@ import pandas as pd
 import pyorb
 import sorts
 from tqdm import tqdm
-from sorts import types, schedule, controller, simulation
+from sorts import types, schedule, controller, passage, simulation
 from sorts.types import Datetime_Like, Float64_as_sec, Datetime64_us, EcefStates
 from sorts.utils import to_datetime64_us
 from sorts.radar import Station, StationId
 from sorts.interpolated_propagation import InterpolatedPropagation
-from .types import Passage
 from .simulation_unit import (
     SimulationUnit,
     FromPassagesOverTxRxStationPairParam,
@@ -66,9 +65,9 @@ def sample_and_propagate_space_objects_states(
 
 
 def group_passages_by_tx_rx_station_pair(
-    passages: t.Sequence[Passage],
-) -> dict[tuple[StationId, StationId], list[Passage]]:
-    groupped_passages: dict[tuple[StationId, StationId], list[Passage]] = {}
+    passages: t.Sequence[passage.Passage],
+) -> dict[tuple[StationId, StationId], list[passage.Passage]]:
+    groupped_passages: dict[tuple[StationId, StationId], list[passage.Passage]] = {}
 
     for passage in passages:
         # TODO: make sure this is not broken
@@ -90,14 +89,12 @@ def find_passages(
     epoch: Datetime_Like,
     spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]],
     spobjs_smpl_states: list[EcefStates],
-) -> dict[int, list[Passage]]:
+) -> dict[int, list[passage.Passage]]:
     """
     Find passages for each space objects over the simulation period.
-
-    Returns a `list[Passage]` per space object.
     """
 
-    passages_map: dict[int, list[Passage]] = {}
+    passages_map: dict[int, list[passage.Passage]] = {}
 
     for spobj_idx, (spobj, spobj_smpl_dsec, spobj_smpl_states) in enumerate(
         zip(
@@ -106,14 +103,14 @@ def find_passages(
             spobjs_smpl_states,
         )
     ):
-        passages_of_spobj: list[Passage] = []
+        passages_of_spobj: list[passage.Passage] = []
 
         for stn_id_pair in station_id_pairs:
             tx_stn = station_map[stn_id_pair[0]]
             rx_stn = station_map[stn_id_pair[1]]
 
             passages_of_spobj.extend(
-                simulation.funcs.find_passages(
+                passage.find_passages(
                     dt=spobj_smpl_dsec,
                     space_object=spobj,
                     states=spobj_smpl_states,
@@ -156,7 +153,7 @@ class StxMrxSimulation:
         end_time: Datetime_Like,
         space_objects: t.Sequence[sorts.SpaceObject],
         interpolated_propagations: t.Sequence[InterpolatedPropagation],
-        passages: dict[int, list[Passage]] | None = None,
+        passages: dict[int, list[passage.Passage]] | None = None,
         progress: bool = False,
     ):
         self.station_map = station_map
@@ -185,7 +182,7 @@ class StxMrxSimulation:
         end_time: Datetime_Like,
         space_objects: t.Sequence[sorts.SpaceObject],
         interpolated_propagations: t.Sequence[InterpolatedPropagation],
-        passages: dict[int, list[Passage]] | None = None,
+        passages: dict[int, list[passage.Passage]] | None = None,
     ):
         """A constructor method"""
         # TODO: - the exp details are already computed outside? Should the `controllers` field be
@@ -330,3 +327,6 @@ class StxMrxSimulation:
         logger.debug("simulation done")
 
         return self.obss, self.sim_units
+
+    def chunk_by_space_object_station_pair(self):
+        raise NotImplementedError()

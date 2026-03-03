@@ -5,8 +5,7 @@ import pandas as pd
 from sorts.utils import to_datetime64_us
 from sorts.types import Datetime64_us, EnuCoordinates, Datetime_Like
 from sorts.space_object import SpaceObject
-from sorts.simulation.types import Passage
-from sorts import types, radar, schedule, interpolation
+from sorts import types, radar, schedule, interpolation, passage
 from .controller_base import ControllerBase
 
 logger = logging.getLogger(__name__)
@@ -86,7 +85,7 @@ class SparseTrackerController(ControllerBase):
 
         return stn_map
 
-    def generate(self, passages_of_spobj: list[Passage]) -> schedule.ScheduleDataframe:
+    def generate(self, passages_of_spobj: list[passage.Passage]) -> schedule.ScheduleDataframe:
         """Generate the schedules."""
         # early return for empty case
         if len(passages_of_spobj) == 0:

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from sorts import types, radar
+from sorts import types, radar, passage
 from sorts.types import TxRxTuple
 from sorts.utils import to_datetime64_us
 from sorts.space_object import SpaceObject
@@ -13,13 +13,12 @@ from sorts.signals import hard_target_snr
 from sorts.interpolation import Interpolator
 from sorts.schedule import ScheduleDataframe, ScheduleKey
 from . import simulation_unit_state
-from .types import Passage
 
 
 @dataclass
 class FromPassagesOverTxRxStationPairParam:
     id: str
-    passages: list[Passage]
+    passages: list[passage.Passage]
     spobj: SpaceObject
     spobj_interp: Interpolator
     tx_station: Station
@@ -45,7 +44,7 @@ class SimulationUnit:
         id: str,
         spobj: SpaceObject,
         spobj_interp: Interpolator,
-        passages: list[Passage],
+        passages: list[passage.Passage],
         tx_station: Station,
         rx_station: Station,
         exp_detail_map: types.ExperimentDetailMap,
@@ -222,7 +221,7 @@ ObservationStateIndexer = tuple[
 class Observation:
     def __init__(
         self,
-        passage: Passage,
+        passage: passage.Passage,
         sim_unit: SimulationUnit,
         exp_id: types.ExperimentId,
         simult_num: types.SimultaneousNum,
@@ -234,7 +233,7 @@ class Observation:
         self.simult_num = simult_num
 
     @classmethod
-    def from_passage(cls, passage: Passage, sim_unit: SimulationUnit) -> list[t.Self]:
+    def from_passage(cls, passage: passage.Passage, sim_unit: SimulationUnit) -> list[t.Self]:
         _K = types.SimulationUnitKey
 
         state_slice = simulation_unit_state.filter_state_by_time_range(

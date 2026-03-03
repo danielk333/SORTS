@@ -12,6 +12,7 @@ from sorts import (
     propagator,
     radar,
     schedule,
+    passage,
     simulation,
     ExperimentDetail,
     MpiQueuedExecution,
@@ -203,7 +204,7 @@ class SimulateObs(MpiQueuedExecution):
 
         sim_pth = obj_pth / "simulation_unit.pickle"
         if prm.clobber or not sim_pth.exists():
-            passages = simulation.find_simultaneous_passages(
+            passages = passage.find_simultaneous_passages(
                 dt=(prop_interp.times - prm.start_time.datetime64) / np.timedelta64(1, "s"),
                 space_object=spobj,
                 states=prop_interp.states[:3, ...],
