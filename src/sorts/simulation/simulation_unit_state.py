@@ -3,8 +3,8 @@ import typing as t
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from sorts import types
-from sorts.radar import Station
+from sorts import types, radar
+from . import simulation_unit
 
 
 SimulationUnitState = t.NewType("SimulationUnitState", pd.DataFrame)
@@ -31,7 +31,7 @@ Cols:
 
 
 def empty_state() -> SimulationUnitState:
-    _K = types.SimulationUnitKey
+    _K = simulation_unit.SimulationUnitKey
 
     multi_index = pd.MultiIndex.from_arrays(
         [
@@ -62,7 +62,7 @@ def empty_state() -> SimulationUnitState:
 def filter_state_by_time_range(
     state: SimulationUnitState, time_range: types.TimeRange_us
 ) -> SimulationUnitState:
-    _K = types.SimulationUnitKey
+    _K = simulation_unit.SimulationUnitKey
 
     mask = (
         (state.index.get_level_values(_K.time) >= time_range[0])
@@ -75,12 +75,12 @@ def filter_state_by_time_range(
 
 def calc_gain(
     state: SimulationUnitState,
-    tx_stn: Station,
-    rx_stn: Station,
+    tx_stn: radar.Station,
+    rx_stn: radar.Station,
     spobj_tx_enu: types.EnuCoordinates,
     spobj_rx_enu: types.EnuCoordinates,
 ) -> SimulationUnitState:
-    _K = types.SimulationUnitKey
+    _K = simulation_unit.SimulationUnitKey
 
     # will be populated to [tx_gain_arr, rx_gain_arr]
     gain_arr_list: list[npt.NDArray[np.float64]] = []

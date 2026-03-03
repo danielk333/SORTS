@@ -2,8 +2,7 @@ from __future__ import annotations
 import logging, typing as t, pathlib, sqlite3
 from collections import OrderedDict
 import pandas as pd
-from sorts import types, utils
-from sorts.types import SimulationUnitKey
+from sorts import types, utils, simulation
 from .schedule_dataframe import ScheduleDataframe, scheduleDataframeDtypes
 
 
@@ -245,6 +244,7 @@ class ScheduleDb:
         tx_stn_num: int,
         rx_stn_num: int,
     ) -> TxRxPointingPairs:
+        _SuK = simulation.SimulationUnitKey
 
         df = pd.read_sql_query(
             f"""
@@ -280,15 +280,15 @@ class ScheduleDb:
             ;""",
             self._db,
             dtype={
-                SimulationUnitKey.exp_num: "int16",
-                SimulationUnitKey.rx_simult_num: "int16",
-                SimulationUnitKey.time: "datetime64[us]",
-                SimulationUnitKey.tx_pointing_e: "float64",
-                SimulationUnitKey.tx_pointing_n: "float64",
-                SimulationUnitKey.tx_pointing_u: "float64",
-                SimulationUnitKey.rx_pointing_e: "float64",
-                SimulationUnitKey.rx_pointing_n: "float64",
-                SimulationUnitKey.rx_pointing_u: "float64",
+                _SuK.exp_num: "int16",
+                _SuK.rx_simult_num: "int16",
+                _SuK.time: "datetime64[us]",
+                _SuK.tx_pointing_e: "float64",
+                _SuK.tx_pointing_n: "float64",
+                _SuK.tx_pointing_u: "float64",
+                _SuK.rx_pointing_e: "float64",
+                _SuK.rx_pointing_n: "float64",
+                _SuK.rx_pointing_u: "float64",
             },
         )
 

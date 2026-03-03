@@ -1,18 +1,39 @@
 from __future__ import annotations
-import typing as t
+import typing as t, enum
 from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from sorts import types, radar, passage
+from sorts import types, radar, passage, schedule as sch
 from sorts.types import TxRxTuple
 from sorts.utils import to_datetime64_us
 from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.signals import hard_target_snr
 from sorts.interpolation import Interpolator
-from sorts.schedule import ScheduleDataframe, ScheduleKey
 from . import simulation_unit_state
+
+
+# TODO: remove key `multi_index`
+# TODO: updated the name with tx/rx as suffix to prefix
+class SimulationUnitKey(enum.StrEnum):
+    multi_index = "multi_index"
+    time = "time"
+    exp_num = "exp_num"
+    rx_simult_num = "rx_simult_num"
+    tx_pointing_e = "tx_pointing_e"
+    tx_pointing_n = "tx_pointing_n"
+    tx_pointing_u = "tx_pointing_u"
+    rx_pointing_e = "rx_pointing_e"
+    rx_pointing_n = "rx_pointing_n"
+    rx_pointing_u = "rx_pointing_u"
+    gain_tx = "gain_tx"
+    gain_rx = "gain_rx"
+    snr = "snr"
+    tx_range = "tx_range"
+    rx_range = "rx_range"
+    two_way_range = "two_way_range"
+    two_way_range_rate = "two_way_range_rate"
 
 
 @dataclass
@@ -73,7 +94,7 @@ class SimulationUnit:
         cls, param: FromPassagesOverTxRxStationPairParam
     ) -> t.Self:
         # TODO: the logic inside this function is not super clear - it needs clarification
-        _K = types.SimulationUnitKey
+        _K = SimulationUnitKey
         id = param.id
         passages = param.passages
         spobj = param.spobj
@@ -114,7 +135,7 @@ class SimulationUnit:
         Will populate the prop `observations`
         """
 
-        _K = types.SimulationUnitKey
+        _K = SimulationUnitKey
 
         if self.tx_station.wavelength is None:
             # TODO: remove this hack; see issues #25 for details
@@ -234,7 +255,7 @@ class Observation:
 
     @classmethod
     def from_passage(cls, passage: passage.Passage, sim_unit: SimulationUnit) -> list[t.Self]:
-        _K = types.SimulationUnitKey
+        _K = SimulationUnitKey
 
         state_slice = simulation_unit_state.filter_state_by_time_range(
             sim_unit._state, passage.time_range
@@ -265,7 +286,7 @@ class Observation:
         )
 
     def get_time_arr(self):
-        _K = types.SimulationUnitKey
+        _K = SimulationUnitKey
 
         time_arr = (
             simulation_unit_state.filter_state_by_time_range(
@@ -278,22 +299,22 @@ class Observation:
         return time_arr
 
     def index_into_schedule_dataframe(
-        self, df: ScheduleDataframe
-    ) -> TxRxTuple[ScheduleDataframe, ScheduleDataframe]:
+        self, df: sch.ScheduleDataframe
+    ) -> TxRxTuple[sch.ScheduleDataframe, sch.ScheduleDataframe]:
         """Returns subset of schedules, in `(tx_scheule, rx_schedule)` that corresponds to the observation"""
 
         tx_sch_obs = df[
-            (df[ScheduleKey.exp_num] == self.exp_id)
-            & (df[ScheduleKey.stn_num] == self.passage.tx_station.uid)
-            & (df[ScheduleKey.start_time] >= self.passage.time_range[0])
-            & (df[ScheduleKey.end_time] <= self.passage.time_range[1])
+            (df[sch.ScheduleKey.exp_num] == self.exp_id)
+            & (df[sch.ScheduleKey.stn_num] == self.passage.tx_station.uid)
+            & (df[sch.ScheduleKey.start_time] >= self.passage.time_range[0])
+            & (df[sch.ScheduleKey.end_time] <= self.passage.time_range[1])
         ]
 
         rx_sch_obs = df[
-            (df[ScheduleKey.exp_num] == self.exp_id)
-            & (df[ScheduleKey.stn_num] != self.passage.tx_station.uid)
-            & (df[ScheduleKey.start_time] >= self.passage.time_range[0])
-            & (df[ScheduleKey.end_time] <= self.passage.time_range[1])
+            (df[sch.ScheduleKey.exp_num] == self.exp_id)
+            & (df[sch.ScheduleKey.stn_num] != self.passage.tx_station.uid)
+            & (df[sch.ScheduleKey.start_time] >= self.passage.time_range[0])
+            & (df[sch.ScheduleKey.end_time] <= self.passage.time_range[1])
         ]
 
         return TxRxTuple(tx=tx_sch_obs, rx=rx_sch_obs)
