@@ -159,8 +159,8 @@ def filter_by_exp_id_simult_num(
     _K = TxRxPairStateKey
 
     mask = (
-        (state.index.get_level_values(_K.exp_num) >= exp_id)
-        & (state.index.get_level_values(_K.rx_simult_num) <= simult_num)
+        (state.index.get_level_values(_K.exp_num) == exp_id)
+        & (state.index.get_level_values(_K.rx_simult_num) == simult_num)
     ) # fmt: skip
     state_masked = state[mask]
 
