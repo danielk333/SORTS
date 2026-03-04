@@ -11,7 +11,7 @@ from sorts.space_object import SpaceObject
 from sorts.radar import Station
 from sorts.signals import hard_target_snr
 from sorts.interpolation import Interpolator
-from . import simulation_unit_state
+from sorts.simulation import tx_rx_pair_state
 
 
 # TODO: remove key `multi_index`
@@ -69,7 +69,7 @@ class SimulationUnit:
         tx_station: Station,
         rx_station: Station,
         exp_detail_map: types.ExperimentDetailMap,
-        state: simulation_unit_state.SimulationUnitState,
+        state: tx_rx_pair_state.TxRxPairState,
     ):
         self.id = id
 
@@ -111,9 +111,7 @@ class SimulationUnit:
                 tx_station=param.tx_station,
                 rx_station=param.rx_station,
                 exp_detail_map=param.exp_detail_map,
-                state=simulation_unit_state.SimulationUnitState(
-                    simulation_unit_state.empty_state()
-                ),
+                state=tx_rx_pair_state.TxRxPairState(tx_rx_pair_state.empty_state()),
             )
 
         state = param.tx_rx_pointing_pairs.set_index([_K.exp_num, _K.rx_simult_num, _K.time])
@@ -126,7 +124,7 @@ class SimulationUnit:
             tx_station=param.tx_station,
             rx_station=param.rx_station,
             exp_detail_map=param.exp_detail_map,
-            state=simulation_unit_state.SimulationUnitState(state),
+            state=tx_rx_pair_state.TxRxPairState(state),
         )
 
     def simulate(self):
@@ -178,7 +176,7 @@ class SimulationUnit:
             dtype=np.float64,
         )
 
-        self._state = simulation_unit_state.calc_gain(
+        self._state = tx_rx_pair_state.calc_gain(
             state=self._state,
             tx_stn=self.tx_station,
             rx_stn=self.rx_station,
@@ -257,7 +255,7 @@ class Observation:
     def from_passage(cls, passage: passage.Passage, sim_unit: SimulationUnit) -> list[t.Self]:
         _K = SimulationUnitKey
 
-        state_slice = simulation_unit_state.filter_state_by_time_range(
+        state_slice = tx_rx_pair_state.filter_state_by_time_range(
             sim_unit._state, passage.time_range
         )
 
@@ -289,7 +287,7 @@ class Observation:
         _K = SimulationUnitKey
 
         time_arr = (
-            simulation_unit_state.filter_state_by_time_range(
+            tx_rx_pair_state.filter_state_by_time_range(
                 self.sim_unit._state, self.passage.time_range
             )
             .index.get_level_values(_K.time)
@@ -319,10 +317,10 @@ class Observation:
 
         return TxRxTuple(tx=tx_sch_obs, rx=rx_sch_obs)
 
-    def get_state_slice(self) -> simulation_unit_state.SimulationUnitState:
+    def get_state_slice(self) -> tx_rx_pair_state.TxRxPairState:
         """Get the subset of `State` data the corresponds to the the observation"""
 
-        sim_state_slice = simulation_unit_state.filter_state_by_time_range(
+        sim_state_slice = tx_rx_pair_state.filter_state_by_time_range(
             self.sim_unit._state, self.passage.time_range
         )
 

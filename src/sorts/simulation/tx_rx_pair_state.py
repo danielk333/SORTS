@@ -7,7 +7,7 @@ from sorts import types, radar
 from . import simulation_unit
 
 
-SimulationUnitState = t.NewType("SimulationUnitState", pd.DataFrame)
+TxRxPairState = t.NewType("TxRxPairState", pd.DataFrame)
 """
 A pandas `DataFrame` with:
 ```
@@ -30,7 +30,7 @@ Cols:
 """
 
 
-def empty_state() -> SimulationUnitState:
+def empty_state() -> TxRxPairState:
     _K = simulation_unit.SimulationUnitKey
 
     multi_index = pd.MultiIndex.from_arrays(
@@ -56,12 +56,12 @@ def empty_state() -> SimulationUnitState:
         index=multi_index,
     )
 
-    return SimulationUnitState(state)
+    return TxRxPairState(state)
 
 
 def filter_state_by_time_range(
-    state: SimulationUnitState, time_range: types.TimeRange_us
-) -> SimulationUnitState:
+    state: TxRxPairState, time_range: types.TimeRange_us
+) -> TxRxPairState:
     _K = simulation_unit.SimulationUnitKey
 
     mask = (
@@ -74,12 +74,12 @@ def filter_state_by_time_range(
 
 
 def calc_gain(
-    state: SimulationUnitState,
+    state: TxRxPairState,
     tx_stn: radar.Station,
     rx_stn: radar.Station,
     spobj_tx_enu: types.EnuCoordinates,
     spobj_rx_enu: types.EnuCoordinates,
-) -> SimulationUnitState:
+) -> TxRxPairState:
     _K = simulation_unit.SimulationUnitKey
 
     # will be populated to [tx_gain_arr, rx_gain_arr]
