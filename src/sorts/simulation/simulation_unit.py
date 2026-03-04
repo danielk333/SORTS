@@ -191,20 +191,6 @@ class SimulationUnit:
         self._state[_K.two_way_range_rate] = v_tx + v_rx
 
 
-ObservationStationScheduleIndexer = tuple[
-    types.ExperimentId,
-    radar.StationId,
-    types.SimultaneousNum,
-    npt.NDArray[types.Datetime64_us],
-]
-ObservationScheduleIndexer = TxRxTuple[
-    ObservationStationScheduleIndexer, ObservationStationScheduleIndexer
-]
-ObservationStateIndexer = tuple[
-    types.ExperimentId, types.SimultaneousNum, npt.NDArray[types.Datetime64_us]
-]
-
-
 # TODO: i dont understand why this does not seem to actually contain any data? everything seems to
 # be in the simulation units? maybe parts of the simulations units could be moved here or vice versa
 class Observation:
