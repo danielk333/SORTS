@@ -51,7 +51,7 @@ Cols:
 """
 
 
-def empty_state() -> TxRxPairState:
+def empty() -> TxRxPairState:
     _K = TxRxPairStateKey
 
     multi_index = pd.MultiIndex.from_arrays(
@@ -80,9 +80,7 @@ def empty_state() -> TxRxPairState:
     return TxRxPairState(state)
 
 
-def filter_state_by_time_range(
-    state: TxRxPairState, time_range: types.TimeRange_us
-) -> TxRxPairState:
+def filter_by_time_range(state: TxRxPairState, time_range: types.TimeRange_us) -> TxRxPairState:
     _K = TxRxPairStateKey
 
     mask = (

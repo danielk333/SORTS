@@ -87,7 +87,7 @@ class SimulationUnit:
                 tx_station=param.tx_station,
                 rx_station=param.rx_station,
                 exp_detail_map=param.exp_detail_map,
-                state=tx_rx_pair_state.TxRxPairState(tx_rx_pair_state.empty_state()),
+                state=tx_rx_pair_state.TxRxPairState(tx_rx_pair_state.empty()),
             )
 
         state = param.tx_rx_pointing_pairs.set_index([_K.exp_num, _K.rx_simult_num, _K.time])
@@ -211,9 +211,7 @@ class Observation:
     def from_passage(cls, passage: passage.Passage, sim_unit: SimulationUnit) -> list[t.Self]:
         _K = tx_rx_pair_state.TxRxPairStateKey
 
-        state_slice = tx_rx_pair_state.filter_state_by_time_range(
-            sim_unit._state, passage.time_range
-        )
+        state_slice = tx_rx_pair_state.filter_by_time_range(sim_unit._state, passage.time_range)
 
         unique_exp_id_simult_num_pairs: list[tuple[types.ExperimentId, types.SimultaneousNum]] = (
             state_slice.index.droplevel(_K.time).unique().to_list()
@@ -243,9 +241,7 @@ class Observation:
         _K = tx_rx_pair_state.TxRxPairStateKey
 
         time_arr = (
-            tx_rx_pair_state.filter_state_by_time_range(
-                self.sim_unit._state, self.passage.time_range
-            )
+            tx_rx_pair_state.filter_by_time_range(self.sim_unit._state, self.passage.time_range)
             .index.get_level_values(_K.time)
             .to_numpy()
         )
@@ -276,7 +272,7 @@ class Observation:
     def get_state_slice(self) -> tx_rx_pair_state.TxRxPairState:
         """Get the subset of `State` data the corresponds to the the observation"""
 
-        sim_state_slice = tx_rx_pair_state.filter_state_by_time_range(
+        sim_state_slice = tx_rx_pair_state.filter_by_time_range(
             self.sim_unit._state, self.passage.time_range
         )
 
