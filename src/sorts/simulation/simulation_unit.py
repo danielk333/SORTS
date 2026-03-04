@@ -62,8 +62,6 @@ class SimulationUnit:
         self.rx_station = rx_station
         self.exp_detail_map = exp_detail_map
 
-        self.observations: list[Observation] = []
-
     # TODO: this param should maybe be expanded so the components are arguments, or a more
     # generalized units should be made: i think this might be too specialized as a data carrier?
     # will it be useful outside of this function call?
@@ -107,8 +105,15 @@ class SimulationUnit:
 
     def simulate(self):
         """
-        Run simulation calculations and update its state/data;
-        Will populate the prop `observations`
+        Run simulation calculations and update its state/data.
+
+        For now, to get the observations, use this pattern:
+        ```python
+        obss = {}
+        obss[spobj_idx] = []
+        for passage in sim_unit.passages:
+            obss[spobj_idx].extend(Observation.from_passage(passage, self))
+        ```
         """
 
         _K = tx_rx_pair_state.TxRxPairStateKey
@@ -184,19 +189,6 @@ class SimulationUnit:
         v_tx = np.sum(spobj_tx_enu[:3, :] * spobj_tx_enu[3:, :], axis=0) / range_tx
         v_rx = np.sum(spobj_rx_enu[:3, :] * spobj_rx_enu[3:, :], axis=0) / range_rx
         self._state[_K.two_way_range_rate] = v_tx + v_rx
-
-        obss = self.get_observations()
-        self.observations = obss
-
-        return obss
-
-    def get_observations(self) -> list[Observation]:
-        obss: list[Observation] = []
-
-        for passage in self.passages:
-            obss.extend(Observation.from_passage(passage, self))
-
-        return obss
 
 
 ObservationStationScheduleIndexer = tuple[

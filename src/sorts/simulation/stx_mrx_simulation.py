@@ -319,7 +319,10 @@ class StxMrxSimulation:
                 self.sim_units[spobj_idx].append(sim_unit)
 
                 sim_unit.simulate()
-                self.obss[spobj_idx].extend(sim_unit.observations)
+
+                for passage in sim_unit.passages:
+                    self.obss[spobj_idx].extend(Observation.from_passage(passage, sim_unit))
+
             if self.progress and pbar is not None:
                 pbar.update(1)
         if self.progress and pbar is not None:
