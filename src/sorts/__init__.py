@@ -39,7 +39,6 @@ from .passage import (
 )
 from .simulation import (
     SimulationUnit as SimulationUnit,
-    Observation as Observation,
     StxMrxSimulation as StxMrxSimulation,
 )
 from .mpi_queued_execution import (

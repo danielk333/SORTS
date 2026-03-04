@@ -12,11 +12,7 @@ from sorts.types import Datetime_Like, Float64_as_sec, Datetime64_us, EcefStates
 from sorts.utils import to_datetime64_us
 from sorts.radar import Station, StationId
 from sorts.interpolated_propagation import InterpolatedPropagation
-from .simulation_unit import (
-    SimulationUnit,
-    FromPassagesOverTxRxStationPairParam,
-    Observation,
-)
+from .simulation_unit import SimulationUnit, FromPassagesOverTxRxStationPairParam
 
 logger = logging.getLogger(__name__)
 
@@ -170,7 +166,6 @@ class StxMrxSimulation:
 
         # indexed by space object index in spobj list
         self.sim_units: dict[int, list[SimulationUnit]] = {}
-        self.obss: dict[int, list[Observation]] = {}
 
     @classmethod
     def from_controllers(
@@ -299,11 +294,10 @@ class StxMrxSimulation:
 
         return sim_units_param
 
-    def run(self) -> tuple[dict[int, list[Observation]], dict[int, list[SimulationUnit]]]:
+    def run(self) -> None:
         logger.debug("starting stx mrx sim")
 
         self.sim_units = {}
-        self.obss = {}
 
         sim_units_param = self.prepare_simulation_unit_params()
 
@@ -313,15 +307,11 @@ class StxMrxSimulation:
 
         for spobj_idx, params in sim_units_param.items():
             self.sim_units[spobj_idx] = []
-            self.obss[spobj_idx] = []
             for param in params:
                 sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(param)
                 self.sim_units[spobj_idx].append(sim_unit)
 
                 sim_unit.simulate()
-
-                for passage in sim_unit.passages:
-                    self.obss[spobj_idx].extend(Observation.from_passage(passage, sim_unit))
 
             if self.progress and pbar is not None:
                 pbar.update(1)
@@ -329,7 +319,7 @@ class StxMrxSimulation:
             pbar.close()
         logger.debug("simulation done")
 
-        return self.obss, self.sim_units
+        return
 
     def chunk_by_space_object_station_pair(self):
         raise NotImplementedError()

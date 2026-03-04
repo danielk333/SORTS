@@ -15,7 +15,6 @@ from .tx_rx_pair_state import (
 )
 from .simulation_unit import (
     SimulationUnit as SimulationUnit,
-    Observation as Observation,
 )
 from .stx_mrx_simulation import (
     StxMrxSimulation as StxMrxSimulation,
