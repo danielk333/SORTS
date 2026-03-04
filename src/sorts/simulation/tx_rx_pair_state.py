@@ -141,29 +141,40 @@ def calc_gain(
     return state
 
 
-def filter_by_passage(state: TxRxPairState, passage: passage.Passage):
-    state_slice = filter_by_time_range(state, passage.time_range)
-
-    # NOTE: early return for empty case; `loc` method does not work with non-existent selection
-    if len(state_slice) == 0:
-        return state_slice
-
-    state_slice = state_slice.loc[
-        # NOTE: seems typing does not support passing tuple for MultiIndex yet
-        (self.exp_id, self.simult_num, slice(None))  # type: ignore
-    ]
-
-    return state_slice
-
-
-# TODO: might not be needed?
-def get_unique_exp_id_simult_num_pairs(state: TxRxPairState, passage: passage.Passage):
+def get_unique_exp_id_simult_num_pairs(
+    state: TxRxPairState,
+) -> list[tuple[types.ExperimentId, types.SimultaneousNum]]:
     _K = TxRxPairStateKey
 
-    state_slice = filter_by_time_range(state, passage.time_range)
-
     unique_exp_id_simult_num_pairs: list[tuple[types.ExperimentId, types.SimultaneousNum]] = (
-        state_slice.index.droplevel(_K.time).unique().to_list()
+        state.index.droplevel(_K.time).unique().to_list()
     )
 
     return unique_exp_id_simult_num_pairs
+
+
+def filter_by_exp_id_simult_num(
+    state: TxRxPairState, exp_id: types.ExperimentId, simult_num: types.SimultaneousNum
+) -> TxRxPairState:
+    _K = TxRxPairStateKey
+
+    mask = (
+        (state.index.get_level_values(_K.exp_num) >= exp_id)
+        & (state.index.get_level_values(_K.rx_simult_num) <= simult_num)
+    ) # fmt: skip
+    state_masked = state[mask]
+
+    return state_masked
+
+
+def group_by_unique_exp_id_simult_num_pairs(
+    state: TxRxPairState,
+) -> dict[tuple[types.ExperimentId, types.SimultaneousNum], TxRxPairState]:
+    unique_exp_id_simult_num_pairs = get_unique_exp_id_simult_num_pairs(state)
+
+    state_groups = {
+        (exp_id, simult_num): filter_by_exp_id_simult_num(state, exp_id, simult_num)
+        for exp_id, simult_num in unique_exp_id_simult_num_pairs
+    }
+
+    return state_groups
