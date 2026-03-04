@@ -38,6 +38,7 @@ from sorts import (
     StxMrxSimulation,
 )
 
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -67,7 +68,7 @@ scan_ranges = np.array([10, spobj_orbital_radius], dtype=np.float64)
 simu_num = len(scan_ranges)
 
 _SK = schedule.ScheduleKey
-_SuK = simulation.SimulationUnitKey
+_SuK = simulation.TxRxPairStateKey
 
 
 def south_to_north_circular_orbit_test():

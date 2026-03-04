@@ -31,7 +31,7 @@ Cols:
 
 
 def empty_state() -> TxRxPairState:
-    _K = simulation_unit.SimulationUnitKey
+    _K = simulation_unit.TxRxPairStateKey
 
     multi_index = pd.MultiIndex.from_arrays(
         [
@@ -62,7 +62,7 @@ def empty_state() -> TxRxPairState:
 def filter_state_by_time_range(
     state: TxRxPairState, time_range: types.TimeRange_us
 ) -> TxRxPairState:
-    _K = simulation_unit.SimulationUnitKey
+    _K = simulation_unit.TxRxPairStateKey
 
     mask = (
         (state.index.get_level_values(_K.time) >= time_range[0])
@@ -80,7 +80,7 @@ def calc_gain(
     spobj_tx_enu: types.EnuCoordinates,
     spobj_rx_enu: types.EnuCoordinates,
 ) -> TxRxPairState:
-    _K = simulation_unit.SimulationUnitKey
+    _K = simulation_unit.TxRxPairStateKey
 
     # will be populated to [tx_gain_arr, rx_gain_arr]
     gain_arr_list: list[npt.NDArray[np.float64]] = []

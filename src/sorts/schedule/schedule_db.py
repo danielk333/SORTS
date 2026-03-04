@@ -244,7 +244,7 @@ class ScheduleDb:
         tx_stn_num: int,
         rx_stn_num: int,
     ) -> TxRxPointingPairs:
-        _SuK = simulation.SimulationUnitKey
+        _SuK = simulation.TxRxPairStateKey
 
         df = pd.read_sql_query(
             f"""

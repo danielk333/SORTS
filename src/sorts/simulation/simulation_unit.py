@@ -16,7 +16,7 @@ from sorts.simulation import tx_rx_pair_state
 
 # TODO: remove key `multi_index`
 # TODO: updated the name with tx/rx as suffix to prefix
-class SimulationUnitKey(enum.StrEnum):
+class TxRxPairStateKey(enum.StrEnum):
     multi_index = "multi_index"
     time = "time"
     exp_num = "exp_num"
@@ -94,7 +94,7 @@ class SimulationUnit:
         cls, param: FromPassagesOverTxRxStationPairParam
     ) -> t.Self:
         # TODO: the logic inside this function is not super clear - it needs clarification
-        _K = SimulationUnitKey
+        _K = TxRxPairStateKey
         id = param.id
         passages = param.passages
         spobj = param.spobj
@@ -133,7 +133,7 @@ class SimulationUnit:
         Will populate the prop `observations`
         """
 
-        _K = SimulationUnitKey
+        _K = TxRxPairStateKey
 
         if self.tx_station.wavelength is None:
             # TODO: remove this hack; see issues #25 for details
@@ -253,7 +253,7 @@ class Observation:
 
     @classmethod
     def from_passage(cls, passage: passage.Passage, sim_unit: SimulationUnit) -> list[t.Self]:
-        _K = SimulationUnitKey
+        _K = TxRxPairStateKey
 
         state_slice = tx_rx_pair_state.filter_state_by_time_range(
             sim_unit._state, passage.time_range
@@ -284,7 +284,7 @@ class Observation:
         )
 
     def get_time_arr(self):
-        _K = SimulationUnitKey
+        _K = TxRxPairStateKey
 
         time_arr = (
             tx_rx_pair_state.filter_state_by_time_range(

@@ -275,7 +275,7 @@ class StxMrxSimulation:
                     ]
                 )
                 tx_rx_pointing_pairs = tx_rx_pointing_pairs.sort_values(
-                    by=simulation.SimulationUnitKey.time
+                    by=simulation.TxRxPairStateKey.time
                 )
 
                 # NOTE: Integers (casted to `str`) are used as `SimulationUnit`s' id

@@ -27,6 +27,7 @@ from sorts import (
     StxMrxSimulation,
 )
 
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -54,7 +55,7 @@ dsec_sampling_intv: Float_as_sec = 30
 dt_equality_thld = dsec_sampling_intv * 0.2  # TODO: need to eval this value with Daniel
 
 _SK = schedule.ScheduleKey
-_SuK = simulation.SimulationUnitKey
+_SuK = simulation.TxRxPairStateKey
 
 
 def south_to_north_circular_orbit_test():
