@@ -4,6 +4,7 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import pandas._typing as pdt
+from sorts import types
 from .types import ScheduleKey, ScheduleValidationError
 
 logger = logging.getLogger(__name__)
@@ -171,3 +172,35 @@ def empty() -> ScheduleDataframe:
     """Create an empty `ScheduleDataframe`"""
 
     return from_rows([])
+
+
+def filter_by_time_range(
+    df: ScheduleDataframe, time_range: types.TimeRange_us
+) -> ScheduleDataframe:
+    _K = ScheduleKey
+
+    mask = (
+        (df.index.get_level_values(_K.start_time) >= time_range[0])
+        & (df.index.get_level_values(_K.end_time) <= time_range[1])
+    ) # fmt: skip
+    state_masked = df[mask]
+
+    return state_masked
+
+
+def filter_by_exp_id_stn_num_simult_num(
+    df: ScheduleDataframe,
+    exp_id: types.ExperimentId,
+    stn_num: types.StationId,
+    simult_num: types.SimultaneousNum,
+) -> ScheduleDataframe:
+    _K = ScheduleKey
+
+    mask = (
+        (df.index.get_level_values(_K.exp_num) == exp_id)
+        & (df.index.get_level_values(_K.stn_num) == stn_num)
+        & (df.index.get_level_values(_K.simult_num) == simult_num)
+    ) # fmt: skip
+    state_masked = df[mask]
+
+    return state_masked
