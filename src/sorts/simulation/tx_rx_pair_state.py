@@ -3,7 +3,7 @@ import typing as t, enum
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from sorts import types, radar
+from sorts import types, radar, passage
 
 
 # TODO: remove key `multi_index`
@@ -139,3 +139,31 @@ def calc_gain(
     state[_K.gain_rx] = gain_arr_list[1]
 
     return state
+
+
+def filter_by_passage(state: TxRxPairState, passage: passage.Passage):
+    state_slice = filter_by_time_range(state, passage.time_range)
+
+    # NOTE: early return for empty case; `loc` method does not work with non-existent selection
+    if len(state_slice) == 0:
+        return state_slice
+
+    state_slice = state_slice.loc[
+        # NOTE: seems typing does not support passing tuple for MultiIndex yet
+        (self.exp_id, self.simult_num, slice(None))  # type: ignore
+    ]
+
+    return state_slice
+
+
+# TODO: might not be needed?
+def get_unique_exp_id_simult_num_pairs(state: TxRxPairState, passage: passage.Passage):
+    _K = TxRxPairStateKey
+
+    state_slice = filter_by_time_range(state, passage.time_range)
+
+    unique_exp_id_simult_num_pairs: list[tuple[types.ExperimentId, types.SimultaneousNum]] = (
+        state_slice.index.droplevel(_K.time).unique().to_list()
+    )
+
+    return unique_exp_id_simult_num_pairs
