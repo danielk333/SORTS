@@ -1,5 +1,5 @@
 from __future__ import annotations
-import typing as t, enum
+import typing as t
 from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
@@ -12,28 +12,6 @@ from sorts.radar import Station
 from sorts.signals import hard_target_snr
 from sorts.interpolation import Interpolator
 from sorts.simulation import tx_rx_pair_state
-
-
-# TODO: remove key `multi_index`
-# TODO: updated the name with tx/rx as suffix to prefix
-class TxRxPairStateKey(enum.StrEnum):
-    multi_index = "multi_index"
-    time = "time"
-    exp_num = "exp_num"
-    rx_simult_num = "rx_simult_num"
-    tx_pointing_e = "tx_pointing_e"
-    tx_pointing_n = "tx_pointing_n"
-    tx_pointing_u = "tx_pointing_u"
-    rx_pointing_e = "rx_pointing_e"
-    rx_pointing_n = "rx_pointing_n"
-    rx_pointing_u = "rx_pointing_u"
-    gain_tx = "gain_tx"
-    gain_rx = "gain_rx"
-    snr = "snr"
-    tx_range = "tx_range"
-    rx_range = "rx_range"
-    two_way_range = "two_way_range"
-    two_way_range_rate = "two_way_range_rate"
 
 
 @dataclass
@@ -94,7 +72,7 @@ class SimulationUnit:
         cls, param: FromPassagesOverTxRxStationPairParam
     ) -> t.Self:
         # TODO: the logic inside this function is not super clear - it needs clarification
-        _K = TxRxPairStateKey
+        _K = tx_rx_pair_state.TxRxPairStateKey
         id = param.id
         passages = param.passages
         spobj = param.spobj
@@ -133,7 +111,7 @@ class SimulationUnit:
         Will populate the prop `observations`
         """
 
-        _K = TxRxPairStateKey
+        _K = tx_rx_pair_state.TxRxPairStateKey
 
         if self.tx_station.wavelength is None:
             # TODO: remove this hack; see issues #25 for details
@@ -253,7 +231,7 @@ class Observation:
 
     @classmethod
     def from_passage(cls, passage: passage.Passage, sim_unit: SimulationUnit) -> list[t.Self]:
-        _K = TxRxPairStateKey
+        _K = tx_rx_pair_state.TxRxPairStateKey
 
         state_slice = tx_rx_pair_state.filter_state_by_time_range(
             sim_unit._state, passage.time_range
@@ -284,7 +262,7 @@ class Observation:
         )
 
     def get_time_arr(self):
-        _K = TxRxPairStateKey
+        _K = tx_rx_pair_state.TxRxPairStateKey
 
         time_arr = (
             tx_rx_pair_state.filter_state_by_time_range(

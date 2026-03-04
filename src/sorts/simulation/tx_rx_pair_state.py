@@ -1,10 +1,31 @@
 from __future__ import annotations
-import typing as t
+import typing as t, enum
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
 from sorts import types, radar
-from . import simulation_unit
+
+
+# TODO: remove key `multi_index`
+# TODO: updated the name with tx/rx as suffix to prefix
+class TxRxPairStateKey(enum.StrEnum):
+    multi_index = "multi_index"
+    time = "time"
+    exp_num = "exp_num"
+    rx_simult_num = "rx_simult_num"
+    tx_pointing_e = "tx_pointing_e"
+    tx_pointing_n = "tx_pointing_n"
+    tx_pointing_u = "tx_pointing_u"
+    rx_pointing_e = "rx_pointing_e"
+    rx_pointing_n = "rx_pointing_n"
+    rx_pointing_u = "rx_pointing_u"
+    gain_tx = "gain_tx"
+    gain_rx = "gain_rx"
+    snr = "snr"
+    tx_range = "tx_range"
+    rx_range = "rx_range"
+    two_way_range = "two_way_range"
+    two_way_range_rate = "two_way_range_rate"
 
 
 TxRxPairState = t.NewType("TxRxPairState", pd.DataFrame)
@@ -31,7 +52,7 @@ Cols:
 
 
 def empty_state() -> TxRxPairState:
-    _K = simulation_unit.TxRxPairStateKey
+    _K = TxRxPairStateKey
 
     multi_index = pd.MultiIndex.from_arrays(
         [
@@ -62,7 +83,7 @@ def empty_state() -> TxRxPairState:
 def filter_state_by_time_range(
     state: TxRxPairState, time_range: types.TimeRange_us
 ) -> TxRxPairState:
-    _K = simulation_unit.TxRxPairStateKey
+    _K = TxRxPairStateKey
 
     mask = (
         (state.index.get_level_values(_K.time) >= time_range[0])
@@ -80,7 +101,7 @@ def calc_gain(
     spobj_tx_enu: types.EnuCoordinates,
     spobj_rx_enu: types.EnuCoordinates,
 ) -> TxRxPairState:
-    _K = simulation_unit.TxRxPairStateKey
+    _K = TxRxPairStateKey
 
     # will be populated to [tx_gain_arr, rx_gain_arr]
     gain_arr_list: list[npt.NDArray[np.float64]] = []
