@@ -311,7 +311,14 @@ class StxMrxSimulation:
                 sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(param)
                 self.sim_units[spobj_idx].append(sim_unit)
 
-                sim_unit.simulate()
+                sim_unit._state = simulation.tx_rx_pair_state.simulate(
+                    state=sim_unit._state,
+                    spobj=sim_unit.space_object,
+                    spobj_interp=sim_unit.space_object_interp,
+                    tx_station=sim_unit.tx_station,
+                    rx_station=sim_unit.rx_station,
+                    exp_detail_map=sim_unit.exp_detail_map,
+                )
 
             if self.progress and pbar is not None:
                 pbar.update(1)
