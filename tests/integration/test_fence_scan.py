@@ -71,7 +71,7 @@ _SK = schedule.ScheduleKey
 _SuK = simulation.TxRxPairStateKey
 
 
-def south_to_north_circular_orbit_test():
+def test_south_to_north_circular_orbit():
     spobj_orbital_period: Float64_as_sec = pyorb.orbital_period(
         spobj_orbital_radius, pyorb.GM_earth
     )

@@ -58,7 +58,7 @@ _SK = schedule.ScheduleKey
 _SuK = simulation.TxRxPairStateKey
 
 
-def south_to_north_circular_orbit_test():
+def test_south_to_north_circular_orbit():
     spobj_orbital_period: Float64_as_sec = pyorb.orbital_period(
         spobj_orbital_radius, pyorb.GM_earth
     )
@@ -132,10 +132,14 @@ def south_to_north_circular_orbit_test():
     )
 
     tracker_sch = tracker_ctrl.generate(start_time, end_time)
+    schedule_db = schedule.ScheduleDb.from_schedule_dataframes(
+        [tracker_sch], ["tracker_sch"]
+    )
+    schedule_db.schedule_by_priority()
 
     sim = StxMrxSimulation.from_controllers(
         controllers=[tracker_ctrl],
-        schedule=tracker_sch,
+        schedule=schedule_db,
         epoch=start_time,
         start_time=start_time,
         end_time=end_time,
