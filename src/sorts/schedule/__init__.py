@@ -6,6 +6,7 @@ from .types import (
 )
 from .schedule_db import (
     ScheduleDbConnection as ScheduleDbConnection,
+    TxRxPointingPairs as TxRxPointingPairs,
     ScheduleDb as ScheduleDb,
 )
 from .schedule_dataframe import (

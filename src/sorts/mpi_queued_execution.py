@@ -115,9 +115,7 @@ class MpiQueuedExecution(abc.ABC):
         ##
         # parallization section
         ##
-        logger.info(
-            f"master: {self.master_proc_rank} | parallel processing of SimulationUnit start"
-        )
+        logger.info(f"master: {self.master_proc_rank} | parallel processing of worker jobs start")
 
         is_worker_idle_list = [True for _ in range(self.num_workers)]
         next_work_job_param_idx = 0
@@ -137,7 +135,7 @@ class MpiQueuedExecution(abc.ABC):
                 self.comm.send(job_param, dest=idle_worker_rank)
 
                 logger.debug(
-                    f"master: {self.master_proc_rank} | sent `SimulationUnit`"
+                    f"master: {self.master_proc_rank} | sent worker job"
                     + f" ({next_work_job_param_idx+1}/{len(worker_job_params)}) to worker {idle_worker_rank}"
                 )
 

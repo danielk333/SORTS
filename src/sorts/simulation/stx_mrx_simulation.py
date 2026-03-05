@@ -12,7 +12,8 @@ from sorts.types import Datetime_Like, Float64_as_sec, Datetime64_us, EcefStates
 from sorts.utils import to_datetime64_us
 from sorts.radar import Station, StationId
 from sorts.interpolated_propagation import InterpolatedPropagation
-from .simulation_unit import SimulationUnit, FromPassagesOverTxRxStationPairParam
+from sorts.simulation import tx_rx_pair_state
+from .simulation_unit import FromPassagesOverTxRxStationPairParam
 
 logger = logging.getLogger(__name__)
 
@@ -121,14 +122,6 @@ def find_passages(
     return passages_map
 
 
-# TODO: should be tailored per experiment?
-def iter_mpi_simulation_results(save_dir: Path):
-    for fpath in save_dir.glob(sim_unit_fname_tpl.format(id="*")):
-        with open(fpath, "rb") as f:
-            sim_unit: SimulationUnit = pickle.load(f)
-            yield sim_unit
-
-
 # TODO: we need to enforce each station to has a unique id (`.uid` prop)
 #   either in the simulation class or in related station getter like `get_radar`
 class StxMrxSimulation:
@@ -165,7 +158,10 @@ class StxMrxSimulation:
         self.passages = passages
 
         # indexed by space object index in spobj list
-        self.sim_units: dict[int, list[SimulationUnit]] = {}
+        self.from_passages_over_tx_rx_station_pair_param_list_dict: dict[
+            int, list[FromPassagesOverTxRxStationPairParam]
+        ] = {}
+        self.tx_rx_pair_state_list_dict: dict[int, list[tx_rx_pair_state.TxRxPairState]] = {}
 
     @classmethod
     def from_controllers(
@@ -282,7 +278,7 @@ class StxMrxSimulation:
                         spobj_interp=spobj_states_interp,
                         tx_station=tx_stn,
                         rx_station=rx_stn,
-                        tx_rx_pointing_pairs=tx_rx_pointing_pairs,
+                        tx_rx_pointing_pairs=schedule.TxRxPointingPairs(tx_rx_pointing_pairs),
                         exp_detail_map=self.exp_detail_map,
                     )
                 )
@@ -297,7 +293,11 @@ class StxMrxSimulation:
     def run(self) -> None:
         logger.debug("starting stx mrx sim")
 
-        self.sim_units = {}
+        _K = tx_rx_pair_state.TxRxPairStateKey
+
+        # TODO: can be removed? already init in contructor
+        self.from_passages_over_tx_rx_station_pair_param_list_dict = {}
+        self.tx_rx_pair_state_list_dict = {}
 
         sim_units_param = self.prepare_simulation_unit_params()
 
@@ -306,19 +306,23 @@ class StxMrxSimulation:
             pbar = tqdm(desc="simulating", total=len(sim_units_param))
 
         for spobj_idx, params in sim_units_param.items():
-            self.sim_units[spobj_idx] = []
+            self.from_passages_over_tx_rx_station_pair_param_list_dict[spobj_idx] = []
+            self.tx_rx_pair_state_list_dict[spobj_idx] = []
             for param in params:
-                sim_unit = SimulationUnit.from_passages_over_tx_rx_station_pair(param)
-                self.sim_units[spobj_idx].append(sim_unit)
+                self.from_passages_over_tx_rx_station_pair_param_list_dict[spobj_idx].append(param)
 
-                sim_unit._state = simulation.tx_rx_pair_state.simulate(
-                    state=sim_unit._state,
-                    spobj=sim_unit.space_object,
-                    spobj_interp=sim_unit.space_object_interp,
-                    tx_station=sim_unit.tx_station,
-                    rx_station=sim_unit.rx_station,
-                    exp_detail_map=sim_unit.exp_detail_map,
+                state = tx_rx_pair_state.TxRxPairState(
+                    param.tx_rx_pointing_pairs.set_index([_K.exp_num, _K.rx_simult_num, _K.time])
                 )
+                state = tx_rx_pair_state.simulate(
+                    state=state,
+                    spobj=param.spobj,
+                    spobj_interp=param.spobj_interp,
+                    tx_station=param.tx_station,
+                    rx_station=param.rx_station,
+                    exp_detail_map=param.exp_detail_map,
+                )
+                self.tx_rx_pair_state_list_dict[spobj_idx].append(state)
 
             if self.progress and pbar is not None:
                 pbar.update(1)
