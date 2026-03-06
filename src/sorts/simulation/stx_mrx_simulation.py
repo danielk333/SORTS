@@ -262,19 +262,10 @@ class StxMrxSimulation:
                 tx_stn = self.station_map[stn_id_pair[0]]
                 rx_stn = self.station_map[stn_id_pair[1]]
 
-                tx_rx_pointing_pairs = pd.concat(
-                    [
-                        self.schedule_db.get_tx_rx_pointing_pairs(
-                            start_time=ps.time_range[0],
-                            end_time=ps.time_range[1],
-                            tx_stn_num=stn_id_pair[0],
-                            rx_stn_num=stn_id_pair[1],
-                        )
-                        for ps in passages
-                    ]
-                )
-                tx_rx_pointing_pairs = tx_rx_pointing_pairs.sort_values(
-                    by=simulation.TxRxPairStateKey.time
+                tx_rx_pointing_pairs = get_pointing_pairs_by_stn_id_pair_passages(
+                    stn_id_pair=stn_id_pair,
+                    passages=passages,
+                    schedule_db=self.schedule_db,
                 )
 
                 # NOTE: Integers (casted to `str`) are used as `SimulationUnit`s' id
@@ -362,3 +353,28 @@ class FromPassagesOverTxRxStationPairParam:
     rx_station: radar.Station
     tx_rx_pointing_pairs: schedule.TxRxPointingPairs # TODO: this is a tmp solution, should refactor this type and dataflow; # fmt: skip
     exp_detail_map: types.ExperimentDetailMap
+
+
+def get_pointing_pairs_by_stn_id_pair_passages(
+    stn_id_pair: tuple[radar.StationId, radar.StationId],
+    passages: list[passage.Passage],
+    schedule_db: schedule.ScheduleDb,
+) -> schedule.TxRxPointingPairs:
+    """Create `TxRxPointingPairs` from a list of `Passage`, sorted by time in ascending order."""
+
+    tx_rx_pointing_pairs = pd.concat(
+        [
+            schedule_db.get_tx_rx_pointing_pairs(
+                start_time=ps.time_range[0],
+                end_time=ps.time_range[1],
+                tx_stn_num=stn_id_pair[0],
+                rx_stn_num=stn_id_pair[1],
+            )
+            for ps in passages
+        ]
+    )
+    tx_rx_pointing_pairs = tx_rx_pointing_pairs.sort_values(
+        by=simulation.TxRxPairStateKey.time, ascending=True
+    )
+
+    return schedule.TxRxPointingPairs(tx_rx_pointing_pairs)

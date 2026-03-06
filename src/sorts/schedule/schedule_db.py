@@ -245,6 +245,8 @@ class ScheduleDb:
         tx_stn_num: int,
         rx_stn_num: int,
     ) -> TxRxPointingPairs:
+        """Get pointing pairs from DB as specified by param."""
+
         _SuK = simulation.TxRxPairStateKey
 
         df = pd.read_sql_query(
