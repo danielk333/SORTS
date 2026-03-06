@@ -10,4 +10,5 @@ from .tx_rx_pair_state import (
 )
 from .stx_mrx_simulation import (
     StxMrxSimulation as StxMrxSimulation,
+    SimulationResult as SimulationResult,
 )

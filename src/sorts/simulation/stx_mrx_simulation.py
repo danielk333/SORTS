@@ -165,12 +165,6 @@ class StxMrxSimulation:
         self.progress = progress
         self.passages = passages
 
-        # indexed by space object index in spobj list
-        self.from_passages_over_tx_rx_station_pair_param_list_dict: dict[
-            int, list[FromPassagesOverTxRxStationPairParam]
-        ] = {}
-        self.tx_rx_pair_state_list_dict: dict[int, list[tx_rx_pair_state.TxRxPairState]] = {}
-
     @classmethod
     def from_controllers(
         cls,
@@ -289,14 +283,12 @@ class StxMrxSimulation:
 
         return sim_units_param
 
-    def run(self) -> None:
+    def run(self) -> SimulationResult:
         logger.debug("starting stx mrx sim")
 
         _K = tx_rx_pair_state.TxRxPairStateKey
 
-        # TODO: can be removed? already init in contructor
-        self.from_passages_over_tx_rx_station_pair_param_list_dict = {}
-        self.tx_rx_pair_state_list_dict = {}
+        resultant_state_list_dict = SimulationResult({})
 
         sim_units_param = self.prepare_simulation_unit_params()
 
@@ -305,11 +297,8 @@ class StxMrxSimulation:
             pbar = tqdm(desc="simulating", total=len(sim_units_param))
 
         for spobj_idx, params in sim_units_param.items():
-            self.from_passages_over_tx_rx_station_pair_param_list_dict[spobj_idx] = []
-            self.tx_rx_pair_state_list_dict[spobj_idx] = []
+            resultant_state_list_dict[spobj_idx] = []
             for param in params:
-                self.from_passages_over_tx_rx_station_pair_param_list_dict[spobj_idx].append(param)
-
                 state = tx_rx_pair_state.TxRxPairState(
                     param.tx_rx_pointing_pairs.set_index([_K.exp_num, _K.rx_simult_num, _K.time])
                 )
@@ -321,7 +310,7 @@ class StxMrxSimulation:
                     rx_station=param.rx_station,
                     exp_detail_map=param.exp_detail_map,
                 )
-                self.tx_rx_pair_state_list_dict[spobj_idx].append(state)
+                resultant_state_list_dict[spobj_idx].append(state)
 
             if self.progress and pbar is not None:
                 pbar.update(1)
@@ -329,7 +318,15 @@ class StxMrxSimulation:
             pbar.close()
         logger.debug("simulation done")
 
-        return
+        return SimulationResult(resultant_state_list_dict)
+
+
+# TODO: tmp; should be simplified
+SimulationResult = t.NewType("SimulationResult", dict[int, list[tx_rx_pair_state.TxRxPairState]])
+"""
+`NewType` of `dict[int, list[tx_rx_pair_state.TxRxPairState]]`.
+Indexed by space object index in spobj list (not `oid` of `SpaceObject`).
+"""
 
 
 # TODO: the docstring is copied from `SimulationUnit`, and needs update
