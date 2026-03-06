@@ -1,4 +1,4 @@
-from . import funcs, simulation_unit, tx_rx_pair_state, stx_mrx_simulation
+from . import funcs, tx_rx_pair_state, stx_mrx_simulation
 
 from .funcs import (
     duplicate_and_perturbate_space_object as duplicate_and_perturbate_space_object,

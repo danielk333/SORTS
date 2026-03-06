@@ -1,18 +1,27 @@
 from __future__ import annotations
 import logging, typing as t
+from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import pyorb
 import sorts
 from tqdm import tqdm
-from sorts import types, schedule, controller, passage, simulation
+from sorts import (
+    types,
+    space_object,
+    interpolation,
+    radar,
+    schedule,
+    controller,
+    passage,
+    simulation,
+)
 from sorts.types import Datetime_Like, Float64_as_sec, Datetime64_us, EcefStates
 from sorts.utils import to_datetime64_us
 from sorts.radar import Station, StationId
 from sorts.interpolated_propagation import InterpolatedPropagation
 from sorts.simulation import tx_rx_pair_state
-from .simulation_unit import FromPassagesOverTxRxStationPairParam
 
 logger = logging.getLogger(__name__)
 
@@ -331,5 +340,25 @@ class StxMrxSimulation:
 
         return
 
-    def chunk_by_space_object_station_pair(self):
-        raise NotImplementedError()
+
+# TODO: the docstring is copied from `SimulationUnit`, and needs update
+@dataclass
+class FromPassagesOverTxRxStationPairParam:
+    """
+    Contains all the params and results for a unit of simulation calculation.
+
+    Notes about the state data:
+    - It is stored in a private attribute `_state`
+    - It can contain data for more than 1 passage
+    - The dataset does not always contains all the columns,
+        which ones are available depends on what calculation have been done.
+    """
+
+    id: str
+    passages: list[passage.Passage]
+    spobj: space_object.SpaceObject
+    spobj_interp: interpolation.Interpolator
+    tx_station: radar.Station
+    rx_station: radar.Station
+    tx_rx_pointing_pairs: schedule.TxRxPointingPairs # TODO: this is a tmp solution, should refactor this type and dataflow; # fmt: skip
+    exp_detail_map: types.ExperimentDetailMap
