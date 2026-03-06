@@ -26,67 +26,6 @@ from sorts.simulation import tx_rx_pair_state
 logger = logging.getLogger(__name__)
 
 
-def group_passages_by_tx_rx_station_pair(
-    passages: t.Sequence[passage.Passage],
-) -> dict[tuple[StationId, StationId], list[passage.Passage]]:
-    groupped_passages: dict[tuple[StationId, StationId], list[passage.Passage]] = {}
-
-    for passage in passages:
-        # TODO: make sure this is not broken
-        tx_station_id = passage.tx_station.uid
-        rx_station_id = passage.rx_stations[0].uid
-
-        if (tx_station_id, rx_station_id) in groupped_passages:
-            groupped_passages[(tx_station_id, rx_station_id)].append(passage)
-        else:
-            groupped_passages[(tx_station_id, rx_station_id)] = [passage]
-
-    return groupped_passages
-
-
-def find_passages(
-    station_map: dict[StationId, Station],
-    station_id_pairs: t.Sequence[tuple[StationId, StationId]],
-    space_objects: t.Sequence[sorts.SpaceObject],
-    epoch: Datetime_Like,
-    spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]],
-    spobjs_smpl_states: list[EcefStates],
-) -> dict[int, list[passage.Passage]]:
-    """
-    Find passages for each space objects over the simulation period.
-    """
-
-    passages_map: dict[int, list[passage.Passage]] = {}
-
-    for spobj_idx, (spobj, spobj_smpl_dsec, spobj_smpl_states) in enumerate(
-        zip(
-            space_objects,
-            spobjs_smpl_dsec,
-            spobjs_smpl_states,
-        )
-    ):
-        passages_of_spobj: list[passage.Passage] = []
-
-        for stn_id_pair in station_id_pairs:
-            tx_stn = station_map[stn_id_pair[0]]
-            rx_stn = station_map[stn_id_pair[1]]
-
-            passages_of_spobj.extend(
-                passage.find_passages(
-                    dt=spobj_smpl_dsec,
-                    space_object=spobj,
-                    states=spobj_smpl_states,
-                    tx_station=tx_stn,
-                    rx_station=rx_stn,
-                    epoch=epoch,
-                )
-            )
-
-        passages_map[spobj_idx] = passages_of_spobj
-
-    return passages_map
-
-
 # TODO: we need to enforce each station to has a unique id (`.uid` prop)
 #   either in the simulation class or in related station getter like `get_radar`
 class StxMrxSimulation:
@@ -276,14 +215,6 @@ class StxMrxSimulation:
         return SimulationResult(resultant_state_list_dict)
 
 
-# TODO: tmp; should be simplified
-SimulationResult = t.NewType("SimulationResult", dict[int, list[tx_rx_pair_state.TxRxPairState]])
-"""
-`NewType` of `dict[int, list[tx_rx_pair_state.TxRxPairState]]`.
-Indexed by space object index in spobj list (not `oid` of `SpaceObject`).
-"""
-
-
 # TODO: the docstring is copied from `SimulationUnit`, and needs update
 @dataclass
 class FromPassagesOverTxRxStationPairParam:
@@ -305,6 +236,75 @@ class FromPassagesOverTxRxStationPairParam:
     rx_station: radar.Station
     tx_rx_pointing_pairs: schedule.TxRxPointingPairs # TODO: this is a tmp solution, should refactor this type and dataflow; # fmt: skip
     exp_detail_map: types.ExperimentDetailMap
+
+
+# TODO: tmp; should be simplified
+SimulationResult = t.NewType("SimulationResult", dict[int, list[tx_rx_pair_state.TxRxPairState]])
+"""
+`NewType` of `dict[int, list[tx_rx_pair_state.TxRxPairState]]`.
+Indexed by space object index in spobj list (not `oid` of `SpaceObject`).
+"""
+
+
+def group_passages_by_tx_rx_station_pair(
+    passages: t.Sequence[passage.Passage],
+) -> dict[tuple[StationId, StationId], list[passage.Passage]]:
+    groupped_passages: dict[tuple[StationId, StationId], list[passage.Passage]] = {}
+
+    for passage in passages:
+        # TODO: make sure this is not broken
+        tx_station_id = passage.tx_station.uid
+        rx_station_id = passage.rx_stations[0].uid
+
+        if (tx_station_id, rx_station_id) in groupped_passages:
+            groupped_passages[(tx_station_id, rx_station_id)].append(passage)
+        else:
+            groupped_passages[(tx_station_id, rx_station_id)] = [passage]
+
+    return groupped_passages
+
+
+def find_passages(
+    station_map: dict[StationId, Station],
+    station_id_pairs: t.Sequence[tuple[StationId, StationId]],
+    space_objects: t.Sequence[sorts.SpaceObject],
+    epoch: Datetime_Like,
+    spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]],
+    spobjs_smpl_states: list[EcefStates],
+) -> dict[int, list[passage.Passage]]:
+    """
+    Find passages for each space objects over the simulation period.
+    """
+
+    passages_map: dict[int, list[passage.Passage]] = {}
+
+    for spobj_idx, (spobj, spobj_smpl_dsec, spobj_smpl_states) in enumerate(
+        zip(
+            space_objects,
+            spobjs_smpl_dsec,
+            spobjs_smpl_states,
+        )
+    ):
+        passages_of_spobj: list[passage.Passage] = []
+
+        for stn_id_pair in station_id_pairs:
+            tx_stn = station_map[stn_id_pair[0]]
+            rx_stn = station_map[stn_id_pair[1]]
+
+            passages_of_spobj.extend(
+                passage.find_passages(
+                    dt=spobj_smpl_dsec,
+                    space_object=spobj,
+                    states=spobj_smpl_states,
+                    tx_station=tx_stn,
+                    rx_station=rx_stn,
+                    epoch=epoch,
+                )
+            )
+
+        passages_map[spobj_idx] = passages_of_spobj
+
+    return passages_map
 
 
 def get_pointing_pairs_by_stn_id_pair_passages(
