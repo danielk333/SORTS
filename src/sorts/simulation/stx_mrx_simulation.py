@@ -137,8 +137,6 @@ class StxMrxSimulation:
     NOTE: This is intended as an internal constructor, please use the constructor methods to create instances.
     """
 
-    save_table_name: t.Final = "_StxMrxSimulation"
-
     def __init__(
         self,
         station_map: dict[StationId, Station],
