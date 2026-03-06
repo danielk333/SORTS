@@ -3,7 +3,7 @@ import typing as t, enum
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from sorts import types, utils, space_object, interpolation, radar, signals, passage
+from sorts import types, utils, space_object, interpolation, radar, signals
 
 
 # TODO: remove key `multi_index`
@@ -178,6 +178,20 @@ def group_by_unique_exp_id_simult_num_pairs(
     }
 
     return state_groups
+
+
+class SimulateParam(t.NamedTuple):
+    """
+    Parameters of a function in a `NamedTuple`.
+    Use unpacking at call site to consume it, e.g. `*param`.
+    """
+
+    state: TxRxPairState
+    spobj: space_object.SpaceObject
+    spobj_interp: interpolation.Interpolator
+    tx_station: radar.Station
+    rx_station: radar.Station
+    exp_detail_map: types.ExperimentDetailMap
 
 
 def simulate(

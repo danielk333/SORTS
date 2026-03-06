@@ -6,6 +6,7 @@ from .funcs import (
 from .tx_rx_pair_state import (
     TxRxPairStateKey as TxRxPairStateKey,
     TxRxPairState as TxRxPairState,
+    SimulateParam as SimulateParam,
 )
 from .stx_mrx_simulation import (
     StxMrxSimulation as StxMrxSimulation,
