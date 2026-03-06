@@ -17,56 +17,13 @@ from sorts import (
     passage,
     simulation,
 )
-from sorts.types import Datetime_Like, Float64_as_sec, Datetime64_us, EcefStates
+from sorts.types import Datetime_Like, Float64_as_sec, EcefStates
 from sorts.utils import to_datetime64_us
 from sorts.radar import Station, StationId
 from sorts.interpolated_propagation import InterpolatedPropagation
 from sorts.simulation import tx_rx_pair_state
 
 logger = logging.getLogger(__name__)
-
-
-sim_unit_fname_tpl = "sim_unit.{id}.pickle"
-
-
-class SpaceObjectDsecSampler(t.Protocol):
-    def __call__(
-        self,
-        orbit: pyorb.Orbit,
-        epoch: Datetime_Like,
-        start_time: Datetime_Like,
-        end_time: Datetime_Like,
-    ) -> npt.NDArray[Float64_as_sec]: ...
-
-
-def sample_and_propagate_space_objects_states(
-    sampler: SpaceObjectDsecSampler,
-    spobjs: t.Sequence[sorts.SpaceObject],
-    start_time: Datetime64_us,
-    end_time: Datetime64_us,
-) -> tuple[list[npt.NDArray[Float64_as_sec]], list[EcefStates]]:
-    """
-    Use the sampler to get the delta time of space object within the simulation `start_time` and `end_time`,
-    then get the space object states at those delta time using the propagator in the space object.
-
-    Returns a list of sampled delta seconds and a list of corresponding states.
-    """
-
-    spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]] = []
-    for spobj in tqdm(spobjs, desc="sampling spobjs dt", total=len(spobjs)):
-        spobjs_smpl_dsec.append(
-            sampler(spobj.state, to_datetime64_us(spobj.epoch), start_time, end_time)
-        )
-
-    spobjs_smpl_states: list[EcefStates] = []
-    for spobj, spobj_smpl_dsec in tqdm(
-        zip(spobjs, spobjs_smpl_dsec),
-        desc="propagating spobjs states at sampled dt",
-        total=len(spobjs),
-    ):
-        spobjs_smpl_states.append(spobj.get_state(spobj_smpl_dsec))
-
-    return spobjs_smpl_dsec, spobjs_smpl_states
 
 
 def group_passages_by_tx_rx_station_pair(
