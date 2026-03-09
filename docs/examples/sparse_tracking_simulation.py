@@ -187,7 +187,7 @@ def simulate_obs():
     spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
     worker_job_params = [{"id": spobj.object_id, "prm": prm} for spobj in spobjs]
 
-    for worker_job_param in worker_job_params:
+    for worker_job_param in tqdm(worker_job_params, desc="running worker job"):
         prm = worker_job_param["prm"]
         object_id = worker_job_param["id"]
         obj_pth = prm.save_dpath / f"space_object_{object_id}"
