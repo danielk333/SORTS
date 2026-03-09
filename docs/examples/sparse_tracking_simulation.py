@@ -257,27 +257,21 @@ def simulate_obs():
 
         obs_pth = obj_pth / "simulation_result.pickle"
         if prm.clobber or not obs_pth.exists():
-            _K = tx_rx_pair_state.TxRxPairStateKey
-
             logger.debug("starting simulation")
 
             sim_result = stx_mrx_simulation.SimulationResult({})
             for spobj_idx in tqdm(range(len(sim.space_objects)), desc="simulating"):
                 sim_result[spobj_idx] = []
 
-                pointing_pairs_dict = stx_mrx_simulation.gather_tx_rx_pointing_pairs(
+                pair_state_dict = stx_mrx_simulation.gather_tx_rx_pair_state(
                     # the same passage data is used for all perturbed objects
                     passages=sim.passages,
                     schedule_db=sim.schedule_db,
                 )
 
-                for stn_id_pair, pointing_pairs in pointing_pairs_dict.items():
-                    state = tx_rx_pair_state.TxRxPairState(
-                        pointing_pairs.set_index([_K.exp_num, _K.rx_simult_num, _K.time])
-                    )
-
+                for stn_id_pair, pair_state in pair_state_dict.items():
                     state = tx_rx_pair_state.simulate(
-                        state=state,
+                        state=pair_state,
                         spobj=sim.space_objects[spobj_idx],
                         spobj_interp=sim.interpolated_propagations[spobj_idx].interpolator,
                         tx_station=sim.station_map[stn_id_pair[0]],

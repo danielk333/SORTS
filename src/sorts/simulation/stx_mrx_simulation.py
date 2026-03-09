@@ -297,3 +297,25 @@ def gather_tx_rx_pointing_pairs(
     }
 
     return pointing_pairs_dict
+
+
+def gather_tx_rx_pair_state(
+    passages: list[passage.Passage],
+    schedule_db: schedule.ScheduleDb,
+) -> dict[tuple[radar.StationId, radar.StationId], tx_rx_pair_state.TxRxPairState]:
+    """
+    Find the unique tx-rx station pairs among the `passages`,
+    then for each pair, gather a `TxRxPairState` from the schedule when the passages pass over the them.
+    """
+
+    _K = tx_rx_pair_state.TxRxPairStateKey
+
+    pointing_pairs_dict = gather_tx_rx_pointing_pairs(passages=passages, schedule_db=schedule_db)
+    pair_state_dict = {
+        key: tx_rx_pair_state.TxRxPairState(
+            pointing_pairs.set_index([_K.exp_num, _K.rx_simult_num, _K.time])
+        )
+        for key, pointing_pairs in pointing_pairs_dict.items()
+    }
+
+    return pair_state_dict
