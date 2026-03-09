@@ -241,8 +241,6 @@ class SimulateObs(MpiQueuedExecution):
                 [tracker_sch], ["tracker_sch"], obj_pth / "schedule.sqlite"
             )
             schedule_db.schedule_by_priority()
-            # make sure the same passage data is used for all perturbed objects
-            passage_groups = {idx: passages for idx in range(len(spobjs))}
 
             sim = StxMrxSimulation.from_controllers(
                 controllers=[tracker_ctrl],
@@ -252,7 +250,7 @@ class SimulateObs(MpiQueuedExecution):
                 end_time=prm.end_time,
                 space_objects=spobjs,
                 interpolated_propagations=prop_interps,
-                passages=passage_groups,
+                passages=passages,
             )
             utils.safe_pickle(sim, sim_pth)
         else:
@@ -261,9 +259,14 @@ class SimulateObs(MpiQueuedExecution):
 
         obs_pth = obj_pth / "simulation_result.pickle"
         if prm.clobber or not obs_pth.exists():
+            # make sure the same passage data is used for all perturbed objects
+            passage_groups = {idx: sim.passages for idx in range(len(spobjs))}
+
             sim_result = stx_mrx_simulation.run(
-                sim_units_param=sim.prepare_simulation_unit_params(), show_progress_bar=True
+                sim_units_param=sim.prepare_simulation_unit_params(passages_map=passage_groups),
+                show_progress_bar=True,
             )
+
             utils.safe_pickle(sim_result, obs_pth)
 
 

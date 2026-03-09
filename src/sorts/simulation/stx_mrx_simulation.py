@@ -43,7 +43,7 @@ class StxMrxSimulation:
         end_time: Datetime_Like,
         space_objects: t.Sequence[sorts.SpaceObject],
         interpolated_propagations: t.Sequence[InterpolatedPropagation],
-        passages: dict[int, list[passage.Passage]] | None = None,
+        passages: list[passage.Passage],
         progress: bool = False,
     ):
         self.station_map = station_map
@@ -68,7 +68,7 @@ class StxMrxSimulation:
         end_time: Datetime_Like,
         space_objects: t.Sequence[sorts.SpaceObject],
         interpolated_propagations: t.Sequence[InterpolatedPropagation],
-        passages: dict[int, list[passage.Passage]] | None = None,
+        passages: list[passage.Passage],
     ):
         """A constructor method"""
         # TODO: - the exp details are already computed outside? Should the `controllers` field be
@@ -109,34 +109,10 @@ class StxMrxSimulation:
         )
 
     def prepare_simulation_unit_params(
-        self,
+        self, passages_map: dict[int, list[passage.Passage]]
     ) -> dict[int, list[FromPassagesOverTxRxStationPairParam]]:
-        epoch = to_datetime64_us(self.epoch)
-
-        # TODO: this is ugly and can be fixed
-        dsecs = [
-            (interp.times - epoch) / np.timedelta64(1, "s")
-            for interp in self.interpolated_propagations
-        ]
-        states = [interp.states for interp in self.interpolated_propagations]
-        if self.passages is None:
-            passages_map = find_passages(
-                station_map=self.station_map,
-                station_id_pairs=self.station_id_pairs,
-                space_objects=self.space_objects,
-                epoch=self.epoch,
-                spobjs_smpl_dsec=dsecs,
-                spobjs_smpl_states=states,
-            )
-            # for obj, objps in enumerate(passages_lists):
-            #     print(f"- {obj}")
-            #     for ps in objps:
-            #         print(f"--  {ps.time_range[0]}")
-            logger.debug("find_passages done")
-        else:
-            passages_map = self.passages
-
         sim_units_param: dict[int, list[FromPassagesOverTxRxStationPairParam]] = {}
+
         for spobj_idx, spobj in enumerate(self.space_objects):
             sim_unit_params: list[FromPassagesOverTxRxStationPairParam] = []
 
