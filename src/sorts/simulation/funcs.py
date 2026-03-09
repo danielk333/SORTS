@@ -11,6 +11,11 @@ from sorts.propagator import Propagator
 from sorts.interpolated_propagation import InterpolatedPropagation
 
 
+class SpaceObjectInterpolatedPropagationPair(t.NamedTuple):
+    space_object: SpaceObject
+    interpolated_propagation: InterpolatedPropagation
+
+
 def duplicate_and_perturbate_space_object(
     space_object: SpaceObject,
     propagator: Propagator,
@@ -22,11 +27,11 @@ def duplicate_and_perturbate_space_object(
     pert_val: tuple[float, float, float, float, float, float] = (
         1e-3, 1e-3, 1e-3, 1e-5, 1e-5, 1e-5  # fmt: skip
     ),
-) -> list[tuple[SpaceObject, InterpolatedPropagation]]:
+) -> list[SpaceObjectInterpolatedPropagationPair]:
     # TODO: detail structure/explanation in docstring
 
     # duplicate list items
-    perturbed_objects = []
+    perturbed_objects: list[SpaceObjectInterpolatedPropagationPair] = []
 
     # perturbate all state variables and leave one original
     # i.e. len 7, [(true_spobj_list, true_prop list), (pert_spobj_prop_list, ...) ...x6]
@@ -53,7 +58,7 @@ def duplicate_and_perturbate_space_object(
             time_step=time_step,
         )
         perturbed_objects.append(
-            (
+            SpaceObjectInterpolatedPropagationPair(
                 new_obj,
                 prop_interp,
             )

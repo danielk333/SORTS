@@ -4,6 +4,7 @@ from pathlib import Path
 import numpy as np
 import numpy.typing as npt
 from astropy.time import Time
+from tqdm import tqdm
 from sorts import (
     utils,
     controller,
@@ -18,7 +19,7 @@ from sorts import (
     MpiQueuedExecution,
     StxMrxSimulation,
 )
-from sorts.simulation import stx_mrx_simulation
+from sorts.simulation import stx_mrx_simulation, tx_rx_pair_state
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -197,7 +198,9 @@ class SimulateObs(MpiQueuedExecution):
         obj_pth = prm.save_dpath / f"space_object_{object_id}"
         pert_pth = obj_pth / "pert_obj_propagation_interpolation.pickle"
         with open(pert_pth, "rb") as fh:
-            perturbed_object_groups = pickle.load(fh)
+            perturbed_object_groups: list[simulation.SpaceObjectInterpolatedPropagationPair] = (
+                pickle.load(fh)
+            )
 
         spobj, prop_interp = perturbed_object_groups[0]
         spobjs = [tup[0] for tup in perturbed_object_groups]
@@ -255,17 +258,41 @@ class SimulateObs(MpiQueuedExecution):
             utils.safe_pickle(sim, sim_pth)
         else:
             with open(sim_pth, "rb") as fh:
-                sim = pickle.load(fh)
+                sim: StxMrxSimulation = pickle.load(fh)
 
         obs_pth = obj_pth / "simulation_result.pickle"
         if prm.clobber or not obs_pth.exists():
-            # make sure the same passage data is used for all perturbed objects
-            passage_groups = {idx: sim.passages for idx in range(len(spobjs))}
+            _K = tx_rx_pair_state.TxRxPairStateKey
 
-            sim_result = stx_mrx_simulation.run(
-                sim_units_param=sim.prepare_simulation_unit_params(passages_map=passage_groups),
-                show_progress_bar=True,
-            )
+            logger.debug("starting simulation")
+
+            sim_result = stx_mrx_simulation.SimulationResult({})
+            for spobj_idx in tqdm(range(len(sim.space_objects)), desc="simulating"):
+                sim_result[spobj_idx] = []
+
+                pointing_pairs_dict = stx_mrx_simulation.gather_tx_rx_pointing_pairs(
+                    # the same passage data is used for all perturbed objects
+                    passages=sim.passages,
+                    schedule_db=sim.schedule_db,
+                )
+
+                for stn_id_pair, pointing_pairs in pointing_pairs_dict.items():
+                    state = tx_rx_pair_state.TxRxPairState(
+                        pointing_pairs.set_index([_K.exp_num, _K.rx_simult_num, _K.time])
+                    )
+
+                    state = tx_rx_pair_state.simulate(
+                        state=state,
+                        spobj=sim.space_objects[spobj_idx],
+                        spobj_interp=sim.interpolated_propagations[spobj_idx].interpolator,
+                        tx_station=sim.station_map[stn_id_pair[0]],
+                        rx_station=sim.station_map[stn_id_pair[1]],
+                        exp_detail_map=sim.exp_detail_map,
+                    )
+
+                    sim_result[spobj_idx].append(state)
+
+            logger.debug("simulation done")
 
             utils.safe_pickle(sim_result, obs_pth)
 

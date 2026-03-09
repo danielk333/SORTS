@@ -1,11 +1,9 @@
 from __future__ import annotations
 import logging, typing as t
 from dataclasses import dataclass
-import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import sorts
-from tqdm import tqdm
 from sorts import (
     types,
     space_object,
@@ -17,7 +15,6 @@ from sorts import (
     simulation,
 )
 from sorts.types import Datetime_Like, Float64_as_sec, EcefStates
-from sorts.utils import to_datetime64_us
 from sorts.radar import Station, StationId
 from sorts.interpolated_propagation import InterpolatedPropagation
 from sorts.simulation import tx_rx_pair_state
@@ -184,20 +181,29 @@ Indexed by space object index in spobj list (not `oid` of `SpaceObject`).
 """
 
 
+# TODO: move to `passage` module?
 def group_passages_by_tx_rx_station_pair(
     passages: t.Sequence[passage.Passage],
 ) -> dict[tuple[StationId, StationId], list[passage.Passage]]:
+    """
+    Group passages by tx-rx station pair.
+
+    For system with multi-rx station, the same passage will be referenced multiple times after the grouping,
+    once per unqiue tx-rx pair.
+    """
+
     groupped_passages: dict[tuple[StationId, StationId], list[passage.Passage]] = {}
 
     for passage in passages:
-        # TODO: make sure this is not broken
-        tx_station_id = passage.tx_station.uid
-        rx_station_id = passage.rx_stations[0].uid
+        for rx_station in passage.rx_stations:
+            # TODO: make sure this is not broken
+            tx_station_id = passage.tx_station.uid
+            rx_station_id = rx_station.uid
 
-        if (tx_station_id, rx_station_id) in groupped_passages:
-            groupped_passages[(tx_station_id, rx_station_id)].append(passage)
-        else:
-            groupped_passages[(tx_station_id, rx_station_id)] = [passage]
+            if (tx_station_id, rx_station_id) in groupped_passages:
+                groupped_passages[(tx_station_id, rx_station_id)].append(passage)
+            else:
+                groupped_passages[(tx_station_id, rx_station_id)] = [passage]
 
     return groupped_passages
 
@@ -270,40 +276,24 @@ def get_pointing_pairs_by_stn_id_pair_passages(
     return schedule.TxRxPointingPairs(tx_rx_pointing_pairs)
 
 
-def run(
-    sim_units_param: dict[int, list[FromPassagesOverTxRxStationPairParam]],
-    show_progress_bar: bool = True,
-) -> SimulationResult:
-    logger.debug("starting stx mrx sim")
+def gather_tx_rx_pointing_pairs(
+    passages: list[passage.Passage],
+    schedule_db: schedule.ScheduleDb,
+) -> dict[tuple[radar.StationId, radar.StationId], schedule.TxRxPointingPairs]:
+    """
+    Find the unique tx-rx station pairs among the `passages`,
+    then for each pair, gather a `TxRxPointingPairs` from the schedule when the passages pass over the them.
+    """
 
-    _K = tx_rx_pair_state.TxRxPairStateKey
+    passages_by_tx_rx_stn_pair = group_passages_by_tx_rx_station_pair(passages)
 
-    resultant_state_list_dict = SimulationResult({})
+    pointing_pairs_dict = {
+        stn_id_pair: get_pointing_pairs_by_stn_id_pair_passages(
+            stn_id_pair=stn_id_pair,
+            passages=passages,
+            schedule_db=schedule_db,
+        )
+        for stn_id_pair, passages in passages_by_tx_rx_stn_pair.items()
+    }
 
-    pbar = None
-    if show_progress_bar:
-        pbar = tqdm(desc="simulating", total=len(sim_units_param))
-
-    for spobj_idx, params in sim_units_param.items():
-        resultant_state_list_dict[spobj_idx] = []
-        for param in params:
-            state = tx_rx_pair_state.TxRxPairState(
-                param.tx_rx_pointing_pairs.set_index([_K.exp_num, _K.rx_simult_num, _K.time])
-            )
-            state = tx_rx_pair_state.simulate(
-                state=state,
-                spobj=param.spobj,
-                spobj_interp=param.spobj_interp,
-                tx_station=param.tx_station,
-                rx_station=param.rx_station,
-                exp_detail_map=param.exp_detail_map,
-            )
-            resultant_state_list_dict[spobj_idx].append(state)
-
-        if show_progress_bar and pbar is not None:
-            pbar.update(1)
-    if show_progress_bar and pbar is not None:
-        pbar.close()
-    logger.debug("simulation done")
-
-    return SimulationResult(resultant_state_list_dict)
+    return pointing_pairs_dict
