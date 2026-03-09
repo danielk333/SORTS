@@ -18,6 +18,7 @@ from sorts import (
     MpiQueuedExecution,
     StxMrxSimulation,
 )
+from sorts.simulation import stx_mrx_simulation
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -258,10 +259,12 @@ class SimulateObs(MpiQueuedExecution):
             with open(sim_pth, "rb") as fh:
                 sim = pickle.load(fh)
 
-        obs_pth = obj_pth / "simulation_unit_completed.pickle"
+        obs_pth = obj_pth / "simulation_result.pickle"
         if prm.clobber or not obs_pth.exists():
-            sim.run()
-            utils.safe_pickle(sim, obs_pth)
+            sim_result = stx_mrx_simulation.run(
+                sim_units_param=sim.prepare_simulation_unit_params(), show_progress_bar=True
+            )
+            utils.safe_pickle(sim_result, obs_pth)
 
 
 try:

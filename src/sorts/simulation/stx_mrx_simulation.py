@@ -4,7 +4,6 @@ from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-import pyorb
 import sorts
 from tqdm import tqdm
 from sorts import (
@@ -177,43 +176,6 @@ class StxMrxSimulation:
 
         return sim_units_param
 
-    def run(self) -> SimulationResult:
-        logger.debug("starting stx mrx sim")
-
-        _K = tx_rx_pair_state.TxRxPairStateKey
-
-        resultant_state_list_dict = SimulationResult({})
-
-        sim_units_param = self.prepare_simulation_unit_params()
-
-        pbar = None
-        if self.progress:
-            pbar = tqdm(desc="simulating", total=len(sim_units_param))
-
-        for spobj_idx, params in sim_units_param.items():
-            resultant_state_list_dict[spobj_idx] = []
-            for param in params:
-                state = tx_rx_pair_state.TxRxPairState(
-                    param.tx_rx_pointing_pairs.set_index([_K.exp_num, _K.rx_simult_num, _K.time])
-                )
-                state = tx_rx_pair_state.simulate(
-                    state=state,
-                    spobj=param.spobj,
-                    spobj_interp=param.spobj_interp,
-                    tx_station=param.tx_station,
-                    rx_station=param.rx_station,
-                    exp_detail_map=param.exp_detail_map,
-                )
-                resultant_state_list_dict[spobj_idx].append(state)
-
-            if self.progress and pbar is not None:
-                pbar.update(1)
-        if self.progress and pbar is not None:
-            pbar.close()
-        logger.debug("simulation done")
-
-        return SimulationResult(resultant_state_list_dict)
-
 
 # TODO: the docstring is copied from `SimulationUnit`, and needs update
 @dataclass
@@ -330,3 +292,42 @@ def get_pointing_pairs_by_stn_id_pair_passages(
     )
 
     return schedule.TxRxPointingPairs(tx_rx_pointing_pairs)
+
+
+def run(
+    sim_units_param: dict[int, list[FromPassagesOverTxRxStationPairParam]],
+    show_progress_bar: bool = True,
+) -> SimulationResult:
+    logger.debug("starting stx mrx sim")
+
+    _K = tx_rx_pair_state.TxRxPairStateKey
+
+    resultant_state_list_dict = SimulationResult({})
+
+    pbar = None
+    if show_progress_bar:
+        pbar = tqdm(desc="simulating", total=len(sim_units_param))
+
+    for spobj_idx, params in sim_units_param.items():
+        resultant_state_list_dict[spobj_idx] = []
+        for param in params:
+            state = tx_rx_pair_state.TxRxPairState(
+                param.tx_rx_pointing_pairs.set_index([_K.exp_num, _K.rx_simult_num, _K.time])
+            )
+            state = tx_rx_pair_state.simulate(
+                state=state,
+                spobj=param.spobj,
+                spobj_interp=param.spobj_interp,
+                tx_station=param.tx_station,
+                rx_station=param.rx_station,
+                exp_detail_map=param.exp_detail_map,
+            )
+            resultant_state_list_dict[spobj_idx].append(state)
+
+        if show_progress_bar and pbar is not None:
+            pbar.update(1)
+    if show_progress_bar and pbar is not None:
+        pbar.close()
+    logger.debug("simulation done")
+
+    return SimulationResult(resultant_state_list_dict)

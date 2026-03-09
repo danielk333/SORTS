@@ -37,6 +37,7 @@ from sorts import (
     InterpolatedPropagation,
     StxMrxSimulation,
 )
+from sorts.simulation import stx_mrx_simulation
 
 
 logging.basicConfig(level=logging.INFO)
@@ -183,7 +184,9 @@ def test_south_to_north_circular_orbit():
         interpolated_propagations=[prop_interp],
     )
 
-    obss_dict, sim_units_dict = sim.run()
+    sim_result = stx_mrx_simulation.run(
+        sim_units_param=sim.prepare_simulation_unit_params(), show_progress_bar=True
+    )
 
     # assert the number of `Passage`, `SimulationUnit` and `Observation` are expected
     assert sum(len(sim_unit_list) for sim_unit_list in sim_units_dict.values()) == 2 # 2 `SimulationUnit` in total; fmt: skip

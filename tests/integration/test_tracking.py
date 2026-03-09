@@ -26,6 +26,7 @@ from sorts import (
     InterpolatedPropagation,
     StxMrxSimulation,
 )
+from sorts.simulation import stx_mrx_simulation
 
 
 logging.basicConfig(level=logging.INFO)
@@ -147,7 +148,9 @@ def test_south_to_north_circular_orbit():
         interpolated_propagations=[prop_interp],
     )
 
-    obss_dict, sim_units_dict = sim.run()
+    sim_result = stx_mrx_simulation.run(
+        sim_units_param=sim.prepare_simulation_unit_params(), show_progress_bar=True
+    )
     sim_unit = sim_units_dict[0][0]
 
     # assert there is only 1 observation
