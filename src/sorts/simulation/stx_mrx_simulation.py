@@ -117,49 +117,6 @@ Indexed by space object index in spobj list (not `oid` of `SpaceObject`).
 """
 
 
-def find_passages(
-    station_map: dict[StationId, Station],
-    station_id_pairs: t.Sequence[tuple[StationId, StationId]],
-    space_objects: t.Sequence[sorts.SpaceObject],
-    epoch: Datetime_Like,
-    spobjs_smpl_dsec: list[npt.NDArray[Float64_as_sec]],
-    spobjs_smpl_states: list[EcefStates],
-) -> dict[int, list[passage.Passage]]:
-    """
-    Find passages for each space objects over the simulation period.
-    """
-
-    passages_map: dict[int, list[passage.Passage]] = {}
-
-    for spobj_idx, (spobj, spobj_smpl_dsec, spobj_smpl_states) in enumerate(
-        zip(
-            space_objects,
-            spobjs_smpl_dsec,
-            spobjs_smpl_states,
-        )
-    ):
-        passages_of_spobj: list[passage.Passage] = []
-
-        for stn_id_pair in station_id_pairs:
-            tx_stn = station_map[stn_id_pair[0]]
-            rx_stn = station_map[stn_id_pair[1]]
-
-            passages_of_spobj.extend(
-                passage.find_passages(
-                    dt=spobj_smpl_dsec,
-                    space_object=spobj,
-                    states=spobj_smpl_states,
-                    tx_station=tx_stn,
-                    rx_station=rx_stn,
-                    epoch=epoch,
-                )
-            )
-
-        passages_map[spobj_idx] = passages_of_spobj
-
-    return passages_map
-
-
 def get_pointing_pairs_by_stn_id_pair_passages(
     stn_id_pair: tuple[radar.StationId, radar.StationId],
     passages: list[passage.Passage],

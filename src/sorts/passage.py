@@ -87,30 +87,6 @@ def find_simultaneous_passages(
     return passages
 
 
-def find_passages(
-    dt: npt.NDArray[Float64_as_sec],
-    space_object: SpaceObject,
-    states: EcefStates,
-    tx_station: radar.Station,
-    rx_station: radar.Station,
-    epoch: Datetime_Like,
-    fov_kw=None,
-) -> list[Passage]:
-    """
-    Finds all passages that are simultaneously inside a tx-rx station pair's FOV.
-    """
-    passages = find_simultaneous_passages(
-        dt=dt,
-        space_object=space_object,
-        states=states,
-        tx_station=tx_station,
-        rx_stations=[rx_station],
-        epoch=epoch,
-        fov_kw=fov_kw,
-    )
-    return passages
-
-
 def group_passages_by_tx_rx_station_pair(
     passages: t.Sequence[Passage],
 ) -> dict[tuple[radar.StationId, radar.StationId], list[Passage]]:
