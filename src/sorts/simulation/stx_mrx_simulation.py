@@ -1,23 +1,10 @@
 from __future__ import annotations
 import logging, typing as t
-from dataclasses import dataclass
-import numpy as np
-import numpy.typing as npt
 import pandas as pd
+from tqdm import tqdm
 import sorts
-from sorts import (
-    types,
-    utils,
-    signals,
-    space_object,
-    interpolation,
-    radar,
-    schedule,
-    controller,
-    passage,
-    simulation,
-)
-from sorts.types import Datetime_Like, Float64_as_sec, EcefStates
+from sorts import types, radar, schedule, controller, passage, simulation
+from sorts.types import Datetime_Like
 from sorts.radar import Station, StationId
 from sorts.interpolated_propagation import InterpolatedPropagation
 from sorts.simulation import tx_rx_pair_state
@@ -188,83 +175,45 @@ def gather_tx_rx_pair_state(
 
 
 def simulate(
-    state: tx_rx_pair_state.TxRxPairState,
-    spobj: space_object.SpaceObject,
-    spobj_interp: interpolation.Interpolator,
-    tx_station: radar.Station,
-    rx_station: radar.Station,
+    space_objects: t.Sequence[sorts.SpaceObject],
+    interpolated_propagations: t.Sequence[InterpolatedPropagation],
+    passages: list[passage.Passage],
+    schedule_db: schedule.ScheduleDb,
+    station_map: dict[StationId, Station],
     exp_detail_map: types.ExperimentDetailMap,
-) -> tx_rx_pair_state.TxRxPairState:
+) -> list[list[tx_rx_pair_state.TxRxPairState]]:
     """
-    Run TX RX simulation calculations.
+    Run a simulation for the list of space objects,
+    over the specified passages and using the supplied propagations.
+
+    `space_objects` and  `interpolated_propagations` should have the same length.
 
     Returns:
-        The updated state/data.
+        A list of list of `TxRxPairState`.
+        A list of `TxRxPairState` is generated for each space object.
     """
 
-    _K = tx_rx_pair_state.TxRxPairStateKey
+    sim_result: list[list[tx_rx_pair_state.TxRxPairState]] = []
 
-    if tx_station.wavelength is None:
-        # TODO: remove this hack; see issues #25 for details
-        raise RuntimeError(
-            "A hack of injecting `frequency` into `tx_stn.frequency` is currently required for calling `hard_target_snr`"
+    for spobj_idx in tqdm(range(len(space_objects)), desc="simulating"):
+        sim_result.append([])
+
+        pair_state_dict = gather_tx_rx_pair_state(
+            # the same passage data is used for all perturbed objects
+            passages=passages,
+            schedule_db=schedule_db,
         )
 
-    epoch = utils.to_datetime64_us(spobj.epoch)
-    dsec = (
-        (state.index.get_level_values(_K.time).to_numpy() - epoch)
-        / np.timedelta64(1, "s")
-    ) # fmt: skip
-    spobj_states = spobj_interp.get_state(dsec)
-    spobj_tx_enu = tx_station.enu(spobj_states)
-    spobj_rx_enu = rx_station.enu(spobj_states)
+        for stn_id_pair, pair_state in pair_state_dict.items():
+            state = tx_rx_pair_state.simulate(
+                state=pair_state,
+                spobj=space_objects[spobj_idx],
+                spobj_interp=interpolated_propagations[spobj_idx].interpolator,
+                tx_station=station_map[stn_id_pair[0]],
+                rx_station=station_map[stn_id_pair[1]],
+                exp_detail_map=exp_detail_map,
+            )
 
-    range_tx: npt.NDArray[types.Float64_as_m] = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
-    range_rx: npt.NDArray[types.Float64_as_m] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
+            sim_result[spobj_idx].append(state)
 
-    # TODO: can likely use assignment by slice/indexing instead of looping
-    powers = np.array(
-        [exp_detail_map[n].power for n in state.index.get_level_values(_K.exp_num).to_numpy()],
-        dtype=np.float64,
-    )
-    bandwidths = np.array(
-        [exp_detail_map[n].bandwidth for n in state.index.get_level_values(_K.exp_num).to_numpy()],
-        dtype=np.float64,
-    )
-    rx_noise_temps = np.array(
-        [exp_detail_map[n].noise_temp for n in state.index.get_level_values(_K.exp_num).to_numpy()],
-        dtype=np.float64,
-    )
-
-    state = tx_rx_pair_state.calc_gain(
-        state=state,
-        tx_stn=tx_station,
-        rx_stn=rx_station,
-        spobj_tx_enu=spobj_tx_enu,
-        spobj_rx_enu=spobj_rx_enu,
-    )
-
-    snr = signals.hard_target_snr(
-        gain_tx=state[_K.gain_tx].to_numpy(),
-        gain_rx=state[_K.gain_rx].to_numpy(),
-        wavelength=tx_station.wavelength,
-        power_tx=powers,
-        range_tx_m=range_tx,
-        range_rx_m=range_rx,
-        diameter=spobj.d,
-        bandwidth=bandwidths,
-        rx_noise_temp=rx_noise_temps,
-        radar_albedo=spobj.properties.get("radar_albedo", 1.0),
-    )
-    state[_K.snr] = snr
-
-    state[_K.tx_range] = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
-
-    state[_K.rx_range] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
-
-    state[_K.two_way_range] = range_tx + range_rx
-    v_tx = np.sum(spobj_tx_enu[:3, :] * spobj_tx_enu[3:, :], axis=0) / range_tx
-    v_rx = np.sum(spobj_rx_enu[:3, :] * spobj_rx_enu[3:, :], axis=0) / range_rx
-    state[_K.two_way_range_rate] = v_tx + v_rx
-
-    return state
+    return sim_result
