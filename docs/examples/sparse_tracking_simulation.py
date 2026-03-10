@@ -16,9 +16,8 @@ from sorts import (
     passage,
     simulation,
     ExperimentDetail,
-    StxMrxSimulation,
 )
-from sorts.simulation import stx_mrx_simulation, tx_rx_pair_state
+from sorts.simulation import stx_mrx_simulation
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -240,7 +239,7 @@ def simulate_obs():
             )
             schedule_db.schedule_by_priority()
 
-            sim = StxMrxSimulation.from_controllers(
+            sim = stx_mrx_simulation.StxMrxSimulation.from_controllers(
                 controllers=[tracker_ctrl],
                 schedule=schedule_db,
                 epoch=prm.start_time,
@@ -253,7 +252,7 @@ def simulate_obs():
             utils.safe_pickle(sim, sim_pth)
         else:
             with open(sim_pth, "rb") as fh:
-                sim: StxMrxSimulation = pickle.load(fh)
+                sim: stx_mrx_simulation.StxMrxSimulation = pickle.load(fh)
 
         obs_pth = obj_pth / "simulation_result.pickle"
         if prm.clobber or not obs_pth.exists():
