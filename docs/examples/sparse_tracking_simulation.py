@@ -201,7 +201,7 @@ def simulate_obs():
         spobjs = [tup[0] for tup in perturbed_object_groups]
         prop_interps = [tup[1] for tup in perturbed_object_groups]
 
-        sim_pth = obj_pth / "simulation_unit.pickle"
+        sim_pth = obj_pth / "simulation.pickle"
         if prm.clobber or not sim_pth.exists():
             passages = passage.find_simultaneous_passages(
                 dt=(prop_interp.times - prm.start_time.datetime64) / np.timedelta64(1, "s"),
