@@ -97,14 +97,6 @@ class StxMrxSimulation:
         )
 
 
-# TODO: tmp; should be simplified
-SimulationResult = t.NewType("SimulationResult", dict[int, list[tx_rx_pair_state.TxRxPairState]])
-"""
-`NewType` of `dict[int, list[tx_rx_pair_state.TxRxPairState]]`.
-Indexed by space object index in spobj list (not `oid` of `SpaceObject`).
-"""
-
-
 def get_pointing_pairs_by_stn_id_pair_passages(
     stn_id_pair: tuple[radar.StationId, radar.StationId],
     passages: list[passage.Passage],
