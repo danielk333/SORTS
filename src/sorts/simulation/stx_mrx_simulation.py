@@ -12,6 +12,7 @@ from sorts.simulation import tx_rx_pair_state
 logger = logging.getLogger(__name__)
 
 
+# TODO: this can be converted into a dataclass (or just be dissolved?)
 # TODO: we need to enforce each station to has a unique id (`.uid` prop)
 #   either in the simulation class or in related station getter like `get_radar`
 class StxMrxSimulation:
