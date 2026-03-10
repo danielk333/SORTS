@@ -117,33 +117,6 @@ Indexed by space object index in spobj list (not `oid` of `SpaceObject`).
 """
 
 
-# TODO: move to `passage` module?
-def group_passages_by_tx_rx_station_pair(
-    passages: t.Sequence[passage.Passage],
-) -> dict[tuple[StationId, StationId], list[passage.Passage]]:
-    """
-    Group passages by tx-rx station pair.
-
-    For system with multi-rx station, the same passage will be referenced multiple times after the grouping,
-    once per unqiue tx-rx pair.
-    """
-
-    groupped_passages: dict[tuple[StationId, StationId], list[passage.Passage]] = {}
-
-    for passage in passages:
-        for rx_station in passage.rx_stations:
-            # TODO: make sure this is not broken
-            tx_station_id = passage.tx_station.uid
-            rx_station_id = rx_station.uid
-
-            if (tx_station_id, rx_station_id) in groupped_passages:
-                groupped_passages[(tx_station_id, rx_station_id)].append(passage)
-            else:
-                groupped_passages[(tx_station_id, rx_station_id)] = [passage]
-
-    return groupped_passages
-
-
 def find_passages(
     station_map: dict[StationId, Station],
     station_id_pairs: t.Sequence[tuple[StationId, StationId]],
@@ -221,7 +194,7 @@ def gather_tx_rx_pointing_pairs(
     then for each pair, gather a `TxRxPointingPairs` from the schedule when the passages pass over the them.
     """
 
-    passages_by_tx_rx_stn_pair = group_passages_by_tx_rx_station_pair(passages)
+    passages_by_tx_rx_stn_pair = passage.group_passages_by_tx_rx_station_pair(passages)
 
     pointing_pairs_dict = {
         stn_id_pair: get_pointing_pairs_by_stn_id_pair_passages(

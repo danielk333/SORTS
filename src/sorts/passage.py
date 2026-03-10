@@ -109,3 +109,29 @@ def find_passages(
         fov_kw=fov_kw,
     )
     return passages
+
+
+def group_passages_by_tx_rx_station_pair(
+    passages: t.Sequence[Passage],
+) -> dict[tuple[radar.StationId, radar.StationId], list[Passage]]:
+    """
+    Group passages by tx-rx station pair.
+
+    For system with multi-rx station, the same passage will be referenced multiple times after the grouping,
+    once per unqiue tx-rx pair.
+    """
+
+    groupped_passages: dict[tuple[radar.StationId, radar.StationId], list[Passage]] = {}
+
+    for passage in passages:
+        for rx_station in passage.rx_stations:
+            # TODO: make sure this is not broken
+            tx_station_id = passage.tx_station.uid
+            rx_station_id = rx_station.uid
+
+            if (tx_station_id, rx_station_id) in groupped_passages:
+                groupped_passages[(tx_station_id, rx_station_id)].append(passage)
+            else:
+                groupped_passages[(tx_station_id, rx_station_id)] = [passage]
+
+    return groupped_passages
