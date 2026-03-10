@@ -275,7 +275,7 @@ class SimulateObs(MpiQueuedExecution):
                 )
 
                 for stn_id_pair, pair_state in pair_state_dict.items():
-                    state = tx_rx_pair_state.simulate(
+                    state = stx_mrx_simulation.simulate(
                         state=pair_state,
                         spobj=sim.space_objects[spobj_idx],
                         spobj_interp=sim.interpolated_propagations[spobj_idx].interpolator,
