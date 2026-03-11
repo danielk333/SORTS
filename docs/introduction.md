@@ -29,12 +29,14 @@ The main subpackages are divided into the following groups:
 
 The conceptual core of this library is quite simple, as illustrated below.
 
-![diagram](assets/simplified_simulation_architecture.svg)
+![diagram](/assets/simplified_simulation_architecture.svg)
 
 It is helpful to first develop this simplified conceptual understanding.
 In practice, the function signatures are more complex, and preparing
 the input parameters can obscure the overall structure. However, the
 underlying idea remains the same.
+
+This architecture will be explained in more detail in the [tutorial](/tutorial/tutorial/).
 
 ## Functionality Highlights
 - Vast library of usage examples
