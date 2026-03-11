@@ -2,9 +2,25 @@
 
 Space Object Radar Tracking Simulator (SORTS) is a python library for radar simulation of space objects.
 
-The library groups different functions/stages of a radar simulation into subpackages to allow easy composition and customization of radar simulation.
+## Simplified Architecture
 
-The main subpackages are divided into the following groups:
+The conceptual core of this library is quite simple. Below is a simplified architecture of a simulation using `sorts`:
+
+![diagram](/assets/simplified_simulation_architecture.svg)
+
+It is helpful to first develop this simplified conceptual understanding.
+In practice, the function signatures are more complex, and preparing
+the input parameters can obscure the overall structure. However, the
+underlying idea remains the same.
+
+This architecture will be explained in more detail in the [tutorial](/tutorial/tutorial/).
+
+
+## Subpackages and Modules
+
+The library organizes the different functions and stages of a radar simulation into subpackages, allowing easy composition and customization of simulations.
+
+The main subpackages are grouped as follows:
 
 - Modeling
     - `space_object`: Models a space object.
@@ -24,21 +40,8 @@ The main subpackages are divided into the following groups:
     - `plotting`: Collection of plotting helpers and functions.
     - `mpi_queued_execution`: Handles parallelzied exection via Message Passing Interface (MPI).
 
-
-## Simplified Simulation Architecture
-
-The conceptual core of this library is quite simple, as illustrated below.
-
-![diagram](/assets/simplified_simulation_architecture.svg)
-
-It is helpful to first develop this simplified conceptual understanding.
-In practice, the function signatures are more complex, and preparing
-the input parameters can obscure the overall structure. However, the
-underlying idea remains the same.
-
-This architecture will be explained in more detail in the [tutorial](/tutorial/tutorial/).
-
 ## Functionality Highlights
+
 - Vast library of usage examples
 - Quick calculation of passes over a radar system
 - Easy simulation of observed variables of hard targets with radar systems (range, range rate, radar cross section, signal to noise ratio, ...) given an arbitrary radar and radar observation schema
