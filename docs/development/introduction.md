@@ -22,8 +22,23 @@ uv pip install -e .
 
 ## Documentation compilation
 
-Use this command in the root folder. For details please refer to [MkDocs documentation](https://www.mkdocs.org/).
-` mkdocs serve`
+Use the command `mkdocs serve` in the root folder.
+
+For details please refer to [MkDocs documentation](https://www.mkdocs.org/).
+
+## Style guide
+
+- We generally follow [PEP 8](https://peps.python.org/pep-0008/) and use the [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) for docstrings.
+
+- This library is data-centric. We prefer standalone functions (rather than methods) to implement behavior.
+
+- Prefer explicit function parameters instead of passing parameter containers.
+  If a grouped representation is needed, use lightweight containers such as `NamedTuple`
+  and unpack them at the call site (e.g., `*params`).
+
+- We group functions and classes by functionality into modules.
+  Prefer importing modules rather than individual functions or classes
+  to maintain consistency and minimize circular import issues.
 
 ## Additional notes about the `docs` directory
 
