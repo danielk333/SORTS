@@ -170,20 +170,20 @@ def gather_tx_rx_pair_state(
 def simulate(
     space_objects: t.Sequence[sorts.SpaceObject],
     interpolated_propagations: t.Sequence[InterpolatedPropagation],
-    passages: list[passage.Passage],
+    passages_list: list[list[passage.Passage]],
     schedule_db: schedule.ScheduleDb,
     station_map: dict[StationId, Station],
     exp_detail_map: types.ExperimentDetailMap,
 ) -> list[list[tx_rx_pair_state.TxRxPairState]]:
     """
-    Run a simulation for the list of space objects,
-    over the specified passages and using the supplied propagations.
+    Run a simulation for the list of space objects using the provided propagations.
+    Each space object will be simulated over the specified passages.
 
-    `space_objects` and  `interpolated_propagations` should have the same length.
+    `space_objects`,  `interpolated_propagations` and `passages_list` should have the same length.
 
     Returns:
         A list of list of `TxRxPairState`.
-        A list of `TxRxPairState` is generated for each space object.
+        (A list of `TxRxPairState` is generated for each space object.)
     """
 
     sim_result: list[list[tx_rx_pair_state.TxRxPairState]] = []
@@ -192,8 +192,7 @@ def simulate(
         sim_result.append([])
 
         pair_state_dict = gather_tx_rx_pair_state(
-            # the same passage data is used for all perturbed objects
-            passages=passages,
+            passages=passages_list[spobj_idx],
             schedule_db=schedule_db,
         )
 

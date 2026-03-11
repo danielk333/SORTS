@@ -261,7 +261,8 @@ def simulate_obs():
             sim_result = stx_mrx_simulation.simulate(
                 space_objects=sim.space_objects,
                 interpolated_propagations=sim.interpolated_propagations,
-                passages=sim.passages,
+                # the same passage data is used for all perturbed objects
+                passages_list=[sim.passages for _ in range(len(sim.space_objects))],
                 schedule_db=sim.schedule_db,
                 station_map=sim.station_map,
                 exp_detail_map=sim.exp_detail_map,
