@@ -172,7 +172,7 @@ def simulate(
     interpolated_propagations: t.Sequence[InterpolatedPropagation],
     passages_list: list[list[passage.Passage]],
     schedule_db: schedule.ScheduleDb,
-    station_map: dict[StationId, Station],
+    station_map: t.Mapping[StationId, Station],
     exp_detail_map: types.ExperimentDetailMap,
 ) -> list[list[tx_rx_pair_state.TxRxPairState]]:
     """
