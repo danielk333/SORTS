@@ -15,6 +15,11 @@ uv sync --all-extras
 uv pip install -e .
 ```
 
+## Tests
+
+- Unit tests are under the `tests/unit` folder
+- Integration tests are under the `tests/integration` folder
+
 ## Documentation compilation
 
 Use this command in the root folder. For details please refer to [MkDocs documentation](https://www.mkdocs.org/).

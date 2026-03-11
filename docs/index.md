@@ -7,4 +7,3 @@ The main folders are:
 - `examples`: Example files
 - `src`: Source code
 - `tests`: Test files
-  (unit tests are placed next to the source files instead of inside this folder)
