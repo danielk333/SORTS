@@ -1,6 +1,5 @@
 """Shared types in this package."""
 
-import enum
 from copy import deepcopy
 from dataclasses import dataclass, fields
 import typing as t
@@ -129,9 +128,10 @@ type SpaceObjectId = int
 
 IndexLike = int | list[int] | tuple[int] | NDArray_N | slice | np.integer
 
-# TODO: better naming
+# TODO: better naming (and relocate?)
 S = t.TypeVar("S", bound="Settings")
 
+# TODO: better naming (and relocate?)
 Frames = t.Literal[
     "TEME",
     "ITRS",
@@ -177,44 +177,6 @@ ExperimentDetailMap = dict[ExperimentId, ExperimentDetail]
 
 
 ExperimentIdStationIdPairsMap = dict[ExperimentId, list[tuple[StationId, StationId]]]
-
-
-class ScheduleKey(enum.StrEnum):
-    index = "index"  # type: ignore ; seems type checker might confuse this with the `index` method from `str`
-    exp_num = "exp_num"
-    stn_num = "stn_num"
-    simult_num = "simult_num"
-    start_time = "start_time"
-    end_time = "end_time"
-    pointing_e = "pointing_e"
-    pointing_n = "pointing_n"
-    pointing_u = "pointing_u"
-
-
-class ScheduleValidationError(Exception):
-    pass
-
-
-# TODO: remove key `multi_index`
-# TODO: updated the name with tx/rx as suffix to prefix
-class SimulationUnitKey(enum.StrEnum):
-    multi_index = "multi_index"
-    time = "time"
-    exp_num = "exp_num"
-    rx_simult_num = "rx_simult_num"
-    tx_pointing_e = "tx_pointing_e"
-    tx_pointing_n = "tx_pointing_n"
-    tx_pointing_u = "tx_pointing_u"
-    rx_pointing_e = "rx_pointing_e"
-    rx_pointing_n = "rx_pointing_n"
-    rx_pointing_u = "rx_pointing_u"
-    gain_tx = "gain_tx"
-    gain_rx = "gain_rx"
-    snr = "snr"
-    tx_range = "tx_range"
-    rx_range = "rx_range"
-    two_way_range = "two_way_range"
-    two_way_range_rate = "two_way_range_rate"
 
 
 @dataclass

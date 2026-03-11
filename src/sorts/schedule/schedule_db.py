@@ -2,8 +2,7 @@ from __future__ import annotations
 import logging, typing as t, pathlib, sqlite3
 from collections import OrderedDict
 import pandas as pd
-from sorts import types, utils
-from sorts.types import SimulationUnitKey
+from sorts import types, utils, simulation
 from .schedule_dataframe import ScheduleDataframe, scheduleDataframeDtypes
 
 
@@ -11,6 +10,24 @@ logger = logging.getLogger(__name__)
 
 
 ScheduleDbConnection = t.NewType("ScheduleDbConnection", sqlite3.Connection)
+
+
+TxRxPointingPairs = t.NewType("TxRxPointingPairs", pd.DataFrame)
+"""
+A pandas `Dataframe` with
+```
+Columns:
+    exp_num        int16
+    rx_simult_num  int16
+    time           datetime64[us]
+    tx_pointing_e  float64
+    tx_pointing_n  float64
+    tx_pointing_u  float64
+    rx_pointing_e  float64
+    rx_pointing_n  float64
+    rx_pointing_u  float64
+```
+"""
 
 
 class ScheduleDb:
@@ -221,23 +238,6 @@ class ScheduleDb:
         self._db.executescript(sql)
         self._db.commit()
 
-    TxRxPointingPairs = t.NewType("TxRxPointingPairs", pd.DataFrame)
-    """
-    A pandas `Dataframe` with
-    ```
-    Columns:
-        exp_num        int16
-        rx_simult_num  int16
-        time           datetime64[us]
-        tx_pointing_e  float64
-        tx_pointing_n  float64
-        tx_pointing_u  float64
-        rx_pointing_e  float64
-        rx_pointing_n  float64
-        rx_pointing_u  float64
-    ```
-    """
-
     def get_tx_rx_pointing_pairs(
         self,
         start_time: types.Datetime_Like,
@@ -245,6 +245,9 @@ class ScheduleDb:
         tx_stn_num: int,
         rx_stn_num: int,
     ) -> TxRxPointingPairs:
+        """Get pointing pairs from DB as specified by param."""
+
+        _SuK = simulation.TxRxPairStateKey
 
         df = pd.read_sql_query(
             f"""
@@ -280,16 +283,16 @@ class ScheduleDb:
             ;""",
             self._db,
             dtype={
-                SimulationUnitKey.exp_num: "int16",
-                SimulationUnitKey.rx_simult_num: "int16",
-                SimulationUnitKey.time: "datetime64[us]",
-                SimulationUnitKey.tx_pointing_e: "float64",
-                SimulationUnitKey.tx_pointing_n: "float64",
-                SimulationUnitKey.tx_pointing_u: "float64",
-                SimulationUnitKey.rx_pointing_e: "float64",
-                SimulationUnitKey.rx_pointing_n: "float64",
-                SimulationUnitKey.rx_pointing_u: "float64",
+                _SuK.exp_num: "int16",
+                _SuK.rx_simult_num: "int16",
+                _SuK.time: "datetime64[us]",
+                _SuK.tx_pointing_e: "float64",
+                _SuK.tx_pointing_n: "float64",
+                _SuK.tx_pointing_u: "float64",
+                _SuK.rx_pointing_e: "float64",
+                _SuK.rx_pointing_n: "float64",
+                _SuK.rx_pointing_u: "float64",
             },
         )
 
-        return self.TxRxPointingPairs(df)
+        return TxRxPointingPairs(df)

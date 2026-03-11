@@ -1,5 +1,5 @@
 import logging
-from .logging import apply_suggested_config
+from sorts.logging import apply_suggested_config
 
 
 def setup_function():

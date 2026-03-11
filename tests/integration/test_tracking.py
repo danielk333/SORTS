@@ -26,6 +26,8 @@ from sorts import (
     InterpolatedPropagation,
     StxMrxSimulation,
 )
+from sorts.simulation import stx_mrx_simulation
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -54,10 +56,10 @@ dsec_sampling_intv: Float_as_sec = 30
 dt_equality_thld = dsec_sampling_intv * 0.2  # TODO: need to eval this value with Daniel
 
 _SK = schedule.ScheduleKey
-_SuK = simulation.SimulationUnitKey
+_SuK = simulation.TxRxPairStateKey
 
 
-def south_to_north_circular_orbit_test():
+def test_south_to_north_circular_orbit():
     spobj_orbital_period: Float64_as_sec = pyorb.orbital_period(
         spobj_orbital_radius, pyorb.GM_earth
     )
@@ -131,10 +133,14 @@ def south_to_north_circular_orbit_test():
     )
 
     tracker_sch = tracker_ctrl.generate(start_time, end_time)
+    schedule_db = schedule.ScheduleDb.from_schedule_dataframes(
+        [tracker_sch], ["tracker_sch"]
+    )
+    schedule_db.schedule_by_priority()
 
     sim = StxMrxSimulation.from_controllers(
         controllers=[tracker_ctrl],
-        schedule=tracker_sch,
+        schedule=schedule_db,
         epoch=start_time,
         start_time=start_time,
         end_time=end_time,
@@ -142,7 +148,9 @@ def south_to_north_circular_orbit_test():
         interpolated_propagations=[prop_interp],
     )
 
-    obss_dict, sim_units_dict = sim.run()
+    sim_result = stx_mrx_simulation.run(
+        sim_units_param=sim.prepare_simulation_unit_params(), show_progress_bar=True
+    )
     sim_unit = sim_units_dict[0][0]
 
     # assert there is only 1 observation

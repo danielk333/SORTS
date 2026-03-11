@@ -1,7 +1,15 @@
 from . import schedule_db, schedule_dataframe
 
-from .schedule_db import ScheduleDbConnection, ScheduleDb
-from .schedule_dataframe import ScheduleDataframe, scheduleDataframeDtypes
-
-# for semantic/logical import/export
-from sorts.types import ScheduleKey, ScheduleValidationError
+from .types import (
+    ScheduleKey as ScheduleKey,
+    ScheduleValidationError as ScheduleValidationError,
+)
+from .schedule_db import (
+    ScheduleDbConnection as ScheduleDbConnection,
+    TxRxPointingPairs as TxRxPointingPairs,
+    ScheduleDb as ScheduleDb,
+)
+from .schedule_dataframe import (
+    ScheduleDataframe as ScheduleDataframe,
+    scheduleDataframeDtypes as scheduleDataframeDtypes,
+)

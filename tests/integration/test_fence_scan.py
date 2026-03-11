@@ -37,6 +37,8 @@ from sorts import (
     InterpolatedPropagation,
     StxMrxSimulation,
 )
+from sorts.simulation import stx_mrx_simulation
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -67,10 +69,10 @@ scan_ranges = np.array([10, spobj_orbital_radius], dtype=np.float64)
 simu_num = len(scan_ranges)
 
 _SK = schedule.ScheduleKey
-_SuK = simulation.SimulationUnitKey
+_SuK = simulation.TxRxPairStateKey
 
 
-def south_to_north_circular_orbit_test():
+def test_south_to_north_circular_orbit():
     spobj_orbital_period: Float64_as_sec = pyorb.orbital_period(
         spobj_orbital_radius, pyorb.GM_earth
     )
@@ -182,7 +184,9 @@ def south_to_north_circular_orbit_test():
         interpolated_propagations=[prop_interp],
     )
 
-    obss_dict, sim_units_dict = sim.run()
+    sim_result = stx_mrx_simulation.run(
+        sim_units_param=sim.prepare_simulation_unit_params(), show_progress_bar=True
+    )
 
     # assert the number of `Passage`, `SimulationUnit` and `Observation` are expected
     assert sum(len(sim_unit_list) for sim_unit_list in sim_units_dict.values()) == 2 # 2 `SimulationUnit` in total; fmt: skip

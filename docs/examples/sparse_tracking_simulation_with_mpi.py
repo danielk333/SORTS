@@ -4,6 +4,7 @@ from pathlib import Path
 import numpy as np
 import numpy.typing as npt
 from astropy.time import Time
+from tqdm import tqdm
 from sorts import (
     utils,
     controller,
@@ -12,11 +13,12 @@ from sorts import (
     propagator,
     radar,
     schedule,
+    passage,
     simulation,
     ExperimentDetail,
     MpiQueuedExecution,
-    StxMrxSimulation,
 )
+from sorts.simulation import stx_mrx_simulation
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -195,15 +197,17 @@ class SimulateObs(MpiQueuedExecution):
         obj_pth = prm.save_dpath / f"space_object_{object_id}"
         pert_pth = obj_pth / "pert_obj_propagation_interpolation.pickle"
         with open(pert_pth, "rb") as fh:
-            perturbed_object_groups = pickle.load(fh)
+            perturbed_object_groups: list[simulation.SpaceObjectInterpolatedPropagationPair] = (
+                pickle.load(fh)
+            )
 
         spobj, prop_interp = perturbed_object_groups[0]
         spobjs = [tup[0] for tup in perturbed_object_groups]
         prop_interps = [tup[1] for tup in perturbed_object_groups]
 
-        sim_pth = obj_pth / "simulation_unit.pickle"
+        sim_pth = obj_pth / "simulation.pickle"
         if prm.clobber or not sim_pth.exists():
-            passages = simulation.find_simultaneous_passages(
+            passages = passage.find_simultaneous_passages(
                 dt=(prop_interp.times - prm.start_time.datetime64) / np.timedelta64(1, "s"),
                 space_object=spobj,
                 states=prop_interp.states[:3, ...],
@@ -239,10 +243,8 @@ class SimulateObs(MpiQueuedExecution):
                 [tracker_sch], ["tracker_sch"], obj_pth / "schedule.sqlite"
             )
             schedule_db.schedule_by_priority()
-            # make sure the same passage data is used for all perturbed objects
-            passage_groups = {idx: passages for idx in range(len(spobjs))}
 
-            sim = StxMrxSimulation.from_controllers(
+            sim = stx_mrx_simulation.StxMrxSimulation.from_controllers(
                 controllers=[tracker_ctrl],
                 schedule=schedule_db,
                 epoch=prm.start_time,
@@ -250,17 +252,30 @@ class SimulateObs(MpiQueuedExecution):
                 end_time=prm.end_time,
                 space_objects=spobjs,
                 interpolated_propagations=prop_interps,
-                passages=passage_groups,
+                passages=passages,
             )
             utils.safe_pickle(sim, sim_pth)
         else:
             with open(sim_pth, "rb") as fh:
-                sim = pickle.load(fh)
+                sim: stx_mrx_simulation.StxMrxSimulation = pickle.load(fh)
 
-        obs_pth = obj_pth / "simulation_unit_completed.pickle"
+        obs_pth = obj_pth / "simulation_result.pickle"
         if prm.clobber or not obs_pth.exists():
-            sim.run()
-            utils.safe_pickle(sim, obs_pth)
+            logger.debug("starting simulation")
+
+            sim_result = stx_mrx_simulation.simulate(
+                space_objects=sim.space_objects,
+                interpolated_propagations=sim.interpolated_propagations,
+                # the same passage data is used for all perturbed objects
+                passages_list=[sim.passages for _ in range(len(sim.space_objects))],
+                schedule_db=sim.schedule_db,
+                station_map=sim.station_map,
+                exp_detail_map=sim.exp_detail_map,
+            )
+
+            logger.debug("simulation done")
+
+            utils.safe_pickle(sim_result, obs_pth)
 
 
 try:
