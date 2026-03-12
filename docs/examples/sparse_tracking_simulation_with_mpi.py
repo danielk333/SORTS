@@ -263,15 +263,22 @@ class SimulateObs(MpiQueuedExecution):
         if prm.clobber or not obs_pth.exists():
             logger.debug("starting simulation")
 
-            sim_result = stx_mrx_simulation.simulate(
-                space_objects=sim.space_objects,
-                interpolated_propagations=sim.interpolated_propagations,
-                # the same passage data is used for all perturbed objects
-                passages_list=[sim.passages for _ in range(len(sim.space_objects))],
-                schedule_db=sim.schedule_db,
-                station_map=sim.station_map,
-                exp_detail_map=sim.exp_detail_map,
-            )
+            sim_result = [
+                stx_mrx_simulation.simulate(
+                    space_object=spobj,
+                    interpolated_propagation=interp_prop,
+                    # the same passage data is used for all perturbed objects
+                    passages=sim.passages,
+                    schedule_db=sim.schedule_db,
+                    station_map=sim.station_map,
+                    exp_detail_map=sim.exp_detail_map,
+                )
+                for spobj, interp_prop in tqdm(
+                    # NOTE: used `list(zip(...))` instead of just `zip(...)` so that `tqdm` can get the length
+                    list(zip(sim.space_objects, sim.interpolated_propagations)),
+                    desc="simulating",
+                )
+            ]
 
             logger.debug("simulation done")
 
