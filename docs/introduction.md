@@ -22,15 +22,15 @@ The library organizes the different functions and stages of a radar simulation i
 
 The main subpackages are grouped as follows:
 
-- Modeling
-    - `space_object`: Models a space object.
-    - `population`: Models a distribution of space object.
-    - `radar`: Models a radar system.
+- Representaions
+    - `space_object`: Represents a space object.
+    - `population`: Represents a distribution of space object.
+    - `radar`: Represents a radar system.
 - Signal processing
     - `signals`: Radar singal calculations.
 - Simulation
     - `schedule`: Handles resolution of multiple schedules
-    - `passage`: Models the passover of a space object over the field of view of a set of radar stations.
+    - `passage`: Represents the passover of a space object over the field of view of a set of radar stations.
     - `controller`: Controls a radar system. Generates schedules.
     - `simulation`: Handles simulation.
 - Physics utilities
