@@ -168,44 +168,32 @@ def gather_tx_rx_pair_state(
 
 
 def simulate(
-    space_objects: t.Sequence[sorts.SpaceObject],
-    interpolated_propagations: t.Sequence[InterpolatedPropagation],
-    passages_list: list[list[passage.Passage]],
+    space_object: sorts.SpaceObject,
+    interpolated_propagation: InterpolatedPropagation,
+    passages: list[passage.Passage],
     schedule_db: schedule.ScheduleDb,
     station_map: t.Mapping[StationId, Station],
     exp_detail_map: types.ExperimentDetailMap,
-) -> list[list[tx_rx_pair_state.TxRxPairState]]:
+) -> list[tx_rx_pair_state.TxRxPairState]:
     """
-    Run a simulation for the list of space objects using the provided propagations.
-    Each space object will be simulated over the specified passages.
-
-    `space_objects`,  `interpolated_propagations` and `passages_list` should have the same length.
-
-    Returns:
-        A list of list of `TxRxPairState`.
-        (A list of `TxRxPairState` is generated for each space object.)
+    Run a simulation for the space object using the provided propagation, over the specified passages.
     """
 
-    sim_result: list[list[tx_rx_pair_state.TxRxPairState]] = []
+    pair_state_dict = gather_tx_rx_pair_state(
+        passages=passages,
+        schedule_db=schedule_db,
+    )
 
-    for spobj_idx in tqdm(range(len(space_objects)), desc="simulating"):
-        sim_result.append([])
-
-        pair_state_dict = gather_tx_rx_pair_state(
-            passages=passages_list[spobj_idx],
-            schedule_db=schedule_db,
+    sim_result = [
+        tx_rx_pair_state.simulate(
+            state=pair_state,
+            spobj=space_object,
+            spobj_interp=interpolated_propagation.interpolator,
+            tx_station=station_map[stn_id_pair[0]],
+            rx_station=station_map[stn_id_pair[1]],
+            exp_detail_map=exp_detail_map,
         )
-
-        for stn_id_pair, pair_state in pair_state_dict.items():
-            state = tx_rx_pair_state.simulate(
-                state=pair_state,
-                spobj=space_objects[spobj_idx],
-                spobj_interp=interpolated_propagations[spobj_idx].interpolator,
-                tx_station=station_map[stn_id_pair[0]],
-                rx_station=station_map[stn_id_pair[1]],
-                exp_detail_map=exp_detail_map,
-            )
-
-            sim_result[spobj_idx].append(state)
+        for stn_id_pair, pair_state in pair_state_dict.items()
+    ]
 
     return sim_result
