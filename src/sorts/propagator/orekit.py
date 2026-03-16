@@ -96,9 +96,6 @@ def mjd2absdate(mjd, utc):
 class Orekit(Propagator):
     """Propagator class implementing the Orekit propagator.
 
-    #TODO: Update docs according to new "settings dict" method.
-    #TODO: Valdiate Orekit v10 compatibility
-
     :ivar list solarsystem_perturbers: List of strings of names of objects in the solarsystem that should be used for third body perturbation calculations. All objects listed at `CelestialBodyFactory <https://www.orekit.org/static/apidocs/org/orekit/bodies/CelestialBodyFactory.html>`_ are available.
     :ivar str in_frame: String identifying the input frame to be used. All frames listed at `FramesFactory <https://www.orekit.org/static/apidocs/org/orekit/frames/FramesFactory.html>`_ are available.
     :ivar str out_frame: String identifying the output frame to be used. All frames listed at `FramesFactory <https://www.orekit.org/static/apidocs/org/orekit/frames/FramesFactory.html>`_ are available.
@@ -146,6 +143,8 @@ class Orekit(Propagator):
     :param tuple gravity_order: A tuple of two integers for describing the order of spherical harmonics used in the `HolmesFeatherstoneAttractionModel <https://www.orekit.org/static/apidocs/org/orekit/forces/gravity/HolmesFeatherstoneAttractionModel.html>`_ model.
     :param str solar_activity_strength: The strength of the solar activity. Options are 'AVRAGE', 'STRONG', 'WEAK'.
     """
+    #TODO: Update docs according to new "settings dict" method.
+    #TODO: Valdiate Orekit v10 compatibility
 
     class OrekitVariableStep(PythonOrekitStepHandler):
         """Class for handling the steps."""

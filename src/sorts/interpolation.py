@@ -1,14 +1,18 @@
 #!/usr/bin/env python
 
-"""Interpolation functions.
-
+"""
+Interpolation functions.
 """
 
+# TODO: unit tests for interpolators!!!
+
 from abc import ABC, abstractmethod
-
 import numpy as np
+import numpy.typing as npt
 
 
+# TODO: should rename to `InterpolatedSpaceObject`? or it should no longer mimics the behavior of `SpaceObject`?
+# TODO: maybe we can just use `InterpolatedPropagation` instead?
 class Interpolator(ABC):
     """Base Interpolation class that mimics the behavior of :code:`SpaceObject` so that a `Interpolator` instance can be used instead.
 
@@ -25,7 +29,7 @@ class Interpolator(ABC):
         self.t = np.atleast_1d(t)
 
     @abstractmethod
-    def get_state(self, t, **kwargs):
+    def get_state(self, t) -> npt.NDArray:
         pass
 
 
@@ -53,11 +57,13 @@ class Linear(Interpolator):
     def get_state(self, t):
         st_t = self.t.flatten()
         in_t = np.atleast_1d(t).flatten()
-        t_mat = st_t[:, None] - in_t[None, :]
-
-        inds = np.argmax(t_mat > 0, axis=0) - 1
-
-        dts = -t_mat[inds, np.arange(len(t))]
+        # TODO: this can be optimized!
+        inds = np.empty(in_t.shape, dtype=np.int64)
+        dts = np.empty(in_t.shape, dtype=np.float64)
+        for ind in range(len(in_t)):
+            t_mat = st_t - in_t[ind]
+            inds[ind] = np.argmax(t_mat > 0) - 1
+            dts[ind] = -t_mat[inds[ind]]
         frac = dts / self.t_diffs[inds]
 
         intep_states = self.states[:, inds] * (1 - frac) + self.states[:, inds + 1] * frac

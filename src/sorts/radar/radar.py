@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 
-"""This module is used to define the radar system
-
-"""
+"""This module is used to define the radar system"""
 import copy
-
 from .. import passes
 
 

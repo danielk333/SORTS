@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """
 The EISCAT 3D system.
 
@@ -9,18 +7,14 @@ For more information see:
     * `EISCAT <https://eiscat.se/>`_
     * `EISCAT 3D <https://www.eiscat.se/eiscat3d/>`_
 
-
-# TODO update these
-
 **EISCAT 3D Stages:**
 
     * Stage 1: x
     * Stage 2: x
     * Stage 3: x
-
-
-
 """
+# TODO: update docstring, the **EISCAT 3D Stages:** section.
+
 import pyant
 
 from .radars import radar_generator

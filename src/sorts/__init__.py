@@ -1,42 +1,54 @@
 #!/usr/bin/env python
 
-"""SORTS package
-
-"""
+"""SORTS package"""
 import ctypes
 import pathlib
 import sysconfig
 import logging
 from .version import __version__
-from .logger import config_logger
 
 # Get and config module-level logger
 logger = logging.getLogger(__name__)
-config_logger(logger)
 
 # Find suffix
-suffix = sysconfig.get_config_var("EXT_SUFFIX")
-if suffix is None:
-    suffix = ".so"
+# suffix = sysconfig.get_config_var("EXT_SUFFIX")
+# if suffix is None:
+#     suffix = ".so"
+#
+# __sortspath__ = pathlib.Path(__file__).resolve().parent
+# __libpath__ = __sortspath__ / ("clibsorts" + suffix)
+#
+# clibsorts = ctypes.cdll.LoadLibrary(str(__libpath__))
 
-__sortspath__ = pathlib.Path(__file__).resolve().parent
-__libpath__ = __sortspath__ / ("clibsorts" + suffix)
+##
+# v2 imports
+##
+from . import types, utils, schedule, controller, interpolated_propagation, passage, simulation
 
-clibsorts = ctypes.cdll.LoadLibrary(str(__libpath__))
+from .types import (
+    ExperimentDetail as ExperimentDetail,
+)
+from .space_object import (
+    SpaceObject as SpaceObject,
+)
+from .interpolated_propagation import (
+    InterpolatedPropagation as InterpolatedPropagation,
+)
+from .passage import (
+    Passage as Passage,
+)
+from .simulation import (
+    StxMrxSimulation as StxMrxSimulation,
+)
+from .mpi_queued_execution import (
+    MpiQueuedExecution as MpiQueuedExecution,
+)
 
 
-# classes
-from .space_object import SpaceObject
-from .population import Population
-from .propagator import Propagator
-from .radar import Scan
-from .radar import Station, TX, RX
-from .controller import RadarController
-from .scheduler import Scheduler
-from .passes import Pass
-from .errors import Errors
-from .simulation import Simulation
-
+##
+# v1 imports
+##
+# TODO: clean up these imports
 
 # modules
 from .radar import scans
@@ -46,25 +58,37 @@ from . import constants
 from . import frames
 from . import dates
 from . import plotting
-from . import profiling
-from . import controller
-from . import scheduler
+
+# from . import controller_v1
 from . import passes
 from . import errors
 from . import io
 from . import interpolation
-from . import simulation
+
+# from . import simulation_v1
 from . import signals
 from . import correlator
 from . import propagator
+
+# classes
+from .space_object import SpaceObject
+from .population import Population
+from .propagator import Propagator
+from .radar import Scan
+from .radar import Station, TX, RX
+from .controller_v1 import RadarController
+from .passes import Pass
+from .errors import Errors
+from .simulation_v1 import Simulation
 
 # Functions
 from .radar import get_radar, list_radars
 from .correlator import correlate
 from .passes import equidistant_sampling
-from .passes import find_passes, find_simultaneous_passes, group_passes
+
+# from .passes import find_passes, find_simultaneous_passes, group_passes
 from .signals import hard_target_snr
-from .simulation import (
+from .simulation_v1 import (
     MPI_single_process,
     MPI_action,
     iterable_step,

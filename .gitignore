@@ -5,6 +5,7 @@ examples/data/test_tdm.tdm
 examples/data/orekit-data-master.zip
 examples/data/tle.txt
 examples/data/tle-201801.txt
+examples/local_data/*
 
 # Compiled source #
 ###################
@@ -18,6 +19,7 @@ examples/data/tle-201801.txt
 *~
 .*.swo
 .*.swp
+session.vim
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -75,9 +77,6 @@ coverage.xml
 *.mo
 *.pot
 
- # Sphinx documentation
-docs/_build/
-
 # PyBuilder
 target/
 
@@ -87,9 +86,6 @@ target/
 # IPython
 profile_default/
 ipython_config.py
-
-# pyenv
-.python-version
 
 # Environments
 .env
@@ -115,9 +111,18 @@ cache_error*
 *~
 .*.sw[op]
 
-#temporary test data
+# temporary test data
 tests/tmp_test_data/*
 
-#do not version control some data
+# do not version control some data
 data/spice/*.bsp
 data/spice/*.tls
+
+# mkdocs output
+site
+
+# local files
+/local_data/*
+/local_scripts/*
+/docs/**/local_data/*
+/mounted_data

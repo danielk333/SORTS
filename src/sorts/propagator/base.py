@@ -1,138 +1,49 @@
 #!/usr/bin/env python
 
-"""A parent class used for interfacing any propagator.
-
-"""
+"""A parent class used for interfacing any propagator."""
 
 # Python standard import
+from typing import Generic
 import logging
 from abc import ABC, abstractmethod
 
-# Third party import
-import numpy as np
 from astropy.time import Time, TimeDelta
-
-# Local import
+from sorts.types import S, NDArray_N, NDArray_6xN
+from sorts.utils import convert_to_relative_time
+from sorts.space_object import SpaceObject
 
 logger = logging.getLogger(__name__)
 
-class Propagator(ABC):
-    DEFAULT_SETTINGS = dict(
-        epoch_format="mjd",
-        epoch_scale="utc",
-        time_format="sec",
-        time_scale=None,
-        heartbeat=False,
-    )
 
-    def __init__(self, settings=None):
-        self.settings = dict()
+class Propagator(ABC, Generic[S]):
+    def __init__(self, settings: S):
+        self.settings = settings
+        for key in self.settings.keys:
+            logger.debug(f"Propagator:settings:{key} = {getattr(self.settings, key)}")
 
-        self.settings.update(self.DEFAULT_SETTINGS)
-        if settings is not None:
-            self.settings.update(settings)
-            self._check_settings()
-
-        for key in self.settings:
-            logger.debug(f"Propagator:settings:{key} = {self.settings[key]}")
-
-    def _check_settings(self):
-        logger.debug(f"Propagator:_check_settings")
-
-        for key_s, val_s in self.settings.items():
-            if key_s not in self.DEFAULT_SETTINGS:
-                raise KeyError('Setting "{}" does not exist'.format(key_s))
-            if type(self.DEFAULT_SETTINGS[key_s]) != type(val_s):
-                raise ValueError('Setting "{}" does not support "{}"'.format(key_s, type(val_s)))
-
-    @property
-    def out_frame(self):
-        if "out_frame" in self.settings:
-            return self.settings["out_frame"]
-        else:
-            raise AttributeError('No setting called "out_frame"')
-
-    @out_frame.setter
-    def out_frame(self, val):
-        if "out_frame" in self.settings:
-            self.settings["out_frame"] = val
-        else:
-            raise AttributeError('No setting called "out_frame"')
-
-    @property
-    def in_frame(self):
-        if "in_frame" in self.settings:
-            return self.settings["in_frame"]
-        else:
-            raise AttributeError('No setting called "in_frame"')
-
-    @in_frame.setter
-    def in_frame(self, val):
-        if "in_frame" in self.settings:
-            self.settings["in_frame"] = val
-        else:
-            raise AttributeError('No setting called "in_frame"')
-
-    def convert_time(self, t, epoch):
-        """Convert input time and epoch variables to :code:`astropy.TimeDelta`
-        and :code:`astropy.Time` variables of the correct format and scale.
-        """
-        logger.debug(f"Propagator:convert_time")
-
-        if epoch is None:
-            pass
-        elif isinstance(epoch, Time) and not isinstance(epoch, TimeDelta):
-            if epoch.format != self.settings["epoch_format"]:
-                epoch.format = self.settings["epoch_format"]
-
-            if epoch.scale != self.settings["epoch_scale"]:
-                epoch = getattr(epoch, self.settings["epoch_scale"])
-        else:
-            epoch = Time(
-                epoch, format=self.settings["epoch_format"], scale=self.settings["epoch_scale"]
-            )
-
-        if len(epoch.shape) > 0:
-            if epoch.size > 1:
-                raise ValueError(f'Can only have one epoch, not "{epoch.size}"')
-            else:
-                epoch = epoch[0]
-
-        if t is None:
-            pass
-        elif isinstance(t, Time) and not isinstance(t, TimeDelta):
-            t = t - epoch
-        elif isinstance(t, TimeDelta):
-            if t.format != self.settings["time_format"]:
-                t.format = self.settings["time_format"]
-
-            if self.settings["time_scale"] is not None:
-                if t.scale != self.settings["time_scale"]:
-                    t = getattr(t, self.settings["time_scale"])
-        elif isinstance(t, np.ndarray):
-            if np.issubdtype(t.dtype, np.datetime64):
-                t = Time(t, scale=self.settings["time_scale"])
-                t = t - epoch
-            else:
-                t = TimeDelta(
-                    t, format=self.settings["time_format"], scale=self.settings["time_scale"]
-                )
-        elif isinstance(t, np.datetime64):
-            t = Time(t, scale=self.settings["time_scale"])
-            t = t - epoch
-        else:
-            t = TimeDelta(t, format=self.settings["time_format"], scale=self.settings["time_scale"])
-
-        logger.debug(f"Propagator:convert_time:completed")
-
-        return t, epoch
-
-    def set(self, **kwargs):
-        self.settings.update(kwargs)
-        self._check_settings()
+    def propagate_to_new_epoch(
+        self,
+        space_object: SpaceObject,
+        dt: Time | TimeDelta | float,
+        copy: bool = True,
+    ) -> SpaceObject:
+        """Propagate and change the epoch of this space object if the state is a `pyorb.Orbit`."""
+        dt = convert_to_relative_time(space_object.epoch, dt)[0]
+        new_cart = self.propagate(space_object, dt)
+        if len(new_cart.shape) < 2:
+            new_cart.shape = (new_cart.size, 1)
+        obj = space_object.copy() if copy else space_object
+        obj.state.cartesian = new_cart
+        obj.state.calculate_kepler()
+        obj.epoch += TimeDelta(dt, format="sec")
+        return obj
 
     @abstractmethod
-    def propagate(self, t, state0, epoch, **kwargs):
+    def propagate(
+        self,
+        space_object: SpaceObject,
+        times: Time | TimeDelta | NDArray_N,
+    ) -> NDArray_6xN:
         """Propagate a state
 
         This function uses key-word argument to supply additional information
@@ -141,19 +52,5 @@ class Propagator(ABC):
         The coordinate frames used should be documented in the child class docstring.
 
         SI units are assumed unless implementation states otherwise.
-
-        :param float/list/numpy.ndarray/astropy.TimeDelta t: Time to propagate relative the initial state epoch.
-        :param float/astropy.Time epoch: The epoch of the initial state.
-        :param any state0: State vector in SI-units.
-        :return: State vectors in SI-units.
-        """
-        return None
-
-    def heartbeat(self, t, state, **kwargs):
-        """Function applied after propagation to time `t` and state `state`,
-        before next time step as given in the input time vector to `propagate`.
         """
         pass
-
-    def __str__(self):
-        return ""

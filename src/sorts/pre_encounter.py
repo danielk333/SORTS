@@ -43,10 +43,9 @@ def propagate_pre_encounter(
     max_t=10 * 24 * 3600.0,
     settings=None,
 ):
-    """Propagates a state from the states backwards in time until the termination_check is true.
-
+    """Propagates a state from the states backwards in time until the termination_check is true."""
     #TODO: implement no saving of intermediate states for large particle runs
-    """
+
     t = -np.arange(0, max_t, dt, dtype=np.float64)
 
     class TerminatedRebound(Rebound):

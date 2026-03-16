@@ -38,7 +38,7 @@ class Scan(ABC):
     .. code-block:: python
 
         import numpy as np
-        #TODO
+        ...
 
     **Coordinate systems:**
 
@@ -46,8 +46,8 @@ class Scan(ABC):
      :ned: Cartesian coordinates in North, East, Down.
      :enu: Cartesian coordinates in East, North, Up.
 
-
     """
+    # TODO: complete the python code-block for "Example pointing function:".
 
     def __init__(self, coordinates="enu"):
         self.coordinates = coordinates.lower()

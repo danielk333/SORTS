@@ -1,0 +1,12 @@
+[env]
+_.file = ".env"
+# setup python venv folder structure relative to this file's directory
+# and create the venv if it doesn't exist
+_.python.venv = { path = ".venv", create = true, uv_create_args = ['--seed'] }
+
+[tools]
+uv = "latest"
+
+[settings]
+# python version managed by `.python-version` file
+idiomatic_version_file_enable_tools = ["python"]

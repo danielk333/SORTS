@@ -1,10 +1,41 @@
 #!/usr/bin/env python
 
-"""This module is used to define the radar network configuration.
+"""This module is used to define the radar network configuration."""
+# TODO: wrong module description?
 
-"""
+import typing as t
 import numpy as np
+import numpy.typing as npt
 import scipy.constants
+
+
+def rayleigh_separatrix_range(
+    gain_tx,
+    gain_rx,
+    wavelength,
+    power_tx,
+    snr,
+    coherent_integration_time=0.02,
+    effective_noise_temperature=150.0,
+    radar_albedo=1.0,
+):
+    """
+    The range at which the Optical-to-Rayleigh change occurs given the input parameters.
+    """
+
+    rx_noise = scipy.constants.k * effective_noise_temperature / coherent_integration_time
+    power = snr * rx_noise / radar_albedo
+    separatrix_diameter = wavelength / (np.pi * np.sqrt(3.0))
+    r = (
+        power_tx
+        * gain_tx
+        * gain_rx
+        * wavelength**2.0
+        * separatrix_diameter**2
+        / (256.0 * np.pi**2 * power)
+    ) ** (1.0 / 4.0)
+
+    return r
 
 
 def hard_target_snr_scaling(diameter_from, diameter_to, wavelength):
@@ -46,16 +77,46 @@ def hard_target_rcs(wavelength, diameter):
     return rcs
 
 
+@t.overload
 def hard_target_snr(
-    gain_tx,
-    gain_rx,
-    wavelength,
-    power_tx,
-    range_tx_m,
-    range_rx_m,
+    gain_tx: npt.NDArray[np.float64],
+    gain_rx: npt.NDArray[np.float64],
+    wavelength: float,
+    power_tx: npt.NDArray[np.float64] | float,
+    range_tx_m: npt.NDArray[np.float64],
+    range_rx_m: npt.NDArray[np.float64],
     diameter=0.01,
-    bandwidth=10,
+    bandwidth: npt.NDArray[np.float64] | float = 10.0,
+    rx_noise_temp: npt.NDArray[np.float64] | float = 150.0,
+    radar_albedo=1.0,
+) -> npt.NDArray[np.float64]: ...
+
+
+@t.overload
+def hard_target_snr(
+    gain_tx: float,
+    gain_rx: float,
+    wavelength: float,
+    power_tx: float,
+    range_tx_m: float,
+    range_rx_m: float,
+    diameter=0.01,
+    bandwidth=10.0,
     rx_noise_temp=150.0,
+    radar_albedo=1.0,
+) -> float: ...
+
+
+def hard_target_snr(
+    gain_tx: npt.NDArray[np.float64] | float,
+    gain_rx: npt.NDArray[np.float64] | float,
+    wavelength: float,
+    power_tx: npt.NDArray[np.float64] | float,
+    range_tx_m: npt.NDArray[np.float64] | float,
+    range_rx_m: npt.NDArray[np.float64] | float,
+    diameter=0.01,
+    bandwidth: npt.NDArray[np.float64] | float = 10.0,
+    rx_noise_temp: npt.NDArray[np.float64] | float = 150.0,
     radar_albedo=1.0,
 ):
     """
@@ -80,9 +141,9 @@ def hard_target_snr(
 
     """
 
-    is_rayleigh = diameter < wavelength / (np.pi * np.sqrt(3.0))
-    is_optical = diameter >= wavelength / (np.pi * np.sqrt(3.0))
-    rayleigh_power = (
+    is_rayleigh: bool = diameter < wavelength / (np.pi * np.sqrt(3.0))
+    is_optical: bool = diameter >= wavelength / (np.pi * np.sqrt(3.0))
+    rayleigh_power: npt.NDArray[np.float64] | float = (
         9.0
         * power_tx
         * (
@@ -90,7 +151,7 @@ def hard_target_snr(
             / (256.0 * (wavelength**2.0) * (range_rx_m**2.0 * range_tx_m**2.0))
         )
     )
-    optical_power = (
+    optical_power: npt.NDArray[np.float64] | float = (
         power_tx
         * (((gain_tx * gain_rx) * (wavelength**2.0) * (diameter**2.0)))
         / (256.0 * (np.pi**2) * (range_rx_m**2.0 * range_tx_m**2.0))
@@ -163,12 +224,11 @@ def hard_target_diameter(
 
 
 def incoherent_snr(p_s, p_n, epsilon=0.05, B=10.0, t_incoh=3600.0):
-    """Calculate the incoherent SNR based on ????
+    """Calculate the incoherent SNR based on ????"""
+    # TODO: Finish docstring
+    # TODO: generalize theory??
+    # TODO: Juha knows
 
-    TODO: Finish docstring
-    TODO: generalize theory??
-    TODO: Juha knows
-    """
     snr = p_s / p_n
     t_epsilon = ((p_s + p_n) ** 2.0) / (epsilon**2.0 * p_s**2.0 * B)
 
@@ -195,18 +255,21 @@ def doppler_spread_hard_target_snr(
     radar_albedo=0.1,
 ):
     """
-    t_obs = observation duration
+    Args:
+        t_obs: observation duration
 
-    #TODO: Double check the "bandwidth" parameter to see that it is actually
-    # defined and used correctly
 
-    returns:
-    snr - signal to noise ratio using coherent integration, when doing object discovery with a
-          limited coherent integration duration and no incoherent integration
-    snr_incoh - the signal to noise ratio using incoherent integration, when using a priori
-                orbital elements to assist in coherent integration and incoherent integration.
-                coherent integration length is determined by t_obs (seconds)
+    Returns:
+        A tuple of `(snr_coh, snr_incoh)`.
+
+        snr: signal to noise ratio using coherent integration, when doing object discovery with a
+            limited coherent integration duration and no incoherent integration
+        snr_incoh: the signal to noise ratio using incoherent integration, when using a priori
+            orbital elements to assist in coherent integration and incoherent integration.
+            coherent integration length is determined by t_obs (seconds)
     """
+    # TODO: Double check the "bandwidth" parameter to see that it is actually
+    # defined and used correctly
 
     doppler_bandwidth = 4 * np.pi * diameter / (wavelength * spin_period)
 

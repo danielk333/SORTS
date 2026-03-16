@@ -30,12 +30,11 @@ from .. import frames
 logger = logging.getLogger(__name__)
 
 class Rebound(Propagator):
-    """Propagator class implementing the REBOUND propagator.
-
-    Internally in the Rebound simulation a ICRS equivalent is always used but output is generated in HCRS.
-
-    #TODO: add to this documentation
     """
+    Propagator class implementing the REBOUND propagator.
+    Internally in the Rebound simulation a ICRS equivalent is always used but output is generated in HCRS.
+    """
+    # TODO: add to this documentation
 
     DEFAULT_MASSIVE = [
         "Sun",
@@ -221,11 +220,9 @@ class Rebound(Propagator):
         return earth_state
 
     def propagate(self, t, state0, epoch, **kwargs):
-        """Propagate a state
-
-        #TODO: add possible different equinox?
-        #TODO: UPDATE THIS DOCSTRING
-        """
+        """Propagate a state."""
+        # TODO: add possible different equinox?
+        # TODO: UPDATE THIS DOCSTRING
 
         logger.debug(f"Rebound:propagate:len(t) = {len(t)}")
 

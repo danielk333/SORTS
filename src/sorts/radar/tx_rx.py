@@ -5,11 +5,14 @@ also defines physical antennas for RX and TX.
 """
 
 import numpy as np
-
+from scipy.constants import speed_of_light
+import spacecoords
 import pyant
+from sorts.types import Float_as_deg
+from sorts import frames
 
-# Local import
-from .. import frames
+StationId = int
+"""A unique int16 that identifies a radar station"""
 
 
 class Station(object):
@@ -35,13 +38,23 @@ class Station(object):
 
     """
 
-    def __init__(self, lat, lon, alt, min_elevation, beam, uid=None):
+    def __init__(
+        self,
+        lat,
+        lon,
+        alt,
+        min_elevation: Float_as_deg,
+        beam: pyant.beam.Beam,
+        frequency: float | None = None,
+        beam_parameters: pyant.types.Parameters | None = None,
+        uid: StationId = 0,
+    ):
         self.lat = lat
         self.lon = lon
         self.alt = alt
         self.min_elevation = min_elevation
         self.ecef = frames.geodetic_to_ITRS(lat, lon, alt, degrees=True)
-        ecef_lla = pyant.coordinates.cart_to_sph(self.ecef, degrees=True)
+        ecef_lla = spacecoords.spherical.cart_to_sph(self.ecef, degrees=True)
         self.ecef_lat = ecef_lla[1]
         self.ecef_lon = 90 - ecef_lla[0]
         self.ecef_alt = ecef_lla[2]
@@ -49,6 +62,14 @@ class Station(object):
         self.enabled = True
         self.pointing_range = None
         self.uid = uid
+
+        # TODO: attributes `frequency`, `wavelength` and `beam_parameters` are a tmp hack
+        self.frequency = frequency
+        self.wavelength = None if frequency is None else speed_of_light / frequency
+        self.beam_parameters = beam_parameters
+
+    def __repr__(self):
+        return f"Station(uid={self.uid}, lat={self.lat}, lon={self.lon}, alt={self.alt})"
 
     def field_of_view(self, states, **kwargs):
         """Determines the field of view of the station.
@@ -62,7 +83,7 @@ class Station(object):
 
         enu = self.enu(states[:3, :])
 
-        zenith_ang = pyant.coordinates.vector_angle(zenith, enu, degrees=True)
+        zenith_ang = spacecoords.linalg.vector_angle(zenith, enu, degrees=True)
         check = zenith_ang < 90.0 - self.min_elevation
 
         return check
@@ -73,7 +94,7 @@ class Station(object):
         self.lon = lon
         self.alt = alt
         self.ecef = frames.geodetic_to_ITRS(lat, lon, alt, degrees=True)
-        ecef_lla = pyant.coordinates.cart_to_sph(self.ecef, degrees=True)
+        ecef_lla = spacecoords.spherical.cart_to_sph(self.ecef, degrees=True)
         self.ecef_lat = ecef_lla[1]
         self.ecef_lon = 90 - ecef_lla[0]
         self.ecef_alt = ecef_lla[2]
@@ -85,17 +106,12 @@ class Station(object):
             alt=self.alt,
             min_elevation=self.min_elevation,
             beam=self.beam.copy(),
+            frequency=self.frequency,
+            beam_parameters=self.beam_parameters,
+            uid=self.uid,
         )
         st.enabled = self.enabled
         return st
-
-    @property
-    def frequency(self):
-        return self.beam.frequency
-
-    @property
-    def wavelength(self):
-        return self.beam.wavelength
 
     def enu(self, ecefs):
         """Converts a set of ECEF states to local ENU coordinates using geocentric zenith."""
@@ -164,8 +180,28 @@ class RX(Station):
     :ivar float noise: Receiver noise in Kelvin, i.e. system temperature.
     """
 
-    def __init__(self, lat, lon, alt, min_elevation, beam, noise, uid=None):
-        super().__init__(lat, lon, alt, min_elevation, beam, uid=uid)
+    def __init__(
+        self,
+        lat,
+        lon,
+        alt,
+        min_elevation,
+        beam,
+        noise,
+        frequency: float | None = None,
+        beam_parameters: pyant.types.Parameters | None = None,
+        uid: StationId = 1,
+    ):
+        super().__init__(
+            lat=lat,
+            lon=lon,
+            alt=alt,
+            min_elevation=min_elevation,
+            beam=beam,
+            frequency=frequency,
+            beam_parameters=beam_parameters,
+            uid=uid,
+        )
         self.noise = noise
 
     def copy(self):
@@ -176,6 +212,9 @@ class RX(Station):
             min_elevation=self.min_elevation,
             beam=self.beam.copy(),
             noise=self.noise,
+            frequency=self.frequency,
+            beam_parameters=self.beam_parameters,
+            uid=self.uid,
         )
         st.enabled = self.enabled
         return st
@@ -215,9 +254,20 @@ class TX(Station):
         pulse_length=1e-3,
         ipp=10e-3,
         n_ipp=20,
-        uid=None,
+        frequency: float | None = None,
+        beam_parameters: pyant.types.Parameters | None = None,
+        uid: StationId = 0,
     ):
-        super().__init__(lat, lon, alt, min_elevation, beam, uid=uid)
+        super().__init__(
+            lat=lat,
+            lon=lon,
+            alt=alt,
+            min_elevation=min_elevation,
+            beam=beam,
+            frequency=frequency,
+            beam_parameters=beam_parameters,
+            uid=uid,
+        )
 
         self.bandwidth = bandwidth
         self.duty_cycle = duty_cycle
@@ -240,6 +290,9 @@ class TX(Station):
             pulse_length=self.pulse_length,
             ipp=self.ipp,
             n_ipp=self.n_ipp,
+            frequency=self.frequency,
+            beam_parameters=self.beam_parameters,
+            uid=self.uid,
         )
         st.enabled = self.enabled
         return st

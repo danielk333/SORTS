@@ -4,9 +4,9 @@
 
 Currently only works for Mono-static measurements.
 
-# TODO: Assume a uniform prior distribution over population index, posterior distribution is the
 probability of what object generated the data. Probability comes from measurement covariance.
 """
+# TODO: Assume a uniform prior distribution over population index, posterior distribution is the
 
 import logging
 from tqdm import tqdm
@@ -215,9 +215,6 @@ def correlate(
                        calculated        individually
     -------------
 
-    # TODO: Update docstring
-    # TODO: Add FOV check option
-
     Parameters
     ----------
     measurements : list
@@ -243,7 +240,7 @@ def correlate(
     propagation_handling : function
         A pointer to a function that handles the propagation of the object to
         the measurnment point. By defaults simple uses the space object
-        `get_state` method. TODO: add doc reference here to the default function
+        `get_state` method.
         to use as template for modifications.
     metric_dtype : numpy.dtype
         A valid numpy dtype declaration for the metric output array.
@@ -280,6 +277,9 @@ def correlate(
         * 'v': [numpy.ndarray] Two-way range-rates in meters per second
 
     """
+    # TODO: Update docstring
+    # TODO: Add FOV check option
+    # TODO: add doc reference here to the default function for param `propagation_handling`
 
     correlation_data = {}
 

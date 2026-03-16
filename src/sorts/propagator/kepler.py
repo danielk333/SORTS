@@ -1,109 +1,79 @@
 #!/usr/bin/env python
 
-"""rapper for the SGP4 propagator
+"""wrapper for the SGP4 propagator"""
 
-"""
-
-# Python standard import
 import logging
-from copy import copy
-
-# Third party import
+from dataclasses import dataclass
 import numpy as np
-import pyorb
-
-
-# Local import
+from astropy.time import TimeDelta, Time
 from .base import Propagator
-from .. import frames
+from sorts.types import Settings, Frames, NDArray_N, NDArray_6xN
+from sorts.space_object import SpaceObject
+from sorts.utils import convert_to_relative_time
+import spacecoords.celestial as cel
 
 logger = logging.getLogger(__name__)
 
 
-class Kepler(Propagator):
+@dataclass
+class KeplerSettings(Settings):
+    numerical_tolerance: float = 1e-12
+    max_iterations: int = 5000
+    laguerre_degree: int = 5
+    out_frame: Frames = "GCRS"
+    internal_frame: Frames = "GCRS"
+
+
+class Kepler(Propagator[KeplerSettings]):
     """Propagator class implementing the Kepler propagator,
     the propagation always occurs in GCRS frame.
 
     Frame options are found in the `sorts.frames.convert` function.
 
-    :ivar str in_frame: String identifying the input frame.
-    :ivar str out_frame: String identifying the output frame.
-
-    :param str in_frame: String identifying the input frame.
-    :param str out_frame: String identifying the output frame.
     """
 
-    DEFAULT_SETTINGS = copy(Propagator.DEFAULT_SETTINGS)
-    DEFAULT_SETTINGS.update(
-        dict(
-            out_frame="GCRS",
-            in_frame="GCRS",
-        )
-    )
+    def propagate(
+        self,
+        space_object: SpaceObject,
+        times: Time | TimeDelta | NDArray_N,
+    ) -> NDArray_6xN:
+        logger.debug("Kepler:propagate")
+        tv = convert_to_relative_time(space_object.epoch, times)
 
-    def __init__(self, settings=None, **kwargs):
-        super(Kepler, self).__init__(settings=settings, **kwargs)
-        logger.debug("sorts.propagator.Kepler:init")
-
-    def propagate(self, t, state0, epoch, **kwargs):
-        """Propagate a state
-
-        :param float/list/numpy.ndarray/astropy.time.TimeDelta t: Time to
-            propagate relative the initial state epoch.
-        :param float/astropy.time.Time epoch: The epoch of the initial state.
-        :param numpy.ndarray state0: 6-D Cartesian state vector in SI-units.
-        :param bool radians: If true, all angles are assumed to be in radians.
-        :return: 6-D Cartesian state vectors in SI-units.
-
-        """
-        logger.debug(f"Kepler:propagate:len(t) = {len(t)}")
-
-        t, epoch = self.convert_time(t, epoch)
-        times = epoch + t
-        tv = t.sec
-        if not isinstance(tv, np.ndarray):
-            tv = np.array([tv])
-
-        if isinstance(state0, pyorb.Orbit):
-            orb = state0.copy()
-        elif isinstance(state0, dict):
-            kw = copy(state0)
-            kw.update(kwargs)
-            orb = pyorb.Orbit(**kw)
-            cart0 = frames.convert(
-                epoch,
-                orb.cartesian,
-                in_frame=self.settings["in_frame"],
-                out_frame="GCRS",
+        orb = space_object.state.copy()
+        if space_object.frame != self.settings.internal_frame:
+            orb._cart = cel.convert(
+                space_object.epoch,
+                orb._cart,
+                in_frame=space_object.frame,
+                out_frame=self.settings.internal_frame,
+                frame_kwargs={},
             )
-            orb.cartesian = cart0
-        else:
-            cart0 = frames.convert(
-                epoch,
-                state0,
-                in_frame=self.settings["in_frame"],
-                out_frame="GCRS",
-            )
-            kw = {key: val for key, val in zip(pyorb.Orbit.CARTESIAN, cart0.flatten())}
-            kw.update(kwargs)
-            orb = pyorb.Orbit(**kw)
+            orb.calculate_kepler()
 
         orb.direct_update = False
         orb.auto_update = False
+        orb.solver_options = dict(
+            tol=self.settings.numerical_tolerance,
+            max_iter=self.settings.max_iterations,
+            degree=self.settings.laguerre_degree,
+        )
 
-        kw_in = {key: val for key, val in zip(pyorb.Orbit.KEPLER, orb.kepler.flatten())}
-        orb.add(num=len(tv), **kw_in)
-        orb.delete(0)
+        orb.add(num=len(tv) - 1)
+        kep0 = orb._kep[:, 0]
+        orb._kep[:, :] = kep0[:, None]
         orb.propagate(tv)
         orb.calculate_cartesian()
 
-        states = frames.convert(
-            times,
-            orb._cart,
-            in_frame="GCRS",
-            out_frame=self.settings["out_frame"],
-        )
+        if self.settings.out_frame != self.settings.internal_frame:
+            orb._cart = cel.convert(
+                space_object.epoch + TimeDelta(tv, format="sec"),
+                orb._cart,
+                in_frame=self.settings.internal_frame,
+                out_frame=self.settings.out_frame,
+                frame_kwargs={},
+            )
 
         logger.debug("Kepler:propagate:completed")
 
-        return states
+        return orb._cart

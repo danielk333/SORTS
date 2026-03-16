@@ -5,23 +5,21 @@ Main usage is the :code:`convert` function that wraps Astropy frame transformati
 
 """
 
-# Python standard import
 import logging
 from collections import OrderedDict
-
-# Third party import
 import numpy as np
 import astropy.coordinates as coord
 import astropy.units as units
-
 from astropy.coordinates import EarthLocation
+from sorts.types import GeodeticCoordinates_DegM
+
 
 try:
     from jplephem.spk import SPK
 except ImportError:
     SPK = None
 
-from pyant.coordinates import sph_to_cart, cart_to_sph, vector_angle
+from spacecoords.spherical import sph_to_cart
 
 logger = logging.getLogger(__name__)
 
@@ -151,7 +149,7 @@ def convert(t, states, in_frame, out_frame, **kwargs):
 
     """
 
-    logger.info(f"frames:convert: in_frame={in_frame}, out_frame={out_frame}")
+    logger.debug(f"frames:convert: in_frame={in_frame}, out_frame={out_frame}")
 
     in_frame = in_frame.upper()
     out_frame = out_frame.upper()
@@ -197,7 +195,7 @@ def convert(t, states, in_frame, out_frame, **kwargs):
     rets[:3, ...] = out_states.cartesian.xyz.to(units.m).value
     rets[3:, ...] = out_states.velocity.d_xyz.to(units.m / units.s).value
 
-    logger.info("frames:convert:completed")
+    logger.debug("frames:convert:completed")
 
     return rets
 
@@ -228,7 +226,7 @@ def geodetic_to_ITRS(lat, lon, alt, degrees=True, ellipsoid=None):
     return pos
 
 
-def ITRS_to_geodetic(x, y, z, degrees=True, ellipsoid=None):
+def ITRS_to_geodetic(x, y, z, degrees=True, ellipsoid=None) -> GeodeticCoordinates_DegM:
     """Use `astropy.coordinates.EarthLocation` to transform from geodetic to ITRS.
 
     :param float x: X-coordinate in ITRS
@@ -238,7 +236,7 @@ def ITRS_to_geodetic(x, y, z, degrees=True, ellipsoid=None):
     :param str/None ellipsoid: Name of the ellipsoid model used for geodetic
     coordinates, for default value see Astropy `EarthLocation`.
     :rtype: numpy.ndarray
-    :return: (3,) array of longitude, latitude and height above ellipsoid
+    :return: (3,) array of (latitude, longitude, height) above ellipsoid
     """
 
     cord = EarthLocation.from_geocentric(
@@ -248,7 +246,12 @@ def ITRS_to_geodetic(x, y, z, degrees=True, ellipsoid=None):
     )
     lon, lat, height = cord.to_geodetic(ellipsoid=ellipsoid)
 
-    llh = np.empty((3,), dtype=np.float64)
+    # TODO: confirm with daniel if the modificaiton is okay (made it work with ndarray instead of just scala)
+    cord_len = len(cord)
+    if cord_len > 1:
+        llh = np.empty((3, cord_len), dtype=np.float64)
+    else:
+        llh = np.empty((3,), dtype=np.float64)
 
     if degrees:
         u_ = units.deg
@@ -342,11 +345,9 @@ def ecef_to_enu(lat, lon, alt, ecef, degrees=True):
 
 
 def azel_to_ecef(lat, lon, alt, az, el, degrees=True):
-    """Radar pointing (az,el) using geocentric zenith to unit vector in
-    ECEF, not including translation.
+    """Radar pointing (az,el) using geocentric zenith to unit vector in ECEF, not including translation."""
+    # TODO: Docstring
 
-    TODO: Docstring
-    """
     shape = (3,)
 
     if isinstance(az, np.ndarray):

@@ -9,8 +9,10 @@ and stations and sorting structures of passes in particular ways.
 import datetime
 
 import numpy as np
+import numpy.typing as npt
+import spacecoords
 import pyorb
-import pyant
+from sorts.types import Float64_as_sec
 
 # Local import
 from .signals import hard_target_snr
@@ -21,10 +23,10 @@ class Pass:
     Optionally also indicates the location of that pass in a bigger dataset.
     """
 
-    def __init__(self, t, enu, inds=None, cache=True, station_id=None):
-        self.inds = inds
-        self.t = t
-        self.enu = enu
+    def __init__(self, t, enu, inds=None, cache=True, station_id: int | list[int] = 0):
+        self.inds = inds  # refer back to the population index
+        self.t = t  # time
+        self.enu: list[npt.NDArray] | npt.NDArray = enu  # of shapes: (3, n) | ((3, n), ..., k)
         self.cache = cache
 
         self.station_id = station_id
@@ -131,7 +133,7 @@ class Pass:
     @staticmethod
     def calculate_zenith_angle(enu, radians=False):
         """Zenith angle of the ENU coordinates."""
-        return pyant.coordinates.vector_angle(
+        return spacecoords.linalg.vector_angle(
             np.array([0, 0, 1], dtype=np.float64), enu[:3, :], degrees=not radians
         )
 
@@ -220,7 +222,9 @@ class Pass:
             return self.get_zenith_angle(radians=radians)
 
 
-def equidistant_sampling(orbit, start_t, end_t, max_dpos=1e3, eccentricity_tol=0.3):
+def equidistant_sampling(
+    orbit, start_t, end_t, max_dpos=1e3, eccentricity_tol=0.3
+) -> npt.NDArray[Float64_as_sec]:
     """Find the temporal sampling of an orbit which is sufficient to achieve a
     maximum spatial separation. Assume elliptic orbit and uses Keplerian propagation
     to find sampling, does not take perturbation patterns into account. If
