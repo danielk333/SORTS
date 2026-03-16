@@ -41,6 +41,7 @@ dependencies = [
   "bottleneck>=1.5.0",
   "mpi4py>=4.1.0",
   "h5netcdf>=1.6.4",
+  "radardef>=0.3.2",
 ]
 
 
