@@ -2,10 +2,10 @@
 
 # from . import eiscat_3d
 # from . import tsdr
-# from . import eiscat_uhf
 # from . import eiscat_esr
 from . import (
     nostra as nostra,
+    eiscat_uhf as eiscat_uhf,
 )
 
 # from . import mock
