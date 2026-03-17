@@ -1,9 +1,9 @@
 from __future__ import annotations
 import logging, typing as t
+import numpy as np
 import pandas as pd
-from tqdm import tqdm
 import sorts
-from sorts import types, radar, schedule, controller, passage, simulation
+from sorts import types, utils, radar, schedule, controller, passage, simulation
 from sorts.types import Datetime_Like
 from sorts.radar import Station, StationId
 from sorts.interpolated_propagation import InterpolatedPropagation
@@ -179,21 +179,36 @@ def simulate(
     Run a simulation for the space object using the provided propagation, over the specified passages.
     """
 
-    pair_state_dict = gather_tx_rx_pair_state(
+    _K = tx_rx_pair_state.TxRxPairStateKey
+
+    epoch = utils.to_datetime64_us(space_object.epoch)
+    spobj_diameter = space_object.d
+    # TODO: confirm with daniel if setting a default radar_albedo is okay
+    spobj_radar_albedo = space_object.properties.get("radar_albedo", 1.0)
+
+    txrx_state_dict = gather_tx_rx_pair_state(
         passages=passages,
         schedule_db=schedule_db,
     )
 
-    sim_result = [
-        tx_rx_pair_state.simulate(
-            state=pair_state,
-            spobj=space_object,
-            spobj_interp=interpolated_propagation.interpolator,
-            tx_station=station_map[stn_id_pair[0]],
-            rx_station=station_map[stn_id_pair[1]],
-            exp_detail_map=exp_detail_map,
+    sim_result: list[tx_rx_pair_state.TxRxPairState] = []
+    for stn_id_pair, txrx_state in txrx_state_dict.items():
+        dsec = (
+            (txrx_state.index.get_level_values(_K.time).to_numpy() - epoch)
+            / np.timedelta64(1, "s")
+        ) # fmt: skip
+        spobj_state = interpolated_propagation.interpolator.get_state(dsec)
+
+        sim_result.append(
+            tx_rx_pair_state.simulate(
+                txrx_state=txrx_state,
+                spobj_state=spobj_state,
+                spobj_diameter=spobj_diameter,
+                spobj_radar_albedo=spobj_radar_albedo,
+                tx_station=station_map[stn_id_pair[0]],
+                rx_station=station_map[stn_id_pair[1]],
+                exp_detail_map=exp_detail_map,
+            )
         )
-        for stn_id_pair, pair_state in pair_state_dict.items()
-    ]
 
     return sim_result

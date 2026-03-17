@@ -3,7 +3,7 @@ import typing as t, enum
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from sorts import types, utils, signals, space_object, interpolation, radar
+from sorts import types, signals, radar
 
 
 # TODO: remove key `multi_index`
@@ -181,15 +181,18 @@ def group_by_unique_exp_id_simult_num_pairs(
 
 
 def simulate(
-    state: TxRxPairState,
-    spobj: space_object.SpaceObject,
-    spobj_interp: interpolation.Interpolator,
+    txrx_state: TxRxPairState,
+    spobj_state: types.EcefStates,
+    spobj_diameter: float,
+    spobj_radar_albedo: float,
     tx_station: radar.Station,
     rx_station: radar.Station,
     exp_detail_map: types.ExperimentDetailMap,
 ) -> TxRxPairState:
     """
     Run TX RX simulation calculations.
+
+    Parameter `txrx_state` and `spobj_state` should have the same length.
 
     Returns:
         The updated state/data.
@@ -203,34 +206,34 @@ def simulate(
             "A hack of injecting `frequency` into `tx_stn.frequency` is currently required for calling `hard_target_snr`"
         )
 
-    epoch = utils.to_datetime64_us(spobj.epoch)
-    dsec = (
-        (state.index.get_level_values(_K.time).to_numpy() - epoch)
-        / np.timedelta64(1, "s")
-    ) # fmt: skip
-    spobj_states = spobj_interp.get_state(dsec)
-    spobj_tx_enu = tx_station.enu(spobj_states)
-    spobj_rx_enu = rx_station.enu(spobj_states)
+    spobj_tx_enu = tx_station.enu(spobj_state)
+    spobj_rx_enu = rx_station.enu(spobj_state)
 
     range_tx: npt.NDArray[types.Float64_as_m] = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
     range_rx: npt.NDArray[types.Float64_as_m] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
 
     # TODO: can likely use assignment by slice/indexing instead of looping
     powers = np.array(
-        [exp_detail_map[n].power for n in state.index.get_level_values(_K.exp_num).to_numpy()],
+        [exp_detail_map[n].power for n in txrx_state.index.get_level_values(_K.exp_num).to_numpy()],
         dtype=np.float64,
     )
     bandwidths = np.array(
-        [exp_detail_map[n].bandwidth for n in state.index.get_level_values(_K.exp_num).to_numpy()],
+        [
+            exp_detail_map[n].bandwidth
+            for n in txrx_state.index.get_level_values(_K.exp_num).to_numpy()
+        ],
         dtype=np.float64,
     )
     rx_noise_temps = np.array(
-        [exp_detail_map[n].noise_temp for n in state.index.get_level_values(_K.exp_num).to_numpy()],
+        [
+            exp_detail_map[n].noise_temp
+            for n in txrx_state.index.get_level_values(_K.exp_num).to_numpy()
+        ],
         dtype=np.float64,
     )
 
-    state = calc_gain(
-        state=state,
+    txrx_state = calc_gain(
+        state=txrx_state,
         tx_stn=tx_station,
         rx_stn=rx_station,
         spobj_tx_enu=spobj_tx_enu,
@@ -238,26 +241,26 @@ def simulate(
     )
 
     snr = signals.hard_target_snr(
-        gain_tx=state[_K.gain_tx].to_numpy(),
-        gain_rx=state[_K.gain_rx].to_numpy(),
+        gain_tx=txrx_state[_K.gain_tx].to_numpy(),
+        gain_rx=txrx_state[_K.gain_rx].to_numpy(),
         wavelength=tx_station.wavelength,
         power_tx=powers,
         range_tx_m=range_tx,
         range_rx_m=range_rx,
-        diameter=spobj.d,
+        diameter=spobj_diameter,
         bandwidth=bandwidths,
         rx_noise_temp=rx_noise_temps,
-        radar_albedo=spobj.properties.get("radar_albedo", 1.0),
+        radar_albedo=spobj_radar_albedo,
     )
-    state[_K.snr] = snr
+    txrx_state[_K.snr] = snr
 
-    state[_K.tx_range] = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
+    txrx_state[_K.tx_range] = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
 
-    state[_K.rx_range] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
+    txrx_state[_K.rx_range] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
 
-    state[_K.two_way_range] = range_tx + range_rx
+    txrx_state[_K.two_way_range] = range_tx + range_rx
     v_tx = np.sum(spobj_tx_enu[:3, :] * spobj_tx_enu[3:, :], axis=0) / range_tx
     v_rx = np.sum(spobj_rx_enu[:3, :] * spobj_rx_enu[3:, :], axis=0) / range_rx
-    state[_K.two_way_range_rate] = v_tx + v_rx
+    txrx_state[_K.two_way_range_rate] = v_tx + v_rx
 
-    return state
+    return txrx_state

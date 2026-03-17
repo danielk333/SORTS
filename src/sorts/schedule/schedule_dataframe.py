@@ -181,7 +181,7 @@ def filter_by_time_range(
 
     mask = (
         (df.index.get_level_values(_K.start_time) >= time_range[0])
-        & (df.index.get_level_values(_K.end_time) <= time_range[1])
+        & (df.index.get_level_values(_K.end_time) < time_range[1])
     ) # fmt: skip
     state_masked = df[mask]
 
