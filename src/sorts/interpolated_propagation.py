@@ -11,7 +11,7 @@ from sorts.propagator import Propagator
 from sorts.population import Population
 
 
-@dataclass
+@dataclass(kw_only=True)
 class InterpolatedPropagation:
     # TODO: investigate if we can just sidestep most of the `datetime64` and just use `Time`?
     #
