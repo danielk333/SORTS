@@ -91,7 +91,7 @@ def test_schedule_by_priority():
 
     assert (
         all(df[ScheduleKey.start_time] >= start_time)
-        and all(df[ScheduleKey.end_time] <= end_time)
+        and all(df[ScheduleKey.end_time] < end_time)
     ), "Entries outside of specified time range should not be included." # fmt: skip
 
     return
