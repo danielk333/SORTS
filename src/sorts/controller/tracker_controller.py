@@ -7,7 +7,6 @@ import spacecoords
 from sorts.types import Datetime64_us, EnuCoordinates, Datetime_Like
 from sorts.utils import to_datetime64_us
 from sorts.space_object import SpaceObject
-from sorts.interpolated_propagation import InterpolatedPropagation
 from sorts import types, radar, schedule
 from .controller_base import ControllerBase
 
@@ -29,7 +28,8 @@ class TrackerController(ControllerBase):
         space_object: SpaceObject,
         epoch: Datetime64_us,
         station_id_pairs: list[tuple[radar.StationId, radar.StationId]],
-        interpolated_propagation: InterpolatedPropagation,
+        spobj_ecef_states: types.EcefStates,
+        spobj_ecef_states_times: npt.NDArray[types.Datetime64_us],
     ):
         """
         NOTE: This is intended as an internal constructor, please use the constructor methods to create instances.
@@ -41,7 +41,8 @@ class TrackerController(ControllerBase):
         self.space_object = space_object
         self.epoch = epoch
         self.station_id_pairs = station_id_pairs
-        self.interpolated_propagation = interpolated_propagation
+        self.spobj_ecef_states = spobj_ecef_states
+        self.spobj_ecef_states_times = spobj_ecef_states_times
 
     @classmethod
     def from_space_object(
@@ -51,7 +52,8 @@ class TrackerController(ControllerBase):
         exp_detail: types.ExperimentDetail,
         space_object: SpaceObject,
         epoch: Datetime_Like,
-        interpolated_propagation: InterpolatedPropagation,
+        spobj_ecef_states: types.EcefStates,
+        spobj_ecef_states_times: npt.NDArray[types.Datetime64_us],
     ) -> t.Self:
         """A constructor method"""
 
@@ -64,7 +66,8 @@ class TrackerController(ControllerBase):
             space_object=space_object,
             epoch=to_datetime64_us(epoch),
             station_id_pairs=stn_pairs,
-            interpolated_propagation=interpolated_propagation,
+            spobj_ecef_states=spobj_ecef_states,
+            spobj_ecef_states_times=spobj_ecef_states_times,
         )
 
         return ctrl
@@ -92,7 +95,7 @@ class TrackerController(ControllerBase):
         loc_zenith = np.array([0, 0, 1], dtype=np.float64)
 
         # generate pointings
-        tx_pointings: EnuCoordinates = self.tx_station.enu(self.interpolated_propagation.states[:3])
+        tx_pointings: EnuCoordinates = self.tx_station.enu(self.spobj_ecef_states[:3])
 
         tx_pointings_zenith_ang = spacecoords.linalg.vector_angle(
             loc_zenith, tx_pointings, degrees=True
@@ -104,7 +107,7 @@ class TrackerController(ControllerBase):
         rx_el_in_range_with_tx_masks: list[npt.NDArray[np.bool]] = []
         pure_rx_stations = [stn for stn in self.rx_stations if stn.uid != self.tx_station.uid]
         for rx_station in pure_rx_stations:
-            rx_pointings: EnuCoordinates = rx_station.enu(self.interpolated_propagation.states[:3])
+            rx_pointings: EnuCoordinates = rx_station.enu(self.spobj_ecef_states[:3])
 
             rx_pointings_zenith_ang = spacecoords.linalg.vector_angle(
                 loc_zenith, rx_pointings, degrees=True
@@ -117,7 +120,7 @@ class TrackerController(ControllerBase):
             rx_pointings = rx_pointings[:, rx_el_in_range_with_tx_mask]
             rxs_pointings.append(rx_pointings)
 
-        tx_sch_time = self.interpolated_propagation.times[tx_el_in_range_mask]
+        tx_sch_time = self.spobj_ecef_states_times[tx_el_in_range_mask]
         tx_sch_len = len(tx_sch_time)
 
         tx_sch = schedule.schedule_dataframe.from_ndarrays(
@@ -135,7 +138,7 @@ class TrackerController(ControllerBase):
         for rx_stn, rx_mask, rx_pointings in zip(
             pure_rx_stations, rx_el_in_range_with_tx_masks, rxs_pointings
         ):
-            rx_sch_time = self.interpolated_propagation.times[rx_mask]
+            rx_sch_time = self.spobj_ecef_states_times[rx_mask]
             rx_sch_len = len(rx_sch_time)
 
             rx_schs.append(
@@ -153,5 +156,6 @@ class TrackerController(ControllerBase):
 
         resultant_sch = schedule.ScheduleDataframe((pd.concat([tx_sch, *rx_schs])))
         resultant_sch = resultant_sch.sort_values(by=schedule.ScheduleKey.start_time)
+        resultant_sch = resultant_sch.reset_index()
 
         return resultant_sch
