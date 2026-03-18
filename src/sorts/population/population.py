@@ -69,6 +69,7 @@ class Population:
 
         data_keys = ["id", "epoch"] + state_keys + list(parameters.keys())
         self.dtypes = OrderedDict()
+        self.default_dtype = default_dtype
         for key in data_keys:
             dt = dtypes[key] if key in dtypes else default_dtype
             self.dtypes[key] = dt
@@ -86,9 +87,20 @@ class Population:
 
     def copy(self) -> Self:
         """Return a copy of the current Population instance."""
-        pop = Population()
-        raise NotImplementedError()
-        pop.data = self.data.copy()
+        pop = Population(
+            states=np.stack([self.data[key] for key in self.state_fields]),
+            epochs=Time(self.data["epoch"], format=self.epoch_format, scale=self.epoch_scale),
+            frame=self.frame,
+            parameters={key: self.data[key] for key in self.property_fields},
+            object_ids=self.data["id"],
+            state_format=self.state_format,
+            anomly_type=self.anomly_type,
+            dtypes=self.dtypes,
+            default_dtype=self.default_dtype,
+            epoch_format=self.epoch_format,
+            epoch_scale=self.epoch_scale,
+            degrees=self.degrees,
+        )
         return pop
 
     def delete(self, inds: IndexLike):
@@ -107,6 +119,16 @@ class Population:
         for ind in inds:
             mask[ind] = False
         self.data = self.data[mask]
+
+    def sort(self, col: str, reverse: bool = False):
+        """Sorts the population according to a column"""
+        if col in self.cols:
+            new_order = np.argsort(self.data[col])
+            if reverse:
+                new_order = np.flip(new_order)
+            self.data = self.data[new_order]
+        else:
+            raise Exception("No such column: {}".format(col))
 
     def filter(self, col: str, fun: Callable[[Any], bool]):
         """Filters the population using a boolean function, keeping true values."""
