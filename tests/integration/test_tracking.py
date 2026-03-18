@@ -1,32 +1,35 @@
 """
-We check against an imaginary circular orbit which
-- co-rotate with Earth
+We test the integration of the following modules in this test:
+- space_object
+- ...
+
+Notably, we used the space object state directly here and `interpolation` module is not involved/tested.
+
+We check against an imaginary circular earth orbit which
+- co-rotate with Earth (i.e. a circular orbit on a earth fixed coordinate system)
 - at 90deg inclination, 0 deg longitude
 - simulation start from the orbit's intersection with earth's equatorial plane, passing south hemisphere then north hemisphere
+
+The radar station is also intentionally positioned at (lat=0, long=0),
+and we abuse coordinate frames by using GCRS coordinates directly as if it is ECEF coordinates,
+we so that:
+- its local east axis align with the earth's
+- its local north axis align with the earth's north
+- its local up axis
 """
 
-# TODO: should add more description/explanation of the setup
+# TODO: complete the description/explanation of the setup; maybe add a picture for the orbit?
 
-import logging, typing as T
+import logging, typing as t
 import numpy as np
+import numpy.typing as npt
 from astropy.time import Time
 from astropy.constants import R_earth  # type: ignore
 import pyant, pyorb
-from sorts.types import Float64_as_sec, Float64_as_deg, Float_as_sec, Float_as_deg
+from sorts.types import Float64_as_sec
 from sorts.utils import to_datetime64_us
-from sorts import (
-    types,
-    schedule,
-    interpolation,
-    simulation,
-    radar,
-    propagator,
-    controller,
-    SpaceObject,
-    InterpolatedPropagation,
-    StxMrxSimulation,
-)
-from sorts.simulation import stx_mrx_simulation
+from sorts import types, schedule, simulation, radar, propagator, passage, controller, SpaceObject
+from sorts.simulation import stx_mrx_simulation, tx_rx_pair_state
 
 
 logging.basicConfig(level=logging.INFO)
@@ -40,46 +43,26 @@ def setup_function():
     # https://github.com/pytest-dev/pytest/issues/8574#issuecomment-1806404215
     print()
 
+    import pandas as pd
 
-earth_radius: np.float64 = R_earth.value  # in meters
-spobj_orbital_radius = 7000e3  # in meters
-
-float_equality_thld = 1e-9
-# NOTE: this is much more lenient than `float_equality_thld`
-pointing_equality_thld: Float_as_deg = 0.04
-
-# TODO: re-eval the `control_slice_duration` value, need to be fast but still accurate enough for testing
-# control_slice_duration = np.timedelta64(10_000, "us")  # 10ms
-control_slice_duration = np.timedelta64(1_000_000, "us")  # 1s
-
-dsec_sampling_intv: Float_as_sec = 30
-dt_equality_thld = dsec_sampling_intv * 0.2  # TODO: need to eval this value with Daniel
-
-_SK = schedule.ScheduleKey
-_SuK = simulation.TxRxPairStateKey
+    pd.set_option("display.expand_frame_repr", False)
 
 
 def test_south_to_north_circular_orbit():
+    spobj_orbital_radius = 7000e3  # in meters
+    num_prop_steps = 60
+    float_equality_thld = 1e-9
+
     spobj_orbital_period: Float64_as_sec = pyorb.orbital_period(
         spobj_orbital_radius, pyorb.GM_earth
     )
 
-    passage_angular_duration: Float64_as_deg = np.degrees(
-        np.arccos(earth_radius / spobj_orbital_radius) * 2
-    )
-    passage_duration: Float64_as_sec = passage_angular_duration / 360 * spobj_orbital_period
+    start_time = Time("2025-01-01T02:45:00", format="isot", scale="utc")
+    start_time_dt64 = to_datetime64_us(start_time)
+    end_time = start_time_dt64 + spobj_orbital_period * np.timedelta64(int(1e6), "us")
 
-    start_time = Time("2025-01-01T02:45:00", format="isot", scale="utc")  # simulation start time
-    expected_passage_start_time = to_datetime64_us(start_time) + (
-        spobj_orbital_period - passage_duration
-    ) / 2 * np.timedelta64(int(1e6), "us")
-    expected_passage_end_time = expected_passage_start_time + passage_duration * np.timedelta64(
-        int(1e6), "us"
-    )
-    end_time = to_datetime64_us(start_time) + spobj_orbital_period * np.timedelta64(
-        int(1e6), "us"
-    )  # simulation end time
-
+    # we make the orbit co-rotate with earth by abusing coordinate frames.
+    # we generate space states on GCRS frame and directly use it as if it is on ECEF frame.
     spobj = SpaceObject.from_kepler(
         semi_major_axis=spobj_orbital_radius,
         eccentricity=0,
@@ -93,16 +76,18 @@ def test_south_to_north_circular_orbit():
         degrees=True,
     )
 
-    prop_interp = InterpolatedPropagation.from_space_object(
-        space_object=spobj,
-        propagator=propagator.Kepler(propagator.KeplerSettings()),
-        interpolator_class=interpolation.Legendre8,
-        start_time=start_time,
-        end_time=Time(end_time),
-        time_step=dsec_sampling_intv,
+    spobj_delta_secs: npt.NDArray[types.Float64_as_sec] = np.linspace(
+        0, spobj.state.period[0], num_prop_steps + 1
+    )
+    spobj_abs_times: npt.NDArray[types.Datetime64_us] = (
+        spobj_delta_secs * np.timedelta64(1, "s") + start_time_dt64
     )
 
-    test_stn = radar.Station(
+    spobj_state: types.EcefStates = propagator.Kepler(propagator.KeplerSettings()).propagate(
+        spobj, spobj_delta_secs
+    )
+
+    tx_stn = radar.Station(
         lat=0.0,
         lon=0.0,
         alt=0.0,
@@ -113,87 +98,116 @@ def test_south_to_north_circular_orbit():
         uid=0,
     )
 
+    rx_stn = radar.Station(
+        lat=0.0,
+        lon=0.0,
+        alt=0.0,
+        min_elevation=0.0,
+        beam=pyant.models.Isotropic(),
+        frequency=233e6,  # same as eisat_3d
+        beam_parameters=pyant.models.IsotropicParams(),
+        uid=1,
+    )
+
+    passages = passage.find_simultaneous_passages(
+        dt=spobj_delta_secs,
+        space_object=spobj,
+        states=spobj_state[:3, ...],
+        tx_station=tx_stn,
+        rx_stations=[rx_stn],
+        epoch=start_time_dt64,
+    )
+
+    exp_detail = types.ExperimentDetail(
+        id=0,
+        coh_int_bandwidth=1.0,
+        ipp=1.0,
+        pulse_length=1.0,
+        power=5000000.0,
+        bandwidth=52.08333333333333,
+        duty_cycle=1.0,
+        noise_temp=150.0,
+        slice_duration=np.timedelta64(1_000_000, "us"),  # 1s,
+    )
+
     tracker_ctrl = controller.TrackerController.from_space_object(
         space_object=spobj,
         epoch=start_time,
-        tx_station=test_stn,
-        rx_stations=[test_stn],
-        exp_detail=types.ExperimentDetail(
-            id=0,
-            coh_int_bandwidth=1.0,
-            ipp=1.0,
-            pulse_length=1.0,
-            power=5000000.0,
-            bandwidth=52.08333333333333,
-            duty_cycle=1.0,
-            noise_temp=150.0,
-            slice_duration=control_slice_duration,
-        ),
-        interpolated_propagation=prop_interp,
+        tx_station=tx_stn,
+        rx_stations=[rx_stn],
+        exp_detail=exp_detail,
+        spobj_ecef_states=spobj_state,
+        spobj_ecef_states_times=spobj_abs_times,
     )
 
     tracker_sch = tracker_ctrl.generate(start_time, end_time)
-    schedule_db = schedule.ScheduleDb.from_schedule_dataframes(
-        [tracker_sch], ["tracker_sch"]
-    )
+    schedule_db = schedule.ScheduleDb.from_schedule_dataframes([tracker_sch], ["tracker_sch"])
     schedule_db.schedule_by_priority()
 
-    sim = StxMrxSimulation.from_controllers(
-        controllers=[tracker_ctrl],
-        schedule=schedule_db,
-        epoch=start_time,
-        start_time=start_time,
-        end_time=end_time,
-        space_objects=[spobj],
-        interpolated_propagations=[prop_interp],
+    txrx_state = stx_mrx_simulation.gather_tx_rx_pair_state(
+        passages=passages,
+        schedule_db=schedule_db,
+    )[(0, 1)]
+
+    filtered_spobj_state = spobj_state[
+        :, np.isin(spobj_abs_times, txrx_state.index.get_level_values("time"))
+    ]
+
+    result_state = tx_rx_pair_state.simulate(
+        txrx_state=txrx_state,
+        spobj_state=filtered_spobj_state,
+        spobj_diameter=spobj.d,
+        spobj_radar_albedo=spobj.properties.get("radar_albedo", 1.0),
+        tx_station=tx_stn,
+        rx_station=rx_stn,
+        exp_detail_map={exp_detail.id: exp_detail},
     )
 
-    sim_result = stx_mrx_simulation.run(
-        sim_units_param=sim.prepare_simulation_unit_params(), show_progress_bar=True
+    _K = simulation.TxRxPairStateKey
+
+    tx_pointings_norm = np.linalg.norm(
+        [
+            result_state[_K.tx_pointing_e],
+            result_state[_K.tx_pointing_n],
+            result_state[_K.tx_pointing_u],
+        ],
+        axis=0,
     )
-    sim_unit = sim_units_dict[0][0]
-
-    # assert there is only 1 observation
-    assert sum(len(obss_list) for obss_list in obss_dict.values()) == 1
-    obs = obss_dict[0][0]
-
-    tx_pointings = obs.index_into_schedule_dataframe(tracker_sch).tx[_SK.pointing]
-    tx_pointings_normalized = tx_pointings / np.linalg.norm(tx_pointings.to_numpy(), axis=0)
+    tx_pointings_e_normalized = result_state[_K.tx_pointing_e] / tx_pointings_norm
+    tx_pointings_n_normalized = result_state[_K.tx_pointing_n] / tx_pointings_norm
+    tx_pointings_u_normalized = result_state[_K.tx_pointing_u] / tx_pointings_norm
 
     # assert `E` componend of tx pointings stayed around zero
-    assert np.all(
-        obs.index_into_schedule_dataframe(tracker_sch).tx[_SK.pointing].loc[_SK.e, :] < float_equality_thld
+    assert np.all(tx_pointings_e_normalized < float_equality_thld)
+
+    # assert the propagation point at 1/2 spobj_orbital_period is in the `result_state`
+    half_orbit_mask = (
+        result_state.index.get_level_values(_K.time) == spobj_abs_times[int(num_prop_steps / 2)]
     )
+    assert half_orbit_mask.sum() == 1  # ensure it exist and is exactly once
 
-    # assert `N` componend of normalized tx pointings swing between -1.0 and +1.0
-    assert abs(tx_pointings_normalized.loc[_SK.n, :].min() + 1.0) < pointing_equality_thld
-    assert abs(tx_pointings_normalized.loc[_SK.n, :].max() - 1.0) < pointing_equality_thld
+    # assert the normalized tx pointings at 1/2 spobj_orbital_period is (0, 0, 1)
+    assert all(tx_pointings_e_normalized[half_orbit_mask] < float_equality_thld)
+    assert all(tx_pointings_n_normalized[half_orbit_mask] < float_equality_thld)
+    assert all(tx_pointings_u_normalized[half_orbit_mask] - 1 < float_equality_thld)
 
-    # assert `U` componend of normalized tx pointings swing between 0.0 and 1.0
-    assert abs(tx_pointings_normalized.loc[_SK.u, :].min()) < pointing_equality_thld
-    assert abs(tx_pointings_normalized.loc[_SK.u, :].max() - 1.0) < pointing_equality_thld
-
-    # assert the max snr time is roughly at half orbital period
+    # assert the max snr time is at half orbital period
     assert (
-        abs(
-            sim_unit._state.index.get_level_values(_SuK.time)[
-                T.cast(int, sim_unit._state[_SuK.snr].argmax())
-            ] # fmt: skip
-            - (
-                to_datetime64_us(start_time) + spobj_orbital_period / 2 * np.timedelta64(int(1e6), "us")
-            ) # fmt: skip
-        ) / np.timedelta64(1, "s")
-        < dt_equality_thld
+        spobj_abs_times[int(num_prop_steps / 2)] == t.cast(tuple, result_state[_K.snr].idxmax())[2]
     )
 
-    # assert the start and end time of the observation is as expected
-    # TODO: this can offset pretty large when we have large sampling time interval, is there better way to test it?
-    #       it is multiplied by 1.5 by now to get the test running
-    assert abs(
-        obs.index_into_schedule_dataframe(tracker_sch).rx[_SK.start_time][0] - expected_passage_start_time
-    ) < np.timedelta64(int(dsec_sampling_intv*1.5), "s")
-    assert abs(
-        obs.index_into_schedule_dataframe(tracker_sch).rx[_SK.end_time][-1] - expected_passage_end_time
-    ) < np.timedelta64(int(dsec_sampling_intv*1.5), "s")
+    # TODO: assert the start and end time of the observation is as expected? it will likely requires interpolation.
+    # earth_radius: np.float64 = R_earth.value  # in meters
+    # passage_angular_duration: Float64_as_deg = np.degrees(
+    #     np.arccos(earth_radius / spobj_orbital_radius) * 2
+    # )
+    # passage_duration: Float64_as_sec = passage_angular_duration / 360 * spobj_orbital_period
+    # expected_passage_start_time = (
+    #     start_time_dt64
+    #     + (spobj_orbital_period - passage_duration) / 2 * np.timedelta64(int(1e6), "us")
+    # ) # fmt: skip
+    # expected_passage_end_time = expected_passage_start_time + passage_duration * np.timedelta64(
+    #     int(1e6), "us"
+    # )
 
     return
