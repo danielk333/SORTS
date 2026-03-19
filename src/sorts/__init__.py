@@ -23,7 +23,16 @@ logger = logging.getLogger(__name__)
 ##
 # v2 imports
 ##
-from . import types, utils, schedule, controller, interpolated_propagation, passage, simulation
+from . import (
+    types,
+    utils,
+    schedule,
+    controller,
+    interpolated_propagation,
+    perturbation,
+    passage,
+    simulation,
+)
 
 from .types import (
     ExperimentDetail as ExperimentDetail,
@@ -33,6 +42,9 @@ from .space_object import (
 )
 from .interpolated_propagation import (
     InterpolatedPropagation as InterpolatedPropagation,
+)
+from .perturbation import (
+    SpaceObjectInterpolatedPropagationPair as SpaceObjectInterpolatedPropagationPair,
 )
 from .passage import (
     Passage as Passage,

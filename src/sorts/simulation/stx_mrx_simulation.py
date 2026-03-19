@@ -1,9 +1,10 @@
 from __future__ import annotations
 import logging, typing as t
+from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 import sorts
-from sorts import types, utils, radar, schedule, controller, passage, simulation
+from sorts import types, utils, radar, schedule, passage, simulation
 from sorts.types import Datetime_Like
 from sorts.radar import Station, StationId
 from sorts.interpolated_propagation import InterpolatedPropagation
@@ -12,89 +13,20 @@ from sorts.simulation import tx_rx_pair_state
 logger = logging.getLogger(__name__)
 
 
-# TODO: this can be converted into a dataclass (or just be dissolved?)
 # TODO: we need to enforce each station to has a unique id (`.uid` prop)
 #   either in the simulation class or in related station getter like `get_radar`
+@dataclass(kw_only=True)
 class StxMrxSimulation:
-    """
-    NOTE: This is intended as an internal constructor, please use the constructor methods to create instances.
-    """
-
-    def __init__(
-        self,
-        station_map: dict[StationId, Station],
-        station_id_pairs: t.Sequence[tuple[StationId, StationId]],
-        schedule_db: schedule.ScheduleDb,
-        exp_detail_map: types.ExperimentDetailMap,
-        epoch: Datetime_Like,
-        start_time: Datetime_Like,
-        end_time: Datetime_Like,
-        space_objects: t.Sequence[sorts.SpaceObject],
-        interpolated_propagations: t.Sequence[InterpolatedPropagation],
-        passages: list[passage.Passage],
-        progress: bool = False,
-    ):
-        self.station_map = station_map
-        self.station_id_pairs = station_id_pairs
-        self.schedule_db = schedule_db
-        self.exp_detail_map = exp_detail_map
-        self.epoch = epoch
-        self.start_time = start_time
-        self.end_time = end_time
-        self.space_objects = space_objects
-        self.interpolated_propagations = interpolated_propagations
-        self.progress = progress
-        self.passages = passages
-
-    @classmethod
-    def from_controllers(
-        cls,
-        controllers: t.Sequence[controller.ControllerBase],
-        schedule: schedule.ScheduleDb,
-        epoch: Datetime_Like,
-        start_time: Datetime_Like,
-        end_time: Datetime_Like,
-        space_objects: t.Sequence[sorts.SpaceObject],
-        interpolated_propagations: t.Sequence[InterpolatedPropagation],
-        passages: list[passage.Passage],
-    ):
-        """A constructor method"""
-        # TODO: - the exp details are already computed outside? Should the `controllers` field be
-        # removed? or this classmethod? or what?
-        #
-        # Notes from Hin, 2025-11-21:
-        #   - both `exp_id_stn_id_pairs_map` and `ExperimentDetail` are currently owned by the controller;
-        #   - the func `priority_scheduling` evolved to requires `exp_id_stn_id_pairs_map` at some point,
-        #     and therefore it is sometimes found as an explicitly variable in simulation experiment file as well
-        #   - we can re-work info flow later but this is needed atm
-
-        schedule_db = schedule
-
-        stn_map: dict[StationId, Station] = {}
-        stn_id_pairs_set: set[tuple[StationId, StationId]] = set()
-        exp_detail_map: types.ExperimentDetailMap = {}
-
-        for ctrl in controllers:
-            stn_map.update(ctrl.get_station_map())
-
-            for pairs in ctrl.get_experiment_id_station_id_pairs_map().values():
-                stn_id_pairs_set.update(pairs)
-
-            exp_detail = ctrl.get_experiment_detail()
-            exp_detail_map[exp_detail.id] = exp_detail
-
-        return cls(
-            station_map=stn_map,
-            station_id_pairs=list(stn_id_pairs_set),
-            schedule_db=schedule_db,
-            exp_detail_map=exp_detail_map,
-            epoch=epoch,
-            start_time=start_time,
-            end_time=end_time,
-            space_objects=space_objects,
-            interpolated_propagations=interpolated_propagations,
-            passages=passages,
-        )
+    station_map: t.Mapping[StationId, Station]
+    schedule_db: schedule.ScheduleDb
+    exp_detail_map: types.ExperimentDetailMap
+    epoch: Datetime_Like
+    start_time: Datetime_Like
+    end_time: Datetime_Like
+    space_objects: t.Sequence[sorts.SpaceObject]
+    interpolated_propagations: t.Sequence[InterpolatedPropagation]
+    passages: list[passage.Passage]
+    progress: bool = False
 
 
 def get_pointing_pairs_by_stn_id_pair_passages(

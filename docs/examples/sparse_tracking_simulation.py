@@ -6,6 +6,7 @@ import numpy.typing as npt
 from astropy.time import Time
 from tqdm import tqdm
 from sorts import (
+    types,
     utils,
     controller,
     interpolation,
@@ -14,7 +15,7 @@ from sorts import (
     radar,
     schedule,
     passage,
-    simulation,
+    perturbation,
     ExperimentDetail,
 )
 from sorts.simulation import stx_mrx_simulation
@@ -48,8 +49,9 @@ class SimulationParams:
     time_step: float
     rand_seed: int
     grid_size: tuple[int, int]
-    tx_station: radar.Station
-    rx_stations: t.Sequence[radar.Station]
+    tx_station: radar.TX
+    rx_stations: t.Sequence[radar.RX]
+    station_map: t.Mapping[types.StationId, radar.Station]
     prop: propagator.Propagator
     oids: npt.NDArray[np.int64]
     clobber: bool
@@ -83,15 +85,11 @@ def prepare_simulation(args) -> tuple[SimulationParams, population.Population]:
         bandwidth_limit_ratio=5,
     )
 
-    tx_station: radar.Station = radar_sys.tx[0]
-    tx_station.uid = 0
-    rx_station_0: radar.Station = radar_sys.rx[0]
-    rx_station_0.uid = 1
-    rx_station_1: radar.Station = radar_sys.rx[1]
-    rx_station_1.uid = 2
-    rx_station_2: radar.Station = radar_sys.rx[2]
-    rx_station_2.uid = 3
-    rx_stations = [rx_station_0, rx_station_1, rx_station_2]
+    tx_station = radar_sys.tx[0]
+    rx_stations = radar_sys.rx
+    station_map = {idx: stn for idx, stn in enumerate([tx_station, *rx_stations])}
+    for idx, stn in station_map.items():
+        stn.uid = idx
 
     np.random.seed(rand_seed)
     rng = np.random.default_rng(seed=rand_seed)
@@ -130,6 +128,7 @@ def prepare_simulation(args) -> tuple[SimulationParams, population.Population]:
         grid_size=grid_size,
         tx_station=tx_station,
         rx_stations=rx_stations,
+        station_map=station_map,
         prop=propagator.Sgp4(
             settings=propagator.Sgp4Settings(out_frame="ITRS", mean_elements_input=True)
         ),
@@ -157,7 +156,7 @@ def propagate():
 
         pert_pth = obj_pth / "pert_obj_propagation_interpolation.pickle"
         if prm.clobber or not pert_pth.exists():
-            perturbed_object_groups = simulation.duplicate_and_perturbate_space_object(
+            perturbed_object_groups = perturbation.duplicate_and_perturbate_space_object(
                 space_object=spobj,
                 propagator=prm.prop,
                 interpolator_class=interpolation.Legendre8,
@@ -187,12 +186,12 @@ def simulate_obs():
     worker_job_params = [{"id": spobj.object_id, "prm": prm} for spobj in spobjs]
 
     for worker_job_param in tqdm(worker_job_params, desc="running worker job"):
-        prm = worker_job_param["prm"]
+        prm = t.cast(SimulationParams, worker_job_param["prm"])
         object_id = worker_job_param["id"]
         obj_pth = prm.save_dpath / f"space_object_{object_id}"
         pert_pth = obj_pth / "pert_obj_propagation_interpolation.pickle"
         with open(pert_pth, "rb") as fh:
-            perturbed_object_groups: list[simulation.SpaceObjectInterpolatedPropagationPair] = (
+            perturbed_object_groups: list[perturbation.SpaceObjectInterpolatedPropagationPair] = (
                 pickle.load(fh)
             )
 
@@ -203,30 +202,35 @@ def simulate_obs():
         sim_pth = obj_pth / "simulation.pickle"
         if prm.clobber or not sim_pth.exists():
             passages = passage.find_simultaneous_passages(
-                dt=(prop_interp.times - prm.start_time.datetime64) / np.timedelta64(1, "s"),
+                dt=(
+                    (prop_interp.times - utils.to_datetime64_us(prm.start_time))
+                    / np.timedelta64(1, "s")
+                ),
                 space_object=spobj,
                 states=prop_interp.states[:3, ...],
                 tx_station=prm.tx_station,
                 rx_stations=prm.rx_stations,
-                epoch=prm.start_time.datetime64,
+                epoch=utils.to_datetime64_us(prm.start_time),
+            )
+
+            exp_detail = ExperimentDetail(
+                id=0,
+                # not used
+                coh_int_bandwidth=1.0,
+                ipp=1.0,
+                pulse_length=1.0,
+                duty_cycle=1.0,
+                # --
+                power=prm.tx_station.power,
+                bandwidth=1 / prm.coherent_integration_time,
+                noise_temp=prm.rx_stations[0].noise,
+                slice_duration=prm.control_slice_duration,
             )
 
             tracker_ctrl = controller.SparseTrackerController.from_space_object(
                 tx_station=prm.tx_station,
                 rx_stations=prm.rx_stations,
-                exp_detail=ExperimentDetail(
-                    id=0,
-                    # not used
-                    coh_int_bandwidth=1.0,
-                    ipp=1.0,
-                    pulse_length=1.0,
-                    duty_cycle=1.0,
-                    # --
-                    power=prm.tx_station.power,
-                    bandwidth=1 / prm.coherent_integration_time,
-                    noise_temp=prm.rx_stations[0].noise,
-                    slice_duration=prm.control_slice_duration,
-                ),
+                exp_detail=exp_detail,
                 space_object=spobj,
                 epoch=prm.start_time,
                 points_per_passage=10,
@@ -239,15 +243,17 @@ def simulate_obs():
             )
             schedule_db.schedule_by_priority()
 
-            sim = stx_mrx_simulation.StxMrxSimulation.from_controllers(
-                controllers=[tracker_ctrl],
-                schedule=schedule_db,
+            sim = stx_mrx_simulation.StxMrxSimulation(
+                station_map=prm.station_map,
+                schedule_db=schedule_db,
+                exp_detail_map={exp_detail.id: exp_detail},
                 epoch=prm.start_time,
                 start_time=prm.start_time,
                 end_time=prm.end_time,
                 space_objects=spobjs,
                 interpolated_propagations=prop_interps,
                 passages=passages,
+                progress=True,
             )
             utils.safe_pickle(sim, sim_pth)
         else:

@@ -174,8 +174,7 @@ def test_south_to_north_circular_orbit():
 
     fence_sch = fence_scan_ctrl.generate(start_time, end_time)
 
-    sim = StxMrxSimulation.from_controllers(
-        controllers=[fence_scan_ctrl],
+    sim = StxMrxSimulation(
         schedule=fence_sch,
         epoch=start_time,
         start_time=start_time,
