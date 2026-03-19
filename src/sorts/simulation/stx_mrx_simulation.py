@@ -1,9 +1,10 @@
 from __future__ import annotations
 import logging, typing as t
+from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 import sorts
-from sorts import types, utils, radar, schedule, controller, passage, simulation
+from sorts import types, utils, radar, schedule, passage, simulation
 from sorts.types import Datetime_Like
 from sorts.radar import Station, StationId
 from sorts.interpolated_propagation import InterpolatedPropagation
@@ -12,37 +13,20 @@ from sorts.simulation import tx_rx_pair_state
 logger = logging.getLogger(__name__)
 
 
-# TODO: this can be converted into a dataclass (or just be dissolved?)
 # TODO: we need to enforce each station to has a unique id (`.uid` prop)
 #   either in the simulation class or in related station getter like `get_radar`
+@dataclass(kw_only=True)
 class StxMrxSimulation:
-    """
-    NOTE: This is intended as an internal constructor, please use the constructor methods to create instances.
-    """
-
-    def __init__(
-        self,
-        station_map: t.Mapping[StationId, Station],
-        schedule_db: schedule.ScheduleDb,
-        exp_detail_map: types.ExperimentDetailMap,
-        epoch: Datetime_Like,
-        start_time: Datetime_Like,
-        end_time: Datetime_Like,
-        space_objects: t.Sequence[sorts.SpaceObject],
-        interpolated_propagations: t.Sequence[InterpolatedPropagation],
-        passages: list[passage.Passage],
-        progress: bool = False,
-    ):
-        self.station_map = station_map
-        self.schedule_db = schedule_db
-        self.exp_detail_map = exp_detail_map
-        self.epoch = epoch
-        self.start_time = start_time
-        self.end_time = end_time
-        self.space_objects = space_objects
-        self.interpolated_propagations = interpolated_propagations
-        self.progress = progress
-        self.passages = passages
+    station_map: t.Mapping[StationId, Station]
+    schedule_db: schedule.ScheduleDb
+    exp_detail_map: types.ExperimentDetailMap
+    epoch: Datetime_Like
+    start_time: Datetime_Like
+    end_time: Datetime_Like
+    space_objects: t.Sequence[sorts.SpaceObject]
+    interpolated_propagations: t.Sequence[InterpolatedPropagation]
+    passages: list[passage.Passage]
+    progress: bool = False
 
 
 def get_pointing_pairs_by_stn_id_pair_passages(
