@@ -23,7 +23,6 @@ class StxMrxSimulation:
     def __init__(
         self,
         station_map: dict[StationId, Station],
-        station_id_pairs: t.Sequence[tuple[StationId, StationId]],
         schedule_db: schedule.ScheduleDb,
         exp_detail_map: types.ExperimentDetailMap,
         epoch: Datetime_Like,
@@ -35,7 +34,6 @@ class StxMrxSimulation:
         progress: bool = False,
     ):
         self.station_map = station_map
-        self.station_id_pairs = station_id_pairs
         self.schedule_db = schedule_db
         self.exp_detail_map = exp_detail_map
         self.epoch = epoch
@@ -71,21 +69,16 @@ class StxMrxSimulation:
         schedule_db = schedule
 
         stn_map: dict[StationId, Station] = {}
-        stn_id_pairs_set: set[tuple[StationId, StationId]] = set()
         exp_detail_map: types.ExperimentDetailMap = {}
 
         for ctrl in controllers:
             stn_map.update(ctrl.get_station_map())
-
-            for pairs in ctrl.get_experiment_id_station_id_pairs_map().values():
-                stn_id_pairs_set.update(pairs)
 
             exp_detail = ctrl.get_experiment_detail()
             exp_detail_map[exp_detail.id] = exp_detail
 
         return cls(
             station_map=stn_map,
-            station_id_pairs=list(stn_id_pairs_set),
             schedule_db=schedule_db,
             exp_detail_map=exp_detail_map,
             epoch=epoch,
