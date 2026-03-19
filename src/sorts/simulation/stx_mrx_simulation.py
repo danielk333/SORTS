@@ -22,7 +22,7 @@ class StxMrxSimulation:
 
     def __init__(
         self,
-        station_map: dict[StationId, Station],
+        station_map: t.Mapping[StationId, Station],
         schedule_db: schedule.ScheduleDb,
         exp_detail_map: types.ExperimentDetailMap,
         epoch: Datetime_Like,
@@ -43,51 +43,6 @@ class StxMrxSimulation:
         self.interpolated_propagations = interpolated_propagations
         self.progress = progress
         self.passages = passages
-
-    @classmethod
-    def from_controllers(
-        cls,
-        controllers: t.Sequence[controller.ControllerBase],
-        schedule: schedule.ScheduleDb,
-        epoch: Datetime_Like,
-        start_time: Datetime_Like,
-        end_time: Datetime_Like,
-        space_objects: t.Sequence[sorts.SpaceObject],
-        interpolated_propagations: t.Sequence[InterpolatedPropagation],
-        passages: list[passage.Passage],
-    ):
-        """A constructor method"""
-        # TODO: - the exp details are already computed outside? Should the `controllers` field be
-        # removed? or this classmethod? or what?
-        #
-        # Notes from Hin, 2025-11-21:
-        #   - both `exp_id_stn_id_pairs_map` and `ExperimentDetail` are currently owned by the controller;
-        #   - the func `priority_scheduling` evolved to requires `exp_id_stn_id_pairs_map` at some point,
-        #     and therefore it is sometimes found as an explicitly variable in simulation experiment file as well
-        #   - we can re-work info flow later but this is needed atm
-
-        schedule_db = schedule
-
-        stn_map: dict[StationId, Station] = {}
-        exp_detail_map: types.ExperimentDetailMap = {}
-
-        for ctrl in controllers:
-            stn_map.update(ctrl.get_station_map())
-
-            exp_detail = ctrl.get_experiment_detail()
-            exp_detail_map[exp_detail.id] = exp_detail
-
-        return cls(
-            station_map=stn_map,
-            schedule_db=schedule_db,
-            exp_detail_map=exp_detail_map,
-            epoch=epoch,
-            start_time=start_time,
-            end_time=end_time,
-            space_objects=space_objects,
-            interpolated_propagations=interpolated_propagations,
-            passages=passages,
-        )
 
 
 def get_pointing_pairs_by_stn_id_pair_passages(
