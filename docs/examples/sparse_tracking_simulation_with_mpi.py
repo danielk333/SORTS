@@ -14,7 +14,7 @@ from sorts import (
     radar,
     schedule,
     passage,
-    simulation,
+    perturbation,
     ExperimentDetail,
     MpiQueuedExecution,
 )
@@ -160,7 +160,7 @@ class Propagate(MpiQueuedExecution):
 
         pert_pth = obj_pth / "pert_obj_propagation_interpolation.pickle"
         if prm.clobber or not pert_pth.exists():
-            perturbed_object_groups = simulation.duplicate_and_perturbate_space_object(
+            perturbed_object_groups = perturbation.duplicate_and_perturbate_space_object(
                 space_object=spobj,
                 propagator=prm.prop,
                 interpolator_class=interpolation.Legendre8,
@@ -197,7 +197,7 @@ class SimulateObs(MpiQueuedExecution):
         obj_pth = prm.save_dpath / f"space_object_{object_id}"
         pert_pth = obj_pth / "pert_obj_propagation_interpolation.pickle"
         with open(pert_pth, "rb") as fh:
-            perturbed_object_groups: list[simulation.SpaceObjectInterpolatedPropagationPair] = (
+            perturbed_object_groups: list[perturbation.SpaceObjectInterpolatedPropagationPair] = (
                 pickle.load(fh)
             )
 

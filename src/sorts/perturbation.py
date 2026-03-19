@@ -1,7 +1,3 @@
-"""
-Functions that do not belong to a particular subpackage.
-"""
-
 import typing as t
 from astropy.time import Time
 from sorts.types import StateType
