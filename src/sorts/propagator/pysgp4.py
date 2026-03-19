@@ -111,6 +111,27 @@ def line_decode(line: str | np.bytes_) -> str:
     return rline
 
 
+def estimate_properties(bstar, rho0):
+    B = bstar * 2.0 / rho0
+    if B < 1e-9:
+        rho = 500.0
+        C_D = 0.0
+        r = 0.1
+        A = np.pi * r**2
+        m = rho * 4.0 / 3.0 * np.pi * r**3
+    else:
+        C_D = 2.3
+        rho = 5.0
+        r = (3.0 * C_D) / (B * rho)
+        A = np.pi * r**2
+        m = rho * 4.0 / 3.0 * np.pi * r**3
+    raise NotImplementedError(
+        "finish this function, these estimations should be explicit"
+        "when needed, and documented"
+    )
+
+
+
 def get_B(properties):
     # TODO: we need a way to specify which properties can exist and what they are somehow....
     if "B" in properties:
@@ -157,6 +178,7 @@ class Sgp4(Propagator[Sgp4Settings]):
         super().__init__(settings=settings)
 
         self.sgp4_mjd0 = Time("1949-12-31 00:00:00", format="iso", scale="ut1").mjd
+        self.radiusearthkm = 6378.135e3 # m
         self.rho0 = 2.461e-5 / 6378.135e3  # kg/m^2/m
 
     def propagate_tle(
@@ -173,7 +195,7 @@ class Sgp4(Propagator[Sgp4Settings]):
 
         satellite = Satrec.twoline2rv(line1, line2, grav_ind)
 
-        epoch = Time(satellite.jdsatepoch + satellite.jdsatepochF, format="jd", scale="utc")
+        epoch = Time(satellite.jdsatepoch, satellite.jdsatepochF, format="jd", scale="utc")
         logger.debug(f"SGP4:propagate_tle:epoch={epoch}")
         tv = convert_to_relative_time(epoch, times)
         td = TimeDelta(tv, format="sec")
