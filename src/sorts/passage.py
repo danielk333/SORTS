@@ -101,7 +101,6 @@ def group_passages_by_tx_rx_station_pair(
 
     for passage in passages:
         for rx_station in passage.rx_stations:
-            # TODO: make sure this is not broken
             tx_station_id = passage.tx_station.uid
             rx_station_id = rx_station.uid
 
