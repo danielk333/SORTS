@@ -200,11 +200,9 @@ def simulate_obs():
     prm, spobj_pop = prepare_simulation(args)
 
     spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
-    worker_job_params = [{"id": spobj.object_id, "prm": prm} for spobj in spobjs]
+    worker_job_params = [(spobj.object_id, prm) for spobj in spobjs]
 
-    for worker_job_param in tqdm(worker_job_params, desc="running worker job"):
-        prm = t.cast(SimulationParams, worker_job_param["prm"])
-        object_id = worker_job_param["id"]
+    for object_id, prm in tqdm(worker_job_params, desc="running worker job"):
         obj_pth = prm.save_dpath / f"space_object_{object_id}"
         pert_pth = obj_pth / "pert_obj_propagation_interpolation.pickle"
         with open(pert_pth, "rb") as fh:

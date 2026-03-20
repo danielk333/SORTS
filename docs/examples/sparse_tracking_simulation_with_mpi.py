@@ -8,6 +8,7 @@ from tqdm import tqdm
 from sorts import (
     types,
     utils,
+    space_object,
     controller,
     interpolation,
     population,
@@ -160,17 +161,16 @@ def prepare_simulation(args) -> tuple[SimulationParams, population.Population]:
     return prm, spobj_pop
 
 
-class Propagate(MpiQueuedExecution):
+class Propagate(MpiQueuedExecution[tuple[space_object.SpaceObject, SimulationParams]]):
     def master_process(self):
         prm, spobj_pop = prepare_simulation(args)
 
         spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
-        worker_job_params = [{"spobj": spobj, "prm": prm} for spobj in spobjs]
+        worker_job_params = [(spobj, prm) for spobj in spobjs]
         self.mpi_master_proc_loop(worker_job_params)
 
     def worker_process(self, worker_job_params):
-        prm = worker_job_params["prm"]
-        spobj = worker_job_params["spobj"]
+        spobj, prm = worker_job_params
         obj_pth = prm.save_dpath / f"space_object_{spobj.object_id}"
         utils.ensure_directory_exist(obj_pth)
 
@@ -199,17 +199,16 @@ class Propagate(MpiQueuedExecution):
                 utils.safe_pickle(true_prop, prop_interp_pth)
 
 
-class SimulateObs(MpiQueuedExecution):
+class SimulateObs(MpiQueuedExecution[tuple[types.SpaceObjectId, SimulationParams]]):
     def master_process(self):
         prm, spobj_pop = prepare_simulation(args)
 
         spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
-        worker_job_params = [{"id": spobj.object_id, "prm": prm} for spobj in spobjs]
+        worker_job_params = [(spobj.object_id, prm) for spobj in spobjs]
         self.mpi_master_proc_loop(worker_job_params)
 
     def worker_process(self, worker_job_params):
-        prm = t.cast(SimulationParams, worker_job_params["prm"])
-        object_id = worker_job_params["id"]
+        object_id, prm = worker_job_params
         obj_pth = prm.save_dpath / f"space_object_{object_id}"
         pert_pth = obj_pth / "pert_obj_propagation_interpolation.pickle"
         with open(pert_pth, "rb") as fh:
