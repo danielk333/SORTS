@@ -38,7 +38,7 @@ args = parser.parse_args()
 R_earth = 6371e3
 
 
-@dataclass
+@dataclass(kw_only=True)
 class SimulationParams:
     save_dname: str
     save_dpath: Path
@@ -53,6 +53,7 @@ class SimulationParams:
     tx_station: radar.TX
     rx_stations: t.Sequence[radar.RX]
     station_map: t.Mapping[types.StationId, radar.Station]
+    exp_detail_map: types.ExperimentDetailMap
     prop: propagator.Propagator
     oids: npt.NDArray[np.int64]
     clobber: bool
@@ -115,6 +116,21 @@ def prepare_simulation(args) -> tuple[SimulationParams, population.Population]:
 
     oids = np.arange(len(spobj_pop))
 
+    control_slice_duration = np.timedelta64(int(time_slice * 1e6), "us")
+    exp_detail = ExperimentDetail(
+        id=0,
+        # not used
+        coh_int_bandwidth=1.0,
+        ipp=1.0,
+        pulse_length=1.0,
+        duty_cycle=1.0,
+        # --
+        power=tx_station.power,
+        bandwidth=1 / coherent_integration_time,
+        noise_temp=rx_stations[0].noise,
+        slice_duration=control_slice_duration,
+    )
+
     prm = SimulationParams(
         save_dname=args.name,
         save_dpath=args.out_dir / args.name,
@@ -122,7 +138,7 @@ def prepare_simulation(args) -> tuple[SimulationParams, population.Population]:
         start_time=start_time,
         # end_time = Time("2025-01-07 00:00:00"),
         end_time=Time("2025-01-02 00:00:00"),
-        control_slice_duration=np.timedelta64(int(time_slice * 1e6), "us"),
+        control_slice_duration=control_slice_duration,
         coherent_integration_time=coherent_integration_time,
         time_step=10.0,
         rand_seed=rand_seed,
@@ -130,6 +146,7 @@ def prepare_simulation(args) -> tuple[SimulationParams, population.Population]:
         tx_station=tx_station,
         rx_stations=rx_stations,
         station_map=station_map,
+        exp_detail_map={exp_detail.id: exp_detail},
         prop=propagator.Sgp4(
             settings=propagator.Sgp4Settings(out_frame="ITRS", mean_elements_input=True)
         ),
@@ -218,24 +235,10 @@ class SimulateObs(MpiQueuedExecution):
                 epoch=utils.to_datetime64_us(prm.start_time),
             )
 
-            exp_detail = ExperimentDetail(
-                id=0,
-                # not used
-                coh_int_bandwidth=1.0,
-                ipp=1.0,
-                pulse_length=1.0,
-                duty_cycle=1.0,
-                # --
-                power=prm.tx_station.power,
-                bandwidth=1 / prm.coherent_integration_time,
-                noise_temp=prm.rx_stations[0].noise,
-                slice_duration=prm.control_slice_duration,
-            )
-
             tracker_ctrl = controller.SparseTrackerController.from_space_object(
                 tx_station=prm.tx_station,
                 rx_stations=prm.rx_stations,
-                exp_detail=exp_detail,
+                exp_detail=prm.exp_detail_map[0],
                 space_object=spobj,
                 epoch=prm.start_time,
                 points_per_passage=10,
@@ -249,16 +252,10 @@ class SimulateObs(MpiQueuedExecution):
             schedule_db.schedule_by_priority()
 
             sim = stx_mrx_simulation.StxMrxSimulation(
-                station_map=prm.station_map,
                 schedule_db=schedule_db,
-                exp_detail_map={exp_detail.id: exp_detail},
-                epoch=prm.start_time,
-                start_time=prm.start_time,
-                end_time=prm.end_time,
                 space_objects=spobjs,
                 interpolated_propagations=prop_interps,
                 passages=passages,
-                progress=True,
             )
             utils.safe_pickle(sim, sim_pth)
         else:
@@ -276,8 +273,8 @@ class SimulateObs(MpiQueuedExecution):
                     # the same passage data is used for all perturbed objects
                     passages=sim.passages,
                     schedule_db=sim.schedule_db,
-                    station_map=sim.station_map,
-                    exp_detail_map=sim.exp_detail_map,
+                    station_map=prm.station_map,
+                    exp_detail_map=prm.exp_detail_map,
                 )
                 for spobj, interp_prop in tqdm(
                     # NOTE: used `list(zip(...))` instead of just `zip(...)` so that `tqdm` can get the length
