@@ -173,11 +173,11 @@ class MpiQueuedExecution[WorkerJobParams](abc.ABC):
 
         logger.info("master proc loop done, returning...")
 
-    def mpi_master_proc_loop(self, worker_job_params: t.Sequence[WorkerJobParams]) -> None:
+    def mpi_master_proc_loop(self, worker_job_params_list: t.Sequence[WorkerJobParams]) -> None:
         if self.is_run_with_mpi:
-            return self._mpi_master_proc_loop_with_mpi(worker_job_params)
+            return self._mpi_master_proc_loop_with_mpi(worker_job_params_list)
         else:
-            return self._mpi_master_proc_loop_without_mpi(worker_job_params)
+            return self._mpi_master_proc_loop_without_mpi(worker_job_params_list)
 
     def mpi_worker_proc_loop(self) -> None:
         worker_proc_rank = self.rank

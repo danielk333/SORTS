@@ -163,11 +163,10 @@ def propagate():
     prm, spobj_pop = prepare_simulation(args)
 
     spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
-    worker_job_params = [{"spobj": spobj, "prm": prm} for spobj in spobjs]
+    worker_job_params_ls = [{"spobj": spobj, "prm": prm} for spobj in spobjs]
 
-    for worker_job_param in worker_job_params:
-        prm = worker_job_param["prm"]
-        spobj = worker_job_param["spobj"]
+    for worker_job_params in worker_job_params_ls:
+        spobj, prm = worker_job_params
         obj_pth = prm.save_dpath / f"space_object_{spobj.object_id}"
         utils.ensure_directory_exist(obj_pth)
 
@@ -202,7 +201,8 @@ def simulate_obs():
     spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
     worker_job_params = [(spobj.object_id, prm) for spobj in spobjs]
 
-    for object_id, prm in tqdm(worker_job_params, desc="running worker job"):
+    for worker_job_params in tqdm(worker_job_params, desc="running worker job"):
+        object_id, prm = worker_job_params
         obj_pth = prm.save_dpath / f"space_object_{object_id}"
         pert_pth = obj_pth / "pert_obj_propagation_interpolation.pickle"
         with open(pert_pth, "rb") as fh:

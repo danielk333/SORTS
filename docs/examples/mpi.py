@@ -13,8 +13,8 @@ class ParallelizableStep1(sorts.MpiQueuedExecution):
 
     def master_process(self):
         np.random.seed(123)
-        worker_job_params = [{"id": i} for i in range(20)]
-        self.mpi_master_proc_loop(worker_job_params)
+        worker_job_params_ls = [{"id": i} for i in range(20)]
+        self.mpi_master_proc_loop(worker_job_params_ls)
 
     def worker_process(self, worker_job_param):
         print(f"{self.__class__.__name__} {rank=}, task id=", worker_job_param["id"])

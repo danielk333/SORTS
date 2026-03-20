@@ -166,8 +166,8 @@ class Propagate(MpiQueuedExecution[tuple[space_object.SpaceObject, SimulationPar
         prm, spobj_pop = prepare_simulation(args)
 
         spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
-        worker_job_params = [(spobj, prm) for spobj in spobjs]
-        self.mpi_master_proc_loop(worker_job_params)
+        worker_job_params_ls = [(spobj, prm) for spobj in spobjs]
+        self.mpi_master_proc_loop(worker_job_params_ls)
 
     def worker_process(self, worker_job_params):
         spobj, prm = worker_job_params
@@ -204,8 +204,8 @@ class SimulateObs(MpiQueuedExecution[tuple[types.SpaceObjectId, SimulationParams
         prm, spobj_pop = prepare_simulation(args)
 
         spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
-        worker_job_params = [(spobj.object_id, prm) for spobj in spobjs]
-        self.mpi_master_proc_loop(worker_job_params)
+        worker_job_params_ls = [(spobj.object_id, prm) for spobj in spobjs]
+        self.mpi_master_proc_loop(worker_job_params_ls)
 
     def worker_process(self, worker_job_params):
         object_id, prm = worker_job_params
