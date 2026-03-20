@@ -49,9 +49,7 @@ from .perturbation import (
 from .passage import (
     Passage as Passage,
 )
-from .simulation import (
-    StxMrxSimulation as StxMrxSimulation,
-)
+
 from .mpi_queued_execution import (
     MpiQueuedExecution as MpiQueuedExecution,
 )

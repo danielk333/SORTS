@@ -8,6 +8,8 @@ from tqdm import tqdm
 from sorts import (
     types,
     utils,
+    space_object,
+    interpolated_propagation,
     controller,
     interpolation,
     population,
@@ -38,7 +40,7 @@ R_earth = 6371e3
 
 
 @dataclass(kw_only=True)
-class SimulationParams:
+class ScriptParams:
     save_dname: str
     save_dpath: Path
     plot_dpath: Path
@@ -59,7 +61,14 @@ class SimulationParams:
     rng: t.Any
 
 
-def prepare_simulation(args) -> tuple[SimulationParams, population.Population]:
+class SimulationParams(t.NamedTuple):
+    schedule_db: schedule.ScheduleDb
+    space_objects: t.Sequence[space_object.SpaceObject]
+    interpolated_propagations: t.Sequence[interpolated_propagation.InterpolatedPropagation]
+    passages: list[passage.Passage]
+
+
+def prepare_simulation(args) -> tuple[ScriptParams, population.Population]:
     ##
     # prepare simulation environment
     ##
@@ -130,7 +139,7 @@ def prepare_simulation(args) -> tuple[SimulationParams, population.Population]:
         slice_duration=control_slice_duration,
     )
 
-    prm = SimulationParams(
+    prm = ScriptParams(
         save_dname=args.name,
         save_dpath=args.out_dir / args.name,
         plot_dpath=args.out_dir / args.name / "plots",
@@ -244,7 +253,7 @@ def simulate_obs():
             )
             schedule_db.schedule_by_priority()
 
-            sim = stx_mrx_simulation.StxMrxSimulation(
+            sim = SimulationParams(
                 schedule_db=schedule_db,
                 space_objects=spobjs,
                 interpolated_propagations=prop_interps,
@@ -253,7 +262,7 @@ def simulate_obs():
             utils.safe_pickle(sim, sim_pth)
         else:
             with open(sim_pth, "rb") as fh:
-                sim: stx_mrx_simulation.StxMrxSimulation = pickle.load(fh)
+                sim: SimulationParams = pickle.load(fh)
 
         obs_pth = obj_pth / "simulation_result.pickle"
         if prm.clobber or not obs_pth.exists():
