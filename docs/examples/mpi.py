@@ -16,8 +16,8 @@ class ParallelizableStep1(sorts.MpiQueuedExecution):
         worker_job_params_ls = [{"id": i} for i in range(20)]
         self.mpi_master_proc_loop(worker_job_params_ls)
 
-    def worker_process(self, worker_job_param):
-        print(f"{self.__class__.__name__} {rank=}, task id=", worker_job_param["id"])
+    def worker_process(self, worker_job_params):
+        print(f"{self.__class__.__name__} {rank=}, task id=", worker_job_params["id"])
 
 
 # `ParallelizableStep2` adds sleep in `worker_process` to demonstrate the parallel execution more clearly
@@ -30,9 +30,9 @@ class ParallelizableStep2(sorts.MpiQueuedExecution):
         ]
         self.mpi_master_proc_loop(worker_job_params)
 
-    def worker_process(self, worker_job_param):
-        time.sleep(worker_job_param["sleep"])
-        print(f"{self.__class__.__name__} {rank=}, task id=", worker_job_param["id"])
+    def worker_process(self, worker_job_params):
+        time.sleep(worker_job_params["sleep"])
+        print(f"{self.__class__.__name__} {rank=}, task id=", worker_job_params["id"])
 
 
 # to leverage mpi,
