@@ -20,25 +20,7 @@ class _MpiK:
     worker_process_return_ok: t.Final = "worker_process_return_ok"
 
 
-# NOTE: Resorted to using a loose `Mapping` type instead of setting a generic param of `MpiQueuedExecution`
-#       because it seems python does not infer generic param based on method signatures of subclasses.
-#       Which mean if the generic param are not provided when subclassing, they are considered as Any/Unknown.
-#
-#       Althought using a loosely typed dict will not provide a strict type correctness,
-#       it at least provide the following values:
-#       - a loosely typed dict is better than Unknown/Any
-#       - user can cast it to TypedDict for enhanced type safety will minimal friction
-#       - code are easier to read without generics, especially when the behaviour of subclassing with generics is not so clear
-#
-#       An alternative solution is to provide default values for generic param.
-#       Such feature is recently added in python 3.13, which is released on October 7, 2024.
-#       But at the moment of writing, we are on October 29, 2025 only
-#       and 3.13 is too new to be adopted as the baseline python version for a lib.
-WorkerJobParam = t.Mapping
-"""Alias of `Mapping`. Cast to `TypedDict` for enhanced type safety."""
-
-
-class MpiQueuedExecution(abc.ABC):
+class MpiQueuedExecution[WorkerJobParams](abc.ABC):
     """
     `MpiQueuedExecution` is a helper abstract class for using MPI.
 
@@ -51,17 +33,17 @@ class MpiQueuedExecution(abc.ABC):
 
     Diagram:
     ```
-    +----------------------------------------------------------------------------------+
-    |    When executed with MPI:                                                       |
-    |                                                                                  |
-    |    +------------------+   +------------------+  +------------------+  +-+        |
-    |    |MPI process rank 0|   |MPI process rank 1|  |MPI process rank 2|  | |        |
-    |    |                  |   |                  |  |                  |  | |        |
-    |    |      master      |   |      worker      |  |      worker      |  | |        |
-    |    |      [jobs]      |   |      job_0       |  |      job_1       |  | |        |
-    |    +------------------+   +------------------+  +------------------+  +-+ ...    |
-    |                                                                                  |
-    +----------------------------------------------------------------------------------+
+    +---------------------------------------------------------------------------------+
+    |    When executed with MPI:                                                      |
+    |                                                                                 |
+    |    +------------------+  +------------------+  +------------------+  +-+        |
+    |    |MPI process rank 0|  |MPI process rank 1|  |MPI process rank 2|  | |        |
+    |    |                  |  |                  |  |                  |  | |        |
+    |    |      master      |  |      worker      |  |      worker      |  | |        |
+    |    |      [jobs]      |  |      job_0       |  |      job_1       |  | |        |
+    |    +------------------+  +------------------+  +------------------+  +-+ ...    |
+    |                                                                                 |
+    +---------------------------------------------------------------------------------+
     ```
 
     ## Usage:
@@ -75,11 +57,21 @@ class MpiQueuedExecution(abc.ABC):
 
     Instantiate the subclass and invoke its `run` method
 
-    NOTE: In typical usage, an instance of this class will be created on each MPI process, which means:
+    NOTE:
+        In typical usage, an instance of this class will be created on each MPI process, which means:
         - Each instance will init it's attributes/properties independently at different time
         - Attributes/Properties of the same name can end up having different value
           (e.g. a timestamp attribute will have different value on each instance.)
+
+    NOTE:
+        Provide a generic param of for `MpiQueuedExecution` when subclassing for enhanced type safety,
+        python defaults it to `Unknown` if not provided
     """
+
+    # NOTE: Provide default values for generic param is preferred but
+    #       such feature only is recently added in python 3.13, which is released on October 7, 2024.
+    #       At the moment of writing, we are on 29 October, 2025 only
+    #       and 3.13 is too new to be adopted as the baseline python version for a lib.
 
     # TODO: spawn MPI process from this class instead of using relying on external `mpiexec`.
 
@@ -102,11 +94,13 @@ class MpiQueuedExecution(abc.ABC):
         """
 
     @abc.abstractmethod
-    def worker_process(self, worker_job_param: WorkerJobParam) -> None:
+    def worker_process(self, worker_job_params: WorkerJobParams) -> None:
         """The code that only ran on the worker rank processes."""
         ...
 
-    def _mpi_master_proc_loop_with_mpi(self, worker_job_params: t.Sequence[WorkerJobParam]) -> None:
+    def _mpi_master_proc_loop_with_mpi(
+        self, worker_job_params: t.Sequence[WorkerJobParams]
+    ) -> None:
         rank_size = self.comm.Get_size()
 
         logger.debug(f"running in mpi with rank: {rank_size}")
@@ -162,7 +156,7 @@ class MpiQueuedExecution(abc.ABC):
         logger.info(f"master: {self.master_proc_rank} | master proc loop done, returning...")
 
     def _mpi_master_proc_loop_without_mpi(
-        self, worker_job_params: t.Sequence[WorkerJobParam]
+        self, worker_job_params: t.Sequence[WorkerJobParams]
     ) -> None:
         """This will be ran instead of `mpi_master_proc_loop` when `is_run_with_mpi` is `False`"""
 
@@ -179,7 +173,7 @@ class MpiQueuedExecution(abc.ABC):
 
         logger.info("master proc loop done, returning...")
 
-    def mpi_master_proc_loop(self, worker_job_params: t.Sequence[WorkerJobParam]) -> None:
+    def mpi_master_proc_loop(self, worker_job_params: t.Sequence[WorkerJobParams]) -> None:
         if self.is_run_with_mpi:
             return self._mpi_master_proc_loop_with_mpi(worker_job_params)
         else:
@@ -201,7 +195,7 @@ class MpiQueuedExecution(abc.ABC):
                 break
 
             elif isinstance(msg, t.Mapping):
-                job_param = t.cast(WorkerJobParam, msg)
+                job_param = t.cast(WorkerJobParams, msg)
                 try:
                     self.worker_process(job_param)
                     self.comm.send(_MpiK.worker_process_return_ok, dest=self.master_proc_rank)

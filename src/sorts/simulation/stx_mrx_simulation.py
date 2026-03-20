@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 import sorts
 from sorts import types, utils, radar, schedule, passage, simulation
-from sorts.types import Datetime_Like
 from sorts.radar import Station, StationId
 from sorts.interpolated_propagation import InterpolatedPropagation
 from sorts.simulation import tx_rx_pair_state
@@ -17,16 +16,10 @@ logger = logging.getLogger(__name__)
 #   either in the simulation class or in related station getter like `get_radar`
 @dataclass(kw_only=True)
 class StxMrxSimulation:
-    station_map: t.Mapping[StationId, Station]
     schedule_db: schedule.ScheduleDb
-    exp_detail_map: types.ExperimentDetailMap
-    epoch: Datetime_Like
-    start_time: Datetime_Like
-    end_time: Datetime_Like
     space_objects: t.Sequence[sorts.SpaceObject]
     interpolated_propagations: t.Sequence[InterpolatedPropagation]
     passages: list[passage.Passage]
-    progress: bool = False
 
 
 def get_pointing_pairs_by_stn_id_pair_passages(
