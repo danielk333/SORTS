@@ -168,9 +168,9 @@ class Propagate(MpiQueuedExecution):
         worker_job_params = [{"spobj": spobj, "prm": prm} for spobj in spobjs]
         self.mpi_master_proc_loop(worker_job_params)
 
-    def worker_process(self, worker_job_param):
-        prm = worker_job_param["prm"]
-        spobj = worker_job_param["spobj"]
+    def worker_process(self, worker_job_params):
+        prm = worker_job_params["prm"]
+        spobj = worker_job_params["spobj"]
         obj_pth = prm.save_dpath / f"space_object_{spobj.object_id}"
         utils.ensure_directory_exist(obj_pth)
 
@@ -207,9 +207,9 @@ class SimulateObs(MpiQueuedExecution):
         worker_job_params = [{"id": spobj.object_id, "prm": prm} for spobj in spobjs]
         self.mpi_master_proc_loop(worker_job_params)
 
-    def worker_process(self, worker_job_param):
-        prm = t.cast(SimulationParams, worker_job_param["prm"])
-        object_id = worker_job_param["id"]
+    def worker_process(self, worker_job_params):
+        prm = t.cast(SimulationParams, worker_job_params["prm"])
+        object_id = worker_job_params["id"]
         obj_pth = prm.save_dpath / f"space_object_{object_id}"
         pert_pth = obj_pth / "pert_obj_propagation_interpolation.pickle"
         with open(pert_pth, "rb") as fh:
