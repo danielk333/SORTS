@@ -72,20 +72,6 @@ class TrackerController(ControllerBase):
 
         return ctrl
 
-    def get_experiment_detail(self) -> types.ExperimentDetail:
-        return self.exp_detail
-
-    def get_experiment_id_station_id_pairs_map(self) -> types.ExperimentIdStationIdPairsMap:
-        return {self.exp_detail.id: self.station_id_pairs}
-
-    def get_station_map(self) -> dict[radar.StationId, radar.Station]:
-        stn_map: dict[radar.StationId, radar.Station] = {}
-
-        stn_map[self.tx_station.uid] = self.tx_station
-        stn_map.update(list([(stn.uid, stn) for stn in self.rx_stations]))
-
-        return stn_map
-
     # TODO: `start_time` and `end_time` are not used atm, remove or adj the logic
     def generate(
         self, start_time: Datetime_Like, end_time: Datetime_Like
