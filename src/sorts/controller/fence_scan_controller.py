@@ -13,7 +13,7 @@ from sorts.types import (
     Datetime_Like,
 )
 from sorts.utils import to_datetime64_us
-from sorts import const, types, frames, radar, schedule
+from sorts import constants, types, frames, radar, schedule
 from . import pointing_funcs
 from .controller_base import ControllerBase
 
@@ -31,8 +31,8 @@ class ControllerState:
     @classmethod
     def empty(cls) -> t.Self:
         return cls(
-            start_time=const.min_datetime64_us,
-            end_time=const.min_datetime64_us,
+            start_time=constants.min_datetime64_us,
+            end_time=constants.min_datetime64_us,
             tx_schedule_size=0,
             tx_pointings_of_a_cycle=np.empty((3, 0), dtype=np.float64),
         )
