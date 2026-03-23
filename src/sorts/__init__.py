@@ -27,6 +27,7 @@ from . import (
     types,
     utils,
     schedule,
+    pointing,
     controller,
     interpolated_propagation,
     perturbation,
