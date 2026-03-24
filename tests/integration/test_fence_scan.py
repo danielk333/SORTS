@@ -28,6 +28,7 @@ from sorts.frames import enu_to_ecef
 from sorts import (
     types,
     schedule,
+    pointing,
     interpolation,
     simulation,
     radar,
@@ -35,7 +36,6 @@ from sorts import (
     controller,
     SpaceObject,
     InterpolatedPropagation,
-    StxMrxSimulation,
 )
 from sorts.simulation import stx_mrx_simulation
 
@@ -152,7 +152,7 @@ def test_south_to_north_circular_orbit():
         uid=2,
     )
 
-    fence_scan_ctrl = controller.FenceScanController.from_scan_spec(
+    fence_scan_ctrl = pointing.fence_scanning(
         tx_station=tx_0_stn,
         rx_stations=[rx_0_stn, rx_1_stn],
         exp_detail=types.ExperimentDetail(

@@ -1,10 +1,10 @@
 from __future__ import annotations
-import logging, typing as t
+import logging, typing as t, math
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import spacecoords
-from sorts import types, passage, radar, schedule, interpolation
+from sorts import types, frames, passage, radar, schedule, interpolation
 
 logger = logging.getLogger(__name__)
 
@@ -170,3 +170,201 @@ def sparse_tracking(
     resultant_sch = resultant_sch.sort_values(by=schedule.ScheduleKey.start_time)
 
     return resultant_sch
+
+
+def fence_scanning(
+    start_time: types.Datetime64_us,
+    end_time: types.Datetime64_us,
+    azimuth: types.Float_as_deg,
+    min_elevation: types.Float_as_deg,
+    scan_range: npt.NDArray[types.Float64_as_m],
+    tx_schedule_size: int,
+    pointings_per_cycle: int,
+    tx_station: radar.Station,
+    rx_stations: t.Sequence[radar.Station],
+    exp_id: types.ExperimentId,
+    slice_duration: types.Timedelta64_us,
+) -> schedule.ScheduleDataframe:
+    """Generate a pointing schedule that scan the sky using a circular fence pattern."""
+
+    # TODO: write schedule to disk generally and then chunk load it as needed in the actual
+    # simulation, the general simulation pattern will be "1. propagate objects and generate
+    # states and make schedule, 2. run simulation, 3. analyze results"
+
+    # The logic of this function:
+    # 1. calculate the cycle of tx pointings
+    # 2. repeat the cycle of tx pointings to form the tx schedule
+    # 3. from the single cycle of tx pointings, we convert it into ECEF location coord and extend them by the `scan_range`
+    # 4. using the resultant location coords from previous step,
+    #    we convert them to rx station pointings of a cycle in ECEF coord,
+    #    and then further back to pointings in ENU coord,
+    #    and finally repeat them to form a rx schedule, for each rx station
+
+    tx_schedule_size = math.floor((end_time - start_time) / slice_duration)
+
+    tx_pointings_of_a_cycle = frames.sph_to_cart(
+        fence_pattern(
+            azimuth=azimuth,
+            min_elevation=min_elevation,
+            pointings_per_cycle=pointings_per_cycle,
+        ),
+        degrees=True,
+    )
+
+    pointings_per_cycle = tx_pointings_of_a_cycle.shape[1]
+
+    # NOTE: for `np.arange` 'stop param,
+    #   - we subtract 'slice_duration' so that only full slice are included
+    #   - and add `+1` so that slice with time range `('end_time - 'slice_duration', 'end_time')` is included
+    tx_slice_start_time: npt.NDArray[types.Datetime64_us] = np.arange(
+        start_time,
+        end_time - slice_duration + 1,
+        slice_duration,
+    )
+
+    # TODO: `tx_schedule_size` is a bit of a mismisnomer, as out-of-range entries might later be removed
+    # repeat a cycle of pointings until it is at least the size of `tx_schedule_size`,
+    # then trim to exactly `tx_schedule_size` long
+    tx_pointing: types.EnuCoordinates = np.tile(
+        tx_pointings_of_a_cycle,
+        (tx_schedule_size + pointings_per_cycle - 1) // pointings_per_cycle,
+    )[:, :tx_schedule_size]
+
+    # mask tx values by min_elevation requirement
+    tx_mask = create_mask_by_min_elevation(tx_pointing, min_elevation)
+    tx_slice_start_time_masked = tx_slice_start_time[tx_mask]
+    tx_pointing_masked = tx_pointing[:, tx_mask]
+
+    tx_sch = schedule.schedule_dataframe.from_ndarrays(
+        exp_num=np.full(len(tx_slice_start_time_masked), exp_id, dtype=np.int16),
+        stn_num=np.full(len(tx_slice_start_time_masked), tx_station.uid, dtype=np.int16),
+        simult_num=np.full(len(tx_slice_start_time_masked), 0, dtype=np.int16),
+        start_time=tx_slice_start_time_masked,
+        end_time=tx_slice_start_time_masked + slice_duration,
+        pointing_e=tx_pointing_masked[0, :],
+        pointing_n=tx_pointing_masked[1, :],
+        pointing_u=tx_pointing_masked[2, :],
+    )
+
+    # TODO: `rx_schedule_size` is a bit of a mismisnomer, as out-of-range entries might later be removed
+    rx_slice_start_time = tx_slice_start_time.repeat(len(scan_range))
+    rx_schedule_size = tx_schedule_size * len(scan_range)
+    rx_schs: list[schedule.ScheduleDataframe] = []
+    tx_pointings_of_a_cycle_without_translation_ecef: types.EcefCoordinates = frames.enu_to_ecef(
+        lat=tx_station.ecef_lat,
+        lon=tx_station.ecef_lon,
+        alt=tx_station.ecef_alt,
+        enu=tx_pointings_of_a_cycle,
+        degrees=True,
+    )
+    rx_pointing_of_a_cycle_ecef: types.EcefCoordinates = (
+        tx_pointings_of_a_cycle_without_translation_ecef[:, :, np.newaxis]
+        * scan_range[np.newaxis, np.newaxis, :]
+        + tx_station.ecef[:, np.newaxis, np.newaxis]
+    ).reshape((3, -1))
+
+    for rx_station in rx_stations:
+        rx_pointings_of_a_cycle_without_translation_ecef: types.EcefCoordinates = (
+            rx_pointing_of_a_cycle_ecef - rx_station.ecef[:, np.newaxis]
+        )
+        rx_pointings_of_a_cycle_enu: types.EnuCoordinates = frames.ecef_to_enu(
+            lat=rx_station.ecef_lat,
+            lon=rx_station.ecef_lon,
+            alt=rx_station.ecef_alt,
+            ecef=rx_pointings_of_a_cycle_without_translation_ecef,
+            degrees=True,
+        )
+
+        # repeat a cycle of pointings until it is at least the size of `rx_schedule_size`
+        # then trim to exactly `rx_schedule_size` long
+        rx_pointings_enu: types.EnuCoordinates = np.tile(
+            rx_pointings_of_a_cycle_enu,
+            (rx_schedule_size + pointings_per_cycle - 1) // pointings_per_cycle,
+        )[:, :rx_schedule_size]
+        rx_pointings_simult_num = np.arange(rx_schedule_size) % len(scan_range)
+
+        # mask rx values by min_elevation requirement, and has a corresponding tx value
+        rx_mask_by_min_elevation = create_mask_by_min_elevation(
+            rx_pointings_enu, rx_station.min_elevation
+        )
+        rx_mask_by_tx_mask = np.isin(rx_slice_start_time, tx_slice_start_time_masked)
+        rx_mask = np.logical_and(rx_mask_by_min_elevation, rx_mask_by_tx_mask)
+        rx_slice_start_time_masked = rx_slice_start_time[rx_mask]
+        rx_pointing_masked = rx_pointings_enu[:, rx_mask]
+        rx_pointings_simult_num_masked = rx_pointings_simult_num[rx_mask]
+
+        rx_sch = schedule.schedule_dataframe.from_ndarrays(
+            exp_num=np.full(len(rx_slice_start_time_masked), exp_id, dtype=np.int16),
+            stn_num=np.full(len(rx_slice_start_time_masked), rx_station.uid, dtype=np.int16),
+            simult_num=rx_pointings_simult_num_masked,
+            start_time=rx_slice_start_time_masked,
+            end_time=rx_slice_start_time_masked + slice_duration,
+            pointing_e=rx_pointing_masked[0, :],
+            pointing_n=rx_pointing_masked[1, :],
+            pointing_u=rx_pointing_masked[2, :],
+        )
+
+        rx_schs.append(rx_sch)
+
+    resultant_sch = schedule.ScheduleDataframe((pd.concat([tx_sch, *rx_schs])))
+    resultant_sch = resultant_sch.sort_values(by=schedule.ScheduleKey.start_time)
+    # TODO: re-eval if it is too brutal
+    # there will be duplicates if the tx station is also a rx station, we drop the duplicates here
+    resultant_sch = resultant_sch.drop_duplicates()
+
+    return resultant_sch
+
+
+def fence_pattern(
+    azimuth: types.Float_as_deg,
+    min_elevation: types.Float_as_deg,
+    pointings_per_cycle: int,
+) -> types.AzelrCoordinates_DegM:
+    """
+    Generate radar pointings that evenly sweep over a symmetrical elevation range, at the given `azimuth`
+
+    Note that the sweeping always strokes in the same direction (not back and forth).
+    """
+
+    el = np.linspace(
+        min_elevation, 180.0 - min_elevation, num=pointings_per_cycle, dtype=np.float64
+    )
+    az = np.full(pointings_per_cycle, azimuth, dtype=np.float64)
+
+    # make 0 <= el < 90
+    el_over_90deg_mask = el > 90.0
+    el[el_over_90deg_mask] = 180.0 - el[el_over_90deg_mask]
+
+    # wrap around az for those with el > 90 deg
+    az[el_over_90deg_mask] = np.mod(az[el_over_90deg_mask] + 180.0, 360.0)
+
+    azelr = np.stack(
+        [
+            az,
+            el,
+            np.full(pointings_per_cycle, 1.0, dtype=np.float64),
+        ],
+    )
+
+    return azelr
+
+
+def create_mask_by_min_elevation(
+    pointings: types.EnuCoordinates, min_elevation: float
+) -> npt.NDArray[np.bool]:
+    loc_zenith = np.array([0, 0, 1], dtype=np.float64)
+
+    _pointings_zenith_ang = spacecoords.linalg.vector_angle(loc_zenith, pointings, degrees=True)
+    match _pointings_zenith_ang:
+        case np.ndarray():
+            pointings_zenith_ang = _pointings_zenith_ang
+        case float():
+            pointings_zenith_ang = np.array([_pointings_zenith_ang], dtype=np.float64)
+        case _:
+            raise RuntimeError(
+                f"unexpected type of `_pointings_zenith_ang`: {type(_pointings_zenith_ang)}"
+            )
+
+    el_in_range_mask = pointings_zenith_ang <= 90.0 - min_elevation
+
+    return el_in_range_mask
