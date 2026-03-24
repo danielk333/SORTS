@@ -25,10 +25,18 @@ import numpy as np
 import numpy.typing as npt
 from astropy.time import Time
 from astropy.constants import R_earth  # type: ignore
-import pyant, pyorb
-from sorts.types import Float64_as_sec
-from sorts.utils import to_datetime64_us
-from sorts import types, schedule, simulation, radar, propagator, passage, controller, SpaceObject
+import pyant
+from sorts import (
+    types,
+    utils,
+    schedule,
+    pointing,
+    simulation,
+    radar,
+    propagator,
+    passage,
+    SpaceObject,
+)
 from sorts.simulation import stx_mrx_simulation, tx_rx_pair_state
 
 
@@ -53,13 +61,8 @@ def test_south_to_north_circular_orbit():
     num_prop_steps = 60
     float_equality_thld = 1e-9
 
-    spobj_orbital_period: Float64_as_sec = pyorb.orbital_period(
-        spobj_orbital_radius, pyorb.GM_earth
-    )
-
     start_time = Time("2025-01-01T02:45:00", format="isot", scale="utc")
-    start_time_dt64 = to_datetime64_us(start_time)
-    end_time = start_time_dt64 + spobj_orbital_period * np.timedelta64(int(1e6), "us")
+    start_time_dt64 = utils.to_datetime64_us(start_time)
 
     # we make the orbit co-rotate with earth by abusing coordinate frames.
     # we generate space states on GCRS frame and directly use it as if it is on ECEF frame.
@@ -130,17 +133,15 @@ def test_south_to_north_circular_orbit():
         slice_duration=np.timedelta64(1_000_000, "us"),  # 1s,
     )
 
-    tracker_ctrl = controller.TrackerController.from_space_object(
-        space_object=spobj,
-        epoch=start_time,
-        tx_station=tx_stn,
-        rx_stations=[rx_stn],
-        exp_detail=exp_detail,
+    tracker_sch = pointing.tracking(
         spobj_ecef_states=spobj_state,
         spobj_ecef_states_times=spobj_abs_times,
+        tx_station=tx_stn,
+        rx_stations=[rx_stn],
+        exp_id=exp_detail.id,
+        slice_duration=exp_detail.slice_duration,
     )
 
-    tracker_sch = tracker_ctrl.generate(start_time, end_time)
     schedule_db = schedule.ScheduleDb.from_schedule_dataframes([tracker_sch], ["tracker_sch"])
     schedule_db.schedule_by_priority()
 
@@ -198,6 +199,11 @@ def test_south_to_north_circular_orbit():
 
     # TODO: assert the start and end time of the observation is as expected? it will likely requires interpolation.
     # earth_radius: np.float64 = R_earth.value  # in meters
+    # spobj_orbital_period: types.Float64_as_sec = pyorb.orbital_period(
+    #         spobj_orbital_radius, pyorb.GM_earth
+    #     )
+    # end_time = start_time_dt64 + spobj_orbital_period * np.timedelta64(int(1e6), "us")
+    #
     # passage_angular_duration: Float64_as_deg = np.degrees(
     #     np.arccos(earth_radius / spobj_orbital_radius) * 2
     # )

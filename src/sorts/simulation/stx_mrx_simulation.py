@@ -1,25 +1,13 @@
 from __future__ import annotations
 import logging, typing as t
-from dataclasses import dataclass
 import numpy as np
 import pandas as pd
-import sorts
-from sorts import types, utils, radar, schedule, passage, simulation
+from sorts import types, utils, space_object, radar, schedule, passage, simulation
 from sorts.radar import Station, StationId
 from sorts.interpolated_propagation import InterpolatedPropagation
 from sorts.simulation import tx_rx_pair_state
 
 logger = logging.getLogger(__name__)
-
-
-# TODO: we need to enforce each station to has a unique id (`.uid` prop)
-#   either in the simulation class or in related station getter like `get_radar`
-@dataclass(kw_only=True)
-class StxMrxSimulation:
-    schedule_db: schedule.ScheduleDb
-    space_objects: t.Sequence[sorts.SpaceObject]
-    interpolated_propagations: t.Sequence[InterpolatedPropagation]
-    passages: list[passage.Passage]
 
 
 def get_pointing_pairs_by_stn_id_pair_passages(
@@ -93,7 +81,7 @@ def gather_tx_rx_pair_state(
 
 
 def simulate(
-    space_object: sorts.SpaceObject,
+    space_object: space_object.SpaceObject,
     interpolated_propagation: InterpolatedPropagation,
     passages: list[passage.Passage],
     schedule_db: schedule.ScheduleDb,

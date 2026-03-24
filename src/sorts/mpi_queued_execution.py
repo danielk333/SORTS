@@ -173,11 +173,11 @@ class MpiQueuedExecution[WorkerJobParams](abc.ABC):
 
         logger.info("master proc loop done, returning...")
 
-    def mpi_master_proc_loop(self, worker_job_params: t.Sequence[WorkerJobParams]) -> None:
+    def mpi_master_proc_loop(self, worker_job_params_list: t.Sequence[WorkerJobParams]) -> None:
         if self.is_run_with_mpi:
-            return self._mpi_master_proc_loop_with_mpi(worker_job_params)
+            return self._mpi_master_proc_loop_with_mpi(worker_job_params_list)
         else:
-            return self._mpi_master_proc_loop_without_mpi(worker_job_params)
+            return self._mpi_master_proc_loop_without_mpi(worker_job_params_list)
 
     def mpi_worker_proc_loop(self) -> None:
         worker_proc_rank = self.rank
@@ -186,6 +186,7 @@ class MpiQueuedExecution[WorkerJobParams](abc.ABC):
             logger.info(f"worker: {worker_proc_rank} | waiting for msg...")
             msg = self.comm.recv(source=self.master_proc_rank)
 
+            # TODO: mixing job payload and control msg is bad
             if msg == _MpiK.terminate:
                 # exit if `_MpiK.terminate` is received
                 logger.info(f"worker: {worker_proc_rank} | exiting...")
@@ -194,20 +195,20 @@ class MpiQueuedExecution[WorkerJobParams](abc.ABC):
                 # break here to allow for further execution of workers later
                 break
 
-            elif isinstance(msg, t.Mapping):
+            else:
                 job_param = t.cast(WorkerJobParams, msg)
                 try:
                     self.worker_process(job_param)
                     self.comm.send(_MpiK.worker_process_return_ok, dest=self.master_proc_rank)
                 except BaseException as exc:
-                    raise WorkerError(
-                        "Error during job:\n "
-                        + "\n".join([f"{key}: {val}" for key, val in job_param.items()])
-                    ) from exc
+                    raise WorkerError(f"Error during job:\n {job_param}") from exc
 
-            else:
-                # throw for unexpected msg
-                raise RuntimeError(f"worker: {worker_proc_rank} | received unexcepted msg: {msg}")
+            # TODO: isinstance checking does not work for generic param
+            # elif isinstance(msg, WorkerJobParams):
+            #     ...
+            # else:
+            #     # throw for unexpected msg
+            #     raise RuntimeError(f"worker: {worker_proc_rank} | received unexcepted msg: {msg}")
 
     def _run_with_mpi(self):
         try:

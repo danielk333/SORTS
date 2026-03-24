@@ -27,7 +27,7 @@ from . import (
     types,
     utils,
     schedule,
-    controller,
+    pointing,
     interpolated_propagation,
     perturbation,
     passage,
@@ -49,9 +49,7 @@ from .perturbation import (
 from .passage import (
     Passage as Passage,
 )
-from .simulation import (
-    StxMrxSimulation as StxMrxSimulation,
-)
+
 from .mpi_queued_execution import (
     MpiQueuedExecution as MpiQueuedExecution,
 )
@@ -71,7 +69,6 @@ from . import frames
 from . import dates
 from . import plotting
 
-# from . import controller_v1
 from . import passes
 from . import errors
 from . import io
@@ -88,7 +85,6 @@ from .population import Population
 from .propagator import Propagator
 from .radar import Scan
 from .radar import Station, TX, RX
-from .controller_v1 import RadarController
 from .passes import Pass
 from .errors import Errors
 from .simulation_v1 import Simulation

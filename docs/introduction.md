@@ -31,7 +31,7 @@ The main subpackages are grouped as follows:
 - Simulation
     - `schedule`: Handles resolution of multiple schedules
     - `passage`: Represents the passover of a space object over the field of view of a set of radar stations.
-    - `controller`: Controls a radar system. Generates schedules.
+    - `pointing`: Generates schedules which controls the pointings of a radar system.
     - `simulation`: Handles simulation.
 - Physics utilities
     - `frames`: Handles the various transformation between coordinate systems.

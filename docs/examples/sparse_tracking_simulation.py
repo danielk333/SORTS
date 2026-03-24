@@ -8,7 +8,9 @@ from tqdm import tqdm
 from sorts import (
     types,
     utils,
-    controller,
+    space_object,
+    interpolated_propagation,
+    pointing,
     interpolation,
     population,
     propagator,
@@ -38,7 +40,7 @@ R_earth = 6371e3
 
 
 @dataclass(kw_only=True)
-class SimulationParams:
+class ScriptParams:
     save_dname: str
     save_dpath: Path
     plot_dpath: Path
@@ -59,7 +61,14 @@ class SimulationParams:
     rng: t.Any
 
 
-def prepare_simulation(args) -> tuple[SimulationParams, population.Population]:
+class SimulationParams(t.NamedTuple):
+    schedule_db: schedule.ScheduleDb
+    space_objects: t.Sequence[space_object.SpaceObject]
+    interpolated_propagations: t.Sequence[interpolated_propagation.InterpolatedPropagation]
+    passages: list[passage.Passage]
+
+
+def prepare_simulation(args) -> tuple[ScriptParams, population.Population]:
     ##
     # prepare simulation environment
     ##
@@ -130,7 +139,7 @@ def prepare_simulation(args) -> tuple[SimulationParams, population.Population]:
         slice_duration=control_slice_duration,
     )
 
-    prm = SimulationParams(
+    prm = ScriptParams(
         save_dname=args.name,
         save_dpath=args.out_dir / args.name,
         plot_dpath=args.out_dir / args.name / "plots",
@@ -163,11 +172,10 @@ def propagate():
     prm, spobj_pop = prepare_simulation(args)
 
     spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
-    worker_job_params = [{"spobj": spobj, "prm": prm} for spobj in spobjs]
+    worker_job_params_ls = [(spobj, prm) for spobj in spobjs]
 
-    for worker_job_param in worker_job_params:
-        prm = worker_job_param["prm"]
-        spobj = worker_job_param["spobj"]
+    for worker_job_params in worker_job_params_ls:
+        spobj, prm = worker_job_params
         obj_pth = prm.save_dpath / f"space_object_{spobj.object_id}"
         utils.ensure_directory_exist(obj_pth)
 
@@ -200,11 +208,10 @@ def simulate_obs():
     prm, spobj_pop = prepare_simulation(args)
 
     spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
-    worker_job_params = [{"id": spobj.object_id, "prm": prm} for spobj in spobjs]
+    worker_job_params_ls = [(spobj.object_id, prm) for spobj in spobjs]
 
-    for worker_job_param in tqdm(worker_job_params, desc="running worker job"):
-        prm = t.cast(SimulationParams, worker_job_param["prm"])
-        object_id = worker_job_param["id"]
+    for worker_job_params in tqdm(worker_job_params_ls, desc="running worker job"):
+        object_id, prm = worker_job_params
         obj_pth = prm.save_dpath / f"space_object_{object_id}"
         pert_pth = obj_pth / "pert_obj_propagation_interpolation.pickle"
         with open(pert_pth, "rb") as fh:
@@ -230,23 +237,21 @@ def simulate_obs():
                 epoch=utils.to_datetime64_us(prm.start_time),
             )
 
-            tracker_ctrl = controller.SparseTrackerController.from_space_object(
+            tracker_sch = pointing.sparse_tracking(
+                passages_of_spobj=passages,
+                interpolator=prop_interp.interpolator,
+                points_per_passage=10,
                 tx_station=prm.tx_station,
                 rx_stations=prm.rx_stations,
-                exp_detail=prm.exp_detail_map[0],
-                space_object=spobj,
-                epoch=prm.start_time,
-                points_per_passage=10,
-                interpolator=prop_interp.interpolator,
+                exp_id=prm.exp_detail_map[0].id,
+                slice_duration=prm.exp_detail_map[0].slice_duration,
             )
-
-            tracker_sch = tracker_ctrl.generate(passages)
             schedule_db = schedule.ScheduleDb.from_schedule_dataframes(
                 [tracker_sch], ["tracker_sch"], obj_pth / "schedule.sqlite"
             )
             schedule_db.schedule_by_priority()
 
-            sim = stx_mrx_simulation.StxMrxSimulation(
+            sim = SimulationParams(
                 schedule_db=schedule_db,
                 space_objects=spobjs,
                 interpolated_propagations=prop_interps,
@@ -255,7 +260,7 @@ def simulate_obs():
             utils.safe_pickle(sim, sim_pth)
         else:
             with open(sim_pth, "rb") as fh:
-                sim: stx_mrx_simulation.StxMrxSimulation = pickle.load(fh)
+                sim: SimulationParams = pickle.load(fh)
 
         obs_pth = obj_pth / "simulation_result.pickle"
         if prm.clobber or not obs_pth.exists():
