@@ -69,7 +69,6 @@ from . import frames
 from . import dates
 from . import plotting
 
-# from . import controller_v1
 from . import passes
 from . import errors
 from . import io
@@ -86,7 +85,6 @@ from .population import Population
 from .propagator import Propagator
 from .radar import Scan
 from .radar import Station, TX, RX
-from .controller_v1 import RadarController
 from .passes import Pass
 from .errors import Errors
 from .simulation_v1 import Simulation

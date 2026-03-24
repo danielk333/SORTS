@@ -25,7 +25,6 @@ api_docs_dpath = project_root_dpath / "docs" / "api_reference"  # path for api d
 
 
 ignore_dpaths: list[Path] = [
-    root_mod_dpath / "controller_v1",
     root_mod_dpath / "simulation_v1.py",
 ]
 
