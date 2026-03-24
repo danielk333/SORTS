@@ -10,7 +10,7 @@ from sorts import (
     utils,
     space_object,
     interpolated_propagation,
-    controller,
+    pointing,
     interpolation,
     population,
     propagator,
@@ -237,17 +237,15 @@ def simulate_obs():
                 epoch=utils.to_datetime64_us(prm.start_time),
             )
 
-            tracker_ctrl = controller.SparseTrackerController.from_space_object(
+            tracker_sch = pointing.sparse_tracking(
+                passages_of_spobj=passages,
+                interpolator=prop_interp.interpolator,
+                points_per_passage=10,
                 tx_station=prm.tx_station,
                 rx_stations=prm.rx_stations,
-                exp_detail=prm.exp_detail_map[0],
-                space_object=spobj,
-                epoch=prm.start_time,
-                points_per_passage=10,
-                interpolator=prop_interp.interpolator,
+                exp_id=prm.exp_detail_map[0].id,
+                slice_duration=prm.exp_detail_map[0].slice_duration,
             )
-
-            tracker_sch = tracker_ctrl.generate(passages)
             schedule_db = schedule.ScheduleDb.from_schedule_dataframes(
                 [tracker_sch], ["tracker_sch"], obj_pth / "schedule.sqlite"
             )
