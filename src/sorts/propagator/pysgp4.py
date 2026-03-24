@@ -178,8 +178,9 @@ class Sgp4(Propagator[Sgp4Settings]):
         super().__init__(settings=settings)
 
         self.sgp4_mjd0 = Time("1949-12-31 00:00:00", format="iso", scale="ut1").mjd
-        self.radiusearthkm = 6378.135e3 # m
+        self.radiusearth_wgs84 = 6378.137e3 # m
         self.rho0 = 2.461e-5 / 6378.135e3  # kg/m^2/m
+
 
     def propagate_tle(
         self,
@@ -323,7 +324,7 @@ class Sgp4(Propagator[Sgp4Settings]):
         self,
         line1: str,
         line2: str,
-        radians: bool = False,
+        degrees: bool = False,
     ) -> tuple[NDArray_6, float, Time]:
         """Extract the mean elements in SI units (a [m], e [1], inc [deg],
         raan [deg], aop [deg], mu [deg]), B-parameter (not bstar) and epoch
@@ -349,10 +350,10 @@ class Sgp4(Propagator[Sgp4Settings]):
         mean_elements[0] = (np.sqrt(grav_model.mu) / n0) ** (2.0 / 3.0) * 1e3
         mean_elements[1] = satrec.ecco
         mean_elements[2] = satrec.inclo
-        mean_elements[3] = satrec.nodeo
-        mean_elements[4] = satrec.argpo
+        mean_elements[3] = satrec.argpo
+        mean_elements[4] = satrec.nodeo
         mean_elements[5] = satrec.mo
-        if not radians:
+        if degrees:
             mean_elements[2:] = np.degrees(mean_elements[2:])
 
         return mean_elements, B, epoch

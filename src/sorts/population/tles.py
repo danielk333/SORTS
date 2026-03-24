@@ -5,8 +5,8 @@
 from pathlib import Path
 
 import numpy as np
+import numpy.typing as npt
 from astropy.time import Time
-import pyorb
 
 from sorts.propagator import pysgp4
 from .population import Population
@@ -14,7 +14,9 @@ from .population import Population
 
 def tle_catalog(
     tles: str | Path | list[tuple[str, str]],
-):
+    save_mean_elements: bool = False,
+    degrees: bool = False,
+) -> Population:
     """Reads a TLE-snapshot file and converts the TLE's to orbits in a TEME frame and creates a population file.
     A snapshot generally contains several TLE's for the same object thus will this population also contain duplicate objects.
     The BSTAR parameter is saved in field BSTAR `BSTAR`.
@@ -30,7 +32,8 @@ def tle_catalog(
     """
     if isinstance(tles, str) or isinstance(tles, Path):
         # first character in a line is line number (1 or 2), so just ignore everything else
-        tle = {"1": [], "2": []}
+        tle: dict[str, list[str]] = {"1": [], "2": []}
+
         for line in open(tles):
             num = line[0]
             if num not in ["1", "2"]:
@@ -52,12 +55,17 @@ def tle_catalog(
     states = np.empty((6, tle_size), dtype=np.float64)
     parameters = dict(
         bstar=np.empty((tle_size,), dtype=np.float64),
+        B=np.empty((tle_size,), dtype=np.float64),
         line1=np.empty((tle_size,), dtype="S70"),
         line2=np.empty((tle_size,), dtype="S70"),
     )
 
     satnum = np.empty((tle_size,), dtype=np.int64)
-    dtypes = {"line1": "S70", "line2": "S70", "id": np.int64}
+    dtypes: dict[str, npt.DTypeLike] = {
+        "line1": np.dtype("S70"),
+        "line2": np.dtype("S70"),
+        "id": np.int64,
+    }
     jd1 = np.empty((tle_size,), dtype=np.float64)
     jd2 = np.empty((tle_size,), dtype=np.float64)
     for line_id, lines in enumerate(tles):
@@ -71,12 +79,18 @@ def tle_catalog(
 
         satnum[line_id] = params["satnum"]
 
-        # TODO: is this to convert to SI?
-        bstar = params["bstar"] / (prop.radiusearthkm * 1000.0)
-        parameters["bstar"][line_id] = bstar
+        parameters["bstar"][line_id] = params["bstar"] / prop.radiusearth_wgs84
+        parameters["B"][line_id] = 2 * params["bstar"] / (prop.radiusearth_wgs84 * prop.rho0)
 
-        state_TEME = prop.propagate_tle(line1, line2, np.array([0.0]))
-        states[:, line_id] = state_TEME[:, 0]
+        if save_mean_elements:
+            states[:, line_id], _, _ = prop.get_mean_elements(
+                line1,
+                line2,
+                degrees=degrees,
+            )
+        else:
+            state_TEME = prop.propagate_tle(line1, line2, np.array([0.0]))
+            states[:, line_id] = state_TEME[:, 0]
 
     jd_epochs = Time(jd1, jd2, format="jd", scale="utc")
 
@@ -86,12 +100,12 @@ def tle_catalog(
         frame="TEME",
         parameters=parameters,
         object_ids=satnum,
-        state_format="cartesian",
+        state_format="kepler" if save_mean_elements else "cartesian",
         anomly_type="mean",
         dtypes=dtypes,
         default_dtype=np.float64,
         epoch_format="jd",
         epoch_scale="utc",
-        degrees=True,
+        degrees=degrees,
     )
     return pop
