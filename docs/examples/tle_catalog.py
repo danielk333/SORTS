@@ -1,65 +1,50 @@
 #!/usr/bin/env python
 
-'''
+"""
 Loading a TLE catalog
 =============================================
-'''
+"""
+
 import pathlib
-import configparser
+import argparse
 
 import matplotlib.pyplot as plt
 import numpy as np
-import sorts
 from sorts import plotting
 from sorts.population import tle_catalog
 
-
-try:
-    base_pth = pathlib.Path(__file__).parents[1].resolve()
-except NameError:
-    base_pth = pathlib.Path('.').parents[1].resolve()
-
-config = configparser.ConfigParser(interpolation=None)
-config.read([base_pth / 'example_config.conf'])
-tle_pth = pathlib.Path(config.get('tle_catalog.py', 'tle_catalog'))
-
-if not tle_pth.is_absolute():
-    tle_pth = base_pth / tle_pth.relative_to('.')
-
-pop = tle_catalog(tle_pth, kepler=True)
-
-print(pop.print(n=slice(None,10), fields = ['oid','a','e','i','mjd0', 'm', 'd', 'BSTAR']))
-
-plotting.orbits(
-    pop.get_fields(['x','y','z','vx','vy','vz'], named=False),
-    title =  "State distribution of tle catalog",
-    axis_labels = 'earth-state',
-    limits = [(-3,3)]*3 + [(-15,15)]*3,
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--path",
+    default=None,
+    help="Path to TLE catalog, otherwise use predefined one",
 )
+args = parser.parse_args()
 
-plotting.orbits(
-    pop.get_fields(['a','e','i','aop','raan','mu0'], named=False),
-    title =  "Orbit distribution of tle catalog",
-    axis_labels = 'earth-orbit',
-    limits = [(0, 5)] + [(None, None)]*5,
+if args.path is None:
+    l1 = "1     5U 58002B   20251.29381767 +.00000045 +00000-0 +68424-4 0  9990"
+    l2 = "2     5 034.2510 336.1746 1845948 000.5952 359.6376 10.84867629214144"
+    pop = tle_catalog([(l1, l2)], save_mean_elements=True)
+else:
+    pop = tle_catalog(args.path, save_mean_elements=True)
+
+first_elemts = pop.print(
+        row_indecies=0,
+        fields=["id", "a", "e", "i", "epoch", "B"],
+    )
+print(first_elemts)
+
+fig, ax =plotting.kepler_orbit(
+    pop.get_orbit(),
 )
+ax.set_title("Orbit distribution of tle catalog")
 
-#look at kepler elements
-orbit = pop.get_orbit(n=101, fields = ['x','y','z','vx','vy','vz', 'm'])
-print(f'\n Orbit of satnum: {pop["oid"][101]} \n{str(orbit)}\n')
+# look at kepler elements
+orbit = pop.get_orbit(row_indecies=0)
+print(f'\n Orbit of satnum: {pop.data["id"][0]} \n{str(orbit)}\n')
 
-#we can also create a space object
-obj = pop.get_object(n=101)
+# we can also create a space object
+obj = pop.get_object(index=0)
 print(obj)
-
-#lets get ITRS states
-obj.propagator.set(out_frame='ITRS')
-
-t = np.linspace(0,3600*24.0*2,num=5000)
-states = obj.get_state(t)
-
-fig = plt.figure(figsize=(15,15))
-ax = fig.add_subplot(111, projection='3d')
-ax.plot(states[0,:], states[1,:], states[2,:],"-b")
 
 plt.show()
