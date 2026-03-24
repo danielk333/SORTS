@@ -178,7 +178,6 @@ def fence_scanning(
     azimuth: types.Float_as_deg,
     min_elevation: types.Float_as_deg,
     scan_range: npt.NDArray[types.Float64_as_m],
-    tx_schedule_size: int,
     pointings_per_cycle: int,
     tx_station: radar.Station,
     rx_stations: t.Sequence[radar.Station],
