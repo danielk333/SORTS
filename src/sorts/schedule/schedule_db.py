@@ -174,7 +174,7 @@ class ScheduleDb:
             names: The list of table name to combine.
                 If `None`, the `dataframe_names` property will be used.
                 Defaults to `None`.
-            priorities: The list of priority correspondign to the table names.
+            priorities: The list of priority corresponding to the table names.
                 Must have the same length as the `names` param.
                 If `None`, a list of `[0, ...]` will be used.
                 Defaults to `None`.
