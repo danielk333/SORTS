@@ -175,13 +175,15 @@ def empty() -> ScheduleDataframe:
 
 
 def filter_by_time_range(
-    df: ScheduleDataframe, time_range: types.TimeRange_us
+    df: ScheduleDataframe,
+    start_time: types.Datetime64_us,
+    end_time: types.Datetime64_us,
 ) -> ScheduleDataframe:
     _K = ScheduleKey
 
     mask = (
-        (df.index.get_level_values(_K.start_time) >= time_range[0])
-        & (df.index.get_level_values(_K.end_time) < time_range[1])
+        (df.index.get_level_values(_K.start_time) >= start_time)
+        & (df.index.get_level_values(_K.end_time) < end_time)
     ) # fmt: skip
     state_masked = df[mask]
 

@@ -80,12 +80,16 @@ def empty() -> TxRxPairState:
     return TxRxPairState(state)
 
 
-def filter_by_time_range(state: TxRxPairState, time_range: types.TimeRange_us) -> TxRxPairState:
+def filter_by_time_range(
+    state: TxRxPairState,
+    start_time: types.Datetime64_us,
+    end_time: types.Datetime64_us,
+) -> TxRxPairState:
     _K = TxRxPairStateKey
 
     mask = (
-        (state.index.get_level_values(_K.time) >= time_range[0])
-        & (state.index.get_level_values(_K.time) <= time_range[1])
+        (state.index.get_level_values(_K.time) >= start_time)
+        & (state.index.get_level_values(_K.time) <= end_time)
     ) # fmt: skip
     state_masked = state[mask]
 
