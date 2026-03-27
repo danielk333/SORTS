@@ -175,23 +175,23 @@ def empty() -> ScheduleDataframe:
 
 
 def filter_by_time_range(
-    df: ScheduleDataframe,
+    sch: ScheduleDataframe,
     start_time: types.Datetime64_us,
     end_time: types.Datetime64_us,
 ) -> ScheduleDataframe:
     _K = ScheduleKey
 
     mask = (
-        (df.index.get_level_values(_K.start_time) >= start_time)
-        & (df.index.get_level_values(_K.end_time) < end_time)
+        (sch.index.get_level_values(_K.start_time) >= start_time)
+        & (sch.index.get_level_values(_K.end_time) < end_time)
     ) # fmt: skip
-    state_masked = df[mask]
+    state_masked = sch[mask]
 
     return state_masked
 
 
 def filter_by_exp_id_stn_num_simult_num(
-    df: ScheduleDataframe,
+    sch: ScheduleDataframe,
     exp_id: types.ExperimentId,
     stn_num: types.StationId,
     simult_num: types.SimultaneousNum,
@@ -199,10 +199,10 @@ def filter_by_exp_id_stn_num_simult_num(
     _K = ScheduleKey
 
     mask = (
-        (df.index.get_level_values(_K.exp_num) == exp_id)
-        & (df.index.get_level_values(_K.stn_num) == stn_num)
-        & (df.index.get_level_values(_K.simult_num) == simult_num)
+        (sch.index.get_level_values(_K.exp_num) == exp_id)
+        & (sch.index.get_level_values(_K.stn_num) == stn_num)
+        & (sch.index.get_level_values(_K.simult_num) == simult_num)
     ) # fmt: skip
-    state_masked = df[mask]
+    state_masked = sch[mask]
 
     return state_masked
