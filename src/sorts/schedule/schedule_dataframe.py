@@ -1,5 +1,5 @@
 from __future__ import annotations
-import logging, typing as t
+import logging, typing as t, enum
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
@@ -87,7 +87,7 @@ def validate(df: pd.DataFrame) -> ScheduleDataframe:
     return ScheduleDataframe(df)
 
 
-def from_rows(rows: list[list[t.Any]]) -> ScheduleDataframe:
+def from_rows(rows: t.Sequence[t.Sequence[t.Any]]) -> ScheduleDataframe:
     """Create a `ScheduleDataframe` from rows of data."""
 
     # NOTE: Constructing `DataFrame` from `Series` seems to be the only safe way to ensure
@@ -206,3 +206,122 @@ def filter_by_exp_id_stn_num_simult_num(
     state_masked = sch[mask]
 
     return state_masked
+
+
+def schedule_by_priority(schs: list[ScheduleDataframe], priorities: list[int]) -> ScheduleDataframe:
+    """
+    Generate a combined schedule for the specified schedules.
+    which defaults to `self.combined_schedule_name`.
+
+    Args:
+        schedules: The list of schedules to combine.
+        priorities: The list of priority corresponding to the table names.
+            Must have the same length as the `schedules` param.
+
+    Returns:
+        The resultant schedule.
+    """
+
+    _K = ScheduleKey
+
+    class _SK(enum.StrEnum):
+        """additinoal string keys that is internal to this func."""
+
+        priority = "priority"
+
+    if len(schs) != len(priorities):
+        raise RuntimeError("`priorities` does not have the same length as the `schedules` param.")
+
+    # add priority column
+    schs_with_pri = schs.copy()
+    for sch, pri in zip(schs_with_pri, priorities):
+        sch[_SK.priority] = pri
+
+    # lump all the schedules into one
+    master_sch = pd.concat(schs_with_pri, ignore_index=True)
+
+    start_time_arr = master_sch[_K.start_time].to_numpy()
+    end_time_arr = master_sch[_K.end_time].to_numpy()
+    priority_arr = master_sch[_SK.priority].to_numpy()
+
+    overlap_mask = time_overlapped_mask(
+        start_time=start_time_arr, end_time=end_time_arr, ignore_self_comparison=True
+    )
+    # TODO: calc this mask only for overlapped rows?
+    losers_mask = priority_loser_mask(priorities=priority_arr)
+
+    combined_mask = overlap_mask & losers_mask
+
+    # flatten the mask by doing an "or" per row
+    flattened_mask = np.any(combined_mask, axis=1)
+    flattened_mask = t.cast(npt.NDArray[np.bool], flattened_mask)
+
+    resultant_sch = master_sch[~flattened_mask]
+
+    return ScheduleDataframe(resultant_sch)
+
+
+def time_overlapped_mask(
+    start_time: npt.NDArray[types.Datetime64_us],
+    end_time: npt.NDArray[types.Datetime64_us],
+    ignore_self_comparison=True,
+) -> types.NDArray_NxN[np.bool]:
+    """
+    For each `start_time` and `end_time` pair at equal index,
+    check if it is overlapped with other pairs in time.
+
+    `start_time` and `end_time` must have equal length.
+
+    Args:
+        ignore_self_comparison:
+            Self-comparison is always True/overlapped.
+            It is therefore general not useful as hard-coded to `False` by default.
+            Set this flag to `False` to disable such hard-coding.
+
+    Returns:
+        A (N, N) bool ndarray.
+    """
+
+    # inject new dimension to ndarray for broadcasting
+    starts = start_time[:, np.newaxis]  # shape (N, 1)
+    ends = end_time[np.newaxis, :]  # shape (1, N)
+
+    # check conditions for overlap
+    mask1 = starts < ends  # shape (N, N)
+    mask2 = ends.T > starts.T  # shape (N, N)
+    overlap_mask = mask1 & mask2
+
+    if ignore_self_comparison:
+        # remove self-comparison (i == j)
+        np.fill_diagonal(overlap_mask, False)
+
+    return overlap_mask
+
+
+def priority_loser_mask(priorities: npt.NDArray[np.int64]) -> types.NDArray_NxN[np.bool]:
+    """
+    For each `(start_time, end_time, priorities)` row at equal index,
+    compair its priority with other rows by:
+
+        - priority: lower number -> higher priority
+        - row order: lower number -> higher priority
+
+    `start_time` and `end_time`, `priorities` must have equal length.
+    """
+
+    # inject new dimension to ndarray for broadcasting
+    # priorities
+    pri_i = priorities[:, np.newaxis]  # shape (N,1)
+    pri_j = priorities[np.newaxis, :]  # shape (1,N)
+
+    # inject new dimension to ndarray for broadcasting
+    # row id
+    rid_i = np.arange(len(priorities))[:, np.newaxis]  # shape (N,1)
+    rid_j = np.arange(len(priorities))[np.newaxis, :]  # shape (1,N)
+
+    # find losers of priorities. row i loses to row j if:
+    # 1. j has lower priority number
+    # 2. or same priority but lower rid
+    losers_mask = (pri_i > pri_j) | ((pri_i == pri_j) & (rid_i > rid_j))
+
+    return losers_mask

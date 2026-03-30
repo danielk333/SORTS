@@ -79,6 +79,9 @@ NDArray_Nx3 = npt.NDArray
 NDArray_Nx6 = npt.NDArray
 "(n, 6) shaped ndarray (i.e. `n` 6D vectors)"
 
+NDArray_NxN = npt.NDArray
+"(n, n) shaped ndarray (i.e. `n` nD vectors)"
+
 EnuCoordinate = NDArray_3[np.float64]
 "ENU cartesian coordinate, a (3,) shaped ndarray of `float64` (i.e. a single 3D vector)"
 
