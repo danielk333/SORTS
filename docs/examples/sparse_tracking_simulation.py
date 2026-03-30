@@ -62,7 +62,7 @@ class ScriptParams:
 
 
 class SimulationParams(t.NamedTuple):
-    schedule_db: schedule.ScheduleDb
+    sch: schedule.ScheduleDataframe
     space_objects: t.Sequence[space_object.SpaceObject]
     interpolated_propagations: t.Sequence[interpolated_propagation.InterpolatedPropagation]
     passages: list[passage.Passage]
@@ -252,7 +252,7 @@ def simulate_obs():
             schedule_db.schedule_by_priority()
 
             sim = SimulationParams(
-                schedule_db=schedule_db,
+                sch=tracker_sch,
                 space_objects=spobjs,
                 interpolated_propagations=prop_interps,
                 passages=passages,
@@ -272,7 +272,7 @@ def simulate_obs():
                     interpolated_propagation=interp_prop,
                     # the same passage data is used for all perturbed objects
                     passages=sim.passages,
-                    schedule_db=sim.schedule_db,
+                    sch=sim.sch,
                     station_map=prm.station_map,
                     exp_detail_map=prm.exp_detail_map,
                 )

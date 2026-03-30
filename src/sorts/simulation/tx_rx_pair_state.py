@@ -102,6 +102,28 @@ def gather_from_passages_schedule_db(
     return pair_state_dict
 
 
+def gather_from_passages_schedule_dataframe(
+    passages: list[passage.Passage],
+    sch: schedule.ScheduleDataframe,
+) -> dict[tuple[radar.StationId, radar.StationId], TxRxPairState]:
+    """
+    Find the unique tx-rx station pairs among the `passages`,
+    then for each pair, gather a `TxRxPairState` from the schedule when the passages pass over the them.
+    """
+
+    _K = TxRxPairStateKey
+
+    pointing_pairs_dict = schedule.tx_rx_pointing_pairs.gather_from_passages_schedule_dataframe(
+        passages=passages, sch=sch
+    )
+    pair_state_dict = {
+        key: TxRxPairState(pointing_pairs.set_index([_K.exp_num, _K.rx_simult_num, _K.time]))
+        for key, pointing_pairs in pointing_pairs_dict.items()
+    }
+
+    return pair_state_dict
+
+
 def filter_by_time_range(
     state: TxRxPairState,
     start_time: types.Datetime64_us,
