@@ -82,8 +82,7 @@ def tracking(
         )
 
     resultant_sch = schedule.ScheduleDataframe((pd.concat([tx_sch, *rx_schs])))
-    resultant_sch = resultant_sch.sort_values(by=schedule.ScheduleKey.start_time)
-    resultant_sch = resultant_sch.reset_index()
+    resultant_sch = resultant_sch.sort_values(by=schedule.ScheduleKey.start_time, ignore_index=True)
 
     return resultant_sch
 
@@ -167,7 +166,7 @@ def sparse_tracking(
         )
 
     resultant_sch = schedule.ScheduleDataframe((pd.concat([tx_sch, *rx_schs])))
-    resultant_sch = resultant_sch.sort_values(by=schedule.ScheduleKey.start_time)
+    resultant_sch = resultant_sch.sort_values(by=schedule.ScheduleKey.start_time, ignore_index=True)
 
     return resultant_sch
 
@@ -306,10 +305,11 @@ def fence_scanning(
         rx_schs.append(rx_sch)
 
     resultant_sch = schedule.ScheduleDataframe((pd.concat([tx_sch, *rx_schs])))
-    resultant_sch = resultant_sch.sort_values(by=schedule.ScheduleKey.start_time)
+    resultant_sch = resultant_sch.sort_values(by=schedule.ScheduleKey.start_time, ignore_index=True)
     # TODO: re-eval if it is too brutal
     # there will be duplicates if the tx station is also a rx station, we drop the duplicates here
     resultant_sch = resultant_sch.drop_duplicates()
+    resultant_sch = resultant_sch.reset_index(drop=True)
 
     return resultant_sch
 

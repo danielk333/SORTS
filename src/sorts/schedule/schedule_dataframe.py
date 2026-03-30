@@ -181,26 +181,8 @@ def filter_by_time_range(
     _K = ScheduleKey
 
     mask = (
-        (sch.index.get_level_values(_K.start_time) >= start_time)
-        & (sch.index.get_level_values(_K.end_time) < end_time)
-    ) # fmt: skip
-    state_masked = sch[mask]
-
-    return state_masked
-
-
-def filter_by_exp_id_stn_num_simult_num(
-    sch: ScheduleDataframe,
-    exp_id: types.ExperimentId,
-    stn_num: types.StationId,
-    simult_num: types.SimultaneousNum,
-) -> ScheduleDataframe:
-    _K = ScheduleKey
-
-    mask = (
-        (sch.index.get_level_values(_K.exp_num) == exp_id)
-        & (sch.index.get_level_values(_K.stn_num) == stn_num)
-        & (sch.index.get_level_values(_K.simult_num) == simult_num)
+        (sch[_K.start_time] >= start_time)
+        & (sch[_K.end_time] < end_time)
     ) # fmt: skip
     state_masked = sch[mask]
 
@@ -372,5 +354,9 @@ def get_tx_rx_pointing_pairs(
 
     df = tx_sch.join(rx_sch)
     df = df.reset_index()
+
+    # rename col start_time to time, and drop col end_time
+    df = df.rename(columns={_SK.start_time: _PK.time})
+    df = df.drop(columns=[_SK.end_time])
 
     return TxRxPointingPairs(df)

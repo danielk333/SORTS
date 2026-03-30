@@ -57,7 +57,7 @@ def from_schedule_db_stn_id_pair_passages(
         ]
     )
     tx_rx_pointing_pairs = tx_rx_pointing_pairs.sort_values(
-        by=TxRxPointingPairsKey.time, ascending=True
+        by=TxRxPointingPairsKey.time, ascending=True, ignore_index=True
     )
 
     return TxRxPointingPairs(tx_rx_pointing_pairs)
@@ -83,7 +83,7 @@ def from_schedule_dataframe_stn_id_pair_passages(
         ]
     )
     tx_rx_pointing_pairs = tx_rx_pointing_pairs.sort_values(
-        by=TxRxPointingPairsKey.time, ascending=True
+        by=TxRxPointingPairsKey.time, ascending=True, ignore_index=True
     )
 
     return TxRxPointingPairs(tx_rx_pointing_pairs)
