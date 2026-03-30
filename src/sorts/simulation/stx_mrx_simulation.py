@@ -22,9 +22,9 @@ def gather_tx_rx_pointing_pairs(
 
     pointing_pairs_dict = {
         stn_id_pair: schedule.tx_rx_pointing_pairs.from_schedule_db_stn_id_pair_passages(
+            schedule_db=schedule_db,
             stn_id_pair=stn_id_pair,
             passages=passages,
-            schedule_db=schedule_db,
         )
         for stn_id_pair, passages in passages_by_tx_rx_stn_pair.items()
     }

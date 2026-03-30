@@ -39,9 +39,9 @@ Columns:
 
 
 def from_schedule_db_stn_id_pair_passages(
+    schedule_db: ScheduleDb,
     stn_id_pair: tuple[radar.StationId, radar.StationId],
     passages: list[passage.Passage],
-    schedule_db: ScheduleDb,
 ) -> TxRxPointingPairs:
     """Create `TxRxPointingPairs` from a list of `Passage`, sorted by time in ascending order."""
 
