@@ -1,38 +1,12 @@
 from __future__ import annotations
 import logging, typing as t
 import numpy as np
-import pandas as pd
-from sorts import types, utils, space_object, radar, schedule, passage, simulation
+from sorts import types, utils, space_object, radar, schedule, passage
 from sorts.radar import Station, StationId
 from sorts.interpolated_propagation import InterpolatedPropagation
 from sorts.simulation import tx_rx_pair_state
 
 logger = logging.getLogger(__name__)
-
-
-def get_pointing_pairs_by_stn_id_pair_passages(
-    stn_id_pair: tuple[radar.StationId, radar.StationId],
-    passages: list[passage.Passage],
-    schedule_db: schedule.ScheduleDb,
-) -> schedule.TxRxPointingPairs:
-    """Create `TxRxPointingPairs` from a list of `Passage`, sorted by time in ascending order."""
-
-    tx_rx_pointing_pairs = pd.concat(
-        [
-            schedule_db.get_tx_rx_pointing_pairs(
-                start_time=ps.time_range[0],
-                end_time=ps.time_range[1],
-                tx_stn_num=stn_id_pair[0],
-                rx_stn_num=stn_id_pair[1],
-            )
-            for ps in passages
-        ]
-    )
-    tx_rx_pointing_pairs = tx_rx_pointing_pairs.sort_values(
-        by=simulation.TxRxPairStateKey.time, ascending=True
-    )
-
-    return schedule.TxRxPointingPairs(tx_rx_pointing_pairs)
 
 
 def gather_tx_rx_pointing_pairs(
@@ -47,7 +21,7 @@ def gather_tx_rx_pointing_pairs(
     passages_by_tx_rx_stn_pair = passage.group_passages_by_tx_rx_station_pair(passages)
 
     pointing_pairs_dict = {
-        stn_id_pair: get_pointing_pairs_by_stn_id_pair_passages(
+        stn_id_pair: schedule.tx_rx_pointing_pairs.from_schedule_db_stn_id_pair_passages(
             stn_id_pair=stn_id_pair,
             passages=passages,
             schedule_db=schedule_db,

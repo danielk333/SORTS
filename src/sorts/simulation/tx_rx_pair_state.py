@@ -3,22 +3,22 @@ import typing as t, enum
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from sorts import types, signals, radar
+from sorts import types, signals, radar, schedule
 
 
 # TODO: remove key `multi_index`
 # TODO: updated the name with tx/rx as suffix to prefix
 class TxRxPairStateKey(enum.StrEnum):
     multi_index = "multi_index"
-    time = "time"
-    exp_num = "exp_num"
-    rx_simult_num = "rx_simult_num"
-    tx_pointing_e = "tx_pointing_e"
-    tx_pointing_n = "tx_pointing_n"
-    tx_pointing_u = "tx_pointing_u"
-    rx_pointing_e = "rx_pointing_e"
-    rx_pointing_n = "rx_pointing_n"
-    rx_pointing_u = "rx_pointing_u"
+    exp_num = schedule.TxRxPointingPairsKey.exp_num
+    rx_simult_num = schedule.TxRxPointingPairsKey.rx_simult_num
+    time = schedule.TxRxPointingPairsKey.time
+    tx_pointing_e = schedule.TxRxPointingPairsKey.tx_pointing_e
+    tx_pointing_n = schedule.TxRxPointingPairsKey.tx_pointing_n
+    tx_pointing_u = schedule.TxRxPointingPairsKey.tx_pointing_u
+    rx_pointing_e = schedule.TxRxPointingPairsKey.rx_pointing_e
+    rx_pointing_n = schedule.TxRxPointingPairsKey.rx_pointing_n
+    rx_pointing_u = schedule.TxRxPointingPairsKey.rx_pointing_u
     gain_tx = "gain_tx"
     gain_rx = "gain_rx"
     snr = "snr"

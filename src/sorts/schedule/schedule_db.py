@@ -4,30 +4,13 @@ from collections import OrderedDict
 import pandas as pd
 from sorts import types, utils, simulation
 from .schedule_dataframe import ScheduleDataframe, scheduleDataframeDtypes
+from .tx_rx_pointing_pairs import TxRxPointingPairs
 
 
 logger = logging.getLogger(__name__)
 
 
 ScheduleDbConnection = t.NewType("ScheduleDbConnection", sqlite3.Connection)
-
-
-TxRxPointingPairs = t.NewType("TxRxPointingPairs", pd.DataFrame)
-"""
-A pandas `Dataframe` with
-```
-Columns:
-    exp_num        int16
-    rx_simult_num  int16
-    time           datetime64[us]
-    tx_pointing_e  float64
-    tx_pointing_n  float64
-    tx_pointing_u  float64
-    rx_pointing_e  float64
-    rx_pointing_n  float64
-    rx_pointing_u  float64
-```
-"""
 
 
 class ScheduleDb:
