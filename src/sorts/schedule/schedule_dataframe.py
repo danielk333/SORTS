@@ -4,8 +4,9 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import pandas._typing as pdt
-from sorts import types
+from sorts import types, utils
 from .types import ScheduleKey, ScheduleValidationError
+from .tx_rx_pointing_pairs import TxRxPointingPairsKey, TxRxPointingPairs
 
 logger = logging.getLogger(__name__)
 
@@ -26,8 +27,6 @@ A pandas `DataFrame` which:
     ```
 
 The keys are available as enum `ScheduleKey` for consistent access.
-
-NOTE: This is intended as an internal constructor, please use the constructor functions to create instances.
 """
 
 scheduleDataframeDtypes: t.Final[dict[t.Hashable, pdt.Dtype]] = {
@@ -325,3 +324,53 @@ def priority_loser_mask(priorities: npt.NDArray[np.int64]) -> types.NDArray_NxN[
     losers_mask = (pri_i > pri_j) | ((pri_i == pri_j) & (rid_i > rid_j))
 
     return losers_mask
+
+
+def get_tx_rx_pointing_pairs(
+    sch: ScheduleDataframe,
+    start_time: types.Datetime_Like,
+    end_time: types.Datetime_Like,
+    tx_stn_num: int,
+    rx_stn_num: int,
+) -> TxRxPointingPairs:
+    """Get pointing pairs from DB as specified by param."""
+
+    _SK = ScheduleKey
+    _PK = TxRxPointingPairsKey
+
+    start_time_dt64 = utils.to_datetime64_us(start_time)
+    end_time_dt64 = utils.to_datetime64_us(end_time)
+
+    # get tx_sch by filtering by time and stn_num on input sch
+    tx_sch = filter_by_time_range(sch, start_time_dt64, end_time_dt64)
+    tx_sch = tx_sch[tx_sch[_SK.stn_num] == tx_stn_num]
+
+    # get rx_sch by filtering by time and stn_num on input sch
+    rx_sch = filter_by_time_range(sch, start_time_dt64, end_time_dt64)
+    rx_sch = rx_sch[rx_sch[_SK.stn_num] == rx_stn_num]
+
+    # prepare the cols and index of tx_sch with rx_sch, then join them
+    tx_sch = tx_sch.rename(
+        columns={
+            _SK.pointing_e: _PK.tx_pointing_e,
+            _SK.pointing_n: _PK.tx_pointing_n,
+            _SK.pointing_u: _PK.tx_pointing_u,
+        }
+    )
+    tx_sch = tx_sch.set_index([_SK.exp_num, _SK.start_time, _SK.end_time])
+
+    rx_sch = rx_sch.rename(
+        columns={
+            _SK.simult_num: _PK.rx_simult_num,
+            _SK.pointing_e: _PK.rx_pointing_e,
+            _SK.pointing_n: _PK.rx_pointing_n,
+            _SK.pointing_u: _PK.rx_pointing_u,
+        }
+    )
+    rx_sch = rx_sch.set_index([_SK.exp_num, _SK.start_time, _SK.end_time])
+    rx_sch = rx_sch.drop(columns=[_SK.stn_num])
+
+    df = tx_sch.join(rx_sch)
+    df = df.reset_index()
+
+    return TxRxPointingPairs(df)

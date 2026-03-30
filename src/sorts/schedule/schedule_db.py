@@ -2,9 +2,9 @@ from __future__ import annotations
 import logging, typing as t, pathlib, sqlite3
 from collections import OrderedDict
 import pandas as pd
-from sorts import types, utils, simulation
+from sorts import types, utils
 from .schedule_dataframe import ScheduleDataframe, scheduleDataframeDtypes
-from .tx_rx_pointing_pairs import TxRxPointingPairs
+from .tx_rx_pointing_pairs import TxRxPointingPairsKey, TxRxPointingPairs
 
 
 logger = logging.getLogger(__name__)
@@ -230,7 +230,7 @@ class ScheduleDb:
     ) -> TxRxPointingPairs:
         """Get pointing pairs from DB as specified by param."""
 
-        _SuK = simulation.TxRxPairStateKey
+        _K = TxRxPointingPairsKey
 
         df = pd.read_sql_query(
             f"""
@@ -266,15 +266,15 @@ class ScheduleDb:
             ;""",
             self._db,
             dtype={
-                _SuK.exp_num: "int16",
-                _SuK.rx_simult_num: "int16",
-                _SuK.time: "datetime64[us]",
-                _SuK.tx_pointing_e: "float64",
-                _SuK.tx_pointing_n: "float64",
-                _SuK.tx_pointing_u: "float64",
-                _SuK.rx_pointing_e: "float64",
-                _SuK.rx_pointing_n: "float64",
-                _SuK.rx_pointing_u: "float64",
+                _K.exp_num: "int16",
+                _K.rx_simult_num: "int16",
+                _K.time: "datetime64[us]",
+                _K.tx_pointing_e: "float64",
+                _K.tx_pointing_n: "float64",
+                _K.tx_pointing_u: "float64",
+                _K.rx_pointing_e: "float64",
+                _K.rx_pointing_n: "float64",
+                _K.rx_pointing_u: "float64",
             },
         )
 
