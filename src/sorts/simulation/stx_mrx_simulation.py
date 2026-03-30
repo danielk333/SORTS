@@ -9,29 +9,6 @@ from sorts.simulation import tx_rx_pair_state
 logger = logging.getLogger(__name__)
 
 
-def gather_tx_rx_pointing_pairs(
-    passages: list[passage.Passage],
-    schedule_db: schedule.ScheduleDb,
-) -> dict[tuple[radar.StationId, radar.StationId], schedule.TxRxPointingPairs]:
-    """
-    Find the unique tx-rx station pairs among the `passages`,
-    then for each pair, gather a `TxRxPointingPairs` from the schedule when the passages pass over the them.
-    """
-
-    passages_by_tx_rx_stn_pair = passage.group_passages_by_tx_rx_station_pair(passages)
-
-    pointing_pairs_dict = {
-        stn_id_pair: schedule.tx_rx_pointing_pairs.from_schedule_db_stn_id_pair_passages(
-            schedule_db=schedule_db,
-            stn_id_pair=stn_id_pair,
-            passages=passages,
-        )
-        for stn_id_pair, passages in passages_by_tx_rx_stn_pair.items()
-    }
-
-    return pointing_pairs_dict
-
-
 def gather_tx_rx_pair_state(
     passages: list[passage.Passage],
     schedule_db: schedule.ScheduleDb,
@@ -43,7 +20,9 @@ def gather_tx_rx_pair_state(
 
     _K = tx_rx_pair_state.TxRxPairStateKey
 
-    pointing_pairs_dict = gather_tx_rx_pointing_pairs(passages=passages, schedule_db=schedule_db)
+    pointing_pairs_dict = schedule.tx_rx_pointing_pairs.gather_from_passages_schedule_db(
+        passages=passages, schedule_db=schedule_db
+    )
     pair_state_dict = {
         key: tx_rx_pair_state.TxRxPairState(
             pointing_pairs.set_index([_K.exp_num, _K.rx_simult_num, _K.time])
