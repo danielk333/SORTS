@@ -2,9 +2,7 @@ from __future__ import annotations
 import logging, typing as t, enum
 import pandas as pd
 from sorts import radar, passage
-from . import schedule_dataframe
-from .schedule_dataframe import ScheduleDataframe
-from .schedule_db import ScheduleDb
+from . import schedule_dataframe, schedule_db
 
 
 logger = logging.getLogger(__name__)
@@ -41,7 +39,7 @@ Columns:
 
 
 def from_schedule_db_stn_id_pair_passages(
-    schedule_db: ScheduleDb,
+    schedule_db: schedule_db.ScheduleDb,
     stn_id_pair: tuple[radar.StationId, radar.StationId],
     passages: list[passage.Passage],
 ) -> TxRxPointingPairs:
@@ -66,7 +64,7 @@ def from_schedule_db_stn_id_pair_passages(
 
 
 def from_schedule_dataframe_stn_id_pair_passages(
-    sch: ScheduleDataframe,
+    sch: schedule_dataframe.ScheduleDataframe,
     stn_id_pair: tuple[radar.StationId, radar.StationId],
     passages: list[passage.Passage],
 ) -> TxRxPointingPairs:

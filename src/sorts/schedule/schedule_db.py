@@ -3,8 +3,7 @@ import logging, typing as t, pathlib, sqlite3
 from collections import OrderedDict
 import pandas as pd
 from sorts import types, utils
-from .schedule_dataframe import ScheduleDataframe, scheduleDataframeDtypes
-from .tx_rx_pointing_pairs import TxRxPointingPairsKey, TxRxPointingPairs
+from . import schedule_dataframe, tx_rx_pointing_pairs
 
 
 logger = logging.getLogger(__name__)
@@ -53,7 +52,7 @@ class ScheduleDb:
     @classmethod
     def from_schedule_dataframes(
         cls,
-        dfs: list[ScheduleDataframe],
+        dfs: list[schedule_dataframe.ScheduleDataframe],
         names: list[str],
         db: str | pathlib.Path | sqlite3.Connection = ":memory:",
     ) -> t.Self:
@@ -110,7 +109,7 @@ class ScheduleDb:
 
         state.pop("_db_fpath", None)
 
-    def add_dataframe(self, df: ScheduleDataframe, name: str):
+    def add_dataframe(self, df: schedule_dataframe.ScheduleDataframe, name: str):
         """
         Insert the dataframe as a table in DB.
         Existing table with the same name will be replaced.
@@ -123,16 +122,16 @@ class ScheduleDb:
         self._db.commit()
         self.dataframe_names.update([(name, None)])
 
-    def get_dataframe(self, name: str) -> ScheduleDataframe:
+    def get_dataframe(self, name: str) -> schedule_dataframe.ScheduleDataframe:
         """Read the a table by name from DB into `ScheduleDataframe`."""
 
         df = pd.read_sql_query(
             f"SELECT * FROM {name}",
             self._db,
-            dtype=scheduleDataframeDtypes,
+            dtype=schedule_dataframe.scheduleDataframeDtypes,
         )
 
-        return ScheduleDataframe(df)
+        return schedule_dataframe.ScheduleDataframe(df)
 
     def remove_dataframe(self, name: str):
         """Remove a dataframe from the DB by name."""
@@ -227,10 +226,10 @@ class ScheduleDb:
         end_time: types.Datetime_Like,
         tx_stn_num: int,
         rx_stn_num: int,
-    ) -> TxRxPointingPairs:
+    ) -> tx_rx_pointing_pairs.TxRxPointingPairs:
         """Get pointing pairs from DB as specified by param."""
 
-        _K = TxRxPointingPairsKey
+        _K = tx_rx_pointing_pairs.TxRxPointingPairsKey
 
         df = pd.read_sql_query(
             f"""
@@ -278,4 +277,4 @@ class ScheduleDb:
             },
         )
 
-        return TxRxPointingPairs(df)
+        return tx_rx_pointing_pairs.TxRxPointingPairs(df)
