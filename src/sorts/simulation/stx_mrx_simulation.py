@@ -1,36 +1,12 @@
 from __future__ import annotations
 import logging, typing as t
 import numpy as np
-from sorts import types, utils, space_object, radar, schedule, passage
+from sorts import types, utils, space_object, schedule, passage
 from sorts.radar import Station, StationId
 from sorts.interpolated_propagation import InterpolatedPropagation
 from sorts.simulation import tx_rx_pair_state
 
 logger = logging.getLogger(__name__)
-
-
-def gather_tx_rx_pair_state(
-    passages: list[passage.Passage],
-    schedule_db: schedule.ScheduleDb,
-) -> dict[tuple[radar.StationId, radar.StationId], tx_rx_pair_state.TxRxPairState]:
-    """
-    Find the unique tx-rx station pairs among the `passages`,
-    then for each pair, gather a `TxRxPairState` from the schedule when the passages pass over the them.
-    """
-
-    _K = tx_rx_pair_state.TxRxPairStateKey
-
-    pointing_pairs_dict = schedule.tx_rx_pointing_pairs.gather_from_passages_schedule_db(
-        passages=passages, schedule_db=schedule_db
-    )
-    pair_state_dict = {
-        key: tx_rx_pair_state.TxRxPairState(
-            pointing_pairs.set_index([_K.exp_num, _K.rx_simult_num, _K.time])
-        )
-        for key, pointing_pairs in pointing_pairs_dict.items()
-    }
-
-    return pair_state_dict
 
 
 def simulate(
@@ -52,7 +28,7 @@ def simulate(
     # TODO: confirm with daniel if setting a default radar_albedo is okay
     spobj_radar_albedo = space_object.properties.get("radar_albedo", 1.0)
 
-    txrx_state_dict = gather_tx_rx_pair_state(
+    txrx_state_dict = tx_rx_pair_state.gather_from_passages_schedule_db(
         passages=passages,
         schedule_db=schedule_db,
     )
