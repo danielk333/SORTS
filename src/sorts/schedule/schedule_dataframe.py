@@ -340,6 +340,7 @@ def get_tx_rx_pointing_pairs(
         }
     )
     tx_sch = tx_sch.set_index([_SK.exp_num, _SK.start_time, _SK.end_time])
+    tx_sch = tx_sch.drop(columns=[_SK.stn_num, _SK.simult_num])
 
     rx_sch = rx_sch.rename(
         columns={
