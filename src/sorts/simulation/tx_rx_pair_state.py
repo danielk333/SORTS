@@ -240,7 +240,8 @@ def simulate(
     """
     Run TX RX simulation calculations.
 
-    Parameter `txrx_state` and `spobj_state` should have the same length.
+    The size of first dimension of `txrx_state` should equal to the 2nd dimension of `spobj_state`.
+    (i.e. `txrx_state.shape[0] == spobj_state.shape[1]`)
 
     Returns:
         The updated state/data.
@@ -248,10 +249,15 @@ def simulate(
 
     _K = TxRxPairStateKey
 
+    if not txrx_state.shape[0] == spobj_state.shape[1]:
+        raise RuntimeError(
+            "The size of first dimension of `txrx_state` is not equal to the 2nd dimension of `spobj_state`."
+        )
+
     if tx_station.wavelength is None:
         # TODO: remove this hack; see issues #25 for details
         raise RuntimeError(
-            "A hack of injecting `frequency` into `tx_stn.frequency` is currently required for calling `hard_target_snr`"
+            "A hack of injecting `frequency` into `tx_stn.frequency` is currently required for calling `hard_target_snr`."
         )
 
     spobj_tx_enu = tx_station.enu(spobj_state)
