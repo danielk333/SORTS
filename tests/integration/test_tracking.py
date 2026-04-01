@@ -130,7 +130,7 @@ def test_south_to_north_circular_orbit():
         bandwidth=52.08333333333333,
         duty_cycle=1.0,
         noise_temp=150.0,
-        slice_duration=np.timedelta64(1_000_000, "us"),  # 1s,
+        slice_duration=np.timedelta64(10_000, "us"),  # 10ms
     )
 
     tracker_sch = pointing.tracking(
@@ -145,7 +145,7 @@ def test_south_to_north_circular_orbit():
     schedule_db = schedule.ScheduleDb.from_schedule_dataframes([tracker_sch], ["tracker_sch"])
     schedule_db.schedule_by_priority()
 
-    txrx_state = stx_mrx_simulation.gather_tx_rx_pair_state(
+    txrx_state = tx_rx_pair_state.gather_from_passages_schedule_db(
         passages=passages,
         schedule_db=schedule_db,
     )[(0, 1)]

@@ -63,7 +63,7 @@ class ScriptParams:
 
 
 class SimulationParams(t.NamedTuple):
-    schedule_db: schedule.ScheduleDb
+    sch: schedule.ScheduleDataframe
     space_objects: t.Sequence[space_object.SpaceObject]
     interpolated_propagations: t.Sequence[interpolated_propagation.InterpolatedPropagation]
     passages: list[passage.Passage]
@@ -251,13 +251,9 @@ class SimulateObs(MpiQueuedExecution[tuple[types.SpaceObjectId, ScriptParams]]):
                 exp_id=prm.exp_detail_map[0].id,
                 slice_duration=prm.exp_detail_map[0].slice_duration,
             )
-            schedule_db = schedule.ScheduleDb.from_schedule_dataframes(
-                [tracker_sch], ["tracker_sch"], obj_pth / "schedule.sqlite"
-            )
-            schedule_db.schedule_by_priority()
 
             sim = SimulationParams(
-                schedule_db=schedule_db,
+                sch=tracker_sch,
                 space_objects=spobjs,
                 interpolated_propagations=prop_interps,
                 passages=passages,
@@ -277,7 +273,7 @@ class SimulateObs(MpiQueuedExecution[tuple[types.SpaceObjectId, ScriptParams]]):
                     interpolated_propagation=interp_prop,
                     # the same passage data is used for all perturbed objects
                     passages=sim.passages,
-                    schedule_db=sim.schedule_db,
+                    sch=sim.sch,
                     station_map=prm.station_map,
                     exp_detail_map=prm.exp_detail_map,
                 )

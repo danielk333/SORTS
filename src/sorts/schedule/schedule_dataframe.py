@@ -1,11 +1,12 @@
 from __future__ import annotations
-import logging, typing as t
+import logging, typing as t, enum
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import pandas._typing as pdt
-from sorts import types
+from sorts import types, utils
 from .types import ScheduleKey, ScheduleValidationError
+from .tx_rx_pointing_pairs import TxRxPointingPairsKey, TxRxPointingPairs
 
 logger = logging.getLogger(__name__)
 
@@ -26,8 +27,6 @@ A pandas `DataFrame` which:
     ```
 
 The keys are available as enum `ScheduleKey` for consistent access.
-
-NOTE: This is intended as an internal constructor, please use the constructor functions to create instances.
 """
 
 scheduleDataframeDtypes: t.Final[dict[t.Hashable, pdt.Dtype]] = {
@@ -87,7 +86,7 @@ def validate(df: pd.DataFrame) -> ScheduleDataframe:
     return ScheduleDataframe(df)
 
 
-def from_rows(rows: list[list[t.Any]]) -> ScheduleDataframe:
+def from_rows(rows: t.Sequence[t.Sequence[t.Any]]) -> ScheduleDataframe:
     """Create a `ScheduleDataframe` from rows of data."""
 
     # NOTE: Constructing `DataFrame` from `Series` seems to be the only safe way to ensure
@@ -175,32 +174,190 @@ def empty() -> ScheduleDataframe:
 
 
 def filter_by_time_range(
-    df: ScheduleDataframe, time_range: types.TimeRange_us
+    sch: ScheduleDataframe,
+    start_time: types.Datetime64_us,
+    end_time: types.Datetime64_us,
 ) -> ScheduleDataframe:
     _K = ScheduleKey
 
     mask = (
-        (df.index.get_level_values(_K.start_time) >= time_range[0])
-        & (df.index.get_level_values(_K.end_time) < time_range[1])
+        (sch[_K.start_time] >= start_time)
+        & (sch[_K.end_time] < end_time)
     ) # fmt: skip
-    state_masked = df[mask]
+    state_masked = sch[mask]
 
     return state_masked
 
 
-def filter_by_exp_id_stn_num_simult_num(
-    df: ScheduleDataframe,
-    exp_id: types.ExperimentId,
-    stn_num: types.StationId,
-    simult_num: types.SimultaneousNum,
-) -> ScheduleDataframe:
+def schedule_by_priority(schs: list[ScheduleDataframe], priorities: list[int]) -> ScheduleDataframe:
+    """
+    Generate a combined schedule for the specified schedules.
+    which defaults to `self.combined_schedule_name`.
+
+    Args:
+        schedules: The list of schedules to combine.
+        priorities: The list of priority corresponding to the table names.
+            Must have the same length as the `schedules` param.
+
+    Returns:
+        The resultant schedule.
+    """
+
     _K = ScheduleKey
 
-    mask = (
-        (df.index.get_level_values(_K.exp_num) == exp_id)
-        & (df.index.get_level_values(_K.stn_num) == stn_num)
-        & (df.index.get_level_values(_K.simult_num) == simult_num)
-    ) # fmt: skip
-    state_masked = df[mask]
+    class _SK(enum.StrEnum):
+        """additinoal string keys that is internal to this func."""
 
-    return state_masked
+        priority = "priority"
+
+    if len(schs) != len(priorities):
+        raise RuntimeError("`priorities` does not have the same length as the `schedules` param.")
+
+    # add priority column
+    schs_with_pri = schs.copy()
+    for sch, pri in zip(schs_with_pri, priorities):
+        sch[_SK.priority] = pri
+
+    # lump all the schedules into one
+    master_sch = pd.concat(schs_with_pri, ignore_index=True)
+
+    start_time_arr = master_sch[_K.start_time].to_numpy()
+    end_time_arr = master_sch[_K.end_time].to_numpy()
+    priority_arr = master_sch[_SK.priority].to_numpy()
+
+    overlap_mask = time_overlapped_mask(
+        start_time=start_time_arr, end_time=end_time_arr, ignore_self_comparison=True
+    )
+    # TODO: calc this mask only for overlapped rows?
+    losers_mask = priority_loser_mask(priorities=priority_arr)
+
+    combined_mask = overlap_mask & losers_mask
+
+    # flatten the mask by doing an "or" per row
+    flattened_mask = np.any(combined_mask, axis=1)
+    flattened_mask = t.cast(npt.NDArray[np.bool], flattened_mask)
+
+    resultant_sch = master_sch[~flattened_mask]
+
+    return ScheduleDataframe(resultant_sch)
+
+
+def time_overlapped_mask(
+    start_time: npt.NDArray[types.Datetime64_us],
+    end_time: npt.NDArray[types.Datetime64_us],
+    ignore_self_comparison=True,
+) -> types.NDArray_NxN[np.bool]:
+    """
+    For each `start_time` and `end_time` pair at equal index,
+    check if it is overlapped with other pairs in time.
+
+    `start_time` and `end_time` must have equal length.
+
+    Args:
+        ignore_self_comparison:
+            Self-comparison is always True/overlapped.
+            It is therefore general not useful as hard-coded to `False` by default.
+            Set this flag to `False` to disable such hard-coding.
+
+    Returns:
+        A (N, N) bool ndarray.
+    """
+
+    # inject new dimension to ndarray for broadcasting
+    starts = start_time[:, np.newaxis]  # shape (N, 1)
+    ends = end_time[np.newaxis, :]  # shape (1, N)
+
+    # check conditions for overlap
+    mask1 = starts < ends  # shape (N, N)
+    mask2 = ends.T > starts.T  # shape (N, N)
+    overlap_mask = mask1 & mask2
+
+    if ignore_self_comparison:
+        # remove self-comparison (i == j)
+        np.fill_diagonal(overlap_mask, False)
+
+    return overlap_mask
+
+
+def priority_loser_mask(priorities: npt.NDArray[np.int64]) -> types.NDArray_NxN[np.bool]:
+    """
+    For each `(start_time, end_time, priorities)` row at equal index,
+    compair its priority with other rows by:
+
+        - priority: lower number -> higher priority
+        - row order: lower number -> higher priority
+
+    `start_time` and `end_time`, `priorities` must have equal length.
+    """
+
+    # inject new dimension to ndarray for broadcasting
+    # priorities
+    pri_i = priorities[:, np.newaxis]  # shape (N,1)
+    pri_j = priorities[np.newaxis, :]  # shape (1,N)
+
+    # inject new dimension to ndarray for broadcasting
+    # row id
+    rid_i = np.arange(len(priorities))[:, np.newaxis]  # shape (N,1)
+    rid_j = np.arange(len(priorities))[np.newaxis, :]  # shape (1,N)
+
+    # find losers of priorities. row i loses to row j if:
+    # 1. j has lower priority number
+    # 2. or same priority but lower rid
+    losers_mask = (pri_i > pri_j) | ((pri_i == pri_j) & (rid_i > rid_j))
+
+    return losers_mask
+
+
+def get_tx_rx_pointing_pairs(
+    sch: ScheduleDataframe,
+    start_time: types.Datetime_Like,
+    end_time: types.Datetime_Like,
+    tx_stn_num: int,
+    rx_stn_num: int,
+) -> TxRxPointingPairs:
+    """Get pointing pairs from DB as specified by param."""
+
+    _SK = ScheduleKey
+    _PK = TxRxPointingPairsKey
+
+    start_time_dt64 = utils.to_datetime64_us(start_time)
+    end_time_dt64 = utils.to_datetime64_us(end_time)
+
+    # get tx_sch by filtering by time and stn_num on input sch
+    tx_sch = filter_by_time_range(sch, start_time_dt64, end_time_dt64)
+    tx_sch = tx_sch[tx_sch[_SK.stn_num] == tx_stn_num]
+
+    # get rx_sch by filtering by time and stn_num on input sch
+    rx_sch = filter_by_time_range(sch, start_time_dt64, end_time_dt64)
+    rx_sch = rx_sch[rx_sch[_SK.stn_num] == rx_stn_num]
+
+    # prepare the cols and index of tx_sch with rx_sch, then join them
+    tx_sch = tx_sch.rename(
+        columns={
+            _SK.pointing_e: _PK.tx_pointing_e,
+            _SK.pointing_n: _PK.tx_pointing_n,
+            _SK.pointing_u: _PK.tx_pointing_u,
+        }
+    )
+    tx_sch = tx_sch.set_index([_SK.exp_num, _SK.start_time, _SK.end_time])
+    tx_sch = tx_sch.drop(columns=[_SK.stn_num, _SK.simult_num])
+
+    rx_sch = rx_sch.rename(
+        columns={
+            _SK.simult_num: _PK.rx_simult_num,
+            _SK.pointing_e: _PK.rx_pointing_e,
+            _SK.pointing_n: _PK.rx_pointing_n,
+            _SK.pointing_u: _PK.rx_pointing_u,
+        }
+    )
+    rx_sch = rx_sch.set_index([_SK.exp_num, _SK.start_time, _SK.end_time])
+    rx_sch = rx_sch.drop(columns=[_SK.stn_num])
+
+    df = tx_sch.join(rx_sch, how="inner")
+    df = df.reset_index()
+
+    # rename col start_time to time, and drop col end_time
+    df = df.rename(columns={_SK.start_time: _PK.time})
+    df = df.drop(columns=[_SK.end_time])
+
+    return TxRxPointingPairs(df)

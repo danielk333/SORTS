@@ -3,22 +3,23 @@ import typing as t, enum
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from sorts import types, signals, radar
+from sorts import types, signals, radar, schedule, passage
+from sorts.schedule import tx_rx_pointing_pairs
 
 
 # TODO: remove key `multi_index`
 # TODO: updated the name with tx/rx as suffix to prefix
 class TxRxPairStateKey(enum.StrEnum):
     multi_index = "multi_index"
-    time = "time"
-    exp_num = "exp_num"
-    rx_simult_num = "rx_simult_num"
-    tx_pointing_e = "tx_pointing_e"
-    tx_pointing_n = "tx_pointing_n"
-    tx_pointing_u = "tx_pointing_u"
-    rx_pointing_e = "rx_pointing_e"
-    rx_pointing_n = "rx_pointing_n"
-    rx_pointing_u = "rx_pointing_u"
+    exp_num = schedule.TxRxPointingPairsKey.exp_num
+    rx_simult_num = schedule.TxRxPointingPairsKey.rx_simult_num
+    time = schedule.TxRxPointingPairsKey.time
+    tx_pointing_e = schedule.TxRxPointingPairsKey.tx_pointing_e
+    tx_pointing_n = schedule.TxRxPointingPairsKey.tx_pointing_n
+    tx_pointing_u = schedule.TxRxPointingPairsKey.tx_pointing_u
+    rx_pointing_e = schedule.TxRxPointingPairsKey.rx_pointing_e
+    rx_pointing_n = schedule.TxRxPointingPairsKey.rx_pointing_n
+    rx_pointing_u = schedule.TxRxPointingPairsKey.rx_pointing_u
     gain_tx = "gain_tx"
     gain_rx = "gain_rx"
     snr = "snr"
@@ -80,12 +81,63 @@ def empty() -> TxRxPairState:
     return TxRxPairState(state)
 
 
-def filter_by_time_range(state: TxRxPairState, time_range: types.TimeRange_us) -> TxRxPairState:
+def from_tx_rx_pointing_pairs(
+    pointing_pairs: tx_rx_pointing_pairs.TxRxPointingPairs,
+) -> TxRxPairState:
+    _K = TxRxPairStateKey
+    return TxRxPairState(pointing_pairs.set_index([_K.exp_num, _K.rx_simult_num, _K.time]))
+
+
+def gather_from_passages_schedule_db(
+    passages: list[passage.Passage],
+    schedule_db: schedule.ScheduleDb,
+) -> dict[tuple[radar.StationId, radar.StationId], TxRxPairState]:
+    """
+    Find the unique tx-rx station pairs among the `passages`,
+    then for each pair, gather a `TxRxPairState` from the schedule when the passages pass over the them.
+    """
+
+    pointing_pairs_dict = schedule.tx_rx_pointing_pairs.gather_from_passages_schedule_db(
+        passages=passages, schedule_db=schedule_db
+    )
+    pair_state_dict = {
+        key: from_tx_rx_pointing_pairs(pointing_pairs)
+        for key, pointing_pairs in pointing_pairs_dict.items()
+    }
+
+    return pair_state_dict
+
+
+def gather_from_passages_schedule_dataframe(
+    passages: list[passage.Passage],
+    sch: schedule.ScheduleDataframe,
+) -> dict[tuple[radar.StationId, radar.StationId], TxRxPairState]:
+    """
+    Find the unique tx-rx station pairs among the `passages`,
+    then for each pair, gather a `TxRxPairState` from the schedule when the passages pass over the them.
+    """
+
+    pointing_pairs_dict = schedule.tx_rx_pointing_pairs.gather_from_passages_schedule_dataframe(
+        passages=passages, sch=sch
+    )
+    pair_state_dict = {
+        key: from_tx_rx_pointing_pairs(pointing_pairs)
+        for key, pointing_pairs in pointing_pairs_dict.items()
+    }
+
+    return pair_state_dict
+
+
+def filter_by_time_range(
+    state: TxRxPairState,
+    start_time: types.Datetime64_us,
+    end_time: types.Datetime64_us,
+) -> TxRxPairState:
     _K = TxRxPairStateKey
 
     mask = (
-        (state.index.get_level_values(_K.time) >= time_range[0])
-        & (state.index.get_level_values(_K.time) <= time_range[1])
+        (state.index.get_level_values(_K.time) >= start_time)
+        & (state.index.get_level_values(_K.time) <= end_time)
     ) # fmt: skip
     state_masked = state[mask]
 
@@ -192,7 +244,8 @@ def simulate(
     """
     Run TX RX simulation calculations.
 
-    Parameter `txrx_state` and `spobj_state` should have the same length.
+    The size of first dimension of `txrx_state` should equal to the 2nd dimension of `spobj_state`.
+    (i.e. `txrx_state.shape[0] == spobj_state.shape[1]`)
 
     Returns:
         The updated state/data.
@@ -200,10 +253,15 @@ def simulate(
 
     _K = TxRxPairStateKey
 
+    if not txrx_state.shape[0] == spobj_state.shape[1]:
+        raise RuntimeError(
+            "The size of first dimension of `txrx_state` is not equal to the 2nd dimension of `spobj_state`."
+        )
+
     if tx_station.wavelength is None:
         # TODO: remove this hack; see issues #25 for details
         raise RuntimeError(
-            "A hack of injecting `frequency` into `tx_stn.frequency` is currently required for calling `hard_target_snr`"
+            "A hack of injecting `frequency` into `tx_stn.frequency` is currently required for calling `hard_target_snr`."
         )
 
     spobj_tx_enu = tx_station.enu(spobj_state)

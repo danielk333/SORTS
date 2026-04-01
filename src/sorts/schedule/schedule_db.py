@@ -2,32 +2,14 @@ from __future__ import annotations
 import logging, typing as t, pathlib, sqlite3
 from collections import OrderedDict
 import pandas as pd
-from sorts import types, utils, simulation
-from .schedule_dataframe import ScheduleDataframe, scheduleDataframeDtypes
+from sorts import types, utils
+from . import schedule_dataframe, tx_rx_pointing_pairs
 
 
 logger = logging.getLogger(__name__)
 
 
 ScheduleDbConnection = t.NewType("ScheduleDbConnection", sqlite3.Connection)
-
-
-TxRxPointingPairs = t.NewType("TxRxPointingPairs", pd.DataFrame)
-"""
-A pandas `Dataframe` with
-```
-Columns:
-    exp_num        int16
-    rx_simult_num  int16
-    time           datetime64[us]
-    tx_pointing_e  float64
-    tx_pointing_n  float64
-    tx_pointing_u  float64
-    rx_pointing_e  float64
-    rx_pointing_n  float64
-    rx_pointing_u  float64
-```
-"""
 
 
 class ScheduleDb:
@@ -70,7 +52,7 @@ class ScheduleDb:
     @classmethod
     def from_schedule_dataframes(
         cls,
-        dfs: list[ScheduleDataframe],
+        dfs: list[schedule_dataframe.ScheduleDataframe],
         names: list[str],
         db: str | pathlib.Path | sqlite3.Connection = ":memory:",
     ) -> t.Self:
@@ -127,7 +109,7 @@ class ScheduleDb:
 
         state.pop("_db_fpath", None)
 
-    def add_dataframe(self, df: ScheduleDataframe, name: str):
+    def add_dataframe(self, df: schedule_dataframe.ScheduleDataframe, name: str):
         """
         Insert the dataframe as a table in DB.
         Existing table with the same name will be replaced.
@@ -140,16 +122,16 @@ class ScheduleDb:
         self._db.commit()
         self.dataframe_names.update([(name, None)])
 
-    def get_dataframe(self, name: str) -> ScheduleDataframe:
+    def get_dataframe(self, name: str) -> schedule_dataframe.ScheduleDataframe:
         """Read the a table by name from DB into `ScheduleDataframe`."""
 
         df = pd.read_sql_query(
             f"SELECT * FROM {name}",
             self._db,
-            dtype=scheduleDataframeDtypes,
+            dtype=schedule_dataframe.scheduleDataframeDtypes,
         )
 
-        return ScheduleDataframe(df)
+        return schedule_dataframe.ScheduleDataframe(df)
 
     def remove_dataframe(self, name: str):
         """Remove a dataframe from the DB by name."""
@@ -174,7 +156,7 @@ class ScheduleDb:
             names: The list of table name to combine.
                 If `None`, the `dataframe_names` property will be used.
                 Defaults to `None`.
-            priorities: The list of priority correspondign to the table names.
+            priorities: The list of priority corresponding to the table names.
                 Must have the same length as the `names` param.
                 If `None`, a list of `[0, ...]` will be used.
                 Defaults to `None`.
@@ -244,10 +226,10 @@ class ScheduleDb:
         end_time: types.Datetime_Like,
         tx_stn_num: int,
         rx_stn_num: int,
-    ) -> TxRxPointingPairs:
+    ) -> tx_rx_pointing_pairs.TxRxPointingPairs:
         """Get pointing pairs from DB as specified by param."""
 
-        _SuK = simulation.TxRxPairStateKey
+        _K = tx_rx_pointing_pairs.TxRxPointingPairsKey
 
         df = pd.read_sql_query(
             f"""
@@ -283,16 +265,16 @@ class ScheduleDb:
             ;""",
             self._db,
             dtype={
-                _SuK.exp_num: "int16",
-                _SuK.rx_simult_num: "int16",
-                _SuK.time: "datetime64[us]",
-                _SuK.tx_pointing_e: "float64",
-                _SuK.tx_pointing_n: "float64",
-                _SuK.tx_pointing_u: "float64",
-                _SuK.rx_pointing_e: "float64",
-                _SuK.rx_pointing_n: "float64",
-                _SuK.rx_pointing_u: "float64",
+                _K.exp_num: "int16",
+                _K.rx_simult_num: "int16",
+                _K.time: "datetime64[us]",
+                _K.tx_pointing_e: "float64",
+                _K.tx_pointing_n: "float64",
+                _K.tx_pointing_u: "float64",
+                _K.rx_pointing_e: "float64",
+                _K.rx_pointing_n: "float64",
+                _K.rx_pointing_u: "float64",
             },
         )
 
-        return TxRxPointingPairs(df)
+        return tx_rx_pointing_pairs.TxRxPointingPairs(df)
