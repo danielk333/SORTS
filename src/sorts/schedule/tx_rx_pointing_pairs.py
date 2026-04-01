@@ -68,7 +68,12 @@ def from_schedule_dataframe_stn_id_pair_passages(
     stn_id_pair: tuple[radar.StationId, radar.StationId],
     passages: list[passage.Passage],
 ) -> TxRxPointingPairs:
-    """Create `TxRxPointingPairs` from a list of `Passage`, sorted by time in ascending order."""
+    """
+    Create `TxRxPointingPairs` from a list of `Passage`,
+    sorted by `[time, rx_simult_num, exp_num]` in ascending order.
+    """
+
+    _K = TxRxPointingPairsKey
 
     tx_rx_pointing_pairs = pd.concat(
         [
@@ -83,7 +88,7 @@ def from_schedule_dataframe_stn_id_pair_passages(
         ]
     )
     tx_rx_pointing_pairs = tx_rx_pointing_pairs.sort_values(
-        by=TxRxPointingPairsKey.time, ascending=True, ignore_index=True
+        by=[_K.time, _K.rx_simult_num, _K.exp_num], ascending=True, ignore_index=True
     )
 
     return TxRxPointingPairs(tx_rx_pointing_pairs)
