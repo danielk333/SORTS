@@ -183,7 +183,13 @@ def fence_scanning(
     exp_id: types.ExperimentId,
     slice_duration: types.Timedelta64_us,
 ) -> schedule.ScheduleDataframe:
-    """Generate a pointing schedule that scan the sky using a circular fence pattern."""
+    """
+    Generate a pointing schedule that scan the sky using a circular fence pattern.
+
+    NOTE:
+        The param `min_elevation` specify the limit for the desired fence scanning pattern.
+        The actual resultant pointings are further limited by the `min_elevation` per stations.
+    """
 
     # TODO: write schedule to disk generally and then chunk load it as needed in the actual
     # simulation, the general simulation pattern will be "1. propagate objects and generate
@@ -229,7 +235,7 @@ def fence_scanning(
     )[:, :tx_schedule_size]
 
     # mask tx values by min_elevation requirement
-    tx_mask = create_mask_by_min_elevation(tx_pointing, min_elevation)
+    tx_mask = create_mask_by_min_elevation(tx_pointing, tx_station.min_elevation)
     tx_slice_start_time_masked = tx_slice_start_time[tx_mask]
     tx_pointing_masked = tx_pointing[:, tx_mask]
 
