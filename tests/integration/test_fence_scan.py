@@ -4,17 +4,11 @@ We check against an imaginary circular orbit which
 - at 90deg inclination, 0 deg longitude
 - simulation start from the orbit's intersection with earth's equatorial plane, passing south hemisphere then north hemisphere
 
-we use 2 rx stations and 2 scan ranges in this setup:
-
-for scan ranges:
-- 1st range is a unrealistically low value for triggering masking effect due to min_elevation of station
-- 2nd range is a normal on that is close to `spobj_orbital_radius`
+we use 2 rx stations in this setup:
 
 for rx stations:
 - 1st one is the same as tx station, and therefore should have the exact same pointings as tx station
-- 2nd one is slightly offseted, with a small, non-zero min_elevation. It should produce 1 observation:
-  - which points to the same location as the 2nd observation of the 1st station, with a bit of masking due to `min_elevation`
-  - no observation for the 1st scan range, beccause it is out of field-of-view/range
+- 2nd one is the same as tx station, except with a small, non-zero min_elevation. It should produce less measurements.
 """
 
 import logging
@@ -23,23 +17,20 @@ import numpy.typing as npt
 import pandas as pd
 from astropy.time import Time
 from astropy.constants import R_earth  # type: ignore
-import pyant, pyorb
-from sorts.types import Float64_as_sec, Float64_as_deg, Float_as_sec, Float_as_m
-from sorts.frames import enu_to_ecef
+import pyant, pyorb, spacecoords
+from sorts.types import Float64_as_sec, Float64_as_deg
 from sorts import (
     types,
     utils,
     schedule,
     pointing,
-    interpolation,
-    simulation,
     radar,
     propagator,
     passage,
     SpaceObject,
-    InterpolatedPropagation,
 )
-from sorts.simulation import stx_mrx_simulation, tx_rx_pair_state
+from sorts.schedule import tx_rx_pointing_pairs
+from sorts.simulation import tx_rx_pair_state
 
 
 logging.basicConfig(level=logging.INFO)
@@ -58,25 +49,12 @@ def setup_function():
     pd.set_option("display.expand_frame_repr", False)
 
 
-# float_equality_thld = 1e-9
-# # TODO: re-eval this threshold
-# pointing_range_equality_thld: Float_as_m = 1e-6
-
-# dt_equality_thld = control_slice_duration
-# dsec_sampling_intv: Float_as_sec = 30
-# scan_ranges = np.array([10, spobj_orbital_radius], dtype=np.float64)
-# simu_num = len(scan_ranges)
-
-# _SK = schedule.ScheduleKey
-# _SuK = simulation.TxRxPairStateKey
-
-
 def test_south_to_north_circular_orbit():
     earth_radius: np.float64 = R_earth.value  # in meters
     spobj_orbital_radius = 7000e3  # in meters
-    scan_ranges = np.array([10, spobj_orbital_radius], dtype=np.float64)
+    scan_ranges = np.array([spobj_orbital_radius, spobj_orbital_radius * 1.2], dtype=np.float64)
     num_prop_steps = 60
-    float_equality_thld = 1e-9
+    min_elevation = 5.0
 
     spobj_orbital_period: Float64_as_sec = pyorb.orbital_period(
         spobj_orbital_radius, pyorb.GM_earth
@@ -137,6 +115,9 @@ def test_south_to_north_circular_orbit():
         for idx in [0, 1, 2]
     ]
 
+    # introduce non-zero min_elevation to `rx_stns[1]` to test its effect
+    rx_stns[1].min_elevation = min_elevation
+
     passages = passage.find_simultaneous_passages(
         dt=spobj_delta_secs,
         space_object=spobj,
@@ -177,10 +158,12 @@ def test_south_to_north_circular_orbit():
     )
     result_states: list[tx_rx_pair_state.TxRxPairState] = []
     for rx_stn in rx_stns:
-        txrx_state = tx_rx_pair_state.gather_from_passages_schedule_dataframe(
-            passages=passages,
+        txrx_pairs = tx_rx_pointing_pairs.from_schedule_dataframe_stn_id_pair_passages(
             sch=fence_sch,
-        )[(tx_stn.uid, rx_stn.uid)]
+            stn_id_pair=(tx_stn.uid, rx_stn.uid),
+            passages=passages,
+        )
+        txrx_state = tx_rx_pair_state.from_tx_rx_pointing_pairs(txrx_pairs)
 
         # TODO: this is slightly cleaner but does not work with multiindex
         # intersection = txrx_state.index.get_level_values("time").intersection(
@@ -209,6 +192,8 @@ def test_south_to_north_circular_orbit():
         )
         result_states.append(result_state)
 
+    _K = schedule.TxRxPointingPairsKey
+
     # assert the number and info of passages are expected
     assert len(passages) == 1  # 1 `Passage` in total
     assert passages[0].tx_station.uid == tx_stn.uid  # with tx_stn in tx_station
@@ -216,88 +201,28 @@ def test_south_to_north_circular_orbit():
         rx_station.uid == rx_stn.uid for rx_station, rx_stn in zip(passages[0].rx_stations, rx_stns)
     ))  # with rx_stns in rx_stations; fmt: skip
 
-    for obs in obss_dict[0]:
-        rx_schedule_slice = obs.index_into_schedule_dataframe(fence_sch).rx
-        simult_num = rx_schedule_slice[_SK.simult_num][0]
+    # assert that we are only pointing in the expected scan_ranges
+    for result_state in result_states:
+        enus = result_state[[_K.rx_pointing_e, _K.rx_pointing_n, _K.rx_pointing_u]].to_numpy().T
+        azelrs = spacecoords.spherical.cart_to_sph(enus, degrees=True)
 
-        # assert that simult_num is the same over the same observation
-        assert (rx_schedule_slice[_SK.simult_num] == simult_num).all()
+        isclose_mat = np.isclose(scan_ranges, azelrs[2][:, np.newaxis])
+        assert np.all(np.any(isclose_mat, axis=1))
 
-        # the checks below only make sense for rx station 0
-        if obs.passage.rx_stations[0].uid != 0:
-            continue
+    # assert that `result_states[0]` has more values than `result_states[1]`
+    # and all missing values are due to space object being
+    # outside of the min_elevation of some stations
+    assert len(result_states[0]) > len(result_states[1])
 
-        # assert that we are pointing at scan_ranges
-        # NOTE: this is based on the assumption that pointings at same direction but at different scan range
-        #   are scheduled in in the same order as `scan_ranges`, and without gaps
-        # rx_pointing = rx_schedule_slice[_SK.pointing][:, 0]
-        rx_pointing_diff = (
-            np.linalg.norm(rx_schedule_slice[_SK.pointing], axis=0) - scan_ranges[simult_num]
-        )
-        assert (rx_pointing_diff < pointing_range_equality_thld).all()
-
-        # assert the start and end time of the observation is as expected
-        # TODO: this can offset pretty large when we have large sampling time interval, is there better way to test it?
-        assert abs(
-            rx_schedule_slice[_SK.start_time][0] - expected_passage_start_time
-        ) < np.timedelta64(int(dsec_sampling_intv), "s")
-        assert abs(
-            rx_schedule_slice[_SK.end_time][-1] - expected_passage_end_time
-        ) < np.timedelta64(int(dsec_sampling_intv), "s")
-
-    # assert that at all rx_pointing from "2nd rx station, 2nd scan range"
-    # is the same as those with same `time` but from "1st rx station, 2nd scan range"
-    obs_ref = next(
-        obs
-        for obs in obss_dict[0]
-        if obs.passage.tx_station.uid == tx_0_stn.uid
-        and obs.passage.rx_stations[0].uid == rx_0_stn.uid
-        and obs.index_into_schedule_dataframe(fence_sch).rx[_SK.simult_num][0]
-        == 1  # i.e. the 2nd scan range
+    missing_rows_idx = result_states[0].index.difference(result_states[1].index)
+    missing_rows_enus = (
+        result_states[0]
+        .loc[missing_rows_idx][[_K.rx_pointing_e, _K.rx_pointing_n, _K.rx_pointing_u]]
+        .to_numpy()
+        .T
     )
+    missing_rows_azelrs = spacecoords.spherical.cart_to_sph(missing_rows_enus, degrees=True)
 
-    obs_subj = next(
-        obs
-        for obs in obss_dict[0]
-        if obs.passage.tx_station.uid == tx_0_stn.uid
-        and obs.passage.rx_stations[0].uid == rx_1_stn.uid
-        and obs.index_into_schedule_dataframe(fence_sch).rx[_SK.simult_num][0]
-        == 1  # i.e. the 2nd scan range
-    )
-
-    obs_ref_rx_station = obs_ref.passage.rx_stations[0]
-    obs_ref_state_slice = obs_ref.get_state_slice()
-    obs_subj_rx_station = obs_subj.passage.rx_stations[0]
-    obs_subj_state_slice = obs_subj.get_state_slice()
-
-    obs_subj_pointings_in_ecef = (
-        enu_to_ecef(
-            lat=obs_subj_rx_station.ecef_lat,
-            lon=obs_subj_rx_station.ecef_lon,
-            alt=obs_subj_rx_station.ecef_alt,
-            enu=obs_subj_state_slice[
-                [_SuK.rx_pointing_e, _SuK.rx_pointing_n, _SuK.rx_pointing_u]
-            ].T.to_numpy(),
-            degrees=True,
-        )
-        + obs_subj_rx_station.ecef[:, np.newaxis]
-    )
-    obs_ref_pointings_at_obs_subj_start_times_in_ecef = (
-        enu_to_ecef(
-            lat=obs_ref_rx_station.ecef_lat,
-            lon=obs_ref_rx_station.ecef_lon,
-            alt=obs_ref_rx_station.ecef_alt,
-            enu=obs_ref_state_slice.loc[obs_subj_state_slice.index][
-                [_SuK.rx_pointing_e, _SuK.rx_pointing_n, _SuK.rx_pointing_u]
-            ].T.to_numpy(),
-            degrees=True,
-        )
-        + obs_ref_rx_station.ecef[:, np.newaxis]
-    )
-
-    assert np.all(
-        (obs_subj_pointings_in_ecef - obs_ref_pointings_at_obs_subj_start_times_in_ecef)
-        < pointing_range_equality_thld
-    )
+    assert np.all(missing_rows_azelrs[1] < min_elevation)
 
     return
