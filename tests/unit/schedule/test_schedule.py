@@ -1,7 +1,7 @@
 import sqlite3, typing as t
 import numpy as np
 import pandas as pd
-from sorts.schedule import schedule_dataframe, ScheduleDb, ScheduleKey
+from sorts.schedule import schedule_dataframe, ScheduleDb, ScheduleKey, tx_rx_pointing_pairs
 
 
 def setup_function():
@@ -198,4 +198,33 @@ def test_priority_loser_mask():
             [True, False, False],
         ] # fmt: skip
     )
+    return
+
+
+def test_get_tx_rx_pointing_pairs_uses_inner_join():
+    """`get_tx_rx_pointing_pairs` should use inner join over on columns `exp_num` `start_time` `end_time`."""
+
+    _SK = schedule_dataframe.ScheduleKey
+    _PK = tx_rx_pointing_pairs.TxRxPointingPairsKey
+
+    df_input = schedule_dataframe.from_rows(
+        [
+            [0,0,0, pd.Timestamp("2026-02-11 01:00:00", unit="us"), pd.Timestamp("2026-02-11 02:00:00", unit="us"), 0,0,0], # fmt: skip
+            [0,0,0, pd.Timestamp("2026-02-11 02:00:00", unit="us"), pd.Timestamp("2026-02-11 03:00:00", unit="us"), 0,0,0], # fmt: skip
+            [0,1,0, pd.Timestamp("2026-02-11 02:00:00", unit="us"), pd.Timestamp("2026-02-11 03:00:00", unit="us"), 0,0,0], # fmt: skip
+            [0,1,0, pd.Timestamp("2026-02-11 03:00:00", unit="us"), pd.Timestamp("2026-02-11 04:00:00", unit="us"), 0,0,0], # fmt: skip
+        ]
+    )
+
+    df_result = schedule_dataframe.get_tx_rx_pointing_pairs(
+        sch=df_input,
+        start_time=df_input[_SK.start_time].min(),
+        end_time=df_input[_SK.end_time].max(),
+        tx_stn_num=0,
+        rx_stn_num=1,
+    )
+
+    # assert the row at time == "2026-02-11 02:00:00" is the only one remains
+    assert (df_result[_PK.time] == pd.Timestamp("2026-02-11 02:00:00", unit="us")).all()
+
     return
