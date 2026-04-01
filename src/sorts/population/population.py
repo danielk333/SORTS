@@ -241,15 +241,15 @@ class Population:
         if row_indecies is None:
             row_indecies = slice(None, None, None)  # all
 
-        fields = self.state_fields
         kwargs = {}
         if isinstance(row_indecies, int) or isinstance(row_indecies, np.integer):
             size = 1
         else:
             size = len(np.arange(len(self.data))[row_indecies])
-
-        for key in fields:
-            kwargs[key] = self.data[row_indecies][key]
+        
+        kwargs[self.state_format] = np.empty((6, size), dtype=np.float64)
+        for ind, key in enumerate(self.state_fields):
+            kwargs[self.state_format][ind] = self.data[row_indecies][key]
 
         obj = pyorb.Orbit(
             M0=M_cent,

@@ -1,5 +1,5 @@
 import numpy as np
-import numpy.testing as npt
+import numpy.testing as nptest
 from astropy.time import Time
 from sorts import Population
 
@@ -34,12 +34,12 @@ def test_copy():
     new_pop = pop.copy()
     assert id(new_pop) != id(pop)
     assert id(new_pop.data) != id(pop.data)
-    npt.assert_array_equal(new_pop.data, pop.data)
+    nptest.assert_array_equal(new_pop.data, pop.data)
 
 def test_filter():
     pop = make_mock_pop()
     len0 = len(pop)
     pop.filter("id", lambda idx: idx < len0//2)
     assert len(pop) == len0//2
-    npt.assert_array_equal(pop.data["id"], np.arange(len0//2))
+    nptest.assert_array_equal(pop.data["id"], np.arange(len0//2))
 
