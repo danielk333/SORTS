@@ -3,6 +3,8 @@ from . import schedule_db, schedule_dataframe, tx_rx_pointing_pairs
 from .types import (
     ScheduleKey as ScheduleKey,
     ScheduleValidationError as ScheduleValidationError,
+    TxRxPointingPairsKey as TxRxPointingPairsKey,
+    TxRxPointingPairs as TxRxPointingPairs,
 )
 from .schedule_db import (
     ScheduleDbConnection as ScheduleDbConnection,
@@ -11,8 +13,4 @@ from .schedule_db import (
 from .schedule_dataframe import (
     ScheduleDataframe as ScheduleDataframe,
     scheduleDataframeDtypes as scheduleDataframeDtypes,
-)
-from .tx_rx_pointing_pairs import (
-    TxRxPointingPairsKey as TxRxPointingPairsKey,
-    TxRxPointingPairs as TxRxPointingPairs,
 )

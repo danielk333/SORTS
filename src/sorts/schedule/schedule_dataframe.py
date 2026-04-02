@@ -5,8 +5,8 @@ import numpy.typing as npt
 import pandas as pd
 import pandas._typing as pdt
 from sorts import types, utils
-from .types import ScheduleKey, ScheduleValidationError
-from .tx_rx_pointing_pairs import TxRxPointingPairsKey, TxRxPointingPairs
+from .types import ScheduleKey, TxRxPointingPairsKey, TxRxPointingPairs, ScheduleValidationError
+
 
 logger = logging.getLogger(__name__)
 

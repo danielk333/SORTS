@@ -1,6 +1,7 @@
 import sqlite3, typing as t
 import numpy as np
 import pandas as pd
+from sorts import schedule
 from sorts.schedule import schedule_dataframe, ScheduleDb, ScheduleKey, tx_rx_pointing_pairs
 
 
@@ -205,7 +206,7 @@ def test_get_tx_rx_pointing_pairs_uses_inner_join():
     """`get_tx_rx_pointing_pairs` should use inner join over on columns `exp_num` `start_time` `end_time`."""
 
     _SK = schedule_dataframe.ScheduleKey
-    _PK = tx_rx_pointing_pairs.TxRxPointingPairsKey
+    _PK = schedule.TxRxPointingPairsKey
 
     df_input = schedule_dataframe.from_rows(
         [

@@ -3,7 +3,8 @@ import logging, typing as t, pathlib, sqlite3
 from collections import OrderedDict
 import pandas as pd
 from sorts import types, utils
-from . import schedule_dataframe, tx_rx_pointing_pairs
+from . import schedule_dataframe
+from .types import TxRxPointingPairsKey, TxRxPointingPairs
 
 
 logger = logging.getLogger(__name__)
@@ -226,10 +227,10 @@ class ScheduleDb:
         end_time: types.Datetime_Like,
         tx_stn_num: int,
         rx_stn_num: int,
-    ) -> tx_rx_pointing_pairs.TxRxPointingPairs:
+    ) -> TxRxPointingPairs:
         """Get pointing pairs from DB as specified by param."""
 
-        _K = tx_rx_pointing_pairs.TxRxPointingPairsKey
+        _K = TxRxPointingPairsKey
 
         df = pd.read_sql_query(
             f"""
@@ -277,4 +278,4 @@ class ScheduleDb:
             },
         )
 
-        return tx_rx_pointing_pairs.TxRxPointingPairs(df)
+        return TxRxPointingPairs(df)

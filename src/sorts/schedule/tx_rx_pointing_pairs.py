@@ -1,48 +1,18 @@
 from __future__ import annotations
-import logging, typing as t, enum
+import logging
 import pandas as pd
 from sorts import radar, passage, schedule
-from . import schedule_dataframe, schedule_db
+from . import types, schedule_dataframe, schedule_db
 
 
 logger = logging.getLogger(__name__)
-
-
-class TxRxPointingPairsKey(enum.StrEnum):
-    exp_num = "exp_num"
-    rx_simult_num = "rx_simult_num"
-    time = "time"
-    tx_pointing_e = "tx_pointing_e"
-    tx_pointing_n = "tx_pointing_n"
-    tx_pointing_u = "tx_pointing_u"
-    rx_pointing_e = "rx_pointing_e"
-    rx_pointing_n = "rx_pointing_n"
-    rx_pointing_u = "rx_pointing_u"
-
-
-TxRxPointingPairs = t.NewType("TxRxPointingPairs", pd.DataFrame)
-"""
-A pandas `Dataframe` with
-```
-Columns:
-    exp_num        int16
-    rx_simult_num  int16
-    time           datetime64[us]
-    tx_pointing_e  float64
-    tx_pointing_n  float64
-    tx_pointing_u  float64
-    rx_pointing_e  float64
-    rx_pointing_n  float64
-    rx_pointing_u  float64
-```
-"""
 
 
 def from_schedule_db_stn_id_pair_passages(
     schedule_db: schedule_db.ScheduleDb,
     stn_id_pair: tuple[radar.StationId, radar.StationId],
     passages: list[passage.Passage],
-) -> TxRxPointingPairs:
+) -> types.TxRxPointingPairs:
     """Create `TxRxPointingPairs` from a list of `Passage`, sorted by time in ascending order."""
 
     tx_rx_pointing_pairs = pd.concat(
@@ -57,23 +27,23 @@ def from_schedule_db_stn_id_pair_passages(
         ]
     )
     tx_rx_pointing_pairs = tx_rx_pointing_pairs.sort_values(
-        by=TxRxPointingPairsKey.time, ascending=True, ignore_index=True
+        by=types.TxRxPointingPairsKey.time, ascending=True, ignore_index=True
     )
 
-    return TxRxPointingPairs(tx_rx_pointing_pairs)
+    return types.TxRxPointingPairs(tx_rx_pointing_pairs)
 
 
 def from_schedule_dataframe_stn_id_pair_passages(
     sch: schedule_dataframe.ScheduleDataframe,
     stn_id_pair: tuple[radar.StationId, radar.StationId],
     passages: list[passage.Passage],
-) -> TxRxPointingPairs:
+) -> types.TxRxPointingPairs:
     """
     Create `TxRxPointingPairs` from a list of `Passage`,
     sorted by `[time, rx_simult_num, exp_num]` in ascending order.
     """
 
-    _K = TxRxPointingPairsKey
+    _K = types.TxRxPointingPairsKey
 
     tx_rx_pointing_pairs = pd.concat(
         [
@@ -91,7 +61,7 @@ def from_schedule_dataframe_stn_id_pair_passages(
         by=[_K.time, _K.rx_simult_num, _K.exp_num], ascending=True, ignore_index=True
     )
 
-    return TxRxPointingPairs(tx_rx_pointing_pairs)
+    return types.TxRxPointingPairs(tx_rx_pointing_pairs)
 
 
 def gather_from_passages_schedule_db(
