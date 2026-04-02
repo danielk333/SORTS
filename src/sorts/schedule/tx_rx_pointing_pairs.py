@@ -64,29 +64,6 @@ def from_schedule_dataframe_stn_id_pair_passages(
     return types.TxRxPointingPairs(tx_rx_pointing_pairs)
 
 
-def gather_from_passages_schedule_db(
-    passages: list[passage.Passage],
-    schedule_db: schedule.ScheduleDb,
-) -> dict[tuple[radar.StationId, radar.StationId], schedule.TxRxPointingPairs]:
-    """
-    Find the unique tx-rx station pairs among the `passages`,
-    then for each pair, gather a `TxRxPointingPairs` from the schedule when the passages pass over the them.
-    """
-
-    passages_by_tx_rx_stn_pair = passage.group_passages_by_tx_rx_station_pair(passages)
-
-    pointing_pairs_dict = {
-        stn_id_pair: schedule.tx_rx_pointing_pairs.from_schedule_db_stn_id_pair_passages(
-            schedule_db=schedule_db,
-            stn_id_pair=stn_id_pair,
-            passages=passages,
-        )
-        for stn_id_pair, passages in passages_by_tx_rx_stn_pair.items()
-    }
-
-    return pointing_pairs_dict
-
-
 def gather_from_passages_schedule_dataframe(
     passages: list[passage.Passage],
     sch: schedule.ScheduleDataframe,

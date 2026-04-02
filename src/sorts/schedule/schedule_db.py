@@ -2,7 +2,7 @@ from __future__ import annotations
 import logging, typing as t, pathlib, sqlite3
 from collections import OrderedDict
 import pandas as pd
-from sorts import types, utils
+from sorts import types, utils, radar, passage, schedule
 from . import schedule_dataframe
 from .types import TxRxPointingPairsKey, TxRxPointingPairs
 
@@ -279,3 +279,25 @@ class ScheduleDb:
         )
 
         return TxRxPointingPairs(df)
+
+    def gather_pointing_pairs(
+        self,
+        passages: list[passage.Passage],
+    ) -> dict[tuple[radar.StationId, radar.StationId], schedule.TxRxPointingPairs]:
+        """
+        Find the unique tx-rx station pairs among the `passages`,
+        then for each pair, gather a `TxRxPointingPairs` from the schedule when the passages pass over the them.
+        """
+
+        passages_by_tx_rx_stn_pair = passage.group_passages_by_tx_rx_station_pair(passages)
+
+        pointing_pairs_dict = {
+            stn_id_pair: schedule.tx_rx_pointing_pairs.from_schedule_db_stn_id_pair_passages(
+                schedule_db=self,
+                stn_id_pair=stn_id_pair,
+                passages=passages,
+            )
+            for stn_id_pair, passages in passages_by_tx_rx_stn_pair.items()
+        }
+
+        return pointing_pairs_dict

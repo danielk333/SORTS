@@ -37,7 +37,8 @@ from sorts import (
     passage,
     SpaceObject,
 )
-from sorts.simulation import stx_mrx_simulation, tx_rx_pair_state
+from sorts.schedule import tx_rx_pointing_pairs
+from sorts.simulation import tx_rx_pair_state
 
 
 logging.basicConfig(level=logging.INFO)
@@ -145,10 +146,12 @@ def test_south_to_north_circular_orbit():
     schedule_db = schedule.ScheduleDb.from_schedule_dataframes([tracker_sch], ["tracker_sch"])
     schedule_db.schedule_by_priority()
 
-    txrx_state = tx_rx_pair_state.gather_from_passages_schedule_db(
+    txrx_pairs = tx_rx_pointing_pairs.from_schedule_dataframe_stn_id_pair_passages(
+        sch=tracker_sch,
+        stn_id_pair=(tx_stn.uid, rx_stn.uid),
         passages=passages,
-        schedule_db=schedule_db,
-    )[(0, 1)]
+    )
+    txrx_state = tx_rx_pair_state.from_tx_rx_pointing_pairs(txrx_pairs)
 
     filtered_spobj_state = spobj_state[
         :, np.isin(spobj_abs_times, txrx_state.index.get_level_values("time"))

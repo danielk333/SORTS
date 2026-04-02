@@ -75,10 +75,11 @@ def simulate_with_schedule_db(
     # TODO: confirm with daniel if setting a default radar_albedo is okay
     spobj_radar_albedo = space_object.properties.get("radar_albedo", 1.0)
 
-    txrx_state_dict = tx_rx_pair_state.gather_from_passages_schedule_db(
-        passages=passages,
-        schedule_db=schedule_db,
-    )
+    pointing_pairs_dict = schedule_db.gather_pointing_pairs(passages)
+    txrx_state_dict = {
+        key: tx_rx_pair_state.from_tx_rx_pointing_pairs(pointing_pairs)
+        for key, pointing_pairs in pointing_pairs_dict.items()
+    }
 
     sim_result: list[tx_rx_pair_state.TxRxPairState] = []
     for stn_id_pair, txrx_state in txrx_state_dict.items():
