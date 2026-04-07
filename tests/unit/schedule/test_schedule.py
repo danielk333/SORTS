@@ -2,7 +2,7 @@ import sqlite3, typing as t
 import numpy as np
 import pandas as pd
 from sorts import schedule
-from sorts.schedule import schedule_dataframe, ScheduleDb, ScheduleKey, tx_rx_pointing_pairs
+from sorts.schedule import schedule_dataframe, ScheduleDb, ScheduleKey
 
 
 def setup_function():

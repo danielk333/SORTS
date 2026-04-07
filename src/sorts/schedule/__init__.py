@@ -1,4 +1,4 @@
-from . import schedule_db, schedule_dataframe, tx_rx_pointing_pairs
+from . import schedule_db, schedule_dataframe
 
 from .types import (
     ScheduleKey as ScheduleKey,

@@ -29,7 +29,6 @@ from sorts import (
     passage,
     SpaceObject,
 )
-from sorts.schedule import tx_rx_pointing_pairs
 from sorts.simulation import tx_rx_pair_state
 
 
