@@ -23,6 +23,7 @@ we so that:
 import logging, typing as t
 import numpy as np
 import numpy.typing as npt
+import pandas as pd
 from astropy.time import Time
 from astropy.constants import R_earth  # type: ignore
 import pyant
@@ -143,15 +144,22 @@ def test_south_to_north_circular_orbit():
         slice_duration=exp_detail.slice_duration,
     )
 
-    schedule_db = schedule.ScheduleDb.from_schedule_dataframes([tracker_sch], ["tracker_sch"])
-    schedule_db.schedule_by_priority()
+    pairs_ls = [
+        schedule.schedule_dataframe.get_tx_rx_pointing_pairs(
+            sch=tracker_sch,
+            start_time=ps.time_range[0],
+            end_time=ps.time_range[1],
+            tx_stn_num=tx_stn.uid,
+            rx_stn_num=rx_stn.uid,
+        )
+        for ps in passages
+    ]
 
-    txrx_pairs = tx_rx_pointing_pairs.from_schedule_dataframe_stn_id_pair_passages(
-        sch=tracker_sch,
-        stn_id_pair=(tx_stn.uid, rx_stn.uid),
-        passages=passages,
+    pairs = schedule.TxRxPointingPairs(pd.concat(pairs_ls))
+    pairs = pairs.sort_values(
+        by=schedule.TxRxPointingPairsKey.time, ascending=True, ignore_index=True
     )
-    txrx_state = tx_rx_pair_state.from_tx_rx_pointing_pairs(txrx_pairs)
+    txrx_state = tx_rx_pair_state.from_tx_rx_pointing_pairs(pairs)
 
     filtered_spobj_state = spobj_state[
         :, np.isin(spobj_abs_times, txrx_state.index.get_level_values("time"))

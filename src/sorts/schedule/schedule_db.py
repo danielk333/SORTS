@@ -307,11 +307,11 @@ class ScheduleDb:
                 for ps in passages
             ]
 
-            pairs = pd.concat(pairs_ls)
+            pairs = TxRxPointingPairs(pd.concat(pairs_ls))
             pairs = pairs.sort_values(
                 by=TxRxPointingPairsKey.time, ascending=True, ignore_index=True
             )
 
-            pointing_pairs_dict[stn_id_pair] = TxRxPointingPairs(pairs)
+            pointing_pairs_dict[stn_id_pair] = pairs
 
         return pointing_pairs_dict
