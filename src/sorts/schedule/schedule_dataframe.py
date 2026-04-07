@@ -4,7 +4,7 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import pandas._typing as pdt
-from sorts import types, utils
+from sorts import types, utils, radar, passage, schedule
 from .types import ScheduleKey, TxRxPointingPairsKey, TxRxPointingPairs, ScheduleValidationError
 
 
@@ -361,3 +361,26 @@ def get_tx_rx_pointing_pairs(
     df = df.drop(columns=[_SK.end_time])
 
     return TxRxPointingPairs(df)
+
+
+def gather_pointing_pairs(
+    passages: list[passage.Passage],
+    sch: schedule.ScheduleDataframe,
+) -> dict[tuple[radar.StationId, radar.StationId], TxRxPointingPairs]:
+    """
+    Find the unique tx-rx station pairs among the `passages`,
+    then for each pair, gather a `TxRxPointingPairs` from the schedule when the passages pass over the them.
+    """
+
+    passages_by_tx_rx_stn_pair = passage.group_passages_by_tx_rx_station_pair(passages)
+
+    pointing_pairs_dict = {
+        stn_id_pair: schedule.tx_rx_pointing_pairs.from_schedule_dataframe_stn_id_pair_passages(
+            sch=sch,
+            stn_id_pair=stn_id_pair,
+            passages=passages,
+        )
+        for stn_id_pair, passages in passages_by_tx_rx_stn_pair.items()
+    }
+
+    return pointing_pairs_dict
