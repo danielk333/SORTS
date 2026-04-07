@@ -8,31 +8,6 @@ from . import types, schedule_dataframe, schedule_db
 logger = logging.getLogger(__name__)
 
 
-def from_schedule_db_stn_id_pair_passages(
-    schedule_db: schedule_db.ScheduleDb,
-    stn_id_pair: tuple[radar.StationId, radar.StationId],
-    passages: list[passage.Passage],
-) -> types.TxRxPointingPairs:
-    """Create `TxRxPointingPairs` from a list of `Passage`, sorted by time in ascending order."""
-
-    tx_rx_pointing_pairs = pd.concat(
-        [
-            schedule_db.get_tx_rx_pointing_pairs(
-                start_time=ps.time_range[0],
-                end_time=ps.time_range[1],
-                tx_stn_num=stn_id_pair[0],
-                rx_stn_num=stn_id_pair[1],
-            )
-            for ps in passages
-        ]
-    )
-    tx_rx_pointing_pairs = tx_rx_pointing_pairs.sort_values(
-        by=types.TxRxPointingPairsKey.time, ascending=True, ignore_index=True
-    )
-
-    return types.TxRxPointingPairs(tx_rx_pointing_pairs)
-
-
 def from_schedule_dataframe_stn_id_pair_passages(
     sch: schedule_dataframe.ScheduleDataframe,
     stn_id_pair: tuple[radar.StationId, radar.StationId],

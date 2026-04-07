@@ -287,17 +287,31 @@ class ScheduleDb:
         """
         Find the unique tx-rx station pairs among the `passages`,
         then for each pair, gather a `TxRxPointingPairs` from the schedule when the passages pass over the them.
+
+        The returned `TxRxPointingPairs` are sorted by time in ascending order.
         """
 
         passages_by_tx_rx_stn_pair = passage.group_passages_by_tx_rx_station_pair(passages)
 
-        pointing_pairs_dict = {
-            stn_id_pair: schedule.tx_rx_pointing_pairs.from_schedule_db_stn_id_pair_passages(
-                schedule_db=self,
-                stn_id_pair=stn_id_pair,
-                passages=passages,
+        pointing_pairs_dict: dict[
+            tuple[radar.StationId, radar.StationId], schedule.TxRxPointingPairs
+        ] = {}
+        for stn_id_pair, passages in passages_by_tx_rx_stn_pair.items():
+            pairs_ls = [
+                self.get_tx_rx_pointing_pairs(
+                    start_time=ps.time_range[0],
+                    end_time=ps.time_range[1],
+                    tx_stn_num=stn_id_pair[0],
+                    rx_stn_num=stn_id_pair[1],
+                )
+                for ps in passages
+            ]
+
+            pairs = pd.concat(pairs_ls)
+            pairs = pairs.sort_values(
+                by=TxRxPointingPairsKey.time, ascending=True, ignore_index=True
             )
-            for stn_id_pair, passages in passages_by_tx_rx_stn_pair.items()
-        }
+
+            pointing_pairs_dict[stn_id_pair] = TxRxPointingPairs(pairs)
 
         return pointing_pairs_dict
