@@ -28,6 +28,7 @@ from sorts import (
     propagator,
     passage,
     SpaceObject,
+    simulation,
 )
 from sorts.simulation import tx_rx_pair_state
 
@@ -182,13 +183,18 @@ def test_south_to_north_circular_orbit():
         # reindexed_txrx_state = txrx_state.reindex(intersection)
         # reindexed_spobj_state = spobj_state[:, spobj_abs_time_indexer.reindex(intersection)]
 
-        txrx_state_time_idx = txrx_state.index.get_level_values("time")
-        txrx_state_mask = txrx_state_time_idx.isin(spobj_abs_time_indexer.index)
+        _K = simulation.TxRxPairStateKey
+
+        txrx_state = txrx_state.set_index(_K.time)
+        txrx_state_mask = txrx_state.index.isin(spobj_abs_time_indexer.index)
 
         reindexed_txrx_state = txrx_state[txrx_state_mask]
         reindexed_spobj_state = spobj_state[
-            :, spobj_abs_time_indexer.reindex(txrx_state_time_idx[txrx_state_mask])
+            :, spobj_abs_time_indexer.reindex(txrx_state.index[txrx_state_mask])
         ]
+
+        txrx_state = txrx_state.reset_index()
+        reindexed_txrx_state = reindexed_txrx_state.reset_index()
 
         result_state = tx_rx_pair_state.simulate(
             txrx_state=reindexed_txrx_state,
@@ -223,10 +229,13 @@ def test_south_to_north_circular_orbit():
     # outside of the min_elevation of some stations
     assert len(result_states[0]) > len(result_states[1])
 
-    missing_rows_idx = result_states[0].index.difference(result_states[1].index)
+    midx_0 = pd.MultiIndex.from_frame(result_states[0][[_K.exp_num, _K.rx_simult_num, _K.time]])
+    midx_1 = pd.MultiIndex.from_frame(result_states[1][[_K.exp_num, _K.rx_simult_num, _K.time]])
+    midx_diff = midx_0.difference(midx_1)
+    missing_rows_mask = midx_0.isin(midx_diff)
+
     missing_rows_enus = (
-        result_states[0]
-        .loc[missing_rows_idx][[_K.rx_pointing_e, _K.rx_pointing_n, _K.rx_pointing_u]]
+        result_states[0][missing_rows_mask][[_K.rx_pointing_e, _K.rx_pointing_n, _K.rx_pointing_u]]
         .to_numpy()
         .T
     )

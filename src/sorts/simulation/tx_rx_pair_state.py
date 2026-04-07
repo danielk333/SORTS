@@ -7,10 +7,8 @@ from sorts import types, signals, radar, schedule, passage
 from sorts.schedule import TxRxPointingPairs
 
 
-# TODO: remove key `multi_index`
 # TODO: updated the name with tx/rx as suffix to prefix
 class TxRxPairStateKey(enum.StrEnum):
-    multi_index = "multi_index"
     exp_num = schedule.TxRxPointingPairsKey.exp_num
     rx_simult_num = schedule.TxRxPointingPairsKey.rx_simult_num
     time = schedule.TxRxPointingPairsKey.time
@@ -33,8 +31,11 @@ TxRxPairState = t.NewType("TxRxPairState", pd.DataFrame)
 """
 A pandas `DataFrame` with:
 ```
-Index: MultiIndex('exp_num', 'rx_simult_num', 'time')
+Index: RangeIndex # without name or named as "index"
 Cols:
+    exp_num             np.int16
+    rx_simult_num       np.int16
+    time                datetime64[us]
     tx_pointing_e       float64
     tx_pointing_n       float64
     tx_pointing_u       float64
@@ -55,17 +56,11 @@ Cols:
 def empty() -> TxRxPairState:
     _K = TxRxPairStateKey
 
-    multi_index = pd.MultiIndex.from_arrays(
-        [
-            np.empty(0, dtype=np.int16),
-            np.empty(0, dtype=np.int16),
-            np.empty(0, dtype="datetime64[us]"),
-        ],
-        names=(_K.exp_num, _K.rx_simult_num, _K.time),
-    )
-
     state = pd.DataFrame(
         {
+            _K.exp_num: np.empty(0, dtype=np.int16),
+            _K.rx_simult_num: np.empty(0, dtype=np.int16),
+            _K.time: np.empty(0, dtype="datetime64[us]"),
             # tx pointing enu
             _K.tx_pointing_e: np.empty(0, dtype=np.float64),
             _K.tx_pointing_n: np.empty(0, dtype=np.float64),
@@ -74,8 +69,7 @@ def empty() -> TxRxPairState:
             _K.rx_pointing_e: np.empty(0, dtype=np.float64),
             _K.rx_pointing_n: np.empty(0, dtype=np.float64),
             _K.rx_pointing_u: np.empty(0, dtype=np.float64),
-        },
-        index=multi_index,
+        }
     )
 
     return TxRxPairState(state)
@@ -84,8 +78,7 @@ def empty() -> TxRxPairState:
 def from_tx_rx_pointing_pairs(
     pointing_pairs: TxRxPointingPairs,
 ) -> TxRxPairState:
-    _K = TxRxPairStateKey
-    return TxRxPairState(pointing_pairs.set_index([_K.exp_num, _K.rx_simult_num, _K.time]))
+    return TxRxPairState(pointing_pairs)
 
 
 def gather_from_passages_schedule_dataframe(
@@ -115,10 +108,7 @@ def filter_by_time_range(
 ) -> TxRxPairState:
     _K = TxRxPairStateKey
 
-    mask = (
-        (state.index.get_level_values(_K.time) >= start_time)
-        & (state.index.get_level_values(_K.time) <= end_time)
-    ) # fmt: skip
+    mask = (state[_K.time] >= start_time) & (state[_K.time] <= end_time)
     state_masked = state[mask]
 
     return state_masked
@@ -178,8 +168,8 @@ def get_unique_exp_id_simult_num_pairs(
 ) -> list[tuple[types.ExperimentId, types.SimultaneousNum]]:
     _K = TxRxPairStateKey
 
-    unique_exp_id_simult_num_pairs: list[tuple[types.ExperimentId, types.SimultaneousNum]] = (
-        state.index.droplevel(_K.time).unique().to_list()
+    unique_exp_id_simult_num_pairs: list[tuple[types.ExperimentId, types.SimultaneousNum]] = list(
+        state[[_K.exp_num, _K.rx_simult_num]].drop_duplicates().itertuples(index=False, name=None)
     )
 
     return unique_exp_id_simult_num_pairs
@@ -190,10 +180,7 @@ def filter_by_exp_id_simult_num(
 ) -> TxRxPairState:
     _K = TxRxPairStateKey
 
-    mask = (
-        (state.index.get_level_values(_K.exp_num) == exp_id)
-        & (state.index.get_level_values(_K.rx_simult_num) == simult_num)
-    ) # fmt: skip
+    mask = (state[_K.exp_num] == exp_id) & (state[_K.rx_simult_num] == simult_num)
     state_masked = state[mask]
 
     return state_masked
@@ -252,21 +239,15 @@ def simulate(
 
     # TODO: can likely use assignment by slice/indexing instead of looping
     powers = np.array(
-        [exp_detail_map[n].power for n in txrx_state.index.get_level_values(_K.exp_num).to_numpy()],
+        [exp_detail_map[n].power for n in txrx_state[_K.exp_num].to_numpy()],
         dtype=np.float64,
     )
     bandwidths = np.array(
-        [
-            exp_detail_map[n].bandwidth
-            for n in txrx_state.index.get_level_values(_K.exp_num).to_numpy()
-        ],
+        [exp_detail_map[n].bandwidth for n in txrx_state[_K.exp_num].to_numpy()],
         dtype=np.float64,
     )
     rx_noise_temps = np.array(
-        [
-            exp_detail_map[n].noise_temp
-            for n in txrx_state.index.get_level_values(_K.exp_num).to_numpy()
-        ],
+        [exp_detail_map[n].noise_temp for n in txrx_state[_K.exp_num].to_numpy()],
         dtype=np.float64,
     )
 

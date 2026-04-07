@@ -35,10 +35,7 @@ def simulate(
 
     sim_result: list[tx_rx_pair_state.TxRxPairState] = []
     for stn_id_pair, txrx_state in txrx_state_dict.items():
-        dsec = (
-            (txrx_state.index.get_level_values(_K.time).to_numpy() - epoch)
-            / np.timedelta64(1, "s")
-        ) # fmt: skip
+        dsec = (txrx_state[_K.time].to_numpy() - epoch) / np.timedelta64(1, "s")
         spobj_state = interpolated_propagation.interpolator.get_state(dsec)
 
         sim_result.append(
@@ -83,10 +80,7 @@ def simulate_with_schedule_db(
 
     sim_result: list[tx_rx_pair_state.TxRxPairState] = []
     for stn_id_pair, txrx_state in txrx_state_dict.items():
-        dsec = (
-            (txrx_state.index.get_level_values(_K.time).to_numpy() - epoch)
-            / np.timedelta64(1, "s")
-        ) # fmt: skip
+        dsec = (txrx_state[_K.time].to_numpy() - epoch) / np.timedelta64(1, "s")
         spobj_state = interpolated_propagation.interpolator.get_state(dsec)
 
         sim_result.append(

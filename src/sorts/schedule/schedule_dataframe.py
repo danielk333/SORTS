@@ -12,19 +12,19 @@ logger = logging.getLogger(__name__)
 
 ScheduleDataframe = t.NewType("ScheduleDataframe", pd.DataFrame)
 """
-A pandas `DataFrame` which:
-- Has an index without name or named as `"index"`
-- Contains all the following columns
-    ```
-    - "exp_num":     np.int16
-    - "stn_num":     np.int16
-    - "simult_num":  np.int16
-    - "start_time":  "datetime64[us]"
-    - "end_time":    "datetime64[us]"
-    - "pointing_e":  np.float64
-    - "pointing_n":  np.float64
-    - "pointing_u":  np.float64
-    ```
+A pandas `DataFrame` with:
+```
+Index: RangeIndex # without name or named as "index"
+Cols:
+    exp_num     np.int16
+    stn_num     np.int16
+    simult_num  np.int16
+    start_time  datetime64[us]
+    end_time    datetime64[us]
+    pointing_e  np.float64
+    pointing_n  np.float64
+    pointing_u  np.float64
+```
 
 The keys are available as enum `ScheduleKey` for consistent access.
 """
