@@ -2,8 +2,9 @@ from __future__ import annotations
 import logging, typing as t, pathlib, sqlite3
 from collections import OrderedDict
 import pandas as pd
-from sorts import types, utils
-from . import schedule_dataframe, tx_rx_pointing_pairs
+from sorts import types, utils, radar, passage, schedule
+from . import schedule_dataframe
+from .types import TxRxPointingPairsKey, TxRxPointingPairs
 
 
 logger = logging.getLogger(__name__)
@@ -226,10 +227,10 @@ class ScheduleDb:
         end_time: types.Datetime_Like,
         tx_stn_num: int,
         rx_stn_num: int,
-    ) -> tx_rx_pointing_pairs.TxRxPointingPairs:
+    ) -> TxRxPointingPairs:
         """Get pointing pairs from DB as specified by param."""
 
-        _K = tx_rx_pointing_pairs.TxRxPointingPairsKey
+        _K = TxRxPointingPairsKey
 
         df = pd.read_sql_query(
             f"""
@@ -277,4 +278,40 @@ class ScheduleDb:
             },
         )
 
-        return tx_rx_pointing_pairs.TxRxPointingPairs(df)
+        return TxRxPointingPairs(df)
+
+    def gather_pointing_pairs(
+        self,
+        passages: list[passage.Passage],
+    ) -> dict[tuple[radar.StationId, radar.StationId], schedule.TxRxPointingPairs]:
+        """
+        Find the unique tx-rx station pairs among the `passages`,
+        then for each pair, gather a `TxRxPointingPairs` from the schedule when the passages pass over the them.
+
+        The returned `TxRxPointingPairs` are sorted by time in ascending order.
+        """
+
+        passages_by_tx_rx_stn_pair = passage.group_passages_by_tx_rx_station_pair(passages)
+
+        pointing_pairs_dict: dict[
+            tuple[radar.StationId, radar.StationId], schedule.TxRxPointingPairs
+        ] = {}
+        for stn_id_pair, passages in passages_by_tx_rx_stn_pair.items():
+            pairs_ls = [
+                self.get_tx_rx_pointing_pairs(
+                    start_time=ps.time_range[0],
+                    end_time=ps.time_range[1],
+                    tx_stn_num=stn_id_pair[0],
+                    rx_stn_num=stn_id_pair[1],
+                )
+                for ps in passages
+            ]
+
+            pairs = TxRxPointingPairs(pd.concat(pairs_ls))
+            pairs = pairs.sort_values(
+                by=TxRxPointingPairsKey.time, ascending=True, ignore_index=True
+            )
+
+            pointing_pairs_dict[stn_id_pair] = pairs
+
+        return pointing_pairs_dict

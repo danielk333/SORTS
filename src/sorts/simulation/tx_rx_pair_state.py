@@ -4,7 +4,7 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 from sorts import types, signals, radar, schedule, passage
-from sorts.schedule import tx_rx_pointing_pairs
+from sorts.schedule import TxRxPointingPairs
 
 
 # TODO: remove key `multi_index`
@@ -82,30 +82,10 @@ def empty() -> TxRxPairState:
 
 
 def from_tx_rx_pointing_pairs(
-    pointing_pairs: tx_rx_pointing_pairs.TxRxPointingPairs,
+    pointing_pairs: TxRxPointingPairs,
 ) -> TxRxPairState:
     _K = TxRxPairStateKey
     return TxRxPairState(pointing_pairs.set_index([_K.exp_num, _K.rx_simult_num, _K.time]))
-
-
-def gather_from_passages_schedule_db(
-    passages: list[passage.Passage],
-    schedule_db: schedule.ScheduleDb,
-) -> dict[tuple[radar.StationId, radar.StationId], TxRxPairState]:
-    """
-    Find the unique tx-rx station pairs among the `passages`,
-    then for each pair, gather a `TxRxPairState` from the schedule when the passages pass over the them.
-    """
-
-    pointing_pairs_dict = schedule.tx_rx_pointing_pairs.gather_from_passages_schedule_db(
-        passages=passages, schedule_db=schedule_db
-    )
-    pair_state_dict = {
-        key: from_tx_rx_pointing_pairs(pointing_pairs)
-        for key, pointing_pairs in pointing_pairs_dict.items()
-    }
-
-    return pair_state_dict
 
 
 def gather_from_passages_schedule_dataframe(
@@ -117,7 +97,7 @@ def gather_from_passages_schedule_dataframe(
     then for each pair, gather a `TxRxPairState` from the schedule when the passages pass over the them.
     """
 
-    pointing_pairs_dict = schedule.tx_rx_pointing_pairs.gather_from_passages_schedule_dataframe(
+    pointing_pairs_dict = schedule.schedule_dataframe.gather_pointing_pairs(
         passages=passages, sch=sch
     )
     pair_state_dict = {

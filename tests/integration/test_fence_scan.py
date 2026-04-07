@@ -29,7 +29,6 @@ from sorts import (
     passage,
     SpaceObject,
 )
-from sorts.schedule import tx_rx_pointing_pairs
 from sorts.simulation import tx_rx_pair_state
 
 
@@ -158,12 +157,22 @@ def test_south_to_north_circular_orbit():
     )
     result_states: list[tx_rx_pair_state.TxRxPairState] = []
     for rx_stn in rx_stns:
-        txrx_pairs = tx_rx_pointing_pairs.from_schedule_dataframe_stn_id_pair_passages(
-            sch=fence_sch,
-            stn_id_pair=(tx_stn.uid, rx_stn.uid),
-            passages=passages,
+        pairs_ls = [
+            schedule.schedule_dataframe.get_tx_rx_pointing_pairs(
+                sch=fence_sch,
+                start_time=ps.time_range[0],
+                end_time=ps.time_range[1],
+                tx_stn_num=tx_stn.uid,
+                rx_stn_num=rx_stn.uid,
+            )
+            for ps in passages
+        ]
+
+        pairs = schedule.TxRxPointingPairs(pd.concat(pairs_ls))
+        pairs = pairs.sort_values(
+            by=schedule.TxRxPointingPairsKey.time, ascending=True, ignore_index=True
         )
-        txrx_state = tx_rx_pair_state.from_tx_rx_pointing_pairs(txrx_pairs)
+        txrx_state = tx_rx_pair_state.from_tx_rx_pointing_pairs(pairs)
 
         # TODO: this is slightly cleaner but does not work with multiindex
         # intersection = txrx_state.index.get_level_values("time").intersection(

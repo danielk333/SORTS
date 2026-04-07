@@ -246,10 +246,6 @@ def simulate_obs():
                 exp_id=prm.exp_detail_map[0].id,
                 slice_duration=prm.exp_detail_map[0].slice_duration,
             )
-            schedule_db = schedule.ScheduleDb.from_schedule_dataframes(
-                [tracker_sch], ["tracker_sch"], obj_pth / "schedule.sqlite"
-            )
-            schedule_db.schedule_by_priority()
 
             sim = SimulationParams(
                 sch=tracker_sch,

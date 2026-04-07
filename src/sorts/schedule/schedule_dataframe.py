@@ -4,9 +4,9 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import pandas._typing as pdt
-from sorts import types, utils
-from .types import ScheduleKey, ScheduleValidationError
-from .tx_rx_pointing_pairs import TxRxPointingPairsKey, TxRxPointingPairs
+from sorts import types, utils, radar, passage, schedule
+from .types import ScheduleKey, TxRxPointingPairsKey, TxRxPointingPairs, ScheduleValidationError
+
 
 logger = logging.getLogger(__name__)
 
@@ -361,3 +361,39 @@ def get_tx_rx_pointing_pairs(
     df = df.drop(columns=[_SK.end_time])
 
     return TxRxPointingPairs(df)
+
+
+def gather_pointing_pairs(
+    passages: list[passage.Passage],
+    sch: schedule.ScheduleDataframe,
+) -> dict[tuple[radar.StationId, radar.StationId], TxRxPointingPairs]:
+    """
+    Find the unique tx-rx station pairs among the `passages`,
+    then for each pair, gather a `TxRxPointingPairs` from the schedule when the passages pass over the them.
+
+    The returned `TxRxPointingPairs` are sorted by time in ascending order.
+    """
+
+    passages_by_tx_rx_stn_pair = passage.group_passages_by_tx_rx_station_pair(passages)
+
+    pointing_pairs_dict: dict[
+        tuple[radar.StationId, radar.StationId], schedule.TxRxPointingPairs
+    ] = {}
+    for stn_id_pair, passages in passages_by_tx_rx_stn_pair.items():
+        pairs_ls = [
+            get_tx_rx_pointing_pairs(
+                sch=sch,
+                start_time=ps.time_range[0],
+                end_time=ps.time_range[1],
+                tx_stn_num=stn_id_pair[0],
+                rx_stn_num=stn_id_pair[1],
+            )
+            for ps in passages
+        ]
+
+        pairs = TxRxPointingPairs(pd.concat(pairs_ls))
+        pairs = pairs.sort_values(by=TxRxPointingPairsKey.time, ascending=True, ignore_index=True)
+
+        pointing_pairs_dict[stn_id_pair] = pairs
+
+    return pointing_pairs_dict
