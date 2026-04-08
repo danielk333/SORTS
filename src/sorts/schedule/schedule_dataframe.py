@@ -225,19 +225,39 @@ def schedule_by_priority(schs: list[ScheduleDataframe], priorities: list[int]) -
     end_time_arr = master_sch[_K.end_time].to_numpy()
     priority_arr = master_sch[_SK.priority].to_numpy()
 
+    # TODO: re-eval if filtering operations can be optimized, e.g.:
+    #     - losers_mask can be calculated only for overlapped rows?
+    #     - `same_stn_mask`, `same_exp_mask` are symmetric, maybe some shortcut can be taken?
+
     overlap_mask = time_overlapped_mask(
         start_time=start_time_arr, end_time=end_time_arr, ignore_self_comparison=True
     )
-    # TODO: calc this mask only for overlapped rows?
-    losers_mask = priority_loser_mask(priorities=priority_arr)
 
-    combined_mask = overlap_mask & losers_mask
+    losers_mask = priority_loser_mask(priority=priority_arr)
+
+    stn_num_arr = master_sch[_K.stn_num].to_numpy()
+    same_stn_mask = stn_num_arr[:, np.newaxis] == stn_num_arr[np.newaxis, :]
+
+    combined_mask = overlap_mask & same_stn_mask & losers_mask
 
     # flatten the mask by doing an "or" per row
     flattened_mask = np.any(combined_mask, axis=1)
     flattened_mask = t.cast(npt.NDArray[np.bool], flattened_mask)
 
+    # all rows of the same time and exp are always removed togather
+    #
+    # we interpret `remove_togather_mask` as [nth row's impact to other rows, ...]
+    # so the resultant impact is taken by collapsing withing a column (i.e. across rows)
+    remove_togather_mask = same_exp_and_time_mask(
+        exp_num=master_sch[_K.exp_num].to_numpy(), time=master_sch[_K.start_time].to_numpy()
+    )
+    flattened_mask = np.any(flattened_mask[:, np.newaxis] & remove_togather_mask, axis=0)
+    flattened_mask = t.cast(npt.NDArray[np.bool], flattened_mask)
+
     resultant_sch = master_sch[~flattened_mask]
+    resultant_sch = resultant_sch.sort_values(
+        by=[_K.start_time, _K.simult_num, _K.stn_num, _K.exp_num], ascending=True, ignore_index=True
+    )
 
     return ScheduleDataframe(resultant_sch)
 
@@ -248,10 +268,10 @@ def time_overlapped_mask(
     ignore_self_comparison=True,
 ) -> types.NDArray_NxN[np.bool]:
     """
-    For each `start_time` and `end_time` pair at equal index,
-    check if it is overlapped with other pairs in time.
+    For each (`start_time`, `end_time`) row at equal index,
+    check if it is overlapped with other rows in time.
 
-    `start_time` and `end_time` must have equal length.
+    `start_time`, `end_time` must have equal length.
 
     Args:
         ignore_self_comparison:
@@ -279,33 +299,50 @@ def time_overlapped_mask(
     return overlap_mask
 
 
-def priority_loser_mask(priorities: npt.NDArray[np.int64]) -> types.NDArray_NxN[np.bool]:
+def priority_loser_mask(priority: npt.NDArray[np.int64]) -> types.NDArray_NxN[np.bool]:
     """
-    For each `(start_time, end_time, priorities)` row at equal index,
-    compair its priority with other rows by:
+    For each `priorities` entry, compare its priority with other entries:
 
         - priority: lower number -> higher priority
-        - row order: lower number -> higher priority
-
-    `start_time` and `end_time`, `priorities` must have equal length.
+        - entry order: lower number -> higher priority
     """
 
     # inject new dimension to ndarray for broadcasting
     # priorities
-    pri_i = priorities[:, np.newaxis]  # shape (N,1)
-    pri_j = priorities[np.newaxis, :]  # shape (1,N)
+    pri_i = priority[:, np.newaxis]  # shape (N,1)
+    pri_j = priority[np.newaxis, :]  # shape (1,N)
 
     # inject new dimension to ndarray for broadcasting
-    # row id
-    rid_i = np.arange(len(priorities))[:, np.newaxis]  # shape (N,1)
-    rid_j = np.arange(len(priorities))[np.newaxis, :]  # shape (1,N)
+    # entry id
+    rid_i = np.arange(len(priority))[:, np.newaxis]  # shape (N,1)
+    rid_j = np.arange(len(priority))[np.newaxis, :]  # shape (1,N)
 
-    # find losers of priorities. row i loses to row j if:
+    # find losers of priorities. entry i loses to entry j if:
     # 1. j has lower priority number
     # 2. or same priority but lower rid
     losers_mask = (pri_i > pri_j) | ((pri_i == pri_j) & (rid_i > rid_j))
 
     return losers_mask
+
+
+def same_exp_and_time_mask(
+    exp_num: npt.NDArray[np.signedinteger],
+    time: npt.NDArray[types.Datetime64_us],
+) -> types.NDArray_NxN[np.bool]:
+    """
+    For each (`exp_num`, `time`) row at equal index,
+    check if it has the same values as other rows.
+
+    `exp_num`, `time` must have equal length.
+
+    Returns:
+        A (N, N) bool ndarray.
+    """
+
+    mask = exp_num[:, np.newaxis] == exp_num[np.newaxis, :]
+    mask &= time[:, np.newaxis] == time[np.newaxis, :]
+
+    return mask
 
 
 def get_tx_rx_pointing_pairs(

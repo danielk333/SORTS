@@ -190,7 +190,7 @@ def test_time_overlapped_mask():
 def test_priority_loser_mask():
     priorities = np.array([0, 1, 0], dtype=np.int64)
 
-    mask = schedule_dataframe.priority_loser_mask(priorities=priorities)
+    mask = schedule_dataframe.priority_loser_mask(priority=priorities)
 
     assert np.all(
         mask == [
