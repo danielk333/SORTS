@@ -160,9 +160,9 @@ def test_south_to_north_circular_orbit():
     )
     txrx_state = tx_rx_pair_state.from_tx_rx_pointing_pairs(pairs)
 
-    filtered_spobj_state = spobj_state[
-        :, np.isin(spobj_abs_times, txrx_state.index.get_level_values("time"))
-    ]
+    _K = simulation.TxRxPairStateKey
+
+    filtered_spobj_state = spobj_state[:, np.isin(spobj_abs_times, txrx_state[_K.time])]
 
     result_state = tx_rx_pair_state.simulate(
         txrx_state=txrx_state,
@@ -173,8 +173,6 @@ def test_south_to_north_circular_orbit():
         rx_station=rx_stn,
         exp_detail_map={exp_detail.id: exp_detail},
     )
-
-    _K = simulation.TxRxPairStateKey
 
     tx_pointings_norm = np.linalg.norm(
         [
@@ -192,9 +190,7 @@ def test_south_to_north_circular_orbit():
     assert np.all(tx_pointings_e_normalized < float_equality_thld)
 
     # assert the propagation point at 1/2 spobj_orbital_period is in the `result_state`
-    half_orbit_mask = (
-        result_state.index.get_level_values(_K.time) == spobj_abs_times[int(num_prop_steps / 2)]
-    )
+    half_orbit_mask = result_state[_K.time] == spobj_abs_times[int(num_prop_steps / 2)]
     assert half_orbit_mask.sum() == 1  # ensure it exist and is exactly once
 
     # assert the normalized tx pointings at 1/2 spobj_orbital_period is (0, 0, 1)
@@ -204,7 +200,8 @@ def test_south_to_north_circular_orbit():
 
     # assert the max snr time is at half orbital period
     assert (
-        spobj_abs_times[int(num_prop_steps / 2)] == t.cast(tuple, result_state[_K.snr].idxmax())[2]
+        spobj_abs_times[int(num_prop_steps / 2)]
+        == result_state.loc[result_state[_K.snr].idxmax()][_K.time]
     )
 
     # TODO: assert the start and end time of the observation is as expected? it will likely requires interpolation.
