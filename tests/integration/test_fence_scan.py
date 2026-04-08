@@ -193,6 +193,7 @@ def test_south_to_north_circular_orbit():
             :, spobj_abs_time_indexer.reindex(txrx_state.index[txrx_state_mask])
         ]
 
+        # put time column back to df body
         txrx_state = txrx_state.reset_index()
         reindexed_txrx_state = reindexed_txrx_state.reset_index()
 

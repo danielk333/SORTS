@@ -354,7 +354,7 @@ def get_tx_rx_pointing_pairs(
     rx_sch = rx_sch.drop(columns=[_SK.stn_num])
 
     df = tx_sch.join(rx_sch, how="inner")
-    df = df.reset_index()
+    df = df.reset_index()  # put multiindex cols back to df body
 
     # rename col start_time to time, and drop col end_time
     df = df.rename(columns={_SK.start_time: _PK.time})
