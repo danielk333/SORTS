@@ -45,11 +45,15 @@ Useful for certain pandas IO methods.
 """
 
 
-def validate(df: pd.DataFrame) -> ScheduleDataframe:
+def validate(df: pd.DataFrame, allow_extra_cols=False) -> ScheduleDataframe:
     """
     Validate a pandas `DataFrame` against the definition of `ScheduleDataframe`.
 
     See the docs of `ScheduleDataframe` for its definition.
+
+    Args:
+        allow_extra_cols:
+            If `True`, allow extra columns that is not in the definition of `ScheduleDataframe`. Defaults to `False.
 
     Returns:
         The original DataFrame casted into a `ScheduleDataframe`.
@@ -58,29 +62,37 @@ def validate(df: pd.DataFrame) -> ScheduleDataframe:
         `ScheduleValidationError`
     """
 
-    if not (df.index.name is None or df.index.name == ScheduleKey.index):
+    _K = ScheduleKey
+
+    if not (df.index.name is None or df.index.name == _K.index):
         raise ScheduleValidationError("DataFrame index name is not `None` or `'index'`")
 
-    if not {key.value for key in ScheduleKey if key != ScheduleKey.index}.issubset(df.columns):
-        raise ScheduleValidationError("One or more column is missing from the DataFrame")
+    if allow_extra_cols:
+        if not {key for key in _K if key != _K.index}.issubset(df.columns):
+            raise ScheduleValidationError("One or more column is missing from the DataFrame")
+    else:
+        if not {key for key in _K if key != _K.index} == set(df.columns):
+            raise ScheduleValidationError(
+                "Columns not identical to the `ScheduleDataframe` definition"
+            )
 
-    if df.dtypes[ScheduleKey.exp_num] != "int16":
+    if df.dtypes[_K.exp_num] != "int16":
         raise ScheduleValidationError("Column 'exp_num' is not numpy dtype 'int16'")
-    if df.dtypes[ScheduleKey.stn_num] != "int16":
+    if df.dtypes[_K.stn_num] != "int16":
         raise ScheduleValidationError("Column 'stn_num' is not numpy dtype 'int16'")
-    if df.dtypes[ScheduleKey.simult_num] != "int16":
+    if df.dtypes[_K.simult_num] != "int16":
         raise ScheduleValidationError("Column 'simult_num' is not numpy dtype 'int16'")
 
-    if df.dtypes[ScheduleKey.start_time] != "datetime64[us]":
+    if df.dtypes[_K.start_time] != "datetime64[us]":
         raise ScheduleValidationError("Column 'start_time' is not numpy dtype 'datetime64[us]'")
-    if df.dtypes[ScheduleKey.end_time] != "datetime64[us]":
+    if df.dtypes[_K.end_time] != "datetime64[us]":
         raise ScheduleValidationError("Column 'end_time' is not numpy dtype 'datetime64[us]'")
 
-    if df.dtypes[ScheduleKey.pointing_e] != "float64":
+    if df.dtypes[_K.pointing_e] != "float64":
         raise ScheduleValidationError("Column 'pointing_e' is not numpy dtype 'float64'")
-    if df.dtypes[ScheduleKey.pointing_n] != "float64":
+    if df.dtypes[_K.pointing_n] != "float64":
         raise ScheduleValidationError("Column 'pointing_n' is not numpy dtype 'float64'")
-    if df.dtypes[ScheduleKey.pointing_u] != "float64":
+    if df.dtypes[_K.pointing_u] != "float64":
         raise ScheduleValidationError("Column 'pointing_u' is not numpy dtype 'float64'")
 
     return ScheduleDataframe(df)
@@ -214,7 +226,7 @@ def schedule_by_priority(schs: list[ScheduleDataframe], priorities: list[int]) -
         raise RuntimeError("`priorities` does not have the same length as the `schedules` param.")
 
     # add priority column
-    schs_with_pri = schs.copy()
+    schs_with_pri = [sch.copy() for sch in schs]  # make shallow copies of the schs
     for sch, pri in zip(schs_with_pri, priorities):
         sch[_SK.priority] = pri
 
@@ -255,11 +267,12 @@ def schedule_by_priority(schs: list[ScheduleDataframe], priorities: list[int]) -
     flattened_mask = t.cast(npt.NDArray[np.bool], flattened_mask)
 
     resultant_sch = master_sch[~flattened_mask]
+    resultant_sch = resultant_sch.drop(columns=[_SK.priority])  # remove priority column
     resultant_sch = resultant_sch.sort_values(
         by=[_K.start_time, _K.simult_num, _K.stn_num, _K.exp_num], ascending=True, ignore_index=True
     )
 
-    return ScheduleDataframe(resultant_sch)
+    return validate(resultant_sch)
 
 
 def time_overlapped_mask(
