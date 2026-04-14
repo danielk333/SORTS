@@ -131,8 +131,6 @@ type SpaceObjectId = int
 
 IndexLike = int | list[int] | tuple[int] | NDArray_N | slice | np.integer
 
-# TODO: better naming (and relocate?)
-S = t.TypeVar("S", bound="Settings")
 
 # TODO: better naming (and relocate?)
 Frames = t.Literal[
@@ -182,9 +180,10 @@ ExperimentDetailMap = dict[ExperimentId, ExperimentDetail]
 ExperimentIdStationIdPairsMap = dict[ExperimentId, list[tuple[StationId, StationId]]]
 
 
+# TODO: re-eval if we really need this complication
 @dataclass
 class Settings:
-    def copy(self: S) -> S:
+    def copy(self: t.Self) -> t.Self:
         kwargs = {key: deepcopy(getattr(self, key)) for key in self.keys}
         return self.__class__(**kwargs)
 

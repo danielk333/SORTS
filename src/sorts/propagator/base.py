@@ -3,19 +3,21 @@
 """A parent class used for interfacing any propagator."""
 
 # Python standard import
-from typing import Generic
+import typing as t
 import logging
 from abc import ABC, abstractmethod
-
 from astropy.time import Time, TimeDelta
-from sorts.types import S, NDArray_N, NDArray_6xN
+from sorts.types import NDArray_N, NDArray_6xN, Settings
 from sorts.utils import convert_to_relative_time
 from sorts.space_object import SpaceObject
 
 logger = logging.getLogger(__name__)
 
 
-class Propagator(ABC, Generic[S]):
+S = t.TypeVar("S", bound="Settings")
+
+
+class Propagator(ABC, t.Generic[S]):
     def __init__(self, settings: S):
         self.settings = settings
         for key in self.settings.keys:
