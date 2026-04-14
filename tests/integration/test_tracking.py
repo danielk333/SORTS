@@ -144,7 +144,7 @@ def test_south_to_north_circular_orbit():
     )
 
     pairs_ls = [
-        schedule.schedule_dataframe.get_tx_rx_pointing_pairs(
+        schedule.get_tx_rx_pointing_pairs(
             sch=tracker_sch,
             start_time=ps.time_range[0],
             end_time=ps.time_range[1],

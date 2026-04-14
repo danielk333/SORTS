@@ -90,9 +90,7 @@ def gather_from_passages_schedule_dataframe(
     then for each pair, gather a `TxRxPairState` from the schedule when the passages pass over the them.
     """
 
-    pointing_pairs_dict = schedule.schedule_dataframe.gather_pointing_pairs(
-        passages=passages, sch=sch
-    )
+    pointing_pairs_dict = schedule.gather_pointing_pairs(passages=passages, sch=sch)
     pair_state_dict = {
         key: from_tx_rx_pointing_pairs(pointing_pairs)
         for key, pointing_pairs in pointing_pairs_dict.items()
