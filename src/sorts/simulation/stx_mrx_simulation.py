@@ -28,7 +28,7 @@ def simulate(
     # TODO: confirm with daniel if setting a default radar_albedo is okay
     spobj_radar_albedo = space_object.properties.get("radar_albedo", 1.0)
 
-    txrx_state_dict = tx_rx_pair_state.gather_from_passages_schedule_dataframe(
+    txrx_state_dict = tx_rx_pair_state.gather_from_passages_schedule(
         passages=passages,
         sch=sch,
     )

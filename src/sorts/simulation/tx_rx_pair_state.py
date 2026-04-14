@@ -81,7 +81,7 @@ def from_tx_rx_pointing_pairs(
     return TxRxPairState(pointing_pairs)
 
 
-def gather_from_passages_schedule_dataframe(
+def gather_from_passages_schedule(
     passages: list[passage.Passage],
     sch: schedule.ScheduleDataframe,
 ) -> dict[tuple[radar.StationId, radar.StationId], TxRxPairState]:
