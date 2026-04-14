@@ -1,3 +1,5 @@
+"""Shared types in this package."""
+
 from __future__ import annotations
 import logging, typing as t, enum
 import numpy as np
@@ -5,11 +7,55 @@ import numpy.typing as npt
 import pandas as pd
 import pandas._typing as pdt
 from sorts import types, utils, radar, passage, schedule
-from .types import ScheduleKey, TxRxPointingPairsKey, TxRxPointingPairs, ScheduleValidationError
 
 
 logger = logging.getLogger(__name__)
 
+
+class ScheduleKey(enum.StrEnum):
+    index = "index"  # type: ignore ; seems type checker might confuse this with the `index` method from `str`
+    exp_num = "exp_num"
+    stn_num = "stn_num"
+    simult_num = "simult_num"
+    start_time = "start_time"
+    end_time = "end_time"
+    pointing_e = "pointing_e"
+    pointing_n = "pointing_n"
+    pointing_u = "pointing_u"
+
+
+class ScheduleValidationError(Exception):
+    pass
+
+
+class TxRxPointingPairsKey(enum.StrEnum):
+    exp_num = "exp_num"
+    rx_simult_num = "rx_simult_num"
+    time = "time"
+    tx_pointing_e = "tx_pointing_e"
+    tx_pointing_n = "tx_pointing_n"
+    tx_pointing_u = "tx_pointing_u"
+    rx_pointing_e = "rx_pointing_e"
+    rx_pointing_n = "rx_pointing_n"
+    rx_pointing_u = "rx_pointing_u"
+
+
+TxRxPointingPairs = t.NewType("TxRxPointingPairs", pd.DataFrame)
+"""
+A pandas `Dataframe` with
+```
+Columns:
+    exp_num        int16
+    rx_simult_num  int16
+    time           datetime64[us]
+    tx_pointing_e  float64
+    tx_pointing_n  float64
+    tx_pointing_u  float64
+    rx_pointing_e  float64
+    rx_pointing_n  float64
+    rx_pointing_u  float64
+```
+"""
 ScheduleDataframe = t.NewType("ScheduleDataframe", pd.DataFrame)
 """
 A pandas `DataFrame` with:
@@ -45,11 +91,15 @@ Useful for certain pandas IO methods.
 """
 
 
-def validate(df: pd.DataFrame) -> ScheduleDataframe:
+def validate(df: pd.DataFrame, allow_extra_cols=False) -> ScheduleDataframe:
     """
     Validate a pandas `DataFrame` against the definition of `ScheduleDataframe`.
 
     See the docs of `ScheduleDataframe` for its definition.
+
+    Args:
+        allow_extra_cols:
+            If `True`, allow extra columns that is not in the definition of `ScheduleDataframe`. Defaults to `False.
 
     Returns:
         The original DataFrame casted into a `ScheduleDataframe`.
@@ -58,29 +108,37 @@ def validate(df: pd.DataFrame) -> ScheduleDataframe:
         `ScheduleValidationError`
     """
 
-    if not (df.index.name is None or df.index.name == ScheduleKey.index):
+    _K = ScheduleKey
+
+    if not (df.index.name is None or df.index.name == _K.index):
         raise ScheduleValidationError("DataFrame index name is not `None` or `'index'`")
 
-    if not {key.value for key in ScheduleKey if key != ScheduleKey.index}.issubset(df.columns):
-        raise ScheduleValidationError("One or more column is missing from the DataFrame")
+    if allow_extra_cols:
+        if not {key for key in _K if key != _K.index}.issubset(df.columns):
+            raise ScheduleValidationError("One or more column is missing from the DataFrame")
+    else:
+        if not {key for key in _K if key != _K.index} == set(df.columns):
+            raise ScheduleValidationError(
+                "Columns not identical to the `ScheduleDataframe` definition"
+            )
 
-    if df.dtypes[ScheduleKey.exp_num] != "int16":
+    if df.dtypes[_K.exp_num] != "int16":
         raise ScheduleValidationError("Column 'exp_num' is not numpy dtype 'int16'")
-    if df.dtypes[ScheduleKey.stn_num] != "int16":
+    if df.dtypes[_K.stn_num] != "int16":
         raise ScheduleValidationError("Column 'stn_num' is not numpy dtype 'int16'")
-    if df.dtypes[ScheduleKey.simult_num] != "int16":
+    if df.dtypes[_K.simult_num] != "int16":
         raise ScheduleValidationError("Column 'simult_num' is not numpy dtype 'int16'")
 
-    if df.dtypes[ScheduleKey.start_time] != "datetime64[us]":
+    if df.dtypes[_K.start_time] != "datetime64[us]":
         raise ScheduleValidationError("Column 'start_time' is not numpy dtype 'datetime64[us]'")
-    if df.dtypes[ScheduleKey.end_time] != "datetime64[us]":
+    if df.dtypes[_K.end_time] != "datetime64[us]":
         raise ScheduleValidationError("Column 'end_time' is not numpy dtype 'datetime64[us]'")
 
-    if df.dtypes[ScheduleKey.pointing_e] != "float64":
+    if df.dtypes[_K.pointing_e] != "float64":
         raise ScheduleValidationError("Column 'pointing_e' is not numpy dtype 'float64'")
-    if df.dtypes[ScheduleKey.pointing_n] != "float64":
+    if df.dtypes[_K.pointing_n] != "float64":
         raise ScheduleValidationError("Column 'pointing_n' is not numpy dtype 'float64'")
-    if df.dtypes[ScheduleKey.pointing_u] != "float64":
+    if df.dtypes[_K.pointing_u] != "float64":
         raise ScheduleValidationError("Column 'pointing_u' is not numpy dtype 'float64'")
 
     return ScheduleDataframe(df)
@@ -214,7 +272,7 @@ def schedule_by_priority(schs: list[ScheduleDataframe], priorities: list[int]) -
         raise RuntimeError("`priorities` does not have the same length as the `schedules` param.")
 
     # add priority column
-    schs_with_pri = schs.copy()
+    schs_with_pri = [sch.copy() for sch in schs]  # make shallow copies of the schs
     for sch, pri in zip(schs_with_pri, priorities):
         sch[_SK.priority] = pri
 
@@ -225,21 +283,42 @@ def schedule_by_priority(schs: list[ScheduleDataframe], priorities: list[int]) -
     end_time_arr = master_sch[_K.end_time].to_numpy()
     priority_arr = master_sch[_SK.priority].to_numpy()
 
+    # TODO: re-eval if filtering operations can be optimized, e.g.:
+    #     - losers_mask can be calculated only for overlapped rows?
+    #     - `same_stn_mask`, `same_exp_mask` are symmetric, maybe some shortcut can be taken?
+
     overlap_mask = time_overlapped_mask(
         start_time=start_time_arr, end_time=end_time_arr, ignore_self_comparison=True
     )
-    # TODO: calc this mask only for overlapped rows?
-    losers_mask = priority_loser_mask(priorities=priority_arr)
 
-    combined_mask = overlap_mask & losers_mask
+    losers_mask = priority_loser_mask(priority=priority_arr)
+
+    stn_num_arr = master_sch[_K.stn_num].to_numpy()
+    same_stn_mask = stn_num_arr[:, np.newaxis] == stn_num_arr[np.newaxis, :]
+
+    combined_mask = overlap_mask & same_stn_mask & losers_mask
 
     # flatten the mask by doing an "or" per row
     flattened_mask = np.any(combined_mask, axis=1)
     flattened_mask = t.cast(npt.NDArray[np.bool], flattened_mask)
 
-    resultant_sch = master_sch[~flattened_mask]
+    # all rows of the same time and exp are always removed togather
+    #
+    # we interpret `remove_togather_mask` as [nth row's impact to other rows, ...]
+    # so the resultant impact is taken by collapsing withing a column (i.e. across rows)
+    remove_togather_mask = same_exp_and_time_mask(
+        exp_num=master_sch[_K.exp_num].to_numpy(), time=master_sch[_K.start_time].to_numpy()
+    )
+    flattened_mask = np.any(flattened_mask[:, np.newaxis] & remove_togather_mask, axis=0)
+    flattened_mask = t.cast(npt.NDArray[np.bool], flattened_mask)
 
-    return ScheduleDataframe(resultant_sch)
+    resultant_sch = master_sch[~flattened_mask]
+    resultant_sch = resultant_sch.drop(columns=[_SK.priority])  # remove priority column
+    resultant_sch = resultant_sch.sort_values(
+        by=[_K.start_time, _K.simult_num, _K.stn_num, _K.exp_num], ascending=True, ignore_index=True
+    )
+
+    return validate(resultant_sch)
 
 
 def time_overlapped_mask(
@@ -248,10 +327,10 @@ def time_overlapped_mask(
     ignore_self_comparison=True,
 ) -> types.NDArray_NxN[np.bool]:
     """
-    For each `start_time` and `end_time` pair at equal index,
-    check if it is overlapped with other pairs in time.
+    For each (`start_time`, `end_time`) row at equal index,
+    check if it is overlapped with other rows in time.
 
-    `start_time` and `end_time` must have equal length.
+    `start_time`, `end_time` must have equal length.
 
     Args:
         ignore_self_comparison:
@@ -279,33 +358,50 @@ def time_overlapped_mask(
     return overlap_mask
 
 
-def priority_loser_mask(priorities: npt.NDArray[np.int64]) -> types.NDArray_NxN[np.bool]:
+def priority_loser_mask(priority: npt.NDArray[np.int64]) -> types.NDArray_NxN[np.bool]:
     """
-    For each `(start_time, end_time, priorities)` row at equal index,
-    compair its priority with other rows by:
+    For each `priorities` entry, compare its priority with other entries:
 
         - priority: lower number -> higher priority
-        - row order: lower number -> higher priority
-
-    `start_time` and `end_time`, `priorities` must have equal length.
+        - entry order: lower number -> higher priority
     """
 
     # inject new dimension to ndarray for broadcasting
     # priorities
-    pri_i = priorities[:, np.newaxis]  # shape (N,1)
-    pri_j = priorities[np.newaxis, :]  # shape (1,N)
+    pri_i = priority[:, np.newaxis]  # shape (N,1)
+    pri_j = priority[np.newaxis, :]  # shape (1,N)
 
     # inject new dimension to ndarray for broadcasting
-    # row id
-    rid_i = np.arange(len(priorities))[:, np.newaxis]  # shape (N,1)
-    rid_j = np.arange(len(priorities))[np.newaxis, :]  # shape (1,N)
+    # entry id
+    rid_i = np.arange(len(priority))[:, np.newaxis]  # shape (N,1)
+    rid_j = np.arange(len(priority))[np.newaxis, :]  # shape (1,N)
 
-    # find losers of priorities. row i loses to row j if:
+    # find losers of priorities. entry i loses to entry j if:
     # 1. j has lower priority number
     # 2. or same priority but lower rid
     losers_mask = (pri_i > pri_j) | ((pri_i == pri_j) & (rid_i > rid_j))
 
     return losers_mask
+
+
+def same_exp_and_time_mask(
+    exp_num: npt.NDArray[np.signedinteger],
+    time: npt.NDArray[types.Datetime64_us],
+) -> types.NDArray_NxN[np.bool]:
+    """
+    For each (`exp_num`, `time`) row at equal index,
+    check if it has the same values as other rows.
+
+    `exp_num`, `time` must have equal length.
+
+    Returns:
+        A (N, N) bool ndarray.
+    """
+
+    mask = exp_num[:, np.newaxis] == exp_num[np.newaxis, :]
+    mask &= time[:, np.newaxis] == time[np.newaxis, :]
+
+    return mask
 
 
 def get_tx_rx_pointing_pairs(
@@ -354,7 +450,7 @@ def get_tx_rx_pointing_pairs(
     rx_sch = rx_sch.drop(columns=[_SK.stn_num])
 
     df = tx_sch.join(rx_sch, how="inner")
-    df = df.reset_index()
+    df = df.reset_index()  # put multiindex cols back to df body
 
     # rename col start_time to time, and drop col end_time
     df = df.rename(columns={_SK.start_time: _PK.time})

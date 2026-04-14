@@ -50,7 +50,7 @@ def tracking(
     tx_sch_time = spobj_ecef_states_times[tx_el_in_range_mask]
     tx_sch_len = len(tx_sch_time)
 
-    tx_sch = schedule.schedule_dataframe.from_ndarrays(
+    tx_sch = schedule.from_ndarrays(
         exp_num=np.full(tx_sch_len, exp_id, dtype=np.int16),
         stn_num=np.full(tx_sch_len, tx_station.uid, dtype=np.int16),
         simult_num=np.full(tx_sch_len, 0, dtype=np.int16),
@@ -69,7 +69,7 @@ def tracking(
         rx_sch_len = len(rx_sch_time)
 
         rx_schs.append(
-            schedule.schedule_dataframe.from_ndarrays(
+            schedule.from_ndarrays(
                 exp_num=np.full(rx_sch_len, exp_id, dtype=np.int16),
                 stn_num=np.full(rx_sch_len, rx_stn.uid, dtype=np.int16),
                 simult_num=np.full(rx_sch_len, 0, dtype=np.int16),
@@ -103,7 +103,7 @@ def sparse_tracking(
 
     # early return for empty case
     if len(passages_of_spobj) == 0:
-        return schedule.schedule_dataframe.empty()
+        return schedule.empty()
 
     observation_times_relative = []
     observation_times = []
@@ -134,7 +134,7 @@ def sparse_tracking(
     )
     tx_pointings = tx_pointings / np.linalg.norm(tx_pointings, axis=0)
 
-    tx_sch = schedule.schedule_dataframe.from_ndarrays(
+    tx_sch = schedule.from_ndarrays(
         exp_num=np.full(tx_sch_len, exp_id, dtype=np.int16),
         stn_num=np.full(tx_sch_len, tx_station.uid, dtype=np.int16),
         simult_num=np.full(tx_sch_len, 0, dtype=np.int16),
@@ -153,7 +153,7 @@ def sparse_tracking(
         rx_pointings = rx_pointings / np.linalg.norm(rx_pointings, axis=0)
 
         rx_schs.append(
-            schedule.schedule_dataframe.from_ndarrays(
+            schedule.from_ndarrays(
                 exp_num=np.full(tx_sch_len, exp_id, dtype=np.int16),
                 stn_num=np.full(tx_sch_len, rx_stn.uid, dtype=np.int16),
                 simult_num=np.full(tx_sch_len, 0, dtype=np.int16),
@@ -239,7 +239,7 @@ def fence_scanning(
     tx_slice_start_time_masked = tx_slice_start_time[tx_mask]
     tx_pointing_masked = tx_pointing[:, tx_mask]
 
-    tx_sch = schedule.schedule_dataframe.from_ndarrays(
+    tx_sch = schedule.from_ndarrays(
         exp_num=np.full(len(tx_slice_start_time_masked), exp_id, dtype=np.int16),
         stn_num=np.full(len(tx_slice_start_time_masked), tx_station.uid, dtype=np.int16),
         simult_num=np.full(len(tx_slice_start_time_masked), 0, dtype=np.int16),
@@ -297,7 +297,7 @@ def fence_scanning(
         rx_pointing_masked = rx_pointings_enu[:, rx_mask]
         rx_pointings_simult_num_masked = rx_pointings_simult_num[rx_mask]
 
-        rx_sch = schedule.schedule_dataframe.from_ndarrays(
+        rx_sch = schedule.from_ndarrays(
             exp_num=np.full(len(rx_slice_start_time_masked), exp_id, dtype=np.int16),
             stn_num=np.full(len(rx_slice_start_time_masked), rx_station.uid, dtype=np.int16),
             simult_num=rx_pointings_simult_num_masked,
