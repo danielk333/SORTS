@@ -6,7 +6,7 @@ from tqdm import tqdm
 from astropy.time import Time, TimeDelta
 from sorts.space_object import SpaceObject
 from sorts.types import Datetime64_us, EcefStates
-from sorts.interpolation import Interpolator
+from sorts.interpolation import Interpolation
 from sorts.propagator import Propagator
 from sorts.population import Population
 
@@ -22,7 +22,7 @@ class InterpolatedPropagation:
     #       having type convertions pops up in random locations in the core computation codes
     times: npt.NDArray[Datetime64_us]
     states: EcefStates
-    interpolator: Interpolator
+    interpolator: Interpolation
     epoch: Datetime64_us
 
     @classmethod
@@ -30,7 +30,7 @@ class InterpolatedPropagation:
         cls,
         space_objects: t.Sequence[SpaceObject] | Population,
         propagator: Propagator,
-        interpolator_class: t.Type[Interpolator],
+        interpolator_class: t.Type[Interpolation],
         start_time: Time,
         end_time: Time,
         time_step: float,
@@ -60,7 +60,7 @@ class InterpolatedPropagation:
         cls,
         space_object: SpaceObject,
         propagator: Propagator,
-        interpolator_class: t.Type[Interpolator],
+        interpolator_class: t.Type[Interpolation],
         start_time: Time,
         end_time: Time,
         time_step: float,

@@ -2,7 +2,7 @@ import typing as t
 from astropy.time import Time
 from sorts import types
 from sorts.space_object import SpaceObject
-from sorts.interpolation import Interpolator
+from sorts.interpolation import Interpolation
 from sorts.propagator import Propagator
 from sorts.interpolated_propagation import InterpolatedPropagation
 
@@ -15,7 +15,7 @@ class SpaceObjectInterpolatedPropagationPair(t.NamedTuple):
 def duplicate_and_perturbate_space_object(
     space_object: SpaceObject,
     propagator: Propagator,
-    interpolator_class: t.Type[Interpolator],
+    interpolator_class: t.Type[Interpolation],
     start_time: Time,
     end_time: Time,
     time_step: float,

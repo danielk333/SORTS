@@ -92,7 +92,7 @@ def tracking(
 #   - state instead of Interpolator?
 def sparse_tracking(
     passages_of_spobj: list[passage.Passage],
-    interpolator: interpolation.Interpolator,
+    interpolator: interpolation.Interpolation,
     points_per_passage: int,
     tx_station: radar.Station,
     rx_stations: t.Sequence[radar.Station],
