@@ -1,14 +1,12 @@
-#!/usr/bin/env python
-
 """Defines a space object. Encapsulates orbital elements, propagation and related methods."""
-from copy import deepcopy
-from typing import Any, Self
-from dataclasses import dataclass, fields
 
+import typing as t
+from copy import deepcopy
+from dataclasses import dataclass, fields
 import numpy as np
 from pyorb import Orbit, M_earth
-from astropy.time import Time, TimeDelta
-from sorts.types import Frames, NDArray_N
+from astropy.time import Time
+from sorts.types import Frames
 
 
 @dataclass
@@ -25,10 +23,10 @@ class SpaceObject:
     orbit: Orbit
     frame: Frames
     epoch: Time
-    properties: dict[str, Any]
+    properties: dict[str, t.Any]
     object_id: int = 0
 
-    def copy(self) -> Self:
+    def copy(self) -> t.Self:
         kwargs = {key: deepcopy(getattr(self, key)) for key in self.keys}
         return self.__class__(**kwargs)
 
@@ -47,7 +45,7 @@ class SpaceObject:
         mean_anomaly: float,
         epoch: Time,
         frame: Frames,
-        properties: dict[str, Any],
+        properties: dict[str, t.Any],
         center_mass: float = M_earth,
         object_id: int = 0,
         degrees: bool = True,
