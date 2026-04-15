@@ -81,7 +81,7 @@ def test_south_to_north_circular_orbit():
     )
 
     spobj_delta_secs: npt.NDArray[types.Float64_as_sec] = np.linspace(
-        0, spobj.state.period[0], num_prop_steps + 1
+        0, spobj.orbit.period[0], num_prop_steps + 1
     )
     spobj_abs_times: npt.NDArray[types.Datetime64_us] = (
         spobj_delta_secs * np.timedelta64(1, "s") + start_time_dt64

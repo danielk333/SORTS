@@ -35,8 +35,8 @@ class Propagator(ABC, t.Generic[S]):
         if len(new_cart.shape) < 2:
             new_cart.shape = (new_cart.size, 1)
         obj = space_object.copy() if copy else space_object
-        obj.state.cartesian = new_cart
-        obj.state.calculate_kepler()
+        obj.orbit.cartesian = new_cart
+        obj.orbit.calculate_kepler()
         obj.epoch += TimeDelta(dt, format="sec")
         return obj
 

@@ -13,16 +13,16 @@ from sorts.types import Frames, NDArray_N
 
 @dataclass
 class SpaceObject:
-    """Encapsulates a object in space which has a state, at an epoch and in a frame, and some
+    """Encapsulates a object in space which has an orbit, at an epoch and in a frame, and some
     properties.
 
-    The state of the object is stored in a `pyorb.Orbit` instance.
-    This instance contains direct transformations between the Cartesian and Kepler states.
+    The orbit of the object is a `pyorb.Orbit` instance,
+    it contains direct transformations between the Cartesian and Kepler states.
 
     To propagate this object in time and get states, supply it to a propagator.
     """
 
-    state: Orbit
+    orbit: Orbit
     frame: Frames
     epoch: Time
     properties: dict[str, Any]
@@ -52,7 +52,7 @@ class SpaceObject:
         object_id: int = 0,
         degrees: bool = True,
     ):
-        state = Orbit(
+        orbit = Orbit(
             M0=center_mass,
             degrees=degrees,
             type="mean",
@@ -61,16 +61,16 @@ class SpaceObject:
             num=1,
             m=0.0,
         )
-        state._kep[0, 0] = semi_major_axis
-        state._kep[1, 0] = eccentricity
-        state._kep[2, 0] = inclination
-        state._kep[3, 0] = argument_of_periapsis
-        state._kep[4, 0] = longitude_of_ascending_node
-        state._kep[5, 0] = mean_anomaly
-        state.calculate_cartesian()
+        orbit._kep[0, 0] = semi_major_axis
+        orbit._kep[1, 0] = eccentricity
+        orbit._kep[2, 0] = inclination
+        orbit._kep[3, 0] = argument_of_periapsis
+        orbit._kep[4, 0] = longitude_of_ascending_node
+        orbit._kep[5, 0] = mean_anomaly
+        orbit.calculate_cartesian()
 
         return cls(
-            state=state,
+            orbit=orbit,
             frame=frame,
             epoch=epoch,
             properties=properties,
@@ -97,7 +97,7 @@ class SpaceObject:
         return diam
 
     def __str__(self):
-        orb_str = str(self.state)
+        orb_str = str(self.orbit)
         orb_str = "".join([f"  {row}\n" for row in orb_str.split("\n")])
         p = f"\nSpace object {self.object_id}: {repr(self.epoch)}:\n"
         p += orb_str

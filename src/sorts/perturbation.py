@@ -48,11 +48,11 @@ def duplicate_and_perturbate_space_object(
             new_obj = space_object.copy()
 
             if perturbation_format == "kepler":
-                new_obj.state._kep[idx - 1, 0] += pert_val[idx - 1]
-                new_obj.state.calculate_cartesian()
+                new_obj.orbit._kep[idx - 1, 0] += pert_val[idx - 1]
+                new_obj.orbit.calculate_cartesian()
             elif perturbation_format == "cartesian":
-                new_obj.state._cart[idx - 1, 0] += pert_val[idx - 1]
-                new_obj.state.calculate_kepler()
+                new_obj.orbit._cart[idx - 1, 0] += pert_val[idx - 1]
+                new_obj.orbit.calculate_kepler()
 
         prop_interp = InterpolatedPropagation.from_space_object(
             space_object=new_obj,

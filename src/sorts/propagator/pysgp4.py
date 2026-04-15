@@ -126,10 +126,8 @@ def estimate_properties(bstar, rho0):
         A = np.pi * r**2
         m = rho * 4.0 / 3.0 * np.pi * r**3
     raise NotImplementedError(
-        "finish this function, these estimations should be explicit"
-        "when needed, and documented"
+        "finish this function, these estimations should be explicit" "when needed, and documented"
     )
-
 
 
 def get_B(properties):
@@ -178,9 +176,8 @@ class Sgp4(Propagator[Sgp4Settings]):
         super().__init__(settings=settings)
 
         self.sgp4_mjd0 = Time("1949-12-31 00:00:00", format="iso", scale="ut1").mjd
-        self.radiusearth_wgs84 = 6378.137e3 # m
+        self.radiusearth_wgs84 = 6378.137e3  # m
         self.rho0 = 2.461e-5 / 6378.135e3  # kg/m^2/m
-
 
     def propagate_tle(
         self,
@@ -251,7 +248,7 @@ class Sgp4(Propagator[Sgp4Settings]):
         - m: Mass
         """
         logger.debug("SGP4:propagate")
-        if space_object.state.num > 1:
+        if space_object.orbit.num > 1:
             t_samps = space_object.properties["state_sample_times"]
         else:
             t_samps = None
@@ -264,7 +261,7 @@ class Sgp4(Propagator[Sgp4Settings]):
 
         B = get_B(space_object.properties)
         logger.debug(f"SGP4:propagate:B = {B}")
-        state0 = space_object.state.copy()
+        state0 = space_object.orbit.copy()
 
         if space_object.frame != "TEME":
             state0._cart = cel.convert(
@@ -626,14 +623,14 @@ class Sgp4(Propagator[Sgp4Settings]):
         self,
         space_object: SpaceObject,
     ) -> NDArray_6:
-        assert space_object.state.num <= 1
+        assert space_object.orbit.num <= 1
         samples = self.settings.kepler_samples
-        max_ang = 360.0 if space_object.state.degrees else 2 * np.pi
+        max_ang = 360.0 if space_object.orbit.degrees else 2 * np.pi
         max_ang *= self.settings.kepler_extent
 
-        _orb = space_object.state.copy()
+        _orb = space_object.orbit.copy()
         _orb.allocate(samples)
-        _orb._kep[()] = space_object.state._kep[()]
+        _orb._kep[()] = space_object.orbit._kep[()]
         _orb._kep[5, :] = np.linspace(-max_ang / 2, max_ang / 2, num=samples, endpoint=False)
         _orb.calculate_cartesian()
         t_vec = _orb.mean_anomaly / _orb.mean_motion

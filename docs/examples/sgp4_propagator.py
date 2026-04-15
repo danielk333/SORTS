@@ -26,7 +26,7 @@ spobj = SpaceObject.from_kepler(
     properties={},
     degrees=True,
 )
-print(spobj.state)
+print(spobj.orbit)
 
 t = np.linspace(0, 3600 * 24.0, num=1000)
 
