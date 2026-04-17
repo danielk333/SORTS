@@ -3,7 +3,7 @@ import logging, typing as t
 import numpy as np
 from sorts import types, utils, space_object, schedule, passage
 from sorts.radar import Station, StationId
-from sorts.interpolated_propagation import InterpolatedPropagation
+from sorts.interpolation import Interpolation
 from sorts.simulation import tx_rx_pair_state
 
 logger = logging.getLogger(__name__)
@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def simulate(
     space_object: space_object.SpaceObject,
-    interpolated_propagation: InterpolatedPropagation,
+    interpolation: Interpolation,
     passages: list[passage.Passage],
     sch: schedule.ScheduleDataframe,
     station_map: t.Mapping[StationId, Station],
@@ -36,7 +36,7 @@ def simulate(
     sim_result: list[tx_rx_pair_state.TxRxPairState] = []
     for stn_id_pair, txrx_state in txrx_state_dict.items():
         dsec = (txrx_state[_K.time].to_numpy() - epoch) / np.timedelta64(1, "s")
-        spobj_state = interpolated_propagation.interpolator.get_state(dsec)
+        spobj_state = interpolation.get_state(dsec)
 
         sim_result.append(
             tx_rx_pair_state.simulate(

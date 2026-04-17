@@ -49,6 +49,7 @@ from .perturbation import (
 from .passage import (
     Passage as Passage,
 )
+from .simulation import SpaceObjectSimulator
 
 from .mpi_queued_execution import (
     MpiQueuedExecution as MpiQueuedExecution,
