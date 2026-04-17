@@ -28,8 +28,6 @@ from . import (
     utils,
     schedule,
     pointing,
-    interpolated_propagation,
-    perturbation,
     passage,
     simulation,
 )
@@ -39,12 +37,6 @@ from .types import (
 )
 from .space_object import (
     SpaceObject as SpaceObject,
-)
-from .interpolated_propagation import (
-    InterpolatedPropagation as InterpolatedPropagation,
-)
-from .perturbation import (
-    SpaceObjectInterpolatedPropagationPair as SpaceObjectInterpolatedPropagationPair,
 )
 from .interpolation import Interpolation
 from .passage import (
