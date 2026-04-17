@@ -46,6 +46,7 @@ from .interpolated_propagation import (
 from .perturbation import (
     SpaceObjectInterpolatedPropagationPair as SpaceObjectInterpolatedPropagationPair,
 )
+from .interpolation import Interpolation
 from .passage import (
     Passage as Passage,
 )
