@@ -45,8 +45,8 @@ class SpaceObjectSimulator:
     ) -> Interpolation:
         return self.interpolator(states=states, t=times)
 
+    @staticmethod
     def simulate(
-        self,
         space_object: SpaceObject,
         states_interpolation: Interpolation,
         passages: list[passage.Passage],
@@ -88,3 +88,49 @@ class SpaceObjectSimulator:
             )
 
         return sim_result
+
+    @staticmethod
+    def perturbate(
+        space_object: SpaceObject,
+        perturbation_format: types.StateType = "cartesian",
+        pert_val: tuple[float, float, float, float, float, float] = (
+            1e-3, 1e-3, 1e-3, 1e-5, 1e-5, 1e-5  # fmt: skip
+        ),
+    ):
+        """
+        Perturbate the input space object by the specified method and values.
+
+        Returns:
+            A tuple of 7 `SpaceObject`,
+            where the first one is for the true space object, and the reset follows the order of input perturbation value order:
+            ```
+            [true_spobj, pert_spobj ...x6]
+            ```
+        """
+
+        space_object_ls: list[SpaceObject] = []
+        for idx in range(7):
+            # the original spobj are left intact, the rest are copied and perturbed
+            if idx == 0:
+                new_obj = space_object
+            else:
+                new_obj = space_object.copy()
+
+                if perturbation_format == "kepler":
+                    new_obj.orbit._kep[idx - 1, 0] += pert_val[idx - 1]
+                    new_obj.orbit.calculate_cartesian()
+                elif perturbation_format == "cartesian":
+                    new_obj.orbit._cart[idx - 1, 0] += pert_val[idx - 1]
+                    new_obj.orbit.calculate_kepler()
+
+            space_object_ls.append(new_obj)
+
+        return (
+            space_object_ls[0],
+            space_object_ls[1],
+            space_object_ls[2],
+            space_object_ls[3],
+            space_object_ls[4],
+            space_object_ls[5],
+            space_object_ls[6],
+        )
