@@ -2,9 +2,9 @@ import dataclasses, typing as t
 import numpy as np
 import numpy.typing as npt
 from sorts import types, utils, schedule, passage
-from sorts.types import Datetime64_us, EcefStates, Datetime_Like, Float64_as_sec
+from sorts.types import EcefStates, Datetime_Like, Float64_as_sec
 from sorts.utils import to_datetime64_us
-from sorts.interpolation import Interpolation
+from sorts.space_object_states_interpolation import SpaceObjectStatesInterpolation
 from sorts.propagator import Propagator
 from sorts.space_object import SpaceObject
 from sorts.radar import Station, StationId
@@ -16,7 +16,7 @@ class SpaceObjectSimulator:
     """A convenience object for simulation of a `SpaceObject`."""
 
     propagator: Propagator
-    interpolator: t.Type[Interpolation]
+    interpolator: t.Type[SpaceObjectStatesInterpolation]
 
     def propagate(
         self,
@@ -42,13 +42,13 @@ class SpaceObjectSimulator:
         self,
         times: npt.NDArray[Float64_as_sec],
         states: EcefStates,
-    ) -> Interpolation:
+    ) -> SpaceObjectStatesInterpolation:
         return self.interpolator(states=states, t=times)
 
     @staticmethod
     def simulate(
         space_object: SpaceObject,
-        states_interpolation: Interpolation,
+        states_interpolation: SpaceObjectStatesInterpolation,
         passages: list[passage.Passage],
         sch: schedule.ScheduleDataframe,
         station_map: t.Mapping[StationId, Station],

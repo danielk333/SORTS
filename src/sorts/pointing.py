@@ -4,7 +4,8 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import spacecoords
-from sorts import types, frames, passage, radar, schedule, interpolation
+from sorts import types, frames, passage, radar, schedule
+from sorts.space_object_states_interpolation import SpaceObjectStatesInterpolation
 
 logger = logging.getLogger(__name__)
 
@@ -92,7 +93,7 @@ def tracking(
 #   - state instead of Interpolator?
 def sparse_tracking(
     passages_of_spobj: list[passage.Passage],
-    interpolation: interpolation.Interpolation,
+    interpolation: SpaceObjectStatesInterpolation,
     points_per_passage: int,
     tx_station: radar.Station,
     rx_stations: t.Sequence[radar.Station],
