@@ -3,19 +3,21 @@
 """A parent class used for interfacing any propagator."""
 
 # Python standard import
-from typing import Generic
+import typing as t
 import logging
 from abc import ABC, abstractmethod
-
 from astropy.time import Time, TimeDelta
-from sorts.types import S, NDArray_N, NDArray_6xN
+from sorts.types import NDArray_N, NDArray_6xN, Settings
 from sorts.utils import convert_to_relative_time
 from sorts.space_object import SpaceObject
 
 logger = logging.getLogger(__name__)
 
 
-class Propagator(ABC, Generic[S]):
+S = t.TypeVar("S", bound="Settings")
+
+
+class Propagator(ABC, t.Generic[S]):
     def __init__(self, settings: S):
         self.settings = settings
         for key in self.settings.keys:
@@ -33,8 +35,8 @@ class Propagator(ABC, Generic[S]):
         if len(new_cart.shape) < 2:
             new_cart.shape = (new_cart.size, 1)
         obj = space_object.copy() if copy else space_object
-        obj.state.cartesian = new_cart
-        obj.state.calculate_kepler()
+        obj.orbit.cartesian = new_cart
+        obj.orbit.calculate_kepler()
         obj.epoch += TimeDelta(dt, format="sec")
         return obj
 

@@ -92,7 +92,7 @@ def tracking(
 #   - state instead of Interpolator?
 def sparse_tracking(
     passages_of_spobj: list[passage.Passage],
-    interpolator: interpolation.Interpolator,
+    interpolation: interpolation.Interpolation,
     points_per_passage: int,
     tx_station: radar.Station,
     rx_stations: t.Sequence[radar.Station],
@@ -130,7 +130,7 @@ def sparse_tracking(
     tx_sch_time = np.concatenate(observation_times)
     tx_sch_len = len(tx_sch_time)
     tx_pointings: types.EnuCoordinates = tx_station.enu(
-        interpolator.get_state(tx_sch_time_rel)[:3, :]
+        interpolation.get_state(tx_sch_time_rel)[:3, :]
     )
     tx_pointings = tx_pointings / np.linalg.norm(tx_pointings, axis=0)
 
@@ -148,7 +148,7 @@ def sparse_tracking(
     rx_schs: list[schedule.ScheduleDataframe] = []
     for rx_stn in rx_stations:
         rx_pointings: types.EnuCoordinates = rx_stn.enu(
-            interpolator.get_state(tx_sch_time_rel)[:3, :]
+            interpolation.get_state(tx_sch_time_rel)[:3, :]
         )
         rx_pointings = rx_pointings / np.linalg.norm(rx_pointings, axis=0)
 

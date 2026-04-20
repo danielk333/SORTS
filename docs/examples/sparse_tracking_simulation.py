@@ -5,11 +5,10 @@ import numpy as np
 import numpy.typing as npt
 from astropy.time import Time
 from tqdm import tqdm
+import sorts
 from sorts import (
     types,
     utils,
-    space_object,
-    interpolated_propagation,
     pointing,
     interpolation,
     population,
@@ -17,10 +16,8 @@ from sorts import (
     radar,
     schedule,
     passage,
-    perturbation,
     ExperimentDetail,
 )
-from sorts.simulation import stx_mrx_simulation
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -61,10 +58,16 @@ class ScriptParams:
     rng: t.Any
 
 
+class PropagateStepOutput(t.NamedTuple):
+    spobj_simulator: sorts.SpaceObjectSimulator
+    times: npt.NDArray[types.Float64_as_sec]
+    spobj_and_perts: t.Sequence[sorts.SpaceObject]
+    spobj_prop_and_perts: t.Sequence[types.EcefStates]
+    spobj_interp_and_perts: t.Sequence[interpolation.Interpolation]
+
+
 class SimulationParams(t.NamedTuple):
     sch: schedule.ScheduleDataframe
-    space_objects: t.Sequence[space_object.SpaceObject]
-    interpolated_propagations: t.Sequence[interpolated_propagation.InterpolatedPropagation]
     passages: list[passage.Passage]
 
 
@@ -179,29 +182,55 @@ def propagate():
         obj_pth = prm.save_dpath / f"space_object_{spobj.object_id}"
         utils.ensure_directory_exist(obj_pth)
 
-        pert_pth = obj_pth / "pert_obj_propagation_interpolation.pickle"
-        if prm.clobber or not pert_pth.exists():
-            perturbed_object_groups = perturbation.duplicate_and_perturbate_space_object(
+        propagate_step_output_pth = obj_pth / "propagate_step_output.pickle"
+        if prm.clobber or not propagate_step_output_pth.exists():
+            spobj_simulator = sorts.SpaceObjectSimulator(
+                propagator=sorts.propagator.Sgp4(
+                    settings=sorts.propagator.Sgp4Settings(
+                        out_frame="ITRS", mean_elements_input=True
+                    )
+                ),
+                interpolator=sorts.interpolation.Legendre8,
+            )
+
+            spobj_and_perts = spobj_simulator.perturbate(
                 space_object=spobj,
-                propagator=prm.prop,
-                interpolator_class=interpolation.Legendre8,
-                start_time=prm.start_time,
-                end_time=prm.end_time,
-                time_step=prm.time_step,
                 perturbation_format="kepler",
                 pert_val=(
                     1e-3, 1e-5, 1e-5, 1e-5, 1e-5, 1e-3  # fmt: skip
                 ),
             )
-            utils.safe_pickle(perturbed_object_groups, pert_pth)
 
-            spobj_pth = obj_pth / "spboj_data.pickle"
-            prop_interp_pth = obj_pth / "propagation_interpolation.pickle"
-            true_spobj, true_prop = perturbed_object_groups[0]
-            if prm.clobber or not spobj_pth.exists():
-                utils.safe_pickle(true_spobj, spobj_pth)
-            if prm.clobber or not prop_interp_pth.exists():
-                utils.safe_pickle(true_prop, prop_interp_pth)
+            times, true_states = spobj_simulator.propagate(
+                space_object=spobj,
+                start_time=prm.start_time,
+                end_time=prm.end_time,
+                time_step=prm.time_step,
+            )
+
+            spobj_prop_and_perts = [true_states]
+            for obj in spobj_and_perts[1:]:
+                _, pert_states = spobj_simulator.propagate(
+                    space_object=obj,
+                    start_time=prm.start_time,
+                    end_time=prm.end_time,
+                    time_step=prm.time_step,
+                )
+                spobj_prop_and_perts.append(pert_states)
+
+            spobj_interp_and_perts = [
+                spobj_simulator.make_interpolation(times=times, states=states)
+                for states in spobj_prop_and_perts
+            ]
+
+            propagate_step_output = PropagateStepOutput(
+                spobj_simulator=spobj_simulator,
+                times=times,
+                spobj_and_perts=spobj_and_perts,
+                spobj_prop_and_perts=spobj_prop_and_perts,
+                spobj_interp_and_perts=spobj_interp_and_perts,
+            )
+            utils.safe_pickle(propagate_step_output, propagate_step_output_pth)
 
 
 def simulate_obs():
@@ -213,25 +242,28 @@ def simulate_obs():
     for worker_job_params in tqdm(worker_job_params_ls, desc="running worker job"):
         object_id, prm = worker_job_params
         obj_pth = prm.save_dpath / f"space_object_{object_id}"
-        pert_pth = obj_pth / "pert_obj_propagation_interpolation.pickle"
-        with open(pert_pth, "rb") as fh:
-            perturbed_object_groups: list[perturbation.SpaceObjectInterpolatedPropagationPair] = (
-                pickle.load(fh)
-            )
+        propagate_step_output_pth = obj_pth / "propagate_step_output.pickle"
+        with open(propagate_step_output_pth, "rb") as fh:
+            propagate_step_output: PropagateStepOutput = pickle.load(fh)
 
-        spobj, prop_interp = perturbed_object_groups[0]
-        spobjs = [tup[0] for tup in perturbed_object_groups]
-        prop_interps = [tup[1] for tup in perturbed_object_groups]
+        (
+            spobj_simulator,
+            times,
+            spobj_and_perts,
+            spobj_prop_and_perts,
+            spobj_interp_and_perts,
+        ) = propagate_step_output
 
-        sim_pth = obj_pth / "simulation.pickle"
-        if prm.clobber or not sim_pth.exists():
+        spobj = spobj_and_perts[0]
+        true_states = spobj_prop_and_perts[0]
+        true_states_interp = spobj_interp_and_perts[0]
+
+        sim_params_pth = obj_pth / "sim_params.pickle"
+        if prm.clobber or not sim_params_pth.exists():
             passages = passage.find_simultaneous_passages(
-                dt=(
-                    (prop_interp.times - utils.to_datetime64_us(prm.start_time))
-                    / np.timedelta64(1, "s")
-                ),
+                dt=times,
                 space_object=spobj,
-                states=prop_interp.states[:3, ...],
+                states=true_states[:3, ...],
                 tx_station=prm.tx_station,
                 rx_stations=prm.rx_stations,
                 epoch=utils.to_datetime64_us(prm.start_time),
@@ -239,7 +271,7 @@ def simulate_obs():
 
             tracker_sch = pointing.sparse_tracking(
                 passages_of_spobj=passages,
-                interpolator=prop_interp.interpolator,
+                interpolation=true_states_interp,
                 points_per_passage=10,
                 tx_station=prm.tx_station,
                 rx_stations=prm.rx_stations,
@@ -247,34 +279,32 @@ def simulate_obs():
                 slice_duration=prm.exp_detail_map[0].slice_duration,
             )
 
-            sim = SimulationParams(
+            sim_params = SimulationParams(
                 sch=tracker_sch,
-                space_objects=spobjs,
-                interpolated_propagations=prop_interps,
                 passages=passages,
             )
-            utils.safe_pickle(sim, sim_pth)
+            utils.safe_pickle(sim_params, sim_params_pth)
         else:
-            with open(sim_pth, "rb") as fh:
-                sim: SimulationParams = pickle.load(fh)
+            with open(sim_params_pth, "rb") as fh:
+                sim_params: SimulationParams = pickle.load(fh)
 
         obs_pth = obj_pth / "simulation_result.pickle"
         if prm.clobber or not obs_pth.exists():
             logger.debug("starting simulation")
 
             sim_result = [
-                stx_mrx_simulation.simulate(
+                spobj_simulator.simulate(
                     space_object=spobj,
-                    interpolated_propagation=interp_prop,
+                    states_interpolation=interp,
                     # the same passage data is used for all perturbed objects
-                    passages=sim.passages,
-                    sch=sim.sch,
+                    passages=sim_params.passages,
+                    sch=sim_params.sch,
                     station_map=prm.station_map,
                     exp_detail_map=prm.exp_detail_map,
                 )
-                for spobj, interp_prop in tqdm(
+                for spobj, interp in tqdm(
                     # NOTE: used `list(zip(...))` instead of just `zip(...)` so that `tqdm` can get the length
-                    list(zip(sim.space_objects, sim.interpolated_propagations)),
+                    list(zip(spobj_and_perts, spobj_interp_and_perts)),
                     desc="simulating",
                 )
             ]

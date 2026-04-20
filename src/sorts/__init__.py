@@ -23,33 +23,38 @@ logger = logging.getLogger(__name__)
 ##
 # v2 imports
 ##
+
+# modules
 from . import (
     types,
     utils,
     schedule,
     pointing,
-    interpolated_propagation,
-    perturbation,
+    space_object,
     passage,
+    interpolation,
     simulation,
+    mpi_queued_execution,
 )
 
+# freq used types
 from .types import (
     ExperimentDetail as ExperimentDetail,
 )
 from .space_object import (
     SpaceObject as SpaceObject,
 )
-from .interpolated_propagation import (
-    InterpolatedPropagation as InterpolatedPropagation,
-)
-from .perturbation import (
-    SpaceObjectInterpolatedPropagationPair as SpaceObjectInterpolatedPropagationPair,
+from .interpolation import (
+    Interpolation as Interpolation,
 )
 from .passage import (
     Passage as Passage,
 )
+from .simulation import (
+    SpaceObjectSimulator as SpaceObjectSimulator,
+)
 
+# mpi helpers
 from .mpi_queued_execution import (
     MpiQueuedExecution as MpiQueuedExecution,
 )
@@ -72,7 +77,6 @@ from . import plotting
 from . import passes
 from . import errors
 from . import io
-from . import interpolation
 
 # from . import simulation_v1
 from . import signals
@@ -80,7 +84,6 @@ from . import correlator
 from . import propagator
 
 # classes
-from .space_object import SpaceObject
 from .population import Population
 from .propagator import Propagator
 from .radar import Scan

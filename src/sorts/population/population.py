@@ -246,7 +246,7 @@ class Population:
             size = 1
         else:
             size = len(np.arange(len(self.data))[row_indecies])
-        
+
         kwargs[self.state_format] = np.empty((6, size), dtype=np.float64)
         for ind, key in enumerate(self.state_fields):
             kwargs[self.state_format][ind] = self.data[row_indecies][key]
@@ -271,7 +271,7 @@ class Population:
 
         orb = self.get_orbit(index, M_cent=M_cent)
         obj = SpaceObject(
-            state=orb,
+            orbit=orb,
             frame=self.frame,
             epoch=Time(self.data["epoch"][index], format=self.epoch_format, scale=self.epoch_scale),
             properties={key: self.data[key][index] for key in self.property_fields},

@@ -40,7 +40,7 @@ class Kepler(Propagator[KeplerSettings]):
         logger.debug("Kepler:propagate")
         tv = convert_to_relative_time(space_object.epoch, times)
 
-        orb = space_object.state.copy()
+        orb = space_object.orbit.copy()
         if space_object.frame != self.settings.internal_frame:
             orb._cart = cel.convert(
                 space_object.epoch,

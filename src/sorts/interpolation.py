@@ -13,7 +13,7 @@ import numpy.typing as npt
 
 # TODO: should rename to `InterpolatedSpaceObject`? or it should no longer mimics the behavior of `SpaceObject`?
 # TODO: maybe we can just use `InterpolatedPropagation` instead?
-class Interpolator(ABC):
+class Interpolation(ABC):
     """Base Interpolation class that mimics the behavior of :code:`SpaceObject` so that a `Interpolator` instance can be used instead.
 
     To create a Interpolator one must define the :code:`get_state` method. to return interpolated
@@ -33,7 +33,7 @@ class Interpolator(ABC):
         pass
 
 
-class Legendre8(Interpolator):
+class Legendre8(Interpolation):
     """Order-8 Legendre polynomial interpolation of uniformly distributed states."""
 
     def __init__(self, states, t):
@@ -46,7 +46,7 @@ class Legendre8(Interpolator):
         return intep_states.T
 
 
-class Linear(Interpolator):
+class Linear(Interpolation):
     """Linear interpolation between states"""
 
     def __init__(self, states, t):
