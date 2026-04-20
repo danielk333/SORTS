@@ -10,7 +10,6 @@ from sorts import (
     types,
     utils,
     pointing,
-    interpolation,
     population,
     propagator,
     radar,
@@ -64,7 +63,7 @@ class PropagateStepOutput(t.NamedTuple):
     times: npt.NDArray[types.Float64_as_sec]
     spobj_and_perts: t.Sequence[sorts.SpaceObject]
     spobj_prop_and_perts: t.Sequence[types.EcefStates]
-    spobj_interp_and_perts: t.Sequence[interpolation.Interpolation]
+    spobj_interp_and_perts: t.Sequence[sorts.SpaceObjectStatesInterpolation]
 
 
 class SimulationParams(t.NamedTuple):
@@ -193,7 +192,7 @@ class Propagate(MpiQueuedExecution[tuple[sorts.SpaceObject, ScriptParams]]):
                         out_frame="ITRS", mean_elements_input=True
                     )
                 ),
-                interpolator=sorts.interpolation.Legendre8,
+                interpolator=sorts.space_object_states_interpolation.Legendre8,
             )
 
             spobj_and_perts = spobj_simulator.perturbate(

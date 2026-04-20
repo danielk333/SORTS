@@ -1,20 +1,14 @@
-#!/usr/bin/env python
-
-"""
-Interpolation functions.
-"""
-
-# TODO: unit tests for interpolators!!!
-
 from abc import ABC, abstractmethod
 import numpy as np
 import numpy.typing as npt
 
 
-# TODO: should rename to `InterpolatedSpaceObject`? or it should no longer mimics the behavior of `SpaceObject`?
-# TODO: maybe we can just use `InterpolatedPropagation` instead?
-class Interpolation(ABC):
-    """Base Interpolation class that mimics the behavior of :code:`SpaceObject` so that a `Interpolator` instance can be used instead.
+# TODO: unit tests for interpolators!!!
+class SpaceObjectStatesInterpolation(ABC):
+    """
+    The base class that represents the interpolation of the states of a `SpaceObject`.
+
+    An instance of this class can give estimated states outside of the sampled states, using the `get_state` method.
 
     To create a Interpolator one must define the :code:`get_state` method. to return interpolated
     This method should return states based on the data contained in the instance.
@@ -33,7 +27,7 @@ class Interpolation(ABC):
         pass
 
 
-class Legendre8(Interpolation):
+class Legendre8(SpaceObjectStatesInterpolation):
     """Order-8 Legendre polynomial interpolation of uniformly distributed states."""
 
     def __init__(self, states, t):
@@ -46,7 +40,7 @@ class Legendre8(Interpolation):
         return intep_states.T
 
 
-class Linear(Interpolation):
+class Linear(SpaceObjectStatesInterpolation):
     """Linear interpolation between states"""
 
     def __init__(self, states, t):

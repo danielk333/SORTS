@@ -7,9 +7,8 @@ Interpolation
 '''
 import numpy as np
 import matplotlib.pyplot as plt
-
+import sorts
 from sorts.propagator import SGP4
-from sorts import interpolation
 
 prop = SGP4(
     settings = dict(
@@ -25,10 +24,10 @@ states = prop.propagate(t, state0, mjd0, A=1.0, C_R = 1.0, C_D = 1.0)
 
 t_f = np.arange(0.0,360.0,step=1.0)
 
-interpolator = interpolation.Legendre8(states, t)
+interpolator = sorts.space_object_states_interpolation.Legendre8(states, t)
 finer_states = interpolator.get_state(t_f)
 
-lin_interp = interpolation.Linear(states, t)
+lin_interp = sorts.space_object_states_interpolation.Linear(states, t)
 lin_states = lin_interp.get_state(t_f)
 
 

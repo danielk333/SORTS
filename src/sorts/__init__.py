@@ -32,7 +32,7 @@ from . import (
     pointing,
     space_object,
     passage,
-    interpolation,
+    space_object_states_interpolation,
     simulation,
     mpi_queued_execution,
 )
@@ -44,8 +44,8 @@ from .types import (
 from .space_object import (
     SpaceObject as SpaceObject,
 )
-from .interpolation import (
-    Interpolation as Interpolation,
+from .space_object_states_interpolation import (
+    SpaceObjectStatesInterpolation as SpaceObjectStatesInterpolation,
 )
 from .passage import (
     Passage as Passage,
