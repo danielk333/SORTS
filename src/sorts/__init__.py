@@ -38,11 +38,15 @@ from .types import (
 from .space_object import (
     SpaceObject as SpaceObject,
 )
-from .interpolation import Interpolation
+from .interpolation import (
+    Interpolation as Interpolation,
+)
 from .passage import (
     Passage as Passage,
 )
-from .simulation import SpaceObjectSimulator
+from .simulation import (
+    SpaceObjectSimulator as SpaceObjectSimulator,
+)
 
 from .mpi_queued_execution import (
     MpiQueuedExecution as MpiQueuedExecution,
