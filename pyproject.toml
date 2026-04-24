@@ -23,20 +23,20 @@ classifiers = [
 ]
 # TODO: this is way to many deps, i think many are not used
 dependencies = [
-  "h5py>=3.2.1",
-  "matplotlib>=2.2.2",
-  "numpy>=1.14.3",
-  "scipy>=1.1.0",
+  "h5py>=3.10.0",      # has pre-built packages for Python 3.12
+  "matplotlib>=3.8.4", # Enable building against numpy 2.0
+  "numpy>=1.26.0",     # addition of Python 3.12.0 support
+  "scipy>=1.13.0",     # support NumPy 2.0.0, and is backwards compatible to NumPy 1.22.4
   "sgp4>=2.7",
   "tabulate>=0.8.7",
   "tqdm>=4.46.0",
-  "astropy>=4.1",
+  "astropy>=6.1.0",    # compiled against NumPy 2.0
   "xmlschema>=1.5.1",
   "pyorb>=0.5.4",
   "pyant>=1.1",
-  "yappi>=1.4.0",
+  "yappi>=1.5.1",      # Add support for Python 3.12
   "requests>=2.32.3",
-  "pandas>=2.2.3",
+  "pandas>=2.2.2",     # compatible with numpy 2.0
   "pyqt6>=6.8.1",
   "bottleneck>=1.5.0",
   "mpi4py>=4.1.0",
