@@ -9,10 +9,6 @@ We use [`mkdocs`](https://www.mkdocs.org/) and [`mkdocstrings`](https://mkdocstr
 use this to install the packages
 ```bash
 uv sync --all-extras
-
-# the sorts bundling info does not work well with `uv` at the moment
-# so a separate install using `pip` sorts itself is needed.
-uv pip install -e .
 ```
 
 ## Tests
