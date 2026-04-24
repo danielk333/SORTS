@@ -77,6 +77,12 @@ dev = [
   "mkdocs-jupyter>=0.25.1",
 ]
 
+# `dependency-groups` is a new feature, bascially like the old extras mechanism but only for dev deps
+# - https://peps.python.org/pep-0735/
+# - https://pip.pypa.io/en/stable/news/#id80
+[dependency-groups]
+dev = ["sorts"]
+
 [tool.setuptools.package-data]
 sorts = ["py.typed", "data/*"]
 
@@ -95,5 +101,13 @@ log_level = "INFO"
 log_cli = true
 testpaths = ["tests"]
 
+[tool.uv]
+# A workaround for using editable install modules wiht `uv` and `pylance`
+# https://github.com/microsoft/pylance-release/blob/d7a084cb2086f22aa999e9392242d15acd53b327/TROUBLESHOOTING.md#editable-install-modules-not-found
+config-settings = { editable_mode = "compat" }
+
+[tool.uv.workspace]
+members = ["."]
+
 [tool.uv.sources]
-sorts = { workspace = true }
+sorts = { workspace = true, editable = true }

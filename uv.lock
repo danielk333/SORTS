@@ -2905,6 +2905,11 @@ spacetrack = [
     { name = "spacetrack" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "sorts" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "astropy", specifier = ">=4.1" },
@@ -2954,6 +2959,9 @@ requires-dist = [
     { name = "yappi", specifier = ">=1.4.0" },
 ]
 provides-extras = ["spacetrack", "jupyter", "dev"]
+
+[package.metadata.requires-dev]
+dev = [{ name = "sorts", editable = "." }]
 
 [[package]]
 name = "soupsieve"
