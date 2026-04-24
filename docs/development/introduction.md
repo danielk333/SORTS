@@ -8,7 +8,7 @@ We use [`mkdocs`](https://www.mkdocs.org/) and [`mkdocstrings`](https://mkdocstr
 
 use this to install the packages
 ```bash
-uv sync --all-extras
+uv sync --all-extras --resolution lowest-direct
 ```
 
 ## Tests
