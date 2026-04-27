@@ -57,7 +57,7 @@ def test_south_to_north_circular_orbit():
     min_elevation = 5.0
 
     spobj_orbital_period: Float64_as_sec = pyorb.orbital_period(
-        spobj_orbital_radius, pyorb.GM_earth
+        spobj_orbital_radius, pyorb.G * pyorb.M_earth
     )
 
     passage_angular_duration: Float64_as_deg = np.degrees(
