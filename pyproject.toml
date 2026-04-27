@@ -23,12 +23,17 @@ classifiers = [
 ]
 # TODO: this is way to many deps, i think many are not used
 dependencies = [
-  "h5py>=3.10.0",      # has pre-built packages for Python 3.12
-  "matplotlib>=3.8.4", # Enable building against numpy 2.0
-  "numpy>=1.26.0",     # addition of Python 3.12.0 support
+  "h5py>=3.11", # v3.10 has pre-built packages for Python 3.12; v3.11 is compatible with Numpy 2.0
+  # v3.8.4 Enable building against numpy 2.0;
+  # v3.9.0 for working around the `pyant` error regarding `pyplot.Colormap`: `cmap: plt.Colormap | None = None`
+  # ```
+  # AttributeError: module 'matplotlib.pyplot' has no attribute 'Colormap'.
+  # ```
+  "matplotlib>=3.9.0",
+  "numpy>=2.0.0",      # v1.26+ gives Python 3.12.0 support; we go for v2.0+
   "scipy>=1.13.0",     # support NumPy 2.0.0, and is backwards compatible to NumPy 1.22.4
   "sgp4>=2.7",
-  "tabulate>=0.8.7",
+  "tabulate>=0.10.0",  # v0.10.0 Add support for Python 3.11, 3.12, 3.13, 3.14.
   "tqdm>=4.46.0",
   "astropy>=6.1.0",    # compiled against NumPy 2.0
   "xmlschema>=1.5.1",
