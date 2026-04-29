@@ -16,7 +16,6 @@ class MpiJobQueueExecutor:
     master_proc_rank: t.ClassVar[t.Final] = 0
 
     num_workers: int
-
     comm: MPI.Intracomm = dataclasses.field(default_factory=lambda: MPI.COMM_WORLD)
     is_run_with_mpi: bool = True
 
@@ -202,7 +201,10 @@ class MpiJobQueueExecutor:
         return wrapper
 
     @staticmethod
-    def as_item_of_retval[**Params, Ret](func: t.Callable[Params, list[Ret]], val):
+    def as_item_of_list_retval[**Params, Ret](func: t.Callable[Params, t.Sequence[Ret]], val):
+        """
+        Take a function `func` that returns a  Cast the input `val` to be"""
+
         return t.cast(Ret, val)
 
 
