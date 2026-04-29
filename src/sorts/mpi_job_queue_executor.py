@@ -9,6 +9,10 @@ logger = logging.getLogger(__name__)
 
 @dataclasses.dataclass(kw_only=True, frozen=True)
 class MpiJobQueueExecutor:
+    """
+    Use MPI as a job queue, with the 0th rank process as master and the rest as workers.
+    """
+
     num_workers: int
 
     master_proc_rank: int = 0
