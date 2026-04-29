@@ -30,7 +30,7 @@ parser.add_argument("--out_dir", type=Path, default=Path(__file__).parent / "loc
 parser.add_argument("--name", type=str, default="sparse_tracking_simulation")
 parser.add_argument("--clobber", action="store_true")
 parser.add_argument("--antennas", type=int, default=10_000)
-args = parser.parse_args()
+cli_args = parser.parse_args()
 
 R_earth = 6371e3
 
@@ -70,11 +70,7 @@ class SimulationParams(t.NamedTuple):
     passages: list[passage.Passage]
 
 
-def prepare_simulation(args) -> tuple[ScriptParams, population.Population]:
-    ##
-    # prepare simulation environment
-    ##
-
+def prepare_simulation(cli_args: argparse.Namespace) -> tuple[ScriptParams, population.Population]:
     coherent_integration_time = 0.04
     duty_cycle = 0.2
     grid_size = (4, 4)  # used a very small grid for demo, normal values are e.g. `(50, 50)`
@@ -83,7 +79,7 @@ def prepare_simulation(args) -> tuple[ScriptParams, population.Population]:
     time_slice = coherent_integration_time / duty_cycle
     radar_sys = radar.radars.nostra.gen_nostra(
         frequency=3.2e9,
-        antenna_num=args.antennas,
+        antenna_num=cli_args.antennas,
         antenna_spacing_lambda=0.65,
         antenna_efficiency=0.5,
         antenna_input_power=100,  # W
@@ -142,9 +138,9 @@ def prepare_simulation(args) -> tuple[ScriptParams, population.Population]:
     )
 
     prm = ScriptParams(
-        save_dname=args.name,
-        save_dpath=args.out_dir / args.name,
-        plot_dpath=args.out_dir / args.name / "plots",
+        save_dname=cli_args.name,
+        save_dpath=cli_args.out_dir / cli_args.name,
+        plot_dpath=cli_args.out_dir / cli_args.name / "plots",
         start_time=start_time,
         # end_time = Time("2025-01-07 00:00:00"),
         end_time=Time("2025-01-02 00:00:00"),
@@ -161,7 +157,7 @@ def prepare_simulation(args) -> tuple[ScriptParams, population.Population]:
             settings=propagator.Sgp4Settings(out_frame="ITRS", mean_elements_input=True)
         ),
         oids=oids,
-        clobber=args.clobber,
+        clobber=cli_args.clobber,
         rng=rng,
     )
     utils.ensure_directory_exist(prm.save_dpath)
@@ -170,148 +166,145 @@ def prepare_simulation(args) -> tuple[ScriptParams, population.Population]:
     return prm, spobj_pop
 
 
-def propagate():
-    prm, spobj_pop = prepare_simulation(args)
+def propagate(spobj: sorts.SpaceObject, prm: ScriptParams):
+    obj_pth = prm.save_dpath / f"space_object_{spobj.object_id}"
+    utils.ensure_directory_exist(obj_pth)
 
-    spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
-    worker_job_params_ls = [(spobj, prm) for spobj in spobjs]
+    propagate_step_output_pth = obj_pth / "propagate_step_output.pickle"
+    if prm.clobber or not propagate_step_output_pth.exists():
+        spobj_simulator = sorts.SpaceObjectSimulator(
+            propagator=sorts.propagator.Sgp4(
+                settings=sorts.propagator.Sgp4Settings(out_frame="ITRS", mean_elements_input=True)
+            ),
+            interpolator=sorts.space_object_states_interpolation.Legendre8,
+        )
 
-    for worker_job_params in worker_job_params_ls:
-        spobj, prm = worker_job_params
-        obj_pth = prm.save_dpath / f"space_object_{spobj.object_id}"
-        utils.ensure_directory_exist(obj_pth)
+        spobj_and_perts = spobj_simulator.perturbate(
+            space_object=spobj,
+            perturbation_format="kepler",
+            pert_val=(
+                1e-3, 1e-5, 1e-5, 1e-5, 1e-5, 1e-3  # fmt: skip
+            ),
+        )
 
-        propagate_step_output_pth = obj_pth / "propagate_step_output.pickle"
-        if prm.clobber or not propagate_step_output_pth.exists():
-            spobj_simulator = sorts.SpaceObjectSimulator(
-                propagator=sorts.propagator.Sgp4(
-                    settings=sorts.propagator.Sgp4Settings(
-                        out_frame="ITRS", mean_elements_input=True
-                    )
-                ),
-                interpolator=sorts.space_object_states_interpolation.Legendre8,
-            )
+        times, true_states = spobj_simulator.propagate(
+            space_object=spobj,
+            start_time=prm.start_time,
+            end_time=prm.end_time,
+            time_step=prm.time_step,
+        )
 
-            spobj_and_perts = spobj_simulator.perturbate(
-                space_object=spobj,
-                perturbation_format="kepler",
-                pert_val=(
-                    1e-3, 1e-5, 1e-5, 1e-5, 1e-5, 1e-3  # fmt: skip
-                ),
-            )
-
-            times, true_states = spobj_simulator.propagate(
-                space_object=spobj,
+        spobj_prop_and_perts = [true_states]
+        for obj in spobj_and_perts[1:]:
+            _, pert_states = spobj_simulator.propagate(
+                space_object=obj,
                 start_time=prm.start_time,
                 end_time=prm.end_time,
                 time_step=prm.time_step,
             )
+            spobj_prop_and_perts.append(pert_states)
 
-            spobj_prop_and_perts = [true_states]
-            for obj in spobj_and_perts[1:]:
-                _, pert_states = spobj_simulator.propagate(
-                    space_object=obj,
-                    start_time=prm.start_time,
-                    end_time=prm.end_time,
-                    time_step=prm.time_step,
-                )
-                spobj_prop_and_perts.append(pert_states)
+        spobj_interp_and_perts = [
+            spobj_simulator.make_interpolation(times=times, states=states)
+            for states in spobj_prop_and_perts
+        ]
 
-            spobj_interp_and_perts = [
-                spobj_simulator.make_interpolation(times=times, states=states)
-                for states in spobj_prop_and_perts
-            ]
-
-            propagate_step_output = PropagateStepOutput(
-                spobj_simulator=spobj_simulator,
-                times=times,
-                spobj_and_perts=spobj_and_perts,
-                spobj_prop_and_perts=spobj_prop_and_perts,
-                spobj_interp_and_perts=spobj_interp_and_perts,
-            )
-            utils.safe_pickle(propagate_step_output, propagate_step_output_pth)
+        propagate_step_output = PropagateStepOutput(
+            spobj_simulator=spobj_simulator,
+            times=times,
+            spobj_and_perts=spobj_and_perts,
+            spobj_prop_and_perts=spobj_prop_and_perts,
+            spobj_interp_and_perts=spobj_interp_and_perts,
+        )
+        utils.safe_pickle(propagate_step_output, propagate_step_output_pth)
 
 
-def simulate_obs():
-    prm, spobj_pop = prepare_simulation(args)
+def simulate_obs(object_id: types.SpaceObjectId, prm: ScriptParams):
+    obj_pth = prm.save_dpath / f"space_object_{object_id}"
+    propagate_step_output_pth = obj_pth / "propagate_step_output.pickle"
+    with open(propagate_step_output_pth, "rb") as fh:
+        propagate_step_output: PropagateStepOutput = pickle.load(fh)
 
-    spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
-    worker_job_params_ls = [(spobj.object_id, prm) for spobj in spobjs]
+    (
+        spobj_simulator,
+        times,
+        spobj_and_perts,
+        spobj_prop_and_perts,
+        spobj_interp_and_perts,
+    ) = propagate_step_output
 
-    for worker_job_params in tqdm(worker_job_params_ls, desc="running worker job"):
-        object_id, prm = worker_job_params
-        obj_pth = prm.save_dpath / f"space_object_{object_id}"
-        propagate_step_output_pth = obj_pth / "propagate_step_output.pickle"
-        with open(propagate_step_output_pth, "rb") as fh:
-            propagate_step_output: PropagateStepOutput = pickle.load(fh)
+    spobj = spobj_and_perts[0]
+    true_states = spobj_prop_and_perts[0]
+    true_states_interp = spobj_interp_and_perts[0]
 
-        (
-            spobj_simulator,
-            times,
-            spobj_and_perts,
-            spobj_prop_and_perts,
-            spobj_interp_and_perts,
-        ) = propagate_step_output
+    sim_params_pth = obj_pth / "sim_params.pickle"
+    if prm.clobber or not sim_params_pth.exists():
+        passages = passage.find_simultaneous_passages(
+            dt=times,
+            space_object=spobj,
+            states=true_states[:3, ...],
+            tx_station=prm.tx_station,
+            rx_stations=prm.rx_stations,
+            epoch=utils.to_datetime64_us(prm.start_time),
+        )
 
-        spobj = spobj_and_perts[0]
-        true_states = spobj_prop_and_perts[0]
-        true_states_interp = spobj_interp_and_perts[0]
+        tracker_sch = pointing.sparse_tracking(
+            passages_of_spobj=passages,
+            interpolation=true_states_interp,
+            points_per_passage=10,
+            tx_station=prm.tx_station,
+            rx_stations=prm.rx_stations,
+            exp_id=prm.exp_detail_map[0].id,
+            slice_duration=prm.exp_detail_map[0].slice_duration,
+        )
 
-        sim_params_pth = obj_pth / "sim_params.pickle"
-        if prm.clobber or not sim_params_pth.exists():
-            passages = passage.find_simultaneous_passages(
-                dt=times,
+        sim_params = SimulationParams(
+            sch=tracker_sch,
+            passages=passages,
+        )
+        utils.safe_pickle(sim_params, sim_params_pth)
+    else:
+        with open(sim_params_pth, "rb") as fh:
+            sim_params: SimulationParams = pickle.load(fh)
+
+    obs_pth = obj_pth / "simulation_result.pickle"
+    if prm.clobber or not obs_pth.exists():
+        logger.debug("starting simulation")
+
+        sim_result = [
+            spobj_simulator.simulate(
                 space_object=spobj,
-                states=true_states[:3, ...],
-                tx_station=prm.tx_station,
-                rx_stations=prm.rx_stations,
-                epoch=utils.to_datetime64_us(prm.start_time),
+                states_interpolation=interp,
+                # the same passage data is used for all perturbed objects
+                passages=sim_params.passages,
+                sch=sim_params.sch,
+                station_map=prm.station_map,
+                exp_detail_map=prm.exp_detail_map,
             )
-
-            tracker_sch = pointing.sparse_tracking(
-                passages_of_spobj=passages,
-                interpolation=true_states_interp,
-                points_per_passage=10,
-                tx_station=prm.tx_station,
-                rx_stations=prm.rx_stations,
-                exp_id=prm.exp_detail_map[0].id,
-                slice_duration=prm.exp_detail_map[0].slice_duration,
+            for spobj, interp in tqdm(
+                # NOTE: used `list(zip(...))` instead of just `zip(...)` so that `tqdm` can get the length
+                list(zip(spobj_and_perts, spobj_interp_and_perts)),
+                desc="simulating",
             )
+        ]
 
-            sim_params = SimulationParams(
-                sch=tracker_sch,
-                passages=passages,
-            )
-            utils.safe_pickle(sim_params, sim_params_pth)
-        else:
-            with open(sim_params_pth, "rb") as fh:
-                sim_params: SimulationParams = pickle.load(fh)
+        logger.debug("simulation done")
 
-        obs_pth = obj_pth / "simulation_result.pickle"
-        if prm.clobber or not obs_pth.exists():
-            logger.debug("starting simulation")
-
-            sim_result = [
-                spobj_simulator.simulate(
-                    space_object=spobj,
-                    states_interpolation=interp,
-                    # the same passage data is used for all perturbed objects
-                    passages=sim_params.passages,
-                    sch=sim_params.sch,
-                    station_map=prm.station_map,
-                    exp_detail_map=prm.exp_detail_map,
-                )
-                for spobj, interp in tqdm(
-                    # NOTE: used `list(zip(...))` instead of just `zip(...)` so that `tqdm` can get the length
-                    list(zip(spobj_and_perts, spobj_interp_and_perts)),
-                    desc="simulating",
-                )
-            ]
-
-            logger.debug("simulation done")
-
-            utils.safe_pickle(sim_result, obs_pth)
+        utils.safe_pickle(sim_result, obs_pth)
 
 
-propagate()
-simulate_obs()
+# propagate
+prm, spobj_pop = prepare_simulation(cli_args)
+spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
+propagate_params_list = [(spobj, prm) for spobj in spobjs]
+
+for propagate_params in propagate_params_list:
+    propagate(*propagate_params)
+
+# simulate_obs
+prm, spobj_pop = prepare_simulation(cli_args)
+spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
+simulate_obs_params_list = [(spobj.object_id, prm) for spobj in spobjs]
+
+for simulate_obs_params in simulate_obs_params_list:
+    simulate_obs(*simulate_obs_params)
