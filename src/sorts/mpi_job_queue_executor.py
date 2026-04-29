@@ -13,9 +13,10 @@ class MpiJobQueueExecutor:
     Use MPI as a job queue, with the 0th rank process as master and the rest as workers.
     """
 
+    master_proc_rank: t.ClassVar[t.Final] = 0
+
     num_workers: int
 
-    master_proc_rank: int = 0
     comm: MPI.Intracomm = dataclasses.field(default_factory=lambda: MPI.COMM_WORLD)
     is_run_with_mpi: bool = True
 
