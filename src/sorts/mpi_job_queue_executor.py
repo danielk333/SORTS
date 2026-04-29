@@ -1,5 +1,5 @@
 from __future__ import annotations
-import logging, typing as t, traceback, time, enum, dataclasses, sys
+import logging, typing as t, traceback, time, enum, dataclasses, sys, functools
 from tqdm import tqdm
 from mpi4py import MPI
 
@@ -174,19 +174,30 @@ class MpiJobQueueExecutor:
             #     # throw for unexpected msg
             #     raise RuntimeError(f"worker: {worker_proc_rank} | received unexcepted msg: {msg}")
 
-    # TODO: add a master_only decorator
     def master_only[**Params, Ret](self, func: t.Callable[Params, Ret]):
         """
         Only runs in master process (MPI rank 0)
 
         NOTE:
-            There is no `worker_only` decorator,
+            There is no `worker_only` counterpart,
             use the job dispatching mechanism of this class to pass job to workers instead.
         """
 
         if not self.is_run_with_mpi:
-            ...
+            # just a pass-through if we are not using MPI
+            return func
+
         else:
+
+            @functools.wraps(func)
+            def wrapper(*args: Params.args, **kwargs: Params.kwargs):
+                if self.comm.rank == self.master_proc_rank:
+                    return func(*args, **kwargs)
+                else:
+                    # return a noop func
+                    return lambda *args, **kwargs: None
+
+            return wrapper
             ...
 
     @staticmethod
