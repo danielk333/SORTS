@@ -308,8 +308,10 @@ except ImportError:
 # mpi_executor = sorts.MpiQueuedExecutor(num_workers=7, is_run_with_mpi=pool_size > 1)
 mpi_executor = sorts.MpiJobQueueExecutor(num_workers=7, is_run_with_mpi=False)
 
-# propagate
+# preparations
 prm, spobj_pop = mpi_executor.master_only(prepare_simulation)(cli_args)
+
+# propagate
 spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
 job_params_list = [(spobj, prm) for spobj in spobjs]
 
@@ -319,7 +321,6 @@ mpi_executor.run_job_queue(
 )
 
 # simulate_obs
-prm, spobj_pop = mpi_executor.master_only(prepare_simulation)(cli_args)
 spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
 job_params_list = [(spobj.object_id, prm) for spobj in spobjs]
 

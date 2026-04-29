@@ -293,8 +293,10 @@ def simulate_obs(object_id: types.SpaceObjectId, prm: ScriptParams):
         utils.safe_pickle(sim_result, obs_pth)
 
 
-# propagate
+# preparations
 prm, spobj_pop = prepare_simulation(cli_args)
+
+# propagate
 spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
 propagate_params_list = [(spobj, prm) for spobj in spobjs]
 
