@@ -176,29 +176,29 @@ class MpiJobQueueExecutor:
 
     def master_only[**Params, Ret](self, func: t.Callable[Params, Ret]):
         """
-        Only runs in master process (MPI rank 0)
+        A decorator that marks a function to run in master process (MPI rank 0) only.
 
         NOTE:
             There is no `worker_only` counterpart,
             use the job dispatching mechanism of this class to pass job to workers instead.
         """
 
-        if not self.is_run_with_mpi:
+        @functools.wraps(func)
+        def wrapper(*args: Params.args, **kwargs: Params.kwargs):
             # just a pass-through if we are not using MPI
-            return func
+            if not self.is_run_with_mpi:
+                return func(*args, **kwargs)
 
-        else:
-
-            @functools.wraps(func)
-            def wrapper(*args: Params.args, **kwargs: Params.kwargs):
+            else:
+                # Also a pass-through if we are a master rank MPI process
                 if self.comm.rank == self.master_proc_rank:
                     return func(*args, **kwargs)
                 else:
-                    # return a noop func
-                    return lambda *args, **kwargs: None
+                    # return a noop func, and cast it to keep the original typings
+                    noop_fn = t.cast(t.Callable[Params, Ret], lambda *args, **kwargs: None)
+                    return noop_fn(*args, **kwargs)
 
-            return wrapper
-            ...
+        return wrapper
 
     @staticmethod
     def as_item_of_retval[**Params, Ret](func: t.Callable[Params, list[Ret]], val):
