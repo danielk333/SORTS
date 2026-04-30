@@ -3,7 +3,6 @@ import logging, typing as t, traceback, time, enum, dataclasses, sys, functools
 from tqdm import tqdm
 from mpi4py import MPI
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -199,13 +198,6 @@ class MpiJobQueueExecutor:
                     return noop_fn(*args, **kwargs)
 
         return wrapper
-
-    @staticmethod
-    def as_item_of_list_retval[**Params, Ret](func: t.Callable[Params, t.Sequence[Ret]], val):
-        """
-        Take a function `func` that returns a  Cast the input `val` to be"""
-
-        return t.cast(Ret, val)
 
 
 # TODO: remove?

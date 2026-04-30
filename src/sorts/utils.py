@@ -163,3 +163,23 @@ def safe_pickle(obj, fpath: str | Path):
     with open(fpath_tmp, "wb") as f:
         pickle.dump(obj, f)
     fpath_tmp.rename(fpath)
+
+
+def as_retval[**Params, Ret](func: t.Callable[Params, Ret], val):
+    """
+    Cast `val` to the type of return val of `func`.
+
+    i.e.: Given `func(...) -> R`, `val` is casted to `R`
+    """
+
+    return t.cast(Ret, val)
+
+
+def as_item_of_seq_retval[**Params, Ret](func: t.Callable[Params, t.Sequence[Ret]], val):
+    """
+    Cast `val` to the type of the item in a sequence returning `func`.
+
+    i.e.: Given `func(...) -> Sequence[R]`, `val` is casted to `R`
+    """
+
+    return t.cast(Ret, val)

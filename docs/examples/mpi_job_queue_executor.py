@@ -14,7 +14,7 @@ def gen_job_params():
 
 
 def worker_process(params):
-    params = sorts.MpiJobQueueExecutor.as_item_of_list_retval(gen_job_params, params)
+    params = sorts.utils.as_item_of_seq_retval(gen_job_params, params)
     time.sleep(params["sleep"])
     print(f"task id=", params["id"])
 
