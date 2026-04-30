@@ -304,7 +304,6 @@ for propagate_params in propagate_params_list:
     propagate(*propagate_params)
 
 # simulate_obs
-prm, spobj_pop = prepare_simulation(cli_args)
 spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
 simulate_obs_params_list = [(spobj.object_id, prm) for spobj in spobjs]
 
