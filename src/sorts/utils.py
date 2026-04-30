@@ -167,7 +167,7 @@ def safe_pickle(obj, fpath: str | Path):
 
 def as_retval[**Params, Ret](func: t.Callable[Params, Ret], val):
     """
-    Cast `val` to the type of return val of `func`.
+    Cast `val` to the type of return value of `func`.
 
     i.e.: Given `func(...) -> R`, `val` is casted to `R`
     """
