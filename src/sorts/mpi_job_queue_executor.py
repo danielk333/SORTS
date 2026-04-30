@@ -175,7 +175,9 @@ class MpiJobQueueExecutor:
 
     def master_only[**Params, Ret](self, func: t.Callable[Params, Ret]):
         """
-        A decorator that marks a function to run in master process (MPI rank 0) only.
+        A function decorator that makes it run in the master process (MPI rank 0) only.
+
+        The return type of the noop code path is hidden (it returns `None`).
 
         NOTE:
             There is no `worker_only` counterpart,
