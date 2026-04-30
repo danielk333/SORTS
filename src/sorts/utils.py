@@ -183,3 +183,13 @@ def as_item_of_seq_retval[**Params, Ret](func: t.Callable[Params, t.Sequence[Ret
     """
 
     return t.cast(Ret, val)
+
+
+def empty_list_of_retval[**Params, Ret](func: t.Callable[Params, Ret]) -> list[Ret]:
+    """
+    Return an empty list of the type of return value of `func`.
+
+    i.e.: Given `func(...) -> R`, return `list[R]`
+    """
+
+    return t.cast(list[Ret], [])
