@@ -151,7 +151,7 @@ def ensure_directory_exist(dpath: str | Path):
 def safe_pickle(obj, fpath: str | Path):
     """
     Use pickle to save an object to the specified file path, with a few extra steps to make the write operation safer:
-    - The output directory will be created if not exists
+    - Any missing directories will be created.
     - We write to an tmp file first then rename that file, as a simple way to reduce risk of corrupted files
     """
 
