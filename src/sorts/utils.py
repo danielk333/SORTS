@@ -1,4 +1,4 @@
-import typing as t, pickle
+import typing as t, pickle, dataclasses
 from datetime import datetime, timedelta
 from pathlib import Path
 import numpy as np
@@ -148,7 +148,16 @@ def ensure_directory_exist(dpath: str | Path):
     assert dpath.is_dir()
 
 
-def safe_pickle(obj, fpath: str | Path):
+@dataclasses.dataclass(kw_only=True, frozen=True)
+class PickledObject[T]:
+    fpath: Path
+
+    def load(self):
+        with open(self.fpath, "rb") as fh:
+            return t.cast(T, pickle.load(fh))
+
+
+def safe_pickle[T](obj: T, fpath: str | Path) -> PickledObject[T]:
     """
     Use pickle to save an object to the specified file path, with a few extra steps to make the write operation safer:
     - Any missing directories will be created.
@@ -163,6 +172,35 @@ def safe_pickle(obj, fpath: str | Path):
     with open(fpath_tmp, "wb") as f:
         pickle.dump(obj, f)
     fpath_tmp.rename(fpath)
+
+    return PickledObject[T](fpath=fpath)
+
+
+def use_pickled_or_compute[**Params, Ret](
+    fpath: str | Path,
+    overwrite,
+    func: t.Callable[Params, Ret],
+    *args: Params.args,
+    **kwargs: Params.kwargs,
+) -> PickledObject[Ret]:
+    """
+    Use the pickled file on disk if exists, otherwise generate a new pickle.
+
+    Any missing directories will be created.
+
+    Args:
+        pickle_path: The file path to read/write from/to.
+        overwrite: Whether or not to overwrite an existing pickle file.
+        func: The function to compute if new pickle is to be generated.
+        *args: The `*args` for `func`.
+        **kwargs: The `**kwargs` for `func`.
+    """
+
+    if overwrite or not Path(fpath).exists():
+        return safe_pickle(func(*args, **kwargs), fpath)
+
+    else:
+        return PickledObject[Ret](fpath=Path(fpath))
 
 
 def as_retval[**Params, Ret](func: t.Callable[Params, Ret], val):

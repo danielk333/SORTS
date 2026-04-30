@@ -1,4 +1,4 @@
-import logging, typing as t, pickle, argparse
+import logging, typing as t, argparse
 from dataclasses import dataclass
 from pathlib import Path
 import numpy as np
@@ -13,11 +13,9 @@ from sorts import (
     population,
     propagator,
     radar,
-    schedule,
     passage,
     ExperimentDetail,
 )
-
 
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger("sorts.propagator").setLevel(logging.WARNING)
@@ -55,19 +53,6 @@ class ScriptParams:
     oids: npt.NDArray[np.int64]
     clobber: bool
     rng: t.Any
-
-
-class PropagateStepOutput(t.NamedTuple):
-    spobj_simulator: sorts.SpaceObjectSimulator
-    times: npt.NDArray[types.Float64_as_sec]
-    spobj_and_perts: t.Sequence[sorts.SpaceObject]
-    spobj_prop_and_perts: t.Sequence[types.EcefStates]
-    spobj_interp_and_perts: t.Sequence[sorts.SpaceObjectStatesInterpolation]
-
-
-class SimulationParams(t.NamedTuple):
-    sch: schedule.ScheduleDataframe
-    passages: list[passage.Passage]
 
 
 def prepare_simulation(cli_args: argparse.Namespace) -> tuple[ScriptParams, population.Population]:
@@ -167,145 +152,164 @@ def prepare_simulation(cli_args: argparse.Namespace) -> tuple[ScriptParams, popu
 
 
 def propagate(spobj: sorts.SpaceObject, prm: ScriptParams):
-    obj_pth = prm.save_dpath / f"space_object_{spobj.object_id}"
-    utils.ensure_directory_exist(obj_pth)
+    spobj_simulator = sorts.SpaceObjectSimulator(
+        propagator=sorts.propagator.Sgp4(
+            settings=sorts.propagator.Sgp4Settings(out_frame="ITRS", mean_elements_input=True)
+        ),
+        interpolator=sorts.space_object_states_interpolation.Legendre8,
+    )
 
-    propagate_step_output_pth = obj_pth / "propagate_step_output.pickle"
-    if prm.clobber or not propagate_step_output_pth.exists():
-        spobj_simulator = sorts.SpaceObjectSimulator(
-            propagator=sorts.propagator.Sgp4(
-                settings=sorts.propagator.Sgp4Settings(out_frame="ITRS", mean_elements_input=True)
-            ),
-            interpolator=sorts.space_object_states_interpolation.Legendre8,
-        )
+    spobj_and_perts = spobj_simulator.perturbate(
+        space_object=spobj,
+        perturbation_format="kepler",
+        pert_val=(
+            1e-3, 1e-5, 1e-5, 1e-5, 1e-5, 1e-3  # fmt: skip
+        ),
+    )
 
-        spobj_and_perts = spobj_simulator.perturbate(
-            space_object=spobj,
-            perturbation_format="kepler",
-            pert_val=(
-                1e-3, 1e-5, 1e-5, 1e-5, 1e-5, 1e-3  # fmt: skip
-            ),
-        )
+    times, true_states = spobj_simulator.propagate(
+        space_object=spobj,
+        start_time=prm.start_time,
+        end_time=prm.end_time,
+        time_step=prm.time_step,
+    )
 
-        times, true_states = spobj_simulator.propagate(
-            space_object=spobj,
+    spobj_prop_and_perts = [true_states]
+    for obj in spobj_and_perts[1:]:
+        _, pert_states = spobj_simulator.propagate(
+            space_object=obj,
             start_time=prm.start_time,
             end_time=prm.end_time,
             time_step=prm.time_step,
         )
+        spobj_prop_and_perts.append(pert_states)
 
-        spobj_prop_and_perts = [true_states]
-        for obj in spobj_and_perts[1:]:
-            _, pert_states = spobj_simulator.propagate(
-                space_object=obj,
-                start_time=prm.start_time,
-                end_time=prm.end_time,
-                time_step=prm.time_step,
-            )
-            spobj_prop_and_perts.append(pert_states)
+    spobj_interp_and_perts = [
+        spobj_simulator.make_interpolation(times=times, states=states)
+        for states in spobj_prop_and_perts
+    ]
 
-        spobj_interp_and_perts = [
-            spobj_simulator.make_interpolation(times=times, states=states)
-            for states in spobj_prop_and_perts
-        ]
-
-        propagate_step_output = PropagateStepOutput(
-            spobj_simulator=spobj_simulator,
-            times=times,
-            spobj_and_perts=spobj_and_perts,
-            spobj_prop_and_perts=spobj_prop_and_perts,
-            spobj_interp_and_perts=spobj_interp_and_perts,
-        )
-        utils.safe_pickle(propagate_step_output, propagate_step_output_pth)
+    return spobj_simulator, times, spobj_and_perts, spobj_prop_and_perts, spobj_interp_and_perts
 
 
-def simulate_obs(object_id: types.SpaceObjectId, prm: ScriptParams):
-    obj_pth = prm.save_dpath / f"space_object_{object_id}"
-    propagate_step_output_pth = obj_pth / "propagate_step_output.pickle"
-    with open(propagate_step_output_pth, "rb") as fh:
-        propagate_step_output: PropagateStepOutput = pickle.load(fh)
-
+def compute_schedule_and_passages(propagate_step_pickles: utils.PickledObject, prm: ScriptParams):
     (
         spobj_simulator,
         times,
         spobj_and_perts,
         spobj_prop_and_perts,
         spobj_interp_and_perts,
-    ) = propagate_step_output
+    ) = utils.as_retval(propagate, propagate_step_pickles.load())
 
     spobj = spobj_and_perts[0]
     true_states = spobj_prop_and_perts[0]
     true_states_interp = spobj_interp_and_perts[0]
 
-    sim_params_pth = obj_pth / "sim_params.pickle"
-    if prm.clobber or not sim_params_pth.exists():
-        passages = passage.find_simultaneous_passages(
-            dt=times,
-            space_object=spobj,
-            states=true_states[:3, ...],
-            tx_station=prm.tx_station,
-            rx_stations=prm.rx_stations,
-            epoch=utils.to_datetime64_us(prm.start_time),
-        )
+    passages = passage.find_simultaneous_passages(
+        dt=times,
+        space_object=spobj,
+        states=true_states[:3, ...],
+        tx_station=prm.tx_station,
+        rx_stations=prm.rx_stations,
+        epoch=utils.to_datetime64_us(prm.start_time),
+    )
 
-        tracker_sch = pointing.sparse_tracking(
-            passages_of_spobj=passages,
-            interpolation=true_states_interp,
-            points_per_passage=10,
-            tx_station=prm.tx_station,
-            rx_stations=prm.rx_stations,
-            exp_id=prm.exp_detail_map[0].id,
-            slice_duration=prm.exp_detail_map[0].slice_duration,
-        )
+    tracker_sch = pointing.sparse_tracking(
+        passages_of_spobj=passages,
+        interpolation=true_states_interp,
+        points_per_passage=10,
+        tx_station=prm.tx_station,
+        rx_stations=prm.rx_stations,
+        exp_id=prm.exp_detail_map[0].id,
+        slice_duration=prm.exp_detail_map[0].slice_duration,
+    )
 
-        sim_params = SimulationParams(
-            sch=tracker_sch,
-            passages=passages,
-        )
-        utils.safe_pickle(sim_params, sim_params_pth)
-    else:
-        with open(sim_params_pth, "rb") as fh:
-            sim_params: SimulationParams = pickle.load(fh)
+    return tracker_sch, passages
 
-    obs_pth = obj_pth / "simulation_result.pickle"
-    if prm.clobber or not obs_pth.exists():
-        logger.debug("starting simulation")
 
-        sim_result = [
+def simulate(
+    propagate_step_pickles: utils.PickledObject,
+    schedule_and_passages_pickles: utils.PickledObject,
+    prm: ScriptParams,
+):
+    (
+        spobj_simulator,
+        times,
+        spobj_and_perts,
+        spobj_prop_and_perts,
+        spobj_interp_and_perts,
+    ) = utils.as_retval(propagate, propagate_step_pickles.load())
+
+    sch, passages = utils.as_retval(
+        compute_schedule_and_passages, schedule_and_passages_pickles.load()
+    )
+
+    sim_result = utils.empty_list_of_retval(spobj_simulator.simulate)
+    for spobj, interp in tqdm(
+        # NOTE: used `list(zip(...))` instead of just `zip(...)` so that `tqdm` can get the length
+        list(zip(spobj_and_perts, spobj_interp_and_perts)),
+        desc="simulating a perturbation set",
+    ):
+        sim_result.append(
             spobj_simulator.simulate(
                 space_object=spobj,
                 states_interpolation=interp,
                 # the same passage data is used for all perturbed objects
-                passages=sim_params.passages,
-                sch=sim_params.sch,
+                passages=passages,
+                sch=sch,
                 station_map=prm.station_map,
                 exp_detail_map=prm.exp_detail_map,
             )
-            for spobj, interp in tqdm(
-                # NOTE: used `list(zip(...))` instead of just `zip(...)` so that `tqdm` can get the length
-                list(zip(spobj_and_perts, spobj_interp_and_perts)),
-                desc="simulating",
-            )
-        ]
+        )
 
-        logger.debug("simulation done")
-
-        utils.safe_pickle(sim_result, obs_pth)
+    return sim_result
 
 
-# preparations
+# preparation step
 prm, spobj_pop = prepare_simulation(cli_args)
+spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
 
 # propagate
-spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
-propagate_params_list = [(spobj, prm) for spobj in spobjs]
+propagate_step_pickle_list: list[utils.PickledObject] = []
+for spobj in tqdm(spobjs, desc="preparation step"):
+    save_fpath = prm.save_dpath / f"space_object_{spobj.object_id}" / "propagate_step_output.pickle"
 
-for propagate_params in propagate_params_list:
-    propagate(*propagate_params)
+    propagate_step_pickle_list.append(
+        utils.use_pickled_or_compute(save_fpath, prm.clobber, propagate, spobj, prm)
+    )
 
-# simulate_obs
-spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
-simulate_obs_params_list = [(spobj.object_id, prm) for spobj in spobjs]
+# compute_schedule_and_passages step
+# NOTE: used `list(zip(...))` instead of just `zip(...)` so that `tqdm` can get the length
+schedule_and_passages_pickle_list: list[utils.PickledObject] = []
+for spobj, propagate_step_pickle in tqdm(
+    list(zip(spobjs, propagate_step_pickle_list)), desc="compute_schedule_and_passages step"
+):
+    save_fpath = prm.save_dpath / f"space_object_{spobj.object_id}" / "schedule_and_passages.pickle"
 
-for simulate_obs_params in simulate_obs_params_list:
-    simulate_obs(*simulate_obs_params)
+    schedule_and_passages_pickle_list.append(
+        utils.use_pickled_or_compute(
+            save_fpath, prm.clobber, compute_schedule_and_passages, propagate_step_pickle, prm
+        )
+    )
+
+# simulation step
+# NOTE: used `list(zip(...))` instead of just `zip(...)` so that `tqdm` can get the length
+logger.debug("starting simulation")
+sim_result_list = []
+for spobj, propagate_step_pickle, schedule_and_passages_pickle_ in tqdm(
+    list(zip(spobjs, propagate_step_pickle_list, schedule_and_passages_pickle_list)),
+    desc="simulation step",
+):
+    save_fpath = prm.save_dpath / f"space_object_{spobj.object_id}" / "simulation_result.pickle"
+
+    sim_result_list.append(
+        utils.use_pickled_or_compute(
+            save_fpath,
+            prm.clobber,
+            simulate,
+            propagate_step_pickle,
+            schedule_and_passages_pickle_,
+            prm,
+        )
+    )
+logger.debug("simulation done")
