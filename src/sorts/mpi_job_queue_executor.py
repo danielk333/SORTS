@@ -83,13 +83,12 @@ class MpiJobQueueExecutor:
 
         is_worker_idle_list = [True for _ in range(self.num_workers)]
         next_job_params_idx = 0
-        processed_job_params_cnt = 0
 
         pbar = None
         if show_progress_bar:
             pbar = tqdm("MPI worker progress", total=len(job_params_list), file=sys.stdout)
 
-        while processed_job_params_cnt < len(job_params_list):
+        while next_job_params_idx < len(job_params_list):
             # send next work_job_param if there is idle worker
             if any(is_worker_idle_list) and next_job_params_idx < len(job_params_list):
                 idle_worker_idx = is_worker_idle_list.index(True)
@@ -114,7 +113,6 @@ class MpiJobQueueExecutor:
                 self.mpi_recv(status=status)
                 worker_rank = status.Get_source()
 
-                processed_job_params_cnt += 1
                 if show_progress_bar and pbar is not None:
                     pbar.update(1)
 
