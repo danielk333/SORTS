@@ -270,41 +270,52 @@ prm, spobj_pop = prepare_simulation(cli_args)
 spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
 
 # propagate
-propagate_step_pickle_list: list[utils.PickledObject] = []
-for spobj in tqdm(spobjs, desc="preparation step"):
-    save_fpath = prm.save_dpath / f"space_object_{spobj.object_id}" / "propagate_step_output.pickle"
-
-    propagate_step_pickle_list.append(
-        utils.use_pickled_or_compute(save_fpath, prm.clobber)(propagate)(spobj, prm)
+params_list = [
+    (
+        prm.save_dpath / f"space_object_{spobj.object_id}" / "propagate_step_output.pickle",
+        prm.clobber,
+        spobj,
+        prm,
     )
+    for spobj in spobjs
+]
+propagate_step_pickle_list = [
+    utils.use_pickled_or_compute(propagate)(*params)
+    for params in tqdm(params_list, desc="preparation step")
+]
 
 # compute_schedule_and_passages step
-# NOTE: used `list(zip(...))` instead of just `zip(...)` so that `tqdm` can get the length
-schedule_and_passages_pickle_list: list[utils.PickledObject] = []
-for spobj, propagate_step_pickle in tqdm(
-    list(zip(spobjs, propagate_step_pickle_list)), desc="compute_schedule_and_passages step"
-):
-    save_fpath = prm.save_dpath / f"space_object_{spobj.object_id}" / "schedule_and_passages.pickle"
-
-    schedule_and_passages_pickle_list.append(
-        utils.use_pickled_or_compute(save_fpath, prm.clobber)(compute_schedule_and_passages)(
-            propagate_step_pickle, prm
-        )
+params_list = [
+    (
+        prm.save_dpath / f"space_object_{spobj.object_id}" / "schedule_and_passages.pickle",
+        prm.clobber,
+        propagate_step_pickle,
+        prm,
     )
+    for spobj, propagate_step_pickle in zip(spobjs, propagate_step_pickle_list)
+]
+schedule_and_passages_pickle_list = [
+    utils.use_pickled_or_compute(compute_schedule_and_passages)(*params)
+    for params in tqdm(params_list, desc="compute_schedule_and_passages step")
+]
+
 
 # simulation step
-# NOTE: used `list(zip(...))` instead of just `zip(...)` so that `tqdm` can get the length
 logger.debug("starting simulation")
-sim_result_list = []
-for spobj, propagate_step_pickle, schedule_and_passages_pickle_ in tqdm(
-    list(zip(spobjs, propagate_step_pickle_list, schedule_and_passages_pickle_list)),
-    desc="simulation step",
-):
-    save_fpath = prm.save_dpath / f"space_object_{spobj.object_id}" / "simulation_result.pickle"
-
-    sim_result_list.append(
-        utils.use_pickled_or_compute(save_fpath, prm.clobber)(simulate)(
-            propagate_step_pickle, schedule_and_passages_pickle_, prm
-        )
+params_list = [
+    (
+        prm.save_dpath / f"space_object_{spobj.object_id}" / "simulation_result.pickle",
+        prm.clobber,
+        propagate_step_pickle,
+        schedule_and_passages_pickle_,
+        prm,
     )
+    for spobj, propagate_step_pickle, schedule_and_passages_pickle_ in zip(
+        spobjs, propagate_step_pickle_list, schedule_and_passages_pickle_list
+    )
+]
+sim_result_list = [
+    utils.use_pickled_or_compute(simulate)(*params)
+    for params in tqdm(params_list, desc="compute_schedule_and_passages step")
+]
 logger.debug("simulation done")
