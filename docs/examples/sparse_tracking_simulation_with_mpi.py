@@ -305,11 +305,15 @@ except ImportError:
     rank = 0
 
 
-# mpi_executor = sorts.MpiQueuedExecutor(num_workers=7, is_run_with_mpi=pool_size > 1)
-mpi_executor = sorts.MpiJobQueueExecutor(num_workers=7, is_run_with_mpi=False)
+mpi_executor = sorts.MpiJobQueueExecutor(num_workers=7, is_run_with_mpi=pool_size > 1)
+
+# TODO: this is a tmp workaround
+#       cannot apply `master_only` to `prm, spobj_pop = prepare_simulation(cli_args)`
+#       because unpacking will fail in workers
+mpi_executor.master_only(lambda: utils.ensure_directory_exist(prm.save_dpath))
 
 # preparations
-prm, spobj_pop = mpi_executor.master_only(prepare_simulation)(cli_args)
+prm, spobj_pop = prepare_simulation(cli_args)
 
 # propagate
 spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
