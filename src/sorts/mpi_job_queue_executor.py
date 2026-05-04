@@ -177,7 +177,8 @@ class MpiJobQueueExecutor:
         """
         A function decorator that makes it run in the master process (MPI rank 0) only.
 
-        The return type of the noop code path is hidden (it returns `None`).
+        For worker processes, `func` will be replaced by a noop func that returns `None`.
+        The return type of this noop code path is hidden from the signature.
 
         NOTE:
             There is no `worker_only` counterpart,
