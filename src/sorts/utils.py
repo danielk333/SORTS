@@ -176,31 +176,42 @@ def safe_pickle[T](obj: T, fpath: str | Path) -> PickledObject[T]:
     return PickledObject[T](fpath=fpath)
 
 
-def use_pickled_or_compute[**Params, Ret](
-    fpath: str | Path,
-    overwrite,
-    func: t.Callable[Params, Ret],
-    *args: Params.args,
-    **kwargs: Params.kwargs,
-) -> PickledObject[Ret]:
+def use_pickled_or_compute(fpath: str | Path, overwrite: bool):
     """
-    Use the pickled file on disk if exists, otherwise generate a new pickle.
+    A function decorator factory.
+
+    It generate a function decorator that returns the pickled file on disk if it exists, otherwise generate and return a new pickle.
 
     Any missing directories will be created.
 
     Args:
         pickle_path: The file path to read/write from/to.
         overwrite: Whether or not to overwrite an existing pickle file.
-        func: The function to compute if new pickle is to be generated.
-        *args: The `*args` for `func`.
-        **kwargs: The `**kwargs` for `func`.
+
+    Usage:
+    ```python
+    @use_pickled_or_compute("./pickle_path.pickle", True)
+    def func(a, b): ...
+    ```
+    Or
+    ```python
+    def func(a, b): ...
+
+    use_pickled_or_compute("./pickle_path.pickle", True)(func)(a, b)
+    ```
     """
 
-    if overwrite or not Path(fpath).exists():
-        return safe_pickle(func(*args, **kwargs), fpath)
+    def inner_decorator[**Params, Ret](func: t.Callable[Params, Ret]):
+        def wrapper(*args: Params.args, **kwargs: Params.kwargs):
+            if overwrite or not Path(fpath).exists():
+                return safe_pickle(func(*args, **kwargs), fpath)
 
-    else:
-        return PickledObject[Ret](fpath=Path(fpath))
+            else:
+                return PickledObject[Ret](fpath=Path(fpath))
+
+        return wrapper
+
+    return inner_decorator
 
 
 def as_retval[**Params, Ret](func: t.Callable[Params, Ret], val):

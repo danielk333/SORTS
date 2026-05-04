@@ -275,7 +275,7 @@ for spobj in tqdm(spobjs, desc="preparation step"):
     save_fpath = prm.save_dpath / f"space_object_{spobj.object_id}" / "propagate_step_output.pickle"
 
     propagate_step_pickle_list.append(
-        utils.use_pickled_or_compute(save_fpath, prm.clobber, propagate, spobj, prm)
+        utils.use_pickled_or_compute(save_fpath, prm.clobber)(propagate)(spobj, prm)
     )
 
 # compute_schedule_and_passages step
@@ -287,8 +287,8 @@ for spobj, propagate_step_pickle in tqdm(
     save_fpath = prm.save_dpath / f"space_object_{spobj.object_id}" / "schedule_and_passages.pickle"
 
     schedule_and_passages_pickle_list.append(
-        utils.use_pickled_or_compute(
-            save_fpath, prm.clobber, compute_schedule_and_passages, propagate_step_pickle, prm
+        utils.use_pickled_or_compute(save_fpath, prm.clobber)(compute_schedule_and_passages)(
+            propagate_step_pickle, prm
         )
     )
 
@@ -303,13 +303,8 @@ for spobj, propagate_step_pickle, schedule_and_passages_pickle_ in tqdm(
     save_fpath = prm.save_dpath / f"space_object_{spobj.object_id}" / "simulation_result.pickle"
 
     sim_result_list.append(
-        utils.use_pickled_or_compute(
-            save_fpath,
-            prm.clobber,
-            simulate,
-            propagate_step_pickle,
-            schedule_and_passages_pickle_,
-            prm,
+        utils.use_pickled_or_compute(save_fpath, prm.clobber)(simulate)(
+            propagate_step_pickle, schedule_and_passages_pickle_, prm
         )
     )
 logger.debug("simulation done")
