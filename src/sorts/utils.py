@@ -1,4 +1,4 @@
-import typing as t, pickle, dataclasses
+import typing as t, pickle, dataclasses, functools
 from datetime import datetime, timedelta
 from pathlib import Path
 import numpy as np
@@ -190,6 +190,7 @@ def use_pickled_or_compute[**Params, Ret](func: t.Callable[Params, Ret]):
         overwrite: Whether or not to overwrite an existing pickle file.
     """
 
+    @functools.wraps(func)
     def wrapper(fpath: str | Path, overwrite: bool, *args: Params.args, **kwargs: Params.kwargs):
         if overwrite or not Path(fpath).exists():
             return safe_pickle(func(*args, **kwargs), fpath)
