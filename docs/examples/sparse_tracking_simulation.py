@@ -192,14 +192,14 @@ def propagate(spobj: sorts.SpaceObject, prm: ScriptParams):
     return spobj_simulator, times, spobj_and_perts, spobj_prop_and_perts, spobj_interp_and_perts
 
 
-def compute_schedule_and_passages(propagate_step_pickles: utils.PickledObject, prm: ScriptParams):
+def compute_schedule_and_passages(propagate_step_pickle: utils.PickledObject, prm: ScriptParams):
     (
         spobj_simulator,
         times,
         spobj_and_perts,
         spobj_prop_and_perts,
         spobj_interp_and_perts,
-    ) = utils.as_retval(propagate, propagate_step_pickles.load())
+    ) = utils.as_retval(propagate, propagate_step_pickle.load())
 
     spobj = spobj_and_perts[0]
     true_states = spobj_prop_and_perts[0]
@@ -228,8 +228,8 @@ def compute_schedule_and_passages(propagate_step_pickles: utils.PickledObject, p
 
 
 def simulate(
-    propagate_step_pickles: utils.PickledObject,
-    schedule_and_passages_pickles: utils.PickledObject,
+    propagate_step_pickle: utils.PickledObject,
+    schedule_and_passages_pickle: utils.PickledObject,
     prm: ScriptParams,
 ):
     (
@@ -238,10 +238,10 @@ def simulate(
         spobj_and_perts,
         spobj_prop_and_perts,
         spobj_interp_and_perts,
-    ) = utils.as_retval(propagate, propagate_step_pickles.load())
+    ) = utils.as_retval(propagate, propagate_step_pickle.load())
 
     sch, passages = utils.as_retval(
-        compute_schedule_and_passages, schedule_and_passages_pickles.load()
+        compute_schedule_and_passages, schedule_and_passages_pickle.load()
     )
 
     sim_result = utils.empty_list_of_retval(spobj_simulator.simulate)
