@@ -29,7 +29,7 @@ class MpiJobQueueExecutor:
             try:
                 # master
                 if self.comm.rank == self.master_proc_rank:
-                    return self.mpi_master_loop(job_params_list, show_progress_bar)
+                    return self.mpi_job_dispatching_loop(job_params_list, show_progress_bar)
 
                 # workers
                 else:
@@ -73,7 +73,7 @@ class MpiJobQueueExecutor:
     # TODO: add a way to spawn mpi process from python
     #     subprocess.run(["mpiexec", "-n", str(num_workers), "python", sys.argv[0]])
 
-    def mpi_master_loop[*Args](
+    def mpi_job_dispatching_loop[*Args](
         self, job_params_list: t.Sequence[tuple[*Args]], show_progress_bar=True
     ) -> list:
         calc_start_time = time.perf_counter()
