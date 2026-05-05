@@ -18,23 +18,25 @@ class MpiJobQueueExecutor:
     comm: MPI.Intracomm = dataclasses.field(default_factory=lambda: MPI.COMM_WORLD)
     is_run_with_mpi: bool = True
 
-    def run_job_queue[JobParams](
+    def run_job_queue[*Args, Ret](
         self,
-        job_params_list: t.Sequence[JobParams],
-        worker_process: t.Callable[[JobParams], None],
+        job_params_list: t.Sequence[tuple[*Args]],
+        worker_process: t.Callable[[*Args], Ret],
         show_progress_bar=True,
-    ):
-
+    ) -> list[Ret]:
         if self.is_run_with_mpi:
             # Run with MPI, the normal path.
             try:
                 # master
                 if self.comm.rank == self.master_proc_rank:
-                    self.mpi_master_loop(job_params_list, show_progress_bar)
+                    return self.mpi_master_loop(job_params_list, show_progress_bar)
 
                 # workers
                 else:
-                    self.mpi_worker_loop(worker_process)
+                    self.mpi_worker_loop(worker_process=worker_process)
+
+                    # return an empty list to conform with typing, but note that this value is not actually used
+                    return []
 
             except Exception as err:
                 comm = MPI.COMM_WORLD
@@ -54,8 +56,9 @@ class MpiJobQueueExecutor:
             if show_progress_bar:
                 pbar = tqdm("Worker progress", total=len(job_params_list), file=sys.stdout)
 
+            worker_process_ret_list: list[Ret] = []
             for work_job_param in job_params_list:
-                worker_process(work_job_param)
+                worker_process_ret_list.append(worker_process(*work_job_param))
 
                 if pbar is not None:
                     pbar.update(1)
@@ -65,13 +68,14 @@ class MpiJobQueueExecutor:
 
             calc_time = time.perf_counter() - calc_start_time
             logger.info(f"run_job_queue done, took {calc_time} sec")
+            return worker_process_ret_list
 
     # TODO: add a way to spawn mpi process from python
     #     subprocess.run(["mpiexec", "-n", str(num_workers), "python", sys.argv[0]])
 
-    def mpi_master_loop[JobParams](
-        self, job_params_list: t.Sequence[JobParams], show_progress_bar=True
-    ) -> None:
+    def mpi_master_loop[*Args](
+        self, job_params_list: t.Sequence[tuple[*Args]], show_progress_bar=True
+    ) -> list:
         calc_start_time = time.perf_counter()
 
         _K = MpiQueuedExecutorKey
@@ -81,6 +85,7 @@ class MpiJobQueueExecutor:
         ##
         logger.info(f"master: {self.master_proc_rank} | parallel processing of worker jobs start")
 
+        worker_ret_list = []
         is_worker_idle_list = [True for _ in range(self.num_workers)]
         next_job_params_idx = 0
 
@@ -110,7 +115,8 @@ class MpiJobQueueExecutor:
                 logger.debug(f"master: {self.master_proc_rank} | awaiting results ...")
 
                 status = MPI.Status()
-                self.mpi_recv(status=status)
+                _msg_type, worker_ret = self.mpi_recv(status=status)
+                worker_ret_list.append(worker_ret)
                 worker_rank = status.Get_source()
 
                 if show_progress_bar and pbar is not None:
@@ -133,9 +139,14 @@ class MpiJobQueueExecutor:
 
         calc_time = time.perf_counter() - calc_start_time
         logger.info(f"master_process took {calc_time} sec")
+        return worker_ret_list
 
-    def mpi_worker_loop[JobParams](self, worker_process: t.Callable[[JobParams], None]) -> None:
-        """Run `worker_process` per `JobParams` from MPI comm until they are exhausted."""
+    def mpi_worker_loop[*Args, Ret](self, worker_process: t.Callable[[*Args], Ret]):
+        """
+        Run `worker_process` for every `MpiMsg(_K.job_params, payload)` message received.
+
+        Stops when a `MpiMsg(_K.terminate, _)` message is received.
+        """
 
         _K = MpiQueuedExecutorKey
         worker_proc_rank = self.comm.rank
@@ -156,15 +167,15 @@ class MpiJobQueueExecutor:
                     break
 
                 case MpiMsg(_K.job_params, payload):
-                    job_param = t.cast(JobParams, payload)
+                    worker_process_args = t.cast(tuple[*Args], payload)
                     try:
-                        worker_process(job_param)
+                        worker_process(*worker_process_args)
                         self.mpi_send(
                             dest=self.master_proc_rank, msg_type=_K.worker_process_return_ok
                         )
                     except BaseException as exc:
                         raise MpiQueuedExecutorError(
-                            f"worker: {worker_proc_rank} | Error during job:\n {job_param}"
+                            f"worker: {worker_proc_rank} | Error during job:\n {worker_process_args}"
                         ) from exc
 
                 case msg:
@@ -172,6 +183,33 @@ class MpiJobQueueExecutor:
                     raise RuntimeError(
                         f"worker: {worker_proc_rank} | received unexcepted msg: {msg}"
                     )
+
+    # TODO: make `MpiJobQueueExecutor` an ABC and this as a virtual method?
+    def entry_point[**Params, Ret](self, func: t.Callable[Params, Ret]):
+        """
+        A function decorator that make `func` the entry point of `MpiJobQueueExecutor`.
+
+        The wrapped `func` will it run in the master process (MPI rank 0) only.
+
+        In a worker process, a worker loop function from `MpiJobQueueExecutor` will be ran instead.
+        The function signature of worker loop is hidden from the signature of this function decorator.
+        """
+
+        @functools.wraps(func)
+        def wrapper(*args: Params.args, **kwargs: Params.kwargs):
+            # just a pass-through if we are not using MPI
+            if not self.is_run_with_mpi:
+                return func(*args, **kwargs)
+
+            else:
+                # Also a pass-through if we are a master rank MPI process
+                if self.comm.rank == self.master_proc_rank:
+                    return func(*args, **kwargs)
+                else:
+                    # return the worker loop otherwise
+                    return t.cast(t.Callable[Params, Ret], self.mpi_worker_loop)
+
+        return wrapper
 
     def master_only[**Params, Ret](self, func: t.Callable[Params, Ret]):
         """
