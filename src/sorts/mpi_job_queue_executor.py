@@ -1,5 +1,5 @@
 from __future__ import annotations
-import logging, typing as t, traceback, time, enum, dataclasses, sys, functools
+import logging, typing as t, traceback, time, dataclasses, sys, functools
 from tqdm import tqdm
 from mpi4py import MPI, typing as mpit
 
@@ -15,8 +15,13 @@ class MpiJobQueueExecutor:
     master_proc_rank: t.ClassVar[t.Final] = 0
 
     num_workers: int
+
     comm: MPI.Intracomm = dataclasses.field(default_factory=lambda: MPI.COMM_WORLD)
     is_run_with_mpi: bool = True
+    is_worker_idle_list: list[bool] = dataclasses.field(init=False, default_factory=list)
+
+    def __post_init__(self):
+        self.is_worker_idle_list.extend([True for _ in range(self.num_workers)])
 
     def run_job_queue[*Args, Ret](
         self,
@@ -78,7 +83,6 @@ class MpiJobQueueExecutor:
         logger.info(f"master: {self.master_proc_rank} | parallel processing of worker jobs start")
 
         worker_ret_dict: dict[int, Ret] = {}
-        is_worker_idle_list = [True for _ in range(self.num_workers)]
         next_job_params_idx = 0
 
         pbar = None
@@ -87,8 +91,8 @@ class MpiJobQueueExecutor:
 
         while next_job_params_idx < len(job_params_list):
             # send next work_job_param if there is idle worker
-            if any(is_worker_idle_list) and next_job_params_idx < len(job_params_list):
-                idle_worker_idx = is_worker_idle_list.index(True)
+            if any(self.is_worker_idle_list) and next_job_params_idx < len(job_params_list):
+                idle_worker_idx = self.is_worker_idle_list.index(True)
                 idle_worker_rank = idle_worker_idx + 1
 
                 args = job_params_list[next_job_params_idx]
@@ -102,7 +106,7 @@ class MpiJobQueueExecutor:
                     + f" ({next_job_params_idx+1}/{len(job_params_list)}) to worker {idle_worker_rank}"
                 )
 
-                is_worker_idle_list[idle_worker_idx] = False
+                self.is_worker_idle_list[idle_worker_idx] = False
                 next_job_params_idx += 1
 
             # otherwise, wait for result
@@ -118,7 +122,7 @@ class MpiJobQueueExecutor:
                         if show_progress_bar and pbar is not None:
                             pbar.update(1)
 
-                        is_worker_idle_list[worker_rank - 1] = True
+                        self.is_worker_idle_list[worker_rank - 1] = True
 
                     case msg:
                         # throw for unexpected msg
