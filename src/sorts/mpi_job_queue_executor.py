@@ -1,5 +1,5 @@
 from __future__ import annotations
-import logging, typing as t, traceback, time, dataclasses, sys, functools
+import logging, typing as t, traceback, time, dataclasses, sys, functools, enum
 from tqdm import tqdm
 from mpi4py import MPI, typing as mpit
 
@@ -83,15 +83,20 @@ class MpiJobQueueExecutor:
         logger.info(f"master: {self.master_proc_rank} | parallel processing of worker jobs start")
 
         job_ret_list = [t.cast(Ret | None, None) for _ in range(len(job_params_list))]
-        next_job_params_idx = 0
+        job_status_list = [JobStatus.Queuing for _ in range(len(job_params_list))]
 
         pbar = None
         if show_progress_bar:
             pbar = tqdm("MPI worker progress", total=len(job_params_list), file=sys.stdout)
 
-        while next_job_params_idx < len(job_params_list):
+        while not all([status == JobStatus.Done for status in job_status_list]):
+
             # send next work_job_param if there is idle worker
-            if any(self.is_worker_idle_list) and next_job_params_idx < len(job_params_list):
+            if (
+                any(self.is_worker_idle_list)
+                and any([status == JobStatus.Queuing for status in job_status_list])
+            ): # fmt: skip
+                next_job_params_idx = job_status_list.index(JobStatus.Queuing)
                 idle_worker_idx = self.is_worker_idle_list.index(True)
                 idle_worker_rank = idle_worker_idx + 1
 
@@ -103,11 +108,11 @@ class MpiJobQueueExecutor:
 
                 logger.debug(
                     f"master: {self.master_proc_rank} | sent worker job"
-                    + f" ({next_job_params_idx+1}/{len(job_params_list)}) to worker {idle_worker_rank}"
+                    f" ({next_job_params_idx+1}/{len(job_params_list)}) to worker {idle_worker_rank}"
                 )
 
+                job_status_list[next_job_params_idx] = JobStatus.Running
                 self.is_worker_idle_list[idle_worker_idx] = False
-                next_job_params_idx += 1
 
             # otherwise, wait for result
             else:
@@ -122,12 +127,13 @@ class MpiJobQueueExecutor:
                         if show_progress_bar and pbar is not None:
                             pbar.update(1)
 
+                        job_status_list[job_idx] = JobStatus.Done
                         self.is_worker_idle_list[worker_rank - 1] = True
 
                     case msg:
                         # throw for unexpected msg
                         raise RuntimeError(
-                            f"master: {self.master_proc_rank} | received unexcepted msg: {msg}"
+                            f"master: {self.master_proc_rank} | received unexpected msg: {msg}"
                         )
 
         if show_progress_bar and pbar is not None:
@@ -168,11 +174,20 @@ class MpiJobQueueExecutor:
                     break
 
                 case MpiMsgJobParams(job_idx, worker_process, args):
+                    logger.debug(
+                        f"worker: {worker_proc_rank} | "
+                        f"recv MpiMsgJobParams, {job_idx=},"
+                        f"will run, {worker_process=} on {args=}"
+                    )
                     try:
                         ret = worker_process(*args)
                         self.mpi_send(
                             msg=MpiMsgWorkerProcessReturns(job_idx, worker_process, args, ret),
                             dest=self.master_proc_rank,
+                        )
+                        logger.debug(
+                            f"worker: {worker_proc_rank} | "
+                            f"sent MpiMsgWorkerProcessReturns, {job_idx=}"
                         )
                     except BaseException as exc:
                         raise MpiQueuedExecutorError(
@@ -182,7 +197,7 @@ class MpiJobQueueExecutor:
                 case msg:
                     # throw for unexpected msg
                     raise RuntimeError(
-                        f"worker: {worker_proc_rank} | received unexcepted msg: {msg}"
+                        f"worker: {worker_proc_rank} | received unexpected msg: {msg}"
                     )
 
     # TODO: make `MpiJobQueueExecutor` an ABC and this as a virtual method?
@@ -315,3 +330,9 @@ class MpiMsgWorkerProcessReturns[*Args, Ret](t.NamedTuple):
     worker_process: t.Callable[[*Args], Ret]
     args: tuple[*Args]
     retval: Ret
+
+
+class JobStatus(enum.Enum):
+    Queuing = 0
+    Running = 1
+    Done = 2
