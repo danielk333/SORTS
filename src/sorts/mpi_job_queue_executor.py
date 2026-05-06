@@ -72,8 +72,6 @@ class MpiJobQueueExecutor:
     ) -> list:
         calc_start_time = time.perf_counter()
 
-        _K = MpiQueuedExecutorKey
-
         ##
         # parallization section
         ##
@@ -144,7 +142,6 @@ class MpiJobQueueExecutor:
         Stops when a `MpiMsgTerminate` message is received.
         """
 
-        _K = MpiQueuedExecutorKey
         worker_proc_rank = self.comm.rank
 
         while True:
@@ -152,12 +149,11 @@ class MpiJobQueueExecutor:
 
             match self.mpi_recv(source=self.master_proc_rank):
                 case MpiMsgTerminate():
-                    # exit if `_K.terminate` is received
                     logger.info(f"worker: {worker_proc_rank} | exiting...")
                     # reply an ack to master
                     self.mpi_send(msg=MpiMsgExitOk(), dest=self.master_proc_rank)
 
-                    # TODO: probably should not send `_K.terminate` if the worker will be reused
+                    # TODO: probably should not send `MpiMsgTerminate` if the worker will be reused
                     # break here to allow for further execution of workers later
                     break
 
@@ -218,8 +214,6 @@ class MpiJobQueueExecutor:
 
     # TODO: WIP
     def terminate(self):
-        _K = MpiQueuedExecutorKey
-
         # TODO: maybe we can use `comm.bcast` here?
         #   but worker also need to call `comm.bcast` for listening,
         #   not sure if mpi allows listening to both `bcast` and `recv`
@@ -283,13 +277,6 @@ class MpiJobQueueExecutor:
 @dataclasses.dataclass(kw_only=True, frozen=True)
 class MpiProessInfo:
     rank: int
-
-
-class MpiQueuedExecutorKey(enum.StrEnum):
-    job_params = "job_params"
-    exit_ok = "exit_ok"
-    terminate = "terminate"
-    worker_process_return_ok = "worker_process_return_ok"
 
 
 class MpiQueuedExecutorError(Exception):
