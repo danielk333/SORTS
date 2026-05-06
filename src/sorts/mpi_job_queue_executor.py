@@ -1,7 +1,7 @@
 from __future__ import annotations
 import logging, typing as t, traceback, time, enum, dataclasses, sys, functools
 from tqdm import tqdm
-from mpi4py import MPI
+from mpi4py import MPI, typing as mpit
 
 logger = logging.getLogger(__name__)
 
@@ -247,14 +247,20 @@ class MpiJobQueueExecutor:
         payload: object = None,
         tag: int = 0,
     ):
-        """Send a `MpiMsg`."""
+        """Send a `MpiMsg`. Take the same params as `MPI.Intracomm.send`."""
 
         self.comm.send(MpiMsg(msg_type, payload), dest, tag)
 
-    def mpi_recv(self, *args, **kwargs):
-        """Receive a `MpiMsg`."""
+    def mpi_recv(
+        self,
+        buf: mpit.Buffer | None = None,
+        source: int = MPI.ANY_SOURCE,
+        tag: int = MPI.ANY_TAG,
+        status: MPI.Status | None = None,
+    ):
+        """Receive a `MpiMsg`. Take the same params as `MPI.Intracomm.recv`."""
 
-        return t.cast(MpiMsg, self.comm.recv(*args, **kwargs))
+        return t.cast(MpiMsg, self.comm.recv(buf=buf, source=source, tag=tag, status=status))
 
 
 # TODO: remove?
@@ -274,6 +280,7 @@ class MpiQueuedExecutorError(Exception):
     pass
 
 
+# TODO: maybe split into multiple types for stronger safety? e.g. MpiMsgJobParams, MpiMsgWorkerProcessReturnOk, ...
 class MpiMsg[T](t.NamedTuple):
     type: MpiQueuedExecutorKey
     payload: T
