@@ -74,7 +74,7 @@ class MpiJobQueueExecutor:
         job_params_list: t.Sequence[tuple[*Args]],
         worker_process: t.Callable[[*Args], Ret],
         show_progress_bar=True,
-    ) -> list:
+    ) -> list[Ret]:
         calc_start_time = time.perf_counter()
 
         ##
@@ -82,7 +82,7 @@ class MpiJobQueueExecutor:
         ##
         logger.info(f"master: {self.master_proc_rank} | parallel processing of worker jobs start")
 
-        job_ret_list: list[Ret] = []
+        job_ret_list = [t.cast(Ret | None, None) for _ in range(len(job_params_list))]
         next_job_params_idx = 0
 
         pbar = None
@@ -132,6 +132,12 @@ class MpiJobQueueExecutor:
 
         if show_progress_bar and pbar is not None:
             pbar.close()
+
+        job_ret_list = [v for v in job_ret_list if v is not None]
+        if len(job_ret_list) != len(job_params_list):
+            raise RuntimeError(
+                "Unexpected `None` values from initialization retained in `job_ret_list`."
+            )
 
         logger.info(f"master: {self.master_proc_rank} | master proc loop done, returning...")
 
