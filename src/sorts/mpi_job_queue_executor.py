@@ -93,11 +93,10 @@ class MpiJobQueueExecutor:
                 idle_worker_idx = is_worker_idle_list.index(True)
                 idle_worker_rank = idle_worker_idx + 1
 
-                job_params = job_params_list[next_job_params_idx]
+                args = job_params_list[next_job_params_idx]
                 self.mpi_send(
+                    msg=MpiMsgJobParams(worker_process, args),
                     dest=idle_worker_rank,
-                    msg_type=_K.job_params,
-                    payload=(worker_process, job_params),
                 )
 
                 logger.debug(
@@ -114,7 +113,7 @@ class MpiJobQueueExecutor:
 
                 status = MPI.Status()
                 match self.mpi_recv(status=status):
-                    case MpiMsg(_K.worker_process_return_ok, worker_ret):
+                    case MpiMsgWorkerProcessReturns(_worker_process, args, worker_ret):
                         worker_ret_list.append(worker_ret)
                         worker_rank = status.Get_source()
 
@@ -140,9 +139,9 @@ class MpiJobQueueExecutor:
 
     def mpi_worker_loop[*Args, Ret](self):
         """
-        Run `worker_process` for every `MpiMsg(_K.job_params, payload)` message received.
+        Run `worker_process` for every `MpiMsg` message received.
 
-        Stops when a `MpiMsg(_K.terminate, _)` message is received.
+        Stops when a `MpiMsgTerminate` message is received.
         """
 
         _K = MpiQueuedExecutorKey
@@ -152,31 +151,26 @@ class MpiJobQueueExecutor:
             logger.info(f"worker: {worker_proc_rank} | waiting for msg...")
 
             match self.mpi_recv(source=self.master_proc_rank):
-                case MpiMsg(_K.terminate, _):
+                case MpiMsgTerminate():
                     # exit if `_K.terminate` is received
                     logger.info(f"worker: {worker_proc_rank} | exiting...")
-                    self.mpi_send(
-                        dest=self.master_proc_rank, msg_type=_K.exit_ok
-                    )  # reply an ack to master
+                    # reply an ack to master
+                    self.mpi_send(msg=MpiMsgExitOk(), dest=self.master_proc_rank)
 
                     # TODO: probably should not send `_K.terminate` if the worker will be reused
                     # break here to allow for further execution of workers later
                     break
 
-                case MpiMsg(_K.job_params, payload):
-                    worker_process, worker_process_args = t.cast(
-                        tuple[t.Callable[[*Args], Ret], *Args], payload
-                    )
+                case MpiMsgJobParams(worker_process, args):
                     try:
-                        ret = worker_process(*worker_process_args)
+                        ret = worker_process(*args)
                         self.mpi_send(
+                            msg=MpiMsgWorkerProcessReturns(worker_process, args, ret),
                             dest=self.master_proc_rank,
-                            msg_type=_K.worker_process_return_ok,
-                            payload=ret,
                         )
                     except BaseException as exc:
                         raise MpiQueuedExecutorError(
-                            f"worker: {worker_proc_rank} | Error during job:\n {worker_process_args}"
+                            f"worker: {worker_proc_rank} | Error during job:\n {args}"
                         ) from exc
 
                 case msg:
@@ -231,7 +225,7 @@ class MpiJobQueueExecutor:
         #   not sure if mpi allows listening to both `bcast` and `recv`
         for r in range(1, self.comm.size):  # start from 1 because 0 rank is the master
             logger.debug(f"master: {self.master_proc_rank} | terminating worker: {r} ...")
-            self.mpi_send(dest=r, msg_type=_K.terminate)
+            self.mpi_send(msg=MpiMsgTerminate(), dest=r)
             self.mpi_recv(source=r)  # wait for an ack
 
     def master_only[**Params, Ret](self, func: t.Callable[Params, Ret]):
@@ -265,16 +259,15 @@ class MpiJobQueueExecutor:
 
     def mpi_send(
         self,
+        msg: MpiMsg,
         dest: int,
-        msg_type: MpiQueuedExecutorKey,
-        payload: object = None,
         tag: int = 0,
     ):
-        """Send a `MpiMsg`. Take the same params as `MPI.Intracomm.send`."""
+        """Send a `MpiMsg`. `dest`, `tag` params are the same as `MPI.Intracomm.send`."""
 
-        self.comm.send(MpiMsg(msg_type, payload), dest, tag)
+        self.comm.send(msg, dest, tag)
 
-    def mpi_recv(
+    def mpi_recv[M: MpiMsg](
         self,
         buf: mpit.Buffer | None = None,
         source: int = MPI.ANY_SOURCE,
@@ -283,7 +276,7 @@ class MpiJobQueueExecutor:
     ):
         """Receive a `MpiMsg`. Take the same params as `MPI.Intracomm.recv`."""
 
-        return t.cast(MpiMsg, self.comm.recv(buf=buf, source=source, tag=tag, status=status))
+        return t.cast(M, self.comm.recv(buf=buf, source=source, tag=tag, status=status))
 
 
 # TODO: remove?
@@ -303,7 +296,23 @@ class MpiQueuedExecutorError(Exception):
     pass
 
 
-# TODO: maybe split into multiple types for stronger safety? e.g. MpiMsgJobParams, MpiMsgWorkerProcessReturnOk, ...
-class MpiMsg[T](t.NamedTuple):
-    type: MpiQueuedExecutorKey
-    payload: T
+type MpiMsg = MpiMsgExitOk | MpiMsgTerminate | MpiMsgJobParams | MpiMsgWorkerProcessReturns
+
+
+class MpiMsgExitOk(t.NamedTuple):
+    pass
+
+
+class MpiMsgTerminate(t.NamedTuple):
+    pass
+
+
+class MpiMsgJobParams[*Args, Ret](t.NamedTuple):
+    worker_process: t.Callable[[*Args], Ret]
+    args: tuple[*Args]
+
+
+class MpiMsgWorkerProcessReturns[*Args, Ret](t.NamedTuple):
+    worker_process: t.Callable[[*Args], Ret]
+    args: tuple[*Args]
+    retval: Ret
