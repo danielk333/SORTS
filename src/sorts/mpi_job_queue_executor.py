@@ -82,7 +82,7 @@ class MpiJobQueueExecutor:
         ##
         logger.info(f"master: {self.master_proc_rank} | parallel processing of worker jobs start")
 
-        worker_ret_dict: dict[int, Ret] = {}
+        job_ret_list: list[Ret] = []
         next_job_params_idx = 0
 
         pbar = None
@@ -115,8 +115,8 @@ class MpiJobQueueExecutor:
 
                 status = MPI.Status()
                 match self.mpi_recv(status=status):
-                    case MpiMsgWorkerProcessReturns(job_idx, _worker_process, _args, worker_ret):
-                        worker_ret_dict[job_idx] = worker_ret
+                    case MpiMsgWorkerProcessReturns(job_idx, _worker_process, _args, job_ret):
+                        job_ret_list[job_idx] = job_ret
                         worker_rank = status.Get_source()
 
                         if show_progress_bar and pbar is not None:
@@ -133,12 +133,11 @@ class MpiJobQueueExecutor:
         if show_progress_bar and pbar is not None:
             pbar.close()
 
-        ret = [worker_ret_dict[k] for k in sorted(worker_ret_dict)]
         logger.info(f"master: {self.master_proc_rank} | master proc loop done, returning...")
 
         calc_time = time.perf_counter() - calc_start_time
         logger.info(f"master_process took {calc_time} sec")
-        return ret
+        return job_ret_list
 
     def mpi_worker_loop(self):
         """
