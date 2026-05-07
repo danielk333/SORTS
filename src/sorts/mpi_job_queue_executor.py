@@ -205,7 +205,7 @@ class MpiJobQueueExecutor:
         """
         A function decorator that make `func` the entry point of `MpiJobQueueExecutor`.
 
-        The wrapped `func` will it run in the master process (MPI rank 0) only.
+        The wrapped `func` will it run in the master process (MPI rank 0) only, and calls `self.terminate()` before returning.
 
         In a worker process, a worker loop function from `MpiJobQueueExecutor` will be ran instead.
         The function signature of worker loop is hidden from the signature of this function decorator.
@@ -221,7 +221,9 @@ class MpiJobQueueExecutor:
                 try:
                     # Also a pass-through if we are a master rank MPI process
                     if self.comm.rank == self.master_proc_rank:
-                        return func(*args, **kwargs)
+                        ret = func(*args, **kwargs)
+                        self.terminate()
+                        return ret
                     else:
                         # return the worker loop otherwise
                         return t.cast(t.Callable[Params, Ret], self.mpi_worker_loop())
