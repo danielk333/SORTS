@@ -115,4 +115,4 @@ config-settings = { editable_mode = "compat" }
 members = ["."]
 
 [tool.uv.sources]
-sorts = { workspace = true, editable = true }
+sorts = { workspace = true }
