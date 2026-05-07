@@ -17,6 +17,16 @@ from sorts import (
     ExperimentDetail,
 )
 
+try:
+    from mpi4py import MPI
+
+    pool_size = MPI.COMM_WORLD.Get_size()
+    rank = MPI.COMM_WORLD.Get_rank()
+except ImportError:
+    pool_size = 1
+    rank = 0
+
+
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger("sorts.propagator").setLevel(logging.WARNING)
 logging.getLogger("sorts.frames").setLevel(logging.WARNING)
@@ -31,6 +41,8 @@ parser.add_argument("--antennas", type=int, default=10_000)
 cli_args = parser.parse_args()
 
 R_earth = 6371e3
+
+mpi_executor = sorts.MpiJobQueueExecutor(num_workers=7, is_run_with_mpi=pool_size > 1)
 
 
 @dataclass(kw_only=True)
@@ -151,6 +163,7 @@ def prepare_simulation(cli_args: argparse.Namespace) -> tuple[ScriptParams, popu
     return prm, spobj_pop
 
 
+@utils.use_pickled_or_compute
 def propagate(spobj: sorts.SpaceObject, prm: ScriptParams):
     spobj_simulator = sorts.SpaceObjectSimulator(
         propagator=sorts.propagator.Sgp4(
@@ -192,6 +205,7 @@ def propagate(spobj: sorts.SpaceObject, prm: ScriptParams):
     return spobj_simulator, times, spobj_and_perts, spobj_prop_and_perts, spobj_interp_and_perts
 
 
+@utils.use_pickled_or_compute
 def compute_schedule_and_passages(propagate_step_pickle: utils.PickledObject, prm: ScriptParams):
     (
         spobj_simulator,
@@ -199,7 +213,7 @@ def compute_schedule_and_passages(propagate_step_pickle: utils.PickledObject, pr
         spobj_and_perts,
         spobj_prop_and_perts,
         spobj_interp_and_perts,
-    ) = utils.as_retval(propagate, propagate_step_pickle.load())
+    ) = utils.as_retval(propagate, propagate_step_pickle).load()
 
     spobj = spobj_and_perts[0]
     true_states = spobj_prop_and_perts[0]
@@ -227,6 +241,7 @@ def compute_schedule_and_passages(propagate_step_pickle: utils.PickledObject, pr
     return tracker_sch, passages
 
 
+@utils.use_pickled_or_compute
 def simulate(
     propagate_step_pickle: utils.PickledObject,
     schedule_and_passages_pickle: utils.PickledObject,
@@ -238,12 +253,12 @@ def simulate(
         spobj_and_perts,
         spobj_prop_and_perts,
         spobj_interp_and_perts,
-    ) = utils.as_retval(propagate, propagate_step_pickle.load())
+    ) = utils.as_retval(propagate, propagate_step_pickle).load()
 
     sch, passages = utils.as_retval(
-        compute_schedule_and_passages, schedule_and_passages_pickle.load()
-    )
-
+        compute_schedule_and_passages, schedule_and_passages_pickle
+    ).load()
+    
     sim_result = utils.empty_list_of_retval(spobj_simulator.simulate)
     for spobj, interp in tqdm(
         # NOTE: used `list(zip(...))` instead of just `zip(...)` so that `tqdm` can get the length
@@ -263,19 +278,6 @@ def simulate(
         )
 
     return sim_result
-
-
-try:
-    from mpi4py import MPI
-
-    pool_size = MPI.COMM_WORLD.Get_size()
-    rank = MPI.COMM_WORLD.Get_rank()
-except ImportError:
-    pool_size = 1
-    rank = 0
-
-
-mpi_executor = sorts.MpiJobQueueExecutor(num_workers=7, is_run_with_mpi=pool_size > 1)
 
 
 def main():
@@ -301,7 +303,7 @@ def main():
 
     propagate_step_pickle_list = mpi_executor.run_job_queue(
         job_params_list=params_list,
-        worker_process=utils.use_pickled_or_compute(propagate),
+        worker_process=propagate,
     )
 
     # compute_schedule_and_passages step
@@ -316,7 +318,7 @@ def main():
     ]
     schedule_and_passages_pickle_list = mpi_executor.run_job_queue(
         job_params_list=params_list,
-        worker_process=utils.use_pickled_or_compute(compute_schedule_and_passages),
+        worker_process=compute_schedule_and_passages,
     )
 
     # simulation step
@@ -334,7 +336,7 @@ def main():
         )
     ]
     sim_result_list = mpi_executor.run_job_queue(
-        job_params_list=params_list, worker_process=utils.use_pickled_or_compute(simulate)
+        job_params_list=params_list, worker_process=simulate
     )
     logger.debug("simulation done")
 

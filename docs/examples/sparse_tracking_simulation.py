@@ -151,6 +151,7 @@ def prepare_simulation(cli_args: argparse.Namespace) -> tuple[ScriptParams, popu
     return prm, spobj_pop
 
 
+@utils.use_pickled_or_compute
 def propagate(spobj: sorts.SpaceObject, prm: ScriptParams):
     spobj_simulator = sorts.SpaceObjectSimulator(
         propagator=sorts.propagator.Sgp4(
@@ -192,6 +193,7 @@ def propagate(spobj: sorts.SpaceObject, prm: ScriptParams):
     return spobj_simulator, times, spobj_and_perts, spobj_prop_and_perts, spobj_interp_and_perts
 
 
+@utils.use_pickled_or_compute
 def compute_schedule_and_passages(propagate_step_pickle: utils.PickledObject, prm: ScriptParams):
     (
         spobj_simulator,
@@ -199,7 +201,7 @@ def compute_schedule_and_passages(propagate_step_pickle: utils.PickledObject, pr
         spobj_and_perts,
         spobj_prop_and_perts,
         spobj_interp_and_perts,
-    ) = utils.as_retval(propagate, propagate_step_pickle.load())
+    ) = utils.as_retval(propagate, propagate_step_pickle).load()
 
     spobj = spobj_and_perts[0]
     true_states = spobj_prop_and_perts[0]
@@ -227,6 +229,7 @@ def compute_schedule_and_passages(propagate_step_pickle: utils.PickledObject, pr
     return tracker_sch, passages
 
 
+@utils.use_pickled_or_compute
 def simulate(
     propagate_step_pickle: utils.PickledObject,
     schedule_and_passages_pickle: utils.PickledObject,
@@ -238,11 +241,11 @@ def simulate(
         spobj_and_perts,
         spobj_prop_and_perts,
         spobj_interp_and_perts,
-    ) = utils.as_retval(propagate, propagate_step_pickle.load())
+    ) = utils.as_retval(propagate, propagate_step_pickle).load()
 
     sch, passages = utils.as_retval(
-        compute_schedule_and_passages, schedule_and_passages_pickle.load()
-    )
+        compute_schedule_and_passages, schedule_and_passages_pickle
+    ).load()
 
     sim_result = utils.empty_list_of_retval(spobj_simulator.simulate)
     for spobj, interp in tqdm(
@@ -280,8 +283,7 @@ params_list = [
     for spobj in spobjs
 ]
 propagate_step_pickle_list = [
-    utils.use_pickled_or_compute(propagate)(*params)
-    for params in tqdm(params_list, desc="preparation step")
+    propagate(*params) for params in tqdm(params_list, desc="preparation step")
 ]
 
 # compute_schedule_and_passages step
@@ -295,7 +297,7 @@ params_list = [
     for spobj, propagate_step_pickle in zip(spobjs, propagate_step_pickle_list)
 ]
 schedule_and_passages_pickle_list = [
-    utils.use_pickled_or_compute(compute_schedule_and_passages)(*params)
+    compute_schedule_and_passages(*params)
     for params in tqdm(params_list, desc="compute_schedule_and_passages step")
 ]
 
@@ -315,7 +317,6 @@ params_list = [
     )
 ]
 sim_result_list = [
-    utils.use_pickled_or_compute(simulate)(*params)
-    for params in tqdm(params_list, desc="compute_schedule_and_passages step")
+    simulate(*params) for params in tqdm(params_list, desc="compute_schedule_and_passages step")
 ]
 logger.debug("simulation done")
