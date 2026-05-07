@@ -111,8 +111,5 @@ testpaths = ["tests"]
 # https://github.com/microsoft/pylance-release/blob/d7a084cb2086f22aa999e9392242d15acd53b327/TROUBLESHOOTING.md#editable-install-modules-not-found
 config-settings = { editable_mode = "compat" }
 
-[tool.uv.workspace]
-members = ["."]
-
 [tool.uv.sources]
 sorts = { workspace = true }
