@@ -20,8 +20,8 @@ uv pip install -r pylock.toml
 
 The lock files are generated using `uv` at the moment:
 ```bash
-uv export --resolution lowest-direct -o requirements.txt
-uv export --resolution lowest-direct -o pylock.toml
+uv export --all-extras --resolution lowest-direct -o requirements.txt
+uv export --all-extras --resolution lowest-direct -o pylock.toml
 ```
 
 ## Tests
