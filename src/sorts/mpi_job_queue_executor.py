@@ -1,27 +1,30 @@
 from __future__ import annotations
-import logging, typing as t, traceback, time, dataclasses, sys, functools, enum
+import logging, typing as t, traceback, time, sys, functools, enum
 from tqdm import tqdm
 from mpi4py import MPI, typing as mpit
 
 logger = logging.getLogger(__name__)
 
 
-@dataclasses.dataclass(kw_only=True, frozen=True)
 class MpiJobQueueExecutor:
     """
-    Use MPI as a job queue, with the 0th rank process as master and the rest as workers.
+    Use MPI as a job queue, with the one process as master and the rest as workers.
     """
 
-    master_proc_rank: t.ClassVar[t.Final] = 0
+    def __init__(self, num_workers: int | None = None, master_proc_rank=0, is_run_with_mpi=True):
+        self.master_proc_rank = master_proc_rank
 
-    num_workers: int
+        self.comm_world: MPI.Intracomm = MPI.COMM_WORLD
+        self.comm_self: MPI.Intracomm = MPI.COMM_SELF
+        self.is_run_with_mpi = is_run_with_mpi
 
-    comm: MPI.Intracomm = dataclasses.field(default_factory=lambda: MPI.COMM_WORLD)
-    is_run_with_mpi: bool = True
-    is_worker_idle_list: list[bool] = dataclasses.field(init=False, default_factory=list)
-
-    def __post_init__(self):
-        self.is_worker_idle_list.extend([True for _ in range(self.num_workers)])
+        if num_workers is None:
+            self.comm = self.comm_world
+            self.num_workers = self.comm_world.size - 1
+            self.is_worker_idle_list = [True for _ in range(self.num_workers)]
+        else:
+            # TODO: implement
+            raise NotImplementedError()
 
     def run_job_queue[*Args, Ret](
         self,
@@ -299,11 +302,22 @@ class MpiJobQueueExecutor:
 
         return t.cast(M, self.comm.recv(buf=buf, source=source, tag=tag, status=status))
 
+    # TODO: WIP
+    def loggingBasicConfig(self):
+        """Returns a suggested config for `logging.basicConfig`."""
 
-# TODO: remove?
-@dataclasses.dataclass(kw_only=True, frozen=True)
-class MpiProessInfo:
-    rank: int
+        return {
+            "filename": f"rank_{self.comm.rank}.log",
+            "formatter": logging.Formatter(
+                "[%(asctime)s]%(levelname)s:%(name)s:%(message)s"
+                "%(asctime)s | "
+                "%(hostname)s | "
+                "r=%(rank)03d/%(size)03d | "
+                "%(levelname)s | "
+                "%(message)s"
+            ),
+            "level": logging.DEBUG,
+        }
 
 
 class MpiQueuedExecutorError(Exception):

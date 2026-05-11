@@ -255,7 +255,7 @@ def simulate(
 
 
 # NOTE: functions that passed to executor.map cannot be declared inside of
-#       `with MPICommExecutor(max_workers=4) as executor:` block.
+#       `with MPICommExecutor() as executor:` block.
 #       the executor will not be able to grab a reference to it.
 #
 #       making our own helper class is still helpful considering this?
