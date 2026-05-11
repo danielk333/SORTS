@@ -268,69 +268,59 @@ def simulate(
     return sim_result
 
 
-mpi_executor = sorts.MpiJobQueueExecutor()
+class Script(sorts.MpiJobQueueExecutor):
+    def master_main(self):
+        # preparations
+        prm, spobj_pop = prepare_simulation(cli_args)
+        spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
 
+        # propagate
+        params_list = [
+            (
+                prm.save_dpath / f"space_object_{spobj.object_id}" / "propagate_step_output.pickle",
+                prm.clobber,
+                spobj,
+                prm,
+            )
+            for spobj in spobjs
+        ]
 
-def main():
-
-    # TODO: this is a tmp workaround
-    #       cannot apply `master_only` to `prm, spobj_pop = prepare_simulation(cli_args)`
-    #       because unpacking will fail in workers
-    mpi_executor.master_only(lambda: utils.ensure_directory_exist(prm.save_dpath))
-
-    # preparations
-    prm, spobj_pop = prepare_simulation(cli_args)
-    spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
-
-    # propagate
-    params_list = [
-        (
-            prm.save_dpath / f"space_object_{spobj.object_id}" / "propagate_step_output.pickle",
-            prm.clobber,
-            spobj,
-            prm,
+        propagate_step_pickle_list = self.run_job_queue(
+            job_params_list=params_list,
+            worker_process=propagate,
         )
-        for spobj in spobjs
-    ]
 
-    propagate_step_pickle_list = mpi_executor.run_job_queue(
-        job_params_list=params_list,
-        worker_process=propagate,
-    )
-
-    # compute_schedule_and_passages step
-    params_list = [
-        (
-            prm.save_dpath / f"space_object_{spobj.object_id}" / "schedule_and_passages.pickle",
-            prm.clobber,
-            propagate_step_pickle,
-            prm,
+        # compute_schedule_and_passages step
+        params_list = [
+            (
+                prm.save_dpath / f"space_object_{spobj.object_id}" / "schedule_and_passages.pickle",
+                prm.clobber,
+                propagate_step_pickle,
+                prm,
+            )
+            for spobj, propagate_step_pickle in zip(spobjs, propagate_step_pickle_list)
+        ]
+        schedule_and_passages_pickle_list = self.run_job_queue(
+            job_params_list=params_list,
+            worker_process=compute_schedule_and_passages,
         )
-        for spobj, propagate_step_pickle in zip(spobjs, propagate_step_pickle_list)
-    ]
-    schedule_and_passages_pickle_list = mpi_executor.run_job_queue(
-        job_params_list=params_list,
-        worker_process=compute_schedule_and_passages,
-    )
 
-    # simulation step
-    logger.debug("starting simulation")
-    params_list = [
-        (
-            prm.save_dpath / f"space_object_{spobj.object_id}" / "simulation_result.pickle",
-            prm.clobber,
-            propagate_step_pickle,
-            schedule_and_passages_pickle_,
-            prm,
-        )
-        for spobj, propagate_step_pickle, schedule_and_passages_pickle_ in zip(
-            spobjs, propagate_step_pickle_list, schedule_and_passages_pickle_list
-        )
-    ]
-    sim_result_list = mpi_executor.run_job_queue(
-        job_params_list=params_list, worker_process=simulate
-    )
-    logger.debug("simulation done")
+        # simulation step
+        logger.debug("starting simulation")
+        params_list = [
+            (
+                prm.save_dpath / f"space_object_{spobj.object_id}" / "simulation_result.pickle",
+                prm.clobber,
+                propagate_step_pickle,
+                schedule_and_passages_pickle_,
+                prm,
+            )
+            for spobj, propagate_step_pickle, schedule_and_passages_pickle_ in zip(
+                spobjs, propagate_step_pickle_list, schedule_and_passages_pickle_list
+            )
+        ]
+        sim_result_list = self.run_job_queue(job_params_list=params_list, worker_process=simulate)
+        logger.debug("simulation done")
 
 
-mpi_executor.entry_point(main)()
+Script().run()

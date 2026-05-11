@@ -1,12 +1,12 @@
 from __future__ import annotations
-import logging, typing as t, traceback, time, sys, functools, enum
+import logging, typing as t, traceback, time, sys, functools, enum, abc
 from tqdm import tqdm
 from mpi4py import MPI, typing as mpit
 
 logger = logging.getLogger(__name__)
 
 
-class MpiJobQueueExecutor:
+class MpiJobQueueExecutor[MasterMainRet](abc.ABC):
     """
     Use MPI as a job queue, with the one process as master and the rest as workers.
     """
@@ -25,6 +25,44 @@ class MpiJobQueueExecutor:
         else:
             # TODO: implement
             raise NotImplementedError()
+
+    def run(self, *args, **kwargs) -> MasterMainRet:
+        """
+        The entry point of this class.
+
+        In the master process, it will run `self.master_main` and call `self.terminate` before returning.
+        All arguments passed to this method is forwarded to `self.master_main`
+
+        In a worker process, a worker loop will be ran instead.
+        The function signature of worker loop is hidden from the signature of this `run` method.
+        """
+
+        try:
+            # Also a pass-through if we are a master rank MPI process
+            if self.is_master_process():
+                ret = self.master_main(*args, **kwargs)
+                self.terminate()
+                return ret
+            else:
+                # run the worker loop otherwise
+                self.mpi_worker_loop()
+                return t.cast(MasterMainRet, None)
+
+        except Exception as err:
+            r = self.comm.Get_rank()
+
+            logger.error(
+                f"terminating MPI process due to exception occured in rank: {r}, error:\n"
+                + "\n".join(traceback.format_exception(err))
+            )
+            self.comm.Abort(1)
+
+    @abc.abstractmethod
+    def master_main(self, *args, **kwargs) -> MasterMainRet:
+        """
+        The main function for master process.
+        """
+        ...
 
     def run_job_queue[*Args, Ret](
         self,
@@ -203,44 +241,12 @@ class MpiJobQueueExecutor:
                         f"worker: {worker_proc_rank} | received unexpected msg: {msg}"
                     )
 
-    # TODO: make `MpiJobQueueExecutor` an ABC and this as a virtual method?
-    def entry_point[**Params, Ret](self, func: t.Callable[Params, Ret]):
-        """
-        A function decorator that make `func` the entry point of `MpiJobQueueExecutor`.
-
-        The wrapped `func` will it run in the master process (MPI rank 0) only, and calls `self.terminate()` before returning.
-
-        In a worker process, a worker loop function from `MpiJobQueueExecutor` will be ran instead.
-        The function signature of worker loop is hidden from the signature of this function decorator.
-        """
-
-        @functools.wraps(func)
-        def wrapper(*args: Params.args, **kwargs: Params.kwargs):
-            # just a pass-through if we are not using MPI
-            if not self.is_run_with_mpi:
-                return func(*args, **kwargs)
-
-            else:
-                try:
-                    # Also a pass-through if we are a master rank MPI process
-                    if self.comm.rank == self.master_proc_rank:
-                        ret = func(*args, **kwargs)
-                        self.terminate()
-                        return ret
-                    else:
-                        # return the worker loop otherwise
-                        return t.cast(t.Callable[Params, Ret], self.mpi_worker_loop())
-
-                except Exception as err:
-                    r = self.comm.Get_rank()
-
-                    logger.error(
-                        f"terminating MPI process due to exception occured in rank: {r}, error:\n"
-                        + "\n".join(traceback.format_exception(err))
-                    )
-                    self.comm.Abort(1)
-
-        return wrapper
+    def is_master_process(self):
+        # TODO: complete support for these cases:
+        #       - not using mpi
+        #       - mpi without dynamic process management
+        #       - mpi with dynamic process management
+        return self.comm_world.rank == self.master_proc_rank
 
     # TODO: WIP
     def terminate(self):

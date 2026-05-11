@@ -17,7 +17,7 @@ from sorts import (
     ExperimentDetail,
 )
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG, force=True)
 logging.getLogger("sorts.propagator").setLevel(logging.WARNING)
 logging.getLogger("sorts.frames").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
