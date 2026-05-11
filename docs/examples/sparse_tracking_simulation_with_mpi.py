@@ -5,6 +5,7 @@ import numpy as np
 import numpy.typing as npt
 from astropy.time import Time
 from tqdm import tqdm
+from mpi4py.futures import MPIPoolExecutor, MPICommExecutor
 import sorts
 from sorts import (
     types,
@@ -16,33 +17,6 @@ from sorts import (
     passage,
     ExperimentDetail,
 )
-
-try:
-    from mpi4py import MPI
-
-    pool_size = MPI.COMM_WORLD.Get_size()
-    rank = MPI.COMM_WORLD.Get_rank()
-except ImportError:
-    pool_size = 1
-    rank = 0
-
-
-logging.basicConfig(level=logging.DEBUG)
-logging.getLogger("sorts.propagator").setLevel(logging.WARNING)
-logging.getLogger("sorts.frames").setLevel(logging.WARNING)
-logger = logging.getLogger(__name__)
-logger.info("starting example")
-
-parser = argparse.ArgumentParser()
-parser.add_argument("--out_dir", type=Path, default=Path(__file__).parent / "local_data")
-parser.add_argument("--name", type=str, default="sparse_tracking_simulation_with_mpi")
-parser.add_argument("--clobber", action="store_true")
-parser.add_argument("--antennas", type=int, default=10_000)
-cli_args = parser.parse_args()
-
-R_earth = 6371e3
-
-mpi_executor = sorts.MpiJobQueueExecutor(num_workers=7, is_run_with_mpi=pool_size > 1)
 
 
 @dataclass(kw_only=True)
@@ -67,7 +41,9 @@ class ScriptParams:
     rng: t.Any
 
 
-def prepare_simulation(cli_args: argparse.Namespace) -> tuple[ScriptParams, population.Population]:
+def prepare_simulation(
+    cli_args: argparse.Namespace,
+) -> tuple[ScriptParams, population.Population]:
     coherent_integration_time = 0.04
     duty_cycle = 0.2
     grid_size = (4, 4)  # used a very small grid for demo, normal values are e.g. `(50, 50)`
@@ -258,7 +234,7 @@ def simulate(
     sch, passages = utils.as_retval(
         compute_schedule_and_passages, schedule_and_passages_pickle
     ).load()
-    
+
     sim_result = utils.empty_list_of_retval(spobj_simulator.simulate)
     for spobj, interp in tqdm(
         # NOTE: used `list(zip(...))` instead of just `zip(...)` so that `tqdm` can get the length
@@ -280,65 +256,81 @@ def simulate(
     return sim_result
 
 
-def main():
-    # TODO: this is a tmp workaround
-    #       cannot apply `master_only` to `prm, spobj_pop = prepare_simulation(cli_args)`
-    #       because unpacking will fail in workers
-    mpi_executor.master_only(lambda: utils.ensure_directory_exist(prm.save_dpath))
+# NOTE: functions that passed to executor.map cannot be declared inside of
+#       `with MPICommExecutor(max_workers=4) as executor:` block.
+#       the executor will not be able to grab a reference to it.
+#
+#       making our own helper class is still helpful considering this?
+#       we should align the syntax to the `MPICommExecutor` though
+#
+# NOTE: the typing of `MPICommExecutor` is not complete, it is missing the `star`, `submit`, ... methods.
+#       looking into the code, `MPICommExecutor` returns a `MPIPoolExecutor` for master rank,
+#       so the method do exists, but as method of `MPIPoolExecutor`
+# with MPIPoolExecutor(max_workers=2) as executor:
+with MPICommExecutor() as executor:
 
-    # preparations
-    prm, spobj_pop = prepare_simulation(cli_args)
-    spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
+    logging.basicConfig(level=logging.DEBUG, force=True)
+    logging.getLogger("sorts.propagator").setLevel(logging.WARNING)
+    logging.getLogger("sorts.frames").setLevel(logging.WARNING)
+    logger = logging.getLogger(__name__)
+    logger.info("starting example")
 
-    # propagate
-    params_list = [
-        (
-            prm.save_dpath / f"space_object_{spobj.object_id}" / "propagate_step_output.pickle",
-            prm.clobber,
-            spobj,
-            prm,
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--out_dir", type=Path, default=Path(__file__).parent / "local_data")
+    parser.add_argument("--name", type=str, default="sparse_tracking_simulation_with_mpi")
+    parser.add_argument("--clobber", action="store_true")
+    parser.add_argument("--antennas", type=int, default=10_000)
+    cli_args = parser.parse_args()
+
+    R_earth = 6371e3
+
+    if executor is not None:
+        # preparations
+        prm, spobj_pop = prepare_simulation(cli_args)
+        spobjs = [spobj_pop.get_object(oid) for oid in prm.oids]
+
+        # propagate
+        params_list = [
+            (
+                prm.save_dpath / f"space_object_{spobj.object_id}" / "propagate_step_output.pickle",
+                prm.clobber,
+                spobj,
+                prm,
+            )
+            for spobj in spobjs
+        ]
+        propagate_step_pickle_list = executor.starmap(
+            propagate, tqdm(params_list, desc="propagate")
         )
-        for spobj in spobjs
-    ]
 
-    propagate_step_pickle_list = mpi_executor.run_job_queue(
-        job_params_list=params_list,
-        worker_process=propagate,
-    )
-
-    # compute_schedule_and_passages step
-    params_list = [
-        (
-            prm.save_dpath / f"space_object_{spobj.object_id}" / "schedule_and_passages.pickle",
-            prm.clobber,
-            propagate_step_pickle,
-            prm,
+        # compute_schedule_and_passages step
+        params_list = [
+            (
+                prm.save_dpath / f"space_object_{spobj.object_id}" / "schedule_and_passages.pickle",
+                prm.clobber,
+                propagate_step_pickle,
+                prm,
+            )
+            for spobj, propagate_step_pickle in zip(spobjs, propagate_step_pickle_list)
+        ]
+        schedule_and_passages_pickle_list = executor.starmap(
+            compute_schedule_and_passages,
+            tqdm(params_list, desc="compute_schedule_and_passages"),
         )
-        for spobj, propagate_step_pickle in zip(spobjs, propagate_step_pickle_list)
-    ]
-    schedule_and_passages_pickle_list = mpi_executor.run_job_queue(
-        job_params_list=params_list,
-        worker_process=compute_schedule_and_passages,
-    )
 
-    # simulation step
-    logger.debug("starting simulation")
-    params_list = [
-        (
-            prm.save_dpath / f"space_object_{spobj.object_id}" / "simulation_result.pickle",
-            prm.clobber,
-            propagate_step_pickle,
-            schedule_and_passages_pickle_,
-            prm,
-        )
-        for spobj, propagate_step_pickle, schedule_and_passages_pickle_ in zip(
-            spobjs, propagate_step_pickle_list, schedule_and_passages_pickle_list
-        )
-    ]
-    sim_result_list = mpi_executor.run_job_queue(
-        job_params_list=params_list, worker_process=simulate
-    )
-    logger.debug("simulation done")
-
-
-mpi_executor.entry_point(main)()
+        # simulation step
+        logger.debug("starting simulation")
+        params_list = [
+            (
+                prm.save_dpath / f"space_object_{spobj.object_id}" / "simulation_result.pickle",
+                prm.clobber,
+                propagate_step_pickle,
+                schedule_and_passages_pickle_,
+                prm,
+            )
+            for spobj, propagate_step_pickle, schedule_and_passages_pickle_ in zip(
+                spobjs, propagate_step_pickle_list, schedule_and_passages_pickle_list
+            )
+        ]
+        sim_result_list = executor.starmap(simulate, tqdm(params_list, desc="simulate"))
+        logger.debug("simulation done")
