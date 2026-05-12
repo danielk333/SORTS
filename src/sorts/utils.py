@@ -1,4 +1,4 @@
-import typing as t, pickle, dataclasses, functools
+import typing as t, pickle, dataclasses, functools, inspect
 from datetime import datetime, timedelta
 from pathlib import Path
 import numpy as np
@@ -176,9 +176,11 @@ def safe_pickle[T](obj: T, fpath: str | Path) -> PickledObject[T]:
     return PickledObject[T](fpath=fpath)
 
 
-def use_pickled_or_compute[**Params, Ret](func: t.Callable[Params, Ret]):
+def use_pickled_or_compute_function[**Params, Ret](func: t.Callable[Params, Ret]):
     """
-    It function decorator that use the pickled file on disk if exists, otherwise generate a new pickle.
+    NOTE: Only use it on functions, for methods, use `use_pickled_or_compute_method`.
+
+    A function decorator that use the pickled file on disk if exists, otherwise generate a new pickle.
     - the wrapped function will have the `fpath` and `overwrite` params prepended.
 
       i.e.: Given `func(...) -> R`, return `wrapped_func(fpath, overwrite, ...) -> R`
@@ -199,6 +201,35 @@ def use_pickled_or_compute[**Params, Ret](func: t.Callable[Params, Ret]):
             return PickledObject[Ret](fpath=Path(fpath))
 
     return wrapper
+
+
+def use_pickled_or_compute_method[Self, *Args, Ret](func: t.Callable[[Self, *Args], Ret]):
+    """
+    NOTE: Only use it on functions, for methods, use `use_pickled_or_compute_function`.
+
+    A method decorator that use the pickled file on disk if exists, otherwise generate a new pickle.
+    - the wrapped function will have the `fpath` and `overwrite` params prepended.
+
+      i.e.: Given `method(self, ...) -> R`, return `wrapped_method(self, fpath, overwrite, ...) -> R`
+
+    - Any missing directories will be created.
+
+    Args:
+        pickle_path: The file path to read/write from/to.
+        overwrite: Whether or not to overwrite an existing pickle file.
+    """
+
+    @functools.wraps(func)
+    def wrapper(self, fpath: str | Path, overwrite: bool, *args: *Args, **kwargs):
+        if overwrite or not Path(fpath).exists():
+            return safe_pickle(func(self, *args, **kwargs), fpath)
+
+        else:
+            return PickledObject[Ret](fpath=Path(fpath))
+
+    # NOTE: Seems `@functools.wraps(func)` will effect type hint in some checker,
+    #       which will mess up the type. We do a casting here to workaround it.
+    return t.cast(t.Callable[[Self, str | Path, bool, *Args], PickledObject[Ret]], wrapper)
 
 
 def as_retval[**Params, Ret](func: t.Callable[Params, Ret], val):

@@ -137,7 +137,7 @@ def prepare_simulation(cli_args: argparse.Namespace) -> tuple[ScriptParams, popu
     return prm, spobj_pop
 
 
-@utils.use_pickled_or_compute
+@utils.use_pickled_or_compute_function
 def propagate(spobj: sorts.SpaceObject, prm: ScriptParams):
     spobj_simulator = sorts.SpaceObjectSimulator(
         propagator=sorts.propagator.Sgp4(
@@ -179,7 +179,7 @@ def propagate(spobj: sorts.SpaceObject, prm: ScriptParams):
     return spobj_simulator, times, spobj_and_perts, spobj_prop_and_perts, spobj_interp_and_perts
 
 
-@utils.use_pickled_or_compute
+@utils.use_pickled_or_compute_function
 def compute_schedule_and_passages(propagate_step_pickle: utils.PickledObject, prm: ScriptParams):
     (
         spobj_simulator,
@@ -215,7 +215,7 @@ def compute_schedule_and_passages(propagate_step_pickle: utils.PickledObject, pr
     return tracker_sch, passages
 
 
-@utils.use_pickled_or_compute
+@utils.use_pickled_or_compute_function
 def simulate(
     propagate_step_pickle: utils.PickledObject,
     schedule_and_passages_pickle: utils.PickledObject,
