@@ -66,8 +66,8 @@ class MpiJobQueueExecutor[MasterMainRet](abc.ABC):
 
     def run_job_queue[*Args, Ret](
         self,
-        job_params_list: t.Sequence[tuple[*Args]],
         worker_process: t.Callable[[*Args], Ret],
+        job_params_list: t.Sequence[tuple[*Args]],
         show_progress_bar=True,
     ) -> list[Ret]:
         # Run with MPI, the normal path.

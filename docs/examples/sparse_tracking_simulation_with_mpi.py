@@ -123,8 +123,8 @@ class Script(sorts.MpiJobQueueExecutor):
         ]
 
         propagate_step_pickle_list = self.run_job_queue(
-            job_params_list=params_list,
             worker_process=self.propagate,
+            job_params_list=params_list,
         )
 
         # compute_schedule_and_passages step
@@ -139,8 +139,8 @@ class Script(sorts.MpiJobQueueExecutor):
             for spobj, propagate_step_pickle in zip(spobjs, propagate_step_pickle_list)
         ]
         schedule_and_passages_pickle_list = self.run_job_queue(
-            job_params_list=params_list,
             worker_process=self.compute_schedule_and_passages,
+            job_params_list=params_list,
         )
 
         # simulation step
@@ -157,7 +157,7 @@ class Script(sorts.MpiJobQueueExecutor):
             )
         ]
         sim_result_list = self.run_job_queue(
-            job_params_list=params_list, worker_process=self.simulate
+            worker_process=self.simulate, job_params_list=params_list
         )
         logger.debug("simulation done")
 
