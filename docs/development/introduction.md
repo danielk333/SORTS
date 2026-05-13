@@ -6,13 +6,22 @@ We use [`mkdocs`](https://www.mkdocs.org/) and [`mkdocstrings`](https://mkdocstr
 
 ## Development setup
 
-use this to install the packages
-```bash
-uv sync --all-extras
+We provide both the `requirements.txt` and `pylock.toml`. \
+(The `requirements.txt` is generated on a linux x86_64 platform)
 
-# the sorts bundling info does not work well with `uv` at the moment
-# so a separate install using `pip` sorts itself is needed.
-uv pip install -e .
+Run these to install the packages:
+```bash
+# using pip
+pip install -r requirements.txt
+
+# using uv
+uv pip install -r pylock.toml
+```
+
+The lock files are generated using `uv` at the moment:
+```bash
+uv export --all-extras --resolution lowest-direct -o requirements.txt
+uv export --all-extras --resolution lowest-direct -o pylock.toml
 ```
 
 ## Tests

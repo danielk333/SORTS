@@ -3,6 +3,7 @@ from pathlib import Path
 import numpy as np
 from astropy.time import Time
 from tqdm import tqdm
+from mpi4py.futures import MPIPoolExecutor, MPICommExecutor
 import sorts
 from sorts import utils, pointing, population, radar, passage, ExperimentDetail
 
@@ -14,12 +15,13 @@ logger.info("starting example")
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--out_dir", type=Path, default=Path(__file__).parent / "local_data")
-parser.add_argument("--name", type=str, default="sparse_tracking_simulation")
+parser.add_argument("--name", type=str, default="sparse_tracking_simulation_with_mpi4py_futures")
 parser.add_argument("--clobber", action="store_true")
 parser.add_argument("--antennas", type=int, default=10_000)
 cli_args = parser.parse_args()
 
 R_earth = 6371e3
+
 
 # persistence configs
 save_dname = cli_args.name
@@ -81,77 +83,85 @@ exp_detail_map = {exp_detail.id: exp_detail}
 # NOTE: Defining a main function is optional.
 #       We do it here so that the main logic can be put upfront before other functions in the file,
 #       so the main logic and can stay close with the script variables for better readability.
+# NOTE: functions that passed to executor.map cannot be declared inside of
+#       `with MPICommExecutor() as executor:` block.
+#       the executor will not be able to grab a reference to it.
+# NOTE: the typing of `MPICommExecutor` is not complete, it is missing the `star`, `submit`, ... methods.
+#       looking into the code, `MPICommExecutor` returns a `MPIPoolExecutor` for master rank,
+#       so the method do exists, but as method of `MPIPoolExecutor`
 def main():
-    utils.ensure_directory_exist(save_dpath)
-    utils.ensure_directory_exist(plot_dpath)
+    with MPICommExecutor() as executor:
+        if executor is not None:
+            utils.ensure_directory_exist(save_dpath)
+            utils.ensure_directory_exist(plot_dpath)
 
-    # used a very small grid for demo, normal values are e.g. `(50, 50)`
-    grid_size = (4, 4)
-    spobj_pop = population.orbit_grid(
-        semi_major_axis_samples=np.linspace(R_earth + 300e3, R_earth + 1000e3, num=grid_size[0]),
-        eccentricity_samples=np.array([0]),
-        inclination_samples=np.array([0]),
-        argument_of_periapsis_samples=np.array([0]),
-        longitude_of_ascending_node_samples=np.array([0]),
-        mean_anomaly_samples=np.array([0]),
-        diameter_samples=10 ** np.linspace(-2, 1, num=grid_size[1]),
-        frame="TEME",
-        epoch_mjd=t.cast(float, start_time.mjd),
-        additional_parameters={"area_to_mass": 0, "m": 0},
-        degrees=True,
-    )
-    spobj_pop.data["i"] = 75.0
-    spobj_pop.data["area_to_mass"] = 10 ** (np.random.rand(len(spobj_pop)) * 4 - 3)
-    areas = np.pi * (spobj_pop.data["d"] / 2) ** 2
-    spobj_pop.data["m"] = areas / spobj_pop.data["area_to_mass"]
+            # used a very small grid for demo, normal values are e.g. `(50, 50)`
+            grid_size = (4, 4)
+            spobj_pop = population.orbit_grid(
+                semi_major_axis_samples=np.linspace(
+                    R_earth + 300e3, R_earth + 1000e3, num=grid_size[0]
+                ),
+                eccentricity_samples=np.array([0]),
+                inclination_samples=np.array([0]),
+                argument_of_periapsis_samples=np.array([0]),
+                longitude_of_ascending_node_samples=np.array([0]),
+                mean_anomaly_samples=np.array([0]),
+                diameter_samples=10 ** np.linspace(-2, 1, num=grid_size[1]),
+                frame="TEME",
+                epoch_mjd=t.cast(float, start_time.mjd),
+                additional_parameters={"area_to_mass": 0, "m": 0},
+                degrees=True,
+            )
+            spobj_pop.data["i"] = 75.0
+            spobj_pop.data["area_to_mass"] = 10 ** (np.random.rand(len(spobj_pop)) * 4 - 3)
+            areas = np.pi * (spobj_pop.data["d"] / 2) ** 2
+            spobj_pop.data["m"] = areas / spobj_pop.data["area_to_mass"]
 
-    oids = np.arange(len(spobj_pop))
-    spobjs = [spobj_pop.get_object(oid) for oid in oids]
+            oids = np.arange(len(spobj_pop))
+            spobjs = [spobj_pop.get_object(oid) for oid in oids]
 
-    # propagate
-    params_list = [
-        (
-            save_dpath / f"space_object_{spobj.object_id}" / "propagate_step_output.pickle",
-            clobber,
-            spobj,
-        )
-        for spobj in spobjs
-    ]
-    propagate_step_pickle_list = [
-        propagate(*params) for params in tqdm(params_list, desc="preparation step")
-    ]
+            # propagate
+            params_list = [
+                (
+                    save_dpath / f"space_object_{spobj.object_id}" / "propagate_step_output.pickle",
+                    clobber,
+                    spobj,
+                )
+                for spobj in spobjs
+            ]
+            propagate_step_pickle_list = executor.starmap(
+                propagate, tqdm(params_list, desc="propagate")
+            )
 
-    # compute_schedule_and_passages step
-    params_list = [
-        (
-            save_dpath / f"space_object_{spobj.object_id}" / "schedule_and_passages.pickle",
-            clobber,
-            propagate_step_pickle,
-        )
-        for spobj, propagate_step_pickle in zip(spobjs, propagate_step_pickle_list)
-    ]
-    schedule_and_passages_pickle_list = [
-        compute_schedule_and_passages(*params)
-        for params in tqdm(params_list, desc="compute_schedule_and_passages step")
-    ]
+            # compute_schedule_and_passages step
+            params_list = [
+                (
+                    save_dpath / f"space_object_{spobj.object_id}" / "schedule_and_passages.pickle",
+                    clobber,
+                    propagate_step_pickle,
+                )
+                for spobj, propagate_step_pickle in zip(spobjs, propagate_step_pickle_list)
+            ]
+            schedule_and_passages_pickle_list = executor.starmap(
+                compute_schedule_and_passages,
+                tqdm(params_list, desc="compute_schedule_and_passages"),
+            )
 
-    # simulation step
-    logger.debug("starting simulation")
-    params_list = [
-        (
-            save_dpath / f"space_object_{spobj.object_id}" / "simulation_result.pickle",
-            clobber,
-            propagate_step_pickle,
-            schedule_and_passages_pickle,
-        )
-        for spobj, propagate_step_pickle, schedule_and_passages_pickle in zip(
-            spobjs, propagate_step_pickle_list, schedule_and_passages_pickle_list
-        )
-    ]
-    sim_result_list = [
-        simulate(*params) for params in tqdm(params_list, desc="compute_schedule_and_passages step")
-    ]
-    logger.debug("simulation done")
+            # simulation step
+            logger.debug("starting simulation")
+            params_list = [
+                (
+                    save_dpath / f"space_object_{spobj.object_id}" / "simulation_result.pickle",
+                    clobber,
+                    propagate_step_pickle,
+                    schedule_and_passages_pickle,
+                )
+                for spobj, propagate_step_pickle, schedule_and_passages_pickle in zip(
+                    spobjs, propagate_step_pickle_list, schedule_and_passages_pickle_list
+                )
+            ]
+            sim_result_list = executor.starmap(simulate, tqdm(params_list, desc="simulate"))
+            logger.debug("simulation done")
 
 
 @utils.use_pickled_or_compute_function

@@ -35,6 +35,7 @@ from . import (
     space_object_states_interpolation,
     simulation,
     mpi_queued_execution,
+    mpi_job_queue_executor,
 )
 
 # freq used types
@@ -57,6 +58,9 @@ from .simulation import (
 # mpi helpers
 from .mpi_queued_execution import (
     MpiQueuedExecution as MpiQueuedExecution,
+)
+from .mpi_job_queue_executor import (
+    MpiJobQueueExecutor as MpiJobQueueExecutor,
 )
 
 

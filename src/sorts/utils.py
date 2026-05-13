@@ -1,4 +1,4 @@
-import typing as t, pickle
+import typing as t, pickle, dataclasses, functools, inspect
 from datetime import datetime, timedelta
 from pathlib import Path
 import numpy as np
@@ -148,10 +148,19 @@ def ensure_directory_exist(dpath: str | Path):
     assert dpath.is_dir()
 
 
-def safe_pickle(obj, fpath: str | Path):
+@dataclasses.dataclass(kw_only=True, frozen=True)
+class PickledObject[T]:
+    fpath: Path
+
+    def load(self):
+        with open(self.fpath, "rb") as fh:
+            return t.cast(T, pickle.load(fh))
+
+
+def safe_pickle[T](obj: T, fpath: str | Path) -> PickledObject[T]:
     """
     Use pickle to save an object to the specified file path, with a few extra steps to make the write operation safer:
-    - The output directory will be created if not exists
+    - Any missing directories will be created.
     - We write to an tmp file first then rename that file, as a simple way to reduce risk of corrupted files
     """
 
@@ -163,3 +172,91 @@ def safe_pickle(obj, fpath: str | Path):
     with open(fpath_tmp, "wb") as f:
         pickle.dump(obj, f)
     fpath_tmp.rename(fpath)
+
+    return PickledObject[T](fpath=fpath)
+
+
+def use_pickled_or_compute_function[**Params, Ret](func: t.Callable[Params, Ret]):
+    """
+    NOTE: Only use it on functions, for methods, use `use_pickled_or_compute_method`.
+
+    A function decorator that use the pickled file on disk if exists, otherwise generate a new pickle.
+    - the wrapped function will have the `fpath` and `overwrite` params prepended.
+
+      i.e.: Given `func(...) -> R`, return `wrapped_func(fpath, overwrite, ...) -> R`
+
+    - Any missing directories will be created.
+
+    Args:
+        pickle_path: The file path to read/write from/to.
+        overwrite: Whether or not to overwrite an existing pickle file.
+    """
+
+    @functools.wraps(func)
+    def wrapper(fpath: str | Path, overwrite: bool, *args: Params.args, **kwargs: Params.kwargs):
+        if overwrite or not Path(fpath).exists():
+            return safe_pickle(func(*args, **kwargs), fpath)
+
+        else:
+            return PickledObject[Ret](fpath=Path(fpath))
+
+    return wrapper
+
+
+def use_pickled_or_compute_method[Self, *Args, Ret](func: t.Callable[[Self, *Args], Ret]):
+    """
+    NOTE: Only use it on functions, for methods, use `use_pickled_or_compute_function`.
+
+    A method decorator that use the pickled file on disk if exists, otherwise generate a new pickle.
+    - the wrapped function will have the `fpath` and `overwrite` params prepended.
+
+      i.e.: Given `method(self, ...) -> R`, return `wrapped_method(self, fpath, overwrite, ...) -> R`
+
+    - Any missing directories will be created.
+
+    Args:
+        pickle_path: The file path to read/write from/to.
+        overwrite: Whether or not to overwrite an existing pickle file.
+    """
+
+    @functools.wraps(func)
+    def wrapper(self, fpath: str | Path, overwrite: bool, *args: *Args, **kwargs):
+        if overwrite or not Path(fpath).exists():
+            return safe_pickle(func(self, *args, **kwargs), fpath)
+
+        else:
+            return PickledObject[Ret](fpath=Path(fpath))
+
+    # NOTE: Seems `@functools.wraps(func)` will effect type hint in some checker,
+    #       which will mess up the type. We do a casting here to workaround it.
+    return t.cast(t.Callable[[Self, str | Path, bool, *Args], PickledObject[Ret]], wrapper)
+
+
+def as_retval[**Params, Ret](func: t.Callable[Params, Ret], val):
+    """
+    Cast `val` to the type of return value of `func`.
+
+    i.e.: Given `func(...) -> R`, `val` is casted to `R`
+    """
+
+    return t.cast(Ret, val)
+
+
+def as_item_of_seq_retval[**Params, Ret](func: t.Callable[Params, t.Sequence[Ret]], val):
+    """
+    Cast `val` to the type of the item in a sequence returning `func`.
+
+    i.e.: Given `func(...) -> Sequence[R]`, `val` is casted to `R`
+    """
+
+    return t.cast(Ret, val)
+
+
+def empty_list_of_retval[**Params, Ret](func: t.Callable[Params, Ret]) -> list[Ret]:
+    """
+    Return an empty list of the type of return value of `func`.
+
+    i.e.: Given `func(...) -> R`, return `list[R]`
+    """
+
+    return t.cast(list[Ret], [])

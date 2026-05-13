@@ -2,12 +2,11 @@
 
 from copy import deepcopy
 from dataclasses import dataclass, fields
-import typing as t
+import typing as t, pathlib
 import numpy as np
 import numpy.typing as npt
 from datetime import datetime, timedelta
 from astropy.time import Time, TimeDelta
-
 
 Datetime64_us = np.datetime64
 "`numpy` `datetime64` in `us` resolution"

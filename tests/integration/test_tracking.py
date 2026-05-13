@@ -207,7 +207,7 @@ def test_south_to_north_circular_orbit():
     # TODO: assert the start and end time of the observation is as expected? it will likely requires interpolation.
     # earth_radius: np.float64 = R_earth.value  # in meters
     # spobj_orbital_period: types.Float64_as_sec = pyorb.orbital_period(
-    #         spobj_orbital_radius, pyorb.GM_earth
+    #         spobj_orbital_radius, pyorb.G * pyorb.M_earth
     #     )
     # end_time = start_time_dt64 + spobj_orbital_period * np.timedelta64(int(1e6), "us")
     #
