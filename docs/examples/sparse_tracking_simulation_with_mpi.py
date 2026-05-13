@@ -1,21 +1,10 @@
 import logging, typing as t, argparse
-from dataclasses import dataclass
 from pathlib import Path
 import numpy as np
-import numpy.typing as npt
 from astropy.time import Time
 from tqdm import tqdm
 import sorts
-from sorts import (
-    types,
-    utils,
-    pointing,
-    population,
-    propagator,
-    radar,
-    passage,
-    ExperimentDetail,
-)
+from sorts import utils, pointing, population, radar, passage, ExperimentDetail
 
 logging.basicConfig(level=logging.DEBUG, force=True)
 logging.getLogger("sorts.propagator").setLevel(logging.WARNING)
@@ -33,35 +22,29 @@ cli_args = parser.parse_args()
 R_earth = 6371e3
 
 
-@dataclass(kw_only=True)
-class ScriptParams:
-    save_dname: str
-    save_dpath: Path
-    plot_dpath: Path
-    start_time: Time
-    end_time: Time
-    control_slice_duration: np.timedelta64
-    coherent_integration_time: float
-    time_step: float
-    rand_seed: int
-    grid_size: tuple[int, int]
-    tx_station: radar.TX
-    rx_stations: t.Sequence[radar.RX]
-    station_map: t.Mapping[types.StationId, radar.Station]
-    exp_detail_map: types.ExperimentDetailMap
-    prop: propagator.Propagator
-    oids: npt.NDArray[np.int64]
-    clobber: bool
-    rng: t.Any
+class Script(sorts.MpiJobQueueExecutor):
+    # NOTE: code here (outside of methods) are ran in all processes of MPI
 
+    # persistence configs
+    save_dname = cli_args.name
+    save_dpath = cli_args.out_dir / cli_args.name
+    plot_dpath = cli_args.out_dir / cli_args.name / "plots"
+    clobber = cli_args.clobber
 
-def prepare_simulation(cli_args: argparse.Namespace) -> tuple[ScriptParams, population.Population]:
+    # config random seed
+    rand_seed = 1203
+    np.random.seed(rand_seed)
+    rng = np.random.default_rng(seed=rand_seed)
+
+    start_time = Time("2025-01-01 00:00:00")
+    end_time = Time("2025-01-02 00:00:00")
+
+    time_step = 10.0
     coherent_integration_time = 0.04
     duty_cycle = 0.2
-    grid_size = (4, 4)  # used a very small grid for demo, normal values are e.g. `(50, 50)`
-    rand_seed = 1203
-    start_time = Time("2025-01-01 00:00:00")
     time_slice = coherent_integration_time / duty_cycle
+    control_slice_duration = np.timedelta64(int(time_slice * 1e6), "us")
+
     radar_sys = radar.radars.nostra.gen_nostra(
         frequency=3.2e9,
         antenna_num=cli_args.antennas,
@@ -77,37 +60,12 @@ def prepare_simulation(cli_args: argparse.Namespace) -> tuple[ScriptParams, popu
         coherent_integration_time=coherent_integration_time,
         bandwidth_limit_ratio=5,
     )
-
     tx_station = radar_sys.tx[0]
     rx_stations = radar_sys.rx
     station_map = {idx: stn for idx, stn in enumerate([tx_station, *rx_stations])}
     for idx, stn in station_map.items():
         stn.uid = idx
 
-    np.random.seed(rand_seed)
-    rng = np.random.default_rng(seed=rand_seed)
-
-    spobj_pop = population.orbit_grid(
-        semi_major_axis_samples=np.linspace(R_earth + 300e3, R_earth + 1000e3, num=grid_size[0]),
-        eccentricity_samples=np.array([0]),
-        inclination_samples=np.array([0]),
-        argument_of_periapsis_samples=np.array([0]),
-        longitude_of_ascending_node_samples=np.array([0]),
-        mean_anomaly_samples=np.array([0]),
-        diameter_samples=10 ** np.linspace(-2, 1, num=grid_size[1]),
-        frame="TEME",
-        epoch_mjd=t.cast(float, start_time.mjd),
-        additional_parameters={"area_to_mass": 0, "m": 0},
-        degrees=True,
-    )
-    spobj_pop.data["i"] = 75.0
-    spobj_pop.data["area_to_mass"] = 10 ** (np.random.rand(len(spobj_pop)) * 4 - 3)
-    areas = np.pi * (spobj_pop.data["d"] / 2) ** 2
-    spobj_pop.data["m"] = areas / spobj_pop.data["area_to_mass"]
-
-    oids = np.arange(len(spobj_pop))
-
-    control_slice_duration = np.timedelta64(int(time_slice * 1e6), "us")
     exp_detail = ExperimentDetail(
         id=0,
         # not used
@@ -121,52 +79,44 @@ def prepare_simulation(cli_args: argparse.Namespace) -> tuple[ScriptParams, popu
         noise_temp=rx_stations[0].noise,
         slice_duration=control_slice_duration,
     )
-
-    prm = ScriptParams(
-        save_dname=cli_args.name,
-        save_dpath=cli_args.out_dir / cli_args.name,
-        plot_dpath=cli_args.out_dir / cli_args.name / "plots",
-        start_time=start_time,
-        # end_time = Time("2025-01-07 00:00:00"),
-        end_time=Time("2025-01-02 00:00:00"),
-        control_slice_duration=control_slice_duration,
-        coherent_integration_time=coherent_integration_time,
-        time_step=10.0,
-        rand_seed=rand_seed,
-        grid_size=grid_size,
-        tx_station=tx_station,
-        rx_stations=rx_stations,
-        station_map=station_map,
-        exp_detail_map={exp_detail.id: exp_detail},
-        prop=propagator.Sgp4(
-            settings=propagator.Sgp4Settings(out_frame="ITRS", mean_elements_input=True)
-        ),
-        oids=oids,
-        clobber=cli_args.clobber,
-        rng=rng,
-    )
-
-    return prm, spobj_pop
-
-
-class Script(sorts.MpiJobQueueExecutor):
-    # NOTE: code here (outside of methods) are ran in all processes of MPI
-
-    # preparations
-    prm, spobj_pop = prepare_simulation(cli_args)
+    exp_detail_map = {exp_detail.id: exp_detail}
 
     def master_main(self):
-        utils.ensure_directory_exist(self.prm.save_dpath)
-        utils.ensure_directory_exist(self.prm.plot_dpath)
-        spobjs = [self.spobj_pop.get_object(oid) for oid in self.prm.oids]
+        utils.ensure_directory_exist(self.save_dpath)
+        utils.ensure_directory_exist(self.plot_dpath)
+
+        # used a very small grid for demo, normal values are e.g. `(50, 50)`
+        grid_size = (4, 4)
+        spobj_pop = population.orbit_grid(
+            semi_major_axis_samples=np.linspace(
+                R_earth + 300e3, R_earth + 1000e3, num=grid_size[0]
+            ),
+            eccentricity_samples=np.array([0]),
+            inclination_samples=np.array([0]),
+            argument_of_periapsis_samples=np.array([0]),
+            longitude_of_ascending_node_samples=np.array([0]),
+            mean_anomaly_samples=np.array([0]),
+            diameter_samples=10 ** np.linspace(-2, 1, num=grid_size[1]),
+            frame="TEME",
+            epoch_mjd=t.cast(float, self.start_time.mjd),
+            additional_parameters={"area_to_mass": 0, "m": 0},
+            degrees=True,
+        )
+        spobj_pop.data["i"] = 75.0
+        spobj_pop.data["area_to_mass"] = 10 ** (np.random.rand(len(spobj_pop)) * 4 - 3)
+        areas = np.pi * (spobj_pop.data["d"] / 2) ** 2
+        spobj_pop.data["m"] = areas / spobj_pop.data["area_to_mass"]
+
+        oids = np.arange(len(spobj_pop))
+        spobjs = [spobj_pop.get_object(oid) for oid in oids]
 
         # propagate
         params_list = [
             (
-                self.prm.save_dpath
+                self.save_dpath
                 / f"space_object_{spobj.object_id}"
                 / "propagate_step_output.pickle",
-                self.prm.clobber,
+                self.clobber,
                 spobj,
             )
             for spobj in spobjs
@@ -180,10 +130,10 @@ class Script(sorts.MpiJobQueueExecutor):
         # compute_schedule_and_passages step
         params_list = [
             (
-                self.prm.save_dpath
+                self.save_dpath
                 / f"space_object_{spobj.object_id}"
                 / "schedule_and_passages.pickle",
-                self.prm.clobber,
+                self.clobber,
                 propagate_step_pickle,
             )
             for spobj, propagate_step_pickle in zip(spobjs, propagate_step_pickle_list)
@@ -197,10 +147,8 @@ class Script(sorts.MpiJobQueueExecutor):
         logger.debug("starting simulation")
         params_list = [
             (
-                self.prm.save_dpath
-                / f"space_object_{spobj.object_id}"
-                / "simulation_result.pickle",
-                self.prm.clobber,
+                self.save_dpath / f"space_object_{spobj.object_id}" / "simulation_result.pickle",
+                self.clobber,
                 propagate_step_pickle,
                 schedule_and_passages_pickle_,
             )
@@ -233,18 +181,18 @@ class Script(sorts.MpiJobQueueExecutor):
 
         times, true_states = spobj_simulator.propagate(
             space_object=spobj,
-            start_time=self.prm.start_time,
-            end_time=self.prm.end_time,
-            time_step=self.prm.time_step,
+            start_time=self.start_time,
+            end_time=self.end_time,
+            time_step=self.time_step,
         )
 
         spobj_prop_and_perts = [true_states]
         for obj in spobj_and_perts[1:]:
             _, pert_states = spobj_simulator.propagate(
                 space_object=obj,
-                start_time=self.prm.start_time,
-                end_time=self.prm.end_time,
-                time_step=self.prm.time_step,
+                start_time=self.start_time,
+                end_time=self.end_time,
+                time_step=self.time_step,
             )
             spobj_prop_and_perts.append(pert_states)
 
@@ -273,19 +221,19 @@ class Script(sorts.MpiJobQueueExecutor):
             dt=times,
             space_object=spobj,
             states=true_states[:3, ...],
-            tx_station=self.prm.tx_station,
-            rx_stations=self.prm.rx_stations,
-            epoch=utils.to_datetime64_us(self.prm.start_time),
+            tx_station=self.tx_station,
+            rx_stations=self.rx_stations,
+            epoch=utils.to_datetime64_us(self.start_time),
         )
 
         tracker_sch = pointing.sparse_tracking(
             passages_of_spobj=passages,
             interpolation=true_states_interp,
             points_per_passage=10,
-            tx_station=self.prm.tx_station,
-            rx_stations=self.prm.rx_stations,
-            exp_id=self.prm.exp_detail_map[0].id,
-            slice_duration=self.prm.exp_detail_map[0].slice_duration,
+            tx_station=self.tx_station,
+            rx_stations=self.rx_stations,
+            exp_id=self.exp_detail_map[0].id,
+            slice_duration=self.exp_detail_map[0].slice_duration,
         )
 
         return tracker_sch, passages
@@ -321,8 +269,8 @@ class Script(sorts.MpiJobQueueExecutor):
                     # the same passage data is used for all perturbed objects
                     passages=passages,
                     sch=sch,
-                    station_map=self.prm.station_map,
-                    exp_detail_map=self.prm.exp_detail_map,
+                    station_map=self.station_map,
+                    exp_detail_map=self.exp_detail_map,
                 )
             )
 
