@@ -154,9 +154,9 @@ def main():
                     save_dpath / f"space_object_{spobj.object_id}" / "simulation_result.pickle",
                     clobber,
                     propagate_step_pickle,
-                    schedule_and_passages_pickle_,
+                    schedule_and_passages_pickle,
                 )
-                for spobj, propagate_step_pickle, schedule_and_passages_pickle_ in zip(
+                for spobj, propagate_step_pickle, schedule_and_passages_pickle in zip(
                     spobjs, propagate_step_pickle_list, schedule_and_passages_pickle_list
                 )
             ]
