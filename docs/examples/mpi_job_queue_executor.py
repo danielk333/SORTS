@@ -3,27 +3,31 @@ import time
 import sorts
 
 
-def gen_job_params():
-    np.random.seed(123)
+class Script(sorts.MpiJobQueueExecutor):
     sleep_sigma = 0.1
 
-    worker_job_params = [
-        {"id": ind, "sleep": np.abs(np.random.randn()) * sleep_sigma} for ind in range(20)
-    ]
-    return worker_job_params
+    def master_main(self):
+        np.random.seed(123)
+
+        params_list = [(ind, np.abs(np.random.randn()) * self.sleep_sigma) for ind in range(20)]
+
+        result = self.run_job_queue(
+            worker_process=self.plus_one_and_sleep,
+            job_params_list=params_list,
+        )
+
+    def plus_one_and_sleep(self, id, sleep_seconds):
+        time.sleep(sleep_seconds)
+        print(f"task id=", id)
 
 
-def worker_process(params):
-    params = sorts.utils.as_item_of_seq_retval(gen_job_params, params)
-    time.sleep(params["sleep"])
-    print(f"task id=", params["id"])
+try:
+    from mpi4py import MPI
 
+    pool_size = MPI.COMM_WORLD.Get_size()
+    rank = MPI.COMM_WORLD.Get_rank()
+except ImportError:
+    pool_size = 1
+    rank = 0
 
-# mpi_executor = sorts.MpiQueuedExecutor(num_workers=7, is_run_with_mpi=True)
-mpi_executor = sorts.MpiJobQueueExecutor(num_workers=7, is_run_with_mpi=False)
-
-mpi_executor.run_job_queue(
-    job_params_list=gen_job_params(),
-    worker_process=worker_process,
-    show_progress_bar=True,
-)
+Script(is_run_with_mpi=pool_size > 1).run()
