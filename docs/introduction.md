@@ -38,7 +38,7 @@ The main subpackages are grouped as follows:
     - `interpolation`: Handles the interpolation of a space object motion states.
 - Other utilities
     - `plotting`: Collection of plotting helpers and functions.
-    - `mpi_queued_execution`: Handles parallelzied exection via Message Passing Interface (MPI).
+    - `mpi_job_queue_executor`: Handles parallelzied exection via Message Passing Interface (MPI).
 
 ## Functionality Highlights
 
