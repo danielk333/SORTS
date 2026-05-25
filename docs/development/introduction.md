@@ -13,6 +13,7 @@ Run these to install the packages:
 ```bash
 # using pip
 pip install -r requirements.txt
+pip install -e .[spacetrack,jupyter,dev]
 
 # using uv
 uv pip install -r pylock.toml
