@@ -47,6 +47,7 @@ dependencies = [
   "mpi4py>=4.1.0",
   "h5netcdf>=1.6.4",
   "radardef>=0.3.2",
+  "spacecoords>=0.2.2",
 ]
 
 

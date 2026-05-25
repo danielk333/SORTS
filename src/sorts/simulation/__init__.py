@@ -1,4 +1,4 @@
-from . import tx_rx_pair_state
+from . import tx_rx_pair_state as tx_rx_pair_state
 
 from .space_object_simulator import (
     SpaceObjectSimulator as SpaceObjectSimulator,

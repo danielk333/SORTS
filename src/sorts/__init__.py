@@ -23,19 +23,26 @@ logger = logging.getLogger(__name__)
 
 ##
 # v2 imports
+#
+# we following Python's suggestion to use explicit `xxx as xxx` to mark public member here, see:
+# https://gitlab.irf.se/danielk/sorts/-/work_items/15
 ##
 
 # modules
+
+# we are using `spacecoords.interpolation` directly as our `interpolation` module.
+# we add a re-export here so user of `sorts` does not need to be aware of the `spacecoords` module/namespace
+from spacecoords import interpolation as interpolation
+
 from . import (
-    types,
-    utils,
-    schedule,
-    pointing,
-    space_object,
-    passage,
-    space_object_states_interpolation,
-    simulation,
-    mpi_job_queue_executor,
+    types as types,
+    utils as utils,
+    schedule as schedule,
+    pointing as pointing,
+    space_object as space_object,
+    passage as passage,
+    simulation as simulation,
+    mpi_job_queue_executor as mpi_job_queue_executor,
 )
 
 # freq used types
@@ -44,9 +51,6 @@ from .types import (
 )
 from .space_object import (
     SpaceObject as SpaceObject,
-)
-from .space_object_states_interpolation import (
-    SpaceObjectStatesInterpolation as SpaceObjectStatesInterpolation,
 )
 from .passage import (
     Passage as Passage,
