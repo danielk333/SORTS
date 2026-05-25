@@ -25,6 +25,10 @@ logger = logging.getLogger(__name__)
 # v2 imports
 ##
 
+# we are using `spacecoords.interpolation` directly as our `interpolation` module.
+# we add a re-export here so user of `sorts` does not need to be aware of the `spacecoords` module/namespace
+from spacecoords import interpolation as interpolation
+
 # modules
 from . import (
     types,
@@ -33,7 +37,6 @@ from . import (
     pointing,
     space_object,
     passage,
-    space_object_states_interpolation,
     simulation,
     mpi_job_queue_executor,
 )
@@ -44,9 +47,6 @@ from .types import (
 )
 from .space_object import (
     SpaceObject as SpaceObject,
-)
-from .space_object_states_interpolation import (
-    SpaceObjectStatesInterpolation as SpaceObjectStatesInterpolation,
 )
 from .passage import (
     Passage as Passage,

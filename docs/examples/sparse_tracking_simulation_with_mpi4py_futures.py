@@ -170,7 +170,7 @@ def propagate(spobj: sorts.SpaceObject):
         propagator=sorts.propagator.Sgp4(
             settings=sorts.propagator.Sgp4Settings(out_frame="ITRS", mean_elements_input=True)
         ),
-        interpolator=sorts.space_object_states_interpolation.Legendre8,
+        interpolator=sorts.interpolation.Legendre8,
     )
 
     spobj_and_perts = spobj_simulator.perturbate(
