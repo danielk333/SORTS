@@ -176,9 +176,6 @@ class ExperimentDetail:
 ExperimentDetailMap = dict[ExperimentId, ExperimentDetail]
 
 
-ExperimentIdStationIdPairsMap = dict[ExperimentId, list[tuple[StationId, StationId]]]
-
-
 # TODO: re-eval if we really need this complication
 @dataclass
 class Settings:
