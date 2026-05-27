@@ -702,32 +702,6 @@ wheels = [
 ]
 
 [[package]]
-name = "digital-rf"
-version = "2.6.14"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "h5py" },
-    { name = "numpy" },
-    { name = "packaging" },
-    { name = "python-dateutil" },
-    { name = "six" },
-    { name = "watchdog" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/60/ac/8eedf825a7b9b107c6695666ee6ffe198c53e521293f977fa7609164316f/digital_rf-2.6.14.tar.gz", hash = "sha256:f900759d503bfedb57480c82919239727e1c1e2839982b8076836b2b243f6c5f", size = 4686117, upload-time = "2025-09-11T19:42:10.4Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/92/b3/eedd84c82750382516b9fee4817889bafebbd7de70fd7b42d17085fadc4e/digital_rf-2.6.14-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:a34a813fa56bcf8d1dff89433879996d0b66d7515bae25e6a34d202a7f478823", size = 1654227, upload-time = "2025-09-11T19:41:37.821Z" },
-    { url = "https://files.pythonhosted.org/packages/aa/60/f966b3269fef3388fb5f53d98d35fa066865f2483dcd8113e67c3cead08c/digital_rf-2.6.14-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:c97f5baae100af74b14fd2775a90712817fae6c49b2aebe465a7f9f7961985fc", size = 1404578, upload-time = "2025-09-11T19:41:39.843Z" },
-    { url = "https://files.pythonhosted.org/packages/89/39/354d8d9c72eb8a60f539c93d934f917a2566870af57b0a3eafb96e74275a/digital_rf-2.6.14-cp312-cp312-manylinux_2_28_aarch64.whl", hash = "sha256:d0fbe69aa661b75368fe7d98b33047c7db5ba76a1dd4e9df87b11e97acba76d0", size = 1895433, upload-time = "2025-09-11T19:41:41.692Z" },
-    { url = "https://files.pythonhosted.org/packages/71/95/28a034717c67223a5d08b00e65208cb42b7a73aaca2ed9d925d161791e0c/digital_rf-2.6.14-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:b7f9f782377e4a32b6c98bd62401b4302f31bd2c931b1dbdf1c8c40b47b98502", size = 1934881, upload-time = "2025-09-11T19:41:43.523Z" },
-    { url = "https://files.pythonhosted.org/packages/f7/ec/c006840a87b5455572de647fffc4b4569fbbfbce43946748427963bc65f6/digital_rf-2.6.14-cp312-cp312-win_amd64.whl", hash = "sha256:38c2cb889c8ff46774be527ef04e134836b4f5b462b82f6a720d40fbd3942026", size = 1279402, upload-time = "2025-09-11T19:41:45.885Z" },
-    { url = "https://files.pythonhosted.org/packages/1a/a7/7239c775db5e8536456b415441cdad2b9c6b025267291be0583ff96105ae/digital_rf-2.6.14-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:bd368d54c3c65a669c1dba7c8c5c9066343fe9ff9ab97f5e7faf913f92ae8a4d", size = 1654231, upload-time = "2025-09-11T19:41:47.332Z" },
-    { url = "https://files.pythonhosted.org/packages/37/ef/46dfa7555c1588f58f34485669dc965dea29d4c3d7170cd63e11c77ea934/digital_rf-2.6.14-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:bd8bb0616bf926492bb3685b270fd4098705bbfff233ec10dede8e5b2490c053", size = 1404582, upload-time = "2025-09-11T19:41:49.1Z" },
-    { url = "https://files.pythonhosted.org/packages/da/20/f30e2374e88e31b510aec80cbaeb2952b42d920406dffcc26b730e6ac05e/digital_rf-2.6.14-cp313-cp313-manylinux_2_28_aarch64.whl", hash = "sha256:734c277f27f9805501da54a7647402f827e21580a0cda33e68bcf1337a215098", size = 1895435, upload-time = "2025-09-11T19:41:50.537Z" },
-    { url = "https://files.pythonhosted.org/packages/60/7e/4642db05dca9b0930df372e15177e3b91fbb256e3dfa6e876545cd0b3370/digital_rf-2.6.14-cp313-cp313-manylinux_2_28_x86_64.whl", hash = "sha256:ec6f8896a20f164040c9ba41ad9c5d2ea0bc4a6723f2b7071ed9ba16c92dab54", size = 1934884, upload-time = "2025-09-11T19:41:52.392Z" },
-    { url = "https://files.pythonhosted.org/packages/9d/cb/93fe4f1f5f0bc9b9223e088d4ff4accbeffa22a1edb0a88d32bfb299d08f/digital_rf-2.6.14-cp313-cp313-win_amd64.whl", hash = "sha256:8bfc789097b7fa427cee3efa677cee31336f505c9aef139a44a08dd6523ab4a1", size = 1279402, upload-time = "2025-09-11T19:41:54.203Z" },
-]
-
-[[package]]
 name = "distlib"
 version = "0.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2813,11 +2787,10 @@ wheels = [
 
 [[package]]
 name = "radardef"
-version = "0.3.2"
+version = "0.4.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "astropy" },
-    { name = "digital-rf" },
     { name = "h5py" },
     { name = "lxml" },
     { name = "numpy" },
@@ -2827,9 +2800,9 @@ dependencies = [
     { name = "spacecoords" },
     { name = "tqdm" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/52/49/32bb7c050ef51c97474c8a1275e54ccdeb3d4a2e64ff70b08730386fecb1/radardef-0.3.2.tar.gz", hash = "sha256:419e5a71559da6f7c171a4acab0728de665e454c77bdb3906e4d806b46f650c5", size = 117345, upload-time = "2026-03-11T09:20:19.044Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f1/4b/3868d479d4014a088eb0f12cf5eb3cfdf0ba461decad9ac478ad50c29ce7/radardef-0.4.6.tar.gz", hash = "sha256:55dc825d1a1d1bbe2f6c64aec760c73ab20a64130ec7d2a080bbd7eb4b15417b", size = 120230, upload-time = "2026-05-13T10:52:33.796Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b2/29/e35c81c22311c257b41a887a887649308cf4ecdfb62568bc26e517c5bb58/radardef-0.3.2-py3-none-any.whl", hash = "sha256:c0c7b17be658c4792dd2461f5b6f4611f308a0b2e89318a56ae955759ba6298e", size = 143277, upload-time = "2026-03-11T09:20:17.167Z" },
+    { url = "https://files.pythonhosted.org/packages/32/c8/9b8534cfcfeb3936222b51b8cfd485c62aae85e72416e099c62613cf8bb1/radardef-0.4.6-py3-none-any.whl", hash = "sha256:87574db190ea5e00551eae0da9f8dd4332ead86537a212a5609d5f8513019f69", size = 149208, upload-time = "2026-05-13T10:52:31.891Z" },
 ]
 
 [[package]]
@@ -3235,7 +3208,7 @@ requires-dist = [
     { name = "pyqt6", specifier = ">=6.8.1" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=9.0" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.1.0" },
-    { name = "radardef", specifier = ">=0.3.2" },
+    { name = "radardef", specifier = ">=0.4.6" },
     { name = "radon", marker = "extra == 'dev'", specifier = ">=5.1.0" },
     { name = "requests", specifier = ">=2.32.3" },
     { name = "scipy", specifier = ">=1.13.0" },
