@@ -6,7 +6,7 @@ from tqdm import tqdm
 import sorts
 from sorts import utils, pointing, population, radar, passage, ExperimentDetail
 
-logging.basicConfig(level=logging.DEBUG, force=True)
+logging.basicConfig(level=logging.DEBUG)
 logging.getLogger("sorts.propagator").setLevel(logging.WARNING)
 logging.getLogger("sorts.frames").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
