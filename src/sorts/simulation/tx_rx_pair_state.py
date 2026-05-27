@@ -204,7 +204,9 @@ def simulate(
     spobj_radar_albedo: float,
     tx_station: radar.Station,
     rx_station: radar.Station,
-    exp_detail_map: types.ExperimentDetailMap,
+    powers: npt.NDArray[np.float64],
+    bandwidths: npt.NDArray[np.float64],
+    rx_noise_temps: npt.NDArray[np.float64],
 ) -> TxRxPairState:
     """
     Run TX RX simulation calculations.
@@ -234,20 +236,6 @@ def simulate(
 
     range_tx: npt.NDArray[types.Float64_as_m] = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
     range_rx: npt.NDArray[types.Float64_as_m] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
-
-    # TODO: can likely use assignment by slice/indexing instead of looping
-    powers = np.array(
-        [exp_detail_map[n].power for n in txrx_state[_K.exp_num].to_numpy()],
-        dtype=np.float64,
-    )
-    bandwidths = np.array(
-        [exp_detail_map[n].bandwidth for n in txrx_state[_K.exp_num].to_numpy()],
-        dtype=np.float64,
-    )
-    rx_noise_temps = np.array(
-        [exp_detail_map[n].noise_temp for n in txrx_state[_K.exp_num].to_numpy()],
-        dtype=np.float64,
-    )
 
     txrx_state = calc_gain(
         state=txrx_state,

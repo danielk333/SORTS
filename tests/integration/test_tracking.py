@@ -40,7 +40,6 @@ from sorts import (
 )
 from sorts.simulation import tx_rx_pair_state
 
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -171,7 +170,18 @@ def test_south_to_north_circular_orbit():
         spobj_radar_albedo=spobj.properties.get("radar_albedo", 1.0),
         tx_station=tx_stn,
         rx_station=rx_stn,
-        exp_detail_map={exp_detail.id: exp_detail},
+        powers=np.array(
+            [exp_detail.power for n in txrx_state[_K.exp_num].to_numpy()],
+            dtype=np.float64,
+        ),
+        bandwidths=np.array(
+            [exp_detail.bandwidth for n in txrx_state[_K.exp_num].to_numpy()],
+            dtype=np.float64,
+        ),
+        rx_noise_temps=np.array(
+            [exp_detail.noise_temp for n in txrx_state[_K.exp_num].to_numpy()],
+            dtype=np.float64,
+        ),
     )
 
     tx_pointings_norm = np.linalg.norm(

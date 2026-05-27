@@ -83,7 +83,19 @@ class SpaceObjectSimulator:
                     spobj_radar_albedo=spobj_radar_albedo,
                     tx_station=station_map[stn_id_pair[0]],
                     rx_station=station_map[stn_id_pair[1]],
-                    exp_detail_map=exp_detail_map,
+                    # TODO: can likely use assignment by slice/indexing instead of looping
+                    powers=np.array(
+                        [exp_detail_map[n].power for n in txrx_state[_K.exp_num].to_numpy()],
+                        dtype=np.float64,
+                    ),
+                    bandwidths=np.array(
+                        [exp_detail_map[n].bandwidth for n in txrx_state[_K.exp_num].to_numpy()],
+                        dtype=np.float64,
+                    ),
+                    rx_noise_temps=np.array(
+                        [exp_detail_map[n].noise_temp for n in txrx_state[_K.exp_num].to_numpy()],
+                        dtype=np.float64,
+                    ),
                 )
             )
 
