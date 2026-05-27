@@ -30,23 +30,23 @@ dependencies = [
   # AttributeError: module 'matplotlib.pyplot' has no attribute 'Colormap'.
   # ```
   "matplotlib>=3.9.0",
-  "numpy>=2.0.0",      # v1.26+ gives Python 3.12.0 support; we go for v2.0+
-  "scipy>=1.13.0",     # support NumPy 2.0.0, and is backwards compatible to NumPy 1.22.4
+  "numpy>=2.0.0",       # v1.26+ gives Python 3.12.0 support; we go for v2.0+
+  "scipy>=1.13.0",      # support NumPy 2.0.0, and is backwards compatible to NumPy 1.22.4
   "sgp4>=2.7",
-  "tabulate>=0.10.0",  # v0.10.0 Add support for Python 3.11, 3.12, 3.13, 3.14.
+  "tabulate>=0.10.0",   # v0.10.0 Add support for Python 3.11, 3.12, 3.13, 3.14.
   "tqdm>=4.46.0",
-  "astropy>=6.1.0",    # compiled against NumPy 2.0
+  "astropy>=6.1.0",     # compiled against NumPy 2.0
   "xmlschema>=1.5.1",
   "pyorb>=0.5.4",
   "pyant>=1.1",
-  "yappi>=1.5.1",      # Add support for Python 3.12
+  "yappi>=1.5.1",       # Add support for Python 3.12
   "requests>=2.32.3",
-  "pandas>=2.2.2",     # compatible with numpy 2.0
+  "pandas>=2.2.2",      # compatible with numpy 2.0
   "pyqt6>=6.8.1",
   "bottleneck>=1.5.0",
   "mpi4py>=4.1.0",
   "h5netcdf>=1.6.4",
-  "radardef>=0.3.2",
+  "radardef>=0.4.6",
   "spacecoords>=0.2.2",
 ]
 
