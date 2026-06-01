@@ -5,7 +5,7 @@ from astropy.time import Time
 from tqdm import tqdm
 from mpi4py import MPI
 import sorts
-from sorts import utils, pointing, population, radar, passage, ExperimentDetail, simulation
+from sorts import utils, pointing, population, radar, passage, simulation
 
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger("sorts.propagator").setLevel(logging.WARNING)
@@ -68,20 +68,10 @@ class Script(sorts.MpiJobQueueExecutor):
     for idx, stn in station_map.items():
         stn.uid = idx
 
-    exp_detail = ExperimentDetail(
-        id=0,
-        # not used
-        coh_int_bandwidth=1.0,
-        ipp=1.0,
-        pulse_length=1.0,
-        duty_cycle=1.0,
-        # --
-        power=tx_station.power,
-        bandwidth=1 / coherent_integration_time,
-        noise_temp=rx_stations[0].noise,
-        slice_duration=control_slice_duration,
-    )
-    exp_detail_map = {exp_detail.id: exp_detail}
+    exp_id = 0
+    radar_power = tx_station.power
+    radar_bandwidth = 1 / coherent_integration_time
+    radar_noise_temp = rx_stations[0].noise
 
     def master_main(self):
         utils.ensure_directory_exist(self.save_dpath)
@@ -234,8 +224,8 @@ class Script(sorts.MpiJobQueueExecutor):
             points_per_passage=10,
             tx_station=self.tx_station,
             rx_stations=self.rx_stations,
-            exp_id=self.exp_detail_map[0].id,
-            slice_duration=self.exp_detail_map[0].slice_duration,
+            exp_id=self.exp_id,  # TODO: rename the param to `sch_id`?
+            slice_duration=self.control_slice_duration,
         )
 
         return tracker_sch, passages
@@ -282,17 +272,17 @@ class Script(sorts.MpiJobQueueExecutor):
             for stn_id_pair, (txrx_state, spobj_state) in states_dict.items():
                 powers = radar_detection_system.build_param_array(
                     txrx_state=txrx_state,
-                    val_map={k: v.power for k, v in self.exp_detail_map.items()},
+                    val_map={self.exp_id: self.radar_power},
                     dtype=np.float64,
                 )
                 bandwidths = radar_detection_system.build_param_array(
                     txrx_state=txrx_state,
-                    val_map={k: v.bandwidth for k, v in self.exp_detail_map.items()},
+                    val_map={self.exp_id: self.radar_bandwidth},
                     dtype=np.float64,
                 )
                 rx_noise_temps = radar_detection_system.build_param_array(
                     txrx_state=txrx_state,
-                    val_map={k: v.noise_temp for k, v in self.exp_detail_map.items()},
+                    val_map={self.exp_id: self.radar_noise_temp},
                     dtype=np.float64,
                 )
 
