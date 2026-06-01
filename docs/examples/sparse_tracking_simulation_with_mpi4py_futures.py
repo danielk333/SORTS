@@ -5,7 +5,7 @@ from astropy.time import Time
 from tqdm import tqdm
 from mpi4py.futures import MPIPoolExecutor, MPICommExecutor
 import sorts
-from sorts import utils, pointing, population, radar, passage, ExperimentDetail
+from sorts import utils, pointing, population, radar, passage, ExperimentDetail, simulation
 
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger("sorts.propagator").setLevel(logging.WARNING)
@@ -259,23 +259,60 @@ def simulate(
         compute_schedule_and_passages, schedule_and_passages_pickle
     ).load()
 
-    sim_result = utils.empty_list_of_retval(spobj_simulator.simulate)
+    sim_result: list[list[simulation.TxRxPairState]] = []
     for spobj, interp in tqdm(
         # NOTE: used `list(zip(...))` instead of just `zip(...)` so that `tqdm` can get the length
         list(zip(spobj_and_perts, spobj_interp_and_perts)),
         desc="simulating a perturbation set",
     ):
-        sim_result.append(
-            spobj_simulator.simulate(
-                space_object=spobj,
-                states_interpolation=interp,
-                # the same passage data is used for all perturbed objects
-                passages=passages,
-                sch=sch,
-                station_map=station_map,
-                exp_detail_map=exp_detail_map,
-            )
+        radar_detection_system = simulation.RadarDetectionSystem(
+            tx_station=tx_station,
+            rx_stations=rx_stations,
+            station_map=station_map,
         )
+
+        states_dict = radar_detection_system.gather_states_during_passages(
+            space_object=spobj,
+            states_interpolation=interp,
+            # the same passage data is used for all perturbed objects
+            passages=passages,
+            sch=sch,
+        )
+
+        stn_pair_sim_result_list = []
+        for stn_id_pair, (txrx_state, spobj_state) in states_dict.items():
+            powers = radar_detection_system.build_param_array(
+                txrx_state=txrx_state,
+                val_map={k: v.power for k, v in exp_detail_map.items()},
+                dtype=np.float64,
+            )
+            bandwidths = radar_detection_system.build_param_array(
+                txrx_state=txrx_state,
+                val_map={k: v.bandwidth for k, v in exp_detail_map.items()},
+                dtype=np.float64,
+            )
+            rx_noise_temps = radar_detection_system.build_param_array(
+                txrx_state=txrx_state,
+                val_map={k: v.noise_temp for k, v in exp_detail_map.items()},
+                dtype=np.float64,
+            )
+
+            stn_pair_sim_result_list.append(
+                radar_detection_system.simulate_(
+                    txrx_state=txrx_state,
+                    spobj_state=spobj_state,
+                    spobj_diameter=spobj.d,
+                    # TODO: confirm with daniel if setting a default radar_albedo is okay
+                    spobj_radar_albedo=spobj.properties.get("radar_albedo", 1.0),
+                    tx_station=station_map[stn_id_pair[0]],
+                    rx_station=station_map[stn_id_pair[1]],
+                    powers=powers,
+                    bandwidths=bandwidths,
+                    rx_noise_temps=rx_noise_temps,
+                )
+            )
+
+        sim_result.append(stn_pair_sim_result_list)
 
     return sim_result
 

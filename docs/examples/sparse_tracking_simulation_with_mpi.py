@@ -258,7 +258,7 @@ class Script(sorts.MpiJobQueueExecutor):
             self.compute_schedule_and_passages, schedule_and_passages_pickle
         ).load()
 
-        sim_result = utils.empty_list_of_retval(spobj_simulator.simulate)
+        sim_result: list[list[simulation.TxRxPairState]] = []
         for spobj, interp in tqdm(
             # NOTE: used `list(zip(...))` instead of just `zip(...)` so that `tqdm` can get the length
             list(zip(spobj_and_perts, spobj_interp_and_perts)),
