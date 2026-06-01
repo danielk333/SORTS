@@ -165,6 +165,7 @@ def calc_gain(
     return state
 
 
+# TODO: not used; remove?
 def get_unique_exp_id_simult_num_pairs(
     state: TxRxPairState,
 ) -> list[tuple[types.ExperimentId, types.SimultaneousNum]]:
@@ -188,6 +189,7 @@ def filter_by_exp_id_simult_num(
     return state_masked
 
 
+# TODO: not used; remove?
 def group_by_unique_exp_id_simult_num_pairs(
     state: TxRxPairState,
 ) -> dict[tuple[types.ExperimentId, types.SimultaneousNum], TxRxPairState]:
