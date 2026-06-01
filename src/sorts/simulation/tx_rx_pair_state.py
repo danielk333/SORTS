@@ -1,10 +1,12 @@
 from __future__ import annotations
-import typing as t, enum
+import typing as t, enum, dataclasses
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from sorts import types, signals, radar, schedule, passage
+from spacecoords.interpolation import Interpolator as Interpolation
+from sorts import types, utils, signals, radar, schedule, passage
 from sorts.schedule import TxRxPointingPairs
+from sorts.space_object import SpaceObject
 
 
 # TODO: updated the name with tx/rx as suffix to prefix
@@ -75,12 +77,14 @@ def empty() -> TxRxPairState:
     return TxRxPairState(state)
 
 
+# TODO: remove?
 def from_tx_rx_pointing_pairs(
     pointing_pairs: TxRxPointingPairs,
 ) -> TxRxPairState:
     return TxRxPairState(pointing_pairs)
 
 
+# TODO: remove?
 def gather_from_passages_schedule(
     passages: list[passage.Passage],
     sch: schedule.ScheduleDataframe,
@@ -197,6 +201,7 @@ def group_by_unique_exp_id_simult_num_pairs(
     return state_groups
 
 
+# TODO: dissolve into `simulate_` method
 def simulate(
     txrx_state: TxRxPairState,
     spobj_state: types.EcefStates,
@@ -269,3 +274,84 @@ def simulate(
     txrx_state[_K.two_way_range_rate] = v_tx + v_rx
 
     return txrx_state
+
+
+@dataclasses.dataclass(kw_only=True)
+class RadarDetectionSystem:
+    """A convenience object for simulation of radar detection metrics."""
+
+    # space_object: SpaceObject
+
+    tx_station: radar.TX
+    rx_stations: list[radar.RX]
+    station_map: dict[int, radar.TX | radar.RX]
+    # states_interpolation: Interpolation
+    # passages: list[passage.Passage]
+    # sch: schedule.ScheduleDataframe
+    # station_map: t.Mapping[StationId, Station]
+    # exp_detail_map: types.ExperimentDetailMap
+
+    def build_param_array(
+        self,
+        # TODO: this param is a bit strange logically; can we infer it via class/instance attr instead?
+        txrx_state: TxRxPairState,
+        val_map: dict[int, t.Any],
+        dtype: npt.DTypeLike = np.float64,
+    ) -> npt.NDArray:
+        _K = TxRxPairStateKey
+
+        # TODO: can likely use assignment by slice/indexing instead of looping
+        arr = np.array(
+            [val_map[n] for n in txrx_state[_K.exp_num].to_numpy()],
+            dtype=dtype,
+        )
+
+        return arr
+
+    @staticmethod
+    def gather_states_during_passages(
+        space_object: SpaceObject,
+        states_interpolation: Interpolation,
+        passages: list[passage.Passage],
+        sch: schedule.ScheduleDataframe,
+    ):
+        _K = TxRxPairStateKey
+
+        epoch = utils.to_datetime64_us(space_object.epoch)
+
+        pointing_pairs_dict = schedule.gather_pointing_pairs(passages=passages, sch=sch)
+        states_dict = {
+            key: (
+                TxRxPairState(pointing_pairs),
+                states_interpolation.get_state(
+                    (pointing_pairs[_K.time].to_numpy() - epoch) / np.timedelta64(1, "s")
+                ),
+            )
+            for key, pointing_pairs in pointing_pairs_dict.items()
+        }
+
+        return states_dict
+
+    def simulate_(
+        self,
+        txrx_state: TxRxPairState,
+        spobj_state: types.EcefStates,
+        spobj_diameter: float,
+        spobj_radar_albedo: float,
+        tx_station: radar.Station,
+        rx_station: radar.Station,
+        powers: npt.NDArray[np.float64],
+        bandwidths: npt.NDArray[np.float64],
+        rx_noise_temps: npt.NDArray[np.float64],
+    ):
+        return simulate(
+            txrx_state=txrx_state,
+            spobj_state=spobj_state,
+            spobj_diameter=spobj_diameter,
+            spobj_radar_albedo=spobj_radar_albedo,
+            tx_station=tx_station,
+            rx_station=rx_station,
+            powers=powers,
+            bandwidths=bandwidths,
+            rx_noise_temps=rx_noise_temps,
+        )

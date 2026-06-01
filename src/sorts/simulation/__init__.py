@@ -6,4 +6,5 @@ from .space_object_simulator import (
 from .tx_rx_pair_state import (
     TxRxPairStateKey as TxRxPairStateKey,
     TxRxPairState as TxRxPairState,
+    RadarDetectionSystem as RadarDetectionSystem,
 )
