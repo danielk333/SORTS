@@ -3,6 +3,7 @@ from pathlib import Path
 import numpy as np
 from astropy.time import Time
 from tqdm import tqdm
+from mpi4py import MPI
 import sorts
 from sorts import utils, pointing, population, radar, passage, ExperimentDetail, simulation
 
@@ -315,4 +316,4 @@ class Script(sorts.MpiJobQueueExecutor):
         return sim_result
 
 
-Script().run()
+Script(is_run_with_mpi=MPI.COMM_WORLD.Get_size() > 1).run()
