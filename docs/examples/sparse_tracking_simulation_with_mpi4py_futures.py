@@ -122,6 +122,8 @@ def main():
             propagate_step_pickle_generator = executor.starmap(
                 propagate, tqdm(params_list, desc="propagate")
             )
+            # trigger the eval of generator items (and also allow multiple consumption of the results)
+            propagate_step_pickle_list = list(propagate_step_pickle_generator)
 
             # compute_schedule_and_passages step
             params_list = [
@@ -130,12 +132,14 @@ def main():
                     clobber,
                     propagate_step_pickle,
                 )
-                for spobj, propagate_step_pickle in zip(spobjs, propagate_step_pickle_generator)
+                for spobj, propagate_step_pickle in zip(spobjs, propagate_step_pickle_list)
             ]
             schedule_and_passages_pickle_generator = executor.starmap(
                 compute_schedule_and_passages,
                 tqdm(params_list, desc="compute_schedule_and_passages"),
             )
+            # trigger the eval of generator items (and also allow multiple consumption of the results)
+            schedule_and_passages_pickle_list = list(schedule_and_passages_pickle_generator)
 
             # simulation step
             logger.debug("starting simulation")
@@ -147,11 +151,13 @@ def main():
                     schedule_and_passages_pickle,
                 )
                 for spobj, propagate_step_pickle, schedule_and_passages_pickle in zip(
-                    spobjs, propagate_step_pickle_generator, schedule_and_passages_pickle_generator
+                    spobjs, propagate_step_pickle_list, schedule_and_passages_pickle_list
                 )
             ]
             sim_result_generator = executor.starmap(simulate, tqdm(params_list, desc="simulate"))
-            sim_result_list = list(sim_result_generator)  # just to triiger eval of generator
+            # trigger the eval of generator items (and also allow multiple consumption of the results)
+            sim_result_list = list(sim_result_generator)
+
             logger.debug("simulation done")
 
 
