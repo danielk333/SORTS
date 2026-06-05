@@ -126,17 +126,11 @@ def test_south_to_north_circular_orbit():
         epoch=start_time_dt64,
     )
 
-    exp_detail = types.ExperimentDetail(
-        id=0,
-        coh_int_bandwidth=1.0,
-        ipp=1.0,
-        pulse_length=1.0,
-        power=5000000.0,
-        bandwidth=52.08333333333333,
-        duty_cycle=1.0,
-        noise_temp=150.0,
-        slice_duration=np.timedelta64(10_000, "us"),  # 10ms
-    )
+    exp_id = 0
+    radar_power = 5000000.0
+    radar_bandwidth = 52.08333333333333
+    radar_noise_temp = 150.0
+    slice_duration = np.timedelta64(10_000, "us")  # 10ms
 
     fence_sch = pointing.fence_scanning(
         start_time=start_time_dt64,
@@ -147,8 +141,8 @@ def test_south_to_north_circular_orbit():
         scan_range=scan_ranges,
         tx_station=tx_stn,
         rx_stations=rx_stns,
-        exp_id=exp_detail.id,
-        slice_duration=exp_detail.slice_duration,
+        exp_id=exp_id,
+        slice_duration=slice_duration,
     )
 
     spobj_abs_times = spobj_delta_secs * np.timedelta64(1, "s") + start_time_dt64
@@ -203,18 +197,12 @@ def test_south_to_north_circular_orbit():
             spobj_radar_albedo=spobj.properties.get("radar_albedo", 1.0),
             tx_station=tx_stn,
             rx_station=rx_stn,
-            # TODO: can likely use assignment by slice/indexing instead of looping
-            powers=np.array(
-                [exp_detail.power for n in reindexed_txrx_state[_K.exp_num].to_numpy()],
-                dtype=np.float64,
+            powers=np.full(len(reindexed_txrx_state[_K.exp_num]), radar_power, dtype=np.float64),
+            bandwidths=np.full(
+                len(reindexed_txrx_state[_K.exp_num]), radar_bandwidth, dtype=np.float64
             ),
-            bandwidths=np.array(
-                [exp_detail.bandwidth for n in reindexed_txrx_state[_K.exp_num].to_numpy()],
-                dtype=np.float64,
-            ),
-            rx_noise_temps=np.array(
-                [exp_detail.noise_temp for n in reindexed_txrx_state[_K.exp_num].to_numpy()],
-                dtype=np.float64,
+            rx_noise_temps=np.full(
+                len(reindexed_txrx_state[_K.exp_num]), radar_noise_temp, dtype=np.float64
             ),
         )
         result_states.append(result_state)

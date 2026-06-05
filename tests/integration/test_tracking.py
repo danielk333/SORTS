@@ -121,25 +121,19 @@ def test_south_to_north_circular_orbit():
         epoch=start_time_dt64,
     )
 
-    exp_detail = types.ExperimentDetail(
-        id=0,
-        coh_int_bandwidth=1.0,
-        ipp=1.0,
-        pulse_length=1.0,
-        power=5000000.0,
-        bandwidth=52.08333333333333,
-        duty_cycle=1.0,
-        noise_temp=150.0,
-        slice_duration=np.timedelta64(10_000, "us"),  # 10ms
-    )
+    exp_id = 0
+    radar_power = 5000000.0
+    radar_bandwidth = 52.08333333333333
+    radar_noise_temp = 150.0
+    slice_duration = np.timedelta64(10_000, "us")  # 10ms
 
     tracker_sch = pointing.tracking(
         spobj_ecef_states=spobj_state,
         spobj_ecef_states_times=spobj_abs_times,
         tx_station=tx_stn,
         rx_stations=[rx_stn],
-        exp_id=exp_detail.id,
-        slice_duration=exp_detail.slice_duration,
+        exp_id=exp_id,
+        slice_duration=slice_duration,
     )
 
     pairs_ls = [
@@ -170,18 +164,9 @@ def test_south_to_north_circular_orbit():
         spobj_radar_albedo=spobj.properties.get("radar_albedo", 1.0),
         tx_station=tx_stn,
         rx_station=rx_stn,
-        powers=np.array(
-            [exp_detail.power for n in txrx_state[_K.exp_num].to_numpy()],
-            dtype=np.float64,
-        ),
-        bandwidths=np.array(
-            [exp_detail.bandwidth for n in txrx_state[_K.exp_num].to_numpy()],
-            dtype=np.float64,
-        ),
-        rx_noise_temps=np.array(
-            [exp_detail.noise_temp for n in txrx_state[_K.exp_num].to_numpy()],
-            dtype=np.float64,
-        ),
+        powers=np.full(len(txrx_state[_K.exp_num]), radar_power, dtype=np.float64),
+        bandwidths=np.full(len(txrx_state[_K.exp_num]), radar_bandwidth, dtype=np.float64),
+        rx_noise_temps=np.full(len(txrx_state[_K.exp_num]), radar_noise_temp, dtype=np.float64),
     )
 
     tx_pointings_norm = np.linalg.norm(

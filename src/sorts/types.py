@@ -157,25 +157,6 @@ StationId = int
 """A unique int16 that identifies a radar station"""
 
 
-@dataclass(kw_only=True)
-class ExperimentDetail:
-    id: ExperimentId
-
-    coh_int_bandwidth: float
-    ipp: float
-    pulse_length: float
-    power: float
-    bandwidth: float
-    duty_cycle: float
-    noise_temp: float
-
-    slice_duration: Timedelta64_us
-    "Duration of a control slice, in micro-second"
-
-
-ExperimentDetailMap = dict[ExperimentId, ExperimentDetail]
-
-
 # TODO: re-eval if we really need this complication
 @dataclass
 class Settings:

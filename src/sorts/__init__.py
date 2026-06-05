@@ -46,9 +46,6 @@ from . import (
 )
 
 # freq used types
-from .types import (
-    ExperimentDetail as ExperimentDetail,
-)
 from .space_object import (
     SpaceObject as SpaceObject,
 )
