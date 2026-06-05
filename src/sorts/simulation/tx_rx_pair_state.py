@@ -282,17 +282,13 @@ def simulate(
 class RadarDetectionSystem:
     """A convenience object for simulation of radar detection metrics."""
 
-    # space_object: SpaceObject
-
+    # TODO: re-eval what is needed as class attr
     tx_station: radar.TX
     rx_stations: list[radar.RX]
     station_map: dict[int, radar.TX | radar.RX]
-    # states_interpolation: Interpolation
-    # passages: list[passage.Passage]
-    # sch: schedule.ScheduleDataframe
-    # station_map: t.Mapping[StationId, Station]
-    # exp_detail_map: types.ExperimentDetailMap
 
+    # TODO: instead of using it per `stn_id_pair` (`stn_id_pair, (txrx_state, spobj_state) in states_dict.items()`)
+    #       we can leverage the dataframe/dataframe.index and build an array for the entire dataframe/dataframe.index?
     def build_param_array(
         self,
         # TODO: this param is a bit strange logically; can we infer it via class/instance attr instead?
@@ -303,6 +299,8 @@ class RadarDetectionSystem:
         _K = TxRxPairStateKey
 
         # TODO: can likely use assignment by slice/indexing instead of looping
+        #       `arr = np.full(len(txrx_state[txrx_state[_K.exp_num] == n]), radar_bandwidth, dtype=dtype)`
+        #       `arr = pd.Series(val_map[n], index=txrx_state[txrx_state[_K.exp_num] == n].index)`
         arr = np.array(
             [val_map[n] for n in txrx_state[_K.exp_num].to_numpy()],
             dtype=dtype,
