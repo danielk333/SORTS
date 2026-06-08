@@ -103,6 +103,7 @@ def gather_from_passages_schedule(
     return pair_state_dict
 
 
+# TODO: remove?
 def filter_by_time_range(
     state: TxRxPairState,
     start_time: types.Datetime64_us,
@@ -203,89 +204,15 @@ def group_by_unique_exp_id_simult_num_pairs(
     return state_groups
 
 
-# TODO: dissolve into `simulate_` method
-def simulate(
-    txrx_state: TxRxPairState,
-    spobj_state: types.EcefStates,
-    spobj_diameter: float,
-    spobj_radar_albedo: float,
-    tx_station: radar.Station,
-    rx_station: radar.Station,
-    powers: npt.NDArray[np.float64],
-    bandwidths: npt.NDArray[np.float64],
-    rx_noise_temps: npt.NDArray[np.float64],
-) -> TxRxPairState:
-    """
-    Run TX RX simulation calculations.
-
-    The size of first dimension of `txrx_state` should equal to the 2nd dimension of `spobj_state`.
-    (i.e. `txrx_state.shape[0] == spobj_state.shape[1]`)
-
-    Returns:
-        The updated state/data.
-    """
-
-    _K = TxRxPairStateKey
-
-    if not txrx_state.shape[0] == spobj_state.shape[1]:
-        raise RuntimeError(
-            "The size of first dimension of `txrx_state` is not equal to the 2nd dimension of `spobj_state`."
-        )
-
-    if tx_station.wavelength is None:
-        # TODO: remove this hack; see issues #25 for details
-        raise RuntimeError(
-            "A hack of injecting `frequency` into `tx_stn.frequency` is currently required for calling `hard_target_snr`."
-        )
-
-    spobj_tx_enu = tx_station.enu(spobj_state)
-    spobj_rx_enu = rx_station.enu(spobj_state)
-
-    range_tx: npt.NDArray[types.Float64_as_m] = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
-    range_rx: npt.NDArray[types.Float64_as_m] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
-
-    txrx_state = calc_gain(
-        state=txrx_state,
-        tx_stn=tx_station,
-        rx_stn=rx_station,
-        spobj_tx_enu=spobj_tx_enu,
-        spobj_rx_enu=spobj_rx_enu,
-    )
-
-    snr = signals.hard_target_snr(
-        gain_tx=txrx_state[_K.gain_tx].to_numpy(),
-        gain_rx=txrx_state[_K.gain_rx].to_numpy(),
-        wavelength=tx_station.wavelength,
-        power_tx=powers,
-        range_tx_m=range_tx,
-        range_rx_m=range_rx,
-        diameter=spobj_diameter,
-        bandwidth=bandwidths,
-        rx_noise_temp=rx_noise_temps,
-        radar_albedo=spobj_radar_albedo,
-    )
-    txrx_state[_K.snr] = snr
-
-    txrx_state[_K.tx_range] = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
-
-    txrx_state[_K.rx_range] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
-
-    txrx_state[_K.two_way_range] = range_tx + range_rx
-    v_tx = np.sum(spobj_tx_enu[:3, :] * spobj_tx_enu[3:, :], axis=0) / range_tx
-    v_rx = np.sum(spobj_rx_enu[:3, :] * spobj_rx_enu[3:, :], axis=0) / range_rx
-    txrx_state[_K.two_way_range_rate] = v_tx + v_rx
-
-    return txrx_state
-
-
 @dataclasses.dataclass(kw_only=True)
 class RadarDetectionSystem:
-    """A convenience object for simulation of radar detection metrics."""
+    """Handles simulation of radar detection metrics."""
 
     # TODO: re-eval what is needed as class attr
-    tx_station: radar.TX
-    rx_stations: list[radar.RX]
-    station_map: dict[int, radar.TX | radar.RX]
+    # TODO: add a constructor method so only (tx_station, rx_stations) or station_map is needed?
+    tx_station: radar.TX | radar.Station
+    rx_stations: list[radar.RX | radar.Station]
+    station_map: dict[int, radar.TX | radar.RX | radar.Station]
 
     # TODO: instead of using it per `stn_id_pair` (`stn_id_pair, (txrx_state, spobj_state) in states_dict.items()`)
     #       we can leverage the dataframe/dataframe.index and build an array for the entire dataframe/dataframe.index?
@@ -332,8 +259,8 @@ class RadarDetectionSystem:
 
         return states_dict
 
-    def simulate_(
-        self,
+    @staticmethod
+    def simulate(
         txrx_state: TxRxPairState,
         spobj_state: types.EcefStates,
         spobj_diameter: float,
@@ -344,14 +271,64 @@ class RadarDetectionSystem:
         bandwidths: npt.NDArray[np.float64],
         rx_noise_temps: npt.NDArray[np.float64],
     ):
-        return simulate(
-            txrx_state=txrx_state,
-            spobj_state=spobj_state,
-            spobj_diameter=spobj_diameter,
-            spobj_radar_albedo=spobj_radar_albedo,
-            tx_station=tx_station,
-            rx_station=rx_station,
-            powers=powers,
-            bandwidths=bandwidths,
-            rx_noise_temps=rx_noise_temps,
+        """
+        Run TX RX simulation calculations.
+
+        The size of first dimension of `txrx_state` should equal to the 2nd dimension of `spobj_state`.
+        (i.e. `txrx_state.shape[0] == spobj_state.shape[1]`)
+
+        Returns:
+            The updated state/data.
+        """
+
+        _K = TxRxPairStateKey
+
+        if not txrx_state.shape[0] == spobj_state.shape[1]:
+            raise RuntimeError(
+                "The size of first dimension of `txrx_state` is not equal to the 2nd dimension of `spobj_state`."
+            )
+
+        if tx_station.wavelength is None:
+            # TODO: remove this hack; see issues #25 for details
+            raise RuntimeError(
+                "A hack of injecting `frequency` into `tx_stn.frequency` is currently required for calling `hard_target_snr`."
+            )
+
+        spobj_tx_enu = tx_station.enu(spobj_state)
+        spobj_rx_enu = rx_station.enu(spobj_state)
+
+        range_tx: npt.NDArray[types.Float64_as_m] = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
+        range_rx: npt.NDArray[types.Float64_as_m] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
+
+        txrx_state = calc_gain(
+            state=txrx_state,
+            tx_stn=tx_station,
+            rx_stn=rx_station,
+            spobj_tx_enu=spobj_tx_enu,
+            spobj_rx_enu=spobj_rx_enu,
         )
+
+        snr = signals.hard_target_snr(
+            gain_tx=txrx_state[_K.gain_tx].to_numpy(),
+            gain_rx=txrx_state[_K.gain_rx].to_numpy(),
+            wavelength=tx_station.wavelength,
+            power_tx=powers,
+            range_tx_m=range_tx,
+            range_rx_m=range_rx,
+            diameter=spobj_diameter,
+            bandwidth=bandwidths,
+            rx_noise_temp=rx_noise_temps,
+            radar_albedo=spobj_radar_albedo,
+        )
+        txrx_state[_K.snr] = snr
+
+        txrx_state[_K.tx_range] = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
+
+        txrx_state[_K.rx_range] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
+
+        txrx_state[_K.two_way_range] = range_tx + range_rx
+        v_tx = np.sum(spobj_tx_enu[:3, :] * spobj_tx_enu[3:, :], axis=0) / range_tx
+        v_rx = np.sum(spobj_rx_enu[:3, :] * spobj_rx_enu[3:, :], axis=0) / range_rx
+        txrx_state[_K.two_way_range_rate] = v_tx + v_rx
+
+        return txrx_state

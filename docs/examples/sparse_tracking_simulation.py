@@ -278,7 +278,7 @@ def simulate(
             )
 
             stn_pair_sim_result_list.append(
-                radar_detection_system.simulate_(
+                radar_detection_system.simulate(
                     txrx_state=txrx_state,
                     spobj_state=spobj_state,
                     spobj_diameter=spobj.d,

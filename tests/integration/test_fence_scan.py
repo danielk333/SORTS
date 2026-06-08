@@ -100,8 +100,8 @@ def test_south_to_north_circular_orbit():
     # NOTE: all stations are physically the same but just have a different id;
     #   this is done so that we can retain both tx and rx pointings in the schedule,
     #   as `pointing.fence_scanning` will drop the rx entries if both tx and rx use the same station.
-    tx_stn, *rx_stns = [
-        radar.Station(
+    station_map = {
+        idx: radar.Station(
             lat=0.0,
             lon=0.0,
             alt=0.0,
@@ -112,17 +112,23 @@ def test_south_to_north_circular_orbit():
             uid=idx,
         )
         for idx in [0, 1, 2]
-    ]
+    }
+
+    radar_detection_system = simulation.RadarDetectionSystem(
+        tx_station=station_map[0],
+        rx_stations=[station_map[1], station_map[2]],
+        station_map=station_map,
+    )
 
     # introduce non-zero min_elevation to `rx_stns[1]` to test its effect
-    rx_stns[1].min_elevation = min_elevation
+    radar_detection_system.rx_stations[1].min_elevation = min_elevation
 
     passages = passage.find_simultaneous_passages(
         dt=spobj_delta_secs,
         space_object=spobj,
         states=spobj_state[:3, ...],
-        tx_station=tx_stn,
-        rx_stations=rx_stns,
+        tx_station=radar_detection_system.tx_station,
+        rx_stations=radar_detection_system.rx_stations,
         epoch=start_time_dt64,
     )
 
@@ -139,8 +145,8 @@ def test_south_to_north_circular_orbit():
         min_elevation=0,
         pointings_per_cycle=40,
         scan_range=scan_ranges,
-        tx_station=tx_stn,
-        rx_stations=rx_stns,
+        tx_station=radar_detection_system.tx_station,
+        rx_stations=radar_detection_system.rx_stations,
         exp_id=exp_id,
         slice_duration=slice_duration,
     )
@@ -150,13 +156,13 @@ def test_south_to_north_circular_orbit():
         np.arange(len(spobj_abs_times)), index=spobj_abs_times
     )
     result_states: list[tx_rx_pair_state.TxRxPairState] = []
-    for rx_stn in rx_stns:
+    for rx_stn in radar_detection_system.rx_stations:
         pairs_ls = [
             schedule.get_tx_rx_pointing_pairs(
                 sch=fence_sch,
                 start_time=ps.time_range[0],
                 end_time=ps.time_range[1],
-                tx_stn_num=tx_stn.uid,
+                tx_stn_num=radar_detection_system.tx_station.uid,
                 rx_stn_num=rx_stn.uid,
             )
             for ps in passages
@@ -190,12 +196,12 @@ def test_south_to_north_circular_orbit():
         txrx_state = txrx_state.reset_index()
         reindexed_txrx_state = reindexed_txrx_state.reset_index()
 
-        result_state = tx_rx_pair_state.simulate(
+        result_state = radar_detection_system.simulate(
             txrx_state=reindexed_txrx_state,
             spobj_state=reindexed_spobj_state,
             spobj_diameter=spobj.d,
             spobj_radar_albedo=spobj.properties.get("radar_albedo", 1.0),
-            tx_station=tx_stn,
+            tx_station=radar_detection_system.tx_station,
             rx_station=rx_stn,
             powers=np.full(len(reindexed_txrx_state[_K.exp_num]), radar_power, dtype=np.float64),
             bandwidths=np.full(
@@ -211,9 +217,9 @@ def test_south_to_north_circular_orbit():
 
     # assert the number and info of passages are expected
     assert len(passages) == 1  # 1 `Passage` in total
-    assert passages[0].tx_station.uid == tx_stn.uid
+    assert passages[0].tx_station.uid == radar_detection_system.tx_station.uid
     assert (all(
-        rx_station.uid == rx_stn.uid for rx_station, rx_stn in zip(passages[0].rx_stations, rx_stns)
+        rx_station.uid == rx_stn.uid for rx_station, rx_stn in zip(passages[0].rx_stations, radar_detection_system.rx_stations)
     ))  # with rx_stns in rx_stations; fmt: skip
 
     # assert that we are only pointing in the expected scan_ranges

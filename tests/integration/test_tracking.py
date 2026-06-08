@@ -89,35 +89,43 @@ def test_south_to_north_circular_orbit():
     spobj_state: types.EcefStates = propagator.Kepler(propagator.KeplerSettings()).propagate(
         spobj, spobj_delta_secs
     )
+    station_map = {
+        # tx
+        0: radar.Station(
+            lat=0.0,
+            lon=0.0,
+            alt=0.0,
+            min_elevation=0.0,
+            beam=pyant.models.Isotropic(),
+            frequency=233e6,  # same as eisat_3d
+            beam_parameters=pyant.models.IsotropicParams(),
+            uid=0,
+        ),
+        # rx
+        1: radar.Station(
+            lat=0.0,
+            lon=0.0,
+            alt=0.0,
+            min_elevation=0.0,
+            beam=pyant.models.Isotropic(),
+            frequency=233e6,  # same as eisat_3d
+            beam_parameters=pyant.models.IsotropicParams(),
+            uid=1,
+        ),
+    }
 
-    tx_stn = radar.Station(
-        lat=0.0,
-        lon=0.0,
-        alt=0.0,
-        min_elevation=0.0,
-        beam=pyant.models.Isotropic(),
-        frequency=233e6,  # same as eisat_3d
-        beam_parameters=pyant.models.IsotropicParams(),
-        uid=0,
-    )
-
-    rx_stn = radar.Station(
-        lat=0.0,
-        lon=0.0,
-        alt=0.0,
-        min_elevation=0.0,
-        beam=pyant.models.Isotropic(),
-        frequency=233e6,  # same as eisat_3d
-        beam_parameters=pyant.models.IsotropicParams(),
-        uid=1,
+    radar_detection_system = simulation.RadarDetectionSystem(
+        tx_station=station_map[0],
+        rx_stations=[station_map[1]],
+        station_map=station_map,
     )
 
     passages = passage.find_simultaneous_passages(
         dt=spobj_delta_secs,
         space_object=spobj,
         states=spobj_state[:3, ...],
-        tx_station=tx_stn,
-        rx_stations=[rx_stn],
+        tx_station=radar_detection_system.tx_station,
+        rx_stations=radar_detection_system.rx_stations,
         epoch=start_time_dt64,
     )
 
@@ -130,8 +138,8 @@ def test_south_to_north_circular_orbit():
     tracker_sch = pointing.tracking(
         spobj_ecef_states=spobj_state,
         spobj_ecef_states_times=spobj_abs_times,
-        tx_station=tx_stn,
-        rx_stations=[rx_stn],
+        tx_station=radar_detection_system.tx_station,
+        rx_stations=radar_detection_system.rx_stations,
         exp_id=exp_id,
         slice_duration=slice_duration,
     )
@@ -141,8 +149,8 @@ def test_south_to_north_circular_orbit():
             sch=tracker_sch,
             start_time=ps.time_range[0],
             end_time=ps.time_range[1],
-            tx_stn_num=tx_stn.uid,
-            rx_stn_num=rx_stn.uid,
+            tx_stn_num=radar_detection_system.tx_station.uid,
+            rx_stn_num=radar_detection_system.rx_stations[0].uid,
         )
         for ps in passages
     ]
@@ -157,13 +165,13 @@ def test_south_to_north_circular_orbit():
 
     filtered_spobj_state = spobj_state[:, np.isin(spobj_abs_times, txrx_state[_K.time])]
 
-    result_state = tx_rx_pair_state.simulate(
+    result_state = radar_detection_system.simulate(
         txrx_state=txrx_state,
         spobj_state=filtered_spobj_state,
         spobj_diameter=spobj.d,
         spobj_radar_albedo=spobj.properties.get("radar_albedo", 1.0),
-        tx_station=tx_stn,
-        rx_station=rx_stn,
+        tx_station=radar_detection_system.tx_station,
+        rx_station=radar_detection_system.rx_stations[0],
         powers=np.full(len(txrx_state[_K.exp_num]), radar_power, dtype=np.float64),
         bandwidths=np.full(len(txrx_state[_K.exp_num]), radar_bandwidth, dtype=np.float64),
         rx_noise_temps=np.full(len(txrx_state[_K.exp_num]), radar_noise_temp, dtype=np.float64),
