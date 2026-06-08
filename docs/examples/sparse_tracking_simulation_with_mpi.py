@@ -270,21 +270,15 @@ class Script(sorts.MpiJobQueueExecutor):
 
             stn_pair_sim_result_list = []
             for stn_id_pair, (txrx_state, spobj_state) in states_dict.items():
-                powers = radar_detection_system.build_param_array(
+                const_param_arr_list = radar_detection_system.ndarray_list_from_schedule_id_maps(
                     txrx_state=txrx_state,
-                    val_map={self.exp_id: self.radar_power},
-                    dtype=np.float64,
+                    val_map_list=[
+                        {self.exp_id: self.radar_power},
+                        {self.exp_id: self.radar_bandwidth},
+                        {self.exp_id: self.radar_noise_temp},
+                    ],
                 )
-                bandwidths = radar_detection_system.build_param_array(
-                    txrx_state=txrx_state,
-                    val_map={self.exp_id: self.radar_bandwidth},
-                    dtype=np.float64,
-                )
-                rx_noise_temps = radar_detection_system.build_param_array(
-                    txrx_state=txrx_state,
-                    val_map={self.exp_id: self.radar_noise_temp},
-                    dtype=np.float64,
-                )
+                powers, bandwidths, rx_noise_temps = const_param_arr_list
 
                 stn_pair_sim_result_list.append(
                     radar_detection_system.simulate(

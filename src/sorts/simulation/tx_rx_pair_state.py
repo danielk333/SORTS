@@ -214,26 +214,37 @@ class RadarDetectionSystem:
     rx_stations: t.Sequence[radar.RX | radar.Station]
     station_map: t.Mapping[int, radar.TX | radar.RX | radar.Station]
 
-    # TODO: instead of using it per `stn_id_pair` (`stn_id_pair, (txrx_state, spobj_state) in states_dict.items()`)
-    #       we can leverage the dataframe/dataframe.index and build an array for the entire dataframe/dataframe.index?
-    def build_param_array(
-        self,
-        # TODO: this param is a bit strange logically; can we infer it via class/instance attr instead?
+    @staticmethod
+    def series_list_from_schedule_id_maps(
         txrx_state: TxRxPairState,
-        val_map: dict[int, t.Any],
-        dtype: npt.DTypeLike = np.float64,
-    ) -> npt.NDArray:
+        val_map_list: t.Sequence[dict[schedule.ScheduleId, t.Any]],
+    ) -> list[pd.Series]:
+        """
+        Replaces the `sch_id` interger values in `TxRxPairState` by the corresponding values in each map from `val_map_list`.
+        """
+
         _K = TxRxPairStateKey
 
-        # TODO: can likely use assignment by slice/indexing instead of looping
-        #       `arr = np.full(len(txrx_state[txrx_state[_K.exp_num] == n]), radar_bandwidth, dtype=dtype)`
-        #       `arr = pd.Series(val_map[n], index=txrx_state[txrx_state[_K.exp_num] == n].index)`
-        arr = np.array(
-            [val_map[n] for n in txrx_state[_K.exp_num].to_numpy()],
-            dtype=dtype,
+        sch_ids = txrx_state[_K.exp_num]
+        series_list = [sch_ids.map(val_map) for val_map in val_map_list]
+
+        return series_list
+
+    @staticmethod
+    def ndarray_list_from_schedule_id_maps(
+        txrx_state: TxRxPairState,
+        val_map_list: t.Sequence[dict[schedule.ScheduleId, t.Any]],
+    ) -> list[np.ndarray]:
+        """
+        Replaces the `sch_id` interger values in `TxRxPairState` by the corresponding values in each map from `val_map_list`.
+        """
+
+        series_list = RadarDetectionSystem.series_list_from_schedule_id_maps(
+            txrx_state=txrx_state,
+            val_map_list=val_map_list,
         )
 
-        return arr
+        return [series.to_numpy() for series in series_list]
 
     @staticmethod
     def gather_states_during_passages(
