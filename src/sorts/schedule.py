@@ -8,10 +8,14 @@ import pandas as pd
 import pandas._typing as pdt
 from sorts import types, utils, radar, passage, schedule
 
-
 logger = logging.getLogger(__name__)
 
+ScheduleId = int
+"""A unique int16 that identifies an experiment"""
 
+
+# TODO: replace `exp_num` by `sch_id`
+# TODO: replace `stn_num` by `stn_id`
 class ScheduleKey(enum.StrEnum):
     index = "index"  # type: ignore ; seems type checker might confuse this with the `index` method from `str`
     exp_num = "exp_num"

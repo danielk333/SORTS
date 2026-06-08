@@ -169,10 +169,10 @@ def calc_gain(
 # TODO: not used; remove?
 def get_unique_exp_id_simult_num_pairs(
     state: TxRxPairState,
-) -> list[tuple[types.ExperimentId, types.SimultaneousNum]]:
+) -> list[tuple[schedule.ScheduleId, types.SimultaneousNum]]:
     _K = TxRxPairStateKey
 
-    unique_exp_id_simult_num_pairs: list[tuple[types.ExperimentId, types.SimultaneousNum]] = list(
+    unique_exp_id_simult_num_pairs: list[tuple[schedule.ScheduleId, types.SimultaneousNum]] = list(
         state[[_K.exp_num, _K.rx_simult_num]].drop_duplicates().itertuples(index=False, name=None)
     )
 
@@ -180,7 +180,7 @@ def get_unique_exp_id_simult_num_pairs(
 
 
 def filter_by_exp_id_simult_num(
-    state: TxRxPairState, exp_id: types.ExperimentId, simult_num: types.SimultaneousNum
+    state: TxRxPairState, exp_id: schedule.ScheduleId, simult_num: types.SimultaneousNum
 ) -> TxRxPairState:
     _K = TxRxPairStateKey
 
@@ -193,7 +193,7 @@ def filter_by_exp_id_simult_num(
 # TODO: not used; remove?
 def group_by_unique_exp_id_simult_num_pairs(
     state: TxRxPairState,
-) -> dict[tuple[types.ExperimentId, types.SimultaneousNum], TxRxPairState]:
+) -> dict[tuple[schedule.ScheduleId, types.SimultaneousNum], TxRxPairState]:
     unique_exp_id_simult_num_pairs = get_unique_exp_id_simult_num_pairs(state)
 
     state_groups = {

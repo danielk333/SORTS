@@ -150,9 +150,6 @@ AnomalyType = t.Literal["mean", "eccentric", "true"]
 SimultaneousNum = int
 """An int16 that corresponds to the order in simultaneous pointings"""
 
-ExperimentId = int
-"""A unique int16 that identifies an experiment"""
-
 StationId = int
 """A unique int16 that identifies a radar station"""
 

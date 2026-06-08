@@ -14,7 +14,7 @@ def tracking(
     spobj_ecef_states_times: npt.NDArray[types.Datetime64_us],
     tx_station: radar.Station,
     rx_stations: t.Sequence[radar.Station],
-    exp_id: types.ExperimentId,
+    exp_id: schedule.ScheduleId,
     slice_duration: types.Timedelta64_us,
 ) -> schedule.ScheduleDataframe:
     """Generate a pointing schedule that tracks the position of a space object."""
@@ -96,7 +96,7 @@ def sparse_tracking(
     points_per_passage: int,
     tx_station: radar.Station,
     rx_stations: t.Sequence[radar.Station],
-    exp_id: types.ExperimentId,
+    exp_id: schedule.ScheduleId,
     slice_duration: types.Timedelta64_us,
 ) -> schedule.ScheduleDataframe:
     """Generate a pointing schedule that sparsely tracks the position of a collection space objects."""
@@ -180,7 +180,7 @@ def fence_scanning(
     pointings_per_cycle: int,
     tx_station: radar.Station,
     rx_stations: t.Sequence[radar.Station],
-    exp_id: types.ExperimentId,
+    exp_id: schedule.ScheduleId,
     slice_duration: types.Timedelta64_us,
 ) -> schedule.ScheduleDataframe:
     """
