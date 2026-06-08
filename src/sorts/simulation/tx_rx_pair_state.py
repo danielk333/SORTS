@@ -211,8 +211,8 @@ class RadarDetectionSystem:
     # TODO: re-eval what is needed as class attr
     # TODO: add a constructor method so only (tx_station, rx_stations) or station_map is needed?
     tx_station: radar.TX | radar.Station
-    rx_stations: list[radar.RX | radar.Station]
-    station_map: dict[int, radar.TX | radar.RX | radar.Station]
+    rx_stations: t.Sequence[radar.RX | radar.Station]
+    station_map: t.Mapping[int, radar.TX | radar.RX | radar.Station]
 
     # TODO: instead of using it per `stn_id_pair` (`stn_id_pair, (txrx_state, spobj_state) in states_dict.items()`)
     #       we can leverage the dataframe/dataframe.index and build an array for the entire dataframe/dataframe.index?
