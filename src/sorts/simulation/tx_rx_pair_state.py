@@ -311,6 +311,9 @@ class RadarDetectionSystem:
         range_tx: npt.NDArray[types.Float64_as_m] = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
         range_rx: npt.NDArray[types.Float64_as_m] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
 
+        # we only add cols, existing are not changed. so a shallow copy is enough
+        txrx_state = txrx_state.copy(deep=False)
+
         txrx_state = calc_gain(
             state=txrx_state,
             tx_stn=tx_station,
