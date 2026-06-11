@@ -505,6 +505,6 @@ def gather_pointing_pairs(
     pair_index_dict = {
         k: resultant_pairs[grp_col_key] == idx for idx, k in enumerate(passages_by_tx_rx_stn_pair)
     }
-    resultant_pairs.drop(columns=[grp_col_key])
+    resultant_pairs = resultant_pairs.drop(columns=[grp_col_key])
 
     return resultant_pairs, pair_index_dict
