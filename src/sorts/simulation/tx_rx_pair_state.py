@@ -253,8 +253,8 @@ class RadarDetectionSystem:
 
     @staticmethod
     def simulate(
-        txrx_state: TxRxPairState,
-        spobj_state: types.EcefStates,
+        txrx_states: TxRxPairState,
+        spobj_states: types.EcefStates,
         spobj_diameter: float,
         spobj_radar_albedo: float,
         tx_station: radar.Station,
@@ -264,7 +264,7 @@ class RadarDetectionSystem:
         rx_noise_temps: npt.NDArray[np.float64],
     ):
         """
-        Run TX RX simulation calculations.
+        Run radar detection metrics calculations over a pair of TX RX stations.
 
         The size of first dimension of `txrx_state` should equal to the 2nd dimension of `spobj_state`.
         (i.e. `txrx_state.shape[0] == spobj_state.shape[1]`)
@@ -275,7 +275,7 @@ class RadarDetectionSystem:
 
         _K = TxRxPairStateKey
 
-        if not txrx_state.shape[0] == spobj_state.shape[1]:
+        if not txrx_states.shape[0] == spobj_states.shape[1]:
             raise RuntimeError(
                 "The size of first dimension of `txrx_state` is not equal to the 2nd dimension of `spobj_state`."
             )
@@ -286,17 +286,17 @@ class RadarDetectionSystem:
                 "A hack of injecting `frequency` into `tx_stn.frequency` is currently required for calling `hard_target_snr`."
             )
 
-        spobj_tx_enu = tx_station.enu(spobj_state)
-        spobj_rx_enu = rx_station.enu(spobj_state)
+        spobj_tx_enu = tx_station.enu(spobj_states)
+        spobj_rx_enu = rx_station.enu(spobj_states)
 
         range_tx: npt.NDArray[types.Float64_as_m] = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
         range_rx: npt.NDArray[types.Float64_as_m] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
 
         # we only add cols, existing are not changed. so a shallow copy is enough
-        txrx_state = txrx_state.copy(deep=False)
+        txrx_states = txrx_states.copy(deep=False)
 
-        txrx_state = calc_gain(
-            state=txrx_state,
+        txrx_states = calc_gain(
+            state=txrx_states,
             tx_stn=tx_station,
             rx_stn=rx_station,
             spobj_tx_enu=spobj_tx_enu,
@@ -304,8 +304,8 @@ class RadarDetectionSystem:
         )
 
         snr = signals.hard_target_snr(
-            gain_tx=txrx_state[_K.gain_tx].to_numpy(),
-            gain_rx=txrx_state[_K.gain_rx].to_numpy(),
+            gain_tx=txrx_states[_K.gain_tx].to_numpy(),
+            gain_rx=txrx_states[_K.gain_rx].to_numpy(),
             wavelength=tx_station.wavelength,
             power_tx=powers,
             range_tx_m=range_tx,
@@ -315,15 +315,16 @@ class RadarDetectionSystem:
             rx_noise_temp=rx_noise_temps,
             radar_albedo=spobj_radar_albedo,
         )
-        txrx_state[_K.snr] = snr
+        txrx_states[_K.snr] = snr
 
-        txrx_state[_K.tx_range] = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
+        txrx_states[_K.tx_range] = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
 
-        txrx_state[_K.rx_range] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
+        txrx_states[_K.rx_range] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
 
-        txrx_state[_K.two_way_range] = range_tx + range_rx
+        txrx_states[_K.two_way_range] = range_tx + range_rx
         v_tx = np.sum(spobj_tx_enu[:3, :] * spobj_tx_enu[3:, :], axis=0) / range_tx
         v_rx = np.sum(spobj_rx_enu[:3, :] * spobj_rx_enu[3:, :], axis=0) / range_rx
-        txrx_state[_K.two_way_range_rate] = v_tx + v_rx
+        txrx_states[_K.two_way_range_rate] = v_tx + v_rx
 
-        return txrx_state
+        return txrx_states
+
