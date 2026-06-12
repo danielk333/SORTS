@@ -284,8 +284,7 @@ def simulate(
                     spobj_diameter=spobj.d,
                     # TODO: confirm with daniel if setting a default radar_albedo is okay
                     spobj_radar_albedo=spobj.properties.get("radar_albedo", 1.0),
-                    tx_station=radar_detection_system.station_map[stn_id_pair[0]],
-                    rx_station=radar_detection_system.station_map[stn_id_pair[1]],
+                    radar_station_pair=stn_id_pair,
                     powers=powers.to_numpy(),
                     bandwidths=bandwidths.to_numpy(),
                     rx_noise_temps=rx_noise_temps.to_numpy(),

@@ -199,8 +199,10 @@ def test_south_to_north_circular_orbit():
             spobj_states=reindexed_spobj_states,
             spobj_diameter=spobj.d,
             spobj_radar_albedo=spobj.properties.get("radar_albedo", 1.0),
-            tx_station=radar_detection_system.tx_station,
-            rx_station=rx_stn,
+            radar_station_pair=(
+                radar_detection_system.tx_station.uid,
+                radar_detection_system.rx_stations[0].uid,
+            ),
             powers=np.full(len(reindexed_txrx_states[_K.exp_num]), radar_power, dtype=np.float64),
             bandwidths=np.full(
                 len(reindexed_txrx_states[_K.exp_num]), radar_bandwidth, dtype=np.float64

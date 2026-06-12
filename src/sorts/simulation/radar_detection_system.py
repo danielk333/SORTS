@@ -167,8 +167,6 @@ def group_by_unique_exp_id_simult_num_pairs(
 class RadarDetectionSystem:
     """Handles simulation of radar detection metrics."""
 
-    # TODO: re-eval what is needed as class attr
-
     tx_station: radar.TX | radar.Station
     rx_stations: t.Sequence[radar.RX | radar.Station]
     station_map: t.Mapping[int, radar.TX | radar.RX | radar.Station]
@@ -209,15 +207,13 @@ class RadarDetectionSystem:
 
         return states_dict
 
-    # TODO: take `stn_id_pair` instead of `tx_station`, `rx_station`
-    @staticmethod
     def simulate(
+        self,
         txrx_states: TxRxPairStates,
         spobj_states: types.EcefStates,
         spobj_diameter: float,
         spobj_radar_albedo: float,
-        tx_station: radar.Station,
-        rx_station: radar.Station,
+        radar_station_pair: tuple[types.StationId, types.StationId],
         powers: npt.NDArray[np.float64],
         bandwidths: npt.NDArray[np.float64],
         rx_noise_temps: npt.NDArray[np.float64],
@@ -225,18 +221,23 @@ class RadarDetectionSystem:
         """
         Run radar detection metrics calculations over a pair of TX RX stations.
 
-        The size of first dimension of `txrx_state` should equal to the 2nd dimension of `spobj_state`.
-        (i.e. `txrx_state.shape[0] == spobj_state.shape[1]`)
+        The size of first dimension of `txrx_states` should equal to the 2nd dimension of `spobj_states`.
+        (i.e. `txrx_states.shape[0] == spobj_states.shape[1]`)
+
+        Parameters:
+            stn_id_pair: tuple of `(<tx-station-id>, <rx-station-id>)`
 
         Returns:
             The updated state/data.
         """
 
         _K = TxRxPairStatesKey
+        tx_station = self.station_map[radar_station_pair[0]]
+        rx_station = self.station_map[radar_station_pair[1]]
 
         if not txrx_states.shape[0] == spobj_states.shape[1]:
             raise RuntimeError(
-                "The size of first dimension of `txrx_state` is not equal to the 2nd dimension of `spobj_state`."
+                "The size of first dimension of `txrx_states` is not equal to the 2nd dimension of `spobj_states`."
             )
 
         if tx_station.wavelength is None:
