@@ -73,6 +73,13 @@ class Script(sorts.MpiJobQueueExecutor):
         rx_stations=radar_sys.rx,
     )
 
+    spobj_motion_sys = sorts.SpaceObjectMotionSystem(
+        propagator=sorts.propagator.Sgp4(
+            settings=sorts.propagator.Sgp4Settings(out_frame="ITRS", mean_elements_input=True)
+        ),
+        interpolator=sorts.interpolation.Legendre8,
+    )
+
     def master_main(self):
         utils.ensure_directory_exist(self.save_dpath)
         utils.ensure_directory_exist(self.plot_dpath)
@@ -155,15 +162,7 @@ class Script(sorts.MpiJobQueueExecutor):
 
     @utils.use_pickled_or_compute_method
     def propagate(self, spobj: sorts.SpaceObject):
-        # TODO: move `spobj_simulator` as out?
-        spobj_motion_sys = sorts.SpaceObjectMotionSystem(
-            propagator=sorts.propagator.Sgp4(
-                settings=sorts.propagator.Sgp4Settings(out_frame="ITRS", mean_elements_input=True)
-            ),
-            interpolator=sorts.interpolation.Legendre8,
-        )
-
-        spobj_and_perts = spobj_motion_sys.perturbate(
+        spobj_and_perts = self.spobj_motion_sys.perturbate(
             space_object=spobj,
             perturbation_format="kepler",
             pert_val=(
@@ -171,7 +170,7 @@ class Script(sorts.MpiJobQueueExecutor):
             ),
         )
 
-        times, true_states = spobj_motion_sys.propagate(
+        times, true_states = self.spobj_motion_sys.propagate(
             space_object=spobj,
             start_time=self.start_time,
             end_time=self.end_time,
@@ -180,7 +179,7 @@ class Script(sorts.MpiJobQueueExecutor):
 
         spobj_prop_and_perts = [true_states]
         for obj in spobj_and_perts[1:]:
-            _, pert_states = spobj_motion_sys.propagate(
+            _, pert_states = self.spobj_motion_sys.propagate(
                 space_object=obj,
                 start_time=self.start_time,
                 end_time=self.end_time,
@@ -189,12 +188,11 @@ class Script(sorts.MpiJobQueueExecutor):
             spobj_prop_and_perts.append(pert_states)
 
         spobj_interp_and_perts = [
-            spobj_motion_sys.make_interpolation(times=times, states=states)
+            self.spobj_motion_sys.make_interpolation(times=times, states=states)
             for states in spobj_prop_and_perts
         ]
 
         return (
-            spobj_motion_sys,
             times,
             spobj_and_perts,
             spobj_prop_and_perts,
@@ -204,7 +202,6 @@ class Script(sorts.MpiJobQueueExecutor):
     @utils.use_pickled_or_compute_method
     def compute_schedule_and_passages(self, propagate_step_pickle: utils.PickledObject):
         (
-            spobj_simulator,
             times,
             spobj_and_perts,
             spobj_prop_and_perts,
@@ -243,7 +240,6 @@ class Script(sorts.MpiJobQueueExecutor):
         schedule_and_passages_pickle: utils.PickledObject,
     ):
         (
-            spobj_simulator,
             times,
             spobj_and_perts,
             spobj_prop_and_perts,

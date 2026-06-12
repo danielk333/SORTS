@@ -68,6 +68,13 @@ radar_detection_system = simulation.RadarDetectionSystem.from_stations(
     rx_stations=radar_sys.rx,
 )
 
+spobj_motion_sys = sorts.SpaceObjectMotionSystem(
+    propagator=sorts.propagator.Sgp4(
+        settings=sorts.propagator.Sgp4Settings(out_frame="ITRS", mean_elements_input=True)
+    ),
+    interpolator=sorts.interpolation.Legendre8,
+)
+
 
 # NOTE: Defining a main function is optional.
 #       We do it here so that the main logic can be put upfront before other functions in the file,
@@ -147,13 +154,6 @@ def main():
 
 @utils.use_pickled_or_compute_function
 def propagate(spobj: sorts.SpaceObject):
-    spobj_motion_sys = sorts.SpaceObjectMotionSystem(
-        propagator=sorts.propagator.Sgp4(
-            settings=sorts.propagator.Sgp4Settings(out_frame="ITRS", mean_elements_input=True)
-        ),
-        interpolator=sorts.interpolation.Legendre8,
-    )
-
     spobj_and_perts = spobj_motion_sys.perturbate(
         space_object=spobj,
         perturbation_format="kepler",
@@ -184,13 +184,12 @@ def propagate(spobj: sorts.SpaceObject):
         for states in spobj_prop_and_perts
     ]
 
-    return spobj_motion_sys, times, spobj_and_perts, spobj_prop_and_perts, spobj_interp_and_perts
+    return times, spobj_and_perts, spobj_prop_and_perts, spobj_interp_and_perts
 
 
 @utils.use_pickled_or_compute_function
 def compute_schedule_and_passages(propagate_step_pickle: utils.PickledObject):
     (
-        spobj_simulator,
         times,
         spobj_and_perts,
         spobj_prop_and_perts,
@@ -229,7 +228,6 @@ def simulate(
     schedule_and_passages_pickle: utils.PickledObject,
 ):
     (
-        spobj_simulator,
         times,
         spobj_and_perts,
         spobj_prop_and_perts,
