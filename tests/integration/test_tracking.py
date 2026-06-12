@@ -38,7 +38,6 @@ from sorts import (
     passage,
     SpaceObject,
 )
-from sorts.simulation import tx_rx_pair_state
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -154,7 +153,7 @@ def test_south_to_north_circular_orbit():
     pairs = pairs.sort_values(
         by=schedule.TxRxPointingPairsKey.time, ascending=True, ignore_index=True
     )
-    txrx_states = tx_rx_pair_state.from_tx_rx_pointing_pairs(pairs)
+    txrx_states = simulation.radar_detection_system.from_tx_rx_pointing_pairs(pairs)
 
     _K = simulation.TxRxPairStateKey
 

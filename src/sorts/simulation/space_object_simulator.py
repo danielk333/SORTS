@@ -2,13 +2,11 @@ import dataclasses, typing as t
 import numpy as np
 import numpy.typing as npt
 from spacecoords.interpolation import Interpolator as Interpolation
-from sorts import types, utils, schedule, passage
+from sorts import types
 from sorts.types import EcefStates, Datetime_Like, Float64_as_sec
 from sorts.utils import to_datetime64_us
 from sorts.propagator import Propagator
 from sorts.space_object import SpaceObject
-from sorts.radar import Station, StationId
-from . import tx_rx_pair_state
 
 
 @dataclasses.dataclass(kw_only=True, frozen=True)

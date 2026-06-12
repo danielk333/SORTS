@@ -30,7 +30,6 @@ from sorts import (
     SpaceObject,
     simulation,
 )
-from sorts.simulation import tx_rx_pair_state
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -154,7 +153,7 @@ def test_south_to_north_circular_orbit():
     spobj_abs_time_indexer: pd.Series[int] = pd.Series(
         np.arange(len(spobj_abs_times)), index=spobj_abs_times
     )
-    result_states: list[tx_rx_pair_state.TxRxPairState] = []
+    result_states: list[simulation.TxRxPairState] = []
     for rx_stn in radar_detection_system.rx_stations:
         pairs_ls = [
             schedule.get_tx_rx_pointing_pairs(
@@ -171,7 +170,7 @@ def test_south_to_north_circular_orbit():
         pairs = pairs.sort_values(
             by=schedule.TxRxPointingPairsKey.time, ascending=True, ignore_index=True
         )
-        txrx_states = tx_rx_pair_state.from_tx_rx_pointing_pairs(pairs)
+        txrx_states = simulation.radar_detection_system.from_tx_rx_pointing_pairs(pairs)
 
         # TODO: this is slightly cleaner but does not work with multiindex
         # intersection = txrx_state.index.get_level_values("time").intersection(
