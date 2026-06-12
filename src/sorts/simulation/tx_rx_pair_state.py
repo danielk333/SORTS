@@ -182,40 +182,6 @@ class RadarDetectionSystem:
     rx_stations: t.Sequence[radar.RX | radar.Station]
     station_map: t.Mapping[int, radar.TX | radar.RX | radar.Station]
 
-    # TODO: remove?
-    @staticmethod
-    def series_list_from_schedule_id_maps(
-        txrx_state: TxRxPairState,
-        val_map_list: t.Sequence[dict[schedule.ScheduleId, t.Any]],
-    ) -> list[pd.Series]:
-        """
-        Replaces the `sch_id` interger values in `TxRxPairState` by the corresponding values in each map from `val_map_list`.
-        """
-
-        _K = TxRxPairStateKey
-
-        sch_ids = txrx_state[_K.exp_num]
-        series_list = [sch_ids.map(val_map) for val_map in val_map_list]
-
-        return series_list
-
-    # TODO: remove?
-    @staticmethod
-    def ndarray_list_from_schedule_id_maps(
-        txrx_state: TxRxPairState,
-        val_map_list: t.Sequence[dict[schedule.ScheduleId, t.Any]],
-    ) -> list[np.ndarray]:
-        """
-        Replaces the `sch_id` interger values in `TxRxPairState` by the corresponding values in each map from `val_map_list`.
-        """
-
-        series_list = RadarDetectionSystem.series_list_from_schedule_id_maps(
-            txrx_state=txrx_state,
-            val_map_list=val_map_list,
-        )
-
-        return [series.to_numpy() for series in series_list]
-
     @staticmethod
     def gather_states_during_passages(
         space_object: SpaceObject,
