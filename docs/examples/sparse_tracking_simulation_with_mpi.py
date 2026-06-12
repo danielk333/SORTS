@@ -60,18 +60,18 @@ class Script(sorts.MpiJobQueueExecutor):
         t_sky=10.0,
         coherent_integration_time=coherent_integration_time,
         bandwidth_limit_ratio=5,
+        station_uid_map={"se_tx": 0, "no_tx": 1, "fi_tx": 2, "se_rx": 3, "no_rx": 4, "fi_rx": 5},
     )
-    # TODO: remove?
-    tx_station = radar_sys.tx[0]
-    rx_stations = radar_sys.rx
-    station_map = {idx: stn for idx, stn in enumerate([tx_station, *rx_stations])}
-    for idx, stn in station_map.items():
-        stn.uid = idx
 
     exp_id = 0
-    radar_power = tx_station.power
+    radar_power = radar_sys.tx[0].power
     radar_bandwidth = 1 / coherent_integration_time
-    radar_noise_temp = rx_stations[0].noise
+    radar_noise_temp = radar_sys.rx[0].noise
+
+    radar_detection_system = simulation.RadarDetectionSystem.from_stations(
+        tx_station=radar_sys.tx[0],
+        rx_stations=radar_sys.rx,
+    )
 
     def master_main(self):
         utils.ensure_directory_exist(self.save_dpath)
@@ -213,8 +213,8 @@ class Script(sorts.MpiJobQueueExecutor):
             dt=times,
             space_object=spobj,
             states=true_states[:3, ...],
-            tx_station=self.tx_station,
-            rx_stations=self.rx_stations,
+            tx_station=self.radar_detection_system.tx_station,
+            rx_stations=self.radar_detection_system.rx_stations,
             epoch=utils.to_datetime64_us(self.start_time),
         )
 
@@ -222,8 +222,8 @@ class Script(sorts.MpiJobQueueExecutor):
             passages_of_spobj=passages,
             interpolation=true_states_interp,
             points_per_passage=10,
-            tx_station=self.tx_station,
-            rx_stations=self.rx_stations,
+            tx_station=self.radar_detection_system.tx_station,
+            rx_stations=self.radar_detection_system.rx_stations,
             exp_id=self.exp_id,  # TODO: rename the param to `sch_id`?
             slice_duration=self.control_slice_duration,
         )
@@ -254,13 +254,7 @@ class Script(sorts.MpiJobQueueExecutor):
             list(zip(spobj_and_perts, spobj_interp_and_perts)),
             desc="simulating a perturbation set",
         ):
-            radar_detection_system = simulation.RadarDetectionSystem(
-                tx_station=self.tx_station,
-                rx_stations=self.rx_stations,
-                station_map=self.station_map,
-            )
-
-            states_dict = radar_detection_system.gather_states_during_passages(
+            states_dict = self.radar_detection_system.gather_states_during_passages(
                 space_object=spobj,
                 states_interpolation=interp,
                 # the same passage data is used for all perturbed objects
@@ -276,14 +270,14 @@ class Script(sorts.MpiJobQueueExecutor):
                 rx_noise_temps = txrx_states[_K.exp_num].map({self.exp_id: self.radar_noise_temp})
 
                 stn_pair_sim_result_list.append(
-                    radar_detection_system.simulate(
+                    self.radar_detection_system.simulate(
                         txrx_states=txrx_states,
                         spobj_states=spobj_states,
                         spobj_diameter=spobj.d,
                         # TODO: confirm with daniel if setting a default radar_albedo is okay
                         spobj_radar_albedo=spobj.properties.get("radar_albedo", 1.0),
-                        tx_station=self.station_map[stn_id_pair[0]],
-                        rx_station=self.station_map[stn_id_pair[1]],
+                        tx_station=self.radar_detection_system.station_map[stn_id_pair[0]],
+                        rx_station=self.radar_detection_system.station_map[stn_id_pair[1]],
                         powers=powers.to_numpy(),
                         bandwidths=bandwidths.to_numpy(),
                         rx_noise_temps=rx_noise_temps.to_numpy(),

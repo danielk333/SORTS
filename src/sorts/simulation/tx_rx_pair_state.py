@@ -217,6 +217,7 @@ class RadarDetectionSystem:
 
         return states_dict
 
+    # TODO: take `stn_id_pair` instead of `tx_station`, `rx_station`
     @staticmethod
     def simulate(
         txrx_states: TxRxPairState,
