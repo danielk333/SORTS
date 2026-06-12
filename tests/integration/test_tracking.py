@@ -153,9 +153,9 @@ def test_south_to_north_circular_orbit():
     pairs = pairs.sort_values(
         by=schedule.TxRxPointingPairsKey.time, ascending=True, ignore_index=True
     )
-    txrx_states = simulation.TxRxPairState(pairs)
+    txrx_states = simulation.TxRxPairStates(pairs)
 
-    _K = simulation.TxRxPairStateKey
+    _K = simulation.TxRxPairStatesKey
 
     filtered_spobj_states = spobj_states[:, np.isin(spobj_abs_times, txrx_states[_K.time])]
 

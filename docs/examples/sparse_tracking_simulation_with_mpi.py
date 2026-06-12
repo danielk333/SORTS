@@ -248,7 +248,7 @@ class Script(sorts.MpiJobQueueExecutor):
             self.compute_schedule_and_passages, schedule_and_passages_pickle
         ).load()
 
-        sim_result: list[list[simulation.TxRxPairState]] = []
+        sim_result: list[list[simulation.TxRxPairStates]] = []
         for spobj, interp in tqdm(
             # NOTE: used `list(zip(...))` instead of just `zip(...)` so that `tqdm` can get the length
             list(zip(spobj_and_perts, spobj_interp_and_perts)),
@@ -264,7 +264,7 @@ class Script(sorts.MpiJobQueueExecutor):
 
             stn_pair_sim_result_list = []
             for stn_id_pair, (txrx_states, spobj_states) in states_dict.items():
-                _K = simulation.TxRxPairStateKey
+                _K = simulation.TxRxPairStatesKey
                 powers = txrx_states[_K.exp_num].map({self.exp_id: self.radar_power})
                 bandwidths = txrx_states[_K.exp_num].map({self.exp_id: self.radar_bandwidth})
                 rx_noise_temps = txrx_states[_K.exp_num].map({self.exp_id: self.radar_noise_temp})

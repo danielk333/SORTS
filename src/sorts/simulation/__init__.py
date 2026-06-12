@@ -4,7 +4,7 @@ from .space_object_simulator import (
     SpaceObjectSimulator as SpaceObjectSimulator,
 )
 from .radar_detection_system import (
-    TxRxPairStateKey as TxRxPairStateKey,
-    TxRxPairState as TxRxPairState,
+    TxRxPairStatesKey as TxRxPairStatesKey,
+    TxRxPairStates as TxRxPairStates,
     RadarDetectionSystem as RadarDetectionSystem,
 )

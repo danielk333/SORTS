@@ -10,7 +10,7 @@ from sorts.space_object import SpaceObject
 
 
 # TODO: updated the name with tx/rx as suffix to prefix
-class TxRxPairStateKey(enum.StrEnum):
+class TxRxPairStatesKey(enum.StrEnum):
     exp_num = schedule.TxRxPointingPairsKey.exp_num
     rx_simult_num = schedule.TxRxPointingPairsKey.rx_simult_num
     time = schedule.TxRxPointingPairsKey.time
@@ -29,8 +29,7 @@ class TxRxPairStateKey(enum.StrEnum):
     two_way_range_rate = "two_way_range_rate"
 
 
-# TODO: rename to `TxRxPairStates`
-TxRxPairState = t.NewType("TxRxPairState", pd.DataFrame)
+TxRxPairStates = t.NewType("TxRxPairStates", pd.DataFrame)
 """
 A pandas `DataFrame` with:
 ```
@@ -56,8 +55,8 @@ Cols:
 """
 
 
-def empty() -> TxRxPairState:
-    _K = TxRxPairStateKey
+def empty() -> TxRxPairStates:
+    _K = TxRxPairStatesKey
 
     state = pd.DataFrame(
         {
@@ -75,18 +74,18 @@ def empty() -> TxRxPairState:
         }
     )
 
-    return TxRxPairState(state)
+    return TxRxPairStates(state)
 
 
 # TODO: return `gain_tx`, `gain_rx` instead of mutation
 def calc_gain(
-    state: TxRxPairState,
+    state: TxRxPairStates,
     tx_stn: radar.Station,
     rx_stn: radar.Station,
     spobj_tx_enu: types.EnuCoordinates,
     spobj_rx_enu: types.EnuCoordinates,
-) -> TxRxPairState:
-    _K = TxRxPairStateKey
+) -> TxRxPairStates:
+    _K = TxRxPairStatesKey
 
     # will be populated to [tx_gain_arr, rx_gain_arr]
     gain_arr_list: list[npt.NDArray[np.float64]] = []
@@ -129,9 +128,9 @@ def calc_gain(
 
 
 def get_unique_exp_id_simult_num_pairs(
-    state: TxRxPairState,
+    state: TxRxPairStates,
 ) -> list[tuple[schedule.ScheduleId, types.SimultaneousNum]]:
-    _K = TxRxPairStateKey
+    _K = TxRxPairStatesKey
 
     unique_exp_id_simult_num_pairs: list[tuple[schedule.ScheduleId, types.SimultaneousNum]] = list(
         state[[_K.exp_num, _K.rx_simult_num]].drop_duplicates().itertuples(index=False, name=None)
@@ -141,9 +140,9 @@ def get_unique_exp_id_simult_num_pairs(
 
 
 def filter_by_exp_id_simult_num(
-    state: TxRxPairState, exp_id: schedule.ScheduleId, simult_num: types.SimultaneousNum
-) -> TxRxPairState:
-    _K = TxRxPairStateKey
+    state: TxRxPairStates, exp_id: schedule.ScheduleId, simult_num: types.SimultaneousNum
+) -> TxRxPairStates:
+    _K = TxRxPairStatesKey
 
     mask = (state[_K.exp_num] == exp_id) & (state[_K.rx_simult_num] == simult_num)
     state_masked = state[mask]
@@ -152,8 +151,8 @@ def filter_by_exp_id_simult_num(
 
 
 def group_by_unique_exp_id_simult_num_pairs(
-    state: TxRxPairState,
-) -> dict[tuple[schedule.ScheduleId, types.SimultaneousNum], TxRxPairState]:
+    state: TxRxPairStates,
+) -> dict[tuple[schedule.ScheduleId, types.SimultaneousNum], TxRxPairStates]:
     unique_exp_id_simult_num_pairs = get_unique_exp_id_simult_num_pairs(state)
 
     state_groups = {
@@ -192,15 +191,15 @@ class RadarDetectionSystem:
         states_interpolation: Interpolation,
         passages: list[passage.Passage],
         sch: schedule.ScheduleDataframe,
-    ) -> dict[tuple[types.StationId, types.StationId], tuple[TxRxPairState, npt.NDArray]]:
-        _K = TxRxPairStateKey
+    ) -> dict[tuple[types.StationId, types.StationId], tuple[TxRxPairStates, npt.NDArray]]:
+        _K = TxRxPairStatesKey
 
         epoch = utils.to_datetime64_us(space_object.epoch)
 
         pointing_pairs_dict = schedule.gather_pointing_pairs(passages=passages, sch=sch)
         states_dict = {
             key: (
-                TxRxPairState(pointing_pairs),
+                TxRxPairStates(pointing_pairs),
                 states_interpolation.get_state(
                     (pointing_pairs[_K.time].to_numpy() - epoch) / np.timedelta64(1, "s")
                 ),
@@ -213,7 +212,7 @@ class RadarDetectionSystem:
     # TODO: take `stn_id_pair` instead of `tx_station`, `rx_station`
     @staticmethod
     def simulate(
-        txrx_states: TxRxPairState,
+        txrx_states: TxRxPairStates,
         spobj_states: types.EcefStates,
         spobj_diameter: float,
         spobj_radar_albedo: float,
@@ -233,7 +232,7 @@ class RadarDetectionSystem:
             The updated state/data.
         """
 
-        _K = TxRxPairStateKey
+        _K = TxRxPairStatesKey
 
         if not txrx_states.shape[0] == spobj_states.shape[1]:
             raise RuntimeError(

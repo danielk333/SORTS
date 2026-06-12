@@ -153,7 +153,7 @@ def test_south_to_north_circular_orbit():
     spobj_abs_time_indexer: pd.Series[int] = pd.Series(
         np.arange(len(spobj_abs_times)), index=spobj_abs_times
     )
-    result_states: list[simulation.TxRxPairState] = []
+    result_states: list[simulation.TxRxPairStates] = []
     for rx_stn in radar_detection_system.rx_stations:
         pairs_ls = [
             schedule.get_tx_rx_pointing_pairs(
@@ -170,7 +170,7 @@ def test_south_to_north_circular_orbit():
         pairs = pairs.sort_values(
             by=schedule.TxRxPointingPairsKey.time, ascending=True, ignore_index=True
         )
-        txrx_states = simulation.TxRxPairState(pairs)
+        txrx_states = simulation.TxRxPairStates(pairs)
 
         # TODO: this is slightly cleaner but does not work with multiindex
         # intersection = txrx_state.index.get_level_values("time").intersection(
@@ -180,7 +180,7 @@ def test_south_to_north_circular_orbit():
         # reindexed_txrx_state = txrx_state.reindex(intersection)
         # reindexed_spobj_state = spobj_state[:, spobj_abs_time_indexer.reindex(intersection)]
 
-        _K = simulation.TxRxPairStateKey
+        _K = simulation.TxRxPairStatesKey
 
         txrx_states = txrx_states.set_index(_K.time)
         txrx_states_mask = txrx_states.index.isin(spobj_abs_time_indexer.index)
