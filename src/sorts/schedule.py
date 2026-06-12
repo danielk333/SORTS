@@ -466,22 +466,21 @@ def get_tx_rx_pointing_pairs(
 def gather_pointing_pairs(
     passages: list[passage.Passage],
     sch: schedule.ScheduleDataframe,
-) -> tuple[TxRxPointingPairs, dict[tuple[radar.StationId, radar.StationId], pd.Series[bool]]]:
+) -> dict[tuple[radar.StationId, radar.StationId], TxRxPointingPairs]:
     """
     Find the unique tx-rx station pairs among the `passages`,
-    then for each pair, form `TxRxPointingPairs` entries from the schedule when the passages pass over them.
+    then for each pair, gather a `TxRxPointingPairs` from the schedule when the passages pass over the them.
 
-    Returns:
-        - A `TxRxPointingPairs`, entries sorted by time in ascending order.
-        - A dict of `[<tx-rx station id pair>, <mask for their entries in TxRxPointingPairs]`
+    The returned `TxRxPointingPairs` are sorted by time in ascending order.
     """
 
     passages_by_tx_rx_stn_pair = passage.group_passages_by_tx_rx_station_pair(passages)
 
-    pairs_list: list[TxRxPointingPairs] = []
-    grp_col_key = "__chunk_grp"
-    for idx, (stn_id_pair, passages) in enumerate(passages_by_tx_rx_stn_pair.items()):
-        pair_list_chunk = [
+    pointing_pairs_dict: dict[
+        tuple[radar.StationId, radar.StationId], schedule.TxRxPointingPairs
+    ] = {}
+    for stn_id_pair, passages in passages_by_tx_rx_stn_pair.items():
+        pairs_ls = [
             get_tx_rx_pointing_pairs(
                 sch=sch,
                 start_time=ps.time_range[0],
@@ -492,19 +491,9 @@ def gather_pointing_pairs(
             for ps in passages
         ]
 
-        for pair in pair_list_chunk:
-            pair[grp_col_key] = idx
+        pairs = TxRxPointingPairs(pd.concat(pairs_ls))
+        pairs = pairs.sort_values(by=TxRxPointingPairsKey.time, ascending=True, ignore_index=True)
 
-        pairs_list.extend(pair_list_chunk)
+        pointing_pairs_dict[stn_id_pair] = pairs
 
-    resultant_pairs = TxRxPointingPairs(pd.concat(pairs_list))
-    resultant_pairs = resultant_pairs.sort_values(
-        by=TxRxPointingPairsKey.time, ascending=True, ignore_index=True
-    )
-
-    pair_index_dict = {
-        k: resultant_pairs[grp_col_key] == idx for idx, k in enumerate(passages_by_tx_rx_stn_pair)
-    }
-    resultant_pairs = resultant_pairs.drop(columns=[grp_col_key])
-
-    return resultant_pairs, pair_index_dict
+    return pointing_pairs_dict

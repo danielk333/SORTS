@@ -29,6 +29,7 @@ class TxRxPairStateKey(enum.StrEnum):
     two_way_range_rate = "two_way_range_rate"
 
 
+# TODO: rename to `TxRxPairStates`
 TxRxPairState = t.NewType("TxRxPairState", pd.DataFrame)
 """
 A pandas `DataFrame` with:
@@ -98,6 +99,7 @@ def filter_by_time_range(
     return state_masked
 
 
+# TODO: return `gain_tx`, `gain_rx` instead of mutation
 def calc_gain(
     state: TxRxPairState,
     tx_stn: radar.Station,
@@ -185,6 +187,7 @@ def group_by_unique_exp_id_simult_num_pairs(
     return state_groups
 
 
+# TODO: rename to `RadarDetectionProcess`/`RadarDetectionContext`?
 @dataclasses.dataclass(kw_only=True)
 class RadarDetectionSystem:
     """Handles simulation of radar detection metrics."""
@@ -195,6 +198,7 @@ class RadarDetectionSystem:
     rx_stations: t.Sequence[radar.RX | radar.Station]
     station_map: t.Mapping[int, radar.TX | radar.RX | radar.Station]
 
+    # TODO: remove?
     @staticmethod
     def series_list_from_schedule_id_maps(
         txrx_state: TxRxPairState,
@@ -211,6 +215,7 @@ class RadarDetectionSystem:
 
         return series_list
 
+    # TODO: remove?
     @staticmethod
     def ndarray_list_from_schedule_id_maps(
         txrx_state: TxRxPairState,
@@ -233,7 +238,7 @@ class RadarDetectionSystem:
         states_interpolation: Interpolation,
         passages: list[passage.Passage],
         sch: schedule.ScheduleDataframe,
-    ):
+    ) -> dict[tuple[types.StationId, types.StationId], tuple[TxRxPairState, npt.NDArray]]:
         _K = TxRxPairStateKey
 
         epoch = utils.to_datetime64_us(space_object.epoch)
@@ -327,4 +332,3 @@ class RadarDetectionSystem:
         txrx_states[_K.two_way_range_rate] = v_tx + v_rx
 
         return txrx_states
-
