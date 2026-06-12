@@ -171,16 +171,27 @@ def group_by_unique_exp_id_simult_num_pairs(
     return state_groups
 
 
-# TODO: rename to `RadarDetectionProcess`/`RadarDetectionContext`?
 @dataclasses.dataclass(kw_only=True)
 class RadarDetectionSystem:
     """Handles simulation of radar detection metrics."""
 
     # TODO: re-eval what is needed as class attr
-    # TODO: add a constructor method so only (tx_station, rx_stations) or station_map is needed?
+
     tx_station: radar.TX | radar.Station
     rx_stations: t.Sequence[radar.RX | radar.Station]
     station_map: t.Mapping[int, radar.TX | radar.RX | radar.Station]
+
+    @classmethod
+    def from_stations(
+        cls,
+        tx_station: radar.Station,
+        rx_stations: t.Sequence[radar.Station],
+    ) -> t.Self:
+        return cls(
+            tx_station=tx_station,
+            rx_stations=rx_stations,
+            station_map={stn.uid: stn for stn in [tx_station, *rx_stations]},
+        )
 
     @staticmethod
     def gather_states_during_passages(

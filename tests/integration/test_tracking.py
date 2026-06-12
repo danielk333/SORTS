@@ -89,9 +89,9 @@ def test_south_to_north_circular_orbit():
     spobj_states: types.EcefStates = propagator.Kepler(propagator.KeplerSettings()).propagate(
         spobj, spobj_delta_secs
     )
-    station_map = {
-        # tx
-        0: radar.Station(
+
+    radar_detection_system = simulation.RadarDetectionSystem.from_stations(
+        tx_station=radar.Station(
             lat=0.0,
             lon=0.0,
             alt=0.0,
@@ -101,23 +101,18 @@ def test_south_to_north_circular_orbit():
             beam_parameters=pyant.models.IsotropicParams(),
             uid=0,
         ),
-        # rx
-        1: radar.Station(
-            lat=0.0,
-            lon=0.0,
-            alt=0.0,
-            min_elevation=0.0,
-            beam=pyant.models.Isotropic(),
-            frequency=233e6,  # same as eisat_3d
-            beam_parameters=pyant.models.IsotropicParams(),
-            uid=1,
-        ),
-    }
-
-    radar_detection_system = simulation.RadarDetectionSystem(
-        tx_station=station_map[0],
-        rx_stations=[station_map[1]],
-        station_map=station_map,
+        rx_stations=[
+            radar.Station(
+                lat=0.0,
+                lon=0.0,
+                alt=0.0,
+                min_elevation=0.0,
+                beam=pyant.models.Isotropic(),
+                frequency=233e6,  # same as eisat_3d
+                beam_parameters=pyant.models.IsotropicParams(),
+                uid=1,
+            )
+        ],
     )
 
     passages = passage.find_simultaneous_passages(

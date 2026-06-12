@@ -100,8 +100,8 @@ def test_south_to_north_circular_orbit():
     # NOTE: all stations are physically the same but just have a different id;
     #   this is done so that we can retain both tx and rx pointings in the schedule,
     #   as `pointing.fence_scanning` will drop the rx entries if both tx and rx use the same station.
-    station_map = {
-        idx: radar.Station(
+    radar_stn_list = [
+        radar.Station(
             lat=0.0,
             lon=0.0,
             alt=0.0,
@@ -112,12 +112,11 @@ def test_south_to_north_circular_orbit():
             uid=idx,
         )
         for idx in [0, 1, 2]
-    }
+    ]
 
-    radar_detection_system = simulation.RadarDetectionSystem(
-        tx_station=station_map[0],
-        rx_stations=[station_map[1], station_map[2]],
-        station_map=station_map,
+    radar_detection_system = simulation.RadarDetectionSystem.from_stations(
+        tx_station=radar_stn_list[0],
+        rx_stations=[radar_stn_list[1], radar_stn_list[2]],
     )
 
     # introduce non-zero min_elevation to `rx_stns[1]` to test its effect
