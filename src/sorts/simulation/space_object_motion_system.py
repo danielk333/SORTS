@@ -10,8 +10,8 @@ from sorts.space_object import SpaceObject
 
 
 @dataclasses.dataclass(kw_only=True, frozen=True)
-class SpaceObjectSimulator:
-    """A convenience object for simulation of a `SpaceObject`."""
+class SpaceObjectMotionSystem:
+    """Handles simulation of space object motions."""
 
     propagator: Propagator
     interpolator: t.Type[Interpolation]

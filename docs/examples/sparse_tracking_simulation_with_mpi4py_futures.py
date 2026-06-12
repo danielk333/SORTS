@@ -165,14 +165,14 @@ def main():
 
 @utils.use_pickled_or_compute_function
 def propagate(spobj: sorts.SpaceObject):
-    spobj_simulator = sorts.SpaceObjectSimulator(
+    spobj_motion_system = sorts.SpaceObjectMotionSystem(
         propagator=sorts.propagator.Sgp4(
             settings=sorts.propagator.Sgp4Settings(out_frame="ITRS", mean_elements_input=True)
         ),
         interpolator=sorts.interpolation.Legendre8,
     )
 
-    spobj_and_perts = spobj_simulator.perturbate(
+    spobj_and_perts = spobj_motion_system.perturbate(
         space_object=spobj,
         perturbation_format="kepler",
         pert_val=(
@@ -180,7 +180,7 @@ def propagate(spobj: sorts.SpaceObject):
         ),
     )
 
-    times, true_states = spobj_simulator.propagate(
+    times, true_states = spobj_motion_system.propagate(
         space_object=spobj,
         start_time=start_time,
         end_time=end_time,
@@ -189,7 +189,7 @@ def propagate(spobj: sorts.SpaceObject):
 
     spobj_prop_and_perts = [true_states]
     for obj in spobj_and_perts[1:]:
-        _, pert_states = spobj_simulator.propagate(
+        _, pert_states = spobj_motion_system.propagate(
             space_object=obj,
             start_time=start_time,
             end_time=end_time,
@@ -198,11 +198,11 @@ def propagate(spobj: sorts.SpaceObject):
         spobj_prop_and_perts.append(pert_states)
 
     spobj_interp_and_perts = [
-        spobj_simulator.make_interpolation(times=times, states=states)
+        spobj_motion_system.make_interpolation(times=times, states=states)
         for states in spobj_prop_and_perts
     ]
 
-    return spobj_simulator, times, spobj_and_perts, spobj_prop_and_perts, spobj_interp_and_perts
+    return spobj_motion_system, times, spobj_and_perts, spobj_prop_and_perts, spobj_interp_and_perts
 
 
 @utils.use_pickled_or_compute_function

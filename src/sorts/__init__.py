@@ -53,7 +53,7 @@ from .passage import (
     Passage as Passage,
 )
 from .simulation import (
-    SpaceObjectSimulator as SpaceObjectSimulator,
+    SpaceObjectMotionSystem as SpaceObjectMotionSystem,
 )
 
 # mpi helpers
