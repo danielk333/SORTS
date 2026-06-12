@@ -1,6 +1,7 @@
+from . import space_object_motion_system as space_object_motion_system
 from . import radar_detection_system as radar_detection_system
 
-from .space_object_simulator import (
+from .space_object_motion_system import (
     SpaceObjectSimulator as SpaceObjectSimulator,
 )
 from .radar_detection_system import (
