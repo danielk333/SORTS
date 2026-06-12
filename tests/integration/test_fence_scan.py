@@ -93,7 +93,7 @@ def test_south_to_north_circular_orbit():
         0, spobj.orbit.period[0], num_prop_steps + 1
     )
 
-    spobj_state: types.EcefStates = propagator.Kepler(propagator.KeplerSettings()).propagate(
+    spobj_states: types.EcefStates = propagator.Kepler(propagator.KeplerSettings()).propagate(
         spobj, spobj_delta_secs
     )
 
@@ -126,7 +126,7 @@ def test_south_to_north_circular_orbit():
     passages = passage.find_simultaneous_passages(
         dt=spobj_delta_secs,
         space_object=spobj,
-        states=spobj_state[:3, ...],
+        states=spobj_states[:3, ...],
         tx_station=radar_detection_system.tx_station,
         rx_stations=radar_detection_system.rx_stations,
         epoch=start_time_dt64,
@@ -188,7 +188,7 @@ def test_south_to_north_circular_orbit():
         txrx_state_mask = txrx_state.index.isin(spobj_abs_time_indexer.index)
 
         reindexed_txrx_state = txrx_state[txrx_state_mask]
-        reindexed_spobj_state = spobj_state[
+        reindexed_spobj_state = spobj_states[
             :, spobj_abs_time_indexer.reindex(txrx_state.index[txrx_state_mask])
         ]
 

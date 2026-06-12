@@ -86,7 +86,7 @@ def test_south_to_north_circular_orbit():
         spobj_delta_secs * np.timedelta64(1, "s") + start_time_dt64
     )
 
-    spobj_state: types.EcefStates = propagator.Kepler(propagator.KeplerSettings()).propagate(
+    spobj_states: types.EcefStates = propagator.Kepler(propagator.KeplerSettings()).propagate(
         spobj, spobj_delta_secs
     )
     station_map = {
@@ -123,7 +123,7 @@ def test_south_to_north_circular_orbit():
     passages = passage.find_simultaneous_passages(
         dt=spobj_delta_secs,
         space_object=spobj,
-        states=spobj_state[:3, ...],
+        states=spobj_states[:3, ...],
         tx_station=radar_detection_system.tx_station,
         rx_stations=radar_detection_system.rx_stations,
         epoch=start_time_dt64,
@@ -136,7 +136,7 @@ def test_south_to_north_circular_orbit():
     slice_duration = np.timedelta64(10_000, "us")  # 10ms
 
     tracker_sch = pointing.tracking(
-        spobj_ecef_states=spobj_state,
+        spobj_ecef_states=spobj_states,
         spobj_ecef_states_times=spobj_abs_times,
         tx_station=radar_detection_system.tx_station,
         rx_stations=radar_detection_system.rx_stations,
@@ -163,7 +163,7 @@ def test_south_to_north_circular_orbit():
 
     _K = simulation.TxRxPairStateKey
 
-    filtered_spobj_state = spobj_state[:, np.isin(spobj_abs_times, txrx_state[_K.time])]
+    filtered_spobj_state = spobj_states[:, np.isin(spobj_abs_times, txrx_state[_K.time])]
 
     result_state = radar_detection_system.simulate(
         txrx_state=txrx_state,
