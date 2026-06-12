@@ -269,29 +269,24 @@ class Script(sorts.MpiJobQueueExecutor):
             )
 
             stn_pair_sim_result_list = []
-            for stn_id_pair, (txrx_state, spobj_state) in states_dict.items():
-                const_param_arr_list = radar_detection_system.ndarray_list_from_schedule_id_maps(
-                    txrx_state=txrx_state,
-                    val_map_list=[
-                        {self.exp_id: self.radar_power},
-                        {self.exp_id: self.radar_bandwidth},
-                        {self.exp_id: self.radar_noise_temp},
-                    ],
-                )
-                powers, bandwidths, rx_noise_temps = const_param_arr_list
+            for stn_id_pair, (txrx_states, spobj_states) in states_dict.items():
+                _K = simulation.TxRxPairStateKey
+                powers = txrx_states[_K.exp_num].map({self.exp_id: self.radar_power})
+                bandwidths = txrx_states[_K.exp_num].map({self.exp_id: self.radar_bandwidth})
+                rx_noise_temps = txrx_states[_K.exp_num].map({self.exp_id: self.radar_noise_temp})
 
                 stn_pair_sim_result_list.append(
                     radar_detection_system.simulate(
-                        txrx_state=txrx_state,
-                        spobj_state=spobj_state,
+                        txrx_states=txrx_states,
+                        spobj_states=spobj_states,
                         spobj_diameter=spobj.d,
                         # TODO: confirm with daniel if setting a default radar_albedo is okay
                         spobj_radar_albedo=spobj.properties.get("radar_albedo", 1.0),
                         tx_station=self.station_map[stn_id_pair[0]],
                         rx_station=self.station_map[stn_id_pair[1]],
-                        powers=powers,
-                        bandwidths=bandwidths,
-                        rx_noise_temps=rx_noise_temps,
+                        powers=powers.to_numpy(),
+                        bandwidths=bandwidths.to_numpy(),
+                        rx_noise_temps=rx_noise_temps.to_numpy(),
                     )
                 )
 
