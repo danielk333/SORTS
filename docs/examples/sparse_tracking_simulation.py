@@ -263,8 +263,8 @@ def simulate(
         for stn_id_pair, (txrx_states, spobj_states) in states_dict.items():
             _K = simulation.TxRxPairStateKey
             powers = txrx_states[_K.exp_num].map({exp_id: radar_power})
-            bandwidths = txrx_states[_K.exp_num].map({exp_id: radar_power})
-            rx_noise_temps = txrx_states[_K.exp_num].map({exp_id: radar_power})
+            bandwidths = txrx_states[_K.exp_num].map({exp_id: radar_bandwidth})
+            rx_noise_temps = txrx_states[_K.exp_num].map({exp_id: radar_noise_temp})
 
             stn_pair_sim_result_list.append(
                 radar_detection_system.simulate(
