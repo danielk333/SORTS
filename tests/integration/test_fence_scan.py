@@ -172,7 +172,7 @@ def test_south_to_north_circular_orbit():
         pairs = pairs.sort_values(
             by=schedule.TxRxPointingPairsKey.time, ascending=True, ignore_index=True
         )
-        txrx_state = tx_rx_pair_state.from_tx_rx_pointing_pairs(pairs)
+        txrx_states = tx_rx_pair_state.from_tx_rx_pointing_pairs(pairs)
 
         # TODO: this is slightly cleaner but does not work with multiindex
         # intersection = txrx_state.index.get_level_values("time").intersection(
@@ -184,31 +184,31 @@ def test_south_to_north_circular_orbit():
 
         _K = simulation.TxRxPairStateKey
 
-        txrx_state = txrx_state.set_index(_K.time)
-        txrx_state_mask = txrx_state.index.isin(spobj_abs_time_indexer.index)
+        txrx_states = txrx_states.set_index(_K.time)
+        txrx_states_mask = txrx_states.index.isin(spobj_abs_time_indexer.index)
 
-        reindexed_txrx_state = txrx_state[txrx_state_mask]
-        reindexed_spobj_state = spobj_states[
-            :, spobj_abs_time_indexer.reindex(txrx_state.index[txrx_state_mask])
+        reindexed_txrx_states = txrx_states[txrx_states_mask]
+        reindexed_spobj_states = spobj_states[
+            :, spobj_abs_time_indexer.reindex(txrx_states.index[txrx_states_mask])
         ]
 
         # put time column back to df body
-        txrx_state = txrx_state.reset_index()
-        reindexed_txrx_state = reindexed_txrx_state.reset_index()
+        txrx_states = txrx_states.reset_index()
+        reindexed_txrx_states = reindexed_txrx_states.reset_index()
 
         result_state = radar_detection_system.simulate(
-            txrx_state=reindexed_txrx_state,
-            spobj_state=reindexed_spobj_state,
+            txrx_states=reindexed_txrx_states,
+            spobj_states=reindexed_spobj_states,
             spobj_diameter=spobj.d,
             spobj_radar_albedo=spobj.properties.get("radar_albedo", 1.0),
             tx_station=radar_detection_system.tx_station,
             rx_station=rx_stn,
-            powers=np.full(len(reindexed_txrx_state[_K.exp_num]), radar_power, dtype=np.float64),
+            powers=np.full(len(reindexed_txrx_states[_K.exp_num]), radar_power, dtype=np.float64),
             bandwidths=np.full(
-                len(reindexed_txrx_state[_K.exp_num]), radar_bandwidth, dtype=np.float64
+                len(reindexed_txrx_states[_K.exp_num]), radar_bandwidth, dtype=np.float64
             ),
             rx_noise_temps=np.full(
-                len(reindexed_txrx_state[_K.exp_num]), radar_noise_temp, dtype=np.float64
+                len(reindexed_txrx_states[_K.exp_num]), radar_noise_temp, dtype=np.float64
             ),
         )
         result_states.append(result_state)

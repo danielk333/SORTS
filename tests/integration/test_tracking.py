@@ -159,22 +159,22 @@ def test_south_to_north_circular_orbit():
     pairs = pairs.sort_values(
         by=schedule.TxRxPointingPairsKey.time, ascending=True, ignore_index=True
     )
-    txrx_state = tx_rx_pair_state.from_tx_rx_pointing_pairs(pairs)
+    txrx_states = tx_rx_pair_state.from_tx_rx_pointing_pairs(pairs)
 
     _K = simulation.TxRxPairStateKey
 
-    filtered_spobj_state = spobj_states[:, np.isin(spobj_abs_times, txrx_state[_K.time])]
+    filtered_spobj_states = spobj_states[:, np.isin(spobj_abs_times, txrx_states[_K.time])]
 
     result_state = radar_detection_system.simulate(
-        txrx_state=txrx_state,
-        spobj_state=filtered_spobj_state,
+        txrx_states=txrx_states,
+        spobj_states=filtered_spobj_states,
         spobj_diameter=spobj.d,
         spobj_radar_albedo=spobj.properties.get("radar_albedo", 1.0),
         tx_station=radar_detection_system.tx_station,
         rx_station=radar_detection_system.rx_stations[0],
-        powers=np.full(len(txrx_state[_K.exp_num]), radar_power, dtype=np.float64),
-        bandwidths=np.full(len(txrx_state[_K.exp_num]), radar_bandwidth, dtype=np.float64),
-        rx_noise_temps=np.full(len(txrx_state[_K.exp_num]), radar_noise_temp, dtype=np.float64),
+        powers=np.full(len(txrx_states[_K.exp_num]), radar_power, dtype=np.float64),
+        bandwidths=np.full(len(txrx_states[_K.exp_num]), radar_bandwidth, dtype=np.float64),
+        rx_noise_temps=np.full(len(txrx_states[_K.exp_num]), radar_noise_temp, dtype=np.float64),
     )
 
     tx_pointings_norm = np.linalg.norm(
