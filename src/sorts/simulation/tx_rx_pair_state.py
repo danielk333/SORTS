@@ -85,20 +85,6 @@ def from_tx_rx_pointing_pairs(
     return TxRxPairState(pointing_pairs)
 
 
-# TODO: remove?
-def filter_by_time_range(
-    state: TxRxPairState,
-    start_time: types.Datetime64_us,
-    end_time: types.Datetime64_us,
-) -> TxRxPairState:
-    _K = TxRxPairStateKey
-
-    mask = (state[_K.time] >= start_time) & (state[_K.time] <= end_time)
-    state_masked = state[mask]
-
-    return state_masked
-
-
 # TODO: return `gain_tx`, `gain_rx` instead of mutation
 def calc_gain(
     state: TxRxPairState,
@@ -149,7 +135,6 @@ def calc_gain(
     return state
 
 
-# TODO: not used; remove?
 def get_unique_exp_id_simult_num_pairs(
     state: TxRxPairState,
 ) -> list[tuple[schedule.ScheduleId, types.SimultaneousNum]]:
@@ -173,7 +158,6 @@ def filter_by_exp_id_simult_num(
     return state_masked
 
 
-# TODO: not used; remove?
 def group_by_unique_exp_id_simult_num_pairs(
     state: TxRxPairState,
 ) -> dict[tuple[schedule.ScheduleId, types.SimultaneousNum], TxRxPairState]:
