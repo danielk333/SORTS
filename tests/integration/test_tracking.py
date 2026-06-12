@@ -153,7 +153,7 @@ def test_south_to_north_circular_orbit():
     pairs = pairs.sort_values(
         by=schedule.TxRxPointingPairsKey.time, ascending=True, ignore_index=True
     )
-    txrx_states = simulation.radar_detection_system.from_tx_rx_pointing_pairs(pairs)
+    txrx_states = simulation.TxRxPairState(pairs)
 
     _K = simulation.TxRxPairStateKey
 

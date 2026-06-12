@@ -78,13 +78,6 @@ def empty() -> TxRxPairState:
     return TxRxPairState(state)
 
 
-# TODO: remove?
-def from_tx_rx_pointing_pairs(
-    pointing_pairs: TxRxPointingPairs,
-) -> TxRxPairState:
-    return TxRxPairState(pointing_pairs)
-
-
 # TODO: return `gain_tx`, `gain_rx` instead of mutation
 def calc_gain(
     state: TxRxPairState,
