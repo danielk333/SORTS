@@ -150,6 +150,7 @@ def filter_by_exp_id_simult_num(
     return state_masked
 
 
+# TODO: move inside RadarDetectionSystem?
 def group_by_unique_exp_id_simult_num_pairs(
     state: TxRxPairStates,
 ) -> dict[tuple[schedule.ScheduleId, types.SimultaneousNum], TxRxPairStates]:
@@ -214,9 +215,9 @@ class RadarDetectionSystem:
         spobj_diameter: float,
         spobj_radar_albedo: float,
         radar_station_pair: tuple[types.StationId, types.StationId],
-        powers: npt.NDArray[np.float64],
-        bandwidths: npt.NDArray[np.float64],
-        rx_noise_temps: npt.NDArray[np.float64],
+        powers: npt.NDArray[np._FloatType],
+        bandwidths: npt.NDArray[np._FloatType],
+        rx_noise_temps: npt.NDArray[np._FloatType],
     ):
         """
         Run radar detection metrics calculations over a pair of TX RX stations.

@@ -20,6 +20,7 @@ class Passage:
     """The start time and end time of the passage, a right-open interval"""
 
 
+# TODO: move inside RadarDetectionSystem?
 def find_simultaneous_passages(
     dt: npt.NDArray[Float64_as_sec],
     space_object: SpaceObject,
