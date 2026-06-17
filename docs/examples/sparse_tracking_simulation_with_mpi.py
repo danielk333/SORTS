@@ -3,8 +3,9 @@ from pathlib import Path
 import numpy as np
 from astropy.time import Time
 from tqdm import tqdm
+from mpi4py import MPI
 import sorts
-from sorts import utils, pointing, population, radar, passage, ExperimentDetail
+from sorts import utils, pointing, population, radar, passage, simulation
 
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger("sorts.propagator").setLevel(logging.WARNING)
@@ -59,27 +60,25 @@ class Script(sorts.MpiJobQueueExecutor):
         t_sky=10.0,
         coherent_integration_time=coherent_integration_time,
         bandwidth_limit_ratio=5,
+        station_uid_map={"se_tx": 0, "no_tx": 1, "fi_tx": 2, "se_rx": 3, "no_rx": 4, "fi_rx": 5},
     )
-    tx_station = radar_sys.tx[0]
-    rx_stations = radar_sys.rx
-    station_map = {idx: stn for idx, stn in enumerate([tx_station, *rx_stations])}
-    for idx, stn in station_map.items():
-        stn.uid = idx
 
-    exp_detail = ExperimentDetail(
-        id=0,
-        # not used
-        coh_int_bandwidth=1.0,
-        ipp=1.0,
-        pulse_length=1.0,
-        duty_cycle=1.0,
-        # --
-        power=tx_station.power,
-        bandwidth=1 / coherent_integration_time,
-        noise_temp=rx_stations[0].noise,
-        slice_duration=control_slice_duration,
+    exp_id = 0
+    radar_power = radar_sys.tx[0].power
+    radar_bandwidth = 1 / coherent_integration_time
+    radar_noise_temp = radar_sys.rx[0].noise
+
+    radar_detection_system = simulation.RadarDetectionSystem.from_stations(
+        tx_station=radar_sys.tx[0],
+        rx_stations=radar_sys.rx,
     )
-    exp_detail_map = {exp_detail.id: exp_detail}
+
+    spobj_motion_sys = sorts.SpaceObjectMotionSystem(
+        propagator=sorts.propagator.Sgp4(
+            settings=sorts.propagator.Sgp4Settings(out_frame="ITRS", mean_elements_input=True)
+        ),
+        interpolator=sorts.interpolation.Legendre8,
+    )
 
     def master_main(self):
         utils.ensure_directory_exist(self.save_dpath)
@@ -163,15 +162,7 @@ class Script(sorts.MpiJobQueueExecutor):
 
     @utils.use_pickled_or_compute_method
     def propagate(self, spobj: sorts.SpaceObject):
-        # TODO: move `spobj_simulator` as out?
-        spobj_simulator = sorts.SpaceObjectSimulator(
-            propagator=sorts.propagator.Sgp4(
-                settings=sorts.propagator.Sgp4Settings(out_frame="ITRS", mean_elements_input=True)
-            ),
-            interpolator=sorts.interpolation.Legendre8,
-        )
-
-        spobj_and_perts = spobj_simulator.perturbate(
+        spobj_and_perts = self.spobj_motion_sys.perturbate(
             space_object=spobj,
             perturbation_format="kepler",
             pert_val=(
@@ -179,7 +170,7 @@ class Script(sorts.MpiJobQueueExecutor):
             ),
         )
 
-        times, true_states = spobj_simulator.propagate(
+        times, true_states = self.spobj_motion_sys.propagate(
             space_object=spobj,
             start_time=self.start_time,
             end_time=self.end_time,
@@ -188,7 +179,7 @@ class Script(sorts.MpiJobQueueExecutor):
 
         spobj_prop_and_perts = [true_states]
         for obj in spobj_and_perts[1:]:
-            _, pert_states = spobj_simulator.propagate(
+            _, pert_states = self.spobj_motion_sys.propagate(
                 space_object=obj,
                 start_time=self.start_time,
                 end_time=self.end_time,
@@ -197,16 +188,20 @@ class Script(sorts.MpiJobQueueExecutor):
             spobj_prop_and_perts.append(pert_states)
 
         spobj_interp_and_perts = [
-            spobj_simulator.make_interpolation(times=times, states=states)
+            self.spobj_motion_sys.make_interpolation(times=times, states=states)
             for states in spobj_prop_and_perts
         ]
 
-        return spobj_simulator, times, spobj_and_perts, spobj_prop_and_perts, spobj_interp_and_perts
+        return (
+            times,
+            spobj_and_perts,
+            spobj_prop_and_perts,
+            spobj_interp_and_perts,
+        )
 
     @utils.use_pickled_or_compute_method
     def compute_schedule_and_passages(self, propagate_step_pickle: utils.PickledObject):
         (
-            spobj_simulator,
             times,
             spobj_and_perts,
             spobj_prop_and_perts,
@@ -221,8 +216,8 @@ class Script(sorts.MpiJobQueueExecutor):
             dt=times,
             space_object=spobj,
             states=true_states[:3, ...],
-            tx_station=self.tx_station,
-            rx_stations=self.rx_stations,
+            tx_station=self.radar_detection_system.tx_station,
+            rx_stations=self.radar_detection_system.rx_stations,
             epoch=utils.to_datetime64_us(self.start_time),
         )
 
@@ -230,10 +225,10 @@ class Script(sorts.MpiJobQueueExecutor):
             passages_of_spobj=passages,
             interpolation=true_states_interp,
             points_per_passage=10,
-            tx_station=self.tx_station,
-            rx_stations=self.rx_stations,
-            exp_id=self.exp_detail_map[0].id,
-            slice_duration=self.exp_detail_map[0].slice_duration,
+            tx_station=self.radar_detection_system.tx_station,
+            rx_stations=self.radar_detection_system.rx_stations,
+            exp_id=self.exp_id,  # TODO: rename the param to `sch_id`?
+            slice_duration=self.control_slice_duration,
         )
 
         return tracker_sch, passages
@@ -245,7 +240,6 @@ class Script(sorts.MpiJobQueueExecutor):
         schedule_and_passages_pickle: utils.PickledObject,
     ):
         (
-            spobj_simulator,
             times,
             spobj_and_perts,
             spobj_prop_and_perts,
@@ -256,25 +250,44 @@ class Script(sorts.MpiJobQueueExecutor):
             self.compute_schedule_and_passages, schedule_and_passages_pickle
         ).load()
 
-        sim_result = utils.empty_list_of_retval(spobj_simulator.simulate)
+        sim_result: list[list[simulation.TxRxPairStates]] = []
         for spobj, interp in tqdm(
             # NOTE: used `list(zip(...))` instead of just `zip(...)` so that `tqdm` can get the length
             list(zip(spobj_and_perts, spobj_interp_and_perts)),
             desc="simulating a perturbation set",
         ):
-            sim_result.append(
-                spobj_simulator.simulate(
-                    space_object=spobj,
-                    states_interpolation=interp,
-                    # the same passage data is used for all perturbed objects
-                    passages=passages,
-                    sch=sch,
-                    station_map=self.station_map,
-                    exp_detail_map=self.exp_detail_map,
-                )
+            states_dict = self.radar_detection_system.gather_states_during_passages(
+                space_object=spobj,
+                states_interpolation=interp,
+                # the same passage data is used for all perturbed objects
+                passages=passages,
+                sch=sch,
             )
+
+            stn_pair_sim_result_list = []
+            for stn_id_pair, (txrx_states, spobj_states) in states_dict.items():
+                _K = simulation.TxRxPairStatesKey
+                powers = txrx_states[_K.exp_num].map({self.exp_id: self.radar_power})
+                bandwidths = txrx_states[_K.exp_num].map({self.exp_id: self.radar_bandwidth})
+                rx_noise_temps = txrx_states[_K.exp_num].map({self.exp_id: self.radar_noise_temp})
+
+                stn_pair_sim_result_list.append(
+                    self.radar_detection_system.simulate(
+                        txrx_states=txrx_states,
+                        spobj_states=spobj_states,
+                        spobj_diameter=spobj.d,
+                        # TODO: confirm with daniel if setting a default radar_albedo is okay
+                        spobj_radar_albedo=spobj.properties.get("radar_albedo", 1.0),
+                        radar_station_pair=stn_id_pair,
+                        powers=powers.to_numpy(),
+                        bandwidths=bandwidths.to_numpy(),
+                        rx_noise_temps=rx_noise_temps.to_numpy(),
+                    )
+                )
+
+            sim_result.append(stn_pair_sim_result_list)
 
         return sim_result
 
 
-Script().run()
+Script(is_run_with_mpi=MPI.COMM_WORLD.Get_size() > 1).run()

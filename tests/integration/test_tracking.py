@@ -38,8 +38,6 @@ from sorts import (
     passage,
     SpaceObject,
 )
-from sorts.simulation import tx_rx_pair_state
-
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -87,60 +85,57 @@ def test_south_to_north_circular_orbit():
         spobj_delta_secs * np.timedelta64(1, "s") + start_time_dt64
     )
 
-    spobj_state: types.EcefStates = propagator.Kepler(propagator.KeplerSettings()).propagate(
+    spobj_states: types.EcefStates = propagator.Kepler(propagator.KeplerSettings()).propagate(
         spobj, spobj_delta_secs
     )
 
-    tx_stn = radar.Station(
-        lat=0.0,
-        lon=0.0,
-        alt=0.0,
-        min_elevation=0.0,
-        beam=pyant.models.Isotropic(),
-        frequency=233e6,  # same as eisat_3d
-        beam_parameters=pyant.models.IsotropicParams(),
-        uid=0,
-    )
-
-    rx_stn = radar.Station(
-        lat=0.0,
-        lon=0.0,
-        alt=0.0,
-        min_elevation=0.0,
-        beam=pyant.models.Isotropic(),
-        frequency=233e6,  # same as eisat_3d
-        beam_parameters=pyant.models.IsotropicParams(),
-        uid=1,
+    radar_detection_system = simulation.RadarDetectionSystem.from_stations(
+        tx_station=radar.Station(
+            lat=0.0,
+            lon=0.0,
+            alt=0.0,
+            min_elevation=0.0,
+            beam=pyant.models.Isotropic(),
+            frequency=233e6,  # same as eisat_3d
+            beam_parameters=pyant.models.IsotropicParams(),
+            uid=0,
+        ),
+        rx_stations=[
+            radar.Station(
+                lat=0.0,
+                lon=0.0,
+                alt=0.0,
+                min_elevation=0.0,
+                beam=pyant.models.Isotropic(),
+                frequency=233e6,  # same as eisat_3d
+                beam_parameters=pyant.models.IsotropicParams(),
+                uid=1,
+            )
+        ],
     )
 
     passages = passage.find_simultaneous_passages(
         dt=spobj_delta_secs,
         space_object=spobj,
-        states=spobj_state[:3, ...],
-        tx_station=tx_stn,
-        rx_stations=[rx_stn],
+        states=spobj_states[:3, ...],
+        tx_station=radar_detection_system.tx_station,
+        rx_stations=radar_detection_system.rx_stations,
         epoch=start_time_dt64,
     )
 
-    exp_detail = types.ExperimentDetail(
-        id=0,
-        coh_int_bandwidth=1.0,
-        ipp=1.0,
-        pulse_length=1.0,
-        power=5000000.0,
-        bandwidth=52.08333333333333,
-        duty_cycle=1.0,
-        noise_temp=150.0,
-        slice_duration=np.timedelta64(10_000, "us"),  # 10ms
-    )
+    exp_id = 0
+    radar_power = 5000000.0
+    radar_bandwidth = 52.08333333333333
+    radar_noise_temp = 150.0
+    slice_duration = np.timedelta64(10_000, "us")  # 10ms
 
     tracker_sch = pointing.tracking(
-        spobj_ecef_states=spobj_state,
+        spobj_ecef_states=spobj_states,
         spobj_ecef_states_times=spobj_abs_times,
-        tx_station=tx_stn,
-        rx_stations=[rx_stn],
-        exp_id=exp_detail.id,
-        slice_duration=exp_detail.slice_duration,
+        tx_station=radar_detection_system.tx_station,
+        rx_stations=radar_detection_system.rx_stations,
+        exp_id=exp_id,
+        slice_duration=slice_duration,
     )
 
     pairs_ls = [
@@ -148,8 +143,8 @@ def test_south_to_north_circular_orbit():
             sch=tracker_sch,
             start_time=ps.time_range[0],
             end_time=ps.time_range[1],
-            tx_stn_num=tx_stn.uid,
-            rx_stn_num=rx_stn.uid,
+            tx_stn_num=radar_detection_system.tx_station.uid,
+            rx_stn_num=radar_detection_system.rx_stations[0].uid,
         )
         for ps in passages
     ]
@@ -158,20 +153,24 @@ def test_south_to_north_circular_orbit():
     pairs = pairs.sort_values(
         by=schedule.TxRxPointingPairsKey.time, ascending=True, ignore_index=True
     )
-    txrx_state = tx_rx_pair_state.from_tx_rx_pointing_pairs(pairs)
+    txrx_states = simulation.TxRxPairStates(pairs)
 
-    _K = simulation.TxRxPairStateKey
+    _K = simulation.TxRxPairStatesKey
 
-    filtered_spobj_state = spobj_state[:, np.isin(spobj_abs_times, txrx_state[_K.time])]
+    filtered_spobj_states = spobj_states[:, np.isin(spobj_abs_times, txrx_states[_K.time])]
 
-    result_state = tx_rx_pair_state.simulate(
-        txrx_state=txrx_state,
-        spobj_state=filtered_spobj_state,
+    result_state = radar_detection_system.simulate(
+        txrx_states=txrx_states,
+        spobj_states=filtered_spobj_states,
         spobj_diameter=spobj.d,
         spobj_radar_albedo=spobj.properties.get("radar_albedo", 1.0),
-        tx_station=tx_stn,
-        rx_station=rx_stn,
-        exp_detail_map={exp_detail.id: exp_detail},
+        radar_station_pair=(
+            radar_detection_system.tx_station.uid,
+            radar_detection_system.rx_stations[0].uid,
+        ),
+        powers=np.full(len(txrx_states[_K.exp_num]), radar_power, dtype=np.float64),
+        bandwidths=np.full(len(txrx_states[_K.exp_num]), radar_bandwidth, dtype=np.float64),
+        rx_noise_temps=np.full(len(txrx_states[_K.exp_num]), radar_noise_temp, dtype=np.float64),
     )
 
     tx_pointings_norm = np.linalg.norm(

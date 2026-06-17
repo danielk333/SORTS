@@ -46,9 +46,6 @@ from . import (
 )
 
 # freq used types
-from .types import (
-    ExperimentDetail as ExperimentDetail,
-)
 from .space_object import (
     SpaceObject as SpaceObject,
 )
@@ -56,7 +53,7 @@ from .passage import (
     Passage as Passage,
 )
 from .simulation import (
-    SpaceObjectSimulator as SpaceObjectSimulator,
+    SpaceObjectMotionSystem as SpaceObjectMotionSystem,
 )
 
 # mpi helpers

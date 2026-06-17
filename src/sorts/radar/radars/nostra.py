@@ -167,6 +167,7 @@ def gen_nostra(
     t_sky,
     coherent_integration_time,
     bandwidth_limit_ratio,
+    station_uid_map: dict[t.Literal["se_tx", "no_tx", "fi_tx", "se_rx", "no_rx", "fi_rx"], int],
 ):
     """The NOSTRA system."""
     data = estimate_radar_parameters(
@@ -211,6 +212,7 @@ def gen_nostra(
     )
 
     se_rx = RX(
+        uid=station_uid_map["se_rx"],
         lat=stns.se_rx.lat,
         lon=stns.se_rx.lon,
         alt=stns.se_rx.alt,
@@ -220,6 +222,7 @@ def gen_nostra(
         **rx_kw,
     )
     se_tx = TX(
+        uid=station_uid_map["se_tx"],
         lat=stns.se_tx.lat,
         lon=stns.se_tx.lon,
         alt=stns.se_tx.alt,
@@ -230,6 +233,7 @@ def gen_nostra(
     )
 
     no_rx = RX(
+        uid=station_uid_map["no_rx"],
         lat=stns.no_rx.lat,
         lon=stns.no_rx.lon,
         alt=stns.no_rx.alt,
@@ -239,6 +243,7 @@ def gen_nostra(
         **rx_kw,
     )
     no_tx = TX(
+        uid=station_uid_map["no_tx"],
         lat=stns.no_tx.lat,
         lon=stns.no_tx.lon,
         alt=stns.no_tx.alt,
@@ -249,6 +254,7 @@ def gen_nostra(
     )
 
     fi_rx = RX(
+        uid=station_uid_map["fi_rx"],
         lat=stns.fi_rx.lat,
         lon=stns.fi_rx.lon,
         alt=stns.fi_rx.alt,
@@ -258,6 +264,7 @@ def gen_nostra(
         **rx_kw,
     )
     fi_tx = TX(
+        uid=station_uid_map["no_tx"],
         lat=stns.fi_tx.lat,
         lon=stns.fi_tx.lon,
         alt=stns.fi_tx.alt,

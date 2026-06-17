@@ -1,0 +1,290 @@
+from __future__ import annotations
+import typing as t, enum, dataclasses
+import numpy as np
+import numpy.typing as npt
+import pandas as pd
+from spacecoords.interpolation import Interpolator as Interpolation
+from sorts import types, utils, signals, radar, schedule, passage
+from sorts.schedule import TxRxPointingPairs
+from sorts.space_object import SpaceObject
+
+
+# TODO: updated the name with tx/rx as suffix to prefix
+class TxRxPairStatesKey(enum.StrEnum):
+    exp_num = schedule.TxRxPointingPairsKey.exp_num
+    rx_simult_num = schedule.TxRxPointingPairsKey.rx_simult_num
+    time = schedule.TxRxPointingPairsKey.time
+    tx_pointing_e = schedule.TxRxPointingPairsKey.tx_pointing_e
+    tx_pointing_n = schedule.TxRxPointingPairsKey.tx_pointing_n
+    tx_pointing_u = schedule.TxRxPointingPairsKey.tx_pointing_u
+    rx_pointing_e = schedule.TxRxPointingPairsKey.rx_pointing_e
+    rx_pointing_n = schedule.TxRxPointingPairsKey.rx_pointing_n
+    rx_pointing_u = schedule.TxRxPointingPairsKey.rx_pointing_u
+    gain_tx = "gain_tx"
+    gain_rx = "gain_rx"
+    snr = "snr"
+    tx_range = "tx_range"
+    rx_range = "rx_range"
+    two_way_range = "two_way_range"
+    two_way_range_rate = "two_way_range_rate"
+
+
+TxRxPairStates = t.NewType("TxRxPairStates", pd.DataFrame)
+"""
+A pandas `DataFrame` with:
+```
+Index: RangeIndex # without name or named as "index"
+Cols:
+    exp_num             np.int16
+    rx_simult_num       np.int16
+    time                datetime64[us]
+    tx_pointing_e       float64
+    tx_pointing_n       float64
+    tx_pointing_u       float64
+    rx_pointing_e       float64
+    rx_pointing_n       float64
+    rx_pointing_u       float64
+    gain_tx             float64
+    gain_rx             float64
+    snr                 float64
+    tx_range            float64
+    rx_range            float64
+    two_way_range       float64
+    two_way_range_rate  float64
+```
+"""
+
+
+def empty() -> TxRxPairStates:
+    _K = TxRxPairStatesKey
+
+    state = pd.DataFrame(
+        {
+            _K.exp_num: np.empty(0, dtype=np.int16),
+            _K.rx_simult_num: np.empty(0, dtype=np.int16),
+            _K.time: np.empty(0, dtype="datetime64[us]"),
+            # tx pointing enu
+            _K.tx_pointing_e: np.empty(0, dtype=np.float64),
+            _K.tx_pointing_n: np.empty(0, dtype=np.float64),
+            _K.tx_pointing_u: np.empty(0, dtype=np.float64),
+            # rx pointing enu
+            _K.rx_pointing_e: np.empty(0, dtype=np.float64),
+            _K.rx_pointing_n: np.empty(0, dtype=np.float64),
+            _K.rx_pointing_u: np.empty(0, dtype=np.float64),
+        }
+    )
+
+    return TxRxPairStates(state)
+
+
+# TODO: return `gain_tx`, `gain_rx` instead of mutation
+def calc_gain(
+    state: TxRxPairStates,
+    tx_stn: radar.Station,
+    rx_stn: radar.Station,
+    spobj_tx_enu: types.EnuCoordinates,
+    spobj_rx_enu: types.EnuCoordinates,
+) -> TxRxPairStates:
+    _K = TxRxPairStatesKey
+
+    # will be populated to [tx_gain_arr, rx_gain_arr]
+    gain_arr_list: list[npt.NDArray[np.float64]] = []
+
+    for stn, spobj_stn_enu, pt_keys in zip(
+        [tx_stn, rx_stn],
+        [spobj_tx_enu, spobj_rx_enu],
+        [
+            [_K.tx_pointing_e, _K.tx_pointing_n, _K.tx_pointing_u],
+            [_K.rx_pointing_e, _K.rx_pointing_n, _K.rx_pointing_u],
+        ],
+    ):
+        # early return for empty cases
+        # NOTE: this is particularly needed because some `.gain` does not work with empty parameters (e.g. beam.parameters["pointing"])
+        # TODO: add test case for empty case?
+        if len(state) == 0:
+            gain_arr_list.append(np.empty(0, dtype=np.float64))
+
+        elif stn.beam_parameters is None:
+            # TODO: remove this hack; see issues #25 for details
+            raise RuntimeError(
+                "A hack of injecting `beam_parameters` into `tx_stn.beam_parameters` is currently required for gain calculation"
+            )
+
+        else:
+            beam_parameters = stn.beam_parameters
+
+            if "pointing" in stn.beam_parameters.keys:
+                beam_parameters = stn.beam_parameters.replace_and_broadcast(
+                    parameters=stn.beam_parameters,
+                    new_parameters=dict(pointing=state[pt_keys].T.to_numpy()),
+                )
+
+            gain_arr_list.append(stn.beam.gain(spobj_stn_enu[:3], beam_parameters))
+
+    state[_K.gain_tx] = gain_arr_list[0]
+    state[_K.gain_rx] = gain_arr_list[1]
+
+    return state
+
+
+def get_unique_exp_id_simult_num_pairs(
+    state: TxRxPairStates,
+) -> list[tuple[schedule.ScheduleId, types.SimultaneousNum]]:
+    _K = TxRxPairStatesKey
+
+    unique_exp_id_simult_num_pairs: list[tuple[schedule.ScheduleId, types.SimultaneousNum]] = list(
+        state[[_K.exp_num, _K.rx_simult_num]].drop_duplicates().itertuples(index=False, name=None)
+    )
+
+    return unique_exp_id_simult_num_pairs
+
+
+def filter_by_exp_id_simult_num(
+    state: TxRxPairStates, exp_id: schedule.ScheduleId, simult_num: types.SimultaneousNum
+) -> TxRxPairStates:
+    _K = TxRxPairStatesKey
+
+    mask = (state[_K.exp_num] == exp_id) & (state[_K.rx_simult_num] == simult_num)
+    state_masked = state[mask]
+
+    return state_masked
+
+
+# TODO: move inside RadarDetectionSystem?
+def group_by_unique_exp_id_simult_num_pairs(
+    state: TxRxPairStates,
+) -> dict[tuple[schedule.ScheduleId, types.SimultaneousNum], TxRxPairStates]:
+    unique_exp_id_simult_num_pairs = get_unique_exp_id_simult_num_pairs(state)
+
+    state_groups = {
+        (exp_id, simult_num): filter_by_exp_id_simult_num(state, exp_id, simult_num)
+        for exp_id, simult_num in unique_exp_id_simult_num_pairs
+    }
+
+    return state_groups
+
+
+@dataclasses.dataclass(kw_only=True)
+class RadarDetectionSystem:
+    """Handles simulation of radar detection metrics."""
+
+    tx_station: radar.TX | radar.Station
+    rx_stations: t.Sequence[radar.RX | radar.Station]
+    station_map: t.Mapping[int, radar.TX | radar.RX | radar.Station]
+
+    @classmethod
+    def from_stations(
+        cls,
+        tx_station: radar.Station,
+        rx_stations: t.Sequence[radar.Station],
+    ) -> t.Self:
+        return cls(
+            tx_station=tx_station,
+            rx_stations=rx_stations,
+            station_map={stn.uid: stn for stn in [tx_station, *rx_stations]},
+        )
+
+    @staticmethod
+    def gather_states_during_passages(
+        space_object: SpaceObject,
+        states_interpolation: Interpolation,
+        passages: list[passage.Passage],
+        sch: schedule.ScheduleDataframe,
+    ) -> dict[tuple[types.StationId, types.StationId], tuple[TxRxPairStates, npt.NDArray]]:
+        _K = TxRxPairStatesKey
+
+        epoch = utils.to_datetime64_us(space_object.epoch)
+
+        pointing_pairs_dict = schedule.gather_pointing_pairs(passages=passages, sch=sch)
+        states_dict = {
+            key: (
+                TxRxPairStates(pointing_pairs),
+                states_interpolation.get_state(
+                    (pointing_pairs[_K.time].to_numpy() - epoch) / np.timedelta64(1, "s")
+                ),
+            )
+            for key, pointing_pairs in pointing_pairs_dict.items()
+        }
+
+        return states_dict
+
+    def simulate(
+        self,
+        txrx_states: TxRxPairStates,
+        spobj_states: types.EcefStates,
+        spobj_diameter: float,
+        spobj_radar_albedo: float,
+        radar_station_pair: tuple[types.StationId, types.StationId],
+        powers: npt.NDArray[np._FloatType],
+        bandwidths: npt.NDArray[np._FloatType],
+        rx_noise_temps: npt.NDArray[np._FloatType],
+    ):
+        """
+        Run radar detection metrics calculations over a pair of TX RX stations.
+
+        The size of first dimension of `txrx_states` should equal to the 2nd dimension of `spobj_states`.
+        (i.e. `txrx_states.shape[0] == spobj_states.shape[1]`)
+
+        Parameters:
+            stn_id_pair: tuple of `(<tx-station-id>, <rx-station-id>)`
+
+        Returns:
+            The updated state/data.
+        """
+
+        _K = TxRxPairStatesKey
+        tx_station = self.station_map[radar_station_pair[0]]
+        rx_station = self.station_map[radar_station_pair[1]]
+
+        if not txrx_states.shape[0] == spobj_states.shape[1]:
+            raise RuntimeError(
+                "The size of first dimension of `txrx_states` is not equal to the 2nd dimension of `spobj_states`."
+            )
+
+        if tx_station.wavelength is None:
+            # TODO: remove this hack; see issues #25 for details
+            raise RuntimeError(
+                "A hack of injecting `frequency` into `tx_stn.frequency` is currently required for calling `hard_target_snr`."
+            )
+
+        spobj_tx_enu = tx_station.enu(spobj_states)
+        spobj_rx_enu = rx_station.enu(spobj_states)
+
+        range_tx: npt.NDArray[types.Float64_as_m] = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
+        range_rx: npt.NDArray[types.Float64_as_m] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
+
+        # we only add cols, existing are not changed. so a shallow copy is enough
+        txrx_states = txrx_states.copy(deep=False)
+
+        txrx_states = calc_gain(
+            state=txrx_states,
+            tx_stn=tx_station,
+            rx_stn=rx_station,
+            spobj_tx_enu=spobj_tx_enu,
+            spobj_rx_enu=spobj_rx_enu,
+        )
+
+        snr = signals.hard_target_snr(
+            gain_tx=txrx_states[_K.gain_tx].to_numpy(),
+            gain_rx=txrx_states[_K.gain_rx].to_numpy(),
+            wavelength=tx_station.wavelength,
+            power_tx=powers,
+            range_tx_m=range_tx,
+            range_rx_m=range_rx,
+            diameter=spobj_diameter,
+            bandwidth=bandwidths,
+            rx_noise_temp=rx_noise_temps,
+            radar_albedo=spobj_radar_albedo,
+        )
+        txrx_states[_K.snr] = snr
+
+        txrx_states[_K.tx_range] = np.linalg.norm(spobj_tx_enu[:3, :], axis=0)
+
+        txrx_states[_K.rx_range] = np.linalg.norm(spobj_rx_enu[:3, :], axis=0)
+
+        txrx_states[_K.two_way_range] = range_tx + range_rx
+        v_tx = np.sum(spobj_tx_enu[:3, :] * spobj_tx_enu[3:, :], axis=0) / range_tx
+        v_rx = np.sum(spobj_rx_enu[:3, :] * spobj_rx_enu[3:, :], axis=0) / range_rx
+        txrx_states[_K.two_way_range_rate] = v_tx + v_rx
+
+        return txrx_states

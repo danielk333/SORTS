@@ -8,10 +8,14 @@ import pandas as pd
 import pandas._typing as pdt
 from sorts import types, utils, radar, passage, schedule
 
-
 logger = logging.getLogger(__name__)
 
+ScheduleId = int
+"""A unique int16 that identifies an experiment"""
 
+
+# TODO: replace `exp_num` by `sch_id`
+# TODO: replace `stn_num` by `stn_id`
 class ScheduleKey(enum.StrEnum):
     index = "index"  # type: ignore ; seems type checker might confuse this with the `index` method from `str`
     exp_num = "exp_num"
@@ -411,7 +415,7 @@ def get_tx_rx_pointing_pairs(
     tx_stn_num: int,
     rx_stn_num: int,
 ) -> TxRxPointingPairs:
-    """Get pointing pairs from DB as specified by param."""
+    """Get pointing pairs from `ScheduleDataframe` as specified by params."""
 
     _SK = ScheduleKey
     _PK = TxRxPointingPairsKey

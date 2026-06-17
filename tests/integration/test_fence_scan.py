@@ -30,8 +30,6 @@ from sorts import (
     SpaceObject,
     simulation,
 )
-from sorts.simulation import tx_rx_pair_state
-
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -94,14 +92,14 @@ def test_south_to_north_circular_orbit():
         0, spobj.orbit.period[0], num_prop_steps + 1
     )
 
-    spobj_state: types.EcefStates = propagator.Kepler(propagator.KeplerSettings()).propagate(
+    spobj_states: types.EcefStates = propagator.Kepler(propagator.KeplerSettings()).propagate(
         spobj, spobj_delta_secs
     )
 
     # NOTE: all stations are physically the same but just have a different id;
     #   this is done so that we can retain both tx and rx pointings in the schedule,
     #   as `pointing.fence_scanning` will drop the rx entries if both tx and rx use the same station.
-    tx_stn, *rx_stns = [
+    radar_stn_list = [
         radar.Station(
             lat=0.0,
             lon=0.0,
@@ -115,29 +113,28 @@ def test_south_to_north_circular_orbit():
         for idx in [0, 1, 2]
     ]
 
+    radar_detection_system = simulation.RadarDetectionSystem.from_stations(
+        tx_station=radar_stn_list[0],
+        rx_stations=[radar_stn_list[1], radar_stn_list[2]],
+    )
+
     # introduce non-zero min_elevation to `rx_stns[1]` to test its effect
-    rx_stns[1].min_elevation = min_elevation
+    radar_detection_system.rx_stations[1].min_elevation = min_elevation
 
     passages = passage.find_simultaneous_passages(
         dt=spobj_delta_secs,
         space_object=spobj,
-        states=spobj_state[:3, ...],
-        tx_station=tx_stn,
-        rx_stations=rx_stns,
+        states=spobj_states[:3, ...],
+        tx_station=radar_detection_system.tx_station,
+        rx_stations=radar_detection_system.rx_stations,
         epoch=start_time_dt64,
     )
 
-    exp_detail = types.ExperimentDetail(
-        id=0,
-        coh_int_bandwidth=1.0,
-        ipp=1.0,
-        pulse_length=1.0,
-        power=5000000.0,
-        bandwidth=52.08333333333333,
-        duty_cycle=1.0,
-        noise_temp=150.0,
-        slice_duration=np.timedelta64(10_000, "us"),  # 10ms
-    )
+    exp_id = 0
+    radar_power = 5000000.0
+    radar_bandwidth = 52.08333333333333
+    radar_noise_temp = 150.0
+    slice_duration = np.timedelta64(10_000, "us")  # 10ms
 
     fence_sch = pointing.fence_scanning(
         start_time=start_time_dt64,
@@ -146,24 +143,24 @@ def test_south_to_north_circular_orbit():
         min_elevation=0,
         pointings_per_cycle=40,
         scan_range=scan_ranges,
-        tx_station=tx_stn,
-        rx_stations=rx_stns,
-        exp_id=exp_detail.id,
-        slice_duration=exp_detail.slice_duration,
+        tx_station=radar_detection_system.tx_station,
+        rx_stations=radar_detection_system.rx_stations,
+        exp_id=exp_id,
+        slice_duration=slice_duration,
     )
 
     spobj_abs_times = spobj_delta_secs * np.timedelta64(1, "s") + start_time_dt64
     spobj_abs_time_indexer: pd.Series[int] = pd.Series(
         np.arange(len(spobj_abs_times)), index=spobj_abs_times
     )
-    result_states: list[tx_rx_pair_state.TxRxPairState] = []
-    for rx_stn in rx_stns:
+    result_states: list[simulation.TxRxPairStates] = []
+    for rx_stn in radar_detection_system.rx_stations:
         pairs_ls = [
             schedule.get_tx_rx_pointing_pairs(
                 sch=fence_sch,
                 start_time=ps.time_range[0],
                 end_time=ps.time_range[1],
-                tx_stn_num=tx_stn.uid,
+                tx_stn_num=radar_detection_system.tx_station.uid,
                 rx_stn_num=rx_stn.uid,
             )
             for ps in passages
@@ -173,7 +170,7 @@ def test_south_to_north_circular_orbit():
         pairs = pairs.sort_values(
             by=schedule.TxRxPointingPairsKey.time, ascending=True, ignore_index=True
         )
-        txrx_state = tx_rx_pair_state.from_tx_rx_pointing_pairs(pairs)
+        txrx_states = simulation.TxRxPairStates(pairs)
 
         # TODO: this is slightly cleaner but does not work with multiindex
         # intersection = txrx_state.index.get_level_values("time").intersection(
@@ -183,28 +180,36 @@ def test_south_to_north_circular_orbit():
         # reindexed_txrx_state = txrx_state.reindex(intersection)
         # reindexed_spobj_state = spobj_state[:, spobj_abs_time_indexer.reindex(intersection)]
 
-        _K = simulation.TxRxPairStateKey
+        _K = simulation.TxRxPairStatesKey
 
-        txrx_state = txrx_state.set_index(_K.time)
-        txrx_state_mask = txrx_state.index.isin(spobj_abs_time_indexer.index)
+        txrx_states = txrx_states.set_index(_K.time)
+        txrx_states_mask = txrx_states.index.isin(spobj_abs_time_indexer.index)
 
-        reindexed_txrx_state = txrx_state[txrx_state_mask]
-        reindexed_spobj_state = spobj_state[
-            :, spobj_abs_time_indexer.reindex(txrx_state.index[txrx_state_mask])
+        reindexed_txrx_states = txrx_states[txrx_states_mask]
+        reindexed_spobj_states = spobj_states[
+            :, spobj_abs_time_indexer.reindex(txrx_states.index[txrx_states_mask])
         ]
 
         # put time column back to df body
-        txrx_state = txrx_state.reset_index()
-        reindexed_txrx_state = reindexed_txrx_state.reset_index()
+        txrx_states = txrx_states.reset_index()
+        reindexed_txrx_states = reindexed_txrx_states.reset_index()
 
-        result_state = tx_rx_pair_state.simulate(
-            txrx_state=reindexed_txrx_state,
-            spobj_state=reindexed_spobj_state,
+        result_state = radar_detection_system.simulate(
+            txrx_states=reindexed_txrx_states,
+            spobj_states=reindexed_spobj_states,
             spobj_diameter=spobj.d,
             spobj_radar_albedo=spobj.properties.get("radar_albedo", 1.0),
-            tx_station=tx_stn,
-            rx_station=rx_stn,
-            exp_detail_map={exp_detail.id: exp_detail},
+            radar_station_pair=(
+                radar_detection_system.tx_station.uid,
+                radar_detection_system.rx_stations[0].uid,
+            ),
+            powers=np.full(len(reindexed_txrx_states[_K.exp_num]), radar_power, dtype=np.float64),
+            bandwidths=np.full(
+                len(reindexed_txrx_states[_K.exp_num]), radar_bandwidth, dtype=np.float64
+            ),
+            rx_noise_temps=np.full(
+                len(reindexed_txrx_states[_K.exp_num]), radar_noise_temp, dtype=np.float64
+            ),
         )
         result_states.append(result_state)
 
@@ -212,9 +217,9 @@ def test_south_to_north_circular_orbit():
 
     # assert the number and info of passages are expected
     assert len(passages) == 1  # 1 `Passage` in total
-    assert passages[0].tx_station.uid == tx_stn.uid  # with tx_stn in tx_station
+    assert passages[0].tx_station.uid == radar_detection_system.tx_station.uid
     assert (all(
-        rx_station.uid == rx_stn.uid for rx_station, rx_stn in zip(passages[0].rx_stations, rx_stns)
+        rx_station.uid == rx_stn.uid for rx_station, rx_stn in zip(passages[0].rx_stations, radar_detection_system.rx_stations)
     ))  # with rx_stns in rx_stations; fmt: skip
 
     # assert that we are only pointing in the expected scan_ranges
