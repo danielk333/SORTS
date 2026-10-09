@@ -55,9 +55,12 @@ class Script(sorts.MpiJobQueueExecutor):
     #     t_sky=10.0,
     #     coherent_integration_time=coherent_integration_time,
     #     bandwidth_limit_ratio=5,
-    #     station_uid_map={"se_tx": 0, "no_tx": 1, "fi_tx": 2, "se_rx": 3, "no_rx": 4, "fi_rx": 5},
+    #     station_uid_map={"no_tx": 0, "se_tx": 1, "fi_tx": 2, "no_rx": 4, "se_rx": 4, "fi_rx": 5},
     # )
-    radar_sys = radar.radars.eiscat_uhf.gen_eiscat_uhf()
+    # radar_sys = radar.radars.eiscat_uhf.gen_eiscat_uhf(
+    #     {"no_tx": 0, "no_rx": 1, "se_rx": 2, "fi_rx": 3}
+    # )
+    radar_sys = radar.radars.eiscat_vhf.gen_eiscat_vhf({"no_tx": 0, "no_rx": 1})
 
     exp_id = 0
     radar_power = radar_sys.tx[0].power
@@ -215,9 +218,24 @@ class Script(sorts.MpiJobQueueExecutor):
             self.compute_schedule_and_passages, schedule_and_passages_pickle
         ).load()
 
+        states_dict = self.radar_detection_system.gather_states_during_passages(
+            space_object=spobj,
+            states_interpolation=spobj_interp,
+            passages=passages,
+            sch=sch,
+        )
+
+        _SimK = simulation.TxRxPairStatesKey
+        txrxpair, spobj_states_in_passages = states_dict[(0, 1)]
+
+        # NOTE: just an example; getting ENUs from `states_dict`
+        txrxpair[[_SimK.rx_pointing_e, _SimK.rx_pointing_n, _SimK.rx_pointing_u]]
+
+        # NOTE: just an example; converting spobj states to ENUs from a radar station
+        self.radar_sys.tx[0].enu(spobj_states_in_passages)
+
         _K = schedule.ScheduleKey
         enus = sch[[_K.pointing_e, _K.pointing_n, _K.pointing_u]].to_numpy().T
-        # NOTE: `r` in `azelrs` are mostly/all `1`s because it is converted from pointings that has no "range" info
         azelrs = spacecoords.spherical.cart_to_sph(enus, degrees=True)
 
         # check when `az` component crosses zero; the start of crossing is marked.

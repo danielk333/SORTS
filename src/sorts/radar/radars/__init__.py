@@ -6,6 +6,7 @@
 from . import (
     nostra as nostra,
     eiscat_uhf as eiscat_uhf,
+    eiscat_vhf as eiscat_vhf,
 )
 
 # from . import mock
