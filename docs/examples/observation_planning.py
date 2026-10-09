@@ -143,7 +143,9 @@ class Script(sorts.MpiJobQueueExecutor):
 
         sch_crossing_slice_list: list[pd.DataFrame] = []
         for analysis_result in analysis_results:
-            sch, crossings_mask = utils.as_retval(self.analyse_passages, analysis_result).load()
+            spobj, sch, crossings_mask = utils.as_retval(
+                self.analyse_passages, analysis_result
+            ).load()
             sch_crossing_slice_list.append(sch.loc[crossings_mask])
 
         sch_crossings = pd.concat(sch_crossing_slice_list)
@@ -220,7 +222,11 @@ class Script(sorts.MpiJobQueueExecutor):
         azs = pd.Series(azelrs[0])
         crossings_mask = (azs.shift(-1) * azs) < 0
 
-        return sch, crossings_mask
+        # insert a spobj id column into sch
+        sch["spobj_id"] = spobj.object_id
+        sch_with_spobj_id = sch
+
+        return spobj, sch_with_spobj_id, crossings_mask
 
 
 Script(is_run_with_mpi=MPI.COMM_WORLD.Get_size() > 1).run()
