@@ -43,7 +43,7 @@ def gen_eiscat_uhf():
             lon=tro_stn.lon,
             alt=tro_stn.alt,
             min_elevation=tro_stn.min_elevation,
-            noise=100,
+            noise=tro_stn.noise_temperature,
             beam=tro_stn.beam,
             beam_parameters=tro_stn.beam_parameters,
         )
@@ -54,7 +54,7 @@ def gen_eiscat_uhf():
             lon=krn_stn.lon,
             alt=krn_stn.alt,
             min_elevation=krn_stn.min_elevation,
-            noise=100,
+            noise=krn_stn.noise_temperature,
             beam=krn_stn.beam,
             beam_parameters=krn_stn.beam_parameters,
         )
@@ -65,7 +65,7 @@ def gen_eiscat_uhf():
             lon=sod_stn.lon,
             alt=sod_stn.alt,
             min_elevation=sod_stn.min_elevation,
-            noise=100,
+            noise=sod_stn.noise_temperature,
             beam=sod_stn.beam,
             beam_parameters=sod_stn.beam_parameters,
         )
