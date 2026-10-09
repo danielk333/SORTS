@@ -6,23 +6,20 @@ We use [`mkdocs`](https://www.mkdocs.org/) and [`mkdocstrings`](https://mkdocstr
 
 ## Development setup
 
-We provide both the `requirements.txt` and `pylock.toml`. \
-(The `requirements.txt` is generated on a linux x86_64 platform)
-
-Run these to install the packages:
+We `uv.lock`. \
+(`requirements.txt` and `pylock.toml` can be generated using the command below)
 ```bash
-# using pip
-pip install -r requirements.txt
-pip install -e .[spacetrack,jupyter,dev]
-
-# using uv
-uv pip install -r pylock.toml
+uv export --all-extras -o requirements.txt
+uv export --all-extras -o pylock.toml
 ```
 
-The lock files are generated using `uv` at the moment:
+Run these to install the dependencies:
 ```bash
-uv export --all-extras --resolution lowest-direct -o requirements.txt
-uv export --all-extras --resolution lowest-direct -o pylock.toml
+# using uv
+uv sync --all-extras
+
+# using pip
+pip install -e .[spacetrack,jupyter,dev]
 ```
 
 ## Tests

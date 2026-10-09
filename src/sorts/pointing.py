@@ -87,6 +87,7 @@ def tracking(
     return resultant_sch
 
 
+# TODO: why is 'min_elevation' not taken into account?
 # TODO: refine the params, e.g:
 #   - passage_time_range instead of passage?
 #   - state instead of Interpolator?
