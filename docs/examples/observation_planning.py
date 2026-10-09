@@ -41,22 +41,23 @@ class Script(sorts.MpiJobQueueExecutor):
     time_slice = coherent_integration_time / duty_cycle
     control_slice_duration = np.timedelta64(int(time_slice * 1e6), "us")
 
-    radar_sys = radar.radars.nostra.gen_nostra(
-        frequency=3.2e9,
-        antenna_num=10_000,
-        antenna_spacing_lambda=0.65,
-        antenna_efficiency=0.5,
-        antenna_input_power=100,  # W
-        thermal_load=1,
-        noise_figure_db=0.7,
-        amplifier_gain_db=18,
-        insertion_loss_db=0.35,
-        duty_cycle=duty_cycle,
-        t_sky=10.0,
-        coherent_integration_time=coherent_integration_time,
-        bandwidth_limit_ratio=5,
-        station_uid_map={"se_tx": 0, "no_tx": 1, "fi_tx": 2, "se_rx": 3, "no_rx": 4, "fi_rx": 5},
-    )
+    # radar_sys = radar.radars.nostra.gen_nostra(
+    #     frequency=3.2e9,
+    #     antenna_num=10_000,
+    #     antenna_spacing_lambda=0.65,
+    #     antenna_efficiency=0.5,
+    #     antenna_input_power=100,  # W
+    #     thermal_load=1,
+    #     noise_figure_db=0.7,
+    #     amplifier_gain_db=18,
+    #     insertion_loss_db=0.35,
+    #     duty_cycle=duty_cycle,
+    #     t_sky=10.0,
+    #     coherent_integration_time=coherent_integration_time,
+    #     bandwidth_limit_ratio=5,
+    #     station_uid_map={"se_tx": 0, "no_tx": 1, "fi_tx": 2, "se_rx": 3, "no_rx": 4, "fi_rx": 5},
+    # )
+    radar_sys = radar.radars.eiscat_uhf.gen_eiscat_uhf()
 
     exp_id = 0
     radar_power = radar_sys.tx[0].power
