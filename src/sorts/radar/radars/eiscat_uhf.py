@@ -11,8 +11,13 @@ from ..tx_rx import TX, RX
 
 
 # TODO: we should dissolve the `Radar` and `Station` classes and use `RadarStation` from `radardef`?
+# TODO: `station_uid_map` should not have default? it has atm because it is wrapped by `@radar_generator("eiscat_uhf", "measured")`
 @radar_generator("eiscat_uhf", "measured")
-def gen_eiscat_uhf():
+def gen_eiscat_uhf(
+    station_uid_map: dict[t.Literal["no_tx", "no_rx", "se_rx", "fi_rx"], int] = {
+        "no_tx": 0, "no_rx": 1, "se_rx": 2, "fi_rx": 3
+    } # fmt:skip
+):
     # NOTE: `cast` is needed because for some reason `EiscatUHFLocation.TROMSO` etc is inferred to be type `int`
     tro_stn = EiscatUHF(t.cast(EiscatUHFLocation, EiscatUHFLocation.TROMSO))
     krn_stn = EiscatUHF(t.cast(EiscatUHFLocation, EiscatUHFLocation.KIRUNA))
@@ -20,6 +25,7 @@ def gen_eiscat_uhf():
 
     tx = [
         TX(
+            uid=station_uid_map["no_tx"],
             lat=tro_stn.lat,
             lon=tro_stn.lon,
             alt=tro_stn.alt,
@@ -39,6 +45,7 @@ def gen_eiscat_uhf():
 
     rx += [
         RX(
+            uid=station_uid_map["no_rx"],
             lat=tro_stn.lat,
             lon=tro_stn.lon,
             alt=tro_stn.alt,
@@ -50,6 +57,7 @@ def gen_eiscat_uhf():
     ]
     rx += [
         RX(
+            uid=station_uid_map["se_rx"],
             lat=krn_stn.lat,
             lon=krn_stn.lon,
             alt=krn_stn.alt,
@@ -61,6 +69,7 @@ def gen_eiscat_uhf():
     ]
     rx += [
         RX(
+            uid=station_uid_map["fi_rx"],
             lat=sod_stn.lat,
             lon=sod_stn.lon,
             alt=sod_stn.alt,
