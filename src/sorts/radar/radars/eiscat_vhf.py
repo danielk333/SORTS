@@ -1,19 +1,21 @@
+import typing as t
 from radardef.radar_stations import EiscatVHF
 from ..radar import Radar
 from ..tx_rx import TX, RX
 
 
 # TODO: we should dissolve the `Radar` and `Station` classes and use `RadarStation` from `radardef`?
-def gen_eiscat_vhf():
+def gen_eiscat_vhf(station_uid_map: dict[t.Literal["no_tx", "no_rx"], int]):
     tro_stn = EiscatVHF()
 
     vhf = Radar(
         [
             TX(
+                uid=station_uid_map["no_tx"],
                 lat=tro_stn.lat,
                 lon=tro_stn.lon,
                 alt=tro_stn.alt,
-                min_elevation=tro_stn.min_elevation,
+                min_elevation=30,  # TODO: `EiscatVHF` has no `min_elevation` ?
                 beam=tro_stn.beam,
                 beam_parameters=tro_stn.beam_parameters,
                 power=tro_stn.power,
@@ -27,10 +29,11 @@ def gen_eiscat_vhf():
         ],
         [
             RX(
+                uid=station_uid_map["no_rx"],
                 lat=tro_stn.lat,
                 lon=tro_stn.lon,
                 alt=tro_stn.alt,
-                min_elevation=tro_stn.min_elevation,
+                min_elevation=30,  # TODO: `EiscatVHF` has no `min_elevation` ?
                 noise=tro_stn.noise_temperature,
                 beam=tro_stn.beam,
                 beam_parameters=tro_stn.beam_parameters,
