@@ -182,7 +182,8 @@ class Script(sorts.MpiJobQueueExecutor):
             states=spobj_states[:3, ...],
             tx_station=self.radar_detection_system.tx_station,
             rx_stations=self.radar_detection_system.rx_stations,
-            epoch=utils.to_datetime64_us(self.start_time),
+            # epoch=utils.to_datetime64_us(self.start_time),
+            epoch=spobj.epoch,  # the TLE of spobj has epoch info
         )
 
         tracker_sch = pointing.sparse_tracking(
