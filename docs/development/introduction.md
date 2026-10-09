@@ -9,8 +9,8 @@ We use [`mkdocs`](https://www.mkdocs.org/) and [`mkdocstrings`](https://mkdocstr
 We `uv.lock`. \
 (`requirements.txt` and `pylock.toml` can be generated using the command below)
 ```bash
-uv export --all-extras --resolution lowest-direct -o requirements.txt
-uv export --all-extras --resolution lowest-direct -o pylock.toml
+uv export --all-extras -o requirements.txt
+uv export --all-extras -o pylock.toml
 ```
 
 Run these to install the packages:

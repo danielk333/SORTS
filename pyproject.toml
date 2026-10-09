@@ -23,7 +23,8 @@ classifiers = [
 ]
 # TODO: this is way to many deps, i think many are not used
 dependencies = [
-  "h5py>=3.11", # v3.10 has pre-built packages for Python 3.12; v3.11 is compatible with Numpy 2.0
+  "h5py>=3.11",
+  # v3.10 has pre-built packages for Python 3.12; v3.11 is compatible with Numpy 2.0
   # v3.8.4 Enable building against numpy 2.0;
   # v3.9.0 for working around the `pyant` error regarding `pyplot.Colormap`: `cmap: plt.Colormap | None = None`
   # ```
@@ -83,11 +84,11 @@ dev = [
   "mkdocs-jupyter>=0.25.1",
 ]
 
-# `dependency-groups` is a new feature, bascially like the old extras mechanism but only for dev deps
-# - https://peps.python.org/pep-0735/
-# - https://pip.pypa.io/en/stable/news/#id80
 [dependency-groups]
 dev = ["sorts"]
+
+[tool.uv]
+resolution = "lowest-direct"
 
 [tool.setuptools.package-data]
 sorts = ["py.typed", "data/*"]
