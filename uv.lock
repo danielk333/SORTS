@@ -3523,7 +3523,7 @@ requires-dist = [
 provides-extras = ["spacetrack", "jupyter", "dev"]
 
 [package.metadata.requires-dev]
-dev = [{ name = "sorts", editable = "." }]
+dev = [{ name = "sorts" }]
 
 [[package]]
 name = "soupsieve"

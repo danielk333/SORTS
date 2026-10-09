@@ -13,13 +13,12 @@ uv export --all-extras -o requirements.txt
 uv export --all-extras -o pylock.toml
 ```
 
-Run these to install the packages:
+Run these to install the dependencies:
 ```bash
 # using uv
-uv pip install -r pylock.toml
+uv sync --all-extras
 
 # using pip
-pip install -r requirements.txt
 pip install -e .[spacetrack,jupyter,dev]
 ```
 
