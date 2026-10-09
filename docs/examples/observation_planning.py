@@ -81,7 +81,7 @@ class Script(sorts.MpiJobQueueExecutor):
         spobj_pop = population.tle_catalog(
             self.tle_fpath,
             save_mean_elements=True,
-            # degrees=True,
+            degrees=True,
         )
 
         oids = np.arange(len(spobj_pop))
