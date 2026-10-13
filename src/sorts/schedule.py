@@ -479,7 +479,7 @@ def gather_pointing_pairs(
     pointing_pairs_dict: dict[
         tuple[radar.StationId, radar.StationId], schedule.TxRxPointingPairs
     ] = {}
-    for stn_id_pair, passages in passages_by_tx_rx_stn_pair.items():
+    for stn_id_pair, ps_list in passages_by_tx_rx_stn_pair.items():
         pairs_ls = [
             get_tx_rx_pointing_pairs(
                 sch=sch,
@@ -488,7 +488,7 @@ def gather_pointing_pairs(
                 tx_stn_num=stn_id_pair[0],
                 rx_stn_num=stn_id_pair[1],
             )
-            for ps in passages
+            for ps in ps_list
         ]
 
         pairs = TxRxPointingPairs(pd.concat(pairs_ls))
